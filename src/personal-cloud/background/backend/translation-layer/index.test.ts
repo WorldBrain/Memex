@@ -18,6 +18,7 @@ import {
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { preprocessPulledObject } from '../..'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -238,6 +239,20 @@ describe('Personal cloud translation layer', () => {
                         userId: TEST_USER.id,
                         clientSchemaVersion: STORAGE_VERSIONS[24].version,
                     })
+                    for (const update of batch) {
+                        if (update.type !== PersonalCloudUpdateType.Overwrite) {
+                            continue
+                        }
+                        const storageManager =
+                            update.storage === 'persistent'
+                                ? setups[0].persistentStorageManager
+                                : setups[0].storageManager
+                        preprocessPulledObject({
+                            storageRegistry: storageManager.registry,
+                            collection: update.collection,
+                            object: update.object,
+                        })
+                    }
                     expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
                 },
             }
@@ -402,7 +417,7 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
-                ], { skip : 4}),
+                ], { skip: 4 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: [testBookmarks.first]
@@ -410,7 +425,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'bookmarks', object: LOCAL_TEST_DATA_V24.bookmarks.first },
-            ], { skip: 2})
+            ], { skip: 2 })
         })
 
         it('should delete bookmarks', async () => {
@@ -447,7 +462,7 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
-                ], { skip : 5}),
+                ], { skip: 5 }),
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: []
@@ -455,7 +470,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'bookmarks', where: changeInfo },
-            ], { skip: 2})
+            ], { skip: 2 })
         })
 
         it('should create visits', async () => {
@@ -556,10 +571,12 @@ describe('Personal cloud translation layer', () => {
             })
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: {
-                    ...LOCAL_TEST_DATA_V24.visits.first,
-                    duration: updatedDuration,
-                 } },
+                {
+                    type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: {
+                        ...LOCAL_TEST_DATA_V24.visits.first,
+                        duration: updatedDuration,
+                    }
+                },
             ], { skip: 3 })
         })
 
@@ -1813,7 +1830,7 @@ describe('Personal cloud translation layer', () => {
                 {
                     type: PersonalCloudUpdateType.Overwrite,
                     collection: 'tags',
-                    object:  LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
+                    object: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
                 },
             ], { skip: 2 })
         })

@@ -107,6 +107,7 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
+            const { collection } = update
             const storageManager =
                 update.storage === 'persistent'
                     ? this.options.persistentStorageManager
@@ -114,6 +115,11 @@ export class PersonalCloudBackground {
 
             if (update.type === PersonalCloudUpdateType.Overwrite) {
                 const object = update.object
+                preprocessPulledObject({
+                    storageRegistry: storageManager.registry,
+                    collection,
+                    object,
+                })
                 if (update.media) {
                     await Promise.all(
                         Object.entries(update.media).map(
@@ -336,5 +342,24 @@ export class PersonalCloudBackground {
 
     preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
         return { valid: true }
+    }
+}
+
+export function preprocessPulledObject(params: {
+    storageRegistry: StorageRegistry
+    collection: string
+    object: any
+}) {
+    const collectionDefinition =
+        params.storageRegistry.collections[params.collection]
+    for (const [fieldName, fieldDefinition] of Object.entries(
+        collectionDefinition.fields,
+    )) {
+        if (
+            fieldDefinition.type === 'datetime' &&
+            typeof params.object[fieldName] === 'number'
+        ) {
+            params.object[fieldName] = new Date(params.object[fieldName])
+        }
     }
 }
