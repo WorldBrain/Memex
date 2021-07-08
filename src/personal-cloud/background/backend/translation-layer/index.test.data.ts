@@ -109,14 +109,12 @@ export const LOCAL_TEST_DATA_V24 = {
             annotation: LOCAL_ANNOTATIONS_V24.first.url,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
             createdWhen: new Date(1625190554983),
-            updatedWhen: new Date(1625190554983),
         },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             createdWhen: new Date(1625190554984),
-            updatedWhen: new Date(1625190554984),
         },
     },
     sharedAnnotationMetadata: {
@@ -475,7 +473,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
         },
         second: {
             id: 1,
@@ -486,7 +484,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
     },
     personalAnnotationShare: {
