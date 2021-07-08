@@ -459,7 +459,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
         },
         second: {
             id: 1,
@@ -470,7 +470,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
     },
     personalAnnotationShare: {
