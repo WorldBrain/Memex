@@ -39,7 +39,7 @@ const LOCAL_PAGES_V24 = {
 
 const LOCAL_ANNOTATIONS_V24 = {
     first: {
-        url: LOCAL_PAGES_V24.first.url + '#111111111',
+        url: LOCAL_PAGES_V24.first.url + '/#111111111',
         pageUrl: LOCAL_PAGES_V24.first.url,
         pageTitle: LOCAL_PAGES_V24.first.fullTitle,
         body: 'This is a test highlight',
@@ -52,7 +52,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         },
     },
     second: {
-        url: LOCAL_PAGES_V24.first.url + '#111111112',
+        url: LOCAL_PAGES_V24.first.url + '/#111111112',
         pageUrl: LOCAL_PAGES_V24.first.url,
         pageTitle: LOCAL_PAGES_V24.first.fullTitle,
         comment: 'This is another test comment',
