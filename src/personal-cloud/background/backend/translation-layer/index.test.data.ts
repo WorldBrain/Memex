@@ -206,6 +206,20 @@ export const LOCAL_TEST_DATA_V24 = {
             code: '[[{{{PageUrl}}}]]',
         },
     },
+    userSettings: {
+        first: {
+            name: 'test-1',
+            value: 123,
+        },
+        second: {
+            name: 'test-2',
+            value: '123',
+        },
+        third: {
+            name: 'test-3',
+            value: { sub: 'hi' },
+        },
+    },
 }
 
 const REMOTE_DEVICES_V24 = {
@@ -578,6 +592,35 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 562,
             updatedWhen: 562,
+        },
+    },
+    personalMemexExtensionSetting: {
+        first: {
+            id: 1,
+            name: LOCAL_TEST_DATA_V24.userSettings.first.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.first.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 561,
+            updatedWhen: 561,
+        },
+        second: {
+            id: 2,
+            name: LOCAL_TEST_DATA_V24.userSettings.second.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.second.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 562,
+            updatedWhen: 562,
+        },
+        third: {
+            id: 3,
+            name: LOCAL_TEST_DATA_V24.userSettings.third.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.third.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 563,
+            updatedWhen: 564,
         },
     },
     personalReadwiseAction: {

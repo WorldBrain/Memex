@@ -2174,6 +2174,163 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 0 })
         })
 
+        it('should create memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [testSettings.first, testSettings.second, testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+            ], { skip: 0 })
+        })
+
+        it('should update memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const updatedValue = 'new-value'
+            await setups[0].storageManager
+                .collection('userSettings')
+                .updateOneObject(
+                    { name: LOCAL_TEST_DATA_V24.userSettings.first.name },
+                    {
+                        value: updatedValue,
+                    },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                    [DataChangeType.Modify, 'personalMemexExtensionSetting', testSettings.first.id],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [{ ...testSettings.first, value: updatedValue }, testSettings.second, testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
+            ], { skip: 0 })
+        })
+
+        it('should delete memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .deleteOneObject({
+                    name: LOCAL_TEST_DATA_V24.userSettings.first.name,
+                })
+            await setups[0].storageManager
+                .collection('userSettings')
+                .deleteOneObject({
+                    name: LOCAL_TEST_DATA_V24.userSettings.second.name,
+                })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.first.id, { name: testSettings.first.name }],
+                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.second.id, { name: testSettings.second.name }],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.first.name } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.second.name } },
+            ], { skip: 0 })
+        })
+
         describe(`translation layer readwise integration`, () => {
             it('should create annotations, triggering readwise highlight upload', async () => {
                 const {
