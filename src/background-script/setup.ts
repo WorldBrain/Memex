@@ -60,6 +60,7 @@ import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import { UserSettingsBackground } from 'src/settings/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -102,6 +103,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
+    settings: UserSettingsBackground
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -423,6 +425,7 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
+        settings: new UserSettingsBackground({ storageManager }),
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -657,6 +660,7 @@ export function getBackgroundStorageModules(
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
         readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
+        userSettings: backgroundModules.settings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }
