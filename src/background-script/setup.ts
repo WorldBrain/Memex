@@ -425,7 +425,10 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
-        settings: new UserSettingsBackground({ storageManager }),
+        settings: new UserSettingsBackground({
+            storageManager,
+            localBrowserStorage: options.browserAPIs.storage.local,
+        }),
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,

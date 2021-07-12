@@ -1,17 +1,30 @@
 import StorageManager from '@worldbrain/storex'
+import type { Storage } from 'webextension-polyfill-ts'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type { SettingValue, RemoteSettingsInterface } from './types'
 import SettingsStorage from './storage'
+import { localStorageToSettingsStorage } from './migrate'
 
 export interface Dependencies {
     storageManager: StorageManager
+    localBrowserStorage: Storage.LocalStorageArea
 }
 
 export class UserSettingsBackground implements LimitedBrowserStorage {
     storage: SettingsStorage
     remoteFunctions: RemoteSettingsInterface
 
-    constructor(options: Dependencies) {
+    private static formatKeyValsTuplesToDict = (
+        keyVals: [string, SettingValue][],
+    ): { [key: string]: SettingValue } => {
+        const storage = {}
+        for (const [key, value] of keyVals) {
+            storage[key as string] = value
+        }
+        return storage
+    }
+
+    constructor(private options: Dependencies) {
         this.storage = new SettingsStorage({
             storageManager: options.storageManager,
         })
@@ -22,14 +35,11 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
         }
     }
 
-    private static formatKeyValsTuplesToDict = (
-        keyVals: [string, SettingValue][],
-    ): { [key: string]: SettingValue } => {
-        const storage = {}
-        for (const [key, value] of keyVals) {
-            storage[key as string] = value
-        }
-        return storage
+    async migrateLocalStorage() {
+        const { localBrowserStorage } = this.options
+
+        const storageValues = await localBrowserStorage.get(null)
+        await this.set(localStorageToSettingsStorage(storageValues))
     }
 
     get: LimitedBrowserStorage['get'] = async (names) => {
