@@ -19,7 +19,8 @@ import {
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
+import { ReadwisePostStorageChange } from '@worldbrain/memex-common/lib/readwise-integration/personal-cloud/post-storage-change'
+import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -32,6 +33,14 @@ const deleteNullFields = <T = any>(obj: T): T => {
         }
     }
     return obj
+}
+
+class FakeFetch {
+    capturedReqs: Array<[RequestInfo, RequestInit | undefined]> = []
+    fetch: typeof fetch = async (input, init) => {
+        this.capturedReqs.push([input, init])
+        return { status: 200 } as Response
+    }
 }
 
 class IdCapturer {
@@ -189,7 +198,7 @@ function dataChanges(
 
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
-        async function setup() {
+        async function setup(options?: { runReadwiseTrigger?: boolean }) {
             const serverIdCapturer = new IdCapturer({
                 postprocesessMerge: (params) => {
                     // tag connections don't connect with the content they tag through a
@@ -210,6 +219,9 @@ describe('Personal cloud translation layer', () => {
                     }
                 },
             })
+
+            const fakeFetch = new FakeFetch()
+            let readwiseStorageChange: ReadwisePostStorageChange
             const {
                 setups,
                 serverStorage,
@@ -217,15 +229,27 @@ describe('Personal cloud translation layer', () => {
             } = await setupSyncBackgroundTest({
                 deviceCount: 2,
                 serverChangeWatchSettings: {
-                    shouldWatchCollection: (collection) => {
-                        return collection.startsWith('personal')
+                    shouldWatchCollection: (collection) =>
+                        collection.startsWith('personal'),
+                    postprocessOperation: async (context) => {
+                        await serverIdCapturer.handlePostStorageChange(context)
+                        if (options?.runReadwiseTrigger) {
+                            await readwiseStorageChange.handlePostStorageChange(
+                                context,
+                            )
+                        }
                     },
-                    postprocessOperation:
-                        serverIdCapturer.handlePostStorageChange,
                 },
             })
+
+            readwiseStorageChange = new ReadwisePostStorageChange({
+                fetch: fakeFetch.fetch,
+                storageManager: serverStorage.storageManager,
+            })
             serverIdCapturer.setup(serverStorage.storageManager)
+
             return {
+                fakeFetch,
                 serverIdCapturer,
                 setups,
                 serverStorage,
@@ -2332,7 +2356,7 @@ describe('Personal cloud translation layer', () => {
         })
 
         describe(`translation layer readwise integration`, () => {
-            it('should create annotations, triggering readwise highlight upload', async () => {
+            it('should create annotations, triggering readwise action create', async () => {
                 const {
                     setups,
                     serverIdCapturer,
@@ -2393,7 +2417,7 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 2 })
             })
 
-            it('should update annotation notes, triggering readwise highlight upload', async () => {
+            it('should update annotation notes, triggering readwise action create', async () => {
                 const {
                     setups,
                     serverIdCapturer,
@@ -2465,7 +2489,7 @@ describe('Personal cloud translation layer', () => {
                 )
             })
 
-            it('should add annotation tags, triggering readwise highlight upload', async () => {
+            it('should add annotation tags, triggering readwise action create', async () => {
                 const {
                     setups,
                     serverIdCapturer,
@@ -2539,7 +2563,7 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 2 })
             })
 
-            it('should remove annotation tags, triggering readwise highlight upload', async () => {
+            it('should remove annotation tags, triggering readwise action create', async () => {
                 const {
                     setups,
                     serverIdCapturer,
@@ -2621,6 +2645,261 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
                 ], { skip: 5 })
+            })
+
+            it('should create annotations, triggering readwise highlight upload', async () => {
+                const { setups, fakeFetch, serverStorage } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const secondHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+
+                expect(fakeFetch.capturedReqs).toEqual([
+                    [
+                        'https://readwise.io/api/v2/highlights/',
+                        {
+                            body: JSON.stringify({
+                                highlights: [
+                                    {
+                                        ...firstHighlight,
+                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
+                                    },
+                                ],
+                            }),
+                            method: 'POST',
+                            headers: {
+                                Authorization: 'Token test-key',
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    ],
+                    [
+                        'https://readwise.io/api/v2/highlights/',
+                        {
+                            body: JSON.stringify({
+                                highlights: [
+                                    {
+                                        ...secondHighlight,
+                                        highlighted_at: secondHighlight.highlighted_at.toISOString(),
+                                    },
+                                ],
+                            }),
+                            method: 'POST',
+                            headers: {
+                                Authorization: 'Token test-key',
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    ],
+                ])
+            })
+
+            it('should update annotation notes, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, fakeFetch } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                const updatedComment = 'This is an updated comment'
+                const lastEdited = new Date()
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .updateOneObject(
+                        { url: LOCAL_TEST_DATA_V24.annotations.first.url },
+                        { comment: updatedComment, lastEdited },
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+
+                expect(fakeFetch.capturedReqs).toEqual([
+                    [
+                        'https://readwise.io/api/v2/highlights/',
+                        {
+                            body: JSON.stringify({
+                                highlights: [
+                                    {
+                                        ...firstHighlight,
+                                        note: updatedComment,
+                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
+                                    },
+                                ],
+                            }),
+                            method: 'POST',
+                            headers: {
+                                Authorization: 'Token test-key',
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    ],
+                ])
+            })
+
+            it('should add annotation tags, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, fakeFetch } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.firstAnnotationTag],
+                })
+
+                expect(fakeFetch.capturedReqs).toEqual([
+                    [
+                        'https://readwise.io/api/v2/highlights/',
+                        {
+                            body: JSON.stringify({
+                                highlights: [
+                                    {
+                                        ...firstHighlight,
+                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
+                                    },
+                                ],
+                            }),
+                            method: 'POST',
+                            headers: {
+                                Authorization: 'Token test-key',
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    ],
+                ])
+            })
+
+            it('should remove annotation tags, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, fakeFetch } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                await setups[0].storageManager
+                    .collection('tags')
+                    .deleteOneObject(
+                        LOCAL_TEST_DATA_V24.tags.firstAnnotationTag,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.firstAnnotationTag],
+                })
+
+                expect(fakeFetch.capturedReqs).toEqual([
+                    [
+                        'https://readwise.io/api/v2/highlights/',
+                        {
+                            body: JSON.stringify({
+                                highlights: [
+                                    {
+                                        ...firstHighlight,
+                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
+                                    },
+                                ],
+                            }),
+                            method: 'POST',
+                            headers: {
+                                Authorization: 'Token test-key',
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    ],
+                ])
             })
         })
     })
