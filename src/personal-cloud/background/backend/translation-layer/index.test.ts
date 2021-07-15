@@ -21,6 +21,7 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { ReadwisePostStorageChange } from '@worldbrain/memex-common/lib/readwise-integration/personal-cloud/post-storage-change'
 import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
+import { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -249,7 +250,6 @@ describe('Personal cloud translation layer', () => {
             serverIdCapturer.setup(serverStorage.storageManager)
 
             return {
-                fakeFetch,
                 serverIdCapturer,
                 setups,
                 serverStorage,
@@ -266,6 +266,27 @@ describe('Personal cloud translation layer', () => {
                     })
                     expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
                 },
+                testFetches: (highlights: ReadwiseHighlight[]) =>
+                    expect(fakeFetch.capturedReqs).toEqual(
+                        highlights.map((highlight) => [
+                            'https://readwise.io/api/v2/highlights/',
+                            {
+                                body: JSON.stringify({
+                                    highlights: [
+                                        {
+                                            ...highlight,
+                                            highlighted_at: highlight.highlighted_at.toISOString(),
+                                        },
+                                    ],
+                                }),
+                                method: 'POST',
+                                headers: {
+                                    Authorization: 'Token test-key',
+                                    'Content-Type': 'application/json',
+                                },
+                            },
+                        ]),
+                    ),
             }
         }
 
@@ -2648,7 +2669,7 @@ describe('Personal cloud translation layer', () => {
             })
 
             it('should create annotations, triggering readwise highlight upload', async () => {
-                const { setups, fakeFetch, serverStorage } = await setup({
+                const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
@@ -2684,48 +2705,11 @@ describe('Personal cloud translation layer', () => {
                     tags: [],
                 })
 
-                expect(fakeFetch.capturedReqs).toEqual([
-                    [
-                        'https://readwise.io/api/v2/highlights/',
-                        {
-                            body: JSON.stringify({
-                                highlights: [
-                                    {
-                                        ...firstHighlight,
-                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
-                                    },
-                                ],
-                            }),
-                            method: 'POST',
-                            headers: {
-                                Authorization: 'Token test-key',
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    ],
-                    [
-                        'https://readwise.io/api/v2/highlights/',
-                        {
-                            body: JSON.stringify({
-                                highlights: [
-                                    {
-                                        ...secondHighlight,
-                                        highlighted_at: secondHighlight.highlighted_at.toISOString(),
-                                    },
-                                ],
-                            }),
-                            method: 'POST',
-                            headers: {
-                                Authorization: 'Token test-key',
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    ],
-                ])
+                testFetches([firstHighlight, secondHighlight])
             })
 
             it('should update annotation notes, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, fakeFetch } = await setup({
+                const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
@@ -2752,7 +2736,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const firstHighlight = cloudDataToReadwiseHighlight({
+                const highlight = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.first,
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
@@ -2760,31 +2744,11 @@ describe('Personal cloud translation layer', () => {
                     tags: [],
                 })
 
-                expect(fakeFetch.capturedReqs).toEqual([
-                    [
-                        'https://readwise.io/api/v2/highlights/',
-                        {
-                            body: JSON.stringify({
-                                highlights: [
-                                    {
-                                        ...firstHighlight,
-                                        note: updatedComment,
-                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
-                                    },
-                                ],
-                            }),
-                            method: 'POST',
-                            headers: {
-                                Authorization: 'Token test-key',
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    ],
-                ])
+                testFetches([highlight, { ...highlight, note: updatedComment }])
             })
 
             it('should add annotation tags, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, fakeFetch } = await setup({
+                const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
@@ -2807,7 +2771,14 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const firstHighlight = cloudDataToReadwiseHighlight({
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const highlightWithTags = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.first,
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
@@ -2815,30 +2786,11 @@ describe('Personal cloud translation layer', () => {
                     tags: [testTags.firstAnnotationTag],
                 })
 
-                expect(fakeFetch.capturedReqs).toEqual([
-                    [
-                        'https://readwise.io/api/v2/highlights/',
-                        {
-                            body: JSON.stringify({
-                                highlights: [
-                                    {
-                                        ...firstHighlight,
-                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
-                                    },
-                                ],
-                            }),
-                            method: 'POST',
-                            headers: {
-                                Authorization: 'Token test-key',
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    ],
-                ])
+                testFetches([highlight, highlightWithTags])
             })
 
             it('should remove annotation tags, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, fakeFetch } = await setup({
+                const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
@@ -2877,28 +2829,34 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    tags: [],
+                })
+                const firstHighlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
                     tags: [testTags.firstAnnotationTag],
                 })
+                const secondHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const secondHighlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.secondAnnotationTag],
+                })
 
-                expect(fakeFetch.capturedReqs).toEqual([
-                    [
-                        'https://readwise.io/api/v2/highlights/',
-                        {
-                            body: JSON.stringify({
-                                highlights: [
-                                    {
-                                        ...firstHighlight,
-                                        highlighted_at: firstHighlight.highlighted_at.toISOString(),
-                                    },
-                                ],
-                            }),
-                            method: 'POST',
-                            headers: {
-                                Authorization: 'Token test-key',
-                                'Content-Type': 'application/json',
-                            },
-                        },
-                    ],
+                testFetches([
+                    firstHighlight,
+                    secondHighlight,
+                    firstHighlightWithTags,
+                    secondHighlightWithTags,
+                    firstHighlight,
                 ])
             })
         })

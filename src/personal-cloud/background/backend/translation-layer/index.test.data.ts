@@ -354,6 +354,14 @@ const REMOTE_TAGS_V24 = {
         user: TEST_USER.id,
         name: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag.name,
     },
+    secondAnnotationTag: {
+        id: 2,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        createdWhen: 561,
+        updatedWhen: 561,
+        user: TEST_USER.id,
+        name: LOCAL_TEST_DATA_V24.tags.secondAnnotationTag.name,
+    },
 }
 
 const REMOTE_LISTS_V24 = {
