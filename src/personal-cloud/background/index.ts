@@ -352,6 +352,12 @@ export function preprocessPulledObject(params: {
 }) {
     const collectionDefinition =
         params.storageRegistry.collections[params.collection]
+    if (!collectionDefinition) {
+        throw new Error(
+            `Got pulled object for non-existing collection: ${params.collection}`,
+        )
+    }
+
     for (const [fieldName, fieldDefinition] of Object.entries(
         collectionDefinition.fields,
     )) {

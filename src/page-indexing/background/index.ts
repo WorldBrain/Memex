@@ -17,6 +17,7 @@ import analysePage from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
+import { StoredContentType } from './types'
 
 export class PageIndexingBackground {
     storage: PageStorage
@@ -221,7 +222,8 @@ export class PageIndexingBackground {
         if (analysisRes.htmlBody) {
             await this.persistentStorage.createOrUpdatePage({
                 normalizedUrl: normalizeUrl(pageData.url),
-                htmlBody: analysisRes.htmlBody,
+                storedContentType: StoredContentType.HtmlBody,
+                content: analysisRes.htmlBody,
             })
         }
 
@@ -251,7 +253,8 @@ export class PageIndexingBackground {
         if (htmlBody) {
             await this.persistentStorage.createOrUpdatePage({
                 normalizedUrl: normalizeUrl(pageData.url),
-                htmlBody,
+                storedContentType: StoredContentType.HtmlBody,
+                content: htmlBody,
             })
         }
 

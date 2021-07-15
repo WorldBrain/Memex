@@ -4,33 +4,35 @@ import {
     StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
 import { PERSISTENT_STORAGE_VERSIONS } from 'src/storage/constants'
+import { StoredContentType } from './types'
 
 export default class PersistentPageStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            pageContent: {
+            docContent: {
                 version: PERSISTENT_STORAGE_VERSIONS[0].version,
                 fields: {
                     normalizedUrl: { type: 'string' },
-                    htmlBody: { type: 'text' },
+                    storedContentType: { type: 'string' },
+                    content: { type: 'text' },
                 },
             },
         },
         operations: {
-            createPageContent: {
+            createDocContent: {
                 operation: 'createObject',
-                collection: 'pageContent',
+                collection: 'docContent',
             },
-            findPageContentByUrl: {
+            findDocContentByUrl: {
                 operation: 'findObject',
-                collection: 'pageContent',
+                collection: 'docContent',
                 args: {
                     normalizedUrl: '$normalizedUrl:string',
                 },
             },
-            updatePageContent: {
+            updateDocContent: {
                 operation: 'updateObjects',
-                collection: 'pageContent',
+                collection: 'docContent',
                 args: [
                     { normalizedUrl: '$normalizedUrl:string' },
                     { htmlBody: '$htmlBody:string' },
@@ -41,13 +43,14 @@ export default class PersistentPageStorage extends StorageModule {
 
     async createOrUpdatePage(params: {
         normalizedUrl: string
-        htmlBody: string
+        storedContentType: StoredContentType
+        content: string
     }) {
-        const existing = await this.operation('findPageContentByUrl', params)
+        const existing = await this.operation('findDocContentByUrl', params)
         if (existing) {
-            await this.operation('updatePageContent', params)
+            await this.operation('updateDocContent', params)
         } else {
-            await this.operation('createPageContent', params)
+            await this.operation('createDocContent', params)
         }
     }
 }

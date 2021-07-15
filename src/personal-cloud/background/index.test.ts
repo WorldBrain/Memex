@@ -8,6 +8,7 @@ import { PersonalCloudOverwriteUpdate } from '@worldbrain/memex-common/lib/perso
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import pipeline from 'src/search/pipeline'
+import { StoredContentType } from 'src/page-indexing/background/types'
 
 describe('Personal cloud', () => {
     const testFullPage = async (testOptions: { source: 'tab' | 'url' }) => {
@@ -71,13 +72,14 @@ describe('Personal cloud', () => {
             ) => {
                 expect(
                     await setup.persistentStorageManager
-                        .collection('pageContent')
+                        .collection('docContent')
                         .findObjects({}),
                 ).toEqual([
                     {
                         id: expect.any(Number),
                         normalizedUrl: 'thetest.com/home',
-                        htmlBody,
+                        storedContentType: StoredContentType.HtmlBody,
+                        content: htmlBody,
                     },
                 ])
                 expect(
@@ -133,7 +135,7 @@ describe('Personal cloud', () => {
             expect(firstCloudBackend.options.view.hub.storedObjects).toEqual([
                 {
                     path: expect.stringMatching(
-                        new RegExp(`/u/${TEST_USER.id}/htmlBody/.+\.html`),
+                        new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
                     ),
                     object: htmlBody,
                 },

@@ -85,6 +85,7 @@ import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/ut
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
 import { getObjectPk } from '@worldbrain/storex/lib/utils'
 import { getObjectWhereByPk, updateOrCreate } from 'src/storage/utils'
+import { StoredContentType } from 'src/page-indexing/background/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -577,12 +578,17 @@ export function createBackgroundModules(options: {
                     },
                 })
 
-                if (params.collection === 'pageContent') {
-                    const normalizedUrl = params.where?.normalizedUrl
-                    const htmlBody = params.updates.htmlBody
-                    if (normalizedUrl && htmlBody) {
+                if (params.collection === 'docContent') {
+                    const { normalizedUrl, storedContentType } =
+                        params.where ?? {}
+                    const { content } = params.updates
+                    if (
+                        normalizedUrl &&
+                        storedContentType === StoredContentType.HtmlBody &&
+                        content
+                    ) {
                         const processed = transformPageHTML({
-                            html: htmlBody,
+                            html: content,
                         }).text
                         await storageManager.backend.operation(
                             'updateObjects',
