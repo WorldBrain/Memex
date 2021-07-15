@@ -2712,6 +2712,11 @@ describe('Personal cloud translation layer', () => {
                 })
 
                 testFetches([firstHighlight, secondHighlight])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
             })
 
             it('should update annotation notes, triggering readwise highlight upload', async () => {
@@ -2751,6 +2756,11 @@ describe('Personal cloud translation layer', () => {
                 })
 
                 testFetches([highlight, { ...highlight, note: updatedComment }])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
             })
 
             it('should add annotation tags, triggering readwise highlight upload', async () => {
@@ -2793,6 +2803,11 @@ describe('Personal cloud translation layer', () => {
                 })
 
                 testFetches([highlight, highlightWithTags])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
             })
 
             it('should remove annotation tags, triggering readwise highlight upload', async () => {
@@ -2864,6 +2879,11 @@ describe('Personal cloud translation layer', () => {
                     secondHighlightWithTags,
                     firstHighlight,
                 ])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
             })
         })
     })
