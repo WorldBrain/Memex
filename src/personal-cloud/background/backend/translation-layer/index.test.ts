@@ -2,8 +2,9 @@ import StorageManager, {
     isChildOfRelationship,
     getChildOfRelationshipTarget,
 } from '@worldbrain/storex'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     LOCAL_TEST_DATA_V24,
@@ -19,9 +20,8 @@ import {
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { ReadwisePostStorageChange } from '@worldbrain/memex-common/lib/readwise-integration/personal-cloud/post-storage-change'
 import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
-import { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
+import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -197,99 +197,105 @@ function dataChanges(
     ]
 }
 
+async function setup(options?: { runReadwiseTrigger?: boolean }) {
+    const serverIdCapturer = new IdCapturer({
+        postprocesessMerge: (params) => {
+            // tag connections don't connect with the content they tag through a
+            // Storex relationship, so we need some extra logic to get the right ID
+            for (const tagConnection of Object.values(
+                params.merged.personalTagConnection,
+            )) {
+                const collectionIds =
+                    serverIdCapturer.ids[tagConnection.collection]
+
+                if (!collectionIds) {
+                    continue
+                }
+
+                const idIndex = tagConnection.objectId - 1
+                const id = collectionIds[idIndex]
+                tagConnection.objectId = id
+            }
+        },
+    })
+
+    const fakeFetch = new FakeFetch()
+    const storageHooksChangeWatcher = new StorageHooksChangeWatcher()
+
+    const {
+        setups,
+        userId,
+        serverStorage,
+        getNow,
+    } = await setupSyncBackgroundTest({
+        deviceCount: 2,
+        serverChangeWatchSettings: options?.runReadwiseTrigger
+            ? storageHooksChangeWatcher
+            : {
+                  shouldWatchCollection: (collection) =>
+                      collection.startsWith('personal'),
+                  postprocessOperation: async (context) => {
+                      await serverIdCapturer.handlePostStorageChange(context)
+                  },
+              },
+    })
+
+    serverIdCapturer.setup(serverStorage.storageManager)
+    storageHooksChangeWatcher.setUp({
+        fetch: fakeFetch.fetch,
+        serverStorageManager: serverStorage.storageManager,
+        getCurrentUserReference: async () => ({
+            id: userId,
+            type: 'user-reference',
+        }),
+        services: {
+            activityStreams: setups[0].services.activityStreams,
+        },
+    })
+
+    return {
+        serverIdCapturer,
+        setups,
+        serverStorage,
+        testDownload: async (
+            expected: PersonalCloudUpdateBatch,
+            options?: { skip?: number },
+        ) => {
+            const { batch } = await downloadClientUpdates({
+                getNow,
+                startTime: 0,
+                storageManager: serverStorage.storageManager,
+                userId: TEST_USER.id,
+                clientSchemaVersion: STORAGE_VERSIONS[24].version,
+            })
+            expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
+        },
+        testFetches: (highlights: ReadwiseHighlight[]) =>
+            expect(fakeFetch.capturedReqs).toEqual(
+                highlights.map((highlight) => [
+                    'https://readwise.io/api/v2/highlights/',
+                    {
+                        body: JSON.stringify({
+                            highlights: [
+                                {
+                                    ...highlight,
+                                    highlighted_at: highlight.highlighted_at.toISOString(),
+                                },
+                            ],
+                        }),
+                        method: 'POST',
+                        headers: {
+                            Authorization: 'Token test-key',
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                ]),
+            ),
+    }
+}
+
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
-        async function setup(options?: { runReadwiseTrigger?: boolean }) {
-            const serverIdCapturer = new IdCapturer({
-                postprocesessMerge: (params) => {
-                    // tag connections don't connect with the content they tag through a
-                    // Storex relationship, so we need some extra logic to get the right ID
-                    for (const tagConnection of Object.values(
-                        params.merged.personalTagConnection,
-                    )) {
-                        const collectionIds =
-                            serverIdCapturer.ids[tagConnection.collection]
-
-                        if (!collectionIds) {
-                            continue
-                        }
-
-                        const idIndex = tagConnection.objectId - 1
-                        const id = collectionIds[idIndex]
-                        tagConnection.objectId = id
-                    }
-                },
-            })
-
-            const fakeFetch = new FakeFetch()
-            let readwiseStorageChange: ReadwisePostStorageChange
-            const {
-                setups,
-                serverStorage,
-                getNow,
-            } = await setupSyncBackgroundTest({
-                deviceCount: 2,
-                serverChangeWatchSettings: {
-                    shouldWatchCollection: (collection) =>
-                        collection.startsWith('personal'),
-                    postprocessOperation: async (context) => {
-                        await serverIdCapturer.handlePostStorageChange(context)
-                        if (options?.runReadwiseTrigger) {
-                            await readwiseStorageChange.handlePostStorageChange(
-                                context,
-                            )
-                        }
-                    },
-                },
-            })
-
-            readwiseStorageChange = new ReadwisePostStorageChange({
-                fetch: fakeFetch.fetch,
-                storageManager: serverStorage.storageManager,
-            })
-            serverIdCapturer.setup(serverStorage.storageManager)
-
-            return {
-                serverIdCapturer,
-                setups,
-                serverStorage,
-                testDownload: async (
-                    expected: PersonalCloudUpdateBatch,
-                    options?: { skip?: number },
-                ) => {
-                    const { batch } = await downloadClientUpdates({
-                        getNow,
-                        startTime: 0,
-                        storageManager: serverStorage.storageManager,
-                        userId: TEST_USER.id,
-                        clientSchemaVersion: STORAGE_VERSIONS[24].version,
-                    })
-                    expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
-                },
-                testFetches: (highlights: ReadwiseHighlight[]) =>
-                    expect(fakeFetch.capturedReqs).toEqual(
-                        highlights.map((highlight) => [
-                            'https://readwise.io/api/v2/highlights/',
-                            {
-                                body: JSON.stringify({
-                                    highlights: [
-                                        {
-                                            ...highlight,
-                                            highlighted_at: highlight.highlighted_at.toISOString(),
-                                        },
-                                    ],
-                                }),
-                                method: 'POST',
-                                headers: {
-                                    Authorization: 'Token test-key',
-                                    'Content-Type': 'application/json',
-                                },
-                            },
-                        ]),
-                    ),
-            }
-        }
-
         it('should create pages', async () => {
             const {
                 setups,

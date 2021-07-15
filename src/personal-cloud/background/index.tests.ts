@@ -1,5 +1,5 @@
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
-import {
+import type {
     BackgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
     BackgroundIntegrationTestInstance,
@@ -16,7 +16,7 @@ import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
-import { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
+import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
