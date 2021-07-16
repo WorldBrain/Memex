@@ -165,7 +165,7 @@ function dataChanges(
             /* info: */ any?,
         ]
     >,
-    options?: { skip?: number },
+    options?: { skip?: number; skipAssertTimestamp?: boolean },
 ) {
     let now = 554
     const advance = () => {
@@ -185,7 +185,9 @@ function dataChanges(
 
             return {
                 id: expect.anything(),
-                createdWhen: now,
+                createdWhen: options?.skipAssertTimestamp
+                    ? expect.anything()
+                    : now,
                 createdByDevice: remoteData.personalDeviceInfo.first.id,
                 user: TEST_USER.id,
                 type: change[0],
@@ -2426,10 +2428,8 @@ describe('Personal cloud translation layer', () => {
                     personalDataChange: dataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.first.id],
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.second.id],
-                    ], { skip: 4 }),
+                    ], { skip: 4, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2490,9 +2490,8 @@ describe('Personal cloud translation layer', () => {
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
                     personalDataChange: dataChanges(remoteData, [
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.first.id],
                         [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
-                    ], { skip: 6 }),
+                    ], { skip: 6, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
@@ -2566,10 +2565,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChange: dataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.first.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                         [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
-                    ], { skip: 4 }),
+                    ], { skip: 4, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalAnnotation: [testAnnotations.first],
@@ -2650,15 +2648,12 @@ describe('Personal cloud translation layer', () => {
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
                     personalDataChange: dataChanges(remoteData, [
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.first.id],
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
-                        [DataChangeType.Create, 'personalReadwiseAction', testReadwiseActions.second.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                         [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
-                        // [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                         [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
                         [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
-                    ], { skip: 6 }),
+                    ], { skip: 6, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalAnnotation: [testAnnotations.first, testAnnotations.second],
