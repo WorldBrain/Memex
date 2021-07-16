@@ -15,7 +15,7 @@ import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integrati
 import type { ReadwiseAction } from '@worldbrain/memex-common/lib/readwise-integration/types'
 import {
     formatReadwiseHighlightNote,
-    formatReadwiseHighlightText,
+    formatReadwiseHighlightTime,
     formatReadwiseHighlightLocation,
 } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import * as Raven from 'src/util/raven'
@@ -212,7 +212,9 @@ function annotationToReadwise(
         location_type: 'order',
         location: formatReadwiseHighlightLocation(annotation?.selector),
         note: formatReadwiseHighlightNote(annotation?.comment, annotation.tags),
-        text: formatReadwiseHighlightText(annotation?.body),
+        text: annotation?.body?.length
+            ? annotation.body
+            : formatReadwiseHighlightTime(annotation?.createdWhen),
     }
 }
 
