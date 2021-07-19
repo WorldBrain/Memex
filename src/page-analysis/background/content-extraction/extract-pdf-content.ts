@@ -17,14 +17,17 @@ async function extractContent(pdfData: ArrayBuffer) {
     // Read text from pages one by one (in parallel may be too heavy).
     const pageTexts = []
     let textSize = 0
-    for (let i = 0; i < pdf.numPages; ++i) {
-        const page = await pdf.getPage(i + 1) // starts at page number 1, not 0
+    let truncated = false
+    let pageIndex = 0
+    for (pageIndex = 0; pageIndex < pdf.numPages; ++pageIndex) {
+        const page = await pdf.getPage(pageIndex + 1) // starts at page number 1, not 0
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
         const pageText = pageItems.items.map((item) => item.str).join(' ')
 
         textSize += pageText.length
         if (textSize > PDF_RAW_TEXT_SIZE_LIMIT) {
+            truncated = true
             break
         }
 
@@ -37,6 +40,11 @@ async function extractContent(pdfData: ArrayBuffer) {
     })
 
     const metadata = await pdf.getMetadata()
+    if (truncated) {
+        metadata.memexTruncated = true
+        metadata.memexTotalPages = pdf.numPages
+        metadata.memexIncludedPages = pageIndex // not off by one, but pageIndex is the index it discarded
+    }
 
     return {
         pdfPageTexts: pageTexts,
