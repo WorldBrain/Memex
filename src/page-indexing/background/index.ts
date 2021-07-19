@@ -13,7 +13,9 @@ import pipeline, { transformUrl } from 'src/search/pipeline'
 import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
-import analysePage from 'src/page-analysis/background/analyse-page'
+import analysePage, {
+    PageAnalysis,
+} from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
@@ -22,6 +24,7 @@ import { StoredContentType } from './types'
 export class PageIndexingBackground {
     storage: PageStorage
     persistentStorage: PersistentPageStorage
+    fetch?: typeof fetch
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
@@ -206,9 +209,10 @@ export class PageIndexingBackground {
         }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
-        const analysisRes = await analysePage({
+        const analysis = await analysePage({
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
+            fetch: this.fetch,
             includeContent: props.stubOnly
                 ? 'metadata-only'
                 : 'metadata-with-full-text',
@@ -216,25 +220,49 @@ export class PageIndexingBackground {
         })
 
         const pageData = await pipeline({
-            pageDoc: { ...analysisRes, url: props.fullUrl },
+            pageDoc: { ...analysis, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
-        if (analysisRes.htmlBody) {
-            await this.persistentStorage.createOrUpdatePage({
-                normalizedUrl: normalizeUrl(pageData.url),
-                storedContentType: StoredContentType.HtmlBody,
-                content: analysisRes.htmlBody,
-            })
-        }
+        await this.storeDocContent(normalizeUrl(pageData.url), analysis)
 
-        if (analysisRes.favIconURI) {
+        if (analysis.favIconURI) {
             await this.storage.createFavIconIfNeeded(
                 pageData.hostname,
-                analysisRes.favIconURI,
+                analysis.favIconURI,
             )
         }
 
         return pageData
+    }
+
+    async storeDocContent(
+        normalizedUrl: string,
+        analysis: Pick<
+            PageAnalysis,
+            'htmlBody' | 'pdfMetadata' | 'pdfPageTexts'
+        >,
+    ) {
+        if (analysis.htmlBody) {
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.HtmlBody,
+                content: analysis.htmlBody,
+            })
+        } else if (analysis.pdfMetadata && analysis.pdfPageTexts) {
+            for (const key of Object.keys(analysis.pdfMetadata)) {
+                if (analysis.pdfMetadata[key] === null) {
+                    delete analysis.pdfMetadata[key]
+                }
+            }
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.PdfContent,
+                content: {
+                    metadata: analysis.pdfMetadata,
+                    pageTexts: analysis.pdfPageTexts,
+                },
+            })
+        }
     }
 
     private async processPageDataFromUrl(
@@ -246,17 +274,11 @@ export class PageIndexingBackground {
             )
         }
 
-        const {
-            content: pageData,
-            htmlBody,
-        } = await this.options.fetchPageData.process(props.fullUrl)
-        if (htmlBody) {
-            await this.persistentStorage.createOrUpdatePage({
-                normalizedUrl: normalizeUrl(pageData.url),
-                storedContentType: StoredContentType.HtmlBody,
-                content: htmlBody,
-            })
-        }
+        const processed = await this.options.fetchPageData.process(
+            props.fullUrl,
+        )
+        const { content: pageData } = processed
+        await this.storeDocContent(normalizeUrl(pageData.url), processed)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text

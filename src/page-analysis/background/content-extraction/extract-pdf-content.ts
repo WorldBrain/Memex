@@ -31,6 +31,8 @@ async function extractContent(pdfData: ArrayBuffer) {
     const metadata = await pdf.getMetadata()
 
     return {
+        pdfPageTexts: pageTexts,
+        pdfMetadata: metadata,
         fullText: processedText,
         author: metadata.info.Author,
         title: metadata.info.Title,
@@ -41,6 +43,7 @@ async function extractContent(pdfData: ArrayBuffer) {
 // Given a PDF as blob or URL, return a promise of its text and metadata.
 export default async function extractPdfContent(
     input: { url: string } | { blob: Blob },
+    options?: { fetch?: typeof fetch },
 ) {
     // TODO: If the PDF is open in a Memex PDF Reader, we should be able to save the content from that tab
     // instead of re-fetching it.
@@ -49,7 +52,8 @@ export default async function extractPdfContent(
     let blob = 'blob' in input ? input.blob : undefined
 
     if (!('blob' in input)) {
-        const response = await fetch(input.url)
+        const doFetch = options?.fetch ?? fetch
+        const response = await doFetch(input.url)
 
         if (response.status >= 400 && response.status < 600) {
             return Promise.reject(

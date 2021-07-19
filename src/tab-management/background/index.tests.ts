@@ -1,12 +1,20 @@
 import TabManagementBackground from '.'
 import { Tabs } from 'webextension-polyfill-ts'
 
-export interface FakeTab {
+export type FakeTab = FakeHtmlTab | FakePdfTab
+export interface FakeHtmlTab {
+    type?: 'html'
     id?: number
     url: string
     favIcon?: string
     htmlBody?: string
     title?: string
+}
+export interface FakePdfTab {
+    type: 'pdf'
+    id?: number
+    url: string
+    favIcon?: string
 }
 
 export function injectFakeTabs(params: {
@@ -26,6 +34,12 @@ export function injectFakeTabs(params: {
         }))
     params.tabManagement.extractRawPageContent = async (tabId) => {
         const fakeTab = params.tabs.find((tab) => tab.id === tabId)
+        if (fakeTab.type === 'pdf') {
+            return {
+                type: 'pdf',
+                url: fakeTab.url,
+            }
+        }
         return {
             type: 'html',
             url: fakeTab.url,

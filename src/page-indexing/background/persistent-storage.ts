@@ -14,7 +14,7 @@ export default class PersistentPageStorage extends StorageModule {
                 fields: {
                     normalizedUrl: { type: 'string' },
                     storedContentType: { type: 'string' },
-                    content: { type: 'text' },
+                    content: { type: 'json' },
                 },
             },
         },
@@ -44,7 +44,7 @@ export default class PersistentPageStorage extends StorageModule {
     async createOrUpdatePage(params: {
         normalizedUrl: string
         storedContentType: StoredContentType
-        content: string
+        content: any
     }) {
         const existing = await this.operation('findDocContentByUrl', params)
         if (existing) {

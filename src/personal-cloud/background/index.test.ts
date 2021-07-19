@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { setupSyncBackgroundTest } from './index.tests'
 import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -9,17 +11,26 @@ import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import pipeline from 'src/search/pipeline'
 import { StoredContentType } from 'src/page-indexing/background/types'
+import {
+    TEST_PDF_PATH,
+    TEST_PDF_METADATA,
+    TEST_PDF_PAGE_TEXTS,
+} from 'src/tests/test.data'
 
 describe('Personal cloud', () => {
-    const testFullPage = async (testOptions: { source: 'tab' | 'url' }) => {
-        const { setups, serverStorage, getNow } = await setupSyncBackgroundTest(
-            {
-                deviceCount: 2,
-                useDownloadTranslationLayer: true,
-            },
-        )
+    const testFullPage = async (testOptions: {
+        type: 'html' | 'pdf'
+        source: 'tab' | 'url'
+    }) => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 2,
+            useDownloadTranslationLayer: true,
+        })
 
-        const fullUrl = 'http://www.thetest.com/home'
+        const fullUrl =
+            testOptions.type === 'html'
+                ? 'http://www.thetest.com/home'
+                : 'https://www.dude-wheres-my/test.pdf'
         const fullTitle = `The Test`
         const fullText = `the lazy fox jumped over something I can't remember!`
         const htmlBody = `<strong>${fullText}</strong>`
@@ -32,22 +43,43 @@ describe('Personal cloud', () => {
                 executedActions.push(action)
             }
 
-            injectFakeTabs({
-                tabManagement: setups[0].backgroundModules.tabManagement,
-                tabsAPI: setups[0].browserAPIs.tabs,
-                includeTitle: true,
-                tabs:
-                    testOptions.source === 'tab'
-                        ? [
-                              {
-                                  url: fullUrl,
-                                  htmlBody,
-                                  title: fullTitle,
-                                  // favIcon: 'data:,fav%20icon',
-                              },
-                          ]
-                        : [],
-            })
+            if (testOptions.source === 'tab') {
+                if (testOptions.type === 'pdf') {
+                    const pdfContent = new Uint8Array(
+                        fs.readFileSync(TEST_PDF_PATH),
+                    )
+                    const pdfBlob = new Blob([pdfContent], {
+                        type: 'application/pdf',
+                    })
+                    setups[0].backgroundModules.pages.fetch = async (url) => {
+                        return {
+                            status: 200,
+                            blob: async () => pdfBlob,
+                        } as any
+                    }
+                }
+                injectFakeTabs({
+                    tabManagement: setups[0].backgroundModules.tabManagement,
+                    tabsAPI: setups[0].browserAPIs.tabs,
+                    includeTitle: true,
+                    tabs:
+                        testOptions.type === 'html'
+                            ? [
+                                  {
+                                      url: fullUrl,
+                                      htmlBody,
+                                      title: fullTitle,
+                                      // favIcon: 'data:,fav%20icon',
+                                  },
+                              ]
+                            : [
+                                  {
+                                      type: 'pdf',
+                                      url: fullUrl,
+                                  },
+                              ],
+                })
+            }
             if (testOptions.source === 'url') {
                 setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
                     await pipeline({
@@ -70,28 +102,42 @@ describe('Personal cloud', () => {
             const expectPageContent = async (
                 setup: BackgroundIntegrationTestSetup,
             ) => {
-                expect(
-                    await setup.persistentStorageManager
-                        .collection('docContent')
-                        .findObjects({}),
-                ).toEqual([
-                    {
-                        id: expect.any(Number),
-                        normalizedUrl: 'thetest.com/home',
-                        storedContentType: StoredContentType.HtmlBody,
-                        content: htmlBody,
-                    },
-                ])
-                expect(
-                    await setup.storageManager
-                        .collection('pages')
-                        .findObjects({}),
-                ).toEqual([
-                    expect.objectContaining({
-                        text: fullText,
-                        terms: ['lazy', 'fox', 'jumped', 'remember'],
-                    }),
-                ])
+                const docContent = await setup.persistentStorageManager
+                    .collection('docContent')
+                    .findObjects({})
+                if (testOptions.type === 'html') {
+                    expect(docContent).toEqual([
+                        {
+                            id: expect.any(Number),
+                            normalizedUrl: 'thetest.com/home',
+                            storedContentType: StoredContentType.HtmlBody,
+                            content: htmlBody,
+                        },
+                    ])
+                } else {
+                    expect(docContent).toEqual([
+                        {
+                            id: expect.any(Number),
+                            normalizedUrl: 'www.dude-wheres-my/test.pdf',
+                            storedContentType: StoredContentType.PdfContent,
+                            content: {
+                                metadata: TEST_PDF_METADATA,
+                                pageTexts: TEST_PDF_PAGE_TEXTS,
+                            },
+                        },
+                    ])
+                }
+                const pages = await setup.storageManager
+                    .collection('pages')
+                    .findObjects({})
+                if (testOptions.type === 'html') {
+                    expect(pages).toEqual([
+                        expect.objectContaining({
+                            text: fullText,
+                            terms: ['lazy', 'fox', 'jumped', 'remember'],
+                        }),
+                    ])
+                }
             }
 
             await expectPageContent(setups[0])
@@ -148,11 +194,15 @@ describe('Personal cloud', () => {
         await test()
     }
 
-    it('should sync full page texts indexed from tabs', async () => {
-        await testFullPage({ source: 'tab' })
+    it('should sync full page HTML texts indexed from tabs', async () => {
+        await testFullPage({ type: 'html', source: 'tab' })
     })
 
-    it('should sync full page texts indexed from URLs', async () => {
-        await testFullPage({ source: 'url' })
+    it('should sync full page HTML texts indexed from URLs', async () => {
+        await testFullPage({ type: 'html', source: 'url' })
+    })
+
+    it('should sync full page PDF texts indexed from tabs', async () => {
+        await testFullPage({ type: 'pdf', source: 'tab' })
     })
 })
