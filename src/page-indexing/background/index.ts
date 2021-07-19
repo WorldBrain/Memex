@@ -20,7 +20,6 @@ import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
 import { StoredContentType } from './types'
-import { PDF_RAW_TEXT_SIZE_LIMIT } from '../constants'
 
 export class PageIndexingBackground {
     storage: PageStorage
@@ -253,21 +252,6 @@ export class PageIndexingBackground {
             for (const key of Object.keys(analysis.pdfMetadata)) {
                 if (analysis.pdfMetadata[key] === null) {
                     delete analysis.pdfMetadata[key]
-                }
-            }
-
-            let textSize = 0
-            for (const [
-                pageIndex,
-                pageText,
-            ] of analysis.pdfPageTexts.entries()) {
-                textSize += pageText.length
-                if (textSize >= PDF_RAW_TEXT_SIZE_LIMIT) {
-                    analysis.pdfPageTexts = analysis.pdfPageTexts.slice(
-                        0,
-                        pageIndex + 1,
-                    )
-                    break
                 }
             }
 
