@@ -16,6 +16,7 @@ export default class PersistentPageStorage extends StorageModule {
                     storedContentType: { type: 'string' },
                     content: { type: 'json' },
                 },
+                indices: [{ field: 'normalizedUrl' }],
             },
         },
         operations: {

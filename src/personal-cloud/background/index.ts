@@ -14,7 +14,7 @@ import {
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
     PersonalCloudClientInstructionType,
-    ClientStorageType,
+    PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import {
     PersonalCloudAction,
@@ -30,6 +30,7 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
 import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
+import { blobToJson } from 'src/util/blob-utils'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -40,7 +41,7 @@ export interface PersonalCloudBackgroundOptions {
     settingStore: SettingStore<PersonalCloudSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
-        storageType: ClientStorageType
+        storageType: PersonalCloudClientStorageType
         collection: string
         where?: { [key: string]: any }
         updates: { [key: string]: any }
@@ -123,19 +124,36 @@ export class PersonalCloudBackground {
                 if (update.media) {
                     await Promise.all(
                         Object.entries(update.media).map(
-                            async ([key, path]) => {
-                                object[
-                                    key
-                                ] = await this.options.backend.downloadFromMedia(
+                            async ([fieldName, path]) => {
+                                let fieldValue = await this.options.backend.downloadFromMedia(
                                     { path },
                                 )
+
+                                const fieldDefinition =
+                                    storageManager.registry.collections[
+                                        collection
+                                    ]?.fields?.[fieldName]
+                                if (!fieldDefinition) {
+                                    return
+                                }
+                                if (fieldDefinition.type === 'json') {
+                                    fieldValue =
+                                        fieldValue instanceof Blob
+                                            ? await blobToJson(
+                                                  fieldValue as Blob,
+                                              )
+                                            : JSON.parse(fieldValue)
+                                }
+
+                                object[fieldName] = fieldValue
                             },
                         ),
                     )
                 }
 
                 await this.options.writeIncomingData({
-                    storageType: update.storage ?? 'normal',
+                    storageType:
+                        update.storage ?? PersonalCloudClientStorageType.Normal,
                     collection: update.collection,
                     updates: update.object,
                     where: update.where,
@@ -306,13 +324,30 @@ export class PersonalCloudBackground {
                             instruction.storage === 'persistent'
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
+                        const fieldDefinition =
+                            storageManager.registry.collections[
+                                instruction.collection
+                            ]?.fields?.[instruction.uploadField]
+                        if (!fieldDefinition) {
+                            return
+                        }
                         const dbObject = await storageManager
                             .collection(instruction.collection)
                             .findObject(instruction.uploadWhere)
                         if (!dbObject) {
                             return
                         }
-                        const storageObject = dbObject[instruction.uploadField]
+                        let storageObject = dbObject[instruction.uploadField]
+                        if (fieldDefinition.type === 'json') {
+                            storageObject = new Blob(
+                                [JSON.stringify(storageObject)],
+                                {
+                                    type:
+                                        instruction.uploadContentType ??
+                                        'application/json',
+                                },
+                            )
+                        }
                         if (
                             !storageObject ||
                             (typeof storageObject !== 'string' &&
@@ -326,6 +361,7 @@ export class PersonalCloudBackground {
                                 mediaPath: instruction.uploadPath,
                                 mediaObject: storageObject,
                                 changeInfo: instruction.changeInfo,
+                                contentType: instruction.uploadContentType,
                             })
                         } catch (e) {
                             console.error(

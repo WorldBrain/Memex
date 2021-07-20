@@ -16,6 +16,7 @@ import {
     TEST_PDF_METADATA,
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
+import { blobToJson } from 'src/util/blob-utils'
 
 describe('Personal cloud', () => {
     const testFullPage = async (testOptions: {
@@ -32,7 +33,15 @@ describe('Personal cloud', () => {
                 ? 'http://www.thetest.com/home'
                 : 'https://www.dude-wheres-my/test.pdf'
         const fullTitle = `The Test`
-        const fullText = `the lazy fox jumped over something I can't remember!`
+        const fullText =
+            testOptions.type === 'html'
+                ? `the lazy fox jumped over something I can't remember!`
+                : `wonderful pdf test monkey banana`
+
+        const terms =
+            testOptions.type === 'html'
+                ? ['lazy', 'fox', 'jumped', 'remember']
+                : fullText.split(' ')
         const htmlBody = `<strong>${fullText}</strong>`
 
         const test = async () => {
@@ -130,14 +139,12 @@ describe('Personal cloud', () => {
                 const pages = await setup.storageManager
                     .collection('pages')
                     .findObjects({})
-                if (testOptions.type === 'html') {
-                    expect(pages).toEqual([
-                        expect.objectContaining({
-                            text: fullText,
-                            terms: ['lazy', 'fox', 'jumped', 'remember'],
-                        }),
-                    ])
-                }
+                expect(pages).toEqual([
+                    expect.objectContaining({
+                        text: fullText,
+                        terms,
+                    }),
+                ])
             }
 
             await expectPageContent(setups[0])
@@ -178,14 +185,37 @@ describe('Personal cloud', () => {
 
             const firstCloudBackend = setups[0].backgroundModules.personalCloud
                 .options.backend as StorexPersonalCloudBackend
-            expect(firstCloudBackend.options.view.hub.storedObjects).toEqual([
-                {
-                    path: expect.stringMatching(
-                        new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
-                    ),
-                    object: htmlBody,
-                },
-            ])
+            if (testOptions.type === 'html') {
+                expect(
+                    firstCloudBackend.options.view.hub.storedObjects,
+                ).toEqual([
+                    {
+                        path: expect.stringMatching(
+                            new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
+                        ),
+                        object: htmlBody,
+                    },
+                ])
+            } else {
+                const { storedObjects } = firstCloudBackend.options.view.hub
+                expect(storedObjects).toEqual([
+                    {
+                        path: expect.stringMatching(
+                            new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
+                        ),
+                        object: expect.any(Blob),
+                    },
+                ])
+                const objectBlob = storedObjects[0].object as Blob
+                const object = await blobToJson(objectBlob)
+                expect(object).toEqual({
+                    metadata: TEST_PDF_METADATA,
+                    pageTexts: TEST_PDF_PAGE_TEXTS,
+                })
+                expect(objectBlob.type).toEqual(
+                    'application/x-memex-pdf-content',
+                )
+            }
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
             await expectPageContent(setups[1])

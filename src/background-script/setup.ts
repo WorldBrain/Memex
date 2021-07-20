@@ -75,17 +75,16 @@ import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import {
     PersonalCloudBackend,
     PersonalCloudService,
+    PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from 'src/authentication/background/utils'
 import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
-import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { getObjectPk } from '@worldbrain/storex/lib/utils'
-import { getObjectWhereByPk, updateOrCreate } from 'src/storage/utils'
+import { updateOrCreate } from 'src/storage/utils'
 import { StoredContentType } from 'src/page-indexing/background/types'
+import transformPageText from 'src/util/transform-page-text'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -565,7 +564,8 @@ export function createBackgroundModules(options: {
             userIdChanges: () => authChanges(auth.authService),
             writeIncomingData: async (params) => {
                 const incomingStorageManager =
-                    params.storageType === 'persistent'
+                    params.storageType ===
+                    PersonalCloudClientStorageType.Persistent
                         ? options.persistentStorageManager
                         : options.storageManager
 
@@ -582,27 +582,29 @@ export function createBackgroundModules(options: {
                     const { normalizedUrl, storedContentType } =
                         params.where ?? {}
                     const { content } = params.updates
-                    if (
-                        normalizedUrl &&
-                        storedContentType === StoredContentType.HtmlBody &&
-                        content
-                    ) {
-                        const processed = transformPageHTML({
-                            html: content,
-                        }).text
-                        await storageManager.backend.operation(
-                            'updateObjects',
-                            'pages',
-                            {
-                                url: normalizedUrl,
-                            },
-                            { text: processed },
-                        )
-                    } else {
+                    if (!normalizedUrl || !content) {
                         console.warn(
                             `Got an incoming page, but it didn't include a URL and a body`,
                         )
+                        return
                     }
+
+                    const processed =
+                        storedContentType === StoredContentType.HtmlBody
+                            ? transformPageHTML({
+                                  html: content,
+                              }).text
+                            : transformPageText({
+                                  text: (content.pageTexts ?? []).join(' '),
+                              }).text
+                    await storageManager.backend.operation(
+                        'updateObjects',
+                        'pages',
+                        {
+                            url: normalizedUrl,
+                        },
+                        { text: processed },
+                    )
                 }
             },
         }),

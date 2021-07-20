@@ -155,7 +155,7 @@ export default class FirestorePersonalCloudBackend
         const ref = firebase.storage().ref(mediaPath)
         if (typeof params.mediaObject === 'string') {
             await ref.putString(params.mediaObject, 'raw', {
-                contentType: 'text/plain',
+                contentType: params.contentType ?? 'text/plain',
             })
         } else {
             await ref.put(params.mediaObject)
