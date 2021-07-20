@@ -7,12 +7,7 @@ import {
     PersonalCloudUpdatePushBatch,
     PersonalCloudUpdateBatch,
     UploadClientUpdatesResult,
-    PersonalCloudObjectInfo,
-    ClientStorageType,
-    MediaChangeInfo,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { SettingStore } from 'src/util/settings'
-import { PersonalCloudSettings } from '../types'
 
 export default class FirestorePersonalCloudBackend
     implements PersonalCloudBackend {
@@ -22,7 +17,8 @@ export default class FirestorePersonalCloudBackend
             personalCloudService: PersonalCloudService
             userChanges: () => AsyncIterableIterator<void>
             getUserChangesReference: () => Promise<firebase.firestore.CollectionReference | null>
-            settingStore: SettingStore<PersonalCloudSettings>
+            getLastUpdateSeenTime: () => Promise<number>
+            setLastUpdateSeenTime: (lastSeen: number) => Promise<void>
         },
     ) {}
 
@@ -36,7 +32,6 @@ export default class FirestorePersonalCloudBackend
 
     async *streamUpdates(): AsyncIterableIterator<PersonalCloudUpdateBatch> {
         const {
-            settingStore,
             personalCloudService,
             getCurrentSchemaVersion,
             getUserChangesReference,
@@ -61,7 +56,7 @@ export default class FirestorePersonalCloudBackend
             )
 
             addedResolvable = createResolvable()
-            lastSeen = (await this.options.settingStore.get('lastSeen')) ?? 0
+            lastSeen = (await this.options.getLastUpdateSeenTime()) ?? 0
             const changesReference = await getUserChangesReference()
             if (!changesReference) {
                 cleanup = async () => {}
@@ -107,7 +102,7 @@ export default class FirestorePersonalCloudBackend
                 // console.log('result', result)
                 yield result.batch
                 lastSeen = result.lastSeen
-                await settingStore.set('lastSeen', lastSeen)
+                await this.options.setLastUpdateSeenTime(lastSeen)
                 if (!result.maybeHasMore) {
                     break
                 }

@@ -545,7 +545,10 @@ export function createBackgroundModules(options: {
                             .doc(currentUser.id)
                             .collection('objects')
                     },
-                    settingStore: personalCloudSettingStore,
+                    getLastUpdateSeenTime: () =>
+                        personalCloudSettingStore.get('lastSeen'),
+                    setLastUpdateSeenTime: (lastSeen) =>
+                        personalCloudSettingStore.set('lastSeen', lastSeen),
                 }),
             createDeviceId: async (userId) => {
                 const serverStorage = await options.getServerStorage()
