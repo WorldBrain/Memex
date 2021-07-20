@@ -2,7 +2,6 @@ import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
-import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
@@ -73,7 +72,6 @@ export function createSelfTests(options: {
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
-            // // const cloudBackend = personalCloud.options.backend as FirestorePersonalCloudBackend
             const testPageUrl = 'https://www.getmemex.com/'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             await backgroundModules.tags.addTagToPage({

@@ -76,15 +76,12 @@ import {
     PersonalCloudBackend,
     PersonalCloudService,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
-import { authChanges } from 'src/authentication/background/utils'
-import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
+import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
+import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
-import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { getObjectPk } from '@worldbrain/storex/lib/utils'
-import { getObjectWhereByPk, updateOrCreate } from 'src/storage/utils'
+import { updateOrCreate } from 'src/storage/utils'
 
 export interface BackgroundModules {
     auth: AuthBackground
