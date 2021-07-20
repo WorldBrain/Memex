@@ -194,6 +194,7 @@ describe('Personal cloud', () => {
                             new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
                         ),
                         object: htmlBody,
+                        contentType: 'application/x-memex-html-body',
                     },
                 ])
             } else {
@@ -204,6 +205,7 @@ describe('Personal cloud', () => {
                             new RegExp(`^/u/${TEST_USER.id}/docContent/.+$`),
                         ),
                         object: expect.any(Blob),
+                        contentType: 'application/x-memex-pdf-content',
                     },
                 ])
                 const objectBlob = storedObjects[0].object as Blob
