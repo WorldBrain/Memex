@@ -1,7 +1,5 @@
-import StorageManager, {
-    IndexSourceField,
-    StorageRegistry,
-} from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex'
+import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
@@ -26,7 +24,6 @@ import {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
-import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
