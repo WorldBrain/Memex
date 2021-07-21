@@ -161,6 +161,7 @@ export async function main() {
     window['selfTests'] = createSelfTests({
         backgroundModules,
         storageManager,
+        persistentStorageManager,
         getServerStorage,
     })
 }

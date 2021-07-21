@@ -234,7 +234,7 @@ describe('Personal cloud', () => {
         await testFullPage({ type: 'html', source: 'url' })
     })
 
-    it('should sync full page PDF texts indexed from tabs', async () => {
+    it('should sync full page PDF texts indexed from tabs', async function () {
         await testFullPage({ type: 'pdf', source: 'tab' })
     })
 })

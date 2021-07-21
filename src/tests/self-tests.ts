@@ -9,6 +9,7 @@ import { AnnotationPrivacyLevels } from 'src/annotations/types'
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     getServerStorage: () => Promise<ServerStorage>
 }) {
     const { backgroundModules } = options
@@ -38,7 +39,8 @@ export function createSelfTests(options: {
     const tests = {
         cloudSend: async () => {
             await clearDb(options.storageManager)
-            console.log('Cleared local database')
+            await clearDb(options.persistentStorageManager)
+            console.log('Cleared local databases')
 
             const user = await ensureTestUser()
             console.log('Self test user:', user.id)

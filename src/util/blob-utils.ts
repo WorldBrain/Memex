@@ -4,10 +4,12 @@ export async function blobToBuffer(blob: Blob): Promise<ArrayBuffer> {
     )
 }
 
+export async function blobToString(blob: Blob) {
+    return convertBlob<string>(blob, (reader) => reader.readAsText(blob))
+}
+
 export async function blobToJson(blob: Blob) {
-    return JSON.parse(
-        await convertBlob<string>(blob, (reader) => reader.readAsText(blob)),
-    )
+    return JSON.parse(await blobToString(blob))
 }
 
 export async function bufferToBlob(buffer: ArrayBuffer): Promise<Blob> {

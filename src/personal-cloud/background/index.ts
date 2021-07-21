@@ -30,7 +30,7 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
 import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
-import { blobToJson } from 'src/util/blob-utils'
+import { blobToJson, blobToString } from 'src/util/blob-utils'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -124,15 +124,23 @@ export class PersonalCloudBackground {
                 if (update.media) {
                     await Promise.all(
                         Object.entries(update.media).map(
-                            async ([fieldName, { path, isJson }]) => {
-                                let fieldValue = await this.options.backend.downloadFromMedia(
+                            async ([fieldName, { path, type }]) => {
+                                let fieldValue:
+                                    | Blob
+                                    | string = await this.options.backend.downloadFromMedia(
                                     { path },
                                 )
-                                if (isJson) {
-                                    fieldValue =
-                                        fieldValue instanceof Blob
-                                            ? await blobToJson(fieldValue)
-                                            : JSON.parse(fieldValue)
+                                if (type === 'text' || type === 'json') {
+                                    if (fieldValue instanceof Blob) {
+                                        fieldValue = await blobToString(
+                                            fieldValue,
+                                        )
+                                    }
+                                }
+                                if (type === 'json') {
+                                    fieldValue = JSON.parse(
+                                        fieldValue as string,
+                                    )
                                 }
 
                                 object[fieldName] = fieldValue
