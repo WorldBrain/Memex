@@ -560,7 +560,7 @@ export function createBackgroundModules(options: {
             },
             settingStore: personalCloudSettingStore,
             getUserId: async () =>
-                (await auth.authService.getCurrentUser()).id ?? null,
+                (await auth.authService.getCurrentUser())?.id ?? null,
             userIdChanges: () => authChanges(auth.authService),
             writeIncomingData: async (params) => {
                 const incomingStorageManager =

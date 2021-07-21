@@ -30,7 +30,8 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
 import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
-import { blobToJson, blobToString } from 'src/util/blob-utils'
+import { blobToString } from 'src/util/blob-utils'
+import * as Raven from 'src/util/raven'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -110,60 +111,66 @@ export class PersonalCloudBackground {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
             // console.log('processing update', update)
-            const { collection } = update
-            const storageManager =
-                update.storage === 'persistent'
-                    ? this.options.persistentStorageManager
-                    : this.options.storageManager
+            try {
+                const { collection } = update
+                const storageManager =
+                    update.storage === 'persistent'
+                        ? this.options.persistentStorageManager
+                        : this.options.storageManager
 
-            if (update.type === PersonalCloudUpdateType.Overwrite) {
-                const object = update.object
-                preprocessPulledObject({
-                    storageRegistry: storageManager.registry,
-                    collection,
-                    object,
-                })
-                if (update.media) {
-                    await Promise.all(
-                        Object.entries(update.media).map(
-                            async ([fieldName, { path, type }]) => {
-                                let fieldValue:
-                                    | Blob
-                                    | string = await this.options.backend.downloadFromMedia(
-                                    { path },
-                                )
-                                if (type === 'text' || type === 'json') {
-                                    if (fieldValue instanceof Blob) {
-                                        fieldValue = await blobToString(
-                                            fieldValue,
+                if (update.type === PersonalCloudUpdateType.Overwrite) {
+                    const object = update.object
+                    preprocessPulledObject({
+                        storageRegistry: storageManager.registry,
+                        collection,
+                        object,
+                    })
+                    if (update.media) {
+                        await Promise.all(
+                            Object.entries(update.media).map(
+                                async ([fieldName, { path, type }]) => {
+                                    let fieldValue:
+                                        | Blob
+                                        | string = await this.options.backend.downloadFromMedia(
+                                        { path },
+                                    )
+                                    if (type === 'text' || type === 'json') {
+                                        if (fieldValue instanceof Blob) {
+                                            fieldValue = await blobToString(
+                                                fieldValue,
+                                            )
+                                        }
+                                    }
+                                    if (type === 'json') {
+                                        fieldValue = JSON.parse(
+                                            fieldValue as string,
                                         )
                                     }
-                                }
-                                if (type === 'json') {
-                                    fieldValue = JSON.parse(
-                                        fieldValue as string,
-                                    )
-                                }
 
-                                object[fieldName] = fieldValue
-                            },
-                        ),
+                                    object[fieldName] = fieldValue
+                                },
+                            ),
+                        )
+                    }
+
+                    await this.options.writeIncomingData({
+                        storageType:
+                            update.storage ??
+                            PersonalCloudClientStorageType.Normal,
+                        collection: update.collection,
+                        updates: update.object,
+                        where: update.where,
+                    })
+                } else if (update.type === PersonalCloudUpdateType.Delete) {
+                    await storageManager.backend.operation(
+                        'deleteObjects',
+                        update.collection,
+                        update.where,
                     )
                 }
-
-                await this.options.writeIncomingData({
-                    storageType:
-                        update.storage ?? PersonalCloudClientStorageType.Normal,
-                    collection: update.collection,
-                    updates: update.object,
-                    where: update.where,
-                })
-            } else if (update.type === PersonalCloudUpdateType.Delete) {
-                await storageManager.backend.operation(
-                    'deleteObjects',
-                    update.collection,
-                    update.where,
-                )
+            } catch (err) {
+                console.error(`Error integrating update from cloud`, err)
+                Raven.captureException(err)
             }
         }
         releaseMutex()
@@ -325,9 +332,24 @@ export class PersonalCloudBackground {
                             instruction.storage === 'persistent'
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
-                        const dbObject = await storageManager
-                            .collection(instruction.collection)
-                            .findObject(instruction.uploadWhere)
+
+                        let dbObject
+                        try {
+                            dbObject = await storageManager
+                                .collection(instruction.collection)
+                                .findObject(instruction.uploadWhere)
+                        } catch (err) {
+                            console.error(
+                                `Could not fetch dbObject for instruction`,
+                                instruction,
+                                err,
+                            )
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(err)
+                            return
+                        }
                         if (!dbObject) {
                             return
                         }
@@ -347,6 +369,18 @@ export class PersonalCloudBackground {
                             (typeof storageObject !== 'string' &&
                                 !(storageObject instanceof Blob))
                         ) {
+                            console.error(
+                                `Don't know how to store object for instruction`,
+                                instruction,
+                            )
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(
+                                new Error(
+                                    `Don't know how to store object for instruction`,
+                                ),
+                            )
                             return
                         }
                         try {
@@ -363,6 +397,10 @@ export class PersonalCloudBackground {
                                 instruction,
                             )
                             console.error(e)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(e)
                         }
                     }
                 }),
