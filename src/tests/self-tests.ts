@@ -4,6 +4,7 @@ import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
@@ -72,6 +73,15 @@ export function createSelfTests(options: {
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
+
+            if (process.env.TEST_READWISE_API_KEY != null) {
+                await backgroundModules.settings.set({
+                    [EXTENSION_SETTINGS_NAME.ReadwiseAPIKey]:
+                        process.env.TEST_READWISE_API_KEY,
+                })
+                console.log('Set test Readwise API Key')
+            }
+
             const testPageUrl = 'https://www.getmemex.com/'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             await backgroundModules.tags.addTagToPage({
