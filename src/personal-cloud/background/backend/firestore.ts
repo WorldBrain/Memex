@@ -167,9 +167,9 @@ export default class FirestorePersonalCloudBackend
         })
     }
 
-    async downloadFromMedia(params: {
-        path: string
-    }): Promise<string | Blob | null> {
+    downloadFromMedia: PersonalCloudBackend['downloadFromMedia'] = async (
+        params,
+    ) => {
         let { path } = params
         if (path.startsWith('/')) {
             path = path.slice(1)
@@ -182,10 +182,6 @@ export default class FirestorePersonalCloudBackend
 
         const response = await fetch(downloadUrl)
         const blob = await response.blob()
-        if (blob.type === 'text/plain') {
-            return blob.text()
-        }
-
         return blob
     }
 }
