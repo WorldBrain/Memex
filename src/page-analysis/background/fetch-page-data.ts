@@ -89,17 +89,22 @@ const fetchPageData: FetchPageData = ({
                     rawContent,
                 )
                 const fullText = await getPageFullText(rawContent, metadata)
-                return { ...metadata, fullText }
+                return { content: { ...metadata, fullText }, rawContent }
             }
 
-            return {
-                favIconURI: opts.includeFavIcon
-                    ? await extractFavIcon(url, doc)
-                    : undefined,
-                content: opts.includePageContent
-                    ? await extractPageContent()
-                    : undefined,
+            const result: PageDataResult = {}
+            if (opts.includePageContent) {
+                const { content, rawContent } = await extractPageContent()
+                result.content = content
+                if (rawContent.type === 'html') {
+                    result.htmlBody = rawContent.body
+                }
             }
+            if (opts.includeFavIcon) {
+                result.favIconURI = await extractFavIcon(url, doc)
+            }
+
+            return result
         }
     }
 

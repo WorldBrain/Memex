@@ -1,7 +1,10 @@
-import StorageManager from '@worldbrain/storex'
+import StorageManager, { StorageRegistry } from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import {
+    getCurrentSchemaVersion,
+    isTermsField,
+} from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
@@ -47,6 +50,7 @@ export class PersonalCloudBackground {
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
     deviceId?: string | number
+    reportExecutingAction?: (action: PersonalCloudAction) => void
 
     constructor(public options: PersonalCloudBackgroundOptions) {
         this.actionQueue = new ActionQueue({
@@ -100,6 +104,7 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
+            const { collection } = update
             const storageManager =
                 update.storage === 'persistent'
                     ? this.options.persistentStorageManager
@@ -107,6 +112,11 @@ export class PersonalCloudBackground {
 
             if (update.type === PersonalCloudUpdateType.Overwrite) {
                 const object = update.object
+                preprocessPulledObject({
+                    storageRegistry: storageManager.registry,
+                    collection,
+                    object,
+                })
                 if (update.media) {
                     await Promise.all(
                         Object.entries(update.media).map(
@@ -148,10 +158,11 @@ export class PersonalCloudBackground {
         const { releaseMutex } = await this.pushMutex.lock()
 
         for (const change of event.info.changes) {
+            const { collection } = change
             if (change.type === 'create') {
                 const object = await getObjectByPk(
                     this.options.storageManager,
-                    change.collection,
+                    collection,
                     change.pk,
                 )
                 if (!object) {
@@ -167,8 +178,11 @@ export class PersonalCloudBackground {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
                                 deviceId: this.deviceId,
-                                collection: change.collection,
-                                object,
+                                collection,
+                                object: this.preprocessObjectForPush({
+                                    collection,
+                                    object,
+                                }),
                             },
                         ],
                     },
@@ -179,7 +193,7 @@ export class PersonalCloudBackground {
                     change.pks.map((pk) =>
                         getObjectByPk(
                             this.options.storageManager,
-                            change.collection,
+                            collection,
                             pk,
                         ),
                     ),
@@ -193,7 +207,7 @@ export class PersonalCloudBackground {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
                                 deviceId: this.deviceId,
-                                collection: change.collection,
+                                collection,
                                 object,
                             })),
                     },
@@ -204,7 +218,7 @@ export class PersonalCloudBackground {
                     change.pks.map((pk) =>
                         getObjectWhereByPk(
                             this.options.storageManager.registry,
-                            change.collection,
+                            collection,
                             pk,
                         ),
                     ),
@@ -216,7 +230,7 @@ export class PersonalCloudBackground {
                             type: PersonalCloudUpdateType.Delete,
                             schemaVersion: this.currentSchemaVersion!,
                             deviceId: this.deviceId,
-                            collection: change.collection,
+                            collection,
                             where,
                         })),
                     },
@@ -228,10 +242,34 @@ export class PersonalCloudBackground {
         releaseMutex()
     }
 
+    preprocessObjectForPush({
+        collection,
+        object,
+    }: {
+        collection: string
+        object: any
+    }) {
+        for (const field of Object.keys(object)) {
+            if (isTermsField({ collection, field })) {
+                delete object[field]
+            }
+        }
+        if (collection === 'pages') {
+            delete object.text
+        }
+        if (collection === 'favIcons') {
+            delete object.favIcon
+        }
+        return object
+    }
+
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
         if (!this.deviceId) {
             return { pauseAndRetry: true }
         }
+
+        // For automated tests
+        this.reportExecutingAction?.(action)
 
         if (action.type === PersonalCloudActionType.PushObject) {
             const {
@@ -242,13 +280,15 @@ export class PersonalCloudBackground {
                     deviceId: update.deviceId ?? this.deviceId,
                 })),
             )
-            await this.actionQueue.scheduleAction(
-                {
-                    type: PersonalCloudActionType.ExecuteClientInstructions,
-                    clientInstructions,
-                },
-                { queueInteraction: 'queue-and-return' },
-            )
+            if (clientInstructions.length) {
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.ExecuteClientInstructions,
+                        clientInstructions,
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            }
         } else if (
             action.type === PersonalCloudActionType.ExecuteClientInstructions
         ) {
@@ -299,5 +339,24 @@ export class PersonalCloudBackground {
 
     preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
         return { valid: true }
+    }
+}
+
+export function preprocessPulledObject(params: {
+    storageRegistry: StorageRegistry
+    collection: string
+    object: any
+}) {
+    const collectionDefinition =
+        params.storageRegistry.collections[params.collection]
+    for (const [fieldName, fieldDefinition] of Object.entries(
+        collectionDefinition.fields,
+    )) {
+        if (
+            fieldDefinition.type === 'datetime' &&
+            typeof params.object[fieldName] === 'number'
+        ) {
+            params.object[fieldName] = new Date(params.object[fieldName])
+        }
     }
 }

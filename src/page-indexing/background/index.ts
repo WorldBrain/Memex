@@ -26,7 +26,7 @@ export class PageIndexingBackground {
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
 
     constructor(
-        private options: {
+        public options: {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             persistentStorageManager: StorageManager
@@ -223,11 +223,6 @@ export class PageIndexingBackground {
                 normalizedUrl: normalizeUrl(pageData.url),
                 htmlBody: analysisRes.htmlBody,
             })
-            console.log(
-                await this.options.persistentStorageManager
-                    .collection('pageContent')
-                    .findObjects({}),
-            )
         }
 
         if (analysisRes.favIconURI) {
@@ -249,9 +244,16 @@ export class PageIndexingBackground {
             )
         }
 
-        const { content: pageData } = await this.options.fetchPageData.process(
-            props.fullUrl,
-        )
+        const {
+            content: pageData,
+            htmlBody,
+        } = await this.options.fetchPageData.process(props.fullUrl)
+        if (htmlBody) {
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl: normalizeUrl(pageData.url),
+                htmlBody,
+            })
+        }
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text
