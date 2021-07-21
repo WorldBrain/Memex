@@ -124,24 +124,14 @@ export class PersonalCloudBackground {
                 if (update.media) {
                     await Promise.all(
                         Object.entries(update.media).map(
-                            async ([fieldName, path]) => {
+                            async ([fieldName, { path, isJson }]) => {
                                 let fieldValue = await this.options.backend.downloadFromMedia(
                                     { path },
                                 )
-
-                                const fieldDefinition =
-                                    storageManager.registry.collections[
-                                        collection
-                                    ]?.fields?.[fieldName]
-                                if (!fieldDefinition) {
-                                    return
-                                }
-                                if (fieldDefinition.type === 'json') {
+                                if (isJson) {
                                     fieldValue =
                                         fieldValue instanceof Blob
-                                            ? await blobToJson(
-                                                  fieldValue as Blob,
-                                              )
+                                            ? await blobToJson(fieldValue)
                                             : JSON.parse(fieldValue)
                                 }
 
@@ -324,13 +314,6 @@ export class PersonalCloudBackground {
                             instruction.storage === 'persistent'
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
-                        const fieldDefinition =
-                            storageManager.registry.collections[
-                                instruction.collection
-                            ]?.fields?.[instruction.uploadField]
-                        if (!fieldDefinition) {
-                            return
-                        }
                         const dbObject = await storageManager
                             .collection(instruction.collection)
                             .findObject(instruction.uploadWhere)
@@ -338,7 +321,7 @@ export class PersonalCloudBackground {
                             return
                         }
                         let storageObject = dbObject[instruction.uploadField]
-                        if (fieldDefinition.type === 'json') {
+                        if (instruction.uploadAsJson) {
                             storageObject = new Blob(
                                 [JSON.stringify(storageObject)],
                                 {
