@@ -72,6 +72,7 @@ export class PersonalCloudBackground {
             this.options.storageManager,
         )
         await this.actionQueue.setup({ paused: true })
+        await this.loadDeviceId()
 
         // These will never return, so don't await for it
         this.observeAuthChanges()
@@ -108,6 +109,7 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
+            // console.log('processing update', update)
             const { collection } = update
             const storageManager =
                 update.storage === 'persistent'
@@ -286,6 +288,7 @@ export class PersonalCloudBackground {
         if (!this.deviceId) {
             return { pauseAndRetry: true }
         }
+        // console.log('executing action', action)
 
         // For automated tests
         this.reportExecutingAction?.(action)
