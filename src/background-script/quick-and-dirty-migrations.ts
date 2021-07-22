@@ -127,25 +127,25 @@ export const migrations: Migrations = {
      * We recently added ordering to annotations uploaded to Readwise, however we messed it up for notes (without highlights), causing them
      * to not upload correctly. Now we need to upload all notes.
      */
-    'reupload-all-readwise-notes': async ({
-        backgroundModules: { readwise },
-    }) => {
-        const readwiseApiKey = await readwise.getAPIKey()
-        if (!readwiseApiKey) {
-            return
-        }
-        const validationResult = await readwise.validateAPIKey({
-            key: readwiseApiKey,
-        })
-        if (!validationResult?.success) {
-            return
-        }
+    // 'reupload-all-readwise-notes': async ({
+    //     backgroundModules: { readwise },
+    // }) => {
+    //     const readwiseApiKey = await readwise.getAPIKey()
+    //     if (!readwiseApiKey) {
+    //         return
+    //     }
+    //     const validationResult = await readwise.validateAPIKey({
+    //         key: readwiseApiKey,
+    //     })
+    //     if (!validationResult?.success) {
+    //         return
+    //     }
 
-        await readwise.uploadAllAnnotations({
-            queueInteraction: 'queue-and-return',
-            annotationFilter: (annot) => !annot.body?.length,
-        })
-    },
+    //     await readwise.uploadAllAnnotations({
+    //         queueInteraction: 'queue-and-return',
+    //         annotationFilter: (annot) => !annot.body?.length,
+    //     })
+    // },
     /*
      * A long time ago we made the decision to make the "Saved from Mobile" list's ID static
      * to simplify references to it. However this was after we'd already rolled the feature out.

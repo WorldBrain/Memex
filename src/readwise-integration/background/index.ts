@@ -1,18 +1,10 @@
 import StorageManager from '@worldbrain/storex'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
-import {
-    ActionExecutor,
-    ActionQueueInteraction,
-    ActionPreprocessor,
-} from '@worldbrain/memex-common/lib/action-queue/types'
-import { STORAGE_VERSIONS } from '@worldbrain/memex-common/lib/browser-extension/storage/versions'
 import type {
     ReadwiseAPI,
     ReadwiseHighlight,
 } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
-import type { ReadwiseAction } from '@worldbrain/memex-common/lib/readwise-integration/types'
 import {
     formatReadwiseHighlightNote,
     formatReadwiseHighlightTime,
@@ -22,7 +14,6 @@ import * as Raven from 'src/util/raven'
 import { ReadwiseSettings } from './types/settings'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { Annotation } from 'src/annotations/types'
-import { READWISE_ACTION_RETRY_INTERVAL } from './constants'
 import { ReadwiseInterface } from './types/remote-interface'
 import {
     remoteFunctionWithoutExtraArgs,
@@ -42,10 +33,7 @@ export class ReadwiseBackground {
     remoteFunctions: ReadwiseInterface<'provider'>
     settingsStore: SettingStore<ReadwiseSettings>
     readwiseAPI: ReadwiseAPI
-    actionQueue: ActionQueue<ReadwiseAction>
-    uploadBatchSize = 10
-    _apiKeyLoaded = false
-    _apiKey?: string
+    private _apiKey: string | null = null
 
     constructor(
         private options: {
@@ -54,9 +42,6 @@ export class ReadwiseBackground {
             fetch: typeof fetch
             getPageData: GetPageData
             getAnnotationTags: GetAnnotationTags
-            getAnnotationsByPks: (
-                annotationUrls: string[],
-            ) => Promise<Annotation[]>
             streamAnnotations(): AsyncIterableIterator<Annotation>
         },
     ) {
@@ -69,14 +54,7 @@ export class ReadwiseBackground {
         this.readwiseAPI = new HTTPReadwiseAPI({
             fetch: options.fetch,
         })
-        this.actionQueue = new ActionQueue({
-            storageManager: options.storageManager,
-            collectionName: 'readwiseAction',
-            versions: { initial: STORAGE_VERSIONS[22].version },
-            retryIntervalInMs: READWISE_ACTION_RETRY_INTERVAL,
-            executeAction: this.executeAction,
-            preprocessAction: this.preprocessAction,
-        })
+
         this.remoteFunctions = {
             validateAPIKey: remoteFunctionWithoutExtraArgs(this.validateAPIKey),
             getAPIKey: remoteFunctionWithoutExtraArgs(this.getAPIKey),
@@ -99,12 +77,11 @@ export class ReadwiseBackground {
     }
 
     getAPIKey: ReadwiseInterfaceMethod<'getAPIKey'> = async () => {
-        if (this._apiKeyLoaded) {
+        if (this._apiKey) {
             return this._apiKey
         }
 
-        this._apiKey = await this.settingsStore.get('apiKey')
-        this._apiKeyLoaded = true
+        this._apiKey = (await this.settingsStore.get('apiKey')) ?? null
         return this._apiKey
     }
 
@@ -113,90 +90,50 @@ export class ReadwiseBackground {
     }) => {
         await this.settingsStore.set('apiKey', validatedKey)
         this._apiKey = validatedKey
-        this._apiKeyLoaded = true
     }
 
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
-    > = async ({ queueInteraction, annotationFilter = () => true }) => {
+    > = async () => {
         const getFullPageUrl = makePageDataCache({
             getPageData: this.options.getPageData,
         })
 
-        let annotationBatch: Annotation[] = []
-        const scheduleBatch = async () => {
-            await this._scheduleAnnotationBatchUpload(annotationBatch, {
-                queueInteraction,
-                getPageData: getFullPageUrl,
-            })
-        }
-
-        for await (const annotation of this.options.streamAnnotations()) {
-            if (!annotationFilter(annotation)) {
-                continue
-            }
-
-            const tags = await this.options.getAnnotationTags(annotation.url)
-
-            annotationBatch.push({ ...annotation, tags })
-            if (annotationBatch.length === this.uploadBatchSize) {
-                await scheduleBatch()
-                annotationBatch = []
-            }
-        }
-        if (annotationBatch.length) {
-            await scheduleBatch()
-        }
-    }
-
-    async _scheduleAnnotationBatchUpload(
-        annotations: Annotation[],
-        options: {
-            getPageData: GetPageData
-            queueInteraction: ActionQueueInteraction
-        },
-    ) {
-        await this.actionQueue.scheduleAction(
-            {
-                type: 'post-highlights',
-                highlights: (
-                    await Promise.all(
-                        annotations.map(async (annotation) => {
-                            try {
-                                const pageData = await options.getPageData(
-                                    annotation.pageUrl,
-                                )
-                                return annotationToReadwise(annotation, {
-                                    pageData,
-                                })
-                            } catch (e) {
-                                console.error(e)
-                                Raven.captureException(e)
-                                return null
-                            }
-                        }),
-                    )
-                ).filter((highlight) => !!highlight),
-            },
-            { queueInteraction: options.queueInteraction },
-        )
-    }
-
-    executeAction: ActionExecutor<ReadwiseAction> = async ({ action }) => {
-        const key = await this.getAPIKey()
-        if (!key) {
+        const apiKey = this._apiKey ?? (await this.getAPIKey())
+        if (!apiKey) {
             throw new Error(
-                `Tried to execute Readwise action without providing API key`,
+                'Attempted readwise highlight upload without API key set',
             )
         }
 
-        if (action.type === 'post-highlights') {
-            await this.readwiseAPI.postHighlights(key, action.highlights)
+        const annotationBatch: Annotation[] = []
+        for await (const annotation of this.options.streamAnnotations()) {
+            const tags = await this.options.getAnnotationTags(annotation.url)
+            annotationBatch.push({ ...annotation, tags })
         }
-    }
 
-    preprocessAction: ActionPreprocessor<ReadwiseAction> = () => {
-        return { valid: true }
+        const highlights = (
+            await Promise.all(
+                annotationBatch.map(async (annotation) => {
+                    try {
+                        const pageData = await getFullPageUrl(
+                            annotation.pageUrl,
+                        )
+                        return annotationToReadwise(annotation, {
+                            pageData,
+                        })
+                    } catch (e) {
+                        console.error(e)
+                        Raven.captureException(e)
+                        return null
+                    }
+                }),
+            )
+        ).filter((highlight) => !!highlight)
+
+        if (highlights.length) {
+            await this.readwiseAPI.postHighlights(apiKey, highlights)
+        }
     }
 }
 
@@ -220,18 +157,17 @@ function annotationToReadwise(
 
 function makePageDataCache(options: { getPageData: GetPageData }): GetPageData {
     const pageDataCache: { [normalizedUrl: string]: PageData } = {}
-    const getPageData = async (normalizedUrl: string) => {
+    return async (normalizedUrl: string) => {
         if (pageDataCache[normalizedUrl]) {
             return pageDataCache[normalizedUrl]
         }
-        const fullUrl = await options.getPageData(normalizedUrl)
-        if (!fullUrl) {
+        const pageData = await options.getPageData(normalizedUrl)
+        if (!pageData) {
             throw new Error(
                 `Can't get full URL for annotation to upload to Readwise`,
             )
         }
-        pageDataCache[normalizedUrl] = fullUrl
-        return fullUrl
+        pageDataCache[normalizedUrl] = pageData
+        return pageData
     }
-    return getPageData
 }

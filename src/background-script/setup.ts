@@ -346,9 +346,6 @@ export function createBackgroundModules(options: {
                     annotationUrl,
                 )
             ).map(({ name }) => name.replace(/\s+/g, '-')),
-        getAnnotationsByPks: async (pks) => {
-            return directLinking.annotationStorage.getAnnotations(pks)
-        },
         streamAnnotations: async function* () {
             yield* await storageManager.operation(
                 'streamObjects',
@@ -686,7 +683,6 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
         userSettings: backgroundModules.settings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
