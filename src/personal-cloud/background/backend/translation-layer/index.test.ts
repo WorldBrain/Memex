@@ -262,7 +262,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         serverStorage,
         testDownload: async (
             expected: PersonalCloudUpdateBatch,
-            options?: { skip?: number },
+            downloadOptions?: { skip?: number; deviceIndex?: number },
         ) => {
             const { batch } = await downloadClientUpdates({
                 getNow,
@@ -270,6 +270,9 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 storageManager: serverStorage.storageManager,
                 userId: TEST_USER.id,
                 clientSchemaVersion: STORAGE_VERSIONS[24].version,
+                deviceId:
+                    setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
+                        .personalCloud.deviceId,
             })
             for (const update of batch) {
                 if (update.type !== PersonalCloudUpdateType.Overwrite) {
@@ -285,7 +288,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                     object: update.object,
                 })
             }
-            expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
+            expect(batch.slice(downloadOptions?.skip ?? 0)).toEqual(expected)
         },
         testFetches: (highlights: ReadwiseHighlight[]) =>
             expect(fakeFetch.capturedReqs).toEqual(
@@ -313,6 +316,20 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
 
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
+        it('should not download updates uploaded from the same device', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // prettier-ignore
+            await testDownload([], { deviceIndex: 0 })
+        })
+
         it('should create pages', async () => {
             const {
                 setups,
@@ -2600,7 +2617,7 @@ describe('Personal cloud translation layer', () => {
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'tags',
-                        object:  LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
+                        object: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
                     },
                 ], { skip: 2 })
             })
