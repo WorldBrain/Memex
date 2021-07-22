@@ -2897,6 +2897,99 @@ describe('Personal cloud translation layer', () => {
                         .findAllObjects({}),
                 ).toEqual([])
             })
+
+            it('should add annotation tags, with spaces, triggering readwise highlight upload, substituting hyphens for spaces', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                const testTagWithSpaces = 'test tag spaces'
+                const testTagWithHypens = testTagWithSpaces.replace(' ', '-')
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager.collection('tags').createObject({
+                    url: LOCAL_TEST_DATA_V24.annotations.first.url,
+                    name: testTagWithSpaces,
+                })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const highlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [{ name: testTagWithHypens } as any],
+                })
+
+                testFetches([highlight, highlightWithTags])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should add annotation to page without title, triggering readwise highlight upload, substituting URL for title', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                const {
+                    fullTitle,
+                    ...titlelessPage
+                } = LOCAL_TEST_DATA_V24.pages.first
+
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(titlelessPage)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const { title, ...titlelessMetadata } = testMetadata.first
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: titlelessMetadata,
+                    tags: [],
+                })
+
+                testFetches([highlight])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
         })
     })
 })
