@@ -312,15 +312,17 @@ export async function setupSyncBackgroundTest(
             getUserId: async () => userId,
             getNow,
             useDownloadTranslationLayer: options.useDownloadTranslationLayer,
+            getDeviceId: () =>
+                (setup as BackgroundIntegrationTestSetup).backgroundModules
+                    .personalCloud.deviceId,
         })
 
-        setups.push(
-            await setupBackgroundIntegrationTest({
-                ...options,
-                getServerStorage,
-                personalCloudBackend,
-            }),
-        )
+        const setup = await setupBackgroundIntegrationTest({
+            ...options,
+            getServerStorage,
+            personalCloudBackend,
+        })
+        setups.push(setup)
     }
 
     // const deviceIds: Array<number | string> = []

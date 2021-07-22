@@ -53,6 +53,7 @@ export class PersonalCloudBackground {
     pullMutex = new AsyncMutex()
     deviceId?: string | number
     reportExecutingAction?: (action: PersonalCloudAction) => void
+    debug = false
 
     constructor(public options: PersonalCloudBackgroundOptions) {
         this.actionQueue = new ActionQueue({
@@ -107,7 +108,7 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
-            // console.log('processing update', update)
+            this._debugLog('Processing update', update)
             try {
                 const { collection } = update
                 const storageManager =
@@ -292,7 +293,7 @@ export class PersonalCloudBackground {
         if (!this.deviceId) {
             return { pauseAndRetry: true }
         }
-        // console.log('executing action', action)
+        this._debugLog('Executing action', action)
 
         // For automated tests
         this.reportExecutingAction?.(action)
@@ -407,6 +408,12 @@ export class PersonalCloudBackground {
 
     preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
         return { valid: true }
+    }
+
+    _debugLog(...args: any[]) {
+        if (this.debug) {
+            console['log']('Personal Cloud -', ...args)
+        }
     }
 }
 

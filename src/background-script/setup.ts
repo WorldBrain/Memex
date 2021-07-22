@@ -405,6 +405,101 @@ export function createBackgroundModules(options: {
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
+    const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
+        storageManager,
+        persistentStorageManager: options.persistentStorageManager,
+        backend:
+            options.personalCloudBackend ??
+            new FirestorePersonalCloudBackend({
+                personalCloudService: firebaseService<PersonalCloudService>(
+                    'personalCloud',
+                    callFirebaseFunction,
+                ),
+                getCurrentSchemaVersion: () =>
+                    getCurrentSchemaVersion(options.storageManager),
+                userChanges: () => authChanges(auth.authService),
+                getUserChangesReference: async () => {
+                    const currentUser = await auth.authService.getCurrentUser()
+                    if (!currentUser) {
+                        return null
+                    }
+                    const firebase = getFirebase()
+                    const firestore = firebase.firestore()
+                    return firestore
+                        .collection('personalDataChange')
+                        .doc(currentUser.id)
+                        .collection('objects')
+                },
+                getLastUpdateSeenTime: () =>
+                    personalCloudSettingStore.get('lastSeen'),
+                setLastUpdateSeenTime: (lastSeen) =>
+                    personalCloudSettingStore.set('lastSeen', lastSeen),
+                getDeviceId: () => personalCloud.deviceId!,
+            }),
+        createDeviceId: async (userId) => {
+            const serverStorage = await options.getServerStorage()
+            const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
+                {
+                    device: {
+                        type: PersonalDeviceType.DesktopBrowser,
+                        os: PersonalDeviceOs.Windows,
+                        browser: PersonalDeviceBrowser.Edge,
+                        product: PersonalDeviceProduct.Extension,
+                    },
+                    userId,
+                },
+            )
+            return device.id
+        },
+        settingStore: personalCloudSettingStore,
+        getUserId: async () =>
+            (await auth.authService.getCurrentUser())?.id ?? null,
+        userIdChanges: () => authChanges(auth.authService),
+        writeIncomingData: async (params) => {
+            const incomingStorageManager =
+                params.storageType === PersonalCloudClientStorageType.Persistent
+                    ? options.persistentStorageManager
+                    : options.storageManager
+
+            // WARNING: Keep in mind this skips all storage middleware
+            await updateOrCreate({
+                ...params,
+                storageManager: incomingStorageManager,
+                executeOperation: (...args) => {
+                    return incomingStorageManager.backend.operation(...args)
+                },
+            })
+
+            if (params.collection === 'docContent') {
+                const { normalizedUrl, storedContentType } = params.where ?? {}
+                const { content } = params.updates
+                if (!normalizedUrl || !content) {
+                    console.warn(
+                        `Got an incoming page, but it didn't include a URL and a body`,
+                    )
+                    return
+                }
+
+                const processed =
+                    storedContentType === StoredContentType.HtmlBody
+                        ? transformPageHTML({
+                              html: content,
+                          }).text
+                        : transformPageText({
+                              text: (content.pageTexts ?? []).join(' '),
+                          }).text
+                await storageManager.backend.operation(
+                    'updateObjects',
+                    'pages',
+                    {
+                        url: normalizedUrl,
+                    },
+                    { text: processed },
+                )
+            }
+        },
+    })
+
     return {
         auth,
         social,
@@ -518,101 +613,7 @@ export function createBackgroundModules(options: {
         copyPaster,
         activityStreams,
         userMessages,
-        personalCloud: new PersonalCloudBackground({
-            storageManager,
-            persistentStorageManager: options.persistentStorageManager,
-            backend:
-                options.personalCloudBackend ??
-                new FirestorePersonalCloudBackend({
-                    personalCloudService: firebaseService<PersonalCloudService>(
-                        'personalCloud',
-                        callFirebaseFunction,
-                    ),
-                    getCurrentSchemaVersion: () =>
-                        getCurrentSchemaVersion(options.storageManager),
-                    userChanges: () => authChanges(auth.authService),
-                    getUserChangesReference: async () => {
-                        const currentUser = await auth.authService.getCurrentUser()
-                        if (!currentUser) {
-                            return null
-                        }
-                        const firebase = getFirebase()
-                        const firestore = firebase.firestore()
-                        return firestore
-                            .collection('personalDataChange')
-                            .doc(currentUser.id)
-                            .collection('objects')
-                    },
-                    getLastUpdateSeenTime: () =>
-                        personalCloudSettingStore.get('lastSeen'),
-                    setLastUpdateSeenTime: (lastSeen) =>
-                        personalCloudSettingStore.set('lastSeen', lastSeen),
-                }),
-            createDeviceId: async (userId) => {
-                const serverStorage = await options.getServerStorage()
-                const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
-                    {
-                        device: {
-                            type: PersonalDeviceType.DesktopBrowser,
-                            os: PersonalDeviceOs.Windows,
-                            browser: PersonalDeviceBrowser.Edge,
-                            product: PersonalDeviceProduct.Extension,
-                        },
-                        userId,
-                    },
-                )
-                return device.id
-            },
-            settingStore: personalCloudSettingStore,
-            getUserId: async () =>
-                (await auth.authService.getCurrentUser())?.id ?? null,
-            userIdChanges: () => authChanges(auth.authService),
-            writeIncomingData: async (params) => {
-                const incomingStorageManager =
-                    params.storageType ===
-                    PersonalCloudClientStorageType.Persistent
-                        ? options.persistentStorageManager
-                        : options.storageManager
-
-                // WARNING: Keep in mind this skips all storage middleware
-                await updateOrCreate({
-                    ...params,
-                    storageManager: incomingStorageManager,
-                    executeOperation: (...args) => {
-                        return incomingStorageManager.backend.operation(...args)
-                    },
-                })
-
-                if (params.collection === 'docContent') {
-                    const { normalizedUrl, storedContentType } =
-                        params.where ?? {}
-                    const { content } = params.updates
-                    if (!normalizedUrl || !content) {
-                        console.warn(
-                            `Got an incoming page, but it didn't include a URL and a body`,
-                        )
-                        return
-                    }
-
-                    const processed =
-                        storedContentType === StoredContentType.HtmlBody
-                            ? transformPageHTML({
-                                  html: content,
-                              }).text
-                            : transformPageText({
-                                  text: (content.pageTexts ?? []).join(' '),
-                              }).text
-                    await storageManager.backend.operation(
-                        'updateObjects',
-                        'pages',
-                        {
-                            url: normalizedUrl,
-                        },
-                        { text: processed },
-                    )
-                }
-            },
-        }),
+        personalCloud,
         contentSharing,
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
