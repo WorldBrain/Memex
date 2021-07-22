@@ -1,7 +1,5 @@
-import StorageManager, {
-    StorageRegistry,
-    IndexSourceField,
-} from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex'
+import { getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import { getObjectPk } from '@worldbrain/storex/lib/utils'
 
@@ -9,42 +7,6 @@ export const dangerousPleaseBeSureDeleteAndRecreateDatabase = async (
     storageManager: StorageManager,
 ) => {
     return storageManager.operation(DexieUtilsPlugin.NUKE_DB_OP)
-}
-
-export function getObjectWhereByPk(
-    storageRegistry: StorageRegistry,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const getPkField = (indexSourceField: IndexSourceField) => {
-        return typeof indexSourceField === 'object' &&
-            'relationship' in indexSourceField
-            ? indexSourceField.relationship
-            : indexSourceField
-    }
-
-    const collectionDefinition = storageRegistry.collections[collection]
-    const pkIndex = collectionDefinition.pkIndex!
-    const where: { [field: string]: number | string } = {}
-    if (pkIndex instanceof Array) {
-        for (const [index, indexSourceField] of pkIndex.entries()) {
-            const pkField = getPkField(indexSourceField)
-            where[pkField] = pk[index]
-        }
-    } else {
-        where[getPkField(pkIndex)] = pk as number | string
-    }
-
-    return where
-}
-
-export async function getObjectByPk(
-    storageManager: StorageManager,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const where = getObjectWhereByPk(storageManager.registry, collection, pk)
-    return storageManager.operation('findObject', collection, where)
 }
 
 export async function updateOrCreate(params: {

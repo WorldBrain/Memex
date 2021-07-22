@@ -61,6 +61,7 @@ import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import { UserSettingsBackground } from 'src/settings/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -79,8 +80,8 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
-import { authChanges } from 'src/authentication/background/utils'
-import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
+import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
+import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { updateOrCreate } from 'src/storage/utils'
 import { StoredContentType } from 'src/page-indexing/background/types'
@@ -103,6 +104,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
+    settings: UserSettingsBackground
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -347,9 +349,6 @@ export function createBackgroundModules(options: {
                     annotationUrl,
                 )
             ).map(({ name }) => name.replace(/\s+/g, '-')),
-        getAnnotationsByPks: async (pks) => {
-            return directLinking.annotationStorage.getAnnotations(pks)
-        },
         streamAnnotations: async function* () {
             yield* await storageManager.operation(
                 'streamObjects',
@@ -424,6 +423,10 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
+        settings: new UserSettingsBackground({
+            storageManager,
+            localBrowserStorage: options.browserAPIs.storage.local,
+        }),
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -521,7 +524,6 @@ export function createBackgroundModules(options: {
             backend:
                 options.personalCloudBackend ??
                 new FirestorePersonalCloudBackend({
-                    getServerStorage: options.getServerStorage,
                     personalCloudService: firebaseService<PersonalCloudService>(
                         'personalCloud',
                         callFirebaseFunction,
@@ -541,7 +543,10 @@ export function createBackgroundModules(options: {
                             .doc(currentUser.id)
                             .collection('objects')
                     },
-                    settingStore: personalCloudSettingStore,
+                    getLastUpdateSeenTime: () =>
+                        personalCloudSettingStore.get('lastSeen'),
+                    setLastUpdateSeenTime: (lastSeen) =>
+                        personalCloudSettingStore.set('lastSeen', lastSeen),
                 }),
             createDeviceId: async (userId) => {
                 const serverStorage = await options.getServerStorage()
@@ -689,7 +694,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
+        userSettings: backgroundModules.settings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }

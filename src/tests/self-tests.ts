@@ -2,9 +2,9 @@ import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
-import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
@@ -75,7 +75,15 @@ export function createSelfTests(options: {
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
-            // // const cloudBackend = personalCloud.options.backend as FirestorePersonalCloudBackend
+
+            if (process.env.TEST_READWISE_API_KEY?.length > 0) {
+                await backgroundModules.settings.set({
+                    [EXTENSION_SETTINGS_NAME.ReadwiseAPIKey]:
+                        process.env.TEST_READWISE_API_KEY,
+                })
+                console.log('Set test Readwise API Key')
+            }
+
             const testPageUrl = 'https://www.getmemex.com/'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             await backgroundModules.tags.addTagToPage({
@@ -96,6 +104,7 @@ export function createSelfTests(options: {
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: 'Hi, this is a test comment',
+                    createdWhen: new Date('2021-07-20'),
                 },
                 { skipPageIndexing: true },
             )
@@ -108,6 +117,7 @@ export function createSelfTests(options: {
                     pageUrl: normalizedTestPageUrl,
                     comment: `Yet another test comment! This one's protected`,
                     privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
                 },
                 { skipPageIndexing: true },
             )

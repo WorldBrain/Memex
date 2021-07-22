@@ -2,13 +2,15 @@ import StorageManager, {
     isChildOfRelationship,
     getChildOfRelationshipTarget,
 } from '@worldbrain/storex'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     LOCAL_TEST_DATA_V24,
     REMOTE_TEST_DATA_V24,
     insertTestPages,
+    insertReadwiseAPIKey,
 } from './index.test.data'
 import { DataChangeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
@@ -18,6 +20,8 @@ import {
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
+import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '../..'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
@@ -31,6 +35,14 @@ const deleteNullFields = <T = any>(obj: T): T => {
         }
     }
     return obj
+}
+
+class FakeFetch {
+    capturedReqs: Array<[RequestInfo, RequestInit | undefined]> = []
+    fetch: typeof fetch = async (input, init) => {
+        this.capturedReqs.push([input, init])
+        return { status: 200 } as Response
+    }
 }
 
 class IdCapturer {
@@ -154,7 +166,7 @@ function dataChanges(
             /* info: */ any?,
         ]
     >,
-    options?: { skip?: number },
+    options?: { skip?: number; skipAssertTimestamp?: boolean },
 ) {
     let now = 554
     const advance = () => {
@@ -174,7 +186,9 @@ function dataChanges(
 
             return {
                 id: expect.anything(),
-                createdWhen: now,
+                createdWhen: options?.skipAssertTimestamp
+                    ? expect.anything()
+                    : now,
                 createdByDevice: remoteData.personalDeviceInfo.first.id,
                 user: TEST_USER.id,
                 type: change[0],
@@ -186,78 +200,119 @@ function dataChanges(
     ]
 }
 
+async function setup(options?: { runReadwiseTrigger?: boolean }) {
+    const serverIdCapturer = new IdCapturer({
+        postprocesessMerge: (params) => {
+            // tag connections don't connect with the content they tag through a
+            // Storex relationship, so we need some extra logic to get the right ID
+            for (const tagConnection of Object.values(
+                params.merged.personalTagConnection,
+            )) {
+                const collectionIds =
+                    serverIdCapturer.ids[tagConnection.collection]
+
+                if (!collectionIds) {
+                    continue
+                }
+
+                const idIndex = tagConnection.objectId - 1
+                const id = collectionIds[idIndex]
+                tagConnection.objectId = id
+            }
+        },
+    })
+
+    const fakeFetch = new FakeFetch()
+    const storageHooksChangeWatcher = new StorageHooksChangeWatcher()
+
+    const {
+        setups,
+        userId,
+        serverStorage,
+        getNow,
+    } = await setupSyncBackgroundTest({
+        deviceCount: 2,
+        serverChangeWatchSettings: options?.runReadwiseTrigger
+            ? storageHooksChangeWatcher
+            : {
+                  shouldWatchCollection: (collection) =>
+                      collection.startsWith('personal'),
+                  postprocessOperation: async (context) => {
+                      await serverIdCapturer.handlePostStorageChange(context)
+                  },
+              },
+    })
+
+    serverIdCapturer.setup(serverStorage.storageManager)
+    storageHooksChangeWatcher.setUp({
+        fetch: fakeFetch.fetch,
+        serverStorageManager: serverStorage.storageManager,
+        getCurrentUserReference: async () => ({
+            id: userId,
+            type: 'user-reference',
+        }),
+        services: {
+            activityStreams: setups[0].services.activityStreams,
+        },
+    })
+
+    return {
+        serverIdCapturer,
+        setups,
+        serverStorage,
+        testDownload: async (
+            expected: PersonalCloudUpdateBatch,
+            options?: { skip?: number },
+        ) => {
+            const { batch } = await downloadClientUpdates({
+                getNow,
+                startTime: 0,
+                storageManager: serverStorage.storageManager,
+                userId: TEST_USER.id,
+                clientSchemaVersion: STORAGE_VERSIONS[24].version,
+            })
+            for (const update of batch) {
+                if (update.type !== PersonalCloudUpdateType.Overwrite) {
+                    continue
+                }
+                const storageManager =
+                    update.storage === 'persistent'
+                        ? setups[0].persistentStorageManager
+                        : setups[0].storageManager
+                preprocessPulledObject({
+                    storageRegistry: storageManager.registry,
+                    collection: update.collection,
+                    object: update.object,
+                })
+            }
+            expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
+        },
+        testFetches: (highlights: ReadwiseHighlight[]) =>
+            expect(fakeFetch.capturedReqs).toEqual(
+                highlights.map((highlight) => [
+                    'https://readwise.io/api/v2/highlights/',
+                    {
+                        body: JSON.stringify({
+                            highlights: [
+                                {
+                                    ...highlight,
+                                    highlighted_at: highlight.highlighted_at.toISOString(),
+                                },
+                            ],
+                        }),
+                        method: 'POST',
+                        headers: {
+                            Authorization: 'Token test-key',
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                ]),
+            ),
+    }
+}
+
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 24`, () => {
-        async function setup() {
-            const serverIdCapturer = new IdCapturer({
-                postprocesessMerge: (params) => {
-                    // tag connections don't connect with the content they tag through a
-                    // Storex relationship, so we need some extra logic to get the right ID
-                    for (const tagConnection of Object.values(
-                        params.merged.personalTagConnection,
-                    )) {
-                        const collectionIds =
-                            serverIdCapturer.ids[tagConnection.collection]
-
-                        if (!collectionIds) {
-                            continue
-                        }
-
-                        const idIndex = tagConnection.objectId - 1
-                        const id = collectionIds[idIndex]
-                        tagConnection.objectId = id
-                    }
-                },
-            })
-            const {
-                setups,
-                serverStorage,
-                getNow,
-            } = await setupSyncBackgroundTest({
-                deviceCount: 2,
-                serverChangeWatchSettings: {
-                    shouldWatchCollection: (collection) => {
-                        return collection.startsWith('personal')
-                    },
-                    postprocessOperation:
-                        serverIdCapturer.handlePostStorageChange,
-                },
-            })
-            serverIdCapturer.setup(serverStorage.storageManager)
-            return {
-                serverIdCapturer,
-                setups,
-                serverStorage,
-                testDownload: async (
-                    expected: PersonalCloudUpdateBatch,
-                    options?: { skip?: number },
-                ) => {
-                    const { batch } = await downloadClientUpdates({
-                        getNow,
-                        startTime: 0,
-                        storageManager: serverStorage.storageManager,
-                        userId: TEST_USER.id,
-                        clientSchemaVersion: STORAGE_VERSIONS[24].version,
-                    })
-                    for (const update of batch) {
-                        if (update.type !== PersonalCloudUpdateType.Overwrite) {
-                            continue
-                        }
-                        const storageManager =
-                            update.storage === 'persistent'
-                                ? setups[0].persistentStorageManager
-                                : setups[0].storageManager
-                        preprocessPulledObject({
-                            storageRegistry: storageManager.registry,
-                            collection: update.collection,
-                            object: update.object,
-                        })
-                    }
-                    expect(batch.slice(options?.skip ?? 0)).toEqual(expected)
-                },
-            }
-        }
-
         it('should create pages', async () => {
             const {
                 setups,
@@ -2187,6 +2242,754 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.first.id } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.second.id } },
             ], { skip: 0 })
+        })
+
+        it('should create memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [testSettings.first, testSettings.second, testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+            ], { skip: 0 })
+        })
+
+        it('should update memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const updatedValue = 'new-value'
+            await setups[0].storageManager
+                .collection('userSettings')
+                .updateOneObject(
+                    { name: LOCAL_TEST_DATA_V24.userSettings.first.name },
+                    {
+                        value: updatedValue,
+                    },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                    [DataChangeType.Modify, 'personalMemexExtensionSetting', testSettings.first.id],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [{ ...testSettings.first, value: updatedValue }, testSettings.second, testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
+            ], { skip: 0 })
+        })
+
+        it('should delete memex extension setting', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+            await setups[0].storageManager
+                .collection('userSettings')
+                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('userSettings')
+                .deleteOneObject({
+                    name: LOCAL_TEST_DATA_V24.userSettings.first.name,
+                })
+            await setups[0].storageManager
+                .collection('userSettings')
+                .deleteOneObject({
+                    name: LOCAL_TEST_DATA_V24.userSettings.second.name,
+                })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testSettings = remoteData.personalMemexExtensionSetting
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'personalDataChange',
+                    'personalMemexExtensionSetting',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                personalDataChange: dataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.first.id, { name: testSettings.first.name }],
+                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.second.id, { name: testSettings.second.name }],
+                ], { skip: 0 }),
+                personalMemexExtensionSetting: [testSettings.third],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.first.name } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.second.name } },
+            ], { skip: 0 })
+        })
+
+        describe(`translation layer readwise integration`, () => {
+            it('should create annotations, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalDataChange: dataChanges(remoteData, [
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
+                        [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
+                    ], { skip: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [testAnnotations.first, testAnnotations.second],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalReadwiseAction: [testReadwiseActions.first, testReadwiseActions.second],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.second },
+                ], { skip: 2 })
+            })
+
+            it('should update annotation notes, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                const updatedComment = 'This is an updated comment'
+                const lastEdited = new Date()
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .updateOneObject(
+                        { url: LOCAL_TEST_DATA_V24.annotations.first.url },
+                        { comment: updatedComment, lastEdited },
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalDataChange: dataChanges(remoteData, [
+                        [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
+                    ], { skip: 6, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalReadwiseAction: [testReadwiseActions.first],
+                })
+
+                await testDownload(
+                    [
+                        {
+                            type: PersonalCloudUpdateType.Overwrite,
+                            collection: 'annotations',
+                            object: {
+                                ...LOCAL_TEST_DATA_V24.annotations.first,
+                                comment: updatedComment,
+                                lastEdited,
+                            },
+                        },
+                    ],
+                    { skip: 3 },
+                )
+            })
+
+            it('should add annotation tags, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    {
+                        skipTagType: 'page',
+                    },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testConnections = remoteData.personalTagConnection
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalTag',
+                        'personalTagConnection',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalDataChange: dataChanges(remoteData, [
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
+                        [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
+                        [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
+                        [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
+                    ], { skip: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [testAnnotations.first],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalTagConnection: [testConnections.firstAnnotationTag],
+                    personalTag: [testTags.firstAnnotationTag],
+                    personalReadwiseAction: [testReadwiseActions.first],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'tags',
+                        object:  LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
+                    },
+                ], { skip: 2 })
+            })
+
+            it('should remove annotation tags, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                await setups[0].storageManager
+                    .collection('tags')
+                    .deleteOneObject(
+                        LOCAL_TEST_DATA_V24.tags.firstAnnotationTag,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    {
+                        skipTagType: 'page',
+                    },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testConnections = remoteData.personalTagConnection
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalTag',
+                        'personalTagConnection',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalDataChange: dataChanges(remoteData, [
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
+                        [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
+                        [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
+                        [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
+                        [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
+                    ], { skip: 6, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [testAnnotations.first, testAnnotations.second],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalTagConnection: [testConnections.secondAnnotationTag],
+                    personalTag: [testTags.firstAnnotationTag],
+                    personalReadwiseAction: [testReadwiseActions.first, testReadwiseActions.second],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
+                ], { skip: 5 })
+            })
+
+            it('should create annotations, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const secondHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+
+                testFetches([firstHighlight, secondHighlight])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should update annotation notes, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                const updatedComment = 'This is an updated comment'
+                const lastEdited = new Date()
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .updateOneObject(
+                        { url: LOCAL_TEST_DATA_V24.annotations.first.url },
+                        { comment: updatedComment, lastEdited },
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+
+                testFetches([highlight, { ...highlight, note: updatedComment }])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should add annotation tags, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const highlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.firstAnnotationTag],
+                })
+
+                testFetches([highlight, highlightWithTags])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should remove annotation tags, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.firstAnnotationTag)
+                await setups[0].storageManager
+                    .collection('tags')
+                    .createObject(LOCAL_TEST_DATA_V24.tags.secondAnnotationTag)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                await setups[0].storageManager
+                    .collection('tags')
+                    .deleteOneObject(
+                        LOCAL_TEST_DATA_V24.tags.firstAnnotationTag,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTags = remoteData.personalTag
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const firstHighlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.firstAnnotationTag],
+                })
+                const secondHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const secondHighlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [testTags.secondAnnotationTag],
+                })
+
+                testFetches([
+                    firstHighlight,
+                    secondHighlight,
+                    firstHighlightWithTags,
+                    secondHighlightWithTags,
+                    firstHighlight,
+                ])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should add annotation tags, with spaces, triggering readwise highlight upload, substituting hyphens for spaces', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                const testTagWithSpaces = 'test tag spaces'
+                const testTagWithHypens = testTagWithSpaces.replace(' ', '-')
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager.collection('tags').createObject({
+                    url: LOCAL_TEST_DATA_V24.annotations.first.url,
+                    name: testTagWithSpaces,
+                })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                })
+                const highlightWithTags = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [{ name: testTagWithHypens } as any],
+                })
+
+                testFetches([highlight, highlightWithTags])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
+
+            it('should add annotation to page without title, triggering readwise highlight upload, substituting URL for title', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                const {
+                    fullTitle,
+                    ...titlelessPage
+                } = LOCAL_TEST_DATA_V24.pages.first
+
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(titlelessPage)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const { title, ...titlelessMetadata } = testMetadata.first
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: titlelessMetadata,
+                    tags: [],
+                })
+
+                testFetches([highlight])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({}),
+                ).toEqual([])
+            })
         })
     })
 })

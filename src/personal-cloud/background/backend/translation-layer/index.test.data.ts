@@ -2,6 +2,7 @@ import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -10,6 +11,19 @@ export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
         .collection('pages')
         .createObject(LOCAL_TEST_DATA_V24.pages.second)
+}
+
+export async function insertReadwiseAPIKey(
+    storageManager: StorageManager,
+    userId: string,
+) {
+    await storageManager
+        .collection('personalMemexExtensionSetting')
+        .createObject({
+            name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
+            value: 'test-key',
+            user: userId,
+        })
 }
 
 const LOCAL_PAGES_V24 = {
@@ -192,6 +206,20 @@ export const LOCAL_TEST_DATA_V24 = {
             code: '[[{{{PageUrl}}}]]',
         },
     },
+    userSettings: {
+        first: {
+            name: 'test-1',
+            value: 123,
+        },
+        second: {
+            name: 'test-2',
+            value: '123',
+        },
+        third: {
+            name: 'test-3',
+            value: { sub: 'hi' },
+        },
+    },
 }
 
 const REMOTE_DEVICES_V24 = {
@@ -325,6 +353,14 @@ const REMOTE_TAGS_V24 = {
         updatedWhen: 560,
         user: TEST_USER.id,
         name: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag.name,
+    },
+    secondAnnotationTag: {
+        id: 2,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        createdWhen: 561,
+        updatedWhen: 561,
+        user: TEST_USER.id,
+        name: LOCAL_TEST_DATA_V24.tags.secondAnnotationTag.name,
     },
 }
 
@@ -564,6 +600,53 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 562,
             updatedWhen: 562,
+        },
+    },
+    personalMemexExtensionSetting: {
+        first: {
+            id: 1,
+            name: LOCAL_TEST_DATA_V24.userSettings.first.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.first.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 561,
+            updatedWhen: 561,
+        },
+        second: {
+            id: 2,
+            name: LOCAL_TEST_DATA_V24.userSettings.second.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.second.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 562,
+            updatedWhen: 562,
+        },
+        third: {
+            id: 3,
+            name: LOCAL_TEST_DATA_V24.userSettings.third.name,
+            value: LOCAL_TEST_DATA_V24.userSettings.third.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 563,
+            updatedWhen: 564,
+        },
+    },
+    personalReadwiseAction: {
+        first: {
+            id: 1,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+            createdWhen: new Date(1625634720653),
+            updatedWhen: new Date(1625634720653),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+        second: {
+            id: 2,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            createdWhen: new Date(1625634720654),
+            updatedWhen: new Date(1625634720654),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
         },
     },
 }

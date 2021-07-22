@@ -1,7 +1,5 @@
-import StorageManager, {
-    IndexSourceField,
-    StorageRegistry,
-} from '@worldbrain/storex'
+import StorageManager, { StorageRegistry } from '@worldbrain/storex'
+import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
     getCurrentSchemaVersion,
@@ -29,7 +27,6 @@ import {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
-import { getObjectByPk, getObjectWhereByPk } from 'src/storage/utils'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
 
