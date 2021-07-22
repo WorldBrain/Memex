@@ -74,7 +74,7 @@ export function createSelfTests(options: {
             await personalCloud.loadDeviceId()
             console.log('Generated device ID:', personalCloud.deviceId!)
 
-            if (process.env.TEST_READWISE_API_KEY != null) {
+            if (process.env.TEST_READWISE_API_KEY?.length > 0) {
                 await backgroundModules.settings.set({
                     [EXTENSION_SETTINGS_NAME.ReadwiseAPIKey]:
                         process.env.TEST_READWISE_API_KEY,
