@@ -86,6 +86,7 @@ import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/ut
 import { updateOrCreate } from 'src/storage/utils'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -140,6 +141,7 @@ export function createBackgroundModules(options: {
         ...args: any[]
     ) => Promise<Returns>
     personalCloudBackend?: PersonalCloudBackend
+    contentSharingBackend?: ContentSharingBackend
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
@@ -149,9 +151,14 @@ export function createBackgroundModules(options: {
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
     fetch?: typeof fetch
+    generateServerId?: (collectionName: string) => number | string
 }): BackgroundModules {
     const getNow = options.getNow ?? (() => Date.now())
     const fetch = options.fetch ?? globalFetch
+    const generateServerId =
+        options.generateServerId ??
+        ((collectionName) =>
+            getFirebase().firestore().collection(collectionName).doc().id)
 
     const { storageManager } = options
     const getServerStorage = async () =>
@@ -321,6 +328,12 @@ export function createBackgroundModules(options: {
     }
     const userMessages = options.userMessageService
     const contentSharing = new ContentSharingBackground({
+        backend:
+            options.contentSharingBackend ??
+            firebaseService<ContentSharingBackend>(
+                'personalCloud',
+                callFirebaseFunction,
+            ),
         activityStreams,
         storageManager,
         customLists: customLists.storage,
@@ -330,6 +343,7 @@ export function createBackgroundModules(options: {
         userMessages,
         getServerStorage,
         services: options.services,
+        generateServerId,
     })
 
     const readwise = new ReadwiseBackground({

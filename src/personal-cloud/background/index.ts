@@ -181,6 +181,8 @@ export class PersonalCloudBackground {
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        this._debugLog('Process storage change:', event)
+
         const { releaseMutex } = await this.pushMutex.lock()
 
         for (const change of event.info.changes) {
@@ -406,7 +408,8 @@ export class PersonalCloudBackground {
         }
     }
 
-    preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
+    preprocessAction: ActionPreprocessor<PersonalCloudAction> = (action) => {
+        this._debugLog('Scheduling action:', action)
         return { valid: true }
     }
 

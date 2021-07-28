@@ -307,6 +307,7 @@ export async function setupSyncBackgroundTest(
     for (let i = 0; i < options.deviceCount; ++i) {
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
+            storageModules: serverStorage.storageModules,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
             view: cloudHub.getView(),
             getUserId: async () => userId,

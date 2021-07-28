@@ -11,6 +11,7 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import orderBy from 'lodash/orderBy'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -32,18 +33,20 @@ async function setupTest(options: {
     createTestList?: boolean
 }) {
     const { setup, testData } = options
-    const { contentSharing } = setup.backgroundModules
+    const { contentSharing, personalCloud } = setup.backgroundModules
     setup.authService.setUser(TEST_USER)
+    personalCloud.actionQueue.forceQueueSkip = true
+    await personalCloud.setup()
 
     if (options.createTestList) {
         testData.localListId = await data.createContentSharingTestList(setup)
     }
 
-    const shareTestList = async (options: { shareEntries: boolean }) => {
+    const shareTestList = async (shareOptions: { shareEntries: boolean }) => {
         const listShareResult = await contentSharing.shareList({
             listId: testData.localListId,
         })
-        if (options.shareEntries) {
+        if (shareOptions.shareEntries) {
             await contentSharing.shareListEntries({
                 listId: testData.localListId,
             })
@@ -51,7 +54,7 @@ async function setupTest(options: {
         testData.remoteListId = listShareResult.remoteListId
     }
 
-    return { contentSharing, shareTestList }
+    return { contentSharing, personalCloud, shareTestList }
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
@@ -69,8 +72,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 const {
-                                    contentSharing,
                                     shareTestList,
+                                    personalCloud,
                                 } = await setupTest({
                                     setup,
                                     testData,
@@ -86,6 +89,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
 
                                 await shareTestList({ shareEntries: true })
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -105,10 +109,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
                                 expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        { sort: [['createdWhen', 'desc']] },
+                                    orderBy(
+                                        await serverStorage.storageManager.operation(
+                                            'findObjects',
+                                            'sharedListEntry',
+                                            {},
+                                        ),
+                                        ['createdWhen'],
+                                        ['desc'],
                                     ),
                                 ).toEqual([
                                     {
@@ -168,6 +176,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -193,7 +202,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: 'https://www.fish.com/cheese',
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -235,6 +244,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -252,7 +262,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         newName: updatedTitle,
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -279,7 +289,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     { id: testData.localListId },
                                     { searchableName: 'something' },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
                                 expect(
                                     await serverStorage.storageManager.operation(
                                         'findObjects',
@@ -315,6 +325,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -329,7 +340,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: 'https://www.spam.com/foo',
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
@@ -362,6 +373,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -433,6 +445,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -460,14 +473,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: 'https://www.spam.com/foo',
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 expect(contentSharing._scheduledRetry).not.toBe(
                                     undefined,
                                 )
                                 sinon.restore()
                                 await contentSharing.forcePendingActionsRetry()
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 expect(
                                     await serverStorage.storageManager.operation(
@@ -545,6 +558,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -563,7 +577,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [annotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
                                     {
@@ -597,7 +611,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         annotationUrls: [annotationUrl],
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 expect(
                                     await getShared(
@@ -645,7 +659,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const { contentSharing } = await setupTest({
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
                                     setup,
                                     testData,
                                 })
@@ -699,7 +716,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [firstAnnotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
                                     {
@@ -715,7 +732,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ...data.ENTRY_1_DATA,
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
@@ -805,6 +822,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({
                                     setup,
@@ -820,14 +838,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotation({
                                     annotationUrl,
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 await setup.backgroundModules.directLinking.editAnnotation(
                                     null,
                                     annotationUrl,
                                     'Updated comment',
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
@@ -866,6 +884,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({ setup, testData })
 
@@ -883,7 +902,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareListEntries({
                                     listId: firstLocalListId,
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
@@ -896,7 +915,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [annotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
@@ -911,7 +930,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     listId: secondLocalListId,
                                 })
 
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
                                 const remoteListIds = await Promise.all(
                                     [firstLocalListId, secondLocalListId].map(
                                         (localId) =>
@@ -1027,6 +1046,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({ setup, testData })
 
@@ -1047,7 +1067,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listId: localListId,
                                     })
                                 }
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
@@ -1060,7 +1080,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [annotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
@@ -1125,6 +1145,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({ setup, testData })
 
@@ -1145,7 +1166,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listId: localListId,
                                     })
                                 }
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
@@ -1158,7 +1179,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [annotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
@@ -1190,7 +1211,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: data.PAGE_1_DATA.pageDoc.url,
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 expect(
                                     await getShared(
@@ -1204,7 +1225,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: data.PAGE_1_DATA.pageDoc.url,
                                     },
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 expect(
                                     await getShared(
@@ -1231,6 +1252,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 const {
                                     contentSharing,
+                                    personalCloud,
                                     shareTestList,
                                 } = await setupTest({ setup, testData })
 
@@ -1251,7 +1273,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listId: localListId,
                                     })
                                 }
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
@@ -1264,7 +1286,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareAnnotationsToLists({
                                     annotationUrls: [annotationUrl],
                                 })
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
                                 const getShared = (collection: string) =>
@@ -1294,7 +1316,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     null,
                                     annotationUrl,
                                 )
-                                await contentSharing.waitForSync()
+                                await personalCloud.waitForSync()
 
                                 // expect(
                                 //     await setup.storageManager.operation(
@@ -1328,7 +1350,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const { contentSharing } = await setupTest({
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
                                     setup,
                                     testData,
                                 })
@@ -1339,7 +1364,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listData: {
                                             title: 'Test list',
                                         },
-                                        localListId: 55,
                                         userReference: {
                                             type: 'user-reference',
                                             id: 'someone-else',
@@ -1358,7 +1382,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     )
                                 const verify = async () => {
-                                    await contentSharing.waitForSync()
+                                    await personalCloud.waitForSync()
                                     const customLists = await setup.storageManager.operation(
                                         'findObjects',
                                         'customLists',
@@ -1406,7 +1430,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const { contentSharing } = await setupTest({
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
                                     setup,
                                     testData,
                                 })
@@ -1454,7 +1481,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     )
                                 const verify = async () => {
-                                    await contentSharing.waitForSync()
+                                    await personalCloud.waitForSync()
                                     const annotations = await setup.storageManager.operation(
                                         'findObjects',
                                         'annotations',
@@ -1515,7 +1542,10 @@ function makeShareAnnotationTest(options: {
         steps: [
             {
                 execute: async ({ setup }) => {
-                    const { contentSharing } = setup.backgroundModules
+                    const {
+                        contentSharing,
+                        personalCloud,
+                    } = setup.backgroundModules
                     setup.authService.setUser(TEST_USER)
 
                     localListId = await data.createContentSharingTestList(setup)
@@ -1571,7 +1601,7 @@ function makeShareAnnotationTest(options: {
                             })
                         }
                     }
-                    await contentSharing.waitForSync()
+                    await personalCloud.waitForSync()
 
                     const sharedAnnotationMetadataPre = await setup.storageManager.operation(
                         'findObjects',
@@ -1655,7 +1685,7 @@ function makeShareAnnotationTest(options: {
                             annotationUrls: [firstAnnotationUrl],
                         })
                     }
-                    await contentSharing.waitForSync()
+                    await personalCloud.waitForSync()
 
                     expect(
                         await getShared('sharedAnnotationListEntry'),
