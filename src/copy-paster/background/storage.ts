@@ -2,31 +2,15 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/copy-paster/constants'
 import { Template } from '../types'
-
-export const COLLECTION_NAMES = {
-    templates: 'templates',
-}
 
 export default class CopyPasterStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
-        collections: {
-            [COLLECTION_NAMES.templates]: {
-                version: new Date('2020-06-03'),
-                fields: {
-                    id: { type: 'int' },
-                    title: { type: 'string' },
-                    code: { type: 'string' },
-                    isFavourite: { type: 'boolean' },
-                },
-                indices: [
-                    { field: 'id', pk: true },
-                    { field: 'title' },
-                    { field: 'code' },
-                    { field: 'isFavourite' },
-                ],
-            },
-        },
+        collections: { ...COLLECTION_DEFINITIONS },
         operations: {
             createTemplate: {
                 collection: COLLECTION_NAMES.templates,
