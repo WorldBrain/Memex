@@ -206,19 +206,23 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const serverStorage = await setup.getServerStorage()
                                 expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        {},
+                                    orderBy(
+                                        await serverStorage.storageManager.operation(
+                                            'findObjects',
+                                            'sharedListEntry',
+                                            {},
+                                        ),
+                                        ['createdWhen'],
+                                        ['asc'],
                                     ),
                                 ).toEqual([
                                     expect.objectContaining({
-                                        normalizedUrl: 'eggs.com/foo',
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                    expect.objectContaining({
                                         normalizedUrl: 'spam.com/foo',
                                         entryTitle: 'Spam.com title',
+                                    }),
+                                    expect.objectContaining({
+                                        normalizedUrl: 'eggs.com/foo',
+                                        entryTitle: 'Eggs.com title',
                                     }),
                                     expect.objectContaining({
                                         normalizedUrl: 'fish.com/cheese',
@@ -361,146 +365,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            `should schedule a retry when we cannot upload list entries`,
-            { skipConflictTests: true },
-            () => {
-                const testData: TestData = {}
-
-                return {
-                    setup: setupPreTest,
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
-                                })
-                                await shareTestList({ shareEntries: false })
-
-                                const serverStorage = await setup.getServerStorage()
-                                const sharingStorage =
-                                    serverStorage.storageModules.contentSharing
-
-                                sinon.replace(
-                                    sharingStorage,
-                                    'createListEntries',
-                                    async () => {
-                                        throw Error(
-                                            `There's a monkey in your WiFi`,
-                                        )
-                                    },
-                                )
-                                try {
-                                    await expect(
-                                        contentSharing.shareListEntries({
-                                            listId: testData.localListId,
-                                            queueInteraction: 'queue-and-await',
-                                        }),
-                                    ).rejects.toThrow(
-                                        `There's a monkey in your WiFi`,
-                                    )
-                                } finally {
-                                    sinon.restore()
-                                }
-                                expect(contentSharing._scheduledRetry).not.toBe(
-                                    undefined,
-                                )
-                                await contentSharing.forcePendingActionsRetry()
-
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                    expect.objectContaining({
-                                        entryTitle: 'Spam.com title',
-                                    }),
-                                ])
-                            },
-                        },
-                    ],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
-            `should schedule a retry when we cannot upload changes`,
-            { skipConflictTests: true },
-            () => {
-                const testData: TestData = {}
-
-                return {
-                    setup: setupPreTest,
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
-                                })
-                                await shareTestList({ shareEntries: true })
-
-                                const serverStorage = await setup.getServerStorage()
-                                const sharingStorage =
-                                    serverStorage.storageModules.contentSharing
-
-                                sinon.replace(
-                                    sharingStorage,
-                                    'removeListEntries',
-                                    async () => {
-                                        throw Error(
-                                            `There's a monkey in your WiFi`,
-                                        )
-                                    },
-                                )
-                                await setup.backgroundModules.customLists.removePageFromList(
-                                    {
-                                        id: testData.localListId,
-                                        url: 'https://www.spam.com/foo',
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                expect(contentSharing._scheduledRetry).not.toBe(
-                                    undefined,
-                                )
-                                sinon.restore()
-                                await contentSharing.forcePendingActionsRetry()
-                                await personalCloud.waitForSync()
-
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                ])
-                            },
-                        },
-                    ],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
-            `should share newly shared annotations in an already shared list using the 'shareAnnotation' method'`,
+            `should share newly shared annotations in an already shared list using the 'shareAnnotation' method`,
             { skipConflictTests: true },
             () =>
                 makeShareAnnotationTest({
@@ -509,7 +374,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            `should not share annotations more than once in an already shared list using the 'shareAnnotation' method'`,
+            `should not share annotations more than once in an already shared list using the 'shareAnnotation' method`,
             { skipConflictTests: true },
             () =>
                 makeShareAnnotationTest({
@@ -518,7 +383,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            `should share newly shared annotations in an already shared list using the 'shareAnnotations' method'`,
+            `should share newly shared annotations in an already shared list using the 'shareAnnotations' method`,
             { skipConflictTests: true },
             () =>
                 makeShareAnnotationTest({
@@ -527,7 +392,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            `should not share annotations more than once in an already shared list using the 'shareAnnotations' method'`,
+            `should not share annotations more than once in an already shared list using the 'shareAnnotations' method`,
             { skipConflictTests: true },
             () =>
                 makeShareAnnotationTest({
@@ -536,7 +401,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            `should skip sharing protected annotations in an already shared list using the 'shareAnnotations' method'`,
+            `should skip sharing protected annotations in an already shared list using the 'shareAnnotations' method`,
             { skipConflictTests: true },
             () =>
                 makeShareAnnotationTest({
@@ -1430,10 +1295,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                } = await setupTest({
+                                const { personalCloud } = await setupTest({
                                     setup,
                                     testData,
                                 })
@@ -1547,6 +1409,8 @@ function makeShareAnnotationTest(options: {
                         personalCloud,
                     } = setup.backgroundModules
                     setup.authService.setUser(TEST_USER)
+                    personalCloud.actionQueue.forceQueueSkip = true
+                    await personalCloud.setup()
 
                     localListId = await data.createContentSharingTestList(setup)
                     await contentSharing.shareList({

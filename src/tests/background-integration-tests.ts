@@ -44,6 +44,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
+import { Services } from 'src/services/types'
 
 fetchMock.restore()
 
@@ -57,6 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
+    services?: Services
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -86,10 +88,12 @@ export async function setupBackgroundIntegrationTest(
         options?.getServerStorage ?? createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
 
-    const services = await createServices({
-        backend: 'memory',
-        getServerStorage,
-    })
+    const services =
+        options?.services ??
+        (await createServices({
+            backend: 'memory',
+            getServerStorage,
+        }))
 
     const auth: AuthBackground = new AuthBackground({
         authService: services.auth,
@@ -187,6 +191,7 @@ export async function setupBackgroundIntegrationTest(
             new StorexPersonalCloudBackend({
                 storageManager: serverStorage.storageManager,
                 storageModules: serverStorage.storageModules,
+                services,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
                 view: new PersonalCloudHub().getView(),
                 getUserId: async () =>
