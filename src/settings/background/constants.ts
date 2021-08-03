@@ -1,7 +1,7 @@
 import type { UserSettingNames } from './types'
 
 export const COLLECTION_NAMES = {
-    settings: 'userSettings',
+    settings: 'settings',
 }
 
 export const FEATURE_PREFIX = {

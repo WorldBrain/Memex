@@ -206,7 +206,7 @@ export const LOCAL_TEST_DATA_V24 = {
             code: '[[{{{PageUrl}}}]]',
         },
     },
-    userSettings: {
+    settings: {
         first: {
             name: 'test-1',
             value: 123,
@@ -605,8 +605,8 @@ export const REMOTE_TEST_DATA_V24 = {
     personalMemexExtensionSetting: {
         first: {
             id: 1,
-            name: LOCAL_TEST_DATA_V24.userSettings.first.name,
-            value: LOCAL_TEST_DATA_V24.userSettings.first.value,
+            name: LOCAL_TEST_DATA_V24.settings.first.name,
+            value: LOCAL_TEST_DATA_V24.settings.first.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: 561,
@@ -614,8 +614,8 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         second: {
             id: 2,
-            name: LOCAL_TEST_DATA_V24.userSettings.second.name,
-            value: LOCAL_TEST_DATA_V24.userSettings.second.value,
+            name: LOCAL_TEST_DATA_V24.settings.second.name,
+            value: LOCAL_TEST_DATA_V24.settings.second.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: 562,
@@ -623,8 +623,8 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         third: {
             id: 3,
-            name: LOCAL_TEST_DATA_V24.userSettings.third.name,
-            value: LOCAL_TEST_DATA_V24.userSettings.third.value,
+            name: LOCAL_TEST_DATA_V24.settings.third.name,
+            value: LOCAL_TEST_DATA_V24.settings.third.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: 563,

@@ -2269,14 +2269,14 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
             } = await setup()
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.first)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.second)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.third)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -2299,9 +2299,9 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.first },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
             ], { skip: 0 })
         })
 
@@ -2313,20 +2313,20 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
             } = await setup()
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.first)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.second)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.third)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             const updatedValue = 'new-value'
             await setups[0].storageManager
-                .collection('userSettings')
+                .collection('settings')
                 .updateOneObject(
-                    { name: LOCAL_TEST_DATA_V24.userSettings.first.name },
+                    { name: LOCAL_TEST_DATA_V24.settings.first.name },
                     {
                         value: updatedValue,
                     },
@@ -2354,10 +2354,10 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.second },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: { ...LOCAL_TEST_DATA_V24.userSettings.first, value: updatedValue } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: { ...LOCAL_TEST_DATA_V24.settings.first, value: updatedValue } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: { ...LOCAL_TEST_DATA_V24.settings.first, value: updatedValue } },
             ], { skip: 0 })
         })
 
@@ -2369,24 +2369,24 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
             } = await setup()
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.first)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.first)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.second)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.second)
             await setups[0].storageManager
-                .collection('userSettings')
-                .createObject(LOCAL_TEST_DATA_V24.userSettings.third)
+                .collection('settings')
+                .createObject(LOCAL_TEST_DATA_V24.settings.third)
             await setups[0].backgroundModules.personalCloud.waitForSync()
             await setups[0].storageManager
-                .collection('userSettings')
+                .collection('settings')
                 .deleteOneObject({
-                    name: LOCAL_TEST_DATA_V24.userSettings.first.name,
+                    name: LOCAL_TEST_DATA_V24.settings.first.name,
                 })
             await setups[0].storageManager
-                .collection('userSettings')
+                .collection('settings')
                 .deleteOneObject({
-                    name: LOCAL_TEST_DATA_V24.userSettings.second.name,
+                    name: LOCAL_TEST_DATA_V24.settings.second.name,
                 })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
@@ -2412,9 +2412,9 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'userSettings', object: LOCAL_TEST_DATA_V24.userSettings.third },
-                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.first.name } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'userSettings', where: { name: LOCAL_TEST_DATA_V24.userSettings.second.name } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
+                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { name: LOCAL_TEST_DATA_V24.settings.first.name } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { name: LOCAL_TEST_DATA_V24.settings.second.name } },
             ], { skip: 0 })
         })
 

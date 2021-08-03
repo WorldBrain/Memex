@@ -695,7 +695,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        userSettings: backgroundModules.settings.storage,
+        settings: backgroundModules.settings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }
