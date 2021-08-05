@@ -100,8 +100,12 @@ export class PersonalCloudBackground {
     }
 
     async integrateContinuously() {
-        for await (const updates of this.options.backend.streamUpdates()) {
-            await this.integrateUpdates(updates)
+        try {
+            for await (const updates of this.options.backend.streamUpdates()) {
+                await this.integrateUpdates(updates)
+            }
+        } catch (err) {
+            console.error(err)
         }
     }
 

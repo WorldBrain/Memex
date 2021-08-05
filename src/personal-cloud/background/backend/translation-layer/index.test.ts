@@ -23,6 +23,7 @@ import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '../..'
+import { FakeFetch } from 'src/util/tests/fake-fetch'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -35,14 +36,6 @@ const deleteNullFields = <T = any>(obj: T): T => {
         }
     }
     return obj
-}
-
-class FakeFetch {
-    capturedReqs: Array<[RequestInfo, RequestInit | undefined]> = []
-    fetch: typeof fetch = async (input, init) => {
-        this.capturedReqs.push([input, init])
-        return { status: 200 } as Response
-    }
 }
 
 class IdCapturer {

@@ -6,19 +6,25 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestInstance,
     BackgroundIntegrationTestContext,
+    BackgroundIntegrationTest,
 } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import orderBy from 'lodash/orderBy'
+import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
+import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
+import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { FakeFetch } from 'src/util/tests/fake-fetch'
+import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import { SharedListRoleID } from '../../../external/@worldbrain/memex-common/ts/content-sharing/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
 }
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
-    setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
 }
 
@@ -38,6 +44,13 @@ async function setupTest(options: {
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
 
+    const serverStorage = await setup.getServerStorage()
+    await serverStorage.storageManager.operation(
+        'createObject',
+        'user',
+        TEST_USER,
+    )
+
     if (options.createTestList) {
         testData.localListId = await data.createContentSharingTestList(setup)
     }
@@ -54,7 +67,11 @@ async function setupTest(options: {
         testData.remoteListId = listShareResult.remoteListId
     }
 
-    return { contentSharing, personalCloud, shareTestList }
+    return {
+        contentSharing,
+        personalCloud,
+        shareTestList,
+    }
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
@@ -1183,13 +1200,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await personalCloud.waitForSync()
 
-                                // expect(
-                                //     await setup.storageManager.operation(
-                                //         'findObjects',
-                                //         'sharedAnnotationMetadata',
-                                //         {},
-                                //     ),
-                                // ).toEqual([])
                                 expect(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([])
@@ -1215,10 +1225,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                } = await setupTest({
+                                const { personalCloud } = await setupTest({
                                     setup,
                                     testData,
                                 })
@@ -1235,49 +1242,46 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 )
-                                const sendMessage = () =>
-                                    setup.backgroundModules.userMessages.events.emit(
-                                        'message',
-                                        {
-                                            timestamp: 555,
-                                            message: {
-                                                type: 'joined-collection',
-                                                sharedListId: listReference.id,
-                                            },
-                                        },
-                                    )
-                                const verify = async () => {
-                                    await personalCloud.waitForSync()
-                                    const customLists = await setup.storageManager.operation(
+                                const {
+                                    keyString,
+                                } = await serverStorage.storageModules.contentSharing.createListKey(
+                                    {
+                                        key: { roleID: SharedListRoleID.Admin },
+                                        listReference,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.options.backend.processListKey(
+                                    {
+                                        keyString,
+                                        listId: listReference.id,
+                                    },
+                                )
+
+                                await (personalCloud.options
+                                    .backend as StorexPersonalCloudBackend).forceUpdateCheck()
+                                await personalCloud.waitForSync()
+                                const customLists = await setup.storageManager.operation(
+                                    'findObjects',
+                                    'customLists',
+                                    {},
+                                )
+                                expect(customLists).toEqual([
+                                    expect.objectContaining({
+                                        name: 'Test list',
+                                    }),
+                                ])
+                                expect(
+                                    await setup.storageManager.operation(
                                         'findObjects',
-                                        'customLists',
+                                        'sharedListMetadata',
                                         {},
-                                    )
-                                    expect(customLists).toEqual([
-                                        expect.objectContaining({
-                                            name: 'Test list',
-                                        }),
-                                    ])
-                                    expect(
-                                        await setup.storageManager.operation(
-                                            'findObjects',
-                                            'sharedListMetadata',
-                                            {},
-                                        ),
-                                    ).toEqual([
-                                        {
-                                            localId: customLists[0].id,
-                                            remoteId: listReference.id.toString(),
-                                        },
-                                    ])
-                                }
-
-                                sendMessage()
-                                await verify()
-
-                                // and it should not add the same remote list to local twice
-                                sendMessage()
-                                await verify()
+                                    ),
+                                ).toEqual([
+                                    {
+                                        localId: customLists[0].id,
+                                        remoteId: listReference.id.toString(),
+                                    },
+                                ])
                             },
                         },
                     ],
@@ -1285,106 +1289,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should add an annotation and store its metadata when the user creates a new annotation via the web UI',
+            'should add an annotation and store its metadata when the user creates a new annotation to their own page via the web UI',
             { skipConflictTests: true },
-            () => {
-                const testData: TestData = {}
-
-                return {
-                    setup: setupPreTest,
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                const { personalCloud } = await setupTest({
-                                    setup,
-                                    testData,
-                                })
-
-                                const serverStorage = await setup.getServerStorage()
-                                const createdWhen = Date.now()
-                                const dummyLocalId = 'aaa'
-                                const {
-                                    sharedAnnotationReferences,
-                                } = await serverStorage.storageModules.contentSharing.createAnnotations(
-                                    {
-                                        annotationsByPage: {
-                                            [normalizeUrl(
-                                                data.ANNOTATION_1_1_DATA
-                                                    .pageUrl,
-                                            )]: [
-                                                {
-                                                    localId: dummyLocalId,
-                                                    createdWhen,
-                                                    comment:
-                                                        data.ANNOTATION_1_1_DATA
-                                                            .comment,
-                                                },
-                                            ],
-                                        },
-                                        creator: {
-                                            type: 'user-reference',
-                                            id: 'someone-else',
-                                        },
-                                        listReferences: [],
-                                    },
-                                )
-                                const sendMessage = () =>
-                                    setup.backgroundModules.userMessages.events.emit(
-                                        'message',
-                                        {
-                                            timestamp: 555,
-                                            message: {
-                                                type: 'created-annotation',
-                                                sharedAnnotationId:
-                                                    sharedAnnotationReferences[
-                                                        dummyLocalId
-                                                    ].id,
-                                            },
-                                        },
-                                    )
-                                const verify = async () => {
-                                    await personalCloud.waitForSync()
-                                    const annotations = await setup.storageManager.operation(
-                                        'findObjects',
-                                        'annotations',
-                                        {},
-                                    )
-                                    expect(annotations).toEqual([
-                                        expect.objectContaining({
-                                            comment:
-                                                data.ANNOTATION_1_1_DATA
-                                                    .comment,
-                                        }),
-                                    ])
-                                    expect(
-                                        await setup.storageManager.operation(
-                                            'findObjects',
-                                            'sharedAnnotationMetadata',
-                                            {},
-                                        ),
-                                    ).toEqual([
-                                        {
-                                            localId: annotations[0].url,
-                                            remoteId:
-                                                sharedAnnotationReferences[
-                                                    dummyLocalId
-                                                ].id,
-                                            excludeFromLists: false,
-                                        },
-                                    ])
-                                }
-
-                                sendMessage()
-                                await verify()
-
-                                // and it should not add the same remote annotation to local twice
-                                sendMessage()
-                                await verify()
-                            },
-                        },
-                    ],
-                }
-            },
+            () => makeAnnotationFromWebUiTest({ ownPage: true }),
+        ),
+        backgroundIntegrationTest(
+            `should add an annotation and store its metadata when the user creates a new annotation to another user's page via the web UI`,
+            { skipConflictTests: true },
+            () => makeAnnotationFromWebUiTest({ ownPage: false }),
         ),
     ],
     { includePostSyncProcessor: true },
@@ -1398,9 +1310,7 @@ function makeShareAnnotationTest(options: {
     let localListId: number
 
     return {
-        setup: async ({ setup }) => {
-            setup.backgroundModules.contentSharing.shouldProcessSyncChanges = false
-        },
+        setup: async ({ setup }) => {},
         steps: [
             {
                 execute: async ({ setup }) => {
@@ -1604,6 +1514,139 @@ function makeShareAnnotationTest(options: {
                                   excludeFromLists: true,
                               },
                     )
+                },
+            },
+        ],
+    }
+}
+
+function makeAnnotationFromWebUiTest(options: {
+    ownPage: boolean
+}): BackgroundIntegrationTestInstance {
+    const testData: TestData = {}
+    let storageHooksChangeWatcher: StorageHooksChangeWatcher
+
+    return {
+        getSetupOptions: (): BackgroundIntegrationTestSetupOpts => {
+            storageHooksChangeWatcher = new StorageHooksChangeWatcher()
+            const getServerStorage = createLazyMemoryServerStorage({
+                changeWatchSettings: storageHooksChangeWatcher,
+            })
+            return {
+                getServerStorage,
+            }
+        },
+        setup: async (context) => {
+            const fakeFetch = new FakeFetch()
+
+            await storageHooksChangeWatcher.setUp({
+                fetch: fakeFetch.fetch,
+                getCurrentUserReference: async () => ({
+                    type: 'user-reference',
+                    id: (await context.setup.authService.getCurrentUser()).id,
+                }),
+                serverStorageManager: (await context.setup.getServerStorage())
+                    .storageManager,
+                services: context.setup.services,
+            })
+            await setupPreTest(context)
+        },
+        steps: [
+            {
+                execute: async ({ setup }) => {
+                    const { personalCloud, shareTestList } = await setupTest({
+                        setup,
+                        testData,
+                        createTestList: true,
+                    })
+                    await shareTestList({ shareEntries: true })
+                    await personalCloud.waitForSync()
+
+                    const serverStorage = await setup.getServerStorage()
+                    if (!options.ownPage) {
+                        await serverStorage.storageModules.contentSharing.ensurePageInfo(
+                            {
+                                creatorReference: {
+                                    type: 'user-reference',
+                                    id: TEST_USER.id,
+                                },
+                                pageInfo: {
+                                    normalizedUrl: normalizeUrl(
+                                        data.ANNOTATION_1_1_DATA.pageUrl,
+                                    ),
+                                    originalUrl: data.PAGE_1_DATA.pageDoc.url,
+                                    fullTitle: 'Full title',
+                                },
+                            },
+                        )
+
+                        const userTwo = {
+                            id: 'test-two',
+                            displayName: 'User two',
+                            email: 'two@test.com',
+                            emailVerified: true,
+                        }
+                        setup.authService.setUser(userTwo)
+                        await serverStorage.storageManager.operation(
+                            'createObject',
+                            'user',
+                            userTwo,
+                        )
+                    }
+
+                    const createdWhen = Date.now()
+                    const dummyLocalId = 'aaa'
+                    const {
+                        sharedAnnotationReferences,
+                    } = await serverStorage.storageModules.contentSharing.createAnnotations(
+                        {
+                            annotationsByPage: {
+                                [normalizeUrl(
+                                    data.ANNOTATION_1_1_DATA.pageUrl,
+                                )]: [
+                                    {
+                                        localId: dummyLocalId,
+                                        createdWhen,
+                                        comment:
+                                            data.ANNOTATION_1_1_DATA.comment,
+                                    },
+                                ],
+                            },
+                            creator: {
+                                type: 'user-reference',
+                                id: 'someone-else',
+                            },
+                            listReferences: [],
+                        },
+                    )
+
+                    await (personalCloud.options
+                        .backend as StorexPersonalCloudBackend).forceUpdateCheck()
+                    await personalCloud.waitForSync() // wait for receival
+                    const annotations = await setup.storageManager.operation(
+                        'findObjects',
+                        'annotations',
+                        {},
+                    )
+                    expect(annotations).toEqual([
+                        expect.objectContaining({
+                            comment: data.ANNOTATION_1_1_DATA.comment,
+                        }),
+                    ])
+                    expect(
+                        await setup.storageManager.operation(
+                            'findObjects',
+                            'sharedAnnotationMetadata',
+                            {},
+                        ),
+                    ).toEqual([
+                        {
+                            localId: annotations[0].url,
+                            remoteId:
+                                sharedAnnotationReferences[dummyLocalId].id,
+                            excludeFromLists: false,
+                        },
+                    ])
                 },
             },
         ],
