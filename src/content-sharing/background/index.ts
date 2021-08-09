@@ -1,9 +1,10 @@
+import pick from 'lodash/pick'
 import StorageManager from '@worldbrain/storex'
-import { ContentSharingInterface, ContentSharingEvents } from './types'
-import { ContentSharingClientStorage } from './storage'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import { AuthBackground } from 'src/authentication/background'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { Analytics } from 'src/analytics/types'
 import AnnotationStorage from 'src/annotations/background/storage'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
@@ -13,14 +14,16 @@ import {
     RemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import ActivityStreamsBackground from 'src/activity-streams/background'
-import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import { Services } from 'src/services/types'
 import { ServerStorageModules } from 'src/storage/types'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import { ContentSharingInterface, ContentSharingEvents } from './types'
+import { ContentSharingClientStorage } from './storage'
 export default class ContentSharingBackground {
     remoteEmitter: RemoteEventEmitter<ContentSharingEvents>
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
+
+    _ensuredPages: { [normalizedUrl: string]: string } = {}
 
     constructor(
         public options: {
@@ -232,7 +235,35 @@ export default class ContentSharingBackground {
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
         normalizedPageUrl,
     ) => {
-        return 'NOT IMPLEMENTED'
+        const userId = (await this.options.auth.authService.getCurrentUser())
+            ?.id
+        if (!userId) {
+            throw new Error(
+                `Tried to execute sharing action without being authenticated`,
+            )
+        }
+        if (this._ensuredPages[normalizedPageUrl]) {
+            return this._ensuredPages[normalizedPageUrl]
+        }
+
+        const userReference = {
+            type: 'user-reference' as 'user-reference',
+            id: userId,
+        }
+
+        const page = (
+            await this.storage.getPages({
+                normalizedPageUrls: [normalizedPageUrl],
+            })
+        )[normalizedPageUrl]
+        const { contentSharing } = await this.options.getServerStorage()
+        const reference = await contentSharing.ensurePageInfo({
+            pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
+            creatorReference: userReference,
+        })
+        const id = contentSharing.getSharedPageInfoLinkID(reference)
+        this._ensuredPages[normalizedPageUrl] = id
+        return id
     }
 
     unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (

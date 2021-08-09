@@ -1,24 +1,21 @@
+import orderBy from 'lodash/orderBy'
 import expect from 'expect'
-import sinon from 'sinon'
-
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
     BackgroundIntegrationTestInstance,
     BackgroundIntegrationTestContext,
-    BackgroundIntegrationTest,
 } from 'src/tests/integration-tests'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import * as data from './index.test.data'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import orderBy from 'lodash/orderBy'
 import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
-import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
-import { SharedListRoleID } from '../../../external/@worldbrain/memex-common/ts/content-sharing/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)

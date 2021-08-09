@@ -33,6 +33,15 @@ export function createSelfTests(options: {
         if (!user) {
             throw new Error(`Could not authenticate user`)
         }
+
+        const serverStorage = await options.getServerStorage()
+        await serverStorage.storageModules.userManagement.ensureUser(
+            {
+                displayName: 'Test user',
+            },
+            { type: 'user-reference', id: user.id },
+        )
+
         return user
     }
 
@@ -63,9 +72,6 @@ export function createSelfTests(options: {
                     const where = {
                         user: user.id,
                         id: { $in: objects.map((object) => object.id) },
-                    }
-                    if (collectionName === 'personalDeviceInfo') {
-                        console.log(collectionName, where)
                     }
                     return where
                 },
@@ -149,6 +155,13 @@ export function createSelfTests(options: {
                 isFavourite: false,
             })
             console.log(`Added test copy-paster template`)
+
+            const {
+                remoteListId,
+            } = await backgroundModules.contentSharing.shareList({
+                listId: testListId1,
+            })
+            console.log('Shared test list #1, remote ID:', remoteListId)
 
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
