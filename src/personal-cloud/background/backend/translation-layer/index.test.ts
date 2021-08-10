@@ -193,6 +193,14 @@ function dataChanges(
     ]
 }
 
+function blockStats(params: { usedBlocks: number }) {
+    return {
+        id: expect.anything(),
+        usedBlocks: params.usedBlocks,
+        user: TEST_USER.id,
+    }
+}
+
 async function setup(options?: { runReadwiseTrigger?: boolean }) {
     const serverIdCapturer = new IdCapturer({
         postprocesessMerge: (params) => {
@@ -341,6 +349,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
@@ -351,6 +360,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                 ]),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
@@ -385,6 +395,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
@@ -392,6 +403,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [
                     {
                         ...testMetadata.first,
@@ -434,6 +446,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
@@ -444,6 +457,7 @@ describe('Personal cloud translation layer', () => {
                     }],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 1 })],
                 personalContentMetadata: [testMetadata.second],
                 personalContentLocator: [testLocators.second],
             })
@@ -475,6 +489,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalBookmark',
@@ -483,6 +498,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: [testBookmarks.first]
@@ -520,6 +536,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalBookmark',
@@ -528,6 +545,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
                 ], { skip: 5 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: []
@@ -560,6 +578,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
@@ -569,6 +588,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -615,6 +635,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
@@ -623,6 +644,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
                 ], { skip: 6 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -675,6 +697,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
@@ -692,6 +715,7 @@ describe('Personal cloud translation layer', () => {
                         time: LOCAL_TEST_DATA_V24.visits.second.time,
                     }],
                 ], { skip: 8 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [],
@@ -746,6 +770,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -757,6 +782,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -801,6 +827,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -810,6 +837,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
                 ], { skip: 6 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
@@ -862,6 +890,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -873,6 +902,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.second.id, { url: LOCAL_TEST_DATA_V24.annotations.second.url }],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [],
@@ -922,6 +952,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -933,6 +964,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -986,6 +1018,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -996,6 +1029,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1053,6 +1087,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1063,6 +1098,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id, changeInfo],
                 ], { skip: 9 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1098,6 +1134,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -1105,6 +1142,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                 ], { skip: 0 }),
+                personalBlockStats: [],
                 personalList: [testLists.first, testLists.second],
             })
 
@@ -1146,12 +1184,14 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalList', testLists.first.id],
                 ], { skip: 2 }),
+                personalBlockStats: [],
                 personalList: [{ ...testLists.first, name: updatedName }, testLists.second],
             })
 
@@ -1198,6 +1238,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -1205,6 +1246,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalList', testLists.first.id, { id: testLists.first.localId }],
                     [DataChangeType.Delete, 'personalList', testLists.second.id, { id: testLists.second.localId }],
                 ], { skip: 2 }),
+                personalBlockStats: [],
                 personalList: [],
             })
 
@@ -1243,6 +1285,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalListEntry'
@@ -1252,6 +1295,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalListEntry', testListEntries.first.id],
                     [DataChangeType.Create, 'personalListEntry', testListEntries.second.id],
                 ], { skip: 5 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.first, testListEntries.second],
@@ -1300,6 +1344,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalListEntry'
@@ -1308,6 +1353,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListEntry', testListEntries.first.id, changeInfo],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.second],
@@ -1342,6 +1388,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalListShare',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
@@ -1349,6 +1396,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListShare', testListShares.first.id],
                 ], { skip: 1 }),
+                personalBlockStats: [],
                 personalListShare: [testListShares.first],
                 personalList: [testLists.first],
             })
@@ -1389,6 +1437,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalListShare',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
@@ -1396,6 +1445,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListShare', testListShares.first.id, changeInfo],
                 ], { skip: 2 }),
+                personalBlockStats: [],
                 personalList: [testLists.first],
                 personalListShare: [],
             })
@@ -1444,6 +1494,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1455,6 +1506,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1522,6 +1574,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1533,6 +1586,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Modify, 'personalAnnotationShare', testAnnotationShares.second.id],
 
                 ], { skip: 9 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1602,6 +1656,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1612,6 +1667,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationShare', testAnnotationShares.second.id, changeInfo],
                 ], { skip: 9 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1650,6 +1706,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
@@ -1660,6 +1717,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -1700,6 +1758,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
@@ -1710,6 +1769,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondPageTag.id],
                 ], { skip: 5 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -1765,6 +1825,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
@@ -1774,6 +1835,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [testConnections.secondPageTag],
@@ -1815,6 +1877,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalTag',
@@ -1825,6 +1888,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstPageTag.id],
                 ], { skip: 6 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [],
@@ -1867,6 +1931,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1881,6 +1946,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                 ], { skip: 4 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1937,6 +2003,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -1950,6 +2017,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
                 ], { skip: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2015,6 +2083,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -2026,6 +2095,7 @@ describe('Personal cloud translation layer', () => {
                 personalDataChange: dataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                 ], { skip: 10 }),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2073,6 +2143,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalAnnotation',
@@ -2085,6 +2156,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstAnnotationTag.id],
                 ], { skip: 8 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -2120,6 +2192,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2127,6 +2200,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.second.id],
                 ], { skip: 0 }),
+                personalBlockStats: [],
                 personalTextTemplate: [testTemplates.first, testTemplates.second],
             })
             // prettier-ignore
@@ -2173,6 +2247,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2180,6 +2255,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.second.id],
                 ], { skip: 2 }),
+                personalBlockStats: [],
                 personalTextTemplate: [{
                     ...testTemplates.first,
                     code: updatedCode,
@@ -2238,6 +2314,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2245,6 +2322,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id, { id: LOCAL_TEST_DATA_V24.templates.first.id }],
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id, { id: LOCAL_TEST_DATA_V24.templates.second.id }],
                 ], { skip: 2 }),
+                personalBlockStats: [],
                 personalTextTemplate: [],
             })
             // prettier-ignore
@@ -2254,7 +2332,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 0 })
         })
 
-        it('should create memex extension setting', async () => {
+        it('should create Memex extension settings', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -2279,6 +2357,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalMemexExtensionSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2287,6 +2366,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
                 ], { skip: 0 }),
+                personalBlockStats: [],
                 personalMemexExtensionSetting: [testSettings.first, testSettings.second, testSettings.third],
             })
 
@@ -2298,7 +2378,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 0 })
         })
 
-        it('should update memex extension setting', async () => {
+        it('should update Memex extension settings', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -2333,6 +2413,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalMemexExtensionSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2342,6 +2423,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
                     [DataChangeType.Modify, 'personalMemexExtensionSetting', testSettings.first.id],
                 ], { skip: 0 }),
+                personalBlockStats: [],
                 personalMemexExtensionSetting: [{ ...testSettings.first, value: updatedValue }, testSettings.second, testSettings.third],
             })
 
@@ -2354,7 +2436,7 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 0 })
         })
 
-        it('should delete memex extension setting', async () => {
+        it('should delete Memex extension settings', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -2390,6 +2472,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
                     'personalDataChange',
+                    'personalBlockStats',
                     'personalMemexExtensionSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
@@ -2400,6 +2483,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.first.id, { name: testSettings.first.name }],
                     [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.second.id, { name: testSettings.second.name }],
                 ], { skip: 0 }),
+                personalBlockStats: [],
                 personalMemexExtensionSetting: [testSettings.third],
             })
 
