@@ -337,6 +337,20 @@ export class PersonalCloudBackground {
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
 
+                        if (
+                            !storageManager.registry.collections[
+                                instruction.collection
+                            ]
+                        ) {
+                            const errorMsg = `Non-existing collection in clientInstruction:`
+                            console.error(errorMsg, instruction)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(new Error(errorMsg))
+                            return
+                        }
+
                         let dbObject
                         try {
                             dbObject = await storageManager
@@ -355,6 +369,10 @@ export class PersonalCloudBackground {
                             return
                         }
                         if (!dbObject) {
+                            this._debugLog(
+                                'Could not find dbObject for clientInstruction:',
+                                instruction,
+                            )
                             return
                         }
                         let storageObject = dbObject[instruction.uploadField]
@@ -373,18 +391,12 @@ export class PersonalCloudBackground {
                             (typeof storageObject !== 'string' &&
                                 !(storageObject instanceof Blob))
                         ) {
-                            console.error(
-                                `Don't know how to store object for instruction`,
-                                instruction,
-                            )
+                            const errorMsg = `Don't know how to store object for instruction`
+                            console.error(errorMsg, instruction)
                             Raven.captureBreadcrumb({
                                 clientInstruction: instruction,
                             })
-                            Raven.captureException(
-                                new Error(
-                                    `Don't know how to store object for instruction`,
-                                ),
-                            )
+                            Raven.captureException(new Error(errorMsg))
                             return
                         }
                         try {

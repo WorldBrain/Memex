@@ -429,6 +429,8 @@ export function createBackgroundModules(options: {
                     'personalCloud',
                     callFirebaseFunction,
                 ),
+                getServerStorageManager: async () =>
+                    (await options.getServerStorage()).storageManager,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
