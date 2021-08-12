@@ -1,4 +1,4 @@
-import StorageManager, { StorageRegistry } from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
@@ -14,6 +14,7 @@ import {
     PersonalCloudClientInstructionType,
     PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
@@ -413,31 +414,6 @@ export class PersonalCloudBackground {
     _debugLog(...args: any[]) {
         if (this.debug) {
             console['log']('Personal Cloud -', ...args)
-        }
-    }
-}
-
-export function preprocessPulledObject(params: {
-    storageRegistry: StorageRegistry
-    collection: string
-    object: any
-}) {
-    const collectionDefinition =
-        params.storageRegistry.collections[params.collection]
-    if (!collectionDefinition) {
-        throw new Error(
-            `Got pulled object for non-existing collection: ${params.collection}`,
-        )
-    }
-
-    for (const [fieldName, fieldDefinition] of Object.entries(
-        collectionDefinition.fields,
-    )) {
-        if (
-            fieldDefinition.type === 'datetime' &&
-            typeof params.object[fieldName] === 'number'
-        ) {
-            params.object[fieldName] = new Date(params.object[fieldName])
         }
     }
 }
