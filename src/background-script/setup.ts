@@ -87,6 +87,7 @@ import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/ut
 import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -516,7 +517,9 @@ export function createBackgroundModules(options: {
         },
     })
     options.services.contentSharing.preKeyGeneration = async (params) => {
-        await personalCloud.waitForSync()
+        if (params.key.roleID > SharedListRoleID.Commenter) {
+            await personalCloud.waitForSync()
+        }
     }
 
     return {
