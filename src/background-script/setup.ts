@@ -164,6 +164,8 @@ export function createBackgroundModules(options: {
     const { storageManager } = options
     const getServerStorage = async () =>
         (await options.getServerStorage()).storageModules
+    const getServerStorageManager = async () =>
+        (await options.getServerStorage()).storageManager
 
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -430,8 +432,7 @@ export function createBackgroundModules(options: {
                     'personalCloud',
                     callFirebaseFunction,
                 ),
-                getServerStorageManager: async () =>
-                    (await options.getServerStorage()).storageManager,
+                getServerStorageManager,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
@@ -515,6 +516,7 @@ export function createBackgroundModules(options: {
                 )
             }
         },
+        getServerStorageManager,
     })
     options.services.contentSharing.preKeyGeneration = async (params) => {
         if (params.key.roleID > SharedListRoleID.Commenter) {

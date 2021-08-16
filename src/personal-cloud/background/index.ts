@@ -45,6 +45,7 @@ export interface PersonalCloudBackgroundOptions {
         where?: { [key: string]: any }
         updates: { [key: string]: any }
     }): Promise<void>
+    getServerStorageManager(): Promise<StorageManager>
 }
 
 export class PersonalCloudBackground {
@@ -428,6 +429,26 @@ export class PersonalCloudBackground {
     preprocessAction: ActionPreprocessor<PersonalCloudAction> = (action) => {
         this._debugLog('Scheduling action:', action)
         return { valid: true }
+    }
+
+    async getBlockStats(): Promise<{ usedBlocks: number }> {
+        const userId = await this.options.getUserId()
+        if (!userId) {
+            throw new Error(`Cannot get block stats if not authenticated`)
+        }
+
+        const serverStorageManager = await this.options.getServerStorageManager()
+        const blockStats = await serverStorageManager.operation(
+            'findObject',
+            'personalBlockStats',
+            {
+                user: userId,
+            },
+        )
+        if (!blockStats) {
+            return { usedBlocks: 0 }
+        }
+        return blockStats.usedBlocks
     }
 
     _debugLog(...args: any[]) {
