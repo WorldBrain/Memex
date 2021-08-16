@@ -33,6 +33,15 @@ export function createSelfTests(options: {
         if (!user) {
             throw new Error(`Could not authenticate user`)
         }
+
+        const serverStorage = await options.getServerStorage()
+        await serverStorage.storageModules.userManagement.ensureUser(
+            {
+                displayName: 'Test user',
+            },
+            { type: 'user-reference', id: user.id },
+        )
+
         return user
     }
 
@@ -64,9 +73,6 @@ export function createSelfTests(options: {
                         user: user.id,
                         id: { $in: objects.map((object) => object.id) },
                     }
-                    if (collectionName === 'personalDeviceInfo') {
-                        console.log(collectionName, where)
-                    }
                     return where
                 },
             })
@@ -90,14 +96,14 @@ export function createSelfTests(options: {
                 url: testPageUrl,
                 tag: 'test-tag',
             })
-            console.log(`Added tag 'test-tag' to 'https://www.getmemex.com'`)
+            console.log(`Added tag 'test-tag' to '${testPageUrl}'`)
             await backgroundModules.bookmarks.addBookmark({
                 url: normalizedTestPageUrl,
                 fullUrl: testPageUrl,
                 skipIndexing: true,
             })
-            console.log(`Bookmarked 'https://www.getmemex.com'`)
-            await backgroundModules.directLinking.createAnnotation(
+            console.log(`Bookmarked '${testPageUrl}'`)
+            const publicAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
@@ -108,7 +114,7 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            console.log(`Added private note to 'https://www.getmemex.com'`)
+            console.log(`Added private note to '${testPageUrl}'`)
             await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
@@ -121,7 +127,7 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            console.log(`Added protected note to 'https://www.getmemex.com'`)
+            console.log(`Added protected note to '${testPageUrl}'`)
             const testListId1 = await backgroundModules.customLists.createCustomList(
                 {
                     name: 'My test list #1',
@@ -149,6 +155,49 @@ export function createSelfTests(options: {
                 isFavourite: false,
             })
             console.log(`Added test copy-paster template`)
+
+            const {
+                remoteListId,
+            } = await backgroundModules.contentSharing.shareList({
+                listId: testListId1,
+            })
+            console.log('Shared test list #1, remote ID:', remoteListId)
+
+            await backgroundModules.contentSharing.shareAnnotation({
+                annotationUrl: publicAnnotationUrl,
+            })
+            await backgroundModules.contentSharing.shareAnnotationsToLists({
+                annotationUrls: [publicAnnotationUrl],
+            })
+            await backgroundModules.directLinking.editAnnotation(
+                null,
+                publicAnnotationUrl,
+                'Edited comment',
+            )
+            console.log('Shared and edited annotation')
+
+            await serverStorage.storageModules.contentSharing.ensurePageInfo({
+                creatorReference: { type: 'user-reference', id: user.id },
+                pageInfo: {
+                    normalizedUrl: normalizedTestPageUrl,
+                    originalUrl: testPageUrl,
+                },
+            })
+            await serverStorage.storageModules.contentSharing.createAnnotations(
+                {
+                    annotationsByPage: {
+                        [normalizedTestPageUrl]: [
+                            {
+                                createdWhen: Date.now(),
+                                localId: 'blub',
+                                comment: 'Yes, totally!',
+                            },
+                        ],
+                    },
+                    creator: { type: 'user-reference', id: user.id },
+                    listReferences: [],
+                },
+            )
 
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')

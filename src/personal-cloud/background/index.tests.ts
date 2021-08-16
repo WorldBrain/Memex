@@ -18,6 +18,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { createServices } from 'src/services'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -305,9 +306,15 @@ export async function setupSyncBackgroundTest(
     const getNow = () => now++
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
+        const services = await createServices({
+            backend: 'memory',
+            getServerStorage,
+        })
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
+            storageModules: serverStorage.storageModules,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
+            services,
             view: cloudHub.getView(),
             getUserId: async () => userId,
             getNow,
@@ -319,6 +326,7 @@ export async function setupSyncBackgroundTest(
 
         const setup = await setupBackgroundIntegrationTest({
             ...options,
+            services,
             getServerStorage,
             personalCloudBackend,
         })

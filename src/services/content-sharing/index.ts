@@ -8,6 +8,10 @@ import { getListShareUrl } from 'src/content-sharing/utils'
 
 export default class ContentSharingService
     implements ContentSharingServiceInterface {
+    preKeyGeneration?(params: {
+        listReference: SharedListReference
+    }): Promise<void>
+
     constructor(
         private dependencies: {
             storage: { contentSharing: ContentSharingStorage }
@@ -70,6 +74,8 @@ export default class ContentSharingService
     generateKeyLink: ContentSharingServiceInterface['generateKeyLink'] = async (
         params,
     ) => {
+        await this.preKeyGeneration?.(params)
+
         let keyString: string | undefined
 
         if (params.key.roleID !== SharedListRoleID.Commenter) {

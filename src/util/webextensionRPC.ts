@@ -243,6 +243,12 @@ export function makeRemotelyCallable<T>(
     // })
 }
 
+export function clearRemotelyCallableFunctions() {
+    for (const key of Object.keys(remotelyCallableFunctions)) {
+        delete remotelyCallableFunctions[key]
+    }
+}
+
 export class RemoteFunctionRegistry {
     registerRemotelyCallable(functions, { insertExtraArg = false } = {}) {
         makeRemotelyCallable(functions, { insertExtraArg })

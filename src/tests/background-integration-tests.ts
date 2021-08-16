@@ -37,6 +37,14 @@ import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-clou
 import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import {
+    PersonalCloudHub,
+    StorexPersonalCloudBackend,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
+import { Services } from 'src/services/types'
 
 fetchMock.restore()
 
@@ -50,6 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
+    services?: Services
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -58,6 +67,8 @@ export async function setupBackgroundIntegrationTest(
     if (typeof window === 'undefined') {
         ;(global as any)['URL'] = URL
     }
+
+    clearRemotelyCallableFunctions()
 
     // We want to allow tests to be able to override time
     let getTime = () => Date.now()
@@ -75,11 +86,14 @@ export async function setupBackgroundIntegrationTest(
 
     const getServerStorage =
         options?.getServerStorage ?? createLazyMemoryServerStorage()
+    const serverStorage = await getServerStorage()
 
-    const services = await createServices({
-        backend: 'memory',
-        getServerStorage,
-    })
+    const services =
+        options?.services ??
+        (await createServices({
+            backend: 'memory',
+            getServerStorage,
+        }))
 
     const auth: AuthBackground = new AuthBackground({
         authService: services.auth,
@@ -150,6 +164,9 @@ export async function setupBackgroundIntegrationTest(
             `Tried to call Firebase function, but no mock was for that`,
         )
     }
+
+    let nextServerId = 1337
+    const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
@@ -165,12 +182,34 @@ export async function setupBackgroundIntegrationTest(
         disableSyncEnryption: !options?.enableSyncEncyption,
         services,
         fetch,
-        userMessageService: new MemoryUserMessageService(),
+        userMessageService: userMessages,
         callFirebaseFunction: (name, ...args) => {
             return callFirebaseFunction(name, ...args)
         },
         personalCloudBackend:
-            options?.personalCloudBackend ?? new NullPersonalCloudBackend(),
+            options?.personalCloudBackend ??
+            new StorexPersonalCloudBackend({
+                storageManager: serverStorage.storageManager,
+                storageModules: serverStorage.storageModules,
+                services,
+                clientSchemaVersion: STORAGE_VERSIONS[25].version,
+                view: new PersonalCloudHub().getView(),
+                getUserId: async () =>
+                    (await backgroundModules.auth.authService.getCurrentUser())
+                        ?.id,
+                getNow,
+                useDownloadTranslationLayer: true,
+                getDeviceId: () => backgroundModules.personalCloud.deviceId,
+            }),
+        contentSharingBackend: new ContentSharingBackend({
+            storageManager: serverStorage.storageManager,
+            activityFollows: serverStorage.storageModules.activityFollows,
+            contentSharing: serverStorage.storageModules.contentSharing,
+            getCurrentUserId: async () =>
+                (await auth.authService.getCurrentUser()).id,
+            userMessages,
+        }),
+        generateServerId: () => nextServerId++,
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
@@ -259,12 +298,14 @@ export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    const setup = await setupBackgroundIntegrationTest({
+    const testOptions = await test.instantiate({ isSyncTest: false })
+    const setupOptions: BackgroundIntegrationTestSetupOpts = {
         customMiddleware: [],
         ...options,
-    })
-    const testOptions = await test.instantiate({ isSyncTest: false })
-    testOptions.setup?.({ setup })
+        ...(testOptions.getSetupOptions?.() ?? {}),
+    }
+    const setup = await setupBackgroundIntegrationTest(setupOptions)
+    await testOptions.setup?.({ setup })
 
     let changeDetectorUsed = false
 

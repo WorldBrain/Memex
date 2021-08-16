@@ -101,8 +101,12 @@ export class PersonalCloudBackground {
     }
 
     async integrateContinuously() {
-        for await (const updates of this.options.backend.streamUpdates()) {
-            await this.integrateUpdates(updates)
+        try {
+            for await (const updates of this.options.backend.streamUpdates()) {
+                await this.integrateUpdates(updates)
+            }
+        } catch (err) {
+            console.error(err)
         }
     }
 
@@ -182,6 +186,8 @@ export class PersonalCloudBackground {
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        this._debugLog('Process storage change:', event)
+
         const { releaseMutex } = await this.pushMutex.lock()
 
         for (const change of event.info.changes) {
@@ -332,6 +338,20 @@ export class PersonalCloudBackground {
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
 
+                        if (
+                            !storageManager.registry.collections[
+                                instruction.collection
+                            ]
+                        ) {
+                            const errorMsg = `Non-existing collection in clientInstruction:`
+                            console.error(errorMsg, instruction)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(new Error(errorMsg))
+                            return
+                        }
+
                         let dbObject
                         try {
                             dbObject = await storageManager
@@ -350,6 +370,10 @@ export class PersonalCloudBackground {
                             return
                         }
                         if (!dbObject) {
+                            this._debugLog(
+                                'Could not find dbObject for clientInstruction:',
+                                instruction,
+                            )
                             return
                         }
                         let storageObject = dbObject[instruction.uploadField]
@@ -368,18 +392,12 @@ export class PersonalCloudBackground {
                             (typeof storageObject !== 'string' &&
                                 !(storageObject instanceof Blob))
                         ) {
-                            console.error(
-                                `Don't know how to store object for instruction`,
-                                instruction,
-                            )
+                            const errorMsg = `Don't know how to store object for instruction`
+                            console.error(errorMsg, instruction)
                             Raven.captureBreadcrumb({
                                 clientInstruction: instruction,
                             })
-                            Raven.captureException(
-                                new Error(
-                                    `Don't know how to store object for instruction`,
-                                ),
-                            )
+                            Raven.captureException(new Error(errorMsg))
                             return
                         }
                         try {
@@ -407,7 +425,8 @@ export class PersonalCloudBackground {
         }
     }
 
-    preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
+    preprocessAction: ActionPreprocessor<PersonalCloudAction> = (action) => {
+        this._debugLog('Scheduling action:', action)
         return { valid: true }
     }
 
