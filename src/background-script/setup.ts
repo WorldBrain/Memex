@@ -515,6 +515,9 @@ export function createBackgroundModules(options: {
             }
         },
     })
+    options.services.contentSharing.preKeyGeneration = async (params) => {
+        await personalCloud.waitForSync()
+    }
 
     return {
         auth,
