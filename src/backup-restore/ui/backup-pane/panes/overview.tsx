@@ -250,7 +250,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                 </div>
 
                 {/* Settings Section */}
-                    {!this.state.hasInitialBackup ? (
+                    {this.state.hasInitialBackup ? (
                         <div className={settingsStyle.section}>
                             <div className={styles.option}>
                                 <div className={settingsStyle.sectionTitle}>Backup Location</div>
