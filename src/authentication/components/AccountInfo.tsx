@@ -45,7 +45,6 @@ interface Props {
 }
 
 interface State {
-    isPioneer?: boolean
     loadState: TaskState
     displayName?: string
     newDisplayName?: string
@@ -55,10 +54,7 @@ interface State {
 export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
         loadingChargebee: false,
-        plans: [],
-        features: [],
         loadState: 'running',
-        isPioneer: false,
         updateProfileState: 'pristine',
         newDisplayName: '',
     }
@@ -122,41 +118,21 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
 
     async updateUserInfo() {
         const user = await this.props.currentUser
-        const plans = await this.props.currentUser.authorizedPlans
-        const features = await this.props.currentUser.authorizedFeatures
-        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
 
         this.setState({
-            plans: plans,
-            features: features,
             loadState: 'success',
-            isPioneer: isBetaAuthorized,
         })
     }
 
     render() {
         const user = this.props.currentUser
-        const features = user?.authorizedFeatures
-        const plans = user?.authorizedPlans
 
         return (
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
                         <PioneerPlanBanner width={'fill-available'} />
-                        {this.state.isPioneer &&
-                            this.state.loadState === 'success' && (
-                                <div className={styles.pioneerBox}>
-                                    <div className={styles.pioneerTitle}>
-                                        🚀 Pioneer Edition
-                                    </div>
-                                    <div className={styles.pioneerSubtitle}>
-                                        You have beta features enabled.
-                                    </div>
-                                </div>
-                            )}
-                        {this.state.isPioneer && (
-                            <>
+                            <div className={styles.section}>
                                 <TypographyInputTitle>
                                     {' '}
                                     Display Name{' '}
@@ -171,8 +147,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         onClickNext={this.updateDisplayName}
                                     />
                                 </DisplayNameBox>
-                            </>
-                        )}
+                            </div>
                         <div className={styles.section}>
                             <TypographyInputTitle>
                                 {' '}
@@ -186,199 +161,18 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                 disabled
                             />
                         </div>
-                        {!user.subscriptionStatus && (
-                            <div className={styles.section}>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Your Plan{' '}
-                                </TypographyInputTitle>
-                                <div className={styles.lineEditBox}>
-                                    <InputTextField
-                                        name={'Plans'}
-                                        defaultValue={'Free Tier'}
-                                        readOnly
-                                    />
-                                    <PrimaryAction
-                                        onClick={
-                                            this.props.showSubscriptionModal
-                                        }
-                                        label={'Upgrade'}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {this.state.plans.length > 0 && (
-                            <div className={styles.section}>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Your Plan{' '}
-                                </TypographyInputTitle>
-                                <div className={styles.lineEditBox}>
-                                    <InputTextField
-                                        name={'plan'}
-                                        defaultValue={this.state.plans}
-                                        readOnly
-                                    />
-                                    {this.state.loadingChargebee ||
-                                    this.props.loadingUser ? (
-                                        <PrimaryAction
-                                            label={<LoadingIndicator />}
-                                            onClick={() => null}
-                                        />
-                                    ) : (
-                                        <PrimaryAction
-                                            onClick={this.openPortal}
-                                            label={'Edit Subscriptions'}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                        {user.subscriptionStatus &&
-                            user.subscriptionStatus !== 'in_trial' &&
-                            user.subscriptionStatus !== 'active' && (
-                                <div className={styles.section}>
-                                    <TypographyInputTitle>
-                                        {' '}
-                                        Subscription Status{' '}
-                                    </TypographyInputTitle>
-                                    <div className={styles.lineEditBox}>
-                                        <InputTextField
-                                            name={'subscriptionStatus'}
-                                            defaultValue={
-                                                user.subscriptionStatus
-                                            }
-                                            readOnly
-                                        />
-                                        <PrimaryAction
-                                            onClick={this.openPortal}
-                                            label={'Reactivate'}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                        {user.subscriptionStatus === 'in_trial' && (
-                            <div className={styles.section}>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Subscription Status{' '}
-                                </TypographyInputTitle>
-                                <div className={styles.lineEditBox}>
-                                    <InputTextField
-                                        name={'subscriptionStatus'}
-                                        defaultValue={user.subscriptionStatus}
-                                        readOnly
-                                    />
-                                    <PrimaryAction
-                                        onClick={this.openPortal}
-                                        label={'Add Payment Methods'}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {user.subscriptionExpiry && (
-                            <div className={styles.section}>
-                                {user.subscriptionStatus === 'non_renewing' ? (
-                                    <div>
-                                        <TypographyInputTitle>
-                                            {' '}
-                                            Expiration Date{' '}
-                                        </TypographyInputTitle>
-                                        <InputTextField
-                                            name={'subscriptionExpiry'}
-                                            defaultValue={
-                                                user.subscriptionExpiry &&
-                                                new Date(
-                                                    user.subscriptionExpiry *
-                                                        1000,
-                                                ).toLocaleString()
-                                            }
-                                            readOnly
-                                        />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        {user.subscriptionStatus ===
-                                        'in_trial' ? (
-                                            <TypographyInputTitle>
-                                                {' '}
-                                                Trial Ends on{' '}
-                                            </TypographyInputTitle>
-                                        ) : (
-                                            <TypographyInputTitle>
-                                                {' '}
-                                                Subscription Renewal Date{' '}
-                                            </TypographyInputTitle>
-                                        )}
-                                        <InputTextField
-                                            name={'subscriptionExpiry'}
-                                            defaultValue={
-                                                user.subscriptionExpiry &&
-                                                new Date(
-                                                    user.subscriptionExpiry *
-                                                        1000,
-                                                ).toLocaleString()
-                                            }
-                                            readOnly
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        <div className={styles.buttonBox}>
-                            {this.state.loadingChargebee ||
-                            this.props.loadingUser ? (
-                                <PrimaryAction
-                                    label={<LoadingIndicator />}
-                                    onClick={() => null}
-                                />
-                            ) : (
-                                <PrimaryAction
-                                    label={'Refresh Subscription Status'}
-                                    onClick={this.handleRefresh}
-                                />
-                            )}
+                        <div className={styles.section}>
+                            <TypographyInputTitle>
+                                {' '}
+                                User-ID{' '}
+                            </TypographyInputTitle>
+                            <InputTextField
+                                type={'text'}
+                                name={'User ID'}
+                                defaultValue={user.id}
+                                readOnly
+                            />
                         </div>
-                        {dev === true && (
-                            <div>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    User-ID{' '}
-                                </TypographyInputTitle>
-                                <InputTextField
-                                    type={hiddenInProduction}
-                                    name={'User ID'}
-                                    defaultValue={user.id}
-                                    readOnly
-                                />
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Enabled Features{' '}
-                                </TypographyInputTitle>
-                                <InputTextField
-                                    type={hiddenInProduction}
-                                    name={'Features'}
-                                    defaultValue={features}
-                                    readOnly
-                                />
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Email Address Verified?{' '}
-                                </TypographyInputTitle>
-
-                                <InputTextField
-                                    type={hiddenInProduction}
-                                    name={'Email Verified'}
-                                    defaultValue={`EmailVerified: ${JSON.stringify(
-                                        user.emailVerified,
-                                    )}`}
-                                    readOnly
-                                />
-                            </div>
-                        )}
                     </div>
                 )}
             </FullPage>
