@@ -304,13 +304,6 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
                 {this.renderRow(
-                    'Sync',
-                    syncState,
-                    backupState,
-                    lastSuccessfulSyncDate,
-                    syncState === 'disabled' ? goToSyncRoute : onInitiateSync,
-                )}
-                {this.renderRow(
                     'Backup',
                     backupState,
                     syncState,
