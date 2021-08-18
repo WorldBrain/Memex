@@ -6,7 +6,6 @@ import Statistics from './statistics'
 import Settings from './settings'
 import UserScreen from '../authentication/components/UserScreen'
 import React from 'react'
-import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 
 export default [
@@ -40,12 +39,6 @@ export default [
         pathname: '/backup',
         component: BackupSettingsContainer,
         icon: 'backup',
-    },
-    {
-        name: 'Sync',
-        pathname: '/sync',
-        component: SyncDevicesPaneContainer,
-        icon: 'sync',
     },
     {
         name: 'Blocklist',

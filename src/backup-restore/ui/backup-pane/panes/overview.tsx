@@ -250,125 +250,46 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                 </div>
 
                 {/* Settings Section */}
-                <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>Settings</div>
-                    <div className={styles.option}>
-                        {!automaticBackupsAllowed && (
-                            <div className={localStyles.statusLine}>
-                                <div>
-                                    <span className={styles.name}>
-                                        Enable Automatic Backups
-                                    </span>
-                                    <span
-                                        className={classNames(
-                                            settingsStyle.subname,
-                                            localStyles.limitWidth,
+                    {!this.state.hasInitialBackup ? (
+                        <div className={settingsStyle.section}>
+                            <div className={styles.option}>
+                                <div className={settingsStyle.sectionTitle}>Backup Location</div>
+                                <div className={localStyles.statusLine}>
+                                    <div>
+                                        {this.state.backupLocation === 'local' ? (
+                                            <span
+                                                className={classNames(
+                                                    settingsStyle.subname,
+                                                    localStyles.limitWidth,
+                                                )}
+                                            >
+                                                {this.state.backupPath === null &&
+                                                this.state.backupLocation ===
+                                                    'local'
+                                                    ? '⚠️Your Memex Backup Helper is not running!'
+                                                    : this.state.backupPath}
+                                            </span>
+                                        ) : (
+                                            <span
+                                                className={classNames(
+                                                    settingsStyle.subname,
+                                                    localStyles.limitWidth,
+                                                )}
+                                            >
+                                                Google Drive
+                                            </span>
                                         )}
-                                    >
-                                        Worry-free. Automatically backs up your
-                                        data every 15 minutes.
-                                    </span>
-                                </div>
-                                <div className={settingsStyle.buttonBox}>
-                                    {this.renderUpgradeBtn()}
-                                </div>
-                            </div>
-                        )}
-
-                        {automaticBackupsAllowed &&
-                            !this.state.automaticBackupEnabled && (
-                                <div className={localStyles.statusLine}>
-                                    <div>
-                                        <span className={styles.name}>
-                                            Automatic Backups still disabled
-                                        </span>
-                                        <span
-                                            className={classNames(
-                                                settingsStyle.subname,
-                                                localStyles.limitWidth,
-                                            )}
-                                        >
-                                            {
-                                                "You successfully upgraded but haven't enabled automatic backups"
-                                            }
-                                        </span>
-                                    </div>
-                                    <PrimaryAction
-                                        onClick={() =>
-                                            this.enableAutomaticBackup()
-                                        }
-                                        label={'Enable'}
-                                    />
-                                </div>
-                            )}
-
-                        {automaticBackupsAllowed &&
-                            this.state.automaticBackupEnabled && (
-                                <div className={localStyles.statusLine}>
-                                    <div>
-                                        <span className={styles.name}>
-                                            Automatic Backups: Enabled
-                                        </span>
-                                        <span
-                                            className={classNames(
-                                                settingsStyle.subname,
-                                                localStyles.limitWidth,
-                                            )}
-                                        >
-                                            All set. Your data is backed up
-                                            every 15 minutes.
-                                        </span>
                                     </div>
                                     <SecondaryAction
+                                        label={'Change'}
                                         onClick={() =>
-                                            this.disableAutomaticBackup()
+                                            this.props.onBackupRequested(true)
                                         }
-                                        label={'✓ Enabled'}
                                     />
                                 </div>
-                            )}
-                    </div>
-                    {this.state.hasInitialBackup ? (
-                        <div className={styles.option}>
-                            <div className={localStyles.statusLine}>
-                                <div>
-                                    <span className={styles.name}>
-                                        Backup Location
-                                    </span>
-                                    {this.state.backupLocation === 'local' ? (
-                                        <span
-                                            className={classNames(
-                                                settingsStyle.subname,
-                                                localStyles.limitWidth,
-                                            )}
-                                        >
-                                            {this.state.backupPath === null &&
-                                            this.state.backupLocation ===
-                                                'local'
-                                                ? '⚠️Your Memex Backup Helper is not running!'
-                                                : this.state.backupPath}
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className={classNames(
-                                                settingsStyle.subname,
-                                                localStyles.limitWidth,
-                                            )}
-                                        >
-                                            Google Drive
-                                        </span>
-                                    )}
-                                </div>
-                                <SecondaryAction
-                                    label={'Change'}
-                                    onClick={() =>
-                                        this.props.onBackupRequested(true)
-                                    }
-                                />
                             </div>
                         </div>
                     ) : null}
-                </div>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Restore & Replace
