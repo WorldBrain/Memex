@@ -2507,13 +2507,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { backupBG } = this.options
-        if (!(await backupBG.isAutomaticBackupAllowed())) {
-            this.emitMutation({
-                modals: { showSubscription: { $set: true } },
-                syncMenu: { isDisplayed: { $set: false } },
-            })
-            return
-        }
 
         if (previousState.syncMenu.isAutoBackupEnabled) {
             this.emitMutation({

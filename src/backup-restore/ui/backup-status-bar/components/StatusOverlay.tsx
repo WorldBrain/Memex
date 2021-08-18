@@ -103,6 +103,7 @@ export default class StatusOverlay extends PureComponent<Props> {
     }
 
     render() {
+        console.log(this.state.automaticBackupEnabled)
         const {
             header,
             message,
