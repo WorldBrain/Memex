@@ -46,7 +46,7 @@ export function createSelfTests(options: {
     }
 
     const tests = {
-        cloudSend: async () => {
+        cloudSend: async (testOptions?: { unshareAnnotation?: boolean }) => {
             await clearDb(options.storageManager)
             await clearDb(options.persistentStorageManager)
             console.log('Cleared local databases')
@@ -59,6 +59,9 @@ export function createSelfTests(options: {
             await clearDb(serverStorage.storageManager, {
                 getWhere: async (collectionName) => {
                     if (!collectionName.startsWith('personal')) {
+                        return null
+                    }
+                    if (collectionName === 'personalBlockStats') {
                         return null
                     }
                     const objects = (await serverStorage.storageManager
@@ -157,12 +160,25 @@ export function createSelfTests(options: {
             console.log(`Added test copy-paster template`)
 
             const {
-                remoteListId,
+                remoteListId: remoteListId1,
             } = await backgroundModules.contentSharing.shareList({
                 listId: testListId1,
             })
-            console.log('Shared test list #1, remote ID:', remoteListId)
+            console.log('Shared test list #1, remote ID:', remoteListId1)
+            const {
+                remoteListId: remoteListId2,
+            } = await backgroundModules.contentSharing.shareList({
+                listId: testListId2,
+            })
+            console.log('Shared test list #2, remote ID:', remoteListId2)
 
+            await serverStorage.storageModules.contentSharing.ensurePageInfo({
+                creatorReference: { type: 'user-reference', id: user.id },
+                pageInfo: {
+                    normalizedUrl: normalizedTestPageUrl,
+                    originalUrl: testPageUrl,
+                },
+            })
             await backgroundModules.contentSharing.shareAnnotation({
                 annotationUrl: publicAnnotationUrl,
             })
@@ -176,13 +192,21 @@ export function createSelfTests(options: {
             )
             console.log('Shared and edited annotation')
 
-            await serverStorage.storageModules.contentSharing.ensurePageInfo({
-                creatorReference: { type: 'user-reference', id: user.id },
-                pageInfo: {
-                    normalizedUrl: normalizedTestPageUrl,
-                    originalUrl: testPageUrl,
-                },
-            })
+            if (testOptions?.unshareAnnotation) {
+                const sharedAnnotationId = (
+                    await backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                        {
+                            localIds: [publicAnnotationUrl],
+                        },
+                    )
+                )[publicAnnotationUrl]
+                await backgroundModules.contentSharing.unshareAnnotation({
+                    annotationUrl: publicAnnotationUrl,
+                    queueInteraction: 'skip-queue',
+                })
+                console.log('Unshared annotation', sharedAnnotationId)
+            }
+
             await serverStorage.storageModules.contentSharing.createAnnotations(
                 {
                     annotationsByPage: {
