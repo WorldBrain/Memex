@@ -8,7 +8,6 @@ import UserScreen from '../authentication/components/UserScreen'
 import React from 'react'
 import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
-import BetaFeaturesScreen from 'src/features/ui/components/BetaFeaturesScreen'
 
 export default [
     {
