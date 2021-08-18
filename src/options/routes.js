@@ -49,12 +49,6 @@ export default [
         icon: 'sync',
     },
     {
-        name: 'Beta Features',
-        pathname: '/features',
-        icon: 'settings',
-        component: BetaFeaturesScreen,
-    },
-    {
         name: 'Blocklist',
         pathname: '/blocklist',
         component: SettingsContainer,
