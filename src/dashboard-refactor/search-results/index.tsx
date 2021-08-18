@@ -258,41 +258,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <NoteTopBarBox
-                    leftSide={
-                        <NotesTypeDropdownMenu
-                            notesTypeSelection={notesType}
-                            onNotesTypeSelection={this.props.onPageNotesTypeSelection(
-                                day,
-                                normalizedUrl,
-                            )}
-                        />
-                    }
-                    rightSide={
-                        <TopBarRightSideWrapper>
-                            <ButtonTooltip
-                                tooltipText="Share Page and Notes"
-                                position="bottom"
-                            >
-                                <ShareBtn onClick={onShareBtnClick}>
-                                    <IconImg
-                                        src={
-                                            isShared ? icons.shared : icons.link
-                                        }
-                                    />
-                                </ShareBtn>
-                            </ButtonTooltip>
-                            <SortingDropdownMenuBtn
-                                onMenuItemClick={({ sortingFn }) =>
-                                    this.props.onPageNotesSortSelection(
-                                        day,
-                                        normalizedUrl,
-                                    )(sortingFn)
-                                }
-                            />
-                        </TopBarRightSideWrapper>
-                    }
-                />
                 <Margin bottom="3px" />
                 <AnnotationCreate
                     autoFocus={this.props.shouldFormsAutoFocus}
@@ -523,7 +488,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
-                                {this.renderListShareBtn()}
                                 <ExpandAllNotes
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}

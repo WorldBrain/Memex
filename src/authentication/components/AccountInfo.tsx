@@ -131,23 +131,6 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
             <FullPage>
                 {user != null && (
                     <div className={styles.AccountInfoBox}>
-                        <PioneerPlanBanner width={'fill-available'} />
-                            <div className={styles.section}>
-                                <TypographyInputTitle>
-                                    {' '}
-                                    Display Name{' '}
-                                </TypographyInputTitle>
-                                <DisplayNameBox>
-                                    <DisplayNameSetup
-                                        name={this.state.newDisplayName}
-                                        onChange={(newDisplayName) => {
-                                            this.setState({ newDisplayName })
-                                            console.log(newDisplayName)
-                                        }}
-                                        onClickNext={this.updateDisplayName}
-                                    />
-                                </DisplayNameBox>
-                            </div>
                         <div className={styles.section}>
                             <TypographyInputTitle>
                                 {' '}

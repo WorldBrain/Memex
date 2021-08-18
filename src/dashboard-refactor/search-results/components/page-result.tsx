@@ -151,12 +151,6 @@ export default class PageResultView extends PureComponent<Props> {
                     tooltipText: 'Copy Page',
                 },
                 {
-                    key: 'share-page-btn',
-                    image: this.props.isShared ? icons.shared : icons.link,
-                    onClick: this.props.onShareBtnClick,
-                    tooltipText: 'Share Page and Notes',
-                },
-                {
                     key: 'tag-page-btn',
                     image: this.hasTags ? icons.tagFull : icons.tagEmpty,
                     onClick: this.props.onTagPickerBtnClick,
@@ -191,11 +185,6 @@ export default class PageResultView extends PureComponent<Props> {
                 key: 'copy-paste-page-btn',
                 isDisabled: true,
                 image: icons.copy,
-            },
-            {
-                key: 'share-page-btn',
-                isDisabled: true,
-                image: this.props.isShared ? icons.shared : icons.link,
             },
             {
                 key: 'tag-page-btn',

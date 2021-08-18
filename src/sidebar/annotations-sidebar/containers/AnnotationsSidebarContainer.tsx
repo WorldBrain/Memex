@@ -474,40 +474,6 @@ export class AnnotationsSidebarContainer<
                                     </CloseBtn>
                                 </ButtonTooltip>
                             ))}
-                        <DropdownMenuBtn
-                            onMenuItemClick={(item) =>
-                                this.processEvent('setDisplayMode', {
-                                    mode: item.id as SidebarDisplayMode,
-                                })
-                            }
-                            btnChildren={
-                                <NoteTypesWrapper>
-                                    <NotesTypeName>
-                                        {sidebarNotesTypeToString(
-                                            this.state.displayMode,
-                                        )}{' '}
-                                    </NotesTypeName>
-                                    <Icon icon="triangle" height="8px" />
-                                </NoteTypesWrapper>
-                            }
-                            menuItems={[
-                                {
-                                    id: 'private-notes',
-                                    name: sidebarNotesTypeToString(
-                                        'private-notes',
-                                    ),
-                                    info: 'The notes you made on this page',
-                                },
-                                {
-                                    id: 'shared-notes',
-                                    name: sidebarNotesTypeToString(
-                                        'shared-notes',
-                                    ),
-                                    info:
-                                        'Notes from collections you follow or shared',
-                                },
-                            ]}
-                        />
                     </TopBarActionBtns>
                     {this.state.displayMode === 'private-notes' && (
                         <TopBarActionBtns>
@@ -526,16 +492,6 @@ export class AnnotationsSidebarContainer<
                                     onClick={this.handleCopyAllNotesClick}
                                 >
                                     <ActionIcon src={icons.copy} />
-                                </ActionBtn>
-                            </ButtonTooltip>
-                            <ButtonTooltip
-                                tooltipText="Share All Notes"
-                                position="bottomRightEdge"
-                            >
-                                <ActionBtn
-                                    onClick={this.handleShareAllNotesClick}
-                                >
-                                    <ActionIcon src={icons.shareEmpty} />
                                 </ActionBtn>
                             </ButtonTooltip>
                         </TopBarActionBtns>

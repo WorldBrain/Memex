@@ -181,59 +181,8 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <SaveBtnText
                     onClick={() => this.handleSave(this.state.savePrivacyLevel)}
                 >
-                    <Icon
-                        icon={
-                            this.state.savePrivacyLevel ===
-                            AnnotationPrivacyLevels.PROTECTED
-                                ? 'lock'
-                                : this.state.savePrivacyLevel ===
-                                  AnnotationPrivacyLevels.PRIVATE
-                                ? 'person'
-                                : 'shared'
-                        }
-                        height="14px"
-                    />{' '}
                     Save
                 </SaveBtnText>
-                <SaveBtnArrow horizontal="1px">
-                    <DropdownMenuBtn
-                        btnChildren={<Icon icon="triangle" height="8px" />}
-                        isOpen={this.state.isPrivacyLevelShown}
-                        toggleOpen={() =>
-                            this.setState((state) => ({
-                                isPrivacyLevelShown: !state.isPrivacyLevelShown,
-                            }))
-                        }
-                    >
-                        <SharePrivacyOption
-                            title="Protected"
-                            shortcut={`shift+${AnnotationCreate.MOD_KEY}+enter`}
-                            description="Sharing status will not change in bulk actions"
-                            icon="lock"
-                            onClick={this.setSavePrivacyLevel(
-                                AnnotationPrivacyLevels.PROTECTED,
-                            )}
-                        />
-                        <SharePrivacyOption
-                            title="Private"
-                            shortcut={`${AnnotationCreate.MOD_KEY}+enter`}
-                            description="Private to you, until shared (in bulk)"
-                            icon="person"
-                            onClick={this.setSavePrivacyLevel(
-                                AnnotationPrivacyLevels.PRIVATE,
-                            )}
-                        />
-                        <SharePrivacyOption
-                            title="Shared"
-                            shortcut={`shift+${AnnotationCreate.ALT_KEY}+enter`}
-                            description="Added to shared collections this page is in"
-                            icon="shared"
-                            onClick={this.setSavePrivacyLevel(
-                                AnnotationPrivacyLevels.SHARED,
-                            )}
-                        />
-                    </DropdownMenuBtn>
-                </SaveBtnArrow>
             </SaveBtn>
         )
     }
@@ -354,8 +303,7 @@ const SaveBtn = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 0 3px 5px;
-    margin-right: 5px;
+    padding: 3px 5px 3px 5px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
@@ -374,18 +322,8 @@ const SaveBtnText = styled.span`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 55px;
     justify-content: space-between;
     display: flex;
-`
-
-const SaveBtnArrow = styled(Margin)`
-    width: 24px;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
 `
 
 const CancelBtnStyled = styled.div`

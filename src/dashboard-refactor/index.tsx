@@ -438,19 +438,6 @@ export class DashboardContainer extends StatefulUIElement<
                             'local-lists',
                         ),
                     },
-                    {
-                        ...listsSidebar.followedLists,
-                        title: 'Followed collections',
-                        onExpandBtnClick: () =>
-                            this.processEvent('setFollowedListsExpanded', {
-                                isExpanded: !listsSidebar.followedLists
-                                    .isExpanded,
-                            }),
-                        listsArray: this.listsStateToProps(
-                            listsSidebar.followedLists.filteredListIds,
-                            'followed-lists',
-                        ),
-                    },
                 ]}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () =>

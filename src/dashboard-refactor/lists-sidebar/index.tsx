@@ -183,17 +183,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     .onListSelection,
                                             },
                                         },
-                                        {
-                                            name: 'Feed',
-                                            listId: SPECIAL_LIST_IDS.INBOX + 2,
-                                            hasActivity: this.props
-                                                .hasFeedActivity,
-                                            selectedState: {
-                                                isSelected: false,
-                                                onSelection: this.props
-                                                    .openFeedUrl,
-                                            },
-                                        },
                                     ],
                                     false,
                                 )}

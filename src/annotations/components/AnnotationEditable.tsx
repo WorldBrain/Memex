@@ -282,25 +282,6 @@ export default class AnnotationEditable extends React.Component<Props> {
             ]
         }
 
-        if (this.props.hoverState === null) {
-            return ['already-shared', 'sharing-success'].includes(
-                this.sharingData.state,
-            ) ||
-                this.props.sharingInfo?.privacyLevel ===
-                    AnnotationPrivacyLevels.PROTECTED
-                ? [
-                      {
-                          key: 'share-note-btn',
-                          isDisabled: true,
-                          image: getShareButtonIcon(
-                              this.sharingData.state,
-                              this.props.sharingInfo?.privacyLevel,
-                          ),
-                      },
-                  ]
-                : []
-        }
-
         if (this.props.hoverState === 'footer') {
             return [
                 {
@@ -324,18 +305,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onTagIconClick,
                     tooltipText: 'Tag Note',
                 },
-                {
-                    key: 'share-note-btn',
-                    image: getShareButtonIcon(
-                        this.sharingData.state,
-                        this.props.sharingInfo?.privacyLevel,
-                    ),
-                    onClick: footerDeps.onShareClick,
-                    tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
-                    isDisabled: ['sharing', 'unsharing'].includes(
-                        this.sharingData.state,
-                    ),
-                },
             ]
         }
 
@@ -357,14 +326,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     this.props.tags?.length > 0
                         ? icons.tagFull
                         : icons.tagEmpty,
-            },
-            {
-                key: 'share-note-btn',
-                isDisabled: true,
-                image: getShareButtonIcon(
-                    this.sharingData.state,
-                    this.props.sharingInfo?.privacyLevel,
-                ),
             },
         ]
     }
