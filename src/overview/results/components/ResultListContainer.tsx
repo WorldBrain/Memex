@@ -129,7 +129,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
 
         document.addEventListener('click', this.handleOutsideClick, false)
 
-        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
+        const isBetaAllowed = true
         this.props.setBetaFeaturesEnabled(isBetaAllowed)
     }
 

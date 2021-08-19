@@ -44,7 +44,7 @@ export default class Logic extends UILogic<State, Events> {
             hasFeedActivity: { $set: activityStatus === 'has-unseen' },
         })
 
-        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
+        const isBetaAllowed = true
         this.emitMutation({ isShown: { $set: isBetaAllowed } })
     }
 

@@ -257,9 +257,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.getSharingAccess()
 
     private async getSharingAccess() {
-        const isAllowed = await this.options.authBG.isAuthorizedForFeature(
-            'beta',
-        )
+        const isAllowed = true
 
         this.emitMutation({
             searchResults: {

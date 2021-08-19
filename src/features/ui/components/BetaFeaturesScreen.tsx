@@ -64,7 +64,7 @@ class BetaFeaturesScreen extends React.Component<
 
     componentDidMount = async () => {
         await this.refreshFeatures()
-        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
+        const isBetaAuthorized = true
         this.getDisplayName()
 
         this.setState({

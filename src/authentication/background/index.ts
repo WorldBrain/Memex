@@ -109,17 +109,7 @@ export class AuthBackground {
                 )
             },
             setBetaEnabled: async (enabled) => {
-                const user = await this.authService.getCurrentUser()
-                if (!user) {
-                    throw new Error(
-                        `User wants to change beta status without being authenticated`,
-                    )
-                }
-
-                if (enabled) {
-                    await this.backendFunctions.registerBetaUser({})
-                }
-                await this.settings.set('beta', enabled)
+                null
             },
             getUserProfile: async () => {
                 if (this._userProfile) {

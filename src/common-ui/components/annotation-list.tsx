@@ -131,7 +131,7 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private async detectPageSharingStatus() {
-        const isAllowed = await this.authBG.isAuthorizedForFeature('beta')
+        const isAllowed = true
         this.setState({
             sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
         })

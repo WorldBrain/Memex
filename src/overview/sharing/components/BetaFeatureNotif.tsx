@@ -147,9 +147,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     async componentDidMount() {
         const user = await this.props.auth.getCurrentUser()
         const plans = await this.props.auth.getAuthorizedPlans()
-        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
-            'beta',
-        )
+        const isBetaAuthorized = true
 
         this.getDisplayName()
 
@@ -228,12 +226,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     async activateBeta() {
         this.setState({ betaActivationState: 'running' })
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
-            'beta',
-        )
-        if (!isBetaAuthorized) {
-            await this.props.auth.setBetaEnabled(true)
-        }
+        const isBetaAuthorized = true
         this.setState({ betaActivationState: 'success' })
     }
 
