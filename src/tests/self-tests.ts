@@ -131,6 +131,36 @@ export function createSelfTests(options: {
                 { skipPageIndexing: true },
             )
             console.log(`Added protected note to '${testPageUrl}'`)
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: upload error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added upload error generating note to '${testPageUrl}'`,
+            )
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: download error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added download error generating note to '${testPageUrl}'`,
+            )
             const testListId1 = await backgroundModules.customLists.createCustomList(
                 {
                     name: 'My test list #1',

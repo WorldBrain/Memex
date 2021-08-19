@@ -1,5 +1,4 @@
 import fs from 'fs'
-import path from 'path'
 import { setupSyncBackgroundTest } from './index.tests'
 import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -17,6 +16,8 @@ import {
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
 import { blobToJson } from 'src/util/blob-utils'
+import { AnnotationPrivacyLevels } from '../../annotations/types'
+import { PersonalCloudErrorType } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 
 describe('Personal cloud', () => {
     const testFullPage = async (testOptions: {
@@ -236,5 +237,68 @@ describe('Personal cloud', () => {
 
     it('should sync full page PDF texts indexed from tabs', async function () {
         await testFullPage({ type: 'pdf', source: 'tab' })
+    })
+
+    it('should handle upload translation layer errors', async () => {
+        const { setups, serverStorage } = await setupSyncBackgroundTest({
+            deviceCount: 2,
+            useDownloadTranslationLayer: true,
+        })
+        const testPageUrl = 'https://www.getmemex.com/'
+        const normalizedTestPageUrl = 'getmemex.com'
+        const errorComment = `*memex-debug*: upload error`
+        const annotationUrl = await setups[0].backgroundModules.directLinking.createAnnotation(
+            {
+                tab: {} as any,
+            },
+            {
+                pageUrl: testPageUrl,
+                comment: errorComment,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                createdWhen: new Date('2021-07-21'),
+            },
+            { skipPageIndexing: true },
+        )
+        await setups[0].backgroundModules.personalCloud.waitForSync()
+
+        const errors = (
+            await serverStorage.storageManager
+                .collection('personalCloudError')
+                .findObjects({})
+        ).map((error: any) => ({ ...error, data: JSON.parse(error.data) }))
+
+        const deviceId = setups[0].backgroundModules.personalCloud.deviceId
+        expect(errors).toEqual([
+            {
+                id: expect.anything(),
+                createdByDevice: deviceId,
+                createdWhen: 555,
+                type: PersonalCloudErrorType.UploadError,
+                user: (
+                    await setups[0].backgroundModules.auth.authService.getCurrentUser()
+                ).id,
+                data: {
+                    error: {
+                        name: 'Error',
+                        message:
+                            'You created a special annotation meant to create a server-side error',
+                        stack: expect.stringContaining('upload.ts:'),
+                    },
+                    update: {
+                        type: 'overwrite',
+                        collection: 'annotations',
+                        deviceId,
+                        schemaVersion: setups[0].backgroundModules.personalCloud.currentSchemaVersion.toISOString(),
+                        object: {
+                            url: annotationUrl,
+                            pageUrl: normalizedTestPageUrl,
+                            comment: errorComment,
+                            createdWhen: expect.any(String),
+                            lastEdited: expect.any(String),
+                        },
+                    },
+                },
+            },
+        ])
     })
 })
