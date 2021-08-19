@@ -208,13 +208,6 @@ async function runSyncBackgroundTest(
         sequence: SyncTestSequence
         test: BackgroundIntegrationTest
         deviceCount: number
-
-        // setups: BackgroundIntegrationTestSetup[]
-        // deviceIds: Array<number | string>
-        // sync: (
-        //     deviceIndex: number | string,
-        //     syncOptions: { debug: boolean },
-        // ) => Promise<void>
     } & BackgroundIntegrationTestOptions,
 ) {
     const { setups, sync } = await setupSyncBackgroundTest(options)
@@ -249,30 +242,7 @@ async function runSyncBackgroundTest(
                 setup,
             })
         } else if (sequenceStep.action === 'execute') {
-            // if (integrationTestStep.expectedStorageOperations) {
-            //     setup.storageOperationLogger.enabled = true
-            // }
-            // const timeBeforeStepExecution = Date.now()
             await integrationTestStep.execute({ setup })
-
-            // setup.storageOperationLogger.enabled = false
-            // if (integrationTestStep.expectedStorageOperations) {
-            //     const executedOperations = setup.storageOperationLogger.popOperations()
-            //     expect(
-            //         executedOperations.filter(
-            //             (entry) => entry.operation[1] !== 'clientSyncLogEntry',
-            //         ),
-            //     ).toEqual(integrationTestStep.expectedStorageOperations())
-            // }
-
-            // if (integrationTestStep.expectedSyncLogEntries) {
-            //     const addedEntries = await setup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
-            //         timeBeforeStepExecution,
-            //     )
-            //     expect(addedEntries).toEqual(
-            //         integrationTestStep.expectedSyncLogEntries(),
-            //     )
-            // }
         } else if (sequenceStep.action === 'sync') {
             await sync(sequenceStep.deviceIndex, {
                 debug: integrationTestStep.debug,
@@ -333,28 +303,12 @@ export async function setupSyncBackgroundTest(
         setups.push(setup)
     }
 
-    // const deviceIds: Array<number | string> = []
-
     for (const setup of setups) {
-        // const deviceId = await sharedSyncLog.createDeviceId({
-        //     userId,
-        //     sharedUntil: 0,
-        // })
-        // deviceIds.push(deviceId)
-
         await setup.backgroundModules.personalCloud.setup()
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
         await memoryAuth.setUser({ ...TEST_USER })
-        // await setup.backgroundModules.sync.continuousSync.initDevice()
-        // await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
     }
-
-    // const changeDetectors = setups.map(setup => new StorageChangeDetector({
-    //     storageManager: setup.storageManager,
-    //     toTrack: Object.keys(setup.storageManager.registry.collections),
-    // }))
-    // let changeDetectorUsed = false
 
     const sync = async (
         deviceIndex: number,
