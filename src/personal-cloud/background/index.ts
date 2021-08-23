@@ -15,6 +15,7 @@ import {
     PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
@@ -36,7 +37,7 @@ export interface PersonalCloudBackgroundOptions {
     persistentStorageManager: StorageManager
     backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
-    userIdChanges(): AsyncIterableIterator<void>
+    userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
     settingStore: SettingStore<PersonalCloudSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
