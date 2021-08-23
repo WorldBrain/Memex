@@ -13,6 +13,8 @@ import {
     PersonalCloudUpdateBatch,
     PersonalCloudClientInstructionType,
     PersonalCloudClientStorageType,
+    PersonalCloudUpdate,
+    PersonalCloudOverwriteUpdate,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
@@ -105,7 +107,12 @@ export class PersonalCloudBackground {
     async integrateContinuously() {
         try {
             for await (const updates of this.options.backend.streamUpdates()) {
-                await this.integrateUpdates(updates)
+                try {
+                    await this.integrateUpdates(updates)
+                } catch (err) {
+                    console.error(`Error integrating update from cloud`, err)
+                    Raven.captureException(err)
+                }
             }
         } catch (err) {
             console.error(err)
@@ -115,70 +122,77 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
-            this._debugLog('Processing update', update)
-            try {
-                const { collection } = update
-                const storageManager =
-                    update.storage === 'persistent'
-                        ? this.options.persistentStorageManager
-                        : this.options.storageManager
-
-                if (update.type === PersonalCloudUpdateType.Overwrite) {
-                    const object = update.object
-                    preprocessPulledObject({
-                        storageRegistry: storageManager.registry,
-                        collection,
-                        object,
-                    })
-                    if (update.media) {
-                        await Promise.all(
-                            Object.entries(update.media).map(
-                                async ([fieldName, { path, type }]) => {
-                                    let fieldValue:
-                                        | Blob
-                                        | string = await this.options.backend.downloadFromMedia(
-                                        { path },
-                                    )
-                                    if (type === 'text' || type === 'json') {
-                                        if (fieldValue instanceof Blob) {
-                                            fieldValue = await blobToString(
-                                                fieldValue,
-                                            )
-                                        }
-                                    }
-                                    if (type === 'json') {
-                                        fieldValue = JSON.parse(
-                                            fieldValue as string,
-                                        )
-                                    }
-
-                                    object[fieldName] = fieldValue
-                                },
-                            ),
-                        )
-                    }
-
-                    await this.options.writeIncomingData({
-                        storageType:
-                            update.storage ??
-                            PersonalCloudClientStorageType.Normal,
-                        collection: update.collection,
-                        updates: update.object,
-                        where: update.where,
-                    })
-                } else if (update.type === PersonalCloudUpdateType.Delete) {
-                    await storageManager.backend.operation(
-                        'deleteObjects',
-                        update.collection,
-                        update.where,
-                    )
-                }
-            } catch (err) {
-                console.error(`Error integrating update from cloud`, err)
-                Raven.captureException(err)
-            }
+            await this.integrateUpdate(update)
         }
         releaseMutex()
+    }
+
+    async integrateUpdate(update: PersonalCloudUpdate) {
+        this._debugLog('Processing update', update)
+
+        const { collection } = update
+        const storageManager =
+            update.storage === 'persistent'
+                ? this.options.persistentStorageManager
+                : this.options.storageManager
+
+        if (update.type === PersonalCloudUpdateType.Overwrite) {
+            preprocessPulledObject({
+                storageRegistry: storageManager.registry,
+                collection,
+                object: update.object,
+            })
+            if (update.media) {
+                try {
+                    await this.downloadMedia(update)
+                } catch (err) {
+                    const errorMsg = `Error while downloading media for update`
+                    console.error(`${errorMsg}:`, err)
+                    Raven.captureBreadcrumb({ update })
+                    Raven.captureException(new Error(err))
+                }
+            }
+
+            await this.options.writeIncomingData({
+                storageType:
+                    update.storage ?? PersonalCloudClientStorageType.Normal,
+                collection: update.collection,
+                updates: update.object,
+                where: update.where,
+            })
+        } else if (update.type === PersonalCloudUpdateType.Delete) {
+            await storageManager.backend.operation(
+                'deleteObjects',
+                update.collection,
+                update.where,
+            )
+        }
+    }
+
+    async downloadMedia(
+        update: Pick<PersonalCloudOverwriteUpdate, 'media' | 'object'>,
+    ) {
+        await Promise.all(
+            Object.entries(update.media).map(
+                async ([fieldName, { path, type }]) => {
+                    let fieldValue:
+                        | Blob
+                        | string = await this.options.backend.downloadFromMedia(
+                        { path },
+                    )
+                    if (type === 'text' || type === 'json') {
+                        if (fieldValue instanceof Blob) {
+                            fieldValue = await blobToString(fieldValue)
+                        }
+                    }
+                    if (type === 'json') {
+                        fieldValue = JSON.parse(fieldValue as string)
+                    }
+
+                    update.object[fieldName] = fieldValue
+                },
+            ),
+        )
     }
 
     async waitForSync() {
