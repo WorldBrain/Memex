@@ -452,7 +452,7 @@ export function createBackgroundModules(options: {
                     personalCloudSettingStore.get('lastSeen'),
                 setLastUpdateSeenTime: (lastSeen) =>
                     personalCloudSettingStore.set('lastSeen', lastSeen),
-                getDeviceId: () => personalCloud.deviceId!,
+                getDeviceId: async () => personalCloud.deviceId!,
             }),
         createDeviceId: async (userId) => {
             const serverStorage = await options.getServerStorage()
@@ -472,7 +472,11 @@ export function createBackgroundModules(options: {
         settingStore: personalCloudSettingStore,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
-        userIdChanges: () => authChanges(auth.authService),
+        userIdChanges: async function* () {
+            for await (const _ of authChanges(auth.authService)) {
+                yield
+            }
+        },
         writeIncomingData: async (params) => {
             const incomingStorageManager =
                 params.storageType === PersonalCloudClientStorageType.Persistent

@@ -199,7 +199,8 @@ export async function setupBackgroundIntegrationTest(
                         ?.id,
                 getNow,
                 useDownloadTranslationLayer: true,
-                getDeviceId: () => backgroundModules.personalCloud.deviceId,
+                getDeviceId: async () =>
+                    backgroundModules.personalCloud.deviceId,
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.storageManager,

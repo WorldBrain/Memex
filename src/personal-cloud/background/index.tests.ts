@@ -289,7 +289,7 @@ export async function setupSyncBackgroundTest(
             getUserId: async () => userId,
             getNow,
             useDownloadTranslationLayer: options.useDownloadTranslationLayer,
-            getDeviceId: () =>
+            getDeviceId: async () =>
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
         })
