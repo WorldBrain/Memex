@@ -5,7 +5,7 @@ import {
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import delay from 'src/util/delay'
-
+import { BACKUP_URL } from 'src/constants'
 import { Event, State, Dependencies } from './types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -30,6 +30,9 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
             // TODO: check for passive data and decide which next stage to set
             this.emitMutation({ needsToRemovePassiveData: { $set: true } })
+
+            // TODO: check if backup was done in the last 2 months
+            this.emitMutation({ shouldBackupViaDump: { $set: true } })
         })
     }
 
@@ -40,8 +43,10 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         dataCleaningState: 'pristine',
 
         currentUser: null,
-        stage: 'pick-plan',
+        stage: 'data-dump',
         tier2PaymentPeriod: 'monthly',
+
+        shouldBackupViaDump: false,
         needsToRemovePassiveData: false,
     })
 
@@ -67,6 +72,20 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
             // Uncomment this to show error state:
             // throw new Error()
         })
+    }
+
+    migrateToOldVersion: EventHandler<'migrateToOldVersion'> = ({}) => {
+        this.emitMutation({ stage: { $set: 'old-version-backup' } })
+    }
+
+    cancelMigrateToOldVersion: EventHandler<
+        'cancelMigrateToOldVersion'
+    > = ({}) => {
+        this.emitMutation({ stage: { $set: 'data-dump' } })
+    }
+
+    goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) => {
+        window.open(BACKUP_URL, '_self')
     }
 
     setTier2PaymentPeriod: EventHandler<'setTier2PaymentPeriod'> = ({
@@ -100,12 +119,16 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.emitMutation({ backupState: { $set: 'pristine' } })
     }
 
+    startDataClean: EventHandler<'startDataClean'> = async ({}) => {
+        await this.attemptPassiveDataClean()
+    }
+
     retryDataClean: EventHandler<'retryDataClean'> = async ({}) => {
         await this.attemptPassiveDataClean()
     }
 
     cancelDataClean: EventHandler<'cancelDataClean'> = async ({}) => {
-        this.emitMutation({ stage: { $set: 'pick-plan' } })
+        this.dependencies.onModalClose()
     }
 
     retryDataMigration: EventHandler<'retryDataMigration'> = async ({}) => {
@@ -120,11 +143,11 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         previousState,
     }) => {
         if (previousState.needsToRemovePassiveData) {
-            await this.attemptPassiveDataClean()
+            this.emitMutation({ stage: { $set: 'data-clean' } })
+        } else {
+            this.emitMutation({ stage: { $set: 'data-migration' } })
+            await this.attemptCloudMigration()
         }
-
-        this.emitMutation({ stage: { $set: 'data-migration' } })
-        await this.attemptCloudMigration()
     }
 
     finishMigration: EventHandler<'finishMigration'> = async ({}) => {

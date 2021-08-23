@@ -9,33 +9,32 @@ import { Container, BtnBox, Header, Text } from './shared-components'
 
 export interface Props {
     supportLink: string
-    backupState: UITaskState
+    readMoreLink: string
+    dataCleaningState: UITaskState
     onStartClick: React.MouseEventHandler
     onRetryClick: React.MouseEventHandler
     onCancelClick: React.MouseEventHandler
-    onContinueClick: React.MouseEventHandler
-    onUseOldVersionClick: React.MouseEventHandler
 }
 
-export default class DataDumper extends React.PureComponent<Props> {
+export default class DataCleaner extends React.PureComponent<Props> {
     private renderBtns() {
-        const { backupState } = this.props
+        const { dataCleaningState } = this.props
 
-        if (backupState === 'pristine') {
+        if (dataCleaningState === 'pristine') {
             return (
                 <>
                     <SecondaryAction
-                        label="Make backup of existing data"
-                        onClick={this.props.onStartClick}
+                        label="Cancel Migration"
+                        onClick={this.props.onCancelClick}
                     />
                     <PrimaryAction
-                        label="Continue migration without backup"
-                        onClick={this.props.onContinueClick}
+                        label="Continue Migration"
+                        onClick={this.props.onStartClick}
                     />
                 </>
             )
         }
-        if (backupState === 'running') {
+        if (dataCleaningState === 'running') {
             return (
                 <SecondaryAction
                     label="Cancel"
@@ -43,7 +42,7 @@ export default class DataDumper extends React.PureComponent<Props> {
                 />
             )
         }
-        if (backupState === 'error') {
+        if (dataCleaningState === 'error') {
             return (
                 <>
                     <SecondaryAction
@@ -51,46 +50,47 @@ export default class DataDumper extends React.PureComponent<Props> {
                         onClick={this.props.onCancelClick}
                     />
                     <PrimaryAction
-                        label="Rety"
+                        label="Retry"
                         onClick={this.props.onRetryClick}
                     />
                 </>
             )
         }
-        return (
-            <PrimaryAction
-                label="Continue Migration"
-                onClick={this.props.onContinueClick}
-            />
-        )
+        return false
     }
 
     private renderContent() {
-        const { backupState, supportLink } = this.props
+        const { dataCleaningState, supportLink, readMoreLink } = this.props
 
-        if (backupState === 'pristine') {
+        if (dataCleaningState === 'pristine') {
             return (
                 <>
-                    <Header>
-                        Locally back up your data before starting the migration
-                    </Header>
+                    <Header>Cleaning out old data</Header>
                     <Text>
-                        Create a backup dump of your data before starting the
-                        sync.
+                        You've been using Memex since when we still had the
+                        history full-text search.
+                    </Text>
+                    <Text>
+                        Because of that, there is a lot of unecessary data in
+                        your Memex that must be cleaned out.
+                    </Text>
+                    <a href={readMoreLink}>Read more ></a>
+                </>
+            )
+        }
+        if (dataCleaningState === 'running') {
+            return (
+                <>
+                    <LoadingIndicator />
+                    <Header>Cleaning out old data</Header>
+                    <Text>
+                        This may take a couple of minutes. You can't use Memex
+                        in the mean time.
                     </Text>
                 </>
             )
         }
-        if (backupState === 'running') {
-            return (
-                <>
-                    <LoadingIndicator />
-                    <Header>Data Backup In Progress</Header>
-                    <Text>This may take a couple of minutes.</Text>
-                </>
-            )
-        }
-        if (backupState === 'error') {
+        if (dataCleaningState === 'error') {
             return (
                 <>
                     <Icon icon="alertRound" height="20px" />
@@ -115,19 +115,6 @@ export default class DataDumper extends React.PureComponent<Props> {
             <Container>
                 {this.renderContent()}
                 <BtnBox>{this.renderBtns()}</BtnBox>
-                {this.props.backupState === 'pristine' && (
-                    <Text dimmed>
-                        Don't want to use the cloud?{' '}
-                        <Text
-                            dimmed
-                            clickable
-                            onClick={this.props.onUseOldVersionClick}
-                        >
-                            Migrate
-                        </Text>{' '}
-                        to the last version of Memex.
-                    </Text>
-                )}
             </Container>
         )
     }

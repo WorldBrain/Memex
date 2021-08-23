@@ -13,4 +13,4 @@ export const BtnBox = styled.div`
 
 export const Header = styled.h1``
 
-export const Text = styled.span``
+export const Text = styled.span<{ dimmed: boolean; clickable: boolean }>``

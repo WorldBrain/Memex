@@ -23,9 +23,11 @@ export interface State {
     migrationState: UITaskState
     dataCleaningState: UITaskState
 
-    stage: 'pick-plan' | 'data-dump' | 'data-migration'
+    stage: 'data-dump' | 'data-clean' | 'data-migration' | 'old-version-backup'
     currentUser: AuthenticatedUser | null
     tier2PaymentPeriod: PaymentPeriod
+
+    shouldBackupViaDump: boolean
     needsToRemovePassiveData: boolean
 }
 
@@ -33,10 +35,15 @@ export interface Event {
     setTier2PaymentPeriod: { period: PaymentPeriod }
     selectPlan: { tier: PlanTier }
 
+    migrateToOldVersion: null
+    cancelMigrateToOldVersion: null
+    goToBackupRoute: null
+
     startDataDump: null
     retryDataDump: null
     cancelDataDump: null
 
+    startDataClean: null
     retryDataClean: null
     cancelDataClean: null
 

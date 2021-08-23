@@ -1,17 +1,17 @@
 import React from 'react'
-import styled from 'styled-components'
 import { UIElement } from '@worldbrain/memex-common/lib/main-ui/classes'
 import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 
 import CloudOnboardingModalLogic from './logic'
 import type { Dependencies, State, Event } from './types'
 import { PlanTier } from './types'
-import CloudPricingPlans from '../components/pricing-plans'
 import DataMigrator from '../components/data-migrator'
+import DataCleaner from '../components/data-cleaner'
 import DataDumper from '../components/data-dumper'
 
 export interface Props extends Dependencies {
     supportLink: string
+    dataCleanReadMoreLink: string
 }
 
 export default class CloudOnboardingModal extends UIElement<
@@ -19,56 +19,55 @@ export default class CloudOnboardingModal extends UIElement<
     State,
     Event
 > {
-    static defaultProps: Pick<Props, 'supportLink'> = {
+    static defaultProps: Pick<
+        Props,
+        'supportLink' | 'dataCleanReadMoreLink'
+    > = {
         supportLink: 'mailto:support@worldbrain.io',
+        dataCleanReadMoreLink: 'https://getmemex.com', // TODO: fix this
     }
 
     constructor(props: Props) {
         super(props, { logic: new CloudOnboardingModalLogic(props) })
     }
 
-    private selectPlan = (tier: PlanTier) => () =>
-        this.processEvent('selectPlan', { tier })
-
     private renderModalContent() {
-        if (this.state.stage === 'pick-plan') {
-            return (
-                <CloudPricingPlans
-                    userType={
-                        this.state.currentUser != null ? 'existing' : 'new'
-                    }
-                    tier2PaymentPeriod={this.state.tier2PaymentPeriod}
-                    onTier1PlanClick={this.selectPlan(PlanTier.Explorer)}
-                    onTier2PlanClick={this.selectPlan(PlanTier.Thinker)}
-                    onTier3PlanClick={this.selectPlan(PlanTier.Supporter)}
-                    setTier2PaymentPeriod={(period) =>
-                        this.processEvent('setTier2PaymentPeriod', { period })
-                    }
-                />
-            )
-        }
         if (this.state.stage === 'data-dump') {
             return (
                 <DataDumper
                     supportLink={this.props.supportLink}
                     backupState={this.state.backupState}
-                    dataCleaningState={this.state.dataCleaningState}
-                    onBackupClick={() =>
+                    onStartClick={() =>
                         this.processEvent('startDataDump', null)
                     }
-                    onRetryBackupClick={() =>
+                    onRetryClick={() =>
                         this.processEvent('retryDataDump', null)
                     }
-                    onCancelBackupClick={() =>
+                    onCancelClick={() =>
                         this.processEvent('cancelDataDump', null)
                     }
                     onContinueClick={() =>
                         this.processEvent('continueToMigration', null)
                     }
-                    onRetryCleanClick={() =>
+                    onUseOldVersionClick={() =>
+                        this.processEvent('cancelMigrateToOldVersion', null)
+                    }
+                />
+            )
+        }
+        if (this.state.stage === 'data-clean') {
+            return (
+                <DataCleaner
+                    supportLink={this.props.supportLink}
+                    readMoreLink={this.props.dataCleanReadMoreLink}
+                    dataCleaningState={this.state.dataCleaningState}
+                    onStartClick={() =>
+                        this.processEvent('startDataClean', null)
+                    }
+                    onRetryClick={() =>
                         this.processEvent('retryDataClean', null)
                     }
-                    onCancelCleanClick={() =>
+                    onCancelClick={() =>
                         this.processEvent('cancelDataClean', null)
                     }
                 />
