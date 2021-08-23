@@ -1,9 +1,10 @@
-import StorageManager, {
-    IndexSourceField,
-    StorageRegistry,
-} from '@worldbrain/storex'
+import StorageManager from '@worldbrain/storex'
+import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import {
+    getCurrentSchemaVersion,
+    isTermsField,
+} from '@worldbrain/memex-common/lib/storage/utils'
 import { AsyncMutex } from '@worldbrain/memex-common/lib/utils/async-mutex'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import {
@@ -11,7 +12,10 @@ import {
     PersonalCloudUpdateType,
     PersonalCloudUpdateBatch,
     PersonalCloudClientInstructionType,
+    PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
@@ -25,15 +29,24 @@ import {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
+import { blobToString } from 'src/util/blob-utils'
+import * as Raven from 'src/util/raven'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
     persistentStorageManager: StorageManager
     backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
-    userIdChanges(): AsyncIterableIterator<void>
+    userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
     settingStore: SettingStore<PersonalCloudSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
+    writeIncomingData(params: {
+        storageType: PersonalCloudClientStorageType
+        collection: string
+        where?: { [key: string]: any }
+        updates: { [key: string]: any }
+    }): Promise<void>
+    getServerStorageManager(): Promise<StorageManager>
 }
 
 export class PersonalCloudBackground {
@@ -42,6 +55,8 @@ export class PersonalCloudBackground {
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
     deviceId?: string | number
+    reportExecutingAction?: (action: PersonalCloudAction) => void
+    debug = false
 
     constructor(public options: PersonalCloudBackgroundOptions) {
         this.actionQueue = new ActionQueue({
@@ -59,6 +74,7 @@ export class PersonalCloudBackground {
             this.options.storageManager,
         )
         await this.actionQueue.setup({ paused: true })
+        await this.loadDeviceId()
 
         // These will never return, so don't await for it
         this.observeAuthChanges()
@@ -87,47 +103,79 @@ export class PersonalCloudBackground {
     }
 
     async integrateContinuously() {
-        for await (const updates of this.options.backend.streamUpdates()) {
-            await this.integrateUpdates(updates)
+        try {
+            for await (const updates of this.options.backend.streamUpdates()) {
+                await this.integrateUpdates(updates)
+            }
+        } catch (err) {
+            console.error(err)
         }
     }
 
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
-            const storageManager =
-                update.storage === 'persistent'
-                    ? this.options.persistentStorageManager
-                    : this.options.storageManager
+            this._debugLog('Processing update', update)
+            try {
+                const { collection } = update
+                const storageManager =
+                    update.storage === 'persistent'
+                        ? this.options.persistentStorageManager
+                        : this.options.storageManager
 
-            if (update.type === PersonalCloudUpdateType.Overwrite) {
-                const object = update.object
-                if (update.media) {
-                    await Promise.all(
-                        Object.entries(update.media).map(
-                            async ([key, path]) => {
-                                object[
-                                    key
-                                ] = await this.options.backend.downloadFromMedia(
-                                    { path },
-                                )
-                            },
-                        ),
+                if (update.type === PersonalCloudUpdateType.Overwrite) {
+                    const object = update.object
+                    preprocessPulledObject({
+                        storageRegistry: storageManager.registry,
+                        collection,
+                        object,
+                    })
+                    if (update.media) {
+                        await Promise.all(
+                            Object.entries(update.media).map(
+                                async ([fieldName, { path, type }]) => {
+                                    let fieldValue:
+                                        | Blob
+                                        | string = await this.options.backend.downloadFromMedia(
+                                        { path },
+                                    )
+                                    if (type === 'text' || type === 'json') {
+                                        if (fieldValue instanceof Blob) {
+                                            fieldValue = await blobToString(
+                                                fieldValue,
+                                            )
+                                        }
+                                    }
+                                    if (type === 'json') {
+                                        fieldValue = JSON.parse(
+                                            fieldValue as string,
+                                        )
+                                    }
+
+                                    object[fieldName] = fieldValue
+                                },
+                            ),
+                        )
+                    }
+
+                    await this.options.writeIncomingData({
+                        storageType:
+                            update.storage ??
+                            PersonalCloudClientStorageType.Normal,
+                        collection: update.collection,
+                        updates: update.object,
+                        where: update.where,
+                    })
+                } else if (update.type === PersonalCloudUpdateType.Delete) {
+                    await storageManager.backend.operation(
+                        'deleteObjects',
+                        update.collection,
+                        update.where,
                     )
                 }
-
-                // WARNING: Keep in mind this skips all storage middleware
-                await storageManager.backend.operation(
-                    'createObject',
-                    update.collection,
-                    object,
-                )
-            } else if (update.type === PersonalCloudUpdateType.Delete) {
-                await storageManager.backend.operation(
-                    'deleteObjects',
-                    update.collection,
-                    update.where,
-                )
+            } catch (err) {
+                console.error(`Error integrating update from cloud`, err)
+                Raven.captureException(err)
             }
         }
         releaseMutex()
@@ -140,13 +188,16 @@ export class PersonalCloudBackground {
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        this._debugLog('Process storage change:', event)
+
         const { releaseMutex } = await this.pushMutex.lock()
 
         for (const change of event.info.changes) {
+            const { collection } = change
             if (change.type === 'create') {
                 const object = await getObjectByPk(
                     this.options.storageManager,
-                    change.collection,
+                    collection,
                     change.pk,
                 )
                 if (!object) {
@@ -162,8 +213,11 @@ export class PersonalCloudBackground {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
                                 deviceId: this.deviceId,
-                                collection: change.collection,
-                                object,
+                                collection,
+                                object: this.preprocessObjectForPush({
+                                    collection,
+                                    object,
+                                }),
                             },
                         ],
                     },
@@ -174,7 +228,7 @@ export class PersonalCloudBackground {
                     change.pks.map((pk) =>
                         getObjectByPk(
                             this.options.storageManager,
-                            change.collection,
+                            collection,
                             pk,
                         ),
                     ),
@@ -188,7 +242,7 @@ export class PersonalCloudBackground {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
                                 deviceId: this.deviceId,
-                                collection: change.collection,
+                                collection,
                                 object,
                             })),
                     },
@@ -199,7 +253,7 @@ export class PersonalCloudBackground {
                     change.pks.map((pk) =>
                         getObjectWhereByPk(
                             this.options.storageManager.registry,
-                            change.collection,
+                            collection,
                             pk,
                         ),
                     ),
@@ -211,7 +265,7 @@ export class PersonalCloudBackground {
                             type: PersonalCloudUpdateType.Delete,
                             schemaVersion: this.currentSchemaVersion!,
                             deviceId: this.deviceId,
-                            collection: change.collection,
+                            collection,
                             where,
                         })),
                     },
@@ -223,10 +277,35 @@ export class PersonalCloudBackground {
         releaseMutex()
     }
 
+    preprocessObjectForPush({
+        collection,
+        object,
+    }: {
+        collection: string
+        object: any
+    }) {
+        for (const field of Object.keys(object)) {
+            if (isTermsField({ collection, field })) {
+                delete object[field]
+            }
+        }
+        if (collection === 'pages') {
+            delete object.text
+        }
+        if (collection === 'favIcons') {
+            delete object.favIcon
+        }
+        return object
+    }
+
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
         if (!this.deviceId) {
             return { pauseAndRetry: true }
         }
+        this._debugLog('Executing action', action)
+
+        // For automated tests
+        this.reportExecutingAction?.(action)
 
         if (action.type === PersonalCloudActionType.PushObject) {
             const {
@@ -237,13 +316,15 @@ export class PersonalCloudBackground {
                     deviceId: update.deviceId ?? this.deviceId,
                 })),
             )
-            await this.actionQueue.scheduleAction(
-                {
-                    type: PersonalCloudActionType.ExecuteClientInstructions,
-                    clientInstructions,
-                },
-                { queueInteraction: 'queue-and-return' },
-            )
+            if (clientInstructions.length) {
+                await this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.ExecuteClientInstructions,
+                        clientInstructions,
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                )
+            }
         } else if (
             action.type === PersonalCloudActionType.ExecuteClientInstructions
         ) {
@@ -258,18 +339,67 @@ export class PersonalCloudBackground {
                             instruction.storage === 'persistent'
                                 ? this.options.persistentStorageManager
                                 : this.options.storageManager
-                        const dbObject = await storageManager
-                            .collection(instruction.collection)
-                            .findObject(instruction.uploadWhere)
-                        if (!dbObject) {
+
+                        if (
+                            !storageManager.registry.collections[
+                                instruction.collection
+                            ]
+                        ) {
+                            const errorMsg = `Non-existing collection in clientInstruction:`
+                            console.error(errorMsg, instruction)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(new Error(errorMsg))
                             return
                         }
-                        const storageObject = dbObject[instruction.uploadField]
+
+                        let dbObject
+                        try {
+                            dbObject = await storageManager
+                                .collection(instruction.collection)
+                                .findObject(instruction.uploadWhere)
+                        } catch (err) {
+                            console.error(
+                                `Could not fetch dbObject for instruction`,
+                                instruction,
+                                err,
+                            )
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(err)
+                            return
+                        }
+                        if (!dbObject) {
+                            this._debugLog(
+                                'Could not find dbObject for clientInstruction:',
+                                instruction,
+                            )
+                            return
+                        }
+                        let storageObject = dbObject[instruction.uploadField]
+                        if (instruction.uploadAsJson) {
+                            storageObject = new Blob(
+                                [JSON.stringify(storageObject)],
+                                {
+                                    type:
+                                        instruction.uploadContentType ??
+                                        'application/json',
+                                },
+                            )
+                        }
                         if (
                             !storageObject ||
                             (typeof storageObject !== 'string' &&
                                 !(storageObject instanceof Blob))
                         ) {
+                            const errorMsg = `Don't know how to store object for instruction`
+                            console.error(errorMsg, instruction)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(new Error(errorMsg))
                             return
                         }
                         try {
@@ -277,12 +407,8 @@ export class PersonalCloudBackground {
                                 deviceId: this.deviceId,
                                 mediaPath: instruction.uploadPath,
                                 mediaObject: storageObject,
-                                changeInfo: {
-                                    dbStorage: instruction.storage,
-                                    dbCollection: instruction.collection,
-                                    dbObject: instruction.updateObject,
-                                    dbMedia: instruction.updateMedia,
-                                },
+                                changeInfo: instruction.changeInfo,
+                                contentType: instruction.uploadContentType,
                             })
                         } catch (e) {
                             console.error(
@@ -290,6 +416,10 @@ export class PersonalCloudBackground {
                                 instruction,
                             )
                             console.error(e)
+                            Raven.captureBreadcrumb({
+                                clientInstruction: instruction,
+                            })
+                            Raven.captureException(e)
                         }
                     }
                 }),
@@ -297,43 +427,34 @@ export class PersonalCloudBackground {
         }
     }
 
-    preprocessAction: ActionPreprocessor<PersonalCloudAction> = () => {
+    preprocessAction: ActionPreprocessor<PersonalCloudAction> = (action) => {
+        this._debugLog('Scheduling action:', action)
         return { valid: true }
     }
-}
 
-function getObjectWhereByPk(
-    storageRegistry: StorageRegistry,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const getPkField = (indexSourceField: IndexSourceField) => {
-        return typeof indexSourceField === 'object' &&
-            'relationship' in indexSourceField
-            ? indexSourceField.relationship
-            : indexSourceField
-    }
-
-    const collectionDefinition = storageRegistry.collections[collection]
-    const pkIndex = collectionDefinition.pkIndex!
-    const where: { [field: string]: number | string } = {}
-    if (pkIndex instanceof Array) {
-        for (const [index, indexSourceField] of pkIndex.entries()) {
-            const pkField = getPkField(indexSourceField)
-            where[pkField] = pk[index]
+    async getBlockStats(): Promise<{ usedBlocks: number }> {
+        const userId = await this.options.getUserId()
+        if (!userId) {
+            throw new Error(`Cannot get block stats if not authenticated`)
         }
-    } else {
-        where[getPkField(pkIndex)] = pk as number | string
+
+        const serverStorageManager = await this.options.getServerStorageManager()
+        const blockStats = await serverStorageManager.operation(
+            'findObject',
+            'personalBlockStats',
+            {
+                user: userId,
+            },
+        )
+        if (!blockStats) {
+            return { usedBlocks: 0 }
+        }
+        return blockStats.usedBlocks
     }
 
-    return where
-}
-
-async function getObjectByPk(
-    storageManager: StorageManager,
-    collection: string,
-    pk: number | string | Array<number | string>,
-) {
-    const where = getObjectWhereByPk(storageManager.registry, collection, pk)
-    return storageManager.operation('findObject', collection, where)
+    _debugLog(...args: any[]) {
+        if (this.debug) {
+            console['log']('Personal Cloud -', ...args)
+        }
+    }
 }

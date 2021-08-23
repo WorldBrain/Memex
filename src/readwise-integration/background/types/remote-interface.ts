@@ -12,18 +12,11 @@ export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
         { key: string },
         ReadwiseAPIResponse
     >
-    getAPIKey: RemoteFunctionWithoutExtraArgs<Role, void, string>
+    getAPIKey: RemoteFunctionWithoutExtraArgs<Role, void, string | null>
     setAPIKey: RemoteFunctionWithoutExtraArgs<
         Role,
         { validatedKey: string },
         void
     >
-    uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<
-        Role,
-        {
-            queueInteraction: ActionQueueInteraction
-            annotationFilter?: (annotation: Annotation) => boolean
-        },
-        void
-    >
+    uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<Role, void, void>
 }

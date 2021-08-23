@@ -91,9 +91,7 @@ export default class ReadwiseSettingsLogic extends UILogic<
             this,
             'syncState',
             async () => {
-                await this.dependencies.readwise.uploadAllAnnotations({
-                    queueInteraction: 'queue-and-return',
-                })
+                await this.dependencies.readwise.uploadAllAnnotations()
             },
         )
     }

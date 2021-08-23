@@ -561,7 +561,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
+            // const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
+            const isBetaAuthd = true // TODO : REMOVE THIS
 
             const mutation: UIMutation<State> = {
                 searchResults: {

@@ -1,1 +1,0 @@
-export const READWISE_ACTION_RETRY_INTERVAL = 1000 * 60 * 5

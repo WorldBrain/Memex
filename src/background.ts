@@ -56,6 +56,7 @@ export async function main() {
         firebase.firestore().useEmulator('localhost', 8080)
         firebase.auth().useEmulator('http://localhost:9099/')
         firebase.functions().useFunctionsEmulator('http://localhost:5001')
+        firebase.storage().useEmulator('localhost', 9199)
     }
 
     const getServerStorage = createLazyServerStorage(
@@ -160,6 +161,7 @@ export async function main() {
     window['selfTests'] = createSelfTests({
         backgroundModules,
         storageManager,
+        persistentStorageManager,
         getServerStorage,
     })
 }

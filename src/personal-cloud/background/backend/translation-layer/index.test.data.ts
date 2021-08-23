@@ -2,6 +2,7 @@ import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -10,6 +11,17 @@ export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
         .collection('pages')
         .createObject(LOCAL_TEST_DATA_V24.pages.second)
+}
+
+export async function insertReadwiseAPIKey(
+    storageManager: StorageManager,
+    userId: string,
+) {
+    await storageManager.collection('personalMemexSetting').createObject({
+        name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
+        value: 'test-key',
+        user: userId,
+    })
 }
 
 const LOCAL_PAGES_V24 = {
@@ -39,7 +51,7 @@ const LOCAL_PAGES_V24 = {
 
 const LOCAL_ANNOTATIONS_V24 = {
     first: {
-        url: LOCAL_PAGES_V24.first.url + '#111111111',
+        url: LOCAL_PAGES_V24.first.url + '/#111111111',
         pageUrl: LOCAL_PAGES_V24.first.url,
         pageTitle: LOCAL_PAGES_V24.first.fullTitle,
         body: 'This is a test highlight',
@@ -52,7 +64,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         },
     },
     second: {
-        url: LOCAL_PAGES_V24.first.url + '#111111112',
+        url: LOCAL_PAGES_V24.first.url + '/#111111112',
         pageUrl: LOCAL_PAGES_V24.first.url,
         pageTitle: LOCAL_PAGES_V24.first.fullTitle,
         comment: 'This is another test comment',
@@ -95,14 +107,12 @@ export const LOCAL_TEST_DATA_V24 = {
             annotation: LOCAL_ANNOTATIONS_V24.first.url,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
             createdWhen: new Date(1625190554983),
-            updatedWhen: new Date(1625190554983),
         },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             createdWhen: new Date(1625190554984),
-            updatedWhen: new Date(1625190554984),
         },
     },
     sharedAnnotationMetadata: {
@@ -192,6 +202,20 @@ export const LOCAL_TEST_DATA_V24 = {
             isFavourite: true,
             title: 'Other Markdown',
             code: '[[{{{PageUrl}}}]]',
+        },
+    },
+    settings: {
+        first: {
+            key: 'test-1',
+            value: 123,
+        },
+        second: {
+            key: 'test-2',
+            value: '123',
+        },
+        third: {
+            key: 'test-3',
+            value: { sub: 'hi' },
         },
     },
 }
@@ -328,6 +352,14 @@ const REMOTE_TAGS_V24 = {
         user: TEST_USER.id,
         name: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag.name,
     },
+    secondAnnotationTag: {
+        id: 2,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        createdWhen: 561,
+        updatedWhen: 561,
+        user: TEST_USER.id,
+        name: LOCAL_TEST_DATA_V24.tags.secondAnnotationTag.name,
+    },
 }
 
 const REMOTE_LISTS_V24 = {
@@ -461,7 +493,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
         },
         second: {
             id: 1,
@@ -472,7 +504,7 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
-            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.updatedWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
     },
     personalAnnotationShare: {
@@ -566,6 +598,53 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 562,
             updatedWhen: 562,
+        },
+    },
+    personalMemexSetting: {
+        first: {
+            id: 1,
+            name: LOCAL_TEST_DATA_V24.settings.first.key,
+            value: LOCAL_TEST_DATA_V24.settings.first.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 561,
+            updatedWhen: 561,
+        },
+        second: {
+            id: 2,
+            name: LOCAL_TEST_DATA_V24.settings.second.key,
+            value: LOCAL_TEST_DATA_V24.settings.second.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 562,
+            updatedWhen: 562,
+        },
+        third: {
+            id: 3,
+            name: LOCAL_TEST_DATA_V24.settings.third.key,
+            value: LOCAL_TEST_DATA_V24.settings.third.value,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 563,
+            updatedWhen: 564,
+        },
+    },
+    personalReadwiseAction: {
+        first: {
+            id: 1,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
+            createdWhen: new Date(1625634720653),
+            updatedWhen: new Date(1625634720653),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+        second: {
+            id: 2,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            createdWhen: new Date(1625634720654),
+            updatedWhen: new Date(1625634720654),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
         },
     },
 }

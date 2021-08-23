@@ -1,5 +1,6 @@
 import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
+import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
@@ -23,6 +24,7 @@ import {
     setImportStateManager,
     ImportStateManager,
 } from 'src/imports/background/state-manager'
+import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import SyncBackground from 'src/sync/background'
 import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
@@ -60,6 +62,7 @@ import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
+import { UserSettingsBackground } from 'src/settings/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -74,13 +77,17 @@ import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import {
     PersonalCloudBackend,
     PersonalCloudService,
+    PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
-import { authChanges } from 'src/authentication/background/utils'
-import FirestorePersonalCloudBackend from 'src/personal-cloud/background/backend/firestore'
+import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
+import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
+import { StoredContentType } from 'src/page-indexing/background/types'
+import transformPageText from 'src/util/transform-page-text'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -99,6 +106,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
+    settings: UserSettingsBackground
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -134,6 +142,7 @@ export function createBackgroundModules(options: {
         ...args: any[]
     ) => Promise<Returns>
     personalCloudBackend?: PersonalCloudBackend
+    contentSharingBackend?: ContentSharingBackend
     fetchPageDataProcessor?: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
@@ -143,13 +152,20 @@ export function createBackgroundModules(options: {
     getIceServers?: () => Promise<string[]>
     getNow?: () => number
     fetch?: typeof fetch
+    generateServerId?: (collectionName: string) => number | string
 }): BackgroundModules {
     const getNow = options.getNow ?? (() => Date.now())
     const fetch = options.fetch ?? globalFetch
+    const generateServerId =
+        options.generateServerId ??
+        ((collectionName) =>
+            getFirebase().firestore().collection(collectionName).doc().id)
 
     const { storageManager } = options
     const getServerStorage = async () =>
         (await options.getServerStorage()).storageModules
+    const getServerStorageManager = async () =>
+        (await options.getServerStorage()).storageManager
 
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -315,6 +331,12 @@ export function createBackgroundModules(options: {
     }
     const userMessages = options.userMessageService
     const contentSharing = new ContentSharingBackground({
+        backend:
+            options.contentSharingBackend ??
+            firebaseService<ContentSharingBackend>(
+                'personalCloud',
+                callFirebaseFunction,
+            ),
         activityStreams,
         storageManager,
         customLists: customLists.storage,
@@ -324,6 +346,7 @@ export function createBackgroundModules(options: {
         userMessages,
         getServerStorage,
         services: options.services,
+        generateServerId,
     })
 
     const readwise = new ReadwiseBackground({
@@ -343,9 +366,6 @@ export function createBackgroundModules(options: {
                     annotationUrl,
                 )
             ).map(({ name }) => name.replace(/\s+/g, '-')),
-        getAnnotationsByPks: async (pks) => {
-            return directLinking.annotationStorage.getAnnotations(pks)
-        },
         streamAnnotations: async function* () {
             yield* await storageManager.operation(
                 'streamObjects',
@@ -402,6 +422,108 @@ export function createBackgroundModules(options: {
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
+    const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
+        storageManager,
+        persistentStorageManager: options.persistentStorageManager,
+        backend:
+            options.personalCloudBackend ??
+            new FirestorePersonalCloudBackend({
+                personalCloudService: firebaseService<PersonalCloudService>(
+                    'personalCloud',
+                    callFirebaseFunction,
+                ),
+                getServerStorageManager,
+                getCurrentSchemaVersion: () =>
+                    getCurrentSchemaVersion(options.storageManager),
+                userChanges: () => authChanges(auth.authService),
+                getUserChangesReference: async () => {
+                    const currentUser = await auth.authService.getCurrentUser()
+                    if (!currentUser) {
+                        return null
+                    }
+                    const firebase = getFirebase()
+                    const firestore = firebase.firestore()
+                    return firestore
+                        .collection('personalDataChange')
+                        .doc(currentUser.id)
+                        .collection('objects')
+                },
+                getLastUpdateSeenTime: () =>
+                    personalCloudSettingStore.get('lastSeen'),
+                setLastUpdateSeenTime: (lastSeen) =>
+                    personalCloudSettingStore.set('lastSeen', lastSeen),
+                getDeviceId: async () => personalCloud.deviceId!,
+            }),
+        createDeviceId: async (userId) => {
+            const serverStorage = await options.getServerStorage()
+            const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
+                {
+                    device: {
+                        type: PersonalDeviceType.DesktopBrowser,
+                        os: PersonalDeviceOs.Windows,
+                        browser: PersonalDeviceBrowser.Edge,
+                        product: PersonalDeviceProduct.Extension,
+                    },
+                    userId,
+                },
+            )
+            return device.id
+        },
+        settingStore: personalCloudSettingStore,
+        getUserId: async () =>
+            (await auth.authService.getCurrentUser())?.id ?? null,
+        userIdChanges: () => authChanges(auth.authService),
+        writeIncomingData: async (params) => {
+            const incomingStorageManager =
+                params.storageType === PersonalCloudClientStorageType.Persistent
+                    ? options.persistentStorageManager
+                    : options.storageManager
+
+            // WARNING: Keep in mind this skips all storage middleware
+            await updateOrCreate({
+                ...params,
+                storageManager: incomingStorageManager,
+                executeOperation: (...args) => {
+                    return incomingStorageManager.backend.operation(...args)
+                },
+            })
+
+            if (params.collection === 'docContent') {
+                const { normalizedUrl, storedContentType } = params.where ?? {}
+                const { content } = params.updates
+                if (!normalizedUrl || !content) {
+                    console.warn(
+                        `Got an incoming page, but it didn't include a URL and a body`,
+                    )
+                    return
+                }
+
+                const processed =
+                    storedContentType === StoredContentType.HtmlBody
+                        ? transformPageHTML({
+                              html: content,
+                          }).text
+                        : transformPageText({
+                              text: (content.pageTexts ?? []).join(' '),
+                          }).text
+                await storageManager.backend.operation(
+                    'updateObjects',
+                    'pages',
+                    {
+                        url: normalizedUrl,
+                    },
+                    { text: processed },
+                )
+            }
+        },
+        getServerStorageManager,
+    })
+    options.services.contentSharing.preKeyGeneration = async (params) => {
+        if (params.key.roleID > SharedListRoleID.Commenter) {
+            await personalCloud.waitForSync()
+        }
+    }
+
     return {
         auth,
         social,
@@ -420,6 +542,10 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
+        settings: new UserSettingsBackground({
+            storageManager,
+            localBrowserStorage: options.browserAPIs.storage.local,
+        }),
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -511,53 +637,7 @@ export function createBackgroundModules(options: {
         copyPaster,
         activityStreams,
         userMessages,
-        personalCloud: new PersonalCloudBackground({
-            storageManager,
-            persistentStorageManager: options.persistentStorageManager,
-            backend:
-                options.personalCloudBackend ??
-                new FirestorePersonalCloudBackend({
-                    personalCloudService: firebaseService<PersonalCloudService>(
-                        'personalCloud',
-                        callFirebaseFunction,
-                    ),
-                    getCurrentSchemaVersion: () =>
-                        getCurrentSchemaVersion(options.storageManager),
-                    userChanges: () => authChanges(auth.authService),
-                    getUserChangesReference: async () => {
-                        const currentUser = await auth.authService.getCurrentUser()
-                        if (!currentUser) {
-                            return null
-                        }
-                        const firebase = getFirebase()
-                        const firestore = firebase.firestore()
-                        return firestore
-                            .collection('personalDataChange')
-                            .doc(currentUser.id)
-                            .collection('objects')
-                    },
-                    settingStore: personalCloudSettingStore,
-                }),
-            createDeviceId: async (userId) => {
-                const serverStorage = await options.getServerStorage()
-                const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
-                    {
-                        device: {
-                            type: PersonalDeviceType.DesktopBrowser,
-                            os: PersonalDeviceOs.Windows,
-                            browser: PersonalDeviceBrowser.Edge,
-                            product: PersonalDeviceProduct.Extension,
-                        },
-                        userId,
-                    },
-                )
-                return device.id
-            },
-            settingStore: personalCloudSettingStore,
-            getUserId: async () =>
-                (await auth.authService.getCurrentUser()).id ?? null,
-            userIdChanges: () => authChanges(auth.authService),
-        }),
+        personalCloud,
         contentSharing,
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
@@ -639,7 +719,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        readwiseActionQueue: backgroundModules.readwise.actionQueue.storage,
+        settings: backgroundModules.settings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }
