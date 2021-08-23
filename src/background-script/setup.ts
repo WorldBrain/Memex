@@ -472,7 +472,11 @@ export function createBackgroundModules(options: {
         settingStore: personalCloudSettingStore,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
-        userIdChanges: () => authChanges(auth.authService),
+        userIdChanges: async function* () {
+            for await (const _ of authChanges(auth.authService)) {
+                yield
+            }
+        },
         writeIncomingData: async (params) => {
             const incomingStorageManager =
                 params.storageType === PersonalCloudClientStorageType.Persistent
