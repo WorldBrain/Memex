@@ -17,13 +17,11 @@ export async function insertReadwiseAPIKey(
     storageManager: StorageManager,
     userId: string,
 ) {
-    await storageManager
-        .collection('personalMemexExtensionSetting')
-        .createObject({
-            name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
-            value: 'test-key',
-            user: userId,
-        })
+    await storageManager.collection('personalMemexSetting').createObject({
+        name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
+        value: 'test-key',
+        user: userId,
+    })
 }
 
 const LOCAL_PAGES_V24 = {
@@ -208,15 +206,15 @@ export const LOCAL_TEST_DATA_V24 = {
     },
     settings: {
         first: {
-            name: 'test-1',
+            key: 'test-1',
             value: 123,
         },
         second: {
-            name: 'test-2',
+            key: 'test-2',
             value: '123',
         },
         third: {
-            name: 'test-3',
+            key: 'test-3',
             value: { sub: 'hi' },
         },
     },
@@ -602,10 +600,10 @@ export const REMOTE_TEST_DATA_V24 = {
             updatedWhen: 562,
         },
     },
-    personalMemexExtensionSetting: {
+    personalMemexSetting: {
         first: {
             id: 1,
-            name: LOCAL_TEST_DATA_V24.settings.first.name,
+            name: LOCAL_TEST_DATA_V24.settings.first.key,
             value: LOCAL_TEST_DATA_V24.settings.first.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
@@ -614,7 +612,7 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         second: {
             id: 2,
-            name: LOCAL_TEST_DATA_V24.settings.second.name,
+            name: LOCAL_TEST_DATA_V24.settings.second.key,
             value: LOCAL_TEST_DATA_V24.settings.second.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
@@ -623,7 +621,7 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         third: {
             id: 3,
-            name: LOCAL_TEST_DATA_V24.settings.third.name,
+            name: LOCAL_TEST_DATA_V24.settings.third.key,
             value: LOCAL_TEST_DATA_V24.settings.third.value,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,

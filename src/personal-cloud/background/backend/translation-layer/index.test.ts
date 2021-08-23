@@ -2451,7 +2451,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
-            const testSettings = remoteData.personalMemexExtensionSetting
+            const testSettings = remoteData.personalMemexSetting
 
             // prettier-ignore
             expect(
@@ -2459,16 +2459,16 @@ describe('Personal cloud translation layer', () => {
                     'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
-                    'personalMemexExtensionSetting',
+                    'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
                 ], { skipChanges: 0 }),
                 personalBlockStats: [],
-                personalMemexExtensionSetting: [testSettings.first, testSettings.second, testSettings.third],
+                personalMemexSetting: [testSettings.first, testSettings.second, testSettings.third],
             })
 
             // prettier-ignore
@@ -2500,7 +2500,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('settings')
                 .updateOneObject(
-                    { name: LOCAL_TEST_DATA_V24.settings.first.name },
+                    { key: LOCAL_TEST_DATA_V24.settings.first.key },
                     {
                         value: updatedValue,
                     },
@@ -2508,7 +2508,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
-            const testSettings = remoteData.personalMemexExtensionSetting
+            const testSettings = remoteData.personalMemexSetting
 
             // prettier-ignore
             expect(
@@ -2516,17 +2516,17 @@ describe('Personal cloud translation layer', () => {
                     'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
-                    'personalMemexExtensionSetting',
+                    'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
-                    [DataChangeType.Modify, 'personalMemexExtensionSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
+                    [DataChangeType.Modify, 'personalMemexSetting', testSettings.first.id],
                 ], { skipChanges: 0 }),
                 personalBlockStats: [],
-                personalMemexExtensionSetting: [{ ...testSettings.first, value: updatedValue }, testSettings.second, testSettings.third],
+                personalMemexSetting: [{ ...testSettings.first, value: updatedValue }, testSettings.second, testSettings.third],
             })
 
             // prettier-ignore
@@ -2558,17 +2558,17 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('settings')
                 .deleteOneObject({
-                    name: LOCAL_TEST_DATA_V24.settings.first.name,
+                    key: LOCAL_TEST_DATA_V24.settings.first.key,
                 })
             await setups[0].storageManager
                 .collection('settings')
                 .deleteOneObject({
-                    name: LOCAL_TEST_DATA_V24.settings.second.name,
+                    key: LOCAL_TEST_DATA_V24.settings.second.key,
                 })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
-            const testSettings = remoteData.personalMemexExtensionSetting
+            const testSettings = remoteData.personalMemexSetting
 
             // prettier-ignore
             expect(
@@ -2576,25 +2576,25 @@ describe('Personal cloud translation layer', () => {
                     'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
-                    'personalMemexExtensionSetting',
+                    'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.first.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.second.id],
-                    [DataChangeType.Create, 'personalMemexExtensionSetting', testSettings.third.id],
-                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.first.id, { name: testSettings.first.name }],
-                    [DataChangeType.Delete, 'personalMemexExtensionSetting', testSettings.second.id, { name: testSettings.second.name }],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
+                    [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
+                    [DataChangeType.Delete, 'personalMemexSetting', testSettings.first.id, { key: testSettings.first.name }],
+                    [DataChangeType.Delete, 'personalMemexSetting', testSettings.second.id, { key: testSettings.second.name }],
                 ], { skipChanges: 0 }),
                 personalBlockStats: [],
-                personalMemexExtensionSetting: [testSettings.third],
+                personalMemexSetting: [testSettings.third],
             })
 
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
-                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { name: LOCAL_TEST_DATA_V24.settings.first.name } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { name: LOCAL_TEST_DATA_V24.settings.second.name } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.first.key } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.second.key } },
             ], { skip: 0 })
         })
 

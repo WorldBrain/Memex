@@ -12,10 +12,10 @@ export default class SettingsStorage extends StorageModule {
             [COLLECTION_NAMES.settings]: {
                 version: STORAGE_VERSIONS[20].version,
                 fields: {
-                    name: { type: 'string' },
+                    key: { type: 'string' },
                     value: { type: 'json' },
                 },
-                indices: [{ field: 'name', pk: true }],
+                indices: [{ field: 'key', pk: true }],
             },
         },
         operations: {
