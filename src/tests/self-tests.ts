@@ -61,7 +61,10 @@ export function createSelfTests(options: {
                     if (!collectionName.startsWith('personal')) {
                         return null
                     }
-                    if (collectionName === 'personalBlockStats') {
+                    if (
+                        collectionName === 'personalBlockStats' ||
+                        collectionName === 'personalCloudError'
+                    ) {
                         return null
                     }
                     const objects = (await serverStorage.storageManager
