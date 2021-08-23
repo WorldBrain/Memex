@@ -4,7 +4,6 @@ import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 
 import CloudOnboardingModalLogic from './logic'
 import type { Dependencies, State, Event } from './types'
-import { PlanTier } from './types'
 import DataMigrator from '../components/data-migrator'
 import DataCleaner from '../components/data-cleaner'
 import DataDumper from '../components/data-dumper'
@@ -77,15 +76,10 @@ export default class CloudOnboardingModal extends UIElement<
             <DataMigrator
                 supportLink={this.props.supportLink}
                 migrationState={this.state.migrationState}
-                onRetryMigrationClick={() =>
-                    this.processEvent('retryDataMigration', null)
-                }
-                onCancelMigrationClick={() =>
-                    this.processEvent('cancelDataMigration', null)
-                }
-                onFinishMigrationClick={() =>
-                    this.processEvent('finishMigration', null)
-                }
+                isPrepping={!this.state.isMigrationPrepped}
+                onRetryClick={() => this.processEvent('retryMigration', null)}
+                onCloseClick={() => this.processEvent('closeMigration', null)}
+                onCancelClick={() => this.processEvent('cancelMigration', null)}
             />
         )
     }

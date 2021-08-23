@@ -28,6 +28,9 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
                 this.emitMutation({ currentUser: { $set: user } })
             }
 
+            // TODO: check whether the migration prep step has already been run
+            this.emitMutation({ isMigrationPrepped: { $set: false } })
+
             // TODO: check for passive data and decide which next stage to set
             this.emitMutation({ needsToRemovePassiveData: { $set: true } })
 
@@ -44,8 +47,8 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
         currentUser: null,
         stage: 'data-dump',
-        tier2PaymentPeriod: 'monthly',
 
+        isMigrationPrepped: false,
         shouldBackupViaDump: false,
         needsToRemovePassiveData: false,
     })
@@ -66,8 +69,15 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         })
     }
 
-    private async attemptCloudMigration() {
+    private async attemptCloudMigration({ isMigrationPrepped }: State) {
         await executeUITask(this, 'migrationState', async () => {
+            if (!isMigrationPrepped) {
+                await delay(2000) // TODO: migration prep step
+
+                // TODO: set local storage key
+                this.emitMutation({ isMigrationPrepped: { $set: true } })
+            }
+
             await delay(2000)
             // Uncomment this to show error state:
             // throw new Error()
@@ -86,25 +96,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) => {
         window.open(BACKUP_URL, '_self')
-    }
-
-    setTier2PaymentPeriod: EventHandler<'setTier2PaymentPeriod'> = ({
-        event,
-    }) => {
-        this.emitMutation({ tier2PaymentPeriod: { $set: event.period } })
-    }
-
-    selectPlan: EventHandler<'selectPlan'> = ({ event, previousState }) => {
-        console.log('selected plan:', event.tier)
-        // TODO: open link to payment page
-
-        this.emitMutation({
-            stage: {
-                $set: previousState.needsToRemovePassiveData
-                    ? 'data-dump'
-                    : 'data-migration',
-            },
-        })
     }
 
     startDataDump: EventHandler<'startDataDump'> = async ({}) => {
@@ -131,12 +122,18 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.dependencies.onModalClose()
     }
 
-    retryDataMigration: EventHandler<'retryDataMigration'> = async ({}) => {
-        await this.attemptCloudMigration()
+    retryMigration: EventHandler<'retryMigration'> = async ({
+        previousState,
+    }) => {
+        await this.attemptCloudMigration(previousState)
     }
 
-    cancelDataMigration: EventHandler<'cancelDataMigration'> = async ({}) => {
-        this.emitMutation({ stage: { $set: 'pick-plan' } })
+    cancelMigration: EventHandler<'cancelMigration'> = async ({}) => {
+        this.dependencies.onModalClose()
+    }
+
+    closeMigration: EventHandler<'closeMigration'> = async ({}) => {
+        this.dependencies.onModalClose()
     }
 
     continueToMigration: EventHandler<'continueToMigration'> = async ({
@@ -146,11 +143,7 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
             this.emitMutation({ stage: { $set: 'data-clean' } })
         } else {
             this.emitMutation({ stage: { $set: 'data-migration' } })
-            await this.attemptCloudMigration()
+            await this.attemptCloudMigration(previousState)
         }
-    }
-
-    finishMigration: EventHandler<'finishMigration'> = async ({}) => {
-        this.dependencies.onModalClose()
     }
 }

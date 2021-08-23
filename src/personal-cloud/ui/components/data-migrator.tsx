@@ -8,11 +8,12 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
 
 export interface Props {
+    isPrepping: boolean
     supportLink: string
     migrationState: UITaskState
-    onRetryMigrationClick: React.MouseEventHandler
-    onCancelMigrationClick: React.MouseEventHandler
-    onFinishMigrationClick: React.MouseEventHandler
+    onRetryClick: React.MouseEventHandler
+    onCancelClick: React.MouseEventHandler
+    onCloseClick: React.MouseEventHandler
 }
 
 export default class DataMigrator extends React.PureComponent<Props> {
@@ -21,8 +22,8 @@ export default class DataMigrator extends React.PureComponent<Props> {
         if (migrationState === 'running') {
             return (
                 <SecondaryAction
-                    label="Cancel"
-                    onClick={this.props.onCancelMigrationClick}
+                    label="Close"
+                    onClick={this.props.onCloseClick}
                 />
             )
         }
@@ -31,36 +32,45 @@ export default class DataMigrator extends React.PureComponent<Props> {
                 <>
                     <SecondaryAction
                         label="Cancel"
-                        onClick={this.props.onCancelMigrationClick}
+                        onClick={this.props.onCancelClick}
                     />
                     <PrimaryAction
                         label="Retry"
-                        onClick={this.props.onRetryMigrationClick}
+                        onClick={this.props.onRetryClick}
                     />
                 </>
             )
         }
-        if (migrationState === 'success') {
-            return (
-                <PrimaryAction
-                    label="Complete"
-                    onClick={this.props.onFinishMigrationClick}
-                />
-            )
-        }
+        return (
+            <PrimaryAction
+                label="Go to Dashboard"
+                onClick={this.props.onCloseClick}
+            />
+        )
     }
 
     private renderContent() {
-        const { migrationState, supportLink } = this.props
+        const { migrationState, supportLink, isPrepping } = this.props
         if (migrationState === 'running') {
-            return (
+            return isPrepping ? (
                 <>
-                    {/* TODO: Proper loading bar */}
+                    <LoadingIndicator />
+                    <Header>Preparing Cloud Migration</Header>
+                    <Text>
+                        Don't close your browser or shut off your computer in
+                        this stage or you have to restart the migration.
+                    </Text>
+                </>
+            ) : (
+                <>
                     <LoadingIndicator />
                     <Header>Cloud Migration in Progress</Header>
                     <Text>
-                        This may take a couple of minutes. You can close the
-                        tab, but can't use Memex in the meantime.
+                        This process with run and continue in the background.
+                    </Text>
+                    <Text>
+                        It may take a while for all content to appear on all
+                        your devices.
                     </Text>
                 </>
             )
@@ -79,18 +89,13 @@ export default class DataMigrator extends React.PureComponent<Props> {
                 </>
             )
         }
-        if (migrationState === 'success') {
-            return (
-                <>
-                    <Icon icon="checkRound" height="20px" />
-                    <Header>Cloud Migration Complete</Header>
-                    <Text>
-                        You can now continue using Memex as you did before.
-                        Login on other devices to sync them too.
-                    </Text>
-                </>
-            )
-        }
+        return (
+            <>
+                <Icon icon="checkRound" height="20px" />
+                <Header>Cloud Migration Complete</Header>
+                <Text>Login on other devices to sync them.</Text>
+            </>
+        )
     }
 
     render() {

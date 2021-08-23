@@ -3,13 +3,6 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UIServices } from 'src/services/ui/types'
-import type { PaymentPeriod } from '../types'
-
-export enum PlanTier {
-    Explorer = 1,
-    Thinker,
-    Supporter,
-}
 
 export interface Dependencies {
     services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
@@ -25,19 +18,16 @@ export interface State {
 
     stage: 'data-dump' | 'data-clean' | 'data-migration' | 'old-version-backup'
     currentUser: AuthenticatedUser | null
-    tier2PaymentPeriod: PaymentPeriod
 
+    isMigrationPrepped: boolean
     shouldBackupViaDump: boolean
     needsToRemovePassiveData: boolean
 }
 
 export interface Event {
-    setTier2PaymentPeriod: { period: PaymentPeriod }
-    selectPlan: { tier: PlanTier }
-
+    goToBackupRoute: null
     migrateToOldVersion: null
     cancelMigrateToOldVersion: null
-    goToBackupRoute: null
 
     startDataDump: null
     retryDataDump: null
@@ -47,9 +37,9 @@ export interface Event {
     retryDataClean: null
     cancelDataClean: null
 
-    retryDataMigration: null
-    cancelDataMigration: null
+    closeMigration: null
+    retryMigration: null
+    cancelMigration: null
 
-    finishMigration: null
     continueToMigration: null
 }
