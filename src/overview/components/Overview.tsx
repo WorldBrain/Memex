@@ -251,10 +251,7 @@ class Overview extends PureComponent<Props, State> {
     renderOnboarding() {
         return (
             <div>
-                <Onboarding
-                    navToOverview={this.handleOnboardingComplete}
-                    startOnLoginStep={isExistingUserOnboarding()}
-                />
+                <Onboarding navToOverview={this.handleOnboardingComplete} />
                 <HelpBtn />
             </div>
         )
