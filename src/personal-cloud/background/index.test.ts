@@ -1,5 +1,4 @@
 import fs from 'fs'
-import path from 'path'
 import { setupSyncBackgroundTest } from './index.tests'
 import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -17,6 +16,11 @@ import {
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
 import { blobToJson } from 'src/util/blob-utils'
+import { AnnotationPrivacyLevels, Annotation } from '../../annotations/types'
+import {
+    PersonalCloudErrorType,
+    DataChangeType,
+} from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 
 describe('Personal cloud', () => {
     const testFullPage = async (testOptions: {
@@ -236,5 +240,141 @@ describe('Personal cloud', () => {
 
     it('should sync full page PDF texts indexed from tabs', async function () {
         await testFullPage({ type: 'pdf', source: 'tab' })
+    })
+
+    const testTranslationError = async (options: {
+        annotationComment: string
+        errorType: PersonalCloudErrorType
+        errorMessage: string
+        errorDeviceIndex: number
+        stackSubstring: string
+        createdWhen: number
+        errorData: (options: {
+            setups: BackgroundIntegrationTestSetup[]
+            userId: number | string
+            annotation: Pick<Annotation, 'url' | 'pageUrl' | 'comment'>
+        }) => any
+    }) => {
+        const { setups, serverStorage } = await setupSyncBackgroundTest({
+            deviceCount: 2,
+            useDownloadTranslationLayer: true,
+        })
+        // setups[0].backgroundModules.personalCloud.debug = true
+        // setups[1].backgroundModules.personalCloud.debug = true
+        const testPageUrl = 'https://www.getmemex.com/'
+        const normalizedTestPageUrl = 'getmemex.com'
+
+        injectFakeTabs({
+            tabManagement: setups[0].backgroundModules.tabManagement,
+            tabsAPI: setups[0].browserAPIs.tabs,
+            includeTitle: true,
+            tabs: [
+                {
+                    url: testPageUrl,
+                    htmlBody: '<strong>test</strong>',
+                    title: 'test page',
+                },
+            ],
+        })
+
+        const annotation = {
+            pageUrl: testPageUrl,
+            comment: options.annotationComment,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            createdWhen: new Date('2021-07-21'),
+        }
+        const annotationUrl = await setups[0].backgroundModules.directLinking.createAnnotation(
+            { tab: { id: 1 } as any },
+            annotation,
+        )
+        annotation.pageUrl = normalizedTestPageUrl
+
+        await setups[0].backgroundModules.personalCloud.waitForSync()
+        await setups[1].backgroundModules.personalCloud.waitForSync()
+
+        const errors = (
+            await serverStorage.storageManager
+                .collection('personalCloudError')
+                .findObjects({})
+        ).map((error: any) => ({ ...error, data: JSON.parse(error.data) }))
+
+        const userId = (
+            await setups[0].backgroundModules.auth.authService.getCurrentUser()
+        ).id
+        expect(errors).toEqual([
+            {
+                id: expect.anything(),
+                createdByDevice:
+                    setups[options.errorDeviceIndex].backgroundModules
+                        .personalCloud.deviceId,
+                createdWhen: options.createdWhen,
+                type: options.errorType,
+                user: userId,
+                data: {
+                    error: {
+                        name: 'Error',
+                        message: options.errorMessage,
+                        stack: expect.stringContaining(options.stackSubstring),
+                    },
+                    ...options.errorData({
+                        userId,
+                        annotation: { ...annotation, url: annotationUrl },
+                        setups,
+                    }),
+                },
+            },
+        ])
+    }
+
+    it('should handle upload translation layer errors', async () => {
+        await testTranslationError({
+            annotationComment: `*memex-debug*: upload error`,
+            errorType: PersonalCloudErrorType.UploadError,
+            errorMessage: `You created a special annotation meant to create a server-side upload error`,
+            stackSubstring: `upload.ts:`,
+            createdWhen: 562,
+            errorDeviceIndex: 0,
+            errorData: (options) => ({
+                update: {
+                    type: 'overwrite',
+                    collection: 'annotations',
+                    deviceId:
+                        options.setups[0].backgroundModules.personalCloud
+                            .deviceId,
+                    schemaVersion: options.setups[0].backgroundModules.personalCloud.currentSchemaVersion.toISOString(),
+                    object: {
+                        url: options.annotation.url,
+                        pageUrl: options.annotation.pageUrl,
+                        comment: options.annotation.comment,
+                        createdWhen: expect.any(String),
+                        lastEdited: expect.any(String),
+                    },
+                },
+            }),
+        })
+    })
+
+    it('should handle download translation layer errors', async () => {
+        await testTranslationError({
+            annotationComment: `*memex-debug*: download error`,
+            errorType: PersonalCloudErrorType.DownloadError,
+            errorMessage: `You created a special annotation meant to create a server-side download error`,
+            stackSubstring: `download.ts:`,
+            createdWhen: 563,
+            errorDeviceIndex: 1,
+            errorData: (options) => ({
+                change: {
+                    id: expect.anything(),
+                    collection: 'personalAnnotation',
+                    createdByDevice:
+                        options.setups[0].backgroundModules.personalCloud
+                            .deviceId,
+                    createdWhen: 562,
+                    objectId: expect.anything(),
+                    type: DataChangeType.Create,
+                    user: options.userId,
+                },
+            }),
+        })
     })
 })

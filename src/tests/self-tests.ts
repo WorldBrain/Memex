@@ -46,7 +46,9 @@ export function createSelfTests(options: {
     }
 
     const tests = {
-        cloudSend: async (testOptions?: { unshareAnnotation?: boolean }) => {
+        cloudSend: async (testOptions?: {
+            deleteSharedAnnotation?: boolean
+        }) => {
             await clearDb(options.storageManager)
             await clearDb(options.persistentStorageManager)
             console.log('Cleared local databases')
@@ -61,7 +63,11 @@ export function createSelfTests(options: {
                     if (!collectionName.startsWith('personal')) {
                         return null
                     }
-                    if (collectionName === 'personalBlockStats') {
+                    if (
+                        collectionName === 'personalBlockStats' ||
+                        collectionName === 'personalCloudError' ||
+                        collectionName === 'personalReadwiseAction'
+                    ) {
                         return null
                     }
                     const objects = (await serverStorage.storageManager
@@ -131,6 +137,36 @@ export function createSelfTests(options: {
                 { skipPageIndexing: true },
             )
             console.log(`Added protected note to '${testPageUrl}'`)
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: upload error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added upload error generating note to '${testPageUrl}'`,
+            )
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: download error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added download error generating note to '${testPageUrl}'`,
+            )
             const testListId1 = await backgroundModules.customLists.createCustomList(
                 {
                     name: 'My test list #1',
@@ -192,19 +228,19 @@ export function createSelfTests(options: {
             )
             console.log('Shared and edited annotation')
 
-            if (testOptions?.unshareAnnotation) {
-                const sharedAnnotationId = (
+            let sharedAnnotationId: string | number
+            if (testOptions?.deleteSharedAnnotation) {
+                sharedAnnotationId = (
                     await backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
                         {
                             localIds: [publicAnnotationUrl],
                         },
                     )
                 )[publicAnnotationUrl]
-                await backgroundModules.contentSharing.unshareAnnotation({
-                    annotationUrl: publicAnnotationUrl,
-                    queueInteraction: 'skip-queue',
-                })
-                console.log('Unshared annotation', sharedAnnotationId)
+                await backgroundModules.directLinking.annotationStorage.deleteAnnotation(
+                    publicAnnotationUrl,
+                )
+                console.log('Deleted shared annotation', sharedAnnotationId)
             }
 
             await serverStorage.storageModules.contentSharing.createAnnotations(
@@ -225,6 +261,18 @@ export function createSelfTests(options: {
 
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
+
+            if (testOptions?.deleteSharedAnnotation) {
+                const sharedAnnotationEntries = await serverStorage.storageModules.contentSharing.getAnnotationListEntries(
+                    {
+                        listReference: {
+                            type: 'shared-list-reference',
+                            id: remoteListId1,
+                        },
+                    },
+                )
+                console.log({ sharedAnnotationEntries })
+            }
 
             console.log('End of self test')
         },
