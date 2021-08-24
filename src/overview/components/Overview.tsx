@@ -38,7 +38,7 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import colors from 'src/dashboard-refactor/colors'
 import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
-import { createServices } from 'src/services/ui'
+import { createUIServices } from 'src/services/ui'
 import type { UIServices } from 'src/services/ui/types'
 import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 import { ContentConversationsInterface } from 'src/content-conversations/background/types'
@@ -102,7 +102,7 @@ class Overview extends PureComponent<Props, State> {
     constructor(props: Props) {
         super(props)
 
-        this.services = createServices()
+        this.services = createUIServices()
         this.annotationsCache = createAnnotationsCache({
             contentSharing: this.contentSharingBG,
             annotations: this.annotationsBG,

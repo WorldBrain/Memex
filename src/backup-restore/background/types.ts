@@ -1,8 +1,8 @@
-import {
+import type {
     RemoteFunctionRole,
     RemotePositionalFunction,
 } from 'src/util/webextensionRPC'
-import { BackupTimes } from '../types'
+import type { BackupTimes } from '../types'
 
 export interface BackupInterface<Role extends RemoteFunctionRole> {
     isAutomaticBackupEnabled: RemotePositionalFunction<Role, [], boolean>

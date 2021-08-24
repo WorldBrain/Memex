@@ -332,7 +332,7 @@ export class BackupBackgroundModule {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
         const times = {
-            lastBackup: lastBackup && lastBackup.getTime(),
+            lastBackup: lastBackup?.getTime() ?? null,
             nextBackup:
                 nextBackup && nextBackup.getTime
                     ? nextBackup.getTime()

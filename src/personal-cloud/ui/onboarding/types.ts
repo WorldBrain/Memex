@@ -3,10 +3,12 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UIServices } from 'src/services/ui/types'
+import type { BackupInterface } from 'src/backup-restore/background/types'
 
 export interface Dependencies {
     services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
     authBG: AuthRemoteFunctionsInterface
+    backupBG: BackupInterface<'caller'>
     onModalClose: () => void
 }
 
