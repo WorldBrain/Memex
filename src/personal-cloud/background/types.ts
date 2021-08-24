@@ -23,4 +23,9 @@ export interface PersonalCloudSettings {
     deviceId?: PersonalCloudDeviceID
     lastSeen?: number
 }
+
 export type PersonalCloudDeviceID = number | string
+
+export interface PersonalCloudRemoteInterface {
+    isPassiveDataRemovalNeeded: () => Promise<boolean>
+}

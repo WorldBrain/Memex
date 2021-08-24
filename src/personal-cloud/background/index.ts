@@ -21,8 +21,12 @@ import {
     PersonalCloudActionType,
     PersonalCloudSettings,
     PersonalCloudDeviceID,
+    PersonalCloudRemoteInterface,
 } from './types'
-import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './constants'
+import {
+    PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
+    PASSIVE_DATA_CUTOFF_DATE,
+} from './constants'
 import {
     ActionExecutor,
     ActionPreprocessor,
@@ -56,6 +60,7 @@ export class PersonalCloudBackground {
     pullMutex = new AsyncMutex()
     deviceId?: string | number
     reportExecutingAction?: (action: PersonalCloudAction) => void
+    remoteFunctions: PersonalCloudRemoteInterface
     debug = false
 
     constructor(public options: PersonalCloudBackgroundOptions) {
@@ -67,6 +72,10 @@ export class PersonalCloudBackground {
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
         })
+
+        this.remoteFunctions = {
+            isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
+        }
     }
 
     async setup() {
@@ -456,5 +465,16 @@ export class PersonalCloudBackground {
         if (this.debug) {
             console['log']('Personal Cloud -', ...args)
         }
+    }
+
+    private isPassiveDataRemovalNeeded: () => Promise<boolean> = async () => {
+        const { storageManager } = this.options
+
+        const oldVisits = await storageManager
+            .collection('visits')
+            .findAllObjects({
+                time: { $lte: PASSIVE_DATA_CUTOFF_DATE.getTime() },
+            })
+        return oldVisits.length > 0
     }
 }

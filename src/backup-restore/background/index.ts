@@ -326,7 +326,7 @@ export class BackupBackgroundModule {
             'lastBackupFinish',
         )
         let nextBackup = null
-        if (this.backupProcedure.running) {
+        if (this.backupProcedure?.running) {
             nextBackup = 'running'
         } else if (await this.isAutomaticBackupEnabled()) {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)

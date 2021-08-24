@@ -6,7 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import delay from 'src/util/delay'
 import { BACKUP_URL } from 'src/constants'
-import { Event, State, Dependencies } from './types'
+import type { Event, State, Dependencies } from './types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -17,31 +17,6 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     constructor(private dependencies: Dependencies) {
         super()
-    }
-
-    async init() {
-        const { authBG, backupBG, onModalClose } = this.dependencies
-        await loadInitial(this, async () => {
-            const user = await authBG.getCurrentUser()
-
-            if (user) {
-                this.emitMutation({ currentUser: { $set: user } })
-            } else {
-                // We can't do the migration if not logged in
-                return onModalClose()
-            }
-
-            // TODO: check whether the migration prep step has already been run
-            this.emitMutation({ isMigrationPrepped: { $set: false } })
-
-            // TODO: check for passive data and decide which next stage to set
-            this.emitMutation({ needsToRemovePassiveData: { $set: true } })
-
-            const { lastBackup } = await backupBG.getBackupTimes()
-            this.emitMutation({
-                shouldBackupViaDump: { $set: lastBackup == null },
-            })
-        })
     }
 
     getInitialState = (): State => ({
@@ -58,6 +33,35 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         needsToRemovePassiveData: false,
     })
 
+    async init() {
+        const {
+            authBG,
+            backupBG,
+            personalCloudBG,
+            onModalClose,
+        } = this.dependencies
+        await loadInitial(this, async () => {
+            const user = await authBG.getCurrentUser()
+
+            if (user) {
+                this.emitMutation({ currentUser: { $set: user } })
+            } else {
+                // We can't do the migration if not logged in
+                return onModalClose()
+            }
+
+            const needsToRemovePassiveData = await personalCloudBG.isPassiveDataRemovalNeeded()
+            this.emitMutation({
+                needsToRemovePassiveData: { $set: needsToRemovePassiveData },
+            })
+
+            const { lastBackup } = await backupBG.getBackupTimes()
+            this.emitMutation({
+                shouldBackupViaDump: { $set: lastBackup == null },
+            })
+        })
+    }
+
     private async attemptDataDump() {
         await executeUITask(this, 'backupState', async () => {
             await delay(2000)
@@ -66,11 +70,18 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         })
     }
 
-    private async attemptPassiveDataClean() {
+    private async attemptPassiveDataClean(state: State) {
         await executeUITask(this, 'dataCleaningState', async () => {
             await delay(2000)
             // Uncomment this to show error state:
             // throw new Error()
+        })
+
+        await this.continueToMigration({
+            event: null,
+            previousState: this.withMutation(state, {
+                needsToRemovePassiveData: { $set: false },
+            }),
         })
     }
 
@@ -115,12 +126,16 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.emitMutation({ backupState: { $set: 'pristine' } })
     }
 
-    startDataClean: EventHandler<'startDataClean'> = async ({}) => {
-        await this.attemptPassiveDataClean()
+    startDataClean: EventHandler<'startDataClean'> = async ({
+        previousState,
+    }) => {
+        await this.attemptPassiveDataClean(previousState)
     }
 
-    retryDataClean: EventHandler<'retryDataClean'> = async ({}) => {
-        await this.attemptPassiveDataClean()
+    retryDataClean: EventHandler<'retryDataClean'> = async ({
+        previousState,
+    }) => {
+        await this.attemptPassiveDataClean(previousState)
     }
 
     cancelDataClean: EventHandler<'cancelDataClean'> = async ({}) => {

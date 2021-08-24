@@ -14,6 +14,7 @@ import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
 import { PDFInterface } from 'src/pdf/background'
+import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -30,6 +31,7 @@ export interface RemoteFunctionImplementations<
     copyPaster: RemoteCopyPasterInterface
     readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
+    personalCloud: PersonalCloudRemoteInterface
     pdf: PDFInterface
 }
 
@@ -48,6 +50,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     copyPaster: runInBackground(),
     readablePageArchives: runInBackground(),
     contentSharing: runInBackground(),
+    personalCloud: runInBackground(),
     pdf: runInBackground(),
 }
 
