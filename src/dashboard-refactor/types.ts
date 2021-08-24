@@ -29,6 +29,7 @@ import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -59,6 +60,7 @@ export interface DashboardDependencies {
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
+    personalCloudBG: PersonalCloudRemoteInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>

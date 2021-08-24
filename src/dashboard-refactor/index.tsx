@@ -69,6 +69,7 @@ export class DashboardContainer extends StatefulUIElement<
         localStorage: browser.storage.local,
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
+        personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
@@ -901,6 +902,8 @@ export class DashboardContainer extends StatefulUIElement<
                 <CloudOnboardingModal
                     services={this.props.services}
                     authBG={this.props.authBG}
+                    backupBG={this.props.backupBG}
+                    personalCloudBG={this.props.personalCloudBG}
                     onModalClose={() =>
                         this.processEvent('setShowCloudOnboardingModal', {
                             isShown: false,
@@ -918,11 +921,7 @@ export class DashboardContainer extends StatefulUIElement<
         if (isDuringInstall(this.props.location)) {
             return (
                 <>
-                    <Onboarding
-                        startOnLoginStep={isExistingUserOnboarding(
-                            this.props.location,
-                        )}
-                    />
+                    <Onboarding authBG={this.props.authBG} />
                     <HelpBtn />
                 </>
             )

@@ -132,6 +132,7 @@ export async function setupTest(
         ) as any,
         localStorage: browser.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
+        personalCloudBG: device.backgroundModules.personalCloud.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         document: args.mockDocument,
         listsBG: {

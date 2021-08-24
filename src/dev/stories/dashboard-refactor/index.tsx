@@ -44,6 +44,7 @@ async function createDependencies(): Promise<DashboardProps> {
         ) as any,
         searchBG: backgroundModules.search.remoteFunctions.search,
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
+        personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
