@@ -19,7 +19,10 @@ export interface Props {
 export default class DataMigrator extends React.PureComponent<Props> {
     private renderBtns() {
         const { migrationState, isPrepping } = this.props
-        if (migrationState === 'running' && !isPrepping) {
+        if (migrationState === 'running' && isPrepping) {
+            return false
+        }
+        if (migrationState === 'running') {
             return (
                 <SecondaryAction
                     label="Close"
