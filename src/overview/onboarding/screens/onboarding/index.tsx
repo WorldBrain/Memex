@@ -7,12 +7,10 @@ import type { State, Event, Dependencies } from './types'
 import OnboardingBox from '../../components/onboarding-box'
 import { OVERVIEW_URL } from 'src/constants'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 import { SignInScreen } from 'src/authentication/components/SignIn'
 
 import { runInBackground } from 'src/util/webextensionRPC'
-import LoadingBlocker from 'src/common-ui/components/loading-blocker'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 const ButtonBar = styled.div`
@@ -30,11 +28,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static defaultProps: Pick<
-        Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG'
-    > = {
-        personalCloudBG: runInBackground(),
+    static defaultProps: Pick<Props, 'navToDashboard' | 'authBG'> = {
         authBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
