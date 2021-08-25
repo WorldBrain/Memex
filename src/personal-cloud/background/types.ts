@@ -27,5 +27,9 @@ export interface PersonalCloudSettings {
 export type PersonalCloudDeviceID = number | string
 
 export interface PersonalCloudRemoteInterface {
+    runDataDump: () => Promise<void>
+    runPassiveDataClean: () => Promise<void>
     isPassiveDataRemovalNeeded: () => Promise<boolean>
+    runDataMigrationPreparation: () => Promise<void>
+    runDataMigration: () => Promise<void>
 }

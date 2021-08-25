@@ -37,6 +37,7 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
+import delay from 'src/util/delay'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -77,6 +78,10 @@ export class PersonalCloudBackground {
 
         this.remoteFunctions = {
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
+            runPassiveDataClean: () => delay(2000),
+            runDataDump: () => delay(2000),
+            runDataMigration: () => delay(2000),
+            runDataMigrationPreparation: () => delay(2000),
         }
     }
 

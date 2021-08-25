@@ -4,7 +4,6 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import delay from 'src/util/delay'
 import { BACKUP_URL } from 'src/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { Event, State, Dependencies } from './types'
@@ -65,7 +64,7 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     private async attemptDataDump() {
         await executeUITask(this, 'backupState', async () => {
-            await delay(2000)
+            await this.dependencies.personalCloudBG.runDataDump()
             // Uncomment this to show error state:
             // throw new Error()
         })
@@ -73,7 +72,7 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     private async attemptPassiveDataClean(state: State) {
         await executeUITask(this, 'dataCleaningState', async () => {
-            await delay(2000)
+            await this.dependencies.personalCloudBG.runPassiveDataClean()
             // Uncomment this to show error state:
             // throw new Error()
         })
@@ -89,13 +88,11 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     private async attemptCloudMigration({ isMigrationPrepped }: State) {
         await executeUITask(this, 'migrationState', async () => {
             if (!isMigrationPrepped) {
-                await delay(2000) // TODO: migration prep step
-
-                // TODO: set local storage key
+                await this.dependencies.personalCloudBG.runDataMigrationPreparation()
                 this.emitMutation({ isMigrationPrepped: { $set: true } })
             }
 
-            await delay(2000)
+            await this.dependencies.personalCloudBG.runDataMigration()
             // Uncomment this to show error state:
             // throw new Error()
         })
