@@ -125,23 +125,8 @@ class BackgroundScript {
     }
 
     private async runOnboarding() {
-        const aWeekBack = new Date()
-        aWeekBack.setDate(aWeekBack.getDate() - 7)
-
-        // Determine whether the user should be shown Memex log in screen based on whether they've visited Memex Social links recently
-        const historyItems = await this.historyAPI.search({
-            startTime: aWeekBack.getTime(),
-            text: 'memex.social/c/',
-            maxResults: 1,
-        })
-
-        const onboardingQueryParam =
-            historyItems.length > 0
-                ? ONBOARDING_QUERY_PARAMS.EXISTING_USER
-                : ONBOARDING_QUERY_PARAMS.NEW_USER
-
         await this.tabsAPI.create({
-            url: `${OVERVIEW_URL}?${onboardingQueryParam}`,
+            url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
         })
     }
 

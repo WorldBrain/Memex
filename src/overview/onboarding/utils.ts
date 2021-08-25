@@ -62,9 +62,6 @@ export const isDuringInstall = (loc = window.location): boolean =>
         .map((queryParam) => loc.href.includes(queryParam))
         .reduce((prev, curr) => prev || curr)
 
-export const isExistingUserOnboarding = (loc = window.location): boolean =>
-    loc.href.includes(ONBOARDING_QUERY_PARAMS.EXISTING_USER)
-
 /**
  * Find the page center of the current page.
  * Used to display the browse notification.

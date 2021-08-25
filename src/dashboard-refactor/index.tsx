@@ -15,10 +15,7 @@ import { shareListAndAllEntries } from './lists-sidebar/util'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import {
-    isDuringInstall,
-    isExistingUserOnboarding,
-} from 'src/overview/onboarding/utils'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
