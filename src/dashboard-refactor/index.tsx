@@ -920,13 +920,10 @@ export class DashboardContainer extends StatefulUIElement<
         const { listsSidebar } = this.state
         if (isDuringInstall(this.props.location)) {
             return (
-                <>
-                    <Onboarding
-                        authBG={this.props.authBG}
-                        personalCloudBG={this.props.personalCloudBG}
-                    />
-                    <HelpBtn />
-                </>
+                <Onboarding
+                    authBG={this.props.authBG}
+                    personalCloudBG={this.props.personalCloudBG}
+                />
             )
         }
 

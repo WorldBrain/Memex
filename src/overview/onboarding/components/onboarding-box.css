@@ -371,6 +371,13 @@
     margin: 20px 0 40px 0;
 }
 
+.descriptionText {
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+    font-weight: normal;
+}
+
 .shortcutContainer {
     display: flex;
     justify-content: center;

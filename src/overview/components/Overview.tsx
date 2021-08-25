@@ -248,15 +248,6 @@ class Overview extends PureComponent<Props, State> {
         window.location.reload()
     }
 
-    renderOnboarding() {
-        return (
-            <div>
-                <Onboarding navToDashboard={this.handleOnboardingComplete} />
-                <HelpBtn />
-            </div>
-        )
-    }
-
     renderUpdateNotifBanner() {
         return <UpdateNotifBanner theme={{ position: 'fixed' }} />
     }
@@ -370,7 +361,7 @@ class Overview extends PureComponent<Props, State> {
         }
 
         if (isDuringInstall()) {
-            return this.renderOnboarding()
+            return <Onboarding navToDashboard={this.handleOnboardingComplete} />
         }
 
         return (
