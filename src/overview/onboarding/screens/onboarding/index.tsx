@@ -47,10 +47,8 @@ export default class OnboardingScreen extends StatefulUIElement<
             </div>
             <div className={styles.videoBox}>
                 <iframe
-                    width="560"
-                    height="315"
                     src="https://www.youtube.com/embed/G8UF8lQnAKA"
-                    title="YouTube video player"
+                    title="Onboarding Video"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 ></iframe>
             </div>
@@ -68,13 +66,14 @@ export default class OnboardingScreen extends StatefulUIElement<
             <div className={styles.loadingSpinner}>
                 <LoadingIndicator />
             </div>
-            <div className={styles.titleText}>Syncing with Existing Data</div>
-            <div className={styles.descriptionText}>
-                This process continues in the background.
-            </div>
-            <div className={styles.descriptionText}>
-                It may take a while for all data to appear in your dashboard and
-                you may experience temporary performance issues.
+            <div className={styles.contentBox}>
+                <div className={styles.titleText}>Syncing with Existing Data</div>
+                <div className={styles.descriptionText}>
+                    This process continues in the background.
+                    <br/>
+                    It may take a while for all data to appear in your dashboard and
+                    you may experience temporary performance issues.
+                </div>
             </div>
             <ButtonBar>
                 <PrimaryAction
@@ -98,6 +97,13 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderLoginStep = () => (
         <div className={styles.welcomeScreen}>
             <img src={'/img/onlyIconLogo.svg'} className={styles.logoImg} />
+            <div className={styles.betaTag}>beta</div>
+            <div className={styles.contentBox}>
+                <div className={styles.titleText}>Welcome to Memex</div>
+                <div className={styles.descriptionText}>
+                    Enter an email address to sign up or log in.
+                </div>
+            </div>
             <SignInScreen
                 onSuccess={() => this.processEvent('onUserLogIn', null)}
             />
