@@ -251,7 +251,7 @@ class Overview extends PureComponent<Props, State> {
     renderOnboarding() {
         return (
             <div>
-                <Onboarding navToOverview={this.handleOnboardingComplete} />
+                <Onboarding navToDashboard={this.handleOnboardingComplete} />
                 <HelpBtn />
             </div>
         )

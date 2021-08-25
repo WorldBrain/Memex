@@ -33,24 +33,28 @@ export default class Logic extends UILogic<State, Event> {
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
             if (user != null) {
-                await this._onUserLogIn()
+                this._onUserLogIn()
             }
         })
     }
 
-    private async _onUserLogIn() {
+    private _onUserLogIn() {
         this.emitMutation({ shouldShowLogin: { $set: false } })
 
         this.syncPromise = executeUITask(this, 'syncState', async () => {
-            await delay(2000)
+            await delay(100)
         })
     }
 
-    onUserLogIn: EventHandler<'onUserLogIn'> = async ({}) => {
-        await this._onUserLogIn()
+    onUserLogIn: EventHandler<'onUserLogIn'> = ({}) => {
+        this._onUserLogIn()
     }
 
     goToSyncStep: EventHandler<'goToSyncStep'> = ({}) => {
         this.emitMutation({ step: { $set: 'sync' } })
+    }
+
+    finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
+        this.dependencies.navToDashboard()
     }
 }

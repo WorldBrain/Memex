@@ -29,9 +29,13 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static defaultProps: Pick<Props, 'navToOverview' | 'authBG'> = {
+    static defaultProps: Pick<
+        Props,
+        'navToDashboard' | 'authBG' | 'personalCloudBG'
+    > = {
+        personalCloudBG: runInBackground(),
         authBG: runInBackground(),
-        navToOverview: () => {
+        navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
         },
@@ -127,7 +131,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <Margin horizontal="5px" />
                     <SecondaryAction
                         label={'Go to Dashboard'}
-                        onClick={this.props.navToOverview}
+                        onClick={this.props.navToDashboard}
                     />
                 </ButtonBar>
             </div>
@@ -147,7 +151,7 @@ export default class OnboardingScreen extends StatefulUIElement<
 
     render() {
         return (
-            <OnboardingBox {...this.props}>
+            <OnboardingBox>
                 {this.state.shouldShowLogin
                     ? this.renderLoginStep()
                     : this.renderMainStep()}

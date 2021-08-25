@@ -921,7 +921,10 @@ export class DashboardContainer extends StatefulUIElement<
         if (isDuringInstall(this.props.location)) {
             return (
                 <>
-                    <Onboarding authBG={this.props.authBG} />
+                    <Onboarding
+                        authBG={this.props.authBG}
+                        personalCloudBG={this.props.personalCloudBG}
+                    />
                     <HelpBtn />
                 </>
             )
