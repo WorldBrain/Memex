@@ -3,10 +3,16 @@ import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import Logic from './logic'
 
 async function setupTest(
-    { backgroundModules, services, createElement }: UILogicTestDevice,
+    {
+        backgroundModules,
+        browserAPIs,
+        services,
+        createElement,
+    }: UILogicTestDevice,
     args?: {
         isLoggedIn?: boolean
         onDashboardNav?: () => void
@@ -20,6 +26,7 @@ async function setupTest(
     }
 
     const _logic = new Logic({
+        localStorage: browserAPIs.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
         navToDashboard: args?.onDashboardNav ?? (() => undefined),
     })
@@ -52,7 +59,7 @@ describe('New install onboarding UI logic', () => {
         expect(logicB.state.loadState).toEqual('success')
     })
 
-    it('should nav to dashboard upon finishing onboarding', async ({
+    it('should nav to dashboard + set local storage flag upon finishing onboarding', async ({
         device,
     }) => {
         let dashboardNavHappened = false
@@ -65,5 +72,25 @@ describe('New install onboarding UI logic', () => {
         expect(dashboardNavHappened).toBe(false)
         await logic.processEvent('finishOnboarding', null)
         expect(dashboardNavHappened).toBe(true)
+    })
+
+    it('should set local storage flag upon login', async ({ device }) => {
+        const { logic } = await setupTest(device)
+
+        expect(
+            (
+                await device.browserAPIs.storage.local.get(
+                    CLOUD_STORAGE_KEYS.isEnabled,
+                )
+            )[CLOUD_STORAGE_KEYS.isEnabled],
+        ).not.toBe(true)
+        await logic.processEvent('onUserLogIn', null)
+        expect(
+            (
+                await device.browserAPIs.storage.local.get(
+                    CLOUD_STORAGE_KEYS.isEnabled,
+                )
+            )[CLOUD_STORAGE_KEYS.isEnabled],
+        ).toBe(true)
     })
 })
