@@ -88,7 +88,7 @@ export default class CloudOnboardingModal extends UIElement<
         return (
             <Overlay
                 services={this.props.services}
-                onCloseRequested={this.props.onModalClose}
+                onCloseRequested={this.props.onModalClose} // TODO: disallow this during important stuff
             >
                 {this.renderModalContent()}
             </Overlay>

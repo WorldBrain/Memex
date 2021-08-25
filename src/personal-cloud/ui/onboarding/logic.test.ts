@@ -6,10 +6,16 @@ import {
 } from 'src/tests/ui-logic-tests'
 import { createUIServices } from 'src/services/ui'
 import Logic from './logic'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { State, Event } from './types'
 
 async function setupTest(
-    { backgroundModules, services, createElement }: UILogicTestDevice,
+    {
+        backgroundModules,
+        browserAPIs,
+        services,
+        createElement,
+    }: UILogicTestDevice,
     args?: { isLoggedOut?: boolean; onModalClose?: () => void },
 ) {
     if (!args?.isLoggedOut) {
@@ -27,6 +33,7 @@ async function setupTest(
         ) as any,
         personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         onModalClose: args?.onModalClose ?? (() => undefined),
+        localStorage: browserAPIs.storage.local,
     })
 
     const logic = createElement<State, Event>(_logic)
@@ -49,6 +56,30 @@ describe('Cloud onboarding UI logic', () => {
         expect(hasModalClosed).toBe(false)
         await logic.init()
         expect(hasModalClosed).toBe(true)
+    })
+
+    it('should set local storage flag upon onboarding finish', async ({
+        device,
+    }) => {
+        const { logic } = await setupTest(device)
+
+        expect(
+            (
+                await device.browserAPIs.storage.local.get(
+                    CLOUD_STORAGE_KEYS.isEnabled,
+                )
+            )[CLOUD_STORAGE_KEYS.isEnabled],
+        ).not.toBe(true)
+
+        await logic.processEvent('closeMigration', null)
+
+        expect(
+            (
+                await device.browserAPIs.storage.local.get(
+                    CLOUD_STORAGE_KEYS.isEnabled,
+                )
+            )[CLOUD_STORAGE_KEYS.isEnabled],
+        ).toBe(true)
     })
 
     it('should determine whether dump is needed, based on last backup time existence', async ({

@@ -1,3 +1,4 @@
+import type { Storage } from 'webextension-polyfill-ts'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
@@ -9,6 +10,7 @@ import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background
 export interface Dependencies {
     services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
     personalCloudBG: PersonalCloudRemoteInterface
+    localStorage: Storage.LocalStorageArea
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     onModalClose: () => void
