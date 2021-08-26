@@ -88,7 +88,7 @@ export function createSelfTests(options: {
             console.log('Cleared Firestore personal cloud collections')
 
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.handleAuthChange()
+            await personalCloud.startSync()
             console.log('Generated device ID:', personalCloud.deviceId!)
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
