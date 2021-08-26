@@ -11,12 +11,12 @@ export const Container = styled.div`
 
 export const BtnBox = styled.div`
     display: flex;
-    justify-content: space-around;
-    width: 360px;
+    grid-auto-flow: column;
+    grid-column-gap: 10px;
 `
 
 export const Header = styled.div`
-	font-size: 24px;
+	font-size: 20px;
     color: ${(props) => props.theme.colors.primary};
     font-weight: bold;
     text-align: center;
