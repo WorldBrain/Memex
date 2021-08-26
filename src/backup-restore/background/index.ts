@@ -73,6 +73,13 @@ export class BackupBackgroundModule {
             disableAutomaticBackup: this.disableAutomaticBackup,
             isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
             isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
+            disableRecordingChanges: async () => {
+                this.storage.stopRecordingChanges()
+                await this.disableAutomaticBackup()
+
+                // This is needed so the recording of changes are not restarted on next ext setup
+                await this.backupInfoStorage.storeDate('lastBackup', null)
+            },
             getBackupTimes: async () => {
                 return this.getBackupTimes()
             },
