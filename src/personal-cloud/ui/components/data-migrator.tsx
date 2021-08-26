@@ -5,7 +5,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { Container, BtnBox, Header, Text } from './shared-components'
+import { Container, BtnBox, Header, Text, TopComponent } from './shared-components'
 
 export interface Props {
     isPrepping: boolean
@@ -57,7 +57,9 @@ export default class DataMigrator extends React.PureComponent<Props> {
         if (migrationState === 'running') {
             return isPrepping ? (
                 <>
-                    <LoadingIndicator />
+                    <TopComponent>
+                        <LoadingIndicator />
+                    </TopComponent>
                     <Header>Preparing Cloud Migration</Header>
                     <Text>
                         Don't close your browser or shut off your computer in
@@ -66,12 +68,14 @@ export default class DataMigrator extends React.PureComponent<Props> {
                 </>
             ) : (
                 <>
-                    <LoadingIndicator />
+                    <TopComponent>
+                        <LoadingIndicator />
+                    </TopComponent>
                     <Header>Cloud Migration in Progress</Header>
                     <Text>
                         This process with run and continue in the background.
-                    </Text>
-                    <Text>
+                        <br/>
+                        <br/>
                         It may take a while for all content to appear on all
                         your devices.
                     </Text>
@@ -81,7 +85,9 @@ export default class DataMigrator extends React.PureComponent<Props> {
         if (migrationState === 'error') {
             return (
                 <>
+                    <TopComponent>
                     <Icon icon="alertRound" height="20px" />
+                    </TopComponent>
                     <Header>
                         There was an error with migrating your data to the cloud
                     </Header>
@@ -94,7 +100,9 @@ export default class DataMigrator extends React.PureComponent<Props> {
         }
         return (
             <>
-                <Icon icon="checkRound" height="20px" />
+                <TopComponent>
+                    <Icon icon="checkRound" height="20px" />
+                </TopComponent>
                 <Header>Cloud Migration Complete</Header>
                 <Text>Login on other devices to sync them.</Text>
             </>

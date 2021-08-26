@@ -4,13 +4,33 @@ export const Container = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
+    width: 800px;
+    height: 400px;
+    align-items: center;
 `
 
 export const BtnBox = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
+    width: 360px;
 `
 
-export const Header = styled.h1``
+export const Header = styled.div`
+	font-size: 24px;
+    color: ${(props) => props.theme.colors.primary};
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+`
 
-export const Text = styled.span<{ dimmed: boolean; clickable: boolean }>``
+export const TopComponent = styled.div`
+	margin-bottom: 20px;
+`
+
+export const Text = styled.span<{ dimmed: boolean; clickable: boolean }>`
+	color: ${(props) => props.dimmed ? props.theme.colors.subText : props.theme.colors.primary};
+	margin-bottom: ${(props) => props.dimmed ? '0px' : '40px'};
+	margin-top: ${(props) => props.dimmed && '20px'};
+	font-size: ${(props) => !props.dimmed && '14px'};
+	text-align: center;
+`

@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
@@ -25,11 +26,11 @@ export default class DataDumper extends React.PureComponent<Props> {
             return (
                 <>
                     <SecondaryAction
-                        label="Make backup of existing data"
+                        label="Backup existing data"
                         onClick={this.props.onStartClick}
                     />
                     <PrimaryAction
-                        label="Continue migration without backup"
+                        label="Continue migration"
                         onClick={this.props.onContinueClick}
                     />
                 </>
@@ -123,7 +124,7 @@ export default class DataDumper extends React.PureComponent<Props> {
                             clickable
                             onClick={this.props.onUseOldVersionClick}
                         >
-                            Migrate
+                            <u>Migrate</u>
                         </Text>{' '}
                         to the last version of Memex.
                     </Text>

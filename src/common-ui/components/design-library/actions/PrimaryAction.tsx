@@ -11,7 +11,7 @@ import {
 
 const StyledPrimaryAction = styled.div`
     padding: 8px 20px;
-    height: 36px;
+    height: 35px;
     overflow: visible;
     white-space: nowrap;
     display: flex;
