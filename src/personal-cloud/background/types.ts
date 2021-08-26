@@ -30,5 +30,7 @@ export interface PersonalCloudSettings {
 export type PersonalCloudDeviceID = number | string
 export interface PersonalCloudStats {
     countingDownloads: boolean
+    countingUploads: boolean
     pendingDownloads: number
+    pendingUploads: number
 }

@@ -24,7 +24,6 @@ import {
     PersonalCloudSettings,
     PersonalCloudDeviceID,
     PersonalCloudStats,
-    PersonalCloudBackgroundEvents,
 } from './types'
 import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './constants'
 import {
@@ -66,7 +65,9 @@ export class PersonalCloudBackground {
 
     stats: PersonalCloudStats = {
         countingDownloads: false,
+        countingUploads: true,
         pendingDownloads: 0,
+        pendingUploads: 0,
     }
 
     constructor(public options: PersonalCloudBackgroundOptions) {
@@ -78,6 +79,11 @@ export class PersonalCloudBackground {
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
         })
+        this.actionQueue.events.on('statsChanged', (stats) => {
+            this._modifyStats({
+                pendingUploads: stats.pendingActionCount,
+            })
+        })
     }
 
     async setup() {
@@ -86,6 +92,10 @@ export class PersonalCloudBackground {
         )
 
         await this.actionQueue.setup({ paused: true })
+        this._modifyStats({
+            pendingUploads: this.actionQueue.pendingActionCount,
+            countingUploads: false,
+        })
         if (await this.options.settingStore.get('isSetUp')) {
             // This might take a long time, so don't wait for it
             this.startSync()
