@@ -98,6 +98,7 @@ export async function setupBackgroundIntegrationTest(
     const auth: AuthBackground = new AuthBackground({
         authService: services.auth,
         subscriptionService: services.subscriptions,
+        remoteEmitter: { emit: async () => {} },
         scheduleJob: (job: JobDefinition) => {
             console['info'](
                 'Running job immediately while in testing, job:',
