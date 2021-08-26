@@ -23,6 +23,8 @@ import {
     PersonalCloudActionType,
     PersonalCloudSettings,
     PersonalCloudDeviceID,
+    PersonalCloudStats,
+    PersonalCloudBackgroundEvents,
 } from './types'
 import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './constants'
 import {
@@ -33,10 +35,12 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
+import { RemoteEventEmitter } from '../../util/webextensionRPC'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
     persistentStorageManager: StorageManager
+    remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
     backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
@@ -60,6 +64,11 @@ export class PersonalCloudBackground {
     reportExecutingAction?: (action: PersonalCloudAction) => void
     debug = false
 
+    stats: PersonalCloudStats = {
+        countingDownloads: false,
+        pendingDownloads: 0,
+    }
+
     constructor(public options: PersonalCloudBackgroundOptions) {
         this.actionQueue = new ActionQueue({
             storageManager: options.storageManager,
@@ -75,21 +84,34 @@ export class PersonalCloudBackground {
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )
+
         await this.actionQueue.setup({ paused: true })
-        await this.loadDeviceId()
+        if (await this.options.settingStore.get('isSetUp')) {
+            // This might take a long time, so don't wait for it
+            this.startSync()
+        }
+    }
+
+    async observeAuthChanges() {
+        for await (const _ of this.options.userIdChanges()) {
+            await this.handleAuthChange()
+        }
+    }
+
+    async enableSync() {
+        await this.options.settingStore.set('isSetUp', true)
+        await this.startSync()
+    }
+
+    async startSync() {
+        await this.handleAuthChange()
 
         // These will never return, so don't await for it
         this.observeAuthChanges()
         this.integrateContinuously()
     }
 
-    async observeAuthChanges() {
-        for await (const _ of this.options.userIdChanges()) {
-            await this.loadDeviceId()
-        }
-    }
-
-    async loadDeviceId() {
+    async handleAuthChange() {
         const userId = await this.options.getUserId()
         if (userId) {
             this.deviceId = await this.options.settingStore.get('deviceId')
@@ -102,6 +124,32 @@ export class PersonalCloudBackground {
             this.actionQueue.pause()
             delete this.deviceId
         }
+
+        const isAuthenticated = !!this.deviceId
+        if (!isAuthenticated) {
+            this._modifyStats({
+                countingDownloads: false,
+                pendingDownloads: 0,
+            })
+        }
+
+        this._modifyStats({ countingDownloads: true })
+        for await (const status of this.options.backend.countChanges({
+            userReference: { type: 'user-reference', id: userId },
+        })) {
+            this._modifyStats({
+                pendingDownloads: status.totalCount,
+            })
+        }
+        this._modifyStats({ countingDownloads: false })
+    }
+
+    _modifyStats(updates: Partial<PersonalCloudStats>) {
+        this.stats = { ...this.stats, ...updates }
+        this._debugLog('Updated stats', this.stats)
+        this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
+            stats: this.stats,
+        })
     }
 
     async integrateContinuously() {

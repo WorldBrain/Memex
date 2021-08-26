@@ -169,7 +169,7 @@ export default class SyncBackground extends SyncService {
     }
 
     registerRemoteEmitter() {
-        const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
+        const remoteEmitter = remoteEventEmitter('sync')
 
         this.initialSync.events.on('progress', (args) => {
             return remoteEmitter.emit('progress', args)

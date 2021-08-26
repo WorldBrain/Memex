@@ -88,7 +88,7 @@ export function createSelfTests(options: {
             console.log('Cleared Firestore personal cloud collections')
 
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.loadDeviceId()
+            await personalCloud.handleAuthChange()
             console.log('Generated device ID:', personalCloud.deviceId!)
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
@@ -282,7 +282,7 @@ export function createSelfTests(options: {
 
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.loadDeviceId()
+            await personalCloud.handleAuthChange()
         },
     }
     return tests
