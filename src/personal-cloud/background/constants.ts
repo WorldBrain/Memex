@@ -20,7 +20,7 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     TEMPLATE_COLLECTION_NAMES.templates,
     ANNOTATIONS_COLLECTION_NAMES.annotation,
     ANNOTATIONS_COLLECTION_NAMES.annotationPrivacy,
-    'syncDeviceInfo',
+    'syncDeviceInfo', // TODO: probably remove this
     'sharedListMetadata',
     'sharedAnnotationMetadata',
 ]
