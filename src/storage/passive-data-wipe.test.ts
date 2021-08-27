@@ -6,10 +6,14 @@ const ACTIVE_PAGE_URLS = ['a.com', 'b.com', 'c.com', 'd.com']
 const ORPHANED_PAGE_URLS = ['e.com', 'f.com', 'g.com', 'h.com']
 const ALL_PAGE_URLS = [...ACTIVE_PAGE_URLS, ...ORPHANED_PAGE_URLS]
 
-async function insertTestData({ db }: { db: Dexie }) {
+async function insertTestData({ db, now }: { db: Dexie; now: number }) {
     for (const pageUrl of ALL_PAGE_URLS) {
         await db.table('pages').put({ url: pageUrl, hostname: pageUrl })
         await db.table('favIcons').put({ hostname: pageUrl })
+        await db.table('visits').put({ url: pageUrl, time: now })
+        await db.table('visits').put({ url: pageUrl, time: now - 1 })
+        await db.table('visits').put({ url: pageUrl, time: now - 2 })
+        await db.table('visits').put({ url: pageUrl, time: now - 3 })
     }
 
     await db.table('bookmarks').put({
@@ -33,12 +37,29 @@ async function assertPageExists(args: {
     db: Dexie
     pageUrl: string
     exists: boolean
+    now: number
 }) {
     expect(await args.db.table('pages').get(args.pageUrl)).toEqual(
         args.exists ? { url: args.pageUrl, hostname: args.pageUrl } : undefined,
     )
     expect(await args.db.table('favIcons').get(args.pageUrl)).toEqual(
         args.exists ? { hostname: args.pageUrl } : undefined,
+    )
+    expect(
+        await args.db
+            .table('visits')
+            .where('url')
+            .equals(args.pageUrl)
+            .toArray(),
+    ).toEqual(
+        args.exists
+            ? [
+                  { url: args.pageUrl, time: args.now - 3 },
+                  { url: args.pageUrl, time: args.now - 2 },
+                  { url: args.pageUrl, time: args.now - 1 },
+                  { url: args.pageUrl, time: args.now },
+              ]
+            : [],
     )
 }
 
@@ -47,14 +68,15 @@ describe('passive data wipe tests', () => {
 
     it('should not delete pages with associated data', async ({ device }) => {
         const db: Dexie = device.storageManager.backend['dexie']
-        await insertTestData({ db })
+        const now = Date.now()
+        await insertTestData({ db, now })
 
         await Promise.all([
             ...ACTIVE_PAGE_URLS.map((pageUrl) =>
-                assertPageExists({ db, pageUrl, exists: true }),
+                assertPageExists({ db, pageUrl, exists: true, now }),
             ),
             ...ORPHANED_PAGE_URLS.map((pageUrl) =>
-                assertPageExists({ db, pageUrl, exists: true }),
+                assertPageExists({ db, pageUrl, exists: true, now }),
             ),
         ])
 
@@ -62,10 +84,10 @@ describe('passive data wipe tests', () => {
 
         await Promise.all([
             ...ACTIVE_PAGE_URLS.map((pageUrl) =>
-                assertPageExists({ db, pageUrl, exists: true }),
+                assertPageExists({ db, pageUrl, exists: true, now }),
             ),
             ...ORPHANED_PAGE_URLS.map((pageUrl) =>
-                assertPageExists({ db, pageUrl, exists: false }),
+                assertPageExists({ db, pageUrl, exists: false, now }),
             ),
         ])
     })
