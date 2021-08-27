@@ -81,21 +81,20 @@ describe('cloud migration preparation tests', () => {
     it('should process data in specific collection order', async ({
         device,
     }) => {
-        const queuedData: Array<{ collection: string; objs: any[] }> = []
+        const queuedData = new Map<string, any[]>()
         const db = device.storageManager
         const now = Date.now()
         await insertTestData({ db, now })
 
-        expect(queuedData).toEqual([])
-
         await prepareDataMigration({
             db,
             queueObjs: async (collection, objs) => {
-                queuedData.push({ collection, objs })
+                const prev = queuedData.get(collection) ?? []
+                queuedData.set(collection, [...prev, ...objs])
             },
         })
 
-        expect(queuedData.map(({ collection }) => collection)).toEqual([
+        expect([...queuedData.keys()]).toEqual([
             'pages',
             'visits',
             'bookmarks',
