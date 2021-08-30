@@ -80,11 +80,13 @@ export class PersonalCloudBackground {
         })
 
         this.remoteFunctions = {
+            enableCloudSync: this.enableCloudSync,
+            disableCloudSync: this.disableCloudSync,
+            runDataMigrationPreparation: this.prepareDataMigration,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () => wipePassiveData({ db: this.dexie }),
             runDataDump: () => delay(2000),
             runDataMigration: () => delay(2000),
-            runDataMigrationPreparation: () => delay(2000),
         }
     }
 
@@ -92,7 +94,7 @@ export class PersonalCloudBackground {
         return this.options.storageManager.backend['dexie']
     }
 
-    private async prepareDataMigration() {
+    private prepareDataMigration = async () => {
         await prepareDataMigration({
             db: this.dexie,
             queueObjs: (actionData) =>
@@ -114,7 +116,25 @@ export class PersonalCloudBackground {
                 ),
         })
 
-        // TODO: Enable cloud
+        await this.enableCloudSync()
+    }
+
+    private enableCloudSync = async () => {
+        await this.options.settingStore.set('isEnabled', true)
+        this.actionQueue.unpause()
+    }
+
+    private disableCloudSync = async () => {
+        await this.options.settingStore.set('isEnabled', false)
+        this.actionQueue.pause()
+    }
+
+    private async startCloudSyncIfEnabled() {
+        const isEnabled = await this.options.settingStore.get('isEnabled')
+
+        if (isEnabled) {
+            this.actionQueue.unpause()
+        }
     }
 
     async setup() {
@@ -143,7 +163,7 @@ export class PersonalCloudBackground {
                 this.deviceId = await this.options.createDeviceId(userId)
                 await this.options.settingStore.set('deviceId', this.deviceId!)
             }
-            this.actionQueue.unpause()
+            await this.startCloudSyncIfEnabled()
         } else {
             this.actionQueue.pause()
             delete this.deviceId
