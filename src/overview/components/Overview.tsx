@@ -361,12 +361,7 @@ class Overview extends PureComponent<Props, State> {
         }
 
         if (isDuringInstall()) {
-            return (
-                <Onboarding
-                    navToDashboard={this.handleOnboardingComplete}
-                    localStorage={browser.storage.local}
-                />
-            )
+            return <Onboarding navToDashboard={this.handleOnboardingComplete} />
         }
 
         return (

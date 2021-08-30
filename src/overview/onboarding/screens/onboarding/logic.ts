@@ -3,7 +3,6 @@ import {
     UIEventHandler,
     loadInitial,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { Dependencies, State, Event } from './types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -36,10 +35,7 @@ export default class Logic extends UILogic<State, Event> {
 
     private async _onUserLogIn() {
         this.emitMutation({ shouldShowLogin: { $set: false } })
-
-        await this.dependencies.localStorage.set({
-            [CLOUD_STORAGE_KEYS.isEnabled]: true,
-        })
+        await this.dependencies.personalCloudBG.enableCloudSync()
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({}) => {

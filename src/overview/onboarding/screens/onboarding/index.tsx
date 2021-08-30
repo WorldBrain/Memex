@@ -28,8 +28,12 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static defaultProps: Pick<Props, 'navToDashboard' | 'authBG'> = {
+    static defaultProps: Pick<
+        Props,
+        'navToDashboard' | 'authBG' | 'personalCloudBG'
+    > = {
         authBG: runInBackground(),
+        personalCloudBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
@@ -67,12 +71,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <LoadingIndicator />
             </div>
             <div className={styles.contentBox}>
-                <div className={styles.titleText}>Syncing with Existing Data</div>
+                <div className={styles.titleText}>
+                    Syncing with Existing Data
+                </div>
                 <div className={styles.descriptionText}>
                     This process continues in the background.
-                    <br/>
-                    It may take a while for all data to appear in your dashboard and
-                    you may experience temporary performance issues.
+                    <br />
+                    It may take a while for all data to appear in your dashboard
+                    and you may experience temporary performance issues.
                 </div>
             </div>
             <ButtonBar>

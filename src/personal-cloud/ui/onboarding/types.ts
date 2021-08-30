@@ -10,7 +10,6 @@ import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background
 export interface Dependencies {
     services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
     personalCloudBG: PersonalCloudRemoteInterface
-    localStorage: Storage.LocalStorageArea
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     onModalClose: () => void

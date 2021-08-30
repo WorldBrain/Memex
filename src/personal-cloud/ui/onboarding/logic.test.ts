@@ -10,12 +10,7 @@ import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants
 import type { State, Event } from './types'
 
 async function setupTest(
-    {
-        backgroundModules,
-        browserAPIs,
-        services,
-        createElement,
-    }: UILogicTestDevice,
+    { backgroundModules, services, createElement }: UILogicTestDevice,
     args?: { isLoggedOut?: boolean; onModalClose?: () => void },
 ) {
     if (!args?.isLoggedOut) {
@@ -33,7 +28,6 @@ async function setupTest(
         ) as any,
         personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         onModalClose: args?.onModalClose ?? (() => undefined),
-        localStorage: browserAPIs.storage.local,
     })
 
     const logic = createElement<State, Event>(_logic)
@@ -58,28 +52,19 @@ describe('Cloud onboarding UI logic', () => {
         expect(hasModalClosed).toBe(true)
     })
 
-    it('should set local storage flag upon onboarding finish', async ({
+    it('should set local storage flag upon data migration', async ({
         device,
     }) => {
         const { logic } = await setupTest(device)
+        const { settingStore } = device.backgroundModules.personalCloud.options
 
-        expect(
-            (
-                await device.browserAPIs.storage.local.get(
-                    CLOUD_STORAGE_KEYS.isEnabled,
-                )
-            )[CLOUD_STORAGE_KEYS.isEnabled],
-        ).not.toBe(true)
+        logic.processMutation({ needsToRemovePassiveData: { $set: false } })
 
-        await logic.processEvent('closeMigration', null)
-
-        expect(
-            (
-                await device.browserAPIs.storage.local.get(
-                    CLOUD_STORAGE_KEYS.isEnabled,
-                )
-            )[CLOUD_STORAGE_KEYS.isEnabled],
-        ).toBe(true)
+        expect(logic.state.stage).toEqual('data-dump')
+        expect(await settingStore.get('isEnabled')).not.toBe(true)
+        await logic.processEvent('continueToMigration', null)
+        expect(logic.state.stage).toEqual('data-migration')
+        expect(await settingStore.get('isEnabled')).toBe(true)
     })
 
     it('should disable DB backup change recording before performing passive data wipe', async ({
@@ -144,30 +129,5 @@ describe('Cloud onboarding UI logic', () => {
         expect(logicB.state.stage).toEqual('data-dump')
         await logicB.processEvent('continueToMigration', null)
         expect(logicB.state.stage).toEqual('data-clean')
-    })
-
-    it('should only do pre-migration prep step once - migration retries should skip it', async ({
-        device,
-    }) => {
-        // TODO: Implement this!
-        expect(true).toBe(false)
-
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: null, // As there isn't a last backup time, it should tell user to dump
-            nextBackup: null,
-        })
-        const { logic: logicA } = await setupTest(device)
-        expect(logicA.state.shouldBackupViaDump).toBe(false)
-        await logicA.init()
-        expect(logicA.state.shouldBackupViaDump).toBe(true)
-
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
-            nextBackup: null,
-        })
-        const { logic: logicB } = await setupTest(device)
-        expect(logicB.state.shouldBackupViaDump).toBe(false)
-        await logicB.init()
-        expect(logicB.state.shouldBackupViaDump).toBe(false)
     })
 })

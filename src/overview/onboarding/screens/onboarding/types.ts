@@ -1,10 +1,10 @@
-import type { Storage } from 'webextension-polyfill-ts'
 import type { UIEvent } from 'ui-logic-core'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface Dependencies {
-    localStorage: Storage.LocalStorageArea
+    personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
     navToDashboard: () => void
 }

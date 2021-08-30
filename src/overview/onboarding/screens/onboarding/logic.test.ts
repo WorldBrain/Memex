@@ -3,16 +3,10 @@ import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import Logic from './logic'
 
 async function setupTest(
-    {
-        backgroundModules,
-        browserAPIs,
-        services,
-        createElement,
-    }: UILogicTestDevice,
+    { backgroundModules, services, createElement }: UILogicTestDevice,
     args?: {
         isLoggedIn?: boolean
         onDashboardNav?: () => void
@@ -26,8 +20,8 @@ async function setupTest(
     }
 
     const _logic = new Logic({
-        localStorage: browserAPIs.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
+        personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         navToDashboard: args?.onDashboardNav ?? (() => undefined),
     })
 
@@ -76,21 +70,10 @@ describe('New install onboarding UI logic', () => {
 
     it('should set local storage flag upon login', async ({ device }) => {
         const { logic } = await setupTest(device)
+        const { settingStore } = device.backgroundModules.personalCloud.options
 
-        expect(
-            (
-                await device.browserAPIs.storage.local.get(
-                    CLOUD_STORAGE_KEYS.isEnabled,
-                )
-            )[CLOUD_STORAGE_KEYS.isEnabled],
-        ).not.toBe(true)
+        expect(await settingStore.get('isEnabled')).not.toBe(true)
         await logic.processEvent('onUserLogIn', null)
-        expect(
-            (
-                await device.browserAPIs.storage.local.get(
-                    CLOUD_STORAGE_KEYS.isEnabled,
-                )
-            )[CLOUD_STORAGE_KEYS.isEnabled],
-        ).toBe(true)
+        expect(await settingStore.get('isEnabled')).toBe(true)
     })
 })

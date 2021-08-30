@@ -5,7 +5,6 @@ import {
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { Event, State, Dependencies } from './types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -154,9 +153,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     }
 
     closeMigration: EventHandler<'closeMigration'> = async ({}) => {
-        await this.dependencies.localStorage.set({
-            [CLOUD_STORAGE_KEYS.isEnabled]: true,
-        })
         this.dependencies.onModalClose()
     }
 
