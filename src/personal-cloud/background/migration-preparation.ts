@@ -1,21 +1,11 @@
 import type Dexie from 'dexie'
-import type { PersonalCloudClientInstruction } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { PersonalCloudActionType } from './types'
-
-type QueueActionData =
-    | {
-          type: PersonalCloudActionType.PushObject
-          collection: string
-          objs: any[]
-      }
-    | {
-          type: PersonalCloudActionType.ExecuteClientInstructions
-          clientInstructions: PersonalCloudClientInstruction[]
-      }
 
 interface Dependencies {
     db: Dexie
-    queueObjs: (actionData: QueueActionData) => Promise<void>
+    queueObjs: (actionData: {
+        collection: string
+        objs: any[]
+    }) => Promise<void>
 }
 
 async function findAllObjectsChunked<T = any>(args: {
@@ -34,7 +24,10 @@ async function findAllObjectsChunked<T = any>(args: {
             .limit(args.chunkSize)
             .toArray()
         skip += args.chunkSize
-        await args.cb(objs)
+
+        if (objs.length) {
+            await args.cb(objs)
+        }
     } while (objs.length === args.chunkSize)
 }
 
@@ -45,41 +38,32 @@ const _prepareDataMigration = ({
 }: Dependencies) => async (): Promise<void> => {
     const queueAllObjects = async (
         collection: string,
-        args?: { chunked: boolean },
+        args?: { chunkSize?: number },
     ) => {
-        if (args?.chunked) {
+        if (args?.chunkSize > 0) {
             await findAllObjectsChunked({
                 db,
-                chunkSize: 500,
                 collection: collection,
-                cb: async (objs) =>
-                    queueObjs({
-                        type: PersonalCloudActionType.PushObject,
-                        collection,
-                        objs,
-                    }),
+                chunkSize: args.chunkSize,
+                cb: async (objs) => queueObjs({ collection, objs }),
             })
         } else {
             const objs = await db.table(collection).toArray()
-            await queueObjs({
-                type: PersonalCloudActionType.PushObject,
-                collection,
-                objs,
-            })
+            await queueObjs({ collection, objs })
         }
     }
 
     // Step 1.1: pages
-    await queueAllObjects('pages', { chunked: true })
+    await queueAllObjects('pages', { chunkSize: 500 })
 
     // Step 1.2: visits
-    await queueAllObjects('visits', { chunked: true })
+    await queueAllObjects('visits', { chunkSize: 500 })
 
     // Step 1.3: bookmarks
     await queueAllObjects('bookmarks')
 
     // Step 2.1: annotations
-    await queueAllObjects('annotations')
+    await queueAllObjects('annotations', { chunkSize: 500 })
 
     // Step 2.2: annotation privacy levels
     await queueAllObjects('annotationPrivacyLevels')
@@ -104,10 +88,6 @@ const _prepareDataMigration = ({
 
     // Step 4.3: copy-paster templates
     await queueAllObjects('templates')
-
-    // Step 5.1: fav-icons
-    // await queueAllObjects('templates')
-    // await queueObjs({ type: PersonalCloudActionType.ExecuteClientInstructions, clientInstructions: [] })
 }
 
 export const prepareDataMigration = (deps: Dependencies) =>
@@ -126,7 +106,6 @@ export const prepareDataMigration = (deps: Dependencies) =>
             'tags',
             'settings',
             'templates',
-            'favIcons',
             'personalCloudAction',
         ],
         _prepareDataMigration(deps),

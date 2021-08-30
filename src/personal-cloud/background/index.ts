@@ -95,38 +95,23 @@ export class PersonalCloudBackground {
     private async prepareDataMigration() {
         await prepareDataMigration({
             db: this.dexie,
-            queueObjs: async (actionData) => {
-                if (actionData.type === PersonalCloudActionType.PushObject) {
-                    await this.actionQueue.scheduleAction(
-                        {
-                            type: PersonalCloudActionType.PushObject,
-                            updates: actionData.objs.map((object) => ({
-                                type: PersonalCloudUpdateType.Overwrite,
-                                schemaVersion: this.currentSchemaVersion!,
-                                deviceId: this.deviceId,
+            queueObjs: (actionData) =>
+                this.actionQueue.scheduleAction(
+                    {
+                        type: PersonalCloudActionType.PushObject,
+                        updates: actionData.objs.map((object) => ({
+                            type: PersonalCloudUpdateType.Overwrite,
+                            schemaVersion: this.currentSchemaVersion!,
+                            deviceId: this.deviceId,
+                            collection: actionData.collection,
+                            object: this.preprocessObjectForPush({
                                 collection: actionData.collection,
-                                object: this.preprocessObjectForPush({
-                                    collection: actionData.collection,
-                                    object,
-                                }),
-                            })),
-                        },
-                        { queueInteraction: 'queue-and-return' },
-                    )
-                } else if (
-                    actionData.type ===
-                    PersonalCloudActionType.ExecuteClientInstructions
-                ) {
-                    await this.actionQueue.scheduleAction(
-                        {
-                            type:
-                                PersonalCloudActionType.ExecuteClientInstructions,
-                            clientInstructions: actionData.clientInstructions,
-                        },
-                        { queueInteraction: 'queue-and-return' },
-                    )
-                }
-            },
+                                object,
+                            }),
+                        })),
+                    },
+                    { queueInteraction: 'queue-and-return' },
+                ),
         })
 
         // TODO: Enable cloud
