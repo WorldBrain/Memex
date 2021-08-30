@@ -1,4 +1,4 @@
-import type StorageManager from '@worldbrain/storex'
+import type Dexie from 'dexie'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { prepareDataMigration } from './migration-preparation'
 
@@ -6,71 +6,57 @@ const ACTIVE_PAGE_URLS = ['a.com', 'b.com', 'c.com', 'd.com']
 const ORPHANED_PAGE_URLS = ['e.com', 'f.com', 'g.com', 'h.com']
 const ALL_PAGE_URLS = [...ACTIVE_PAGE_URLS, ...ORPHANED_PAGE_URLS]
 
-async function insertTestData({
-    db,
-    now,
-}: {
-    db: StorageManager
-    now: number
-}) {
+async function insertTestData({ db, now }: { db: Dexie; now: number }) {
     for (const pageUrl of ALL_PAGE_URLS) {
-        await db
-            .collection('pages')
-            .createObject({ url: pageUrl, hostname: pageUrl })
-        await db.collection('favIcons').createObject({ hostname: pageUrl })
-        await db.collection('visits').createObject({ url: pageUrl, time: now })
-        await db
-            .collection('visits')
-            .createObject({ url: pageUrl, time: now - 1 })
-        await db
-            .collection('visits')
-            .createObject({ url: pageUrl, time: now - 2 })
-        await db
-            .collection('visits')
-            .createObject({ url: pageUrl, time: now - 3 })
+        await db.table('pages').put({ url: pageUrl, hostname: pageUrl })
+        await db.table('favIcons').put({ hostname: pageUrl })
+        await db.table('visits').put({ url: pageUrl, time: now })
+        await db.table('visits').put({ url: pageUrl, time: now - 1 })
+        await db.table('visits').put({ url: pageUrl, time: now - 2 })
+        await db.table('visits').put({ url: pageUrl, time: now - 3 })
     }
 
-    await db.collection('bookmarks').createObject({
+    await db.table('bookmarks').put({
         url: ACTIVE_PAGE_URLS[0],
     })
 
     const annotationUrl = ACTIVE_PAGE_URLS[1] + '/#1234'
 
-    await db.collection('annotations').createObject({
+    await db.table('annotations').put({
         url: annotationUrl,
         pageUrl: ACTIVE_PAGE_URLS[1],
     })
-    await db.collection('annotationPrivacyLevels').createObject({
+    await db.table('annotationPrivacyLevels').put({
         annotation: annotationUrl,
     })
-    await db.collection('sharedAnnotationMetadata').createObject({
+    await db.table('sharedAnnotationMetadata').put({
         localId: annotationUrl,
     })
 
-    await db.collection('customLists').createObject({
+    await db.table('customLists').put({
         id: 123,
     })
-    await db.collection('pageListEntries').createObject({
+    await db.table('pageListEntries').put({
         listId: 123,
         pageUrl: ACTIVE_PAGE_URLS[2],
     })
-    await db.collection('sharedListMetadata').createObject({
+    await db.table('sharedListMetadata').put({
         localId: 123,
     })
 
-    await db.collection('tags').createObject({
+    await db.table('tags').put({
         url: ACTIVE_PAGE_URLS[3],
         name: 'test-tag',
     })
-    await db.collection('tags').createObject({
+    await db.table('tags').put({
         url: annotationUrl,
         name: 'test-tag',
     })
-    await db.collection('settings').createObject({
+    await db.table('settings').put({
         key: 'my-setting',
         value: 'hi',
     })
-    await db.collection('templates').createObject({
+    await db.table('templates').put({
         id: 1,
     })
 }
@@ -82,7 +68,7 @@ describe('cloud migration preparation tests', () => {
         device,
     }) => {
         const queuedData = new Map<string, any[]>()
-        const db = device.storageManager
+        const db = device.storageManager.backend['dexie']
         const now = Date.now()
         await insertTestData({ db, now })
 

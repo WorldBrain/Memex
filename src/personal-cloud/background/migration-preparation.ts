@@ -1,7 +1,12 @@
-import type StorageManager from '@worldbrain/storex'
+import type Dexie from 'dexie'
+
+interface Dependencies {
+    db: Dexie
+    queueObjs: (collection: string, objs: any[]) => Promise<void>
+}
 
 async function findAllObjectsChunked<T = any>(args: {
-    db: StorageManager
+    db: Dexie
     collection: string
     chunkSize: number
     cb: (objs: T[]) => Promise<void>
@@ -11,21 +16,20 @@ async function findAllObjectsChunked<T = any>(args: {
 
     do {
         objs = await args.db
-            .collection(args.collection)
-            .findAllObjects({}, { skip, limit: args.chunkSize })
+            .table(args.collection)
+            .offset(skip)
+            .limit(args.chunkSize)
+            .toArray()
         skip += args.chunkSize
         await args.cb(objs)
     } while (objs.length === args.chunkSize)
 }
 
 // NOTE: the order of steps in this function matters a lot!
-export async function prepareDataMigration({
+const _prepareDataMigration = ({
     db,
     queueObjs,
-}: {
-    db: StorageManager
-    queueObjs: (collection: string, objs: any[]) => Promise<void>
-}): Promise<void> {
+}: Dependencies) => async (): Promise<void> => {
     const queueAllObjects = async (
         collection: string,
         args?: { chunked: boolean },
@@ -38,7 +42,7 @@ export async function prepareDataMigration({
                 cb: async (objs) => queueObjs(collection, objs),
             })
         } else {
-            const objs = await db.collection(collection).findAllObjects({})
+            const objs = await db.table(collection).toArray()
             await queueObjs(collection, objs)
         }
     }
@@ -82,3 +86,25 @@ export async function prepareDataMigration({
     // Step 5.1: fav-icons
     // await queueAllObjects('templates')
 }
+
+export const prepareDataMigration = (deps: Dependencies) =>
+    deps.db.transaction(
+        'rw!',
+        [
+            'pages',
+            'visits',
+            'bookmarks',
+            'annotations',
+            'annotationPrivacyLevels',
+            'sharedAnnotationMetadata',
+            'customLists',
+            'pageListEntries',
+            'sharedListMetadata',
+            'tags',
+            'settings',
+            'templates',
+            'favIcons',
+            'personalCloudAction',
+        ],
+        _prepareDataMigration(deps),
+    )
