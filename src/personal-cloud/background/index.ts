@@ -1,4 +1,5 @@
-import StorageManager from '@worldbrain/storex'
+import type Dexie from 'dexie'
+import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
@@ -35,6 +36,7 @@ import {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { wipePassiveData } from 'src/storage/passive-data-wipe'
+import { prepareDataMigration } from './migration-preparation'
 import { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
@@ -79,14 +81,55 @@ export class PersonalCloudBackground {
 
         this.remoteFunctions = {
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
-            runPassiveDataClean: () =>
-                wipePassiveData({
-                    db: options.storageManager.backend['dexie'],
-                }),
+            runPassiveDataClean: () => wipePassiveData({ db: this.dexie }),
             runDataDump: () => delay(2000),
             runDataMigration: () => delay(2000),
             runDataMigrationPreparation: () => delay(2000),
         }
+    }
+
+    private get dexie(): Dexie {
+        return this.options.storageManager.backend['dexie']
+    }
+
+    private async prepareDataMigration() {
+        await prepareDataMigration({
+            db: this.dexie,
+            queueObjs: async (actionData) => {
+                if (actionData.type === PersonalCloudActionType.PushObject) {
+                    await this.actionQueue.scheduleAction(
+                        {
+                            type: PersonalCloudActionType.PushObject,
+                            updates: actionData.objs.map((object) => ({
+                                type: PersonalCloudUpdateType.Overwrite,
+                                schemaVersion: this.currentSchemaVersion!,
+                                deviceId: this.deviceId,
+                                collection: actionData.collection,
+                                object: this.preprocessObjectForPush({
+                                    collection: actionData.collection,
+                                    object,
+                                }),
+                            })),
+                        },
+                        { queueInteraction: 'queue-and-return' },
+                    )
+                } else if (
+                    actionData.type ===
+                    PersonalCloudActionType.ExecuteClientInstructions
+                ) {
+                    await this.actionQueue.scheduleAction(
+                        {
+                            type:
+                                PersonalCloudActionType.ExecuteClientInstructions,
+                            clientInstructions: actionData.clientInstructions,
+                        },
+                        { queueInteraction: 'queue-and-return' },
+                    )
+                }
+            },
+        })
+
+        // TODO: Enable cloud
     }
 
     async setup() {

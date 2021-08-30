@@ -1,6 +1,7 @@
 import type Dexie from 'dexie'
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { prepareDataMigration } from './migration-preparation'
+import { PersonalCloudActionType } from './types'
 
 const ACTIVE_PAGE_URLS = ['a.com', 'b.com', 'c.com', 'd.com']
 const ORPHANED_PAGE_URLS = ['e.com', 'f.com', 'g.com', 'h.com']
@@ -74,9 +75,14 @@ describe('cloud migration preparation tests', () => {
 
         await prepareDataMigration({
             db,
-            queueObjs: async (collection, objs) => {
-                const prev = queuedData.get(collection) ?? []
-                queuedData.set(collection, [...prev, ...objs])
+            queueObjs: async (actionData) => {
+                if (actionData.type === PersonalCloudActionType.PushObject) {
+                    const prev = queuedData.get(actionData.collection) ?? []
+                    queuedData.set(actionData.collection, [
+                        ...prev,
+                        ...actionData.objs,
+                    ])
+                }
             },
         })
 

@@ -1,8 +1,21 @@
 import type Dexie from 'dexie'
+import type { PersonalCloudClientInstruction } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { PersonalCloudActionType } from './types'
+
+type QueueActionData =
+    | {
+          type: PersonalCloudActionType.PushObject
+          collection: string
+          objs: any[]
+      }
+    | {
+          type: PersonalCloudActionType.ExecuteClientInstructions
+          clientInstructions: PersonalCloudClientInstruction[]
+      }
 
 interface Dependencies {
     db: Dexie
-    queueObjs: (collection: string, objs: any[]) => Promise<void>
+    queueObjs: (actionData: QueueActionData) => Promise<void>
 }
 
 async function findAllObjectsChunked<T = any>(args: {
@@ -39,11 +52,20 @@ const _prepareDataMigration = ({
                 db,
                 chunkSize: 500,
                 collection: collection,
-                cb: async (objs) => queueObjs(collection, objs),
+                cb: async (objs) =>
+                    queueObjs({
+                        type: PersonalCloudActionType.PushObject,
+                        collection,
+                        objs,
+                    }),
             })
         } else {
             const objs = await db.table(collection).toArray()
-            await queueObjs(collection, objs)
+            await queueObjs({
+                type: PersonalCloudActionType.PushObject,
+                collection,
+                objs,
+            })
         }
     }
 
@@ -85,6 +107,7 @@ const _prepareDataMigration = ({
 
     // Step 5.1: fav-icons
     // await queueAllObjects('templates')
+    // await queueObjs({ type: PersonalCloudActionType.ExecuteClientInstructions, clientInstructions: [] })
 }
 
 export const prepareDataMigration = (deps: Dependencies) =>
