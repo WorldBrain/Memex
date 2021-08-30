@@ -5,7 +5,7 @@ const differenceSets = <T extends string | number>(
     b: Set<T>,
 ): Set<T> => new Set([...a].filter((val) => !b.has(val)))
 
-export async function wipePassiveData(args: { db: Dexie }): Promise<void> {
+const _wipePassiveData = (args: { db: Dexie }) => async (): Promise<void> => {
     // Adds urls and pageUrls from active data into an activeUrls set
     const t_bookmarks = await args.db
         .table('bookmarks')
@@ -62,3 +62,18 @@ export async function wipePassiveData(args: { db: Dexie }): Promise<void> {
         .noneOf([...pageHostnames])
         .delete()
 }
+
+export const wipePassiveData = (args: { db: Dexie }) =>
+    args.db.transaction(
+        'rw!',
+        [
+            'tags',
+            'pages',
+            'visits',
+            'favIcons',
+            'bookmarks',
+            'annotations',
+            'pageListEntries',
+        ],
+        _wipePassiveData(args),
+    )
