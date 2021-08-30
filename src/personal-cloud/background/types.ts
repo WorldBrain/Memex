@@ -38,8 +38,8 @@ export interface PersonalCloudRemoteInterface {
     runDataMigration: () => Promise<void>
 }
 export interface PersonalCloudStats {
-    countingDownloads: boolean
-    countingUploads: boolean
+    // countingDownloads: boolean
+    // countingUploads: boolean
     pendingDownloads: number
     pendingUploads: number
 }

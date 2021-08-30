@@ -48,6 +48,7 @@ export function createSelfTests(options: {
     const tests = {
         cloudSend: async (testOptions?: {
             deleteSharedAnnotation?: boolean
+            lotsOfData?: boolean
         }) => {
             await clearDb(options.storageManager)
             await clearDb(options.persistentStorageManager)
@@ -274,6 +275,30 @@ export function createSelfTests(options: {
                 console.log({ sharedAnnotationEntries })
             }
 
+            if (testOptions?.lotsOfData) {
+                for (let i = 0; i < 50; ++i) {
+                    const normalizedUrl = `example.com/test-${i}`
+                    const fullUrl = `https://www.example.com/test-${i}`
+                    await backgroundModules.pages.storage.createPage({
+                        url: normalizedUrl,
+                        domain: 'www.example.com',
+                        hostname: 'example.com',
+                        fullTitle: `Example.com test ${i}`,
+                        titleTerms: ['example', 'test'],
+                        fullUrl,
+                        tags: [],
+                        terms: [],
+                        text: '',
+                        urlTerms: [],
+                    })
+                    await backgroundModules.bookmarks.addBookmark({
+                        url: normalizedUrl,
+                        fullUrl,
+                        skipIndexing: true,
+                    })
+                }
+            }
+
             console.log('End of self test')
         },
         cloudReceive: async () => {
@@ -282,7 +307,7 @@ export function createSelfTests(options: {
 
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.handleAuthChange()
+            await personalCloud.startSync()
         },
     }
     return tests
