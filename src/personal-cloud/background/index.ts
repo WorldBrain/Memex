@@ -62,10 +62,11 @@ export class PersonalCloudBackground {
     deviceId?: string | number
     reportExecutingAction?: (action: PersonalCloudAction) => void
     debug = false
+    emitEvents = true
 
     stats: PersonalCloudStats = {
-        countingDownloads: false,
-        countingUploads: true,
+        // countingDownloads: false,
+        // countingUploads: true,
         pendingDownloads: 0,
         pendingUploads: 0,
     }
@@ -84,6 +85,17 @@ export class PersonalCloudBackground {
                 pendingUploads: stats.pendingActionCount,
             })
         })
+        this.options.backend.events.on('incomingChangesPending', (event) => {
+            this._modifyStats({
+                pendingDownloads:
+                    this.stats.pendingDownloads + event.changeCountDelta,
+            })
+        })
+        this.options.backend.events.on('incomingChangesProcessed', (event) => {
+            this._modifyStats({
+                pendingDownloads: this.stats.pendingDownloads - event.count,
+            })
+        })
     }
 
     async setup() {
@@ -94,7 +106,7 @@ export class PersonalCloudBackground {
         await this.actionQueue.setup({ paused: true })
         this._modifyStats({
             pendingUploads: this.actionQueue.pendingActionCount,
-            countingUploads: false,
+            // countingUploads: false,
         })
         if (await this.options.settingStore.get('isSetUp')) {
             // This might take a long time, so don't wait for it
@@ -138,28 +150,22 @@ export class PersonalCloudBackground {
         const isAuthenticated = !!this.deviceId
         if (!isAuthenticated) {
             this._modifyStats({
-                countingDownloads: false,
+                // countingDownloads: false,
                 pendingDownloads: 0,
+                pendingUploads: 0,
             })
+            return
         }
-
-        this._modifyStats({ countingDownloads: true })
-        for await (const status of this.options.backend.countChanges({
-            userReference: { type: 'user-reference', id: userId },
-        })) {
-            this._modifyStats({
-                pendingDownloads: status.totalCount,
-            })
-        }
-        this._modifyStats({ countingDownloads: false })
     }
 
     _modifyStats(updates: Partial<PersonalCloudStats>) {
         this.stats = { ...this.stats, ...updates }
         this._debugLog('Updated stats', this.stats)
-        this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
-            stats: this.stats,
-        })
+        if (this.emitEvents) {
+            this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
+                stats: this.stats,
+            })
+        }
     }
 
     async integrateContinuously() {
