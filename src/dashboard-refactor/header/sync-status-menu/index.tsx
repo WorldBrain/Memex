@@ -14,7 +14,6 @@ import type { SyncStatusIconState } from '../types'
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
     width: 230px;
-    padding: 15px;
     background-color: ${colors.white};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
@@ -26,10 +25,12 @@ const Separator = styled.div`
 
 const Row = styled(Margin)`
     height: min-content;
-    display: flex;
+    display: grid;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    grid-auto-flow: column;
+    grid-gap: 10px;
 
     &:last-child {
         margin-bottom: 0px;
@@ -41,10 +42,12 @@ const RowContainer = styled.div`
     width: 100%;
     display: flex;
     flex-direction: column;
+    padding: 15px;
 `
 
 const Count = styled.span`
     font-weight: ${fonts.primary.weight.bold};
+    padding-left: 5px;
 `
 
 const textStyles = `
@@ -73,10 +76,20 @@ const TextBlock = styled.div<{
 const TextBlockSmall = styled.div`
     ${textStyles}
     font-weight: ${fonts.primary.weight.normal};
+    color: ${fonts.primary.colors.darkgrey};
     font-size: 10px;
     line-height: 12px;
     text-align: center;
 `
+
+const TextContainer = styled.div`
+    ${textStyles}
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+`
+
+
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
@@ -159,24 +172,28 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
-                <Row bottom="10px">
-                    <SyncStatusIcon color={syncStatusIconState} />
-                    <RowContainer>
-                        <TextBlock bold>{this.renderTitleText()}</TextBlock>
-                        <TextBlockSmall>
-                            {this.renderLastSyncText()}
-                        </TextBlockSmall>
-                    </RowContainer>
-                </Row>
+                <RowContainer>
+                    <Row>
+                        <SyncStatusIcon color={syncStatusIconState} />
+                        <TextContainer>
+                            <TextBlock bold>{this.renderTitleText()}</TextBlock>
+                            <TextBlockSmall>
+                                {this.renderLastSyncText()}
+                            </TextBlockSmall>
+                        </TextContainer>
+                    </Row>
+                </RowContainer>
                 <Separator />
-                <Row>
-                    <Count>{pendingLocalChangeCount}</Count>
-                    <TextBlock> pending local changes</TextBlock>
-                </Row>
-                <Row>
-                    <Count>{pendingRemoteChangeCount}</Count>
-                    <TextBlock> pending remote changes</TextBlock>
-                </Row>
+                <RowContainer>
+                    <Row>
+                        <Count>{pendingLocalChangeCount}</Count>
+                        <TextBlock> pending local changes</TextBlock>
+                    </Row>
+                    <Row>
+                        <Count>{pendingRemoteChangeCount ? pendingRemoteChangeCount : 0}</Count>
+                        <TextBlock> pending remote changes</TextBlock>
+                    </Row>
+                </RowContainer>
             </StyledHoverBox>
         )
     }
