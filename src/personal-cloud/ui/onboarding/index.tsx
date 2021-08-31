@@ -4,6 +4,7 @@ import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 
 import CloudOnboardingModalLogic from './logic'
 import type { Dependencies, State, Event } from './types'
+import type { UIServices } from 'src/services/ui/types'
 import DataMigrator from '../components/data-migrator'
 import DataCleaner from '../components/data-cleaner'
 import DataDumper from '../components/data-dumper'
@@ -11,6 +12,7 @@ import DataDumper from '../components/data-dumper'
 export interface Props extends Dependencies {
     supportLink: string
     dataCleanReadMoreLink: string
+    services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
 }
 
 export default class CloudOnboardingModal extends UIElement<

@@ -4,7 +4,6 @@ import {
     insertBackgroundFunctionTab,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
-import { createUIServices } from 'src/services/ui'
 import Logic from './logic'
 import type { State, Event } from './types'
 
@@ -28,7 +27,6 @@ async function setupTest(
     }
 
     const _logic = new Logic({
-        services: createUIServices(),
         authBG: backgroundModules.auth.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
             backgroundModules.backupModule.remoteFunctions,
