@@ -190,7 +190,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.getLastSyncDate(),
                 this.getSharingAccess(),
             ])
         })
@@ -204,12 +203,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
+            [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
             [CLOUD_STORAGE_KEYS.isSetUp]: isCloudEnabled,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await this.options.localStorage.get([
             STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
+            CLOUD_STORAGE_KEYS.lastSeen,
             CLOUD_STORAGE_KEYS.isSetUp,
             STORAGE_KEYS.mobileAdSeen,
         ])
@@ -224,26 +225,17 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
+            syncMenu: {
+                lastSuccessfulSyncDate: {
+                    $set:
+                        cloudLastSynced == null
+                            ? null
+                            : new Date(cloudLastSynced),
+                },
+            },
         }
         this.emitMutation(mutation)
         return this.withMutation(previousState, mutation)
-    }
-
-    private async getLastSyncDate() {
-        const { syncBG } = this.options
-
-        let lastSuccessfulSync: Date = null
-        try {
-            lastSuccessfulSync = new Date(
-                await syncBG.retrieveLastSyncTimestamp(),
-            )
-        } catch (err) {}
-
-        this.emitMutation({
-            syncMenu: {
-                lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
-            },
-        })
     }
 
     private async getFeedActivityStatus() {

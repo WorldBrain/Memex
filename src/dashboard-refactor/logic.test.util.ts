@@ -1,4 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
 
 import {
@@ -130,7 +129,7 @@ export async function setupTest(
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,
-        localStorage: browser.storage.local,
+        localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         personalCloudBG: device.backgroundModules.personalCloud.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
@@ -143,7 +142,6 @@ export async function setupTest(
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
-        syncBG: device.backgroundModules.sync.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
             device.backgroundModules.backupModule.remoteFunctions,
         ) as any,

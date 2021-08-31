@@ -74,7 +74,6 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
-        syncBG: runInBackground(),
         openFeed: () => window.open(getFeedUrl(), '_blank'),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),

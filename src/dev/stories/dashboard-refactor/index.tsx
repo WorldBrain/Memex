@@ -36,7 +36,6 @@ async function createDependencies(): Promise<DashboardProps> {
         ) as any,
         localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
-        syncBG: backgroundModules.sync.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(

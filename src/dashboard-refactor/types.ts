@@ -24,7 +24,6 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Analytics } from 'src/analytics'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { PublicSyncInterface } from 'src/sync/background/types'
 import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
@@ -56,7 +55,6 @@ export interface DashboardDependencies {
     analytics: Analytics
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
-    syncBG: PublicSyncInterface
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface

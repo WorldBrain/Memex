@@ -20,6 +20,26 @@ describe('Dashboard sync menu logic', () => {
         expect(searchResults.state.syncMenu.isDisplayed).toBe(false)
     })
 
+    it('should set last synced date based of sync last seen value', async ({
+        device,
+    }) => {
+        const testTime = Date.now()
+        await device.backgroundModules.personalCloud.options.settingStore.set(
+            'lastSeen',
+            testTime,
+        )
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.syncMenu.lastSuccessfulSyncDate).toBeNull()
+        await searchResults.init()
+        expect(
+            searchResults.state.syncMenu.lastSuccessfulSyncDate,
+        ).not.toBeNull()
+        expect(
+            searchResults.state.syncMenu.lastSuccessfulSyncDate.getTime(),
+        ).toEqual(testTime)
+    })
+
     it('should be able to set unsynced item count display states', async ({
         device,
     }) => {
