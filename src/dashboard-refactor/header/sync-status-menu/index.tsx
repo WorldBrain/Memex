@@ -76,7 +76,7 @@ const TextBlock = styled.div<{
 const TextBlockSmall = styled.div`
     ${textStyles}
     font-weight: ${fonts.primary.weight.normal};
-    color: ${fonts.primary.colors.darkgrey};
+    color: ${(props) => props.theme.colors.darkgrey};
     font-size: 10px;
     line-height: 12px;
     text-align: center;
