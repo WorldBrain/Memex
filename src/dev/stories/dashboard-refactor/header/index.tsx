@@ -2,7 +2,6 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 import Header, { HeaderProps } from 'src/dashboard-refactor/header'
 import { headerSearchBarPropsTemplate } from './search-bar'
-import { syncStatusMenuStoryProps } from './sync-status-menu'
 import { sidebarToggleProps } from './sidebar-toggle'
 
 const { lockedHover, noHover } = sidebarToggleProps
@@ -44,7 +43,7 @@ export const sidebarHeaderPropsTemplate: {
 const template: HeaderProps = {
     ...sidebarHeaderPropsTemplate.open,
     searchBarProps: headerSearchBarPropsTemplate.default,
-    syncStatusMenuProps: syncStatusMenuStoryProps.hidden,
+    syncStatusMenuProps: {} as any,
     syncStatusIconState: 'green',
 }
 
@@ -75,7 +74,6 @@ const props: {
     },
     syncStatusMenuOpen: {
         ...template,
-        syncStatusMenuProps: syncStatusMenuStoryProps.allSuccessful,
     },
 }
 

@@ -5,15 +5,11 @@ import moment from 'moment'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-
-import { LoadingIndicator, ToggleSwitch } from 'src/common-ui/components'
-import { Icon } from 'src/dashboard-refactor/styled-components'
-
-import { DisableableState, RootState } from './types'
-import { HoverState } from 'src/dashboard-refactor/types'
+import { RootState } from './types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import * as icons from 'src/common-ui/components/design-library/icons'
+import { SyncStatusIcon } from './sync-status-icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import type { SyncStatusIconState } from '../types'
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
@@ -22,6 +18,10 @@ const StyledHoverBox = styled(HoverBox)`
     background-color: ${colors.white};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
+`
+
+const Separator = styled.div`
+    border-bottom: 1px solid #ddd;
 `
 
 const Row = styled(Margin)`
@@ -43,41 +43,8 @@ const RowContainer = styled.div`
     flex-direction: column;
 `
 
-const NotificationBox = styled(RowContainer)`
-    height: 40px;
-    padding: 0 !important;
-    justify-content: center;
-    align-items: center;
-    background-color: ${colors.error.pink};
-    box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: ${styles.borderRadius.medium};
-`
-
-const IconContainer = styled(Icon)<{
-    disabled: boolean
-}>`
-    padding-right: 10px;
-    ${(props) =>
-        props.disabled &&
-        css`
-            opacity: 0.5;
-        `}
-    ${(props) =>
-        !props.disabled &&
-        css`
-            cursor: pointer;
-        `}
-
-    &:hover {
-        background-color: #e8e8e8;
-    }
-    border-radius: 3px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 24px;
-    width: 24px;
-    background-size: 16px;
+const Count = styled.span`
+    font-weight: ${fonts.primary.weight.bold};
 `
 
 const textStyles = `
@@ -110,18 +77,6 @@ const TextBlockSmall = styled.div`
     line-height: 12px;
     text-align: center;
 `
-
-const StyledAnchor = styled.a`
-    color: ${colors.fonts.secondary};
-    text-decoration: none;
-`
-
-const AutoBackupBox = styled(Margin)`
-    display: flex;
-    justify-content: space-between;
-`
-
-const BackupReminderBox = styled(Margin)``
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
@@ -165,176 +120,63 @@ export const timeSinceNowToString = (date: Date | null): string => {
 
 export interface SyncStatusMenuProps extends RootState {
     outsideClickIgnoreClass?: string
-    goToSyncRoute: () => void
-    goToBackupRoute: () => void
+    pendingChangeCountCount: number
+    pendingRemoteChangeCount: number
     onClickOutside: React.MouseEventHandler
-    onInitiateSync: React.MouseEventHandler
-    onInitiateBackup: React.MouseEventHandler
-    onToggleAutoBackup: React.MouseEventHandler
+    syncStatusIconState: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
-    onShowUnsyncedItemCount: React.MouseEventHandler
-    onHideUnsyncedItemCount: React.MouseEventHandler
 }
-
-type ServiceType = 'Sync' | 'Backup'
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     handleClickOutside = this.props.onClickOutside
 
-    private renderNotificationBox = (
-        topSpanContent: JSX.Element | string,
-        bottomSpanContent: JSX.Element | string,
-    ) => {
-        return (
-            <Row>
-                <NotificationBox>
-                    <TextBlockSmall>{topSpanContent}</TextBlockSmall>
-                    <TextBlockSmall>{bottomSpanContent}</TextBlockSmall>
-                </NotificationBox>
-            </Row>
-        )
-    }
-
-    private renderBackupReminder = () => {
-        return this.renderNotificationBox(
-            'Memex stores all data locally.',
-            'Backup your data.',
-        )
-    }
-
-    private renderError = (
-        serviceType: ServiceType,
-        serviceStatus: DisableableState,
-    ) => {
-        if (serviceStatus !== 'error') {
-            return null
+    private renderTitleText(): string {
+        if (this.props.syncState === 'success') {
+            return 'Everything is synced'
         }
-
-        return this.renderNotificationBox(
-            `Your last ${serviceType.toLocaleLowerCase()} failed.`,
-            <span>
-                <StyledAnchor href="">Contact Support</StyledAnchor> if retry
-                fails too.
-            </span>,
-        )
+        return 'Syncing changes...'
     }
 
-    private renderRowTextBlock = (
-        serviceType: ServiceType,
-        serviceStatus: DisableableState,
-        lastRunDate: Date | null,
-    ) => {
-        if (serviceStatus === 'disabled') {
-            return serviceType === 'Sync'
-                ? 'No device paired yet'
-                : 'No backup set yet'
+    private renderLastSyncText(): string {
+        const { syncState, lastSuccessfulSyncDate } = this.props
+        if (syncState === 'success' && lastSuccessfulSyncDate) {
+            return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
-
-        if (serviceStatus === 'running') {
-            return 'In progress'
-        }
-
-        return (
-            'Last ' +
-            serviceType.toLocaleLowerCase() +
-            ': ' +
-            timeSinceNowToString(lastRunDate)
-        )
-    }
-
-    private renderRow = (
-        serviceType: ServiceType,
-        serviceStatus: DisableableState,
-        otherServiceStatus: DisableableState,
-        lastRunDate: Date | null,
-        clickHandler: React.MouseEventHandler,
-    ) => {
-        return (
-            <>
-                <Row bottom="10px">
-                    <RowContainer>
-                        <TextBlock bold>{`${serviceType} Status`}</TextBlock>
-                        <TextBlock>
-                            {this.renderRowTextBlock(
-                                serviceType,
-                                serviceStatus,
-                                lastRunDate,
-                            )}
-                        </TextBlock>
-                    </RowContainer>
-                    {serviceStatus === 'running' ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <IconContainer
-                            path={
-                                serviceStatus === 'disabled'
-                                    ? icons.arrowRight
-                                    : icons.reload
-                            }
-                            disabled={otherServiceStatus === 'running'}
-                            onClick={clickHandler}
-                            heightAndWidth="15px"
-                        />
-                    )}
-                </Row>
-                {this.renderError(serviceType, serviceStatus)}
-            </>
-        )
+        return 'in progress'
     }
 
     render() {
         const {
-            syncState,
-            backupState,
             isDisplayed,
-            onInitiateSync,
-            goToSyncRoute,
-            goToBackupRoute,
-            onInitiateBackup,
-            lastSuccessfulSyncDate,
-            lastSuccessfulBackupDate,
+            syncStatusIconState,
+            pendingChangeCountCount,
+            pendingRemoteChangeCount,
         } = this.props
 
         if (!isDisplayed) {
             return null
         }
 
-        console.log(this.props)
-
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
-                {this.renderRow(
-                    'Sync',
-                    syncState,
-                    backupState,
-                    lastSuccessfulSyncDate,
-                    syncState === 'disabled' ? goToSyncRoute : onInitiateSync,
-                )}
-                {this.renderRow(
-                    'Backup',
-                    backupState,
-                    syncState,
-                    lastSuccessfulBackupDate,
-                    backupState === 'disabled'
-                        ? goToBackupRoute
-                        : onInitiateBackup,
-                )}
-                <AutoBackupBox>
-                    <TextBlock bold>Auto Backup</TextBlock>
-                    <ToggleSwitch
-                        isChecked={this.props.isAutoBackupEnabled}
-                        onChange={
-                            !lastSuccessfulBackupDate
-                                ? this.props.goToBackupRoute
-                                : this.props.onToggleAutoBackup
-                        }
-                    />
-                </AutoBackupBox>
-                {backupState === 'disabled' && (
-                    <BackupReminderBox top="10px">
-                        {this.renderBackupReminder()}
-                    </BackupReminderBox>
-                )}
+                <Row bottom="10px">
+                    <SyncStatusIcon color={syncStatusIconState} />
+                    <RowContainer>
+                        <TextBlock bold>{this.renderTitleText()}</TextBlock>
+                        <TextBlockSmall>
+                            {this.renderLastSyncText()}
+                        </TextBlockSmall>
+                    </RowContainer>
+                </Row>
+                <Separator />
+                <Row>
+                    <Count>{pendingChangeCountCount}</Count>
+                    <TextBlock> pending local changes</TextBlock>
+                </Row>
+                <Row>
+                    <Count>{pendingRemoteChangeCount}</Count>
+                    <TextBlock> pending remote changes</TextBlock>
+                </Row>
             </StyledHoverBox>
         )
     }

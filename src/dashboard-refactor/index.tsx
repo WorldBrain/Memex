@@ -302,7 +302,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const { searchFilters, listsSidebar, syncMenu } = this.state
-
+        const syncStatusIconState = deriveStatusIconColor(syncMenu)
         return (
             <HeaderContainer
                 searchBarProps={{
@@ -338,35 +338,22 @@ export class DashboardContainer extends StatefulUIElement<
                 selectedListName={
                     listsSidebar.listData[listsSidebar.selectedListId]?.name
                 }
-                syncStatusIconState={deriveStatusIconColor(syncMenu)}
+                syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
+                    syncStatusIconState,
+                    pendingChangeCountCount: 0,
+                    pendingRemoteChangeCount: 0,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
                         }),
-                    onToggleAutoBackup: () =>
-                        this.processEvent('toggleAutoBackup', null),
                     onToggleDisplayState: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: !syncMenu.isDisplayed,
                         }),
-                    onHideUnsyncedItemCount: () =>
-                        this.processEvent('setUnsyncedItemCountShown', {
-                            isShown: false,
-                        }),
-                    onShowUnsyncedItemCount: () =>
-                        this.processEvent('setUnsyncedItemCountShown', {
-                            isShown: true,
-                        }),
-                    onInitiateBackup: () =>
-                        this.processEvent('initiateBackup', null),
-                    onInitiateSync: () =>
-                        this.processEvent('initiateSync', null),
-                    goToBackupRoute: this.bindRouteGoTo('backup'),
-                    goToSyncRoute: this.bindRouteGoTo('sync'),
                 }}
             />
         )

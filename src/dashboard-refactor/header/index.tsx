@@ -6,13 +6,14 @@ import { SETTINGS_URL } from 'src/constants'
 import SearchBar, { SearchBarProps } from './search-bar'
 import { SyncStatusIconState } from './types'
 import SyncStatusMenu, { SyncStatusMenuProps } from './sync-status-menu'
-import styles, { fonts } from '../styles'
+import { fonts } from '../styles'
 import { Icon } from '../styled-components'
 import Margin from '../components/Margin'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import SidebarToggle from './sidebar-toggle'
-import { SidebarLockedState } from '../lists-sidebar/types'
-import { HoverState } from '../types'
+import type { SidebarLockedState } from '../lists-sidebar/types'
+import type { HoverState } from '../types'
+import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
 
 const Container = styled.div`
     height: ${sizeConstants.header.heightPx}px;
@@ -52,16 +53,6 @@ const RightHeader = styled.div`
     align-items: center;
     justify-content: flex-end;
     flex: 1;
-`
-
-const SyncStatusIcon = styled.div<{
-    color: SyncStatusIconState
-}>`
-    height: 12px;
-    width: 12px;
-    border-radius: 6px;
-    background-color: ${(props) =>
-        styles.components.syncStatusIcon.colors[props.color]};
 `
 
 const SyncStatusHeaderBox = styled.div`
@@ -168,14 +159,17 @@ export default class Header extends PureComponent<HeaderProps> {
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
                     </SyncStatusHeaderBox>
-                    <SettingsSection 
-                        vertical="auto" 
+                    <SettingsSection
+                        vertical="auto"
                         horizontal="17px"
-                        onClick={()=> window.open(SETTINGS_URL, '_self')}
+                        onClick={() => window.open(SETTINGS_URL, '_self')}
                     >
-                            <Icon heightAndWidth="18px" path={icons.settings} />
+                        <Icon heightAndWidth="18px" path={icons.settings} />
                     </SettingsSection>
-                    <SyncStatusMenu {...syncStatusMenuProps} />
+                    <SyncStatusMenu
+                        {...syncStatusMenuProps}
+                        syncStatusIconState={syncStatusIconState}
+                    />
                 </RightHeader>
             </Container>
         )
