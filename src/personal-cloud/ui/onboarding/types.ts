@@ -9,7 +9,7 @@ export interface Dependencies {
     personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
-    onModalClose: () => void
+    onModalClose: (args?: { didFinish?: boolean }) => void
 }
 
 export interface State {

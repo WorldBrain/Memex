@@ -12,7 +12,7 @@ async function setupTest(
     args?: {
         isLoggedOut?: boolean
         isSyncDisabled?: boolean
-        onModalClose?: () => void
+        onModalClose?: (args?: { didFinish?: boolean }) => void
     },
 ) {
     if (!args?.isLoggedOut) {
@@ -74,6 +74,28 @@ describe('Cloud onboarding UI logic', () => {
         expect(logic.state.stage).toEqual('data-migration')
         expect(logic.state.isMigrationPrepped).toBe(true)
         expect(await settingStore.get('isSetUp')).toBe(true)
+    })
+
+    it('should set finished flag on modal close handler, upon final modal close', async ({
+        device,
+    }) => {
+        let didFinish = false
+        const { logic } = await setupTest(device, {
+            isSyncDisabled: true,
+            onModalClose: (args) => {
+                didFinish = !!args?.didFinish
+            },
+        })
+
+        logic.processMutation({ needsToRemovePassiveData: { $set: false } })
+
+        expect(logic.state.isMigrationPrepped).toBe(false)
+        await logic.processEvent('continueToMigration', null)
+        expect(logic.state.isMigrationPrepped).toBe(true)
+
+        expect(didFinish).toBe(false)
+        await logic.processEvent('closeMigration', null)
+        expect(didFinish).toBe(true)
     })
 
     it('should disable DB backup change recording before performing passive data wipe', async ({

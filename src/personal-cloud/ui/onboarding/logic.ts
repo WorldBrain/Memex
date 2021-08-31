@@ -64,8 +64,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     private async attemptDataDump() {
         await executeUITask(this, 'backupState', async () => {
             await this.dependencies.personalCloudBG.runDataDump()
-            // Uncomment this to show error state:
-            // throw new Error()
         })
     }
 
@@ -75,8 +73,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         await executeUITask(this, 'dataCleaningState', async () => {
             await backupBG.disableRecordingChanges()
             await personalCloudBG.runPassiveDataClean()
-            // Uncomment this to show error state:
-            // throw new Error()
         })
 
         await this.continueToMigration({
@@ -95,8 +91,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
             }
 
             await this.dependencies.personalCloudBG.runDataMigration()
-            // Uncomment this to show error state:
-            // throw new Error()
         })
     }
 
@@ -152,8 +146,12 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.dependencies.onModalClose()
     }
 
-    closeMigration: EventHandler<'closeMigration'> = async ({}) => {
-        this.dependencies.onModalClose()
+    closeMigration: EventHandler<'closeMigration'> = async ({
+        previousState,
+    }) => {
+        this.dependencies.onModalClose({
+            didFinish: previousState.isMigrationPrepped,
+        })
     }
 
     continueToMigration: EventHandler<'continueToMigration'> = async ({

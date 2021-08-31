@@ -96,11 +96,11 @@ export class PersonalCloudBackground {
 
         this.remoteFunctions = {
             enableCloudSync: this.enableSync,
+            runDataMigration: this.waitForSync,
             runDataMigrationPreparation: this.prepareDataMigration,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () => wipePassiveData({ db: this.dexie }),
             runDataDump: () => delay(2000),
-            runDataMigration: () => delay(500),
         }
     }
 
@@ -147,7 +147,6 @@ export class PersonalCloudBackground {
                             },
                         ],
                     })),
-
                     { queueInteraction: 'queue-and-return' },
                 ),
         })
@@ -328,7 +327,7 @@ export class PersonalCloudBackground {
         )
     }
 
-    async waitForSync() {
+    waitForSync = async () => {
         await this.pushMutex.wait()
         await this.pullMutex.wait()
         await this.actionQueue.waitForSync()

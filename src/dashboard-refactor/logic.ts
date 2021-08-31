@@ -1381,6 +1381,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setCloudUpgradeBannerShown: EventHandler<'setCloudUpgradeBannerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                isCloudUpgradeBannerShown: { $set: event.isShown },
+            },
+        })
+    }
+
     setListShareMenuShown: EventHandler<'setListShareMenuShown'> = async ({
         event,
     }) => {
