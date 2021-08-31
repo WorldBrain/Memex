@@ -16,10 +16,7 @@ import {
     getSubscriptionStatus,
     getAuthorizedPlans,
 } from './utils'
-import {
-    RemoteEventEmitter,
-    remoteEventEmitter,
-} from 'src/util/webextensionRPC'
+import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import {
     AuthRemoteEvents,
     AuthRemoteFunctionsInterface,
@@ -41,24 +38,25 @@ export class AuthBackground {
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
-    remoteEmitter: RemoteEventEmitter<AuthRemoteEvents>
     getUserManagement: () => Promise<UserStorage>
 
     private _userProfile?: Promise<User>
 
-    constructor(options: {
-        authService: AuthService
-        subscriptionService: SubscriptionsService
-        localStorageArea: LimitedBrowserStorage
-        backendFunctions: AuthBackendFunctions
-        getUserManagement: () => Promise<UserStorage>
-        scheduleJob: (job: JobDefinition) => void
-    }) {
+    constructor(
+        public options: {
+            authService: AuthService
+            subscriptionService: SubscriptionsService
+            localStorageArea: LimitedBrowserStorage
+            backendFunctions: AuthBackendFunctions
+            getUserManagement: () => Promise<UserStorage>
+            scheduleJob: (job: JobDefinition) => void
+            remoteEmitter: RemoteEventEmitter<'auth'>
+        },
+    ) {
         this.authService = options.authService
         this.backendFunctions = options.backendFunctions
         this.subscriptionService = options.subscriptionService
         this.scheduleJob = options.scheduleJob
-        this.remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
         this.getUserManagement = options.getUserManagement
         this.settings = new BrowserSettingsStore<AuthSettings>(
             options.localStorageArea,
@@ -159,9 +157,9 @@ export class AuthBackground {
     }
 
     refreshUserInfo = async () => {
-        await this.remoteEmitter.emit('onLoadingUser', true)
+        await this.options.remoteEmitter.emit('onLoadingUser', true)
         await this.authService.refreshUserInfo()
-        await this.remoteEmitter.emit('onLoadingUser', false)
+        await this.options.remoteEmitter.emit('onLoadingUser', false)
     }
 
     setupRequestInterceptor() {
@@ -202,7 +200,7 @@ export class AuthBackground {
 
     registerRemoteEmitter() {
         this.authService.events.on('changed', async ({ user }) => {
-            await this.remoteEmitter.emit('onLoadingUser', true)
+            await this.options.remoteEmitter.emit('onLoadingUser', true)
 
             const userWithClaims = user
                 ? {
@@ -226,8 +224,11 @@ export class AuthBackground {
                 console['info'](`User changed:`, userDebug)
             }
 
-            await this.remoteEmitter.emit('onLoadingUser', false)
-            await this.remoteEmitter.emit('onAuthStateChanged', userWithClaims)
+            await this.options.remoteEmitter.emit('onLoadingUser', false)
+            await this.options.remoteEmitter.emit(
+                'onAuthStateChanged',
+                userWithClaims,
+            )
         })
     }
 }

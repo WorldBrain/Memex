@@ -3,6 +3,9 @@ import {
     PersonalCloudClientInstruction,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
+export interface PersonalCloudBackgroundEvents {
+    cloudStatsUpdated(event: { stats: PersonalCloudStats }): void
+}
 export type PersonalCloudAction =
     | PushObjectAction
     | ExecuteClientInstructionsAction
@@ -22,7 +25,7 @@ export interface ExecuteClientInstructionsAction {
 export interface PersonalCloudSettings {
     deviceId?: PersonalCloudDeviceID
     lastSeen?: number
-    isEnabled?: boolean
+    isSetUp?: boolean
 }
 
 export type PersonalCloudDeviceID = number | string
@@ -30,9 +33,14 @@ export type PersonalCloudDeviceID = number | string
 export interface PersonalCloudRemoteInterface {
     runDataDump: () => Promise<void>
     enableCloudSync: () => Promise<void>
-    disableCloudSync: () => Promise<void>
     runPassiveDataClean: () => Promise<void>
     isPassiveDataRemovalNeeded: () => Promise<boolean>
     runDataMigrationPreparation: () => Promise<void>
     runDataMigration: () => Promise<void>
+}
+export interface PersonalCloudStats {
+    // countingDownloads: boolean
+    // countingUploads: boolean
+    pendingDownloads: number
+    pendingUploads: number
 }

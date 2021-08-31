@@ -96,9 +96,7 @@ class Container extends React.Component<Props, State> {
         const subBannerDismissed = await getLocalStorage(
             DASHBOARD_STORAGE_KEYS.subBannerDismissed,
         )
-        const isCloudEnabled = await getLocalStorage(
-            CLOUD_STORAGE_KEYS.isEnabled,
-        )
+        const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
 
         let fetchNotif
         if (notification) {

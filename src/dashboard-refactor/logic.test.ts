@@ -78,7 +78,7 @@ describe('Dashboard Refactor misc logic', () => {
         } = await setupTest(device)
 
         await logicA['options'].localStorage.set({
-            [CLOUD_STORAGE_KEYS.isEnabled]: false,
+            [CLOUD_STORAGE_KEYS.isSetUp]: false,
             [STORAGE_KEYS.listSidebarLocked]: false,
             [STORAGE_KEYS.subBannerDismissed]: false,
         })
@@ -105,7 +105,7 @@ describe('Dashboard Refactor misc logic', () => {
         } = await setupTest(device)
 
         await logicB['options'].localStorage.set({
-            [CLOUD_STORAGE_KEYS.isEnabled]: true,
+            [CLOUD_STORAGE_KEYS.isSetUp]: true,
             [STORAGE_KEYS.listSidebarLocked]: true,
             [STORAGE_KEYS.subBannerDismissed]: true,
         })

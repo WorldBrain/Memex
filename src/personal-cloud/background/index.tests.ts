@@ -305,6 +305,7 @@ export async function setupSyncBackgroundTest(
 
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
+        await setup.backgroundModules.personalCloud.startSync()
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
         await memoryAuth.setUser({ ...TEST_USER })

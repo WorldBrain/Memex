@@ -190,13 +190,13 @@ export class DashboardLogic extends UILogic<State, Events> {
             [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
-            [CLOUD_STORAGE_KEYS.isEnabled]: isCloudEnabled,
+            [CLOUD_STORAGE_KEYS.isSetUp]: isCloudEnabled,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await this.options.localStorage.get([
             STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
-            CLOUD_STORAGE_KEYS.isEnabled,
+            CLOUD_STORAGE_KEYS.isSetUp,
             STORAGE_KEYS.mobileAdSeen,
         ])
 

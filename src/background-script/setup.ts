@@ -55,7 +55,12 @@ import ContentSharingBackground from 'src/content-sharing/background'
 import ContentConversationsBackground from 'src/content-conversations/background'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import TabManagementBackground from 'src/tab-management/background'
-import { runInTab } from 'src/util/webextensionRPC'
+import {
+    runInTab,
+    RemoteEventEmitter,
+    RemoteEvents,
+    remoteEventEmitter,
+} from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
@@ -80,7 +85,10 @@ import {
     PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { PersonalCloudSettings } from 'src/personal-cloud/background/types'
+import {
+    PersonalCloudSettings,
+    PersonalCloudBackgroundEvents,
+} from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
@@ -88,6 +96,7 @@ import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
+import { AuthRemoteEvents } from '../authentication/background/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -153,7 +162,13 @@ export function createBackgroundModules(options: {
     getNow?: () => number
     fetch?: typeof fetch
     generateServerId?: (collectionName: string) => number | string
+    createRemoteEventEmitter?<ModuleName extends keyof RemoteEvents>(
+        name: ModuleName,
+        options?: { broadcastToTabs?: boolean },
+    ): RemoteEventEmitter<ModuleName>
 }): BackgroundModules {
+    const createRemoteEventEmitter =
+        options.createRemoteEventEmitter ?? remoteEventEmitter
     const getNow = options.getNow ?? (() => Date.now())
     const fetch = options.fetch ?? globalFetch
     const generateServerId =
@@ -284,6 +299,7 @@ export function createBackgroundModules(options: {
         options.auth ||
         new AuthBackground({
             authService: options.services.auth,
+            remoteEmitter: createRemoteEventEmitter('auth'),
             subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
@@ -337,6 +353,9 @@ export function createBackgroundModules(options: {
                 'personalCloud',
                 callFirebaseFunction,
             ),
+        remoteEmitter: createRemoteEventEmitter('contentSharing', {
+            broadcastToTabs: true,
+        }),
         activityStreams,
         storageManager,
         customLists: customLists.storage,
@@ -454,6 +473,7 @@ export function createBackgroundModules(options: {
                     personalCloudSettingStore.set('lastSeen', lastSeen),
                 getDeviceId: async () => personalCloud.deviceId!,
             }),
+        remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {
             const serverStorage = await options.getServerStorage()
             const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
@@ -473,8 +493,8 @@ export function createBackgroundModules(options: {
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
         userIdChanges: async function* () {
-            for await (const _ of authChanges(auth.authService)) {
-                yield
+            for await (const nextUser of authChanges(auth.authService)) {
+                yield nextUser
             }
         },
         writeIncomingData: async (params) => {

@@ -69,11 +69,11 @@ describe('New install onboarding UI logic', () => {
     })
 
     it('should set local storage flag upon login', async ({ device }) => {
-        const { logic } = await setupTest(device)
+        const { logic } = await setupTest(device, { isLoggedIn: true })
         const { settingStore } = device.backgroundModules.personalCloud.options
 
-        expect(await settingStore.get('isEnabled')).not.toBe(true)
+        expect(await settingStore.get('isSetUp')).not.toBe(true)
         await logic.processEvent('onUserLogIn', null)
-        expect(await settingStore.get('isEnabled')).toBe(true)
+        expect(await settingStore.get('isSetUp')).toBe(true)
     })
 })
