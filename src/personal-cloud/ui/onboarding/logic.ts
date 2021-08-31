@@ -71,8 +71,11 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     }
 
     private async attemptPassiveDataClean(state: State) {
+        const { personalCloudBG, backupBG } = this.dependencies
+
         await executeUITask(this, 'dataCleaningState', async () => {
-            await this.dependencies.personalCloudBG.runPassiveDataClean()
+            await backupBG.disableRecordingChanges()
+            await personalCloudBG.runPassiveDataClean()
             // Uncomment this to show error state:
             // throw new Error()
         })

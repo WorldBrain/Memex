@@ -82,6 +82,20 @@ describe('Cloud onboarding UI logic', () => {
         ).toBe(true)
     })
 
+    it('should disable DB backup change recording before performing passive data wipe', async ({
+        device,
+    }) => {
+        let recordingChanges = true
+        device.backgroundModules.backupModule.remoteFunctions.disableRecordingChanges = async () => {
+            recordingChanges = false
+        }
+        const { logic } = await setupTest(device)
+
+        expect(recordingChanges).toBe(true)
+        await logic.processEvent('startDataClean', null)
+        expect(recordingChanges).toBe(false)
+    })
+
     it('should determine whether dump is needed, based on last backup time existence', async ({
         device,
     }) => {

@@ -9,6 +9,7 @@ export interface BackupInterface<Role extends RemoteFunctionRole> {
     isAutomaticBackupAllowed: RemotePositionalFunction<Role, [], boolean>
     disableAutomaticBackup: RemotePositionalFunction<Role, [], void>
     enableAutomaticBackup: RemotePositionalFunction<Role, [], void>
+    disableRecordingChanges: RemotePositionalFunction<Role, [], void>
     getBackupTimes: RemotePositionalFunction<Role, [], BackupTimes>
     startBackup: RemotePositionalFunction<Role, [], void>
 }
