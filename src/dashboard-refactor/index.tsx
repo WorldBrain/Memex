@@ -342,8 +342,6 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusMenuProps={{
                     ...syncMenu,
                     syncStatusIconState,
-                    pendingChangeCountCount: 0,
-                    pendingRemoteChangeCount: 0,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     onClickOutside: () =>

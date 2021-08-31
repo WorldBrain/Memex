@@ -120,7 +120,7 @@ export const timeSinceNowToString = (date: Date | null): string => {
 
 export interface SyncStatusMenuProps extends RootState {
     outsideClickIgnoreClass?: string
-    pendingChangeCountCount: number
+    pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
     onClickOutside: React.MouseEventHandler
     syncStatusIconState: SyncStatusIconState
@@ -131,15 +131,15 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     handleClickOutside = this.props.onClickOutside
 
     private renderTitleText(): string {
-        if (this.props.syncState === 'success') {
+        if (this.props.syncStatusIconState === 'green') {
             return 'Everything is synced'
         }
         return 'Syncing changes...'
     }
 
     private renderLastSyncText(): string {
-        const { syncState, lastSuccessfulSyncDate } = this.props
-        if (syncState === 'success' && lastSuccessfulSyncDate) {
+        const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
+        if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
         return 'in progress'
@@ -149,7 +149,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         const {
             isDisplayed,
             syncStatusIconState,
-            pendingChangeCountCount,
+            pendingLocalChangeCount,
             pendingRemoteChangeCount,
         } = this.props
 
@@ -170,7 +170,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 </Row>
                 <Separator />
                 <Row>
-                    <Count>{pendingChangeCountCount}</Count>
+                    <Count>{pendingLocalChangeCount}</Count>
                     <TextBlock> pending local changes</TextBlock>
                 </Row>
                 <Row>

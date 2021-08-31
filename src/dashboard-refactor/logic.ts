@@ -21,11 +21,14 @@ import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
-import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
+import {
+    getRemoteEventEmitter,
+    TypedRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -67,8 +70,23 @@ export const removeAllResultOccurrencesOfPage = (
 }
 
 export class DashboardLogic extends UILogic<State, Events> {
+    personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
+
     constructor(private options: DashboardDependencies) {
         super()
+        this.setupRemoteEventListeners()
+    }
+
+    private setupRemoteEventListeners() {
+        this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
+        this.personalCloudEvents.on('cloudStatsUpdated', ({ stats }) => {
+            this.emitMutation({
+                syncMenu: {
+                    pendingLocalChangeCount: { $set: stats.pendingUploads },
+                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                },
+            })
+        })
     }
 
     getInitialState(): State {
@@ -155,13 +173,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             syncMenu: {
                 isDisplayed: false,
-                syncState: 'disabled',
-                backupState: 'disabled',
-                isAutoBackupEnabled: false,
-                lastSuccessfulBackupDate: null,
+                pendingLocalChangeCount: 0,
+                pendingRemoteChangeCount: 0,
                 lastSuccessfulSyncDate: null,
-                showUnsyncedItemCount: false,
-                unsyncedItemCount: 0,
             },
         }
     }
@@ -176,7 +190,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.getSyncMenuStatus(),
+                this.getLastSyncDate(),
                 this.getSharingAccess(),
             ])
         })
@@ -215,19 +229,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         return this.withMutation(previousState, mutation)
     }
 
-    private async getSyncMenuStatus() {
-        const { syncBG, backupBG } = this.options
-        const syncDevices = await syncBG.listDevices()
-
-        const autoBackupEnabled = await backupBG.isAutomaticBackupEnabled()
-        const { lastBackup } = await backupBG.getBackupTimes()
-        const lastSuccessfulBackup =
-            typeof lastBackup === 'number' ? new Date(lastBackup) : null
-
-        const backupState: DisableableState =
-            autoBackupEnabled || lastSuccessfulBackup != null
-                ? 'enabled'
-                : 'disabled'
+    private async getLastSyncDate() {
+        const { syncBG } = this.options
 
         let lastSuccessfulSync: Date = null
         try {
@@ -238,13 +241,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation({
             syncMenu: {
-                lastSuccessfulBackupDate: { $set: lastSuccessfulBackup },
                 lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
-                backupState: { $set: backupState },
-                isAutoBackupEnabled: { $set: autoBackupEnabled },
-                syncState: {
-                    $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
-                },
             },
         })
     }
@@ -2461,87 +2458,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setUnsyncedItemCountShown: EventHandler<
-        'setUnsyncedItemCountShown'
-    > = async ({ event }) => {
-        this.emitMutation({
-            syncMenu: { showUnsyncedItemCount: { $set: event.isShown } },
-        })
-    }
-
-    initiateSync: EventHandler<'initiateSync'> = async ({
+    setPendingChangeCounts: EventHandler<'setPendingChangeCounts'> = async ({
         event,
         previousState,
     }) => {
-        if (previousState.syncMenu.syncState === 'disabled') {
-            return
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                syncMenu: {
-                    syncState: { $set: taskState },
-                },
-            }),
-            async () => {
-                await this.options.syncBG.forceIncrementalSync()
-            },
-        )
-
         this.emitMutation({
-            syncMenu: { lastSuccessfulSyncDate: { $set: new Date() } },
-        })
-    }
-
-    initiateBackup: EventHandler<'initiateBackup'> = async ({
-        event,
-        previousState,
-    }) => {
-        if (previousState.syncMenu.backupState === 'disabled') {
-            return
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                syncMenu: {
-                    backupState: { $set: taskState },
+            syncMenu: {
+                pendingLocalChangeCount: {
+                    $set:
+                        event.local ??
+                        previousState.syncMenu.pendingLocalChangeCount,
                 },
-            }),
-            async () => {
-                await this.options.backupBG.startBackup()
+                pendingRemoteChangeCount: {
+                    $set:
+                        event.remote ??
+                        previousState.syncMenu.pendingRemoteChangeCount,
+                },
             },
-        )
-
-        this.emitMutation({
-            syncMenu: { lastSuccessfulBackupDate: { $set: new Date() } },
         })
-    }
-
-    toggleAutoBackup: EventHandler<'toggleAutoBackup'> = async ({
-        previousState,
-    }) => {
-        const { backupBG } = this.options
-        if (!(await backupBG.isAutomaticBackupAllowed())) {
-            this.emitMutation({
-                modals: { showSubscription: { $set: true } },
-                syncMenu: { isDisplayed: { $set: false } },
-            })
-            return
-        }
-
-        if (previousState.syncMenu.isAutoBackupEnabled) {
-            this.emitMutation({
-                syncMenu: { isAutoBackupEnabled: { $set: false } },
-            })
-            await backupBG.disableAutomaticBackup()
-        } else {
-            this.emitMutation({
-                syncMenu: { isAutoBackupEnabled: { $set: true } },
-            })
-            await backupBG.enableAutomaticBackup()
-        }
     }
     /* END - sync status menu event handlers */
 }
