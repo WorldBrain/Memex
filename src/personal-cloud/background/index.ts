@@ -240,9 +240,13 @@ export class PersonalCloudBackground {
         this.stats = { ...this.stats, ...updates }
         this._debugLog('Updated stats', this.stats)
         if (this.emitEvents) {
-            this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
-                stats: this.stats,
-            })
+            try {
+                this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
+                    stats: this.stats,
+                })
+            } catch (err) {
+                console.error('Error while emitting updated stats:', err)
+            }
         }
     }
 
