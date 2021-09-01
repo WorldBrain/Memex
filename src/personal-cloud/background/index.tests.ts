@@ -255,6 +255,7 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
+        startDisabled?: boolean
         withTestUser?: boolean
         superuser?: boolean
         serverChangeWatchSettings?: Omit<
@@ -300,15 +301,19 @@ export async function setupSyncBackgroundTest(
             getServerStorage,
             personalCloudBackend,
         })
+
+        const memoryAuth = setup.backgroundModules.auth
+            .authService as MemoryAuthService
+        await memoryAuth.setUser({ ...TEST_USER })
         setups.push(setup)
     }
 
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
-        await setup.backgroundModules.personalCloud.startSync()
-        const memoryAuth = setup.backgroundModules.auth
-            .authService as MemoryAuthService
-        await memoryAuth.setUser({ ...TEST_USER })
+
+        if (!options.startDisabled) {
+            await setup.backgroundModules.personalCloud.enableSync()
+        }
     }
 
     const sync = async (

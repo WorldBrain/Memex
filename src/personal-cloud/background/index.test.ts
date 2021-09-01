@@ -377,4 +377,89 @@ describe('Personal cloud', () => {
             }),
         })
     })
+
+    it('should start sync right away if sync is already set up', async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startDisabled: false,
+            useDownloadTranslationLayer: true,
+        })
+
+        const { personalCloud } = setups[0].backgroundModules
+
+        expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
+            true,
+        )
+        expect(personalCloud.syncStartCount).not.toBe(0)
+        expect(personalCloud.actionQueue.isPaused).toBe(false)
+        expect(personalCloud.authChangesObserved).not.toBeUndefined()
+        expect(personalCloud.changesIntegrating).not.toBeUndefined()
+    })
+
+    it(`should not do weird stuff if you start sync when it's already started`, async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startDisabled: true,
+            useDownloadTranslationLayer: true,
+        })
+
+        const { personalCloud } = setups[0].backgroundModules
+
+        await personalCloud.enableSync()
+
+        expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
+            true,
+        )
+        expect(personalCloud.syncStartCount).toBe(1)
+        expect(personalCloud.actionQueue.isPaused).toBe(false)
+        expect(personalCloud.authChangesObserved).not.toBeUndefined()
+        expect(personalCloud.changesIntegrating).not.toBeUndefined()
+
+        const authChangesPromiseBefore = personalCloud.authChangesObserved
+        const changesIntegratingPromiseBefore = personalCloud.changesIntegrating
+
+        await personalCloud.startSync()
+
+        expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
+            true,
+        )
+        expect(personalCloud.syncStartCount).toBe(2)
+        expect(personalCloud.actionQueue.isPaused).toBe(false)
+        expect(personalCloud.authChangesObserved).not.toBeUndefined()
+        expect(authChangesPromiseBefore).toEqual(
+            personalCloud.authChangesObserved,
+        )
+        expect(personalCloud.changesIntegrating).not.toBeUndefined()
+        expect(changesIntegratingPromiseBefore).toEqual(
+            personalCloud.changesIntegrating,
+        )
+    })
+
+    it('should enable and start sync only after data migration prep is complete', async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startDisabled: true,
+            useDownloadTranslationLayer: true,
+        })
+
+        const { personalCloud } = setups[0].backgroundModules
+
+        expect(
+            await personalCloud.options.settingStore.get('isSetUp'),
+        ).not.toBe(true)
+        expect(personalCloud.syncStartCount).toBe(0)
+        expect(personalCloud.actionQueue.isPaused).toBe(true)
+        expect(personalCloud.authChangesObserved).toBeUndefined()
+        expect(personalCloud.changesIntegrating).toBeUndefined()
+
+        await personalCloud['prepareDataMigration']()
+
+        expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
+            true,
+        )
+        expect(personalCloud.syncStartCount).toBe(1)
+        expect(personalCloud.actionQueue.isPaused).toBe(false)
+        expect(personalCloud.authChangesObserved).not.toBeUndefined()
+        expect(personalCloud.changesIntegrating).not.toBeUndefined()
+    })
 })
