@@ -1,9 +1,11 @@
 import {
     UILogic,
-    UIEventHandler,
     loadInitial,
+    executeUITask,
+    UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
+import delay from 'src/util/delay'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -12,6 +14,9 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 >
 
 export default class Logic extends UILogic<State, Event> {
+    syncPromise: Promise<any>
+    isExistingUser = false
+
     constructor(private dependencies: Dependencies) {
         super()
     }
@@ -19,6 +24,7 @@ export default class Logic extends UILogic<State, Event> {
     getInitialState = (): State => ({
         step: 'tutorial',
         loadState: 'pristine',
+        syncState: 'pristine',
         shouldShowLogin: true,
     })
 
@@ -28,6 +34,7 @@ export default class Logic extends UILogic<State, Event> {
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
             if (user != null) {
+                this.isExistingUser = true
                 await this._onUserLogIn()
             }
         })
@@ -35,15 +42,27 @@ export default class Logic extends UILogic<State, Event> {
 
     private async _onUserLogIn() {
         this.emitMutation({ shouldShowLogin: { $set: false } })
-        await this.dependencies.personalCloudBG.enableCloudSync()
+
+        if (!this.isExistingUser) {
+            this.syncPromise = executeUITask(this, 'syncState', async () =>
+                this.dependencies.personalCloudBG.enableCloudSync(),
+            )
+        }
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({}) => {
         await this._onUserLogIn()
     }
 
-    goToSyncStep: EventHandler<'goToSyncStep'> = ({}) => {
-        this.emitMutation({ step: { $set: 'sync' } })
+    goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {
+        if (!this.isExistingUser) {
+            this.emitMutation({ step: { $set: 'sync' } })
+
+            await (previousState.syncState === 'success'
+                ? delay(3000)
+                : this.syncPromise)
+        }
+        this.dependencies.navToDashboard()
     }
 
     finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {

@@ -4,13 +4,14 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface Dependencies {
-    personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
+    personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
 }
 
 export interface State {
     loadState: UITaskState
+    syncState: UITaskState
     step: 'tutorial' | 'sync'
     shouldShowLogin: boolean
 }
