@@ -37,8 +37,8 @@ import {
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { wipePassiveData } from 'src/storage/passive-data-wipe'
-import { prepareDataMigration } from './migration-preparation'
+import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
+import { prepareDataMigration } from 'src/personal-cloud/storage/migration-preparation'
 import { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'

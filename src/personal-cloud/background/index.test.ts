@@ -462,4 +462,32 @@ describe('Personal cloud', () => {
         expect(personalCloud.authChangesObserved).not.toBeUndefined()
         expect(personalCloud.changesIntegrating).not.toBeUndefined()
     })
+
+    it('should enable and start sync only after data migration prep is complete', async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startDisabled: true,
+            useDownloadTranslationLayer: true,
+        })
+
+        const { personalCloud } = setups[0].backgroundModules
+
+        expect(
+            await personalCloud.options.settingStore.get('isSetUp'),
+        ).not.toBe(true)
+        expect(personalCloud.syncStartCount).toBe(0)
+        expect(personalCloud.actionQueue.isPaused).toBe(true)
+        expect(personalCloud.authChangesObserved).toBeUndefined()
+        expect(personalCloud.changesIntegrating).toBeUndefined()
+
+        await personalCloud['prepareDataMigration']()
+
+        expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
+            true,
+        )
+        expect(personalCloud.syncStartCount).toBe(1)
+        expect(personalCloud.actionQueue.isPaused).toBe(false)
+        expect(personalCloud.authChangesObserved).not.toBeUndefined()
+        expect(personalCloud.changesIntegrating).not.toBeUndefined()
+    })
 })
