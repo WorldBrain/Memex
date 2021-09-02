@@ -66,7 +66,9 @@ async function assertPageExists(args: {
 describe('passive data wipe tests', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    it('should not delete pages with associated data', async ({ device }) => {
+    it('should not delete pages with associated data while deleting those without', async ({
+        device,
+    }) => {
         const db: Dexie = device.storageManager.backend['dexie']
         const now = Date.now()
         await insertTestData({ db, now })
@@ -80,11 +82,55 @@ describe('passive data wipe tests', () => {
             ),
         ])
 
-        await wipePassiveData({ db })
+        await wipePassiveData({ db, visitLimit: 100 })
 
         await Promise.all([
             ...ACTIVE_PAGE_URLS.map((pageUrl) =>
                 assertPageExists({ db, pageUrl, exists: true, now }),
+            ),
+            ...ORPHANED_PAGE_URLS.map((pageUrl) =>
+                assertPageExists({ db, pageUrl, exists: false, now }),
+            ),
+        ])
+    })
+
+    it('should delete all but oldest visit when page has more than visit limit', async ({
+        device,
+    }) => {
+        const db: Dexie = device.storageManager.backend['dexie']
+        const now = Date.now()
+        await insertTestData({ db, now })
+
+        await Promise.all([
+            ...ACTIVE_PAGE_URLS.map((pageUrl) =>
+                assertPageExists({ db, pageUrl, exists: true, now }),
+            ),
+            ...ORPHANED_PAGE_URLS.map((pageUrl) =>
+                assertPageExists({ db, pageUrl, exists: true, now }),
+            ),
+        ])
+
+        // Add some extra visits on two pages, that exceed the visit limit
+        const now2 = Date.now()
+        const [activePage1, activePage2] = ACTIVE_PAGE_URLS
+        for (let i = 0; i < 10; i++) {
+            await db.table('visits').put({ url: activePage1, time: now2 - i })
+            await db.table('visits').put({ url: activePage2, time: now2 - i })
+        }
+
+        await wipePassiveData({ db, visitLimit: 4 })
+
+        // The exact same assertions should pass as before those extra visits were added
+        await Promise.all([
+            ...ACTIVE_PAGE_URLS.map((pageUrl) =>
+                assertPageExists({
+                    db,
+                    pageUrl,
+                    exists: true,
+                    now: [activePage1, activePage2].includes(pageUrl)
+                        ? now2
+                        : now,
+                }),
             ),
             ...ORPHANED_PAGE_URLS.map((pageUrl) =>
                 assertPageExists({ db, pageUrl, exists: false, now }),

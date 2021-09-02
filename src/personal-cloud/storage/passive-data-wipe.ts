@@ -5,7 +5,44 @@ const differenceSets = <T extends string | number>(
     b: Set<T>,
 ): Set<T> => new Set([...a].filter((val) => !b.has(val)))
 
-const _wipePassiveData = (args: { db: Dexie }) => async (): Promise<void> => {
+interface Dependencies {
+    db: Dexie
+    visitLimit: number
+}
+
+async function pruneOvergrownVisits(
+    args: Dependencies & { activePageUrls: Set<string> },
+) {
+    const visitTimesByPage = new Map<string, number[]>()
+    await args.db
+        .table('visits')
+        .where('url')
+        .anyOf([...args.activePageUrls])
+        .eachPrimaryKey(([time, pageUrl]: [number, string]) => {
+            const prev = visitTimesByPage.get(pageUrl) ?? []
+            visitTimesByPage.set(pageUrl, [...prev, time])
+        })
+
+    const visitKeysToDelete: [number, string][] = []
+    for (const [pageUrl, visits] of visitTimesByPage) {
+        if (visits.length < args.visitLimit) {
+            continue
+        }
+
+        const visitsToDelete = visits.sort().reverse().slice(args.visitLimit)
+        visitKeysToDelete.push(
+            ...visitsToDelete.map(
+                (time) => [time, pageUrl] as [number, string],
+            ),
+        )
+    }
+
+    if (visitKeysToDelete.length) {
+        await args.db.table('visits').bulkDelete(visitKeysToDelete as any)
+    }
+}
+
+const _wipePassiveData = (args: Dependencies) => async (): Promise<void> => {
     // Adds urls and pageUrls from active data into an activeUrls set
     const t_bookmarks = await args.db
         .table('bookmarks')
@@ -45,6 +82,8 @@ const _wipePassiveData = (args: { db: Dexie }) => async (): Promise<void> => {
         .anyOf([...orphanPageUrls])
         .delete()
 
+    await pruneOvergrownVisits({ ...args, activePageUrls })
+
     if (numDeletedPages === 0) {
         return
     }
@@ -63,7 +102,7 @@ const _wipePassiveData = (args: { db: Dexie }) => async (): Promise<void> => {
         .delete()
 }
 
-export const wipePassiveData = (args: { db: Dexie }) =>
+export const wipePassiveData = (args: Dependencies) =>
     args.db.transaction(
         'rw!',
         [

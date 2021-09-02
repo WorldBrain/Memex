@@ -100,7 +100,8 @@ export class PersonalCloudBackground {
             runDataMigration: this.waitForSync,
             runDataMigrationPreparation: this.prepareDataMigration,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
-            runPassiveDataClean: () => wipePassiveData({ db: this.dexie }),
+            runPassiveDataClean: () =>
+                wipePassiveData({ db: this.dexie, visitLimit: 20 }),
             runDataDump: () => delay(2000),
         }
     }
