@@ -2,7 +2,7 @@ import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
+import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -18,7 +18,7 @@ export async function insertReadwiseAPIKey(
     userId: string,
 ) {
     await storageManager.collection('personalMemexSetting').createObject({
-        name: EXTENSION_SETTINGS_NAME.ReadwiseAPIKey,
+        name: SYNCED_SETTING_KEYS.ReadwiseAPIKey,
         value: 'test-key',
         user: userId,
     })

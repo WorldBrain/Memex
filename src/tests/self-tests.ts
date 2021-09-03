@@ -4,7 +4,7 @@ import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
+import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
@@ -94,7 +94,7 @@ export function createSelfTests(options: {
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
                 await backgroundModules.settings.set({
-                    [EXTENSION_SETTINGS_NAME.ReadwiseAPIKey]:
+                    [SYNCED_SETTING_KEYS.ReadwiseAPIKey]:
                         process.env.TEST_READWISE_API_KEY,
                 })
                 console.log('Set test Readwise API Key')
