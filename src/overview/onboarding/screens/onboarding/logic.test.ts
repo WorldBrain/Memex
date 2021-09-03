@@ -142,7 +142,6 @@ describe('New install onboarding UI logic', () => {
 
         expect(hasNavdToDashboard).toBe(false)
         expect(_logic.syncPromise).not.toBeUndefined()
-        expect(logic.state.syncState).toBe('running')
 
         expect(logic.state.step).toBe('tutorial')
         const syncStepPromise = logic.processEvent('goToSyncStep', null)

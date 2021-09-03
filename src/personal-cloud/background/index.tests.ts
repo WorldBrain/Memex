@@ -255,7 +255,7 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
-        startDisabled?: boolean
+        startWithSyncDisabled?: boolean
         withTestUser?: boolean
         superuser?: boolean
         serverChangeWatchSettings?: Omit<
@@ -311,8 +311,9 @@ export async function setupSyncBackgroundTest(
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
 
-        if (!options.startDisabled) {
+        if (!options.startWithSyncDisabled) {
             await setup.backgroundModules.personalCloud.enableSync()
+            setup.backgroundModules.personalCloud.startSync()
         }
     }
 

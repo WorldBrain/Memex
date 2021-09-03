@@ -72,7 +72,6 @@ export class PersonalCloudBackground {
     deviceId?: string | number
     reportExecutingAction?: (action: PersonalCloudAction) => void
     remoteFunctions: PersonalCloudRemoteInterface
-    syncStartCount = 0
     emitEvents = true
     debug = false
 
@@ -154,14 +153,12 @@ export class PersonalCloudBackground {
         })
 
         await this.enableSync()
+        this.startSync()
     }
 
     private async startCloudSyncIfEnabled() {
-        if (
-            this.actionQueue.isPaused &&
-            (await this.options.settingStore.get('isSetUp'))
-        ) {
-            await this.startSync()
+        if (await this.options.settingStore.get('isSetUp')) {
+            this.startSync()
         }
     }
 
@@ -175,27 +172,31 @@ export class PersonalCloudBackground {
             pendingUploads: this.actionQueue.pendingActionCount,
             // countingUploads: false,
         })
+
+        const userId = await this.options.getUserId()
+        if (userId) {
+            await this.createOrLoadDeviceId(userId)
+        }
+
         await this.startCloudSyncIfEnabled()
     }
 
     async observeAuthChanges() {
         for await (const nextUser of this.options.userIdChanges()) {
             await this.handleAuthChange(nextUser?.id)
+
+            if (nextUser) {
+                this.startSync()
+            }
         }
     }
 
     enableSync = async () => {
         await this.options.settingStore.set('isSetUp', true)
-        await this.startSync()
     }
 
-    async startSync() {
+    startSync() {
         this.actionQueue.unpause()
-
-        if (this.syncStartCount++ === 0) {
-            const userId = await this.options.getUserId()
-            await this.handleAuthChange(userId)
-        }
 
         // These will never return, so don't await for it
         if (!this.authChangesObserved) {
@@ -219,9 +220,7 @@ export class PersonalCloudBackground {
     async handleAuthChange(userId: string | number | null) {
         if (userId) {
             await this.createOrLoadDeviceId(userId)
-            await this.startCloudSyncIfEnabled()
         } else {
-            this.syncStartCount = 0
             this.actionQueue.pause()
             delete this.deviceId
         }
