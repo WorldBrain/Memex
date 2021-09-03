@@ -8,7 +8,7 @@ export type SettingValue =
     | { [key: string]: any }
 
 export interface Setting {
-    name: string
+    key: string
     value: SettingValue
 }
 

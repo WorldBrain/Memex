@@ -69,8 +69,8 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
 
     set: LimitedBrowserStorage['set'] = async (items) => {
         await Promise.all(
-            Object.entries(items).map(([name, value]) =>
-                this.storage.setSetting({ name, value }),
+            Object.entries(items).map(([key, value]) =>
+                this.storage.setSetting({ key, value }),
             ),
         )
     }

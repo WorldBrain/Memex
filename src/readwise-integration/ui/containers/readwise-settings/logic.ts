@@ -12,6 +12,7 @@ export const INITIAL_STATE: ReadwiseSettingsState = {
     syncState: 'pristine',
     syncExistingNotes: true,
     apiKeyEditable: false,
+    apiKey: null,
 }
 
 type EventHandler<

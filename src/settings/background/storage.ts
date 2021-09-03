@@ -56,14 +56,19 @@ export default class SettingsStorage extends StorageModule {
         await this.operation('createSetting', setting)
     }
 
-    async getSetting<T extends SettingValue>(name: string): Promise<T> {
+    async getSetting<T extends SettingValue>(name: string): Promise<T | null> {
         const record: Setting = await this.operation('findSetting', { name })
-        return record.value as T
+        return (record?.value as T) ?? null
     }
 
-    async removeSetting<T extends SettingValue>(name: string): Promise<T> {
-        const setting = await this.operation('findSetting', { name })
-        await this.operation('deleteSetting', { name })
-        return setting
+    async removeSetting<T extends SettingValue>(
+        name: string,
+    ): Promise<T | null> {
+        const setting: T = await this.operation('findSetting', { name })
+        if (setting) {
+            await this.operation('deleteSetting', { name })
+            return setting
+        }
+        return null
     }
 }

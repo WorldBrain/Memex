@@ -27,9 +27,7 @@ export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
 
     async get<Key extends keyof Settings>(key: Key): Promise<Settings[Key]> {
         const storageKey = this._makeStorageKey(key as string)
-        const response = await this.localBrowserStorage.get(
-            storageKey as string,
-        )
+        const response = await this.localBrowserStorage.get(storageKey)
         return response[storageKey as string]
     }
 

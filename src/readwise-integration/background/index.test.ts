@@ -29,17 +29,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
-        backgroundIntegrationTest('should retrieve a saved API key', () => {
+        backgroundIntegrationTest('should retrieve a pre-saved API key', () => {
             return {
                 steps: [
                     {
-                        execute: async ({ setup }) => {
-                            await setup.browserLocalStorage.set({
-                                'readwise.apiKey': 'my key',
-                            })
-                            expect(
-                                await setup.backgroundModules.readwise.getAPIKey(),
-                            ).toEqual('my key')
+                        execute: async ({
+                            setup: {
+                                backgroundModules: { readwise, settings },
+                            },
+                        }) => {
+                            await readwise['options'].settingsStore.set(
+                                'apiKey',
+                                'my key',
+                            )
+                            await settings.set({ 'readwise.apiKey': 'my key' })
+                            expect(await readwise.getAPIKey()).toEqual('my key')
                         },
                     },
                 ],
@@ -58,7 +62,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 expect(
-                                    await setup.browserLocalStorage.get(
+                                    await setup.browserAPIs.storage.local.get(
                                         'readwise.apiKey',
                                     ),
                                 ).toEqual({

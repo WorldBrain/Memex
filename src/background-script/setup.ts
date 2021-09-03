@@ -96,7 +96,7 @@ import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
-import { AuthRemoteEvents } from '../authentication/background/types'
+import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -368,9 +368,19 @@ export function createBackgroundModules(options: {
         generateServerId,
     })
 
+    const settings = new UserSettingsBackground({
+        storageManager,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
+    const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
+        settings,
+        { prefix: 'readwise.' },
+    )
+
     const readwise = new ReadwiseBackground({
         storageManager,
-        browserStorage: options.browserAPIs.storage.local,
+        settingsStore: readwiseSettingsStore,
         fetch,
         getPageData: async (normalizedUrl) =>
             pick(
@@ -566,10 +576,7 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
-        settings: new UserSettingsBackground({
-            storageManager,
-            localBrowserStorage: options.browserAPIs.storage.local,
-        }),
+        settings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
