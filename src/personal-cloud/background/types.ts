@@ -33,6 +33,7 @@ export type PersonalCloudDeviceID = number | string
 export interface PersonalCloudRemoteInterface {
     runDataDump: () => Promise<void>
     enableCloudSync: () => Promise<void>
+    isCloudSyncEnabled: () => Promise<boolean>
     runPassiveDataClean: () => Promise<void>
     isPassiveDataRemovalNeeded: () => Promise<boolean>
     runDataMigrationPreparation: () => Promise<void>

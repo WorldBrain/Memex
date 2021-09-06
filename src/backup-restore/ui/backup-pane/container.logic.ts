@@ -2,6 +2,7 @@ import React from 'react'
 const mapValues = require('lodash/mapValues')
 import { redirectToGDriveLogin } from 'src/backup-restore/ui/utils'
 import { Analytics } from 'src/analytics/types'
+import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export async function getInitialState({
     analytics,
@@ -11,6 +12,7 @@ export async function getInitialState({
     analytics: Analytics
     localStorage: any
     remoteFunction: any
+    personalCloudBG: PersonalCloudRemoteInterface
 }) {
     const isAuthenticated = await remoteFunction(
         'isBackupBackendAuthenticated',

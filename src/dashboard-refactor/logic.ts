@@ -199,21 +199,22 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async hydrateStateFromLocalStorage(
         previousState: State,
     ): Promise<State> {
+        const { personalCloudBG, localStorage } = this.options
         const {
             [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
             [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
             [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
             [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
-            [CLOUD_STORAGE_KEYS.isSetUp]: isCloudEnabled,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
-        } = await this.options.localStorage.get([
+        } = await localStorage.get([
             STORAGE_KEYS.subBannerDismissed,
             STORAGE_KEYS.listSidebarLocked,
             STORAGE_KEYS.onboardingMsgSeen,
             CLOUD_STORAGE_KEYS.lastSeen,
-            CLOUD_STORAGE_KEYS.isSetUp,
             STORAGE_KEYS.mobileAdSeen,
         ])
+
+        const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
 
         const mutation: UIMutation<State> = {
             searchResults: {

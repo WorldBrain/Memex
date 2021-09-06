@@ -97,6 +97,7 @@ export class PersonalCloudBackground {
         this.remoteFunctions = {
             enableCloudSync: this.enableSync,
             runDataMigration: this.waitForSync,
+            isCloudSyncEnabled: this.isCloudSyncEnabled,
             runDataMigrationPreparation: this.prepareDataMigration,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
@@ -156,8 +157,10 @@ export class PersonalCloudBackground {
         this.startSync()
     }
 
+    private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
+
     private async startCloudSyncIfEnabled() {
-        if (await this.options.settingStore.get('isSetUp')) {
+        if (await this.isCloudSyncEnabled()) {
             this.startSync()
         }
     }
