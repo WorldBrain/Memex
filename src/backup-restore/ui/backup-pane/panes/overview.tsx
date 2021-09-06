@@ -1,7 +1,7 @@
 import moment from 'moment'
 import React, { Component } from 'react'
 import classNames from 'classnames'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -15,6 +15,8 @@ import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { auth, subscription } from 'src/util/remote-functions-background'
+import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import { DumpPane } from './dump-pane'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -29,9 +31,14 @@ interface Props {
     authorizedFeatures: UserFeature[]
     backupPath: string
     showSubscriptionModal: () => void
+    personalCloudBG?: PersonalCloudRemoteInterface
 }
 
 export class OverviewContainer extends Component<Props & AuthContextInterface> {
+    static defaultProps: Pick<Props, 'personalCloudBG'> = {
+        personalCloudBG: runInBackground(),
+    }
+
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -48,10 +55,13 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         subscribeModal: false,
         backupPath: null,
         loadingChargebee: false,
+        isCloudSyncEnabled: true,
+        isDev: process.env.NODE_ENV !== 'production',
     }
 
     async componentDidMount() {
         const status = await checkServerStatus()
+        const isCloudSyncEnabled = await this.props.personalCloudBG.isCloudSyncEnabled()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -68,6 +78,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         }
         this.setState({
             automaticBackupEnabled,
+            isCloudSyncEnabled,
             backupTimes,
             hasInitialBackup,
             backupLocation,
@@ -133,40 +144,12 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         )
     }
 
-    render() {
+    private renderOldBackupPanes() {
         const automaticBackupsAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'backup',
         )
-
-        if (!this.state.backupTimes) {
-            return <LoadingBlocker />
-        }
-
         return (
-            <div>
-                {this.state.showWarning && (
-                    <div className={styles.showWarning}>
-                        <span className={styles.WarningIcon} />
-                        <span className={styles.showWarningText}>
-                            The first backup must be done manually. Follow{' '}
-                            <span
-                                className={styles.underline}
-                                onClick={this.props.onBackupRequested}
-                            >
-                                the wizard
-                            </span>{' '}
-                            to get started.
-                        </span>
-                    </div>
-                )}
-                {this.state.showRestoreConfirmation && (
-                    <RestoreConfirmation
-                        onConfirm={this.props.onRestoreRequested}
-                        onClose={() =>
-                            this.setState({ showRestoreConfirmation: false })
-                        }
-                    />
-                )}
+            <>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Backup Status
@@ -369,31 +352,73 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                         </div>
                     ) : null}
                 </div>
-                <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>
-                        Restore & Replace
-                    </div>
-                    <div className={styles.option}>
-                        <div className={localStyles.statusLine}>
+            </>
+        )
+    }
+
+    render() {
+        if (!this.state.backupTimes) {
+            return <LoadingBlocker />
+        }
+
+        return (
+            <div>
+                {this.state.showWarning && (
+                    <div className={styles.showWarning}>
+                        <span className={styles.WarningIcon} />
+                        <span className={styles.showWarningText}>
+                            The first backup must be done manually. Follow{' '}
                             <span
-                                className={classNames(
-                                    settingsStyle.subname,
-                                    localStyles.limitWidth,
-                                )}
+                                className={styles.underline}
+                                onClick={this.props.onBackupRequested}
                             >
-                                <b>Replace</b> all current data with a backup.
-                            </span>
-                            <SecondaryAction
-                                onClick={() =>
-                                    this.setState({
-                                        showRestoreConfirmation: true,
-                                    })
-                                }
-                                label={'Restore'}
-                            />
+                                the wizard
+                            </span>{' '}
+                            to get started.
+                        </span>
+                    </div>
+                )}
+                {this.state.showRestoreConfirmation && (
+                    <RestoreConfirmation
+                        onConfirm={this.props.onRestoreRequested}
+                        onClose={() =>
+                            this.setState({ showRestoreConfirmation: false })
+                        }
+                    />
+                )}
+                {!this.state.isCloudSyncEnabled ? (
+                    this.renderOldBackupPanes()
+                ) : (
+                    <DumpPane onDumpClick={() => console.log('dump!')} />
+                )}
+                {this.state.isDev && (
+                    <div className={settingsStyle.section}>
+                        <div className={settingsStyle.sectionTitle}>
+                            Restore & Replace
+                        </div>
+                        <div className={styles.option}>
+                            <div className={localStyles.statusLine}>
+                                <span
+                                    className={classNames(
+                                        settingsStyle.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    <b>Replace</b> all current data with a
+                                    backup.
+                                </span>
+                                <SecondaryAction
+                                    onClick={() =>
+                                        this.setState({
+                                            showRestoreConfirmation: true,
+                                        })
+                                    }
+                                    label={'Restore'}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         )
     }

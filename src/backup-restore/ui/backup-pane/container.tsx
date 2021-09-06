@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
 import { default as Overview } from './panes/overview'
 import { default as RunningBackup } from './panes/running-backup'
@@ -76,7 +76,6 @@ export default class BackupSettingsContainer extends Component {
             analytics,
             localStorage,
             remoteFunction,
-            personalCloudBG: runInBackground(),
         })
         this.setState(state)
     }
