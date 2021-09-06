@@ -9018,6 +9018,11 @@ detect-port@^1.3.0:
     address "^1.0.1"
     debug "^2.6.0"
 
+dexie-export-import@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/dexie-export-import/-/dexie-export-import-1.0.3.tgz#e93926a0a3939c68f5e2b80b48517ea4c6d88fde"
+  integrity sha512-oun27bUUEaeOfSZ8Cv3Nvj5s0LeANYBYQ7ROpF/3Zg1X/IALUnrX0hk5ZUMlYC3s99kFHimXX57ac5AlOdMzWw==
+
 dexie-mongoify@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/dexie-mongoify/-/dexie-mongoify-1.3.0.tgz#952035718a1bf1d130a174b4df96272ea4b6d0a2"
