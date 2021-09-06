@@ -186,7 +186,7 @@ export class PersonalCloudBackground {
             await this.handleAuthChange(nextUser?.id)
 
             if (nextUser) {
-                this.startSync()
+                await this.startCloudSyncIfEnabled()
             }
         }
     }

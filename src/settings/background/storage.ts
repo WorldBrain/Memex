@@ -27,7 +27,7 @@ export default class SettingsStorage extends StorageModule {
                 operation: 'findObject',
                 collection: COLLECTION_NAMES.settings,
                 args: {
-                    name: '$name:string',
+                    key: '$key:string',
                 },
             },
             updateSetting: {
@@ -35,7 +35,7 @@ export default class SettingsStorage extends StorageModule {
                 collection: COLLECTION_NAMES.settings,
                 args: [
                     {
-                        name: '$name:string',
+                        key: '$key:string',
                     },
                     {
                         value: '$value:json',
@@ -46,7 +46,7 @@ export default class SettingsStorage extends StorageModule {
                 operation: 'deleteObject',
                 collection: COLLECTION_NAMES.settings,
                 args: {
-                    name: '$name:string',
+                    key: '$key:string',
                 },
             },
         },
@@ -56,17 +56,17 @@ export default class SettingsStorage extends StorageModule {
         await this.operation('createSetting', setting)
     }
 
-    async getSetting<T extends SettingValue>(name: string): Promise<T | null> {
-        const record: Setting = await this.operation('findSetting', { name })
+    async getSetting<T extends SettingValue>(key: string): Promise<T | null> {
+        const record: Setting = await this.operation('findSetting', { key })
         return (record?.value as T) ?? null
     }
 
     async removeSetting<T extends SettingValue>(
-        name: string,
+        key: string,
     ): Promise<T | null> {
-        const setting: T = await this.operation('findSetting', { name })
+        const setting: T = await this.operation('findSetting', { key })
         if (setting) {
-            await this.operation('deleteSetting', { name })
+            await this.operation('deleteSetting', { key })
             return setting
         }
         return null

@@ -208,7 +208,8 @@ async function runSyncBackgroundTest(
         sequence: SyncTestSequence
         test: BackgroundIntegrationTest
         deviceCount: number
-    } & BackgroundIntegrationTestOptions,
+    } & BackgroundIntegrationTestOptions &
+        BackgroundIntegrationTestSetupOpts,
 ) {
     const { setups, sync } = await setupSyncBackgroundTest(options)
 
@@ -255,7 +256,6 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
-        startWithSyncDisabled?: boolean
         withTestUser?: boolean
         superuser?: boolean
         serverChangeWatchSettings?: Omit<
@@ -263,7 +263,8 @@ export async function setupSyncBackgroundTest(
             'storageManager'
         >
         useDownloadTranslationLayer?: boolean
-    } & BackgroundIntegrationTestOptions,
+    } & BackgroundIntegrationTestOptions &
+        BackgroundIntegrationTestSetupOpts,
 ) {
     const userId = TEST_USER.id
 

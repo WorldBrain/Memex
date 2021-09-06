@@ -62,7 +62,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 expect(
-                                    await setup.browserAPIs.storage.local.get(
+                                    await setup.backgroundModules.settings.get(
                                         'readwise.apiKey',
                                     ),
                                 ).toEqual({
@@ -485,6 +485,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
     ],
+    {
+        startWithSyncDisabled: true,
+    },
 )
 
 function parseJsonFetchCalls(calls: fetchMock.MockCall[]) {

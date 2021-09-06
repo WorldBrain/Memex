@@ -58,6 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
+    startWithSyncDisabled?: boolean
     services?: Services
 }
 
