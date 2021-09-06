@@ -38,6 +38,7 @@ async function assertPageExists(args: {
     pageUrl: string
     exists: boolean
     now: number
+    expectExtraVisits?: () => any[]
 }) {
     expect(await args.db.table('pages').get(args.pageUrl)).toEqual(
         args.exists ? { url: args.pageUrl, hostname: args.pageUrl } : undefined,
@@ -45,22 +46,21 @@ async function assertPageExists(args: {
     expect(await args.db.table('favIcons').get(args.pageUrl)).toEqual(
         args.exists ? { hostname: args.pageUrl } : undefined,
     )
+
+    const expectedVisits = args.expectExtraVisits?.() ?? [
+        { url: args.pageUrl, time: args.now - 3 },
+        { url: args.pageUrl, time: args.now - 2 },
+        { url: args.pageUrl, time: args.now - 1 },
+        { url: args.pageUrl, time: args.now },
+    ]
+
     expect(
         await args.db
             .table('visits')
             .where('url')
             .equals(args.pageUrl)
             .toArray(),
-    ).toEqual(
-        args.exists
-            ? [
-                  { url: args.pageUrl, time: args.now - 3 },
-                  { url: args.pageUrl, time: args.now - 2 },
-                  { url: args.pageUrl, time: args.now - 1 },
-                  { url: args.pageUrl, time: args.now },
-              ]
-            : [],
-    )
+    ).toEqual(args.exists ? expectedVisits : [])
 }
 
 describe('passive data wipe tests', () => {
@@ -111,12 +111,44 @@ describe('passive data wipe tests', () => {
         ])
 
         // Add some extra visits on two pages, that exceed the visit limit
-        const now2 = Date.now()
+        const now2 = now + 10
+        const extraVisits1 = []
+        const extraVisits2 = []
         const [activePage1, activePage2] = ACTIVE_PAGE_URLS
-        for (let i = 0; i < 10; i++) {
-            await db.table('visits').put({ url: activePage1, time: now2 - i })
-            await db.table('visits').put({ url: activePage2, time: now2 - i })
+        for (let i = 9; i >= 0; i--) {
+            extraVisits1.push({ url: activePage1, time: now2 - i })
+            extraVisits2.push({ url: activePage2, time: now2 - i })
         }
+        await db.table('visits').bulkPut([...extraVisits1, ...extraVisits2])
+
+        await Promise.all(
+            ACTIVE_PAGE_URLS.map((pageUrl) =>
+                assertPageExists({
+                    db,
+                    pageUrl,
+                    exists: true,
+                    now: [activePage1, activePage2].includes(pageUrl)
+                        ? now2
+                        : now,
+                    expectExtraVisits: () => {
+                        const origVisits = [
+                            { url: pageUrl, time: now - 3 },
+                            { url: pageUrl, time: now - 2 },
+                            { url: pageUrl, time: now - 1 },
+                            { url: pageUrl, time: now },
+                        ]
+
+                        if (pageUrl === activePage1) {
+                            return [...origVisits, ...extraVisits1]
+                        } else if (pageUrl === activePage2) {
+                            return [...origVisits, ...extraVisits2]
+                        } else {
+                            return origVisits
+                        }
+                    },
+                }),
+            ),
+        )
 
         await wipePassiveData({ db, visitLimit: 4 })
 
