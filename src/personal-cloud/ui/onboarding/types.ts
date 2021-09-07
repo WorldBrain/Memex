@@ -14,13 +14,14 @@ export interface Dependencies {
 
 export interface State {
     loadState: UITaskState
-    backupState: UITaskState
+    dumpState: UITaskState
     migrationState: UITaskState
     dataCleaningState: UITaskState
 
     stage: 'data-dump' | 'data-clean' | 'data-migration' | 'old-version-backup'
     currentUser: AuthenticatedUser | null
 
+    dumpPercentComplete: number
     isMigrationPrepped: boolean
     shouldBackupViaDump: boolean
     needsToRemovePassiveData: boolean

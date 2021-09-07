@@ -37,7 +37,7 @@ export default class CloudOnboardingModal extends UIElement<
             return (
                 <DataDumper
                     supportLink={this.props.supportLink}
-                    backupState={this.state.backupState}
+                    backupState={this.state.dumpState}
                     onStartClick={() =>
                         this.processEvent('startDataDump', null)
                     }

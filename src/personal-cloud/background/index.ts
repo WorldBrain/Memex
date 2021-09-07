@@ -1,6 +1,5 @@
 import type Dexie from 'dexie'
 import type StorageManager from '@worldbrain/storex'
-import delay from 'src/util/delay'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
@@ -102,7 +101,6 @@ export class PersonalCloudBackground {
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
                 wipePassiveData({ db: this.dexie, visitLimit: 20 }),
-            runDataDump: () => delay(2000),
         }
     }
 

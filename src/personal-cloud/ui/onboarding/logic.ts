@@ -6,6 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
+import { dumpDB } from 'src/personal-cloud/storage/dump-db-contents'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -20,13 +21,15 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         loadState: 'pristine',
-        backupState: 'pristine',
+        dumpState: 'pristine',
+
         migrationState: 'pristine',
         dataCleaningState: 'pristine',
 
         currentUser: null,
         stage: 'data-dump',
 
+        dumpPercentComplete: 0,
         isMigrationPrepped: false,
         shouldBackupViaDump: false,
         needsToRemovePassiveData: false,
@@ -62,8 +65,17 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     }
 
     private async attemptDataDump() {
-        await executeUITask(this, 'backupState', async () => {
-            await this.dependencies.personalCloudBG.runDataDump()
+        await executeUITask(this, 'dumpState', async () => {
+            await dumpDB({
+                progressCallback: ({ completedTables, totalTables }) => {
+                    this.emitMutation({
+                        dumpPercentComplete: {
+                            $set: completedTables / totalTables,
+                        },
+                    })
+                    return true
+                },
+            })
         })
     }
 
@@ -117,7 +129,7 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     }
 
     cancelDataDump: EventHandler<'cancelDataDump'> = async ({}) => {
-        this.emitMutation({ backupState: { $set: 'pristine' } })
+        this.emitMutation({ dumpState: { $set: 'pristine' } })
     }
 
     startDataClean: EventHandler<'startDataClean'> = async ({
