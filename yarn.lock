@@ -6600,6 +6600,11 @@ brorand@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
 
+browser-fs-access@^0.20.4:
+  version "0.20.4"
+  resolved "https://registry.yarnpkg.com/browser-fs-access/-/browser-fs-access-0.20.4.tgz#e5ad94cf11b832da36fb16db0832f47dd903e912"
+  integrity sha512-rSbY1AIoDe+fvYZ1LiRDdKBnytfsd1nN/GKS/DRZAhaJkz3cfbp14IHw5lk4FFWBelD6Sw6EtdnAI990ZuBZjg==
+
 browser-process-hrtime@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/browser-process-hrtime/-/browser-process-hrtime-0.1.2.tgz#425d68a58d3447f02a04aa894187fce8af8b7b8e"

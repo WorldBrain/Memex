@@ -1,44 +1,29 @@
-import type Dexie from 'dexie'
-import { showDirectoryPicker } from 'native-file-system-adapter'
+import Dexie from 'dexie'
 import { exportDB, ExportOptions } from 'dexie-export-import'
+import { fileSave } from 'browser-fs-access'
 
 export interface Dependencies {
-    db: Dexie
+    dbName?: string
     progressCallback: ExportOptions['progressCallback']
 }
 
-type FileHandle = any
-
-async function getDumpFile(): Promise<FileHandle> {
-    const dirHandle = await showDirectoryPicker()
-
-    if ((await dirHandle.requestPermission({ writable: true })) !== 'granted') {
-        throw new Error('FS access was denied by user')
-    }
-
-    return dirHandle.getFileHandle('memex-db-dump', {
-        create: true,
-    })
-}
-
-async function writeToDumpFile(
-    fileHandle: FileHandle,
-    dbContents: Blob,
-): Promise<void> {
-    const writable = await fileHandle.createWritable()
-    await dbContents.stream().pipeTo(writable)
-    await writable.close()
-}
-
+/**
+ * NOTE: This function should NOT be run from the background script. The download prompt will not work in Firefox unless it's run from the options script.
+ */
 export async function dumpDB({
-    db,
+    dbName = 'memex',
     progressCallback,
 }: Dependencies): Promise<void> {
-    const dumpFile = await getDumpFile()
+    const db = await new Dexie(dbName).open()
+
     const dbContentsBlob = await exportDB(db, {
         noTransaction: true,
         progressCallback,
     })
 
-    await writeToDumpFile(dumpFile, dbContentsBlob)
+    await fileSave(dbContentsBlob, {
+        startIn: 'downloads',
+        extensions: ['.txt', '.json'],
+        fileName: 'memex-db-dump.json',
+    })
 }
