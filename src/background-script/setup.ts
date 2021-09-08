@@ -210,6 +210,7 @@ export function createBackgroundModules(options: {
         createInboxEntry,
         tabManagement,
         getNow,
+        generateServerId,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)

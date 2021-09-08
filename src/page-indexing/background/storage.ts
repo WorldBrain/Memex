@@ -1,3 +1,4 @@
+import flatten from 'lodash/flatten'
 import {
     StorageModule,
     StorageModuleConfig,
@@ -8,9 +9,17 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
-import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import {
+    mergeTermFields,
+    fingerprintsEqual,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
+import {
+    ContentIdentifier,
+    ContentLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
+import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -98,6 +107,24 @@ export default class PageStorage extends StorageModule {
                 args: {
                     url: '$url:string',
                 },
+            },
+            findLocatorsByNormalizedUrl: {
+                operation: 'findObjects',
+                collection: 'locators',
+                args: {
+                    normalizedUrl: '$normalizedUrl:string',
+                },
+            },
+            findLocatorsByFingerprint: {
+                operation: 'findObjects',
+                collection: 'locators',
+                args: {
+                    fingerprint: '$fingerprint:string',
+                },
+            },
+            createLocator: {
+                operation: 'createObject',
+                collection: 'locators',
             },
         },
     })
@@ -286,6 +313,61 @@ export default class PageStorage extends StorageModule {
             url: normalizedUrl,
         })
         return result.length ? result[0] : null
+    }
+
+    async getContentIdentifier(params: {
+        regularNormalizedUrl: string
+        fingerprints: Array<ContentFingerprint>
+    }): Promise<ContentIdentifier> {
+        const existingLocators: Array<ContentLocator> = flatten(
+            await Promise.all(
+                params.fingerprints.map((fingerprint) =>
+                    this.operation('findLocatorsByFingerprint', {
+                        fingerprint,
+                    }),
+                ),
+            ),
+        )
+        const locator = existingLocators.find(
+            (existingLocator) =>
+                !!params.fingerprints.find((fingerprint) =>
+                    fingerprintsEqual(
+                        {
+                            fingerprintScheme: fingerprint.fingerprintScheme,
+                            fingerprint: fingerprint.fingerprint,
+                        },
+                        existingLocator,
+                    ),
+                ),
+        )
+        if (!locator) {
+            return null
+        }
+        const page = await this.getPage(locator.normalizedUrl)
+        return (
+            page && {
+                normalizedUrl: page.url,
+                fullUrl: page.fullUrl,
+            }
+        )
+    }
+
+    async storeLocators(params: {
+        identifier: ContentIdentifier
+        locators: ContentLocator[]
+    }) {
+        const existingLocators: Array<ContentLocator> = await this.operation(
+            'findLocatorsByNormalizedUrl',
+            params.identifier,
+        )
+        const toStore = params.locators.filter((locator) => {
+            return !existingLocators.find((existing) =>
+                fingerprintsEqual(existing, locator),
+            )
+        })
+        await Promise.all(
+            toStore.map((locator) => this.operation('createLocator', locator)),
+        )
     }
 
     async _maybeDecodeBlob(

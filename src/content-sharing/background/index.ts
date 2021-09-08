@@ -15,6 +15,7 @@ import { Services } from 'src/services/types'
 import { ServerStorageModules } from 'src/storage/types'
 import { ContentSharingInterface, ContentSharingEvents } from './types'
 import { ContentSharingClientStorage } from './storage'
+import { GenerateServerID } from '../../background-script/types'
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
@@ -36,7 +37,7 @@ export default class ContentSharingBackground {
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
             >
-            generateServerId: (collectionName: string) => number | string
+            generateServerId: GenerateServerID
         },
     ) {
         this.storage = new ContentSharingClientStorage({
