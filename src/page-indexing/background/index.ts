@@ -37,7 +37,10 @@ import {
     InitContentIdentifierReturns,
 } from './types'
 import { GenerateServerID } from '../../background-script/types'
-import { remoteFunctionWithExtraArgs } from '../../util/webextensionRPC'
+import {
+    remoteFunctionWithExtraArgs,
+    registerRemoteFunctions,
+} from '../../util/webextensionRPC'
 
 interface ContentInfo {
     locators: Array<ContentLocator>
