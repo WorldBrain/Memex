@@ -8,3 +8,5 @@ export const LEARN_MORE_URL = 'https://worldbrain.io/pricing'
 export const UPGRADE_URL = 'https://getmemex.com/#pricingSection'
 export const TAG_SUGGESTIONS_KEY = 'tag_suggestions'
 export const SYNC_URL = `${OPTIONS_URL}#/sync`
+
+export const SUPPORT_EMAIL = 'support@worldbrain.io'

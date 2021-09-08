@@ -28,6 +28,7 @@ interface Props {
     onBackupSetupRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
+    onDumpRequested: (...args: any[]) => any
     authorizedFeatures: UserFeature[]
     backupPath: string
     showSubscriptionModal: () => void
@@ -389,7 +390,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                 {!this.state.isCloudSyncEnabled ? (
                     this.renderOldBackupPanes()
                 ) : (
-                    <DumpPane onDumpClick={() => console.log('dump!')} />
+                    <DumpPane onDumpClick={this.props.onDumpRequested} />
                 )}
                 {this.state.isDev && (
                     <div className={settingsStyle.section}>

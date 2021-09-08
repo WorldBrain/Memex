@@ -16,6 +16,7 @@ import {
 } from '../components/shared-components'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SUPPORT_EMAIL } from 'src/constants'
 
 export interface Props extends Dependencies {
     supportLink: string
@@ -32,7 +33,7 @@ export default class CloudOnboardingModal extends UIElement<
         Props,
         'supportLink' | 'dataCleanReadMoreLink'
     > = {
-        supportLink: 'mailto:support@worldbrain.io',
+        supportLink: 'mailto:' + SUPPORT_EMAIL,
         dataCleanReadMoreLink: 'https://getmemex.com', // TODO: fix this
     }
 
