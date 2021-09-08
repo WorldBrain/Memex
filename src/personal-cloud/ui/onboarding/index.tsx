@@ -118,6 +118,41 @@ export default class CloudOnboardingModal extends UIElement<
                 />
             )
         }
+        if (this.state.stage === 'old-version-backup') {
+            return (
+                <Container>
+                    <Header>Create backup to migrate to old version</Header>
+                    <Text bold>Important:</Text>
+                    <Text>
+                        Memex last version (2.20.0) is made available for users
+                        who really want to keep using an offline-only product.
+                        Be aware that development on this version is
+                        discontinued and will not have mobile sync.
+                    </Text>
+                    <Text>
+                        Backup your data, install 2.20.0 and then restore your
+                        data there.
+                    </Text>
+                    <BtnBox>
+                        <SecondaryAction
+                            label="Go Back"
+                            onClick={() =>
+                                this.processEvent(
+                                    'cancelMigrateToOldVersion',
+                                    null,
+                                )
+                            }
+                        />
+                        <PrimaryAction
+                            label="Continue to Backup"
+                            onClick={() =>
+                                this.processEvent('goToBackupRoute', null)
+                            }
+                        />
+                    </BtnBox>
+                </Container>
+            )
+        }
         return (
             <DataMigrator
                 supportLink={this.props.supportLink}
