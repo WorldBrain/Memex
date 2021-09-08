@@ -10,6 +10,7 @@ import type { State, Event } from './types'
 async function setupTest(
     { backgroundModules, services, createElement }: UILogicTestDevice,
     args?: {
+        browser?: 'chrome' | 'firefox'
         isLoggedOut?: boolean
         isSyncDisabled?: boolean
         onModalClose?: (args?: { didFinish?: boolean }) => void
@@ -27,6 +28,7 @@ async function setupTest(
     }
 
     const _logic = new Logic({
+        browser: args?.browser ?? 'chrome',
         authBG: backgroundModules.auth.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
             backgroundModules.backupModule.remoteFunctions,
@@ -129,6 +131,30 @@ describe('Cloud onboarding UI logic', () => {
             nextBackup: null,
         })
         const { logic: logicB } = await setupTest(device)
+        expect(logicB.state.shouldBackupViaDump).toBe(false)
+        await logicB.init()
+        expect(logicB.state.shouldBackupViaDump).toBe(false)
+    })
+
+    it('should not ask user to dump if using firefox', async ({ device }) => {
+        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
+            lastBackup: null, // As there isn't a last backup time, it should tell user to dump
+            nextBackup: null,
+        })
+        const { logic: logicA } = await setupTest(device, {
+            browser: 'firefox',
+        })
+        expect(logicA.state.shouldBackupViaDump).toBe(false)
+        await logicA.init()
+        expect(logicA.state.shouldBackupViaDump).toBe(false)
+
+        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
+            lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
+            nextBackup: null,
+        })
+        const { logic: logicB } = await setupTest(device, {
+            browser: 'firefox',
+        })
         expect(logicB.state.shouldBackupViaDump).toBe(false)
         await logicB.init()
         expect(logicB.state.shouldBackupViaDump).toBe(false)

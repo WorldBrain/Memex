@@ -6,6 +6,7 @@ import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface Dependencies {
+    browser: 'firefox' | 'chrome'
     personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>

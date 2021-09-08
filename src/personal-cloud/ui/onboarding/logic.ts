@@ -6,7 +6,6 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
-import { dumpDB } from 'src/personal-cloud/storage/dump-db-contents'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -57,7 +56,11 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
             const { lastBackup } = await backupBG.getBackupTimes()
             this.emitMutation({
-                shouldBackupViaDump: { $set: lastBackup == null },
+                shouldBackupViaDump: {
+                    $set:
+                        this.dependencies.browser !== 'firefox' &&
+                        lastBackup == null,
+                },
             })
         })
     }
