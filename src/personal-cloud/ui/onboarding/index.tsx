@@ -8,6 +8,14 @@ import type { UIServices } from 'src/services/ui/types'
 import DataMigrator from '../components/data-migrator'
 import DataCleaner from '../components/data-cleaner'
 import DataDumper from '../components/data-dumper'
+import {
+    Text,
+    Header,
+    BtnBox,
+    Container,
+} from '../components/shared-components'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export interface Props extends Dependencies {
     supportLink: string
@@ -32,29 +40,62 @@ export default class CloudOnboardingModal extends UIElement<
         super(props, { logic: new CloudOnboardingModalLogic(props) })
     }
 
+    private renderDataDumper() {
+        if (!this.state.giveControlToDumper) {
+            return (
+                <Container>
+                    <Header>
+                        Locally back up your data before starting the migration
+                    </Header>
+                    <Text>
+                        Create a backup dump of your data before starting the
+                        sync.
+                    </Text>
+                    <BtnBox>
+                        <SecondaryAction
+                            label="Backup existing data"
+                            onClick={() =>
+                                this.processEvent('startDataDump', null)
+                            }
+                        />
+                        <PrimaryAction
+                            label="Continue migration"
+                            onClick={() =>
+                                this.processEvent('continueToMigration', null)
+                            }
+                        />
+                    </BtnBox>
+                    <Text dimmed>
+                        Don't want to use the cloud?{' '}
+                        <Text
+                            dimmed
+                            clickable
+                            onClick={() =>
+                                this.processEvent('migrateToOldVersion', null)
+                            }
+                        >
+                            <u>Migrate</u>
+                        </Text>{' '}
+                        to the last version of Memex.
+                    </Text>
+                </Container>
+            )
+        }
+
+        return (
+            <DataDumper
+                {...this.props}
+                onCancel={() => this.processEvent('cancelDataDump', null)}
+                onComplete={() =>
+                    this.processEvent('continueToMigration', null)
+                }
+            />
+        )
+    }
+
     private renderModalContent() {
         if (this.state.stage === 'data-dump') {
-            return (
-                <DataDumper
-                    supportLink={this.props.supportLink}
-                    backupState={this.state.dumpState}
-                    onStartClick={() =>
-                        this.processEvent('startDataDump', null)
-                    }
-                    onRetryClick={() =>
-                        this.processEvent('retryDataDump', null)
-                    }
-                    onCancelClick={() =>
-                        this.processEvent('cancelDataDump', null)
-                    }
-                    onContinueClick={() =>
-                        this.processEvent('continueToMigration', null)
-                    }
-                    onUseOldVersionClick={() =>
-                        this.processEvent('cancelMigrateToOldVersion', null)
-                    }
-                />
-            )
+            return this.renderDataDumper()
         }
         if (this.state.stage === 'data-clean') {
             return (

@@ -1,46 +1,37 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { Container, BtnBox, Header, Text } from './shared-components'
+import { UIElement } from '@worldbrain/memex-common/lib/main-ui/classes'
+import Logic, { Dependencies, State, Event } from './data-dumper.logic'
+import type { UIServices } from 'src/services/ui/types'
 
-export interface Props {
+export interface Props extends Dependencies {
     supportLink: string
-    backupState: UITaskState
-    onStartClick: React.MouseEventHandler
-    onRetryClick: React.MouseEventHandler
-    onCancelClick: React.MouseEventHandler
-    onContinueClick: React.MouseEventHandler
-    onUseOldVersionClick: React.MouseEventHandler
+    services: Pick<UIServices, 'overlay' | 'device' | 'logicRegistry'>
 }
 
-export default class DataDumper extends React.PureComponent<Props> {
+export default class DataDumper extends UIElement<Props, State, Event> {
+    constructor(props: Props) {
+        super(props, { logic: new Logic(props) })
+    }
+
+    private run = (event: keyof Event) => () => this.processEvent(event, null)
+
     private renderBtns() {
-        const { backupState } = this.props
+        const { dumpState: backupState } = this.state
 
         if (backupState === 'pristine') {
-            return (
-                <>
-                    <SecondaryAction
-                        label="Backup existing data"
-                        onClick={this.props.onStartClick}
-                    />
-                    <PrimaryAction
-                        label="Continue migration"
-                        onClick={this.props.onContinueClick}
-                    />
-                </>
-            )
+            return false
         }
         if (backupState === 'running') {
             return (
                 <SecondaryAction
                     label="Cancel"
-                    onClick={this.props.onCancelClick}
+                    onClick={this.run('cancelDataDump')}
                 />
             )
         }
@@ -49,44 +40,34 @@ export default class DataDumper extends React.PureComponent<Props> {
                 <>
                     <SecondaryAction
                         label="Cancel"
-                        onClick={this.props.onCancelClick}
+                        onClick={this.run('cancelDataDump')}
                     />
                     <PrimaryAction
-                        label="Rety"
-                        onClick={this.props.onRetryClick}
+                        label="Retry"
+                        onClick={this.run('retryDataDump')}
                     />
                 </>
             )
         }
         return (
             <PrimaryAction
-                label="Continue Migration"
-                onClick={this.props.onContinueClick}
+                label="Continue"
+                onClick={this.run('completeDataDump')}
             />
         )
     }
 
     private renderContent() {
-        const { backupState, supportLink } = this.props
+        const { dumpState: backupState } = this.state
 
         if (backupState === 'pristine') {
-            return (
-                <>
-                    <Header>
-                        Locally back up your data before starting the migration
-                    </Header>
-                    <Text>
-                        Create a backup dump of your data before starting the
-                        sync.
-                    </Text>
-                </>
-            )
+            return false
         }
         if (backupState === 'running') {
             return (
                 <>
                     <LoadingIndicator />
-                    <Header>Data Backup In Progress</Header>
+                    <Header>Data Dump In Progress</Header>
                     <Text>This may take a couple of minutes.</Text>
                 </>
             )
@@ -97,8 +78,8 @@ export default class DataDumper extends React.PureComponent<Props> {
                     <Icon icon="alertRound" height="20px" />
                     <Header>There was an error</Header>
                     <Text>
-                        <a href={supportLink}>Contact support</a> if problem
-                        persists.
+                        <a href={this.props.supportLink}>Contact support</a> if
+                        problem persists.
                     </Text>
                 </>
             )
@@ -106,7 +87,7 @@ export default class DataDumper extends React.PureComponent<Props> {
         return (
             <>
                 <Icon icon="checkRound" height="20px" />
-                <Header>Data Backup Finished</Header>
+                <Header>Data Dump Finished</Header>
             </>
         )
     }
@@ -116,19 +97,6 @@ export default class DataDumper extends React.PureComponent<Props> {
             <Container>
                 {this.renderContent()}
                 <BtnBox>{this.renderBtns()}</BtnBox>
-                {this.props.backupState === 'pristine' && (
-                    <Text dimmed>
-                        Don't want to use the cloud?{' '}
-                        <Text
-                            dimmed
-                            clickable
-                            onClick={this.props.onUseOldVersionClick}
-                        >
-                            <u>Migrate</u>
-                        </Text>{' '}
-                        to the last version of Memex.
-                    </Text>
-                )}
             </Container>
         )
     }

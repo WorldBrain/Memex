@@ -21,16 +21,14 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         loadState: 'pristine',
-        dumpState: 'pristine',
-
         migrationState: 'pristine',
         dataCleaningState: 'pristine',
 
         currentUser: null,
         stage: 'data-dump',
 
-        dumpPercentComplete: 0,
         isMigrationPrepped: false,
+        giveControlToDumper: false,
         shouldBackupViaDump: false,
         needsToRemovePassiveData: false,
     })
@@ -60,21 +58,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
             const { lastBackup } = await backupBG.getBackupTimes()
             this.emitMutation({
                 shouldBackupViaDump: { $set: lastBackup == null },
-            })
-        })
-    }
-
-    private async attemptDataDump() {
-        await executeUITask(this, 'dumpState', async () => {
-            await dumpDB({
-                progressCallback: ({ completedTables, totalTables }) => {
-                    this.emitMutation({
-                        dumpPercentComplete: {
-                            $set: completedTables / totalTables,
-                        },
-                    })
-                    return true
-                },
             })
         })
     }
@@ -120,16 +103,12 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         window.open(BACKUP_URL, '_self')
     }
 
-    startDataDump: EventHandler<'startDataDump'> = async ({}) => {
-        await this.attemptDataDump()
-    }
-
-    retryDataDump: EventHandler<'retryDataDump'> = async ({}) => {
-        await this.attemptDataDump()
+    startDataDump: EventHandler<'cancelDataDump'> = async ({}) => {
+        this.emitMutation({ giveControlToDumper: { $set: true } })
     }
 
     cancelDataDump: EventHandler<'cancelDataDump'> = async ({}) => {
-        this.emitMutation({ dumpState: { $set: 'pristine' } })
+        this.emitMutation({ giveControlToDumper: { $set: false } })
     }
 
     startDataClean: EventHandler<'startDataClean'> = async ({
