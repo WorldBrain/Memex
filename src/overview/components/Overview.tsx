@@ -38,15 +38,14 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import colors from 'src/dashboard-refactor/colors'
 import { STORAGE_KEYS } from 'src/dashboard-refactor/constants'
-import { createUIServices } from 'src/services/ui'
-import type { UIServices } from 'src/services/ui/types'
-import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 import { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { UIServices } from 'src/services/ui/types'
 
 const styles = require('./overview.styles.css')
 const resultItemStyles = require('src/common-ui/components/result-item.css')
 
 export interface Props {
+    services: UIServices
     setShowOnboardingMessage: () => void
     toggleAnnotationsSidebar(args: { pageUrl: string; pageTitle: string }): void
     handleReaderViewClick: (url: string) => void
@@ -71,7 +70,6 @@ class Overview extends PureComponent<Props, State> {
         localStorage: browser.storage.local,
     }
 
-    private services: UIServices
     private annotationsCache: AnnotationsCacheInterface
     private annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     private customListsBG = runInBackground<RemoteCollectionsInterface>()
@@ -102,7 +100,6 @@ class Overview extends PureComponent<Props, State> {
     constructor(props: Props) {
         super(props)
 
-        this.services = createUIServices()
         this.annotationsCache = createAnnotationsCache({
             contentSharing: this.contentSharingBG,
             annotations: this.annotationsBG,
@@ -255,7 +252,6 @@ class Overview extends PureComponent<Props, State> {
     renderOverview() {
         return (
             <>
-                <OverlayContainer services={this.services} />
                 {this.renderUpdateNotifBanner()}
                 <div className={styles.mainWindow}>
                     <div
@@ -365,18 +361,13 @@ class Overview extends PureComponent<Props, State> {
         }
 
         return (
-            <>
-                <OverlayContainer services={this.services} />
-                <DashboardContainer
-                    services={this.services}
-                    renderDashboardSwitcherLink={() =>
-                        this.renderSwitcherLink('old')
-                    }
-                    renderUpdateNotifBanner={() =>
-                        this.renderUpdateNotifBanner()
-                    }
-                />
-            </>
+            <DashboardContainer
+                services={this.props.services}
+                renderDashboardSwitcherLink={() =>
+                    this.renderSwitcherLink('old')
+                }
+                renderUpdateNotifBanner={() => this.renderUpdateNotifBanner()}
+            />
         )
     }
 }

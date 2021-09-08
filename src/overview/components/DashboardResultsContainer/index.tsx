@@ -119,6 +119,7 @@ export default class DashboardResultsContainer extends StatefulUIElement<
         return (
             <>
                 <Overview
+                    {...this.props}
                     toggleAnnotationsSidebar={
                         this.handleAnnotationSidebarToggle
                     }
