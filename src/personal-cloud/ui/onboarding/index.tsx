@@ -167,7 +167,12 @@ export default class CloudOnboardingModal extends UIElement<
 
     render() {
         return (
-            <Overlay services={this.props.services}>
+            <Overlay
+                services={this.props.services}
+                onCloseRequested={() =>
+                    this.processEvent('attemptModalClose', null)
+                }
+            >
                 {this.renderModalContent()}
             </Overlay>
         )

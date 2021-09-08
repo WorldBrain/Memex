@@ -29,6 +29,7 @@ export interface State {
 
 export interface Event {
     goToBackupRoute: null
+    attemptModalClose: null
     migrateToOldVersion: null
     cancelMigrateToOldVersion: null
 

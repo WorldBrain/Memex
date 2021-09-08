@@ -92,6 +92,10 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         })
     }
 
+    private _goToBackupRoute = () => {
+        window.open(BACKUP_URL, '_self')
+    }
+
     migrateToOldVersion: EventHandler<'migrateToOldVersion'> = ({}) => {
         this.emitMutation({ stage: { $set: 'old-version-backup' } })
     }
@@ -102,11 +106,17 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.emitMutation({ stage: { $set: 'data-dump' } })
     }
 
-    goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) => {
-        window.open(BACKUP_URL, '_self')
-    }
+    goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) =>
+        this._goToBackupRoute()
 
-    startDataDump: EventHandler<'cancelDataDump'> = async ({}) => {
+    startDataDump: EventHandler<'cancelDataDump'> = async ({
+        previousState,
+    }) => {
+        if (!previousState.shouldBackupViaDump) {
+            this._goToBackupRoute()
+            return
+        }
+
         this.emitMutation({ giveControlToDumper: { $set: true } })
     }
 
@@ -156,6 +166,17 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         } else {
             this.emitMutation({ stage: { $set: 'data-migration' } })
             await this.attemptCloudMigration(previousState)
+        }
+    }
+
+    attemptModalClose: EventHandler<'attemptModalClose'> = async ({
+        previousState,
+    }) => {
+        if (
+            previousState.stage === 'data-dump' &&
+            !previousState.giveControlToDumper
+        ) {
+            this.dependencies.onModalClose({ didFinish: false })
         }
     }
 }
