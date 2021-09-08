@@ -37,10 +37,9 @@ import { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
-import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { TabManagementInterface } from 'src/tab-management/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
-import { browser } from 'webextension-polyfill-ts'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -51,7 +50,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
 
     setupPageContentRPC()
-    runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
+    runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
     const getPageUrl = () => getUrl(window.location.href)
     const getPageTitle = () => document.title

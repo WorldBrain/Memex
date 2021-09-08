@@ -30,8 +30,14 @@ import analysePage, {
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
-import { StoredContentType } from './types'
+import {
+    StoredContentType,
+    PageIndexingInterface,
+    InitContentIdentifierParams,
+    InitContentIdentifierReturns,
+} from './types'
 import { GenerateServerID } from '../../background-script/types'
+import { remoteFunctionWithExtraArgs } from '../../util/webextensionRPC'
 
 interface ContentInfo {
     locators: Array<ContentLocator>
@@ -42,6 +48,7 @@ export class PageIndexingBackground {
     storage: PageStorage
     persistentStorage: PersistentPageStorage
     fetch?: typeof fetch
+    remoteFunctions: PageIndexingInterface<'provider'>
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
@@ -68,15 +75,26 @@ export class PageIndexingBackground {
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,
         })
+        this.remoteFunctions = {
+            initContentIdentifier: remoteFunctionWithExtraArgs(
+                this.initContentIdentifierRemote,
+            ),
+        }
     }
 
-    async initContentIdentifier(params: {
-        locator: Pick<
-            ContentLocator,
-            'format' | 'originalLocation' | 'contentSize'
-        >
-        fingerprints: ContentFingerprint[]
-    }): Promise<ContentIdentifier> {
+    setupRemoteFunctions() {
+        registerRemoteFunctions(this.remoteFunctions)
+    }
+
+    initContentIdentifierRemote: PageIndexingInterface<
+        'provider'
+    >['initContentIdentifier']['function'] = async (info, params) => {
+        return this.initContentIdentifier(params)
+    }
+
+    async initContentIdentifier(
+        params: InitContentIdentifierParams,
+    ): Promise<InitContentIdentifierReturns> {
         const regularNormalizedUrl = normalizeUrl(
             params.locator.originalLocation,
         )
@@ -85,7 +103,7 @@ export class PageIndexingBackground {
             fullUrl: params.locator.originalLocation,
         }
         if (!params.fingerprints.length) {
-            return regularIdentifier
+            return { identifier: regularIdentifier }
         }
         const existingIndentifier = await this.storage.getContentIdentifier({
             regularNormalizedUrl,
@@ -138,7 +156,7 @@ export class PageIndexingBackground {
                 lastVisited: this.options.getNow(),
             })
         }
-        return primaryIdentifier
+        return { identifier: primaryIdentifier }
     }
 
     /**
