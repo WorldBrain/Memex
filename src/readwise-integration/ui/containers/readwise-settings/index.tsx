@@ -182,7 +182,7 @@ class ReadwiseSettings extends StatefulUIElement<
                                 )
                             }
                         />{' '}
-                        Sync existing higlights
+                        Sync existing highlights
                     </ExistingHighlightBox>
                 )}
             </div>
