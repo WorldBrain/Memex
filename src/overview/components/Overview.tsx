@@ -4,8 +4,6 @@ import { browser, Browser } from 'webextension-polyfill-ts'
 import styled from 'styled-components'
 import classNames from 'classnames'
 
-import { OVERVIEW_URL } from 'src/constants'
-import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
     SidebarContainer as SidebarLeft,
@@ -18,7 +16,6 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import TrialExpiryWarning from './TrialExpiryWarning'
 import { Tooltip } from '../tooltips'
-import { isDuringInstall } from '../onboarding/utils'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import { AnnotationsSidebarInDashboardResults } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -237,14 +234,6 @@ class Overview extends PureComponent<Props, State> {
         )
     }
 
-    handleOnboardingComplete = () => {
-        window.location.href = OVERVIEW_URL
-        this.props.setShowOnboardingMessage()
-        localStorage.setItem('stage.Onboarding', 'true')
-        localStorage.setItem('stage.MobileAppAd', 'true')
-        window.location.reload()
-    }
-
     renderUpdateNotifBanner() {
         return <UpdateNotifBanner theme={{ position: 'fixed' }} />
     }
@@ -354,10 +343,6 @@ class Overview extends PureComponent<Props, State> {
     render() {
         if (this.state.useOldDash) {
             return this.renderOverview()
-        }
-
-        if (isDuringInstall()) {
-            return <Onboarding navToDashboard={this.handleOnboardingComplete} />
         }
 
         return (

@@ -1,3 +1,4 @@
+import React from 'react'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import {
     DashboardResultsDependencies,
@@ -6,7 +7,9 @@ import {
 } from 'src/overview/components/DashboardResultsContainer/types'
 import DashboardResultsLogic from 'src/overview/components/DashboardResultsContainer/logic'
 import Overview from 'src/overview/components/Overview'
-import React from 'react'
+import Onboarding from 'src/overview/onboarding'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
+import { OVERVIEW_URL } from 'src/constants'
 import ViewerModal from 'src/reader/components/ViewerModal'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -115,7 +118,16 @@ export default class DashboardResultsContainer extends StatefulUIElement<
     //     await renderHighlights(highlightables, onAnnotationClick)
     // }
 
+    handleOnboardingComplete = () => {
+        window.location.href = OVERVIEW_URL
+        window.location.reload()
+    }
+
     render() {
+        if (isDuringInstall()) {
+            return <Onboarding navToDashboard={this.handleOnboardingComplete} />
+        }
+
         return (
             <>
                 <Overview

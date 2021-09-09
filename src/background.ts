@@ -39,8 +39,6 @@ import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 
 export async function main() {
-    setupRpcConnection({ sideName: 'background', role: 'background' })
-
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
@@ -169,3 +167,4 @@ export async function main() {
 }
 
 main()
+setupRpcConnection({ sideName: 'background', role: 'background' })

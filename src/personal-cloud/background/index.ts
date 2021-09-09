@@ -194,6 +194,7 @@ export class PersonalCloudBackground {
 
     enableSync = async () => {
         await this.options.settingStore.set('isSetUp', true)
+        this.startSync()
     }
 
     startSync() {

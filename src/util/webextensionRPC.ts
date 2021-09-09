@@ -20,14 +20,14 @@
 
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
-import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
-import TypedEventEmitter, { Arguments } from 'typed-emitter'
 import { EventEmitter } from 'events'
-import { AuthRemoteEvents } from 'src/authentication/background/types'
-import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { ContentSharingEvents } from 'src/content-sharing/background/types'
 import { PortBasedRPCManager } from 'src/util/rpc/rpc'
-import { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
+import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
+import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
+import type { AuthRemoteEvents } from 'src/authentication/background/types'
+import type { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import type { ContentSharingEvents } from 'src/content-sharing/background/types'
+import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
 
 export class RpcError extends Error {
     constructor(message) {
