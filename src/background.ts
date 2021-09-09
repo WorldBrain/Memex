@@ -129,6 +129,7 @@ export async function main() {
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
         auth: backgroundModules.auth.remoteFunctions,
+        analytics: backgroundModules.analytics.remoteFunctions,
         subscription: {
             getCheckoutLink:
                 backgroundModules.auth.subscriptionService.getCheckoutLink,
