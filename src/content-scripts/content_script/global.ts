@@ -1,7 +1,10 @@
 import 'core-js'
 import { EventEmitter } from 'events'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import {
+    ContentIdentifier,
+    ContentLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/types'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -18,7 +21,7 @@ import {
     setupRpcConnection,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
-import { ContentScriptRegistry } from './types'
+import { ContentScriptRegistry, GetContentFingerprints } from './types'
 import { ContentScriptsInterface } from '../background/types'
 import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
@@ -49,13 +52,20 @@ import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common
 // on demand by the browser, as needed. This main function manages the initialisation
 // and dependencies of content scripts.
 
-export async function main({ loadRemotely } = { loadRemotely: true }) {
+export async function main(
+    params: {
+        loadRemotely?: boolean
+        getContentFingerprints?: GetContentFingerprints
+    } = {},
+) {
+    params.loadRemotely = params.loadRemotely ?? true
+
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
 
     setupPageContentRPC()
     runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
-    const pageInfo = new PageInfo()
+    const pageInfo = new PageInfo(params)
 
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
@@ -275,7 +285,9 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             action: 'createFromShortcut',
         }),
     })
-    const loadContentScript = createContentScriptLoader({ loadRemotely })
+    const loadContentScript = createContentScriptLoader({
+        loadRemotely: params.loadRemotely,
+    })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         await contentScriptRegistry.registerSearchInjectionScript(
             searchInjectionMain,
@@ -341,6 +353,10 @@ class PageInfo {
     _href?: string
     _identifier?: ContentIdentifier
 
+    constructor(
+        public options?: { getContentFingerprints?: GetContentFingerprints },
+    ) {}
+
     async refreshIfNeeded() {
         if (window.location.href === this._href) {
             return
@@ -356,9 +372,10 @@ class PageInfo {
                     : ContentLocatorFormat.HTML,
                 originalLocation: fullUrl,
             },
-            fingerprints: [],
+            fingerprints:
+                (await this.options?.getContentFingerprints?.()) ?? [],
         })
-        console.log(this._identifier)
+        this._href = window.location.href
     }
 
     getPageUrl = async () => {

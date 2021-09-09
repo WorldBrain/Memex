@@ -69,7 +69,7 @@ export class PDFBackground {
             this.listener,
             {
                 types: ['main_frame', 'sub_frame'],
-                urls: ['http://*/*.pdf', 'https://*/*.pdf'],
+                urls: ['http://*/*.pdf', 'https://*/*.pdf', 'file://*/*.pdf'],
             },
             ['blocking'],
         )

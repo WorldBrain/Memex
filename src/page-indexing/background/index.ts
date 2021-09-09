@@ -11,7 +11,10 @@ import {
     ContentIdentifier,
     ContentLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { fingerprintInArray } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import {
+    fingerprintInArray,
+    fingerprintsEqual,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
 import {
@@ -108,36 +111,73 @@ export class PageIndexingBackground {
         if (!params.fingerprints.length) {
             return regularIdentifier
         }
-        const existingIndentifier = await this.storage.getContentIdentifier({
-            regularNormalizedUrl,
-            fingerprints: params.fingerprints,
-        })
+        let contentInfo = this.contentInfo[regularNormalizedUrl]
+        let stored: {
+            identifier: ContentIdentifier
+            locators: ContentLocator[]
+        }
+        if (!contentInfo) {
+            stored = await this.storage.getContentIdentifier({
+                regularNormalizedUrl,
+                fingerprints: params.fingerprints,
+            })
+            if (!stored) {
+                const generatedNormalizedUrl = `memex.cloud/ct/${this.options.generateServerId(
+                    'personalContentMetadata',
+                )}.${params.locator.format}`
+                const generatedIdentifier: ContentIdentifier = {
+                    normalizedUrl: generatedNormalizedUrl,
+                    fullUrl: `https://${generatedNormalizedUrl}`,
+                }
+                contentInfo = {
+                    primaryIdentifier: generatedIdentifier,
+                    locators: [],
+                    aliasIdentifiers: [regularIdentifier],
+                }
+            } else {
+                contentInfo = this.contentInfo[
+                    stored.identifier.normalizedUrl
+                ] ?? {
+                    primaryIdentifier: stored.identifier,
+                    locators: stored.locators,
+                    aliasIdentifiers: stored.locators.map((locator) => ({
+                        normalizedUrl: normalizeUrl(locator.originalLocation),
+                        fullUrl: locator.originalLocation,
+                    })),
+                }
+            }
+        }
+        this.contentInfo[regularNormalizedUrl] = contentInfo
+        this.contentInfo[
+            contentInfo.primaryIdentifier.normalizedUrl
+        ] = contentInfo
+        const { primaryIdentifier } = contentInfo
 
-        const generatedNormalizedUrl = `memex.cloud/ct/${this.options.generateServerId(
-            'personalContentMetadata',
-        )}.${params.locator.format}`
-        const primaryIdentifier: ContentIdentifier = existingIndentifier ?? {
-            normalizedUrl: generatedNormalizedUrl,
-            fullUrl: `https://${generatedNormalizedUrl}`,
+        if (
+            !contentInfo.aliasIdentifiers.find(
+                (identifier) =>
+                    identifier.normalizedUrl === regularNormalizedUrl,
+            )
+        ) {
+            contentInfo.aliasIdentifiers.push(regularIdentifier)
         }
 
-        const contentInfo: ContentInfo = this.contentInfo[
-            regularNormalizedUrl
-        ] ??
-            this.contentInfo[primaryIdentifier.normalizedUrl] ?? {
-                primaryIdentifier,
-                aliasIdentifiers: [],
-                locators: [],
-            }
-        contentInfo.aliasIdentifiers.push(regularIdentifier)
-        this.contentInfo[primaryIdentifier.normalizedUrl] = contentInfo
-        this.contentInfo[regularNormalizedUrl] = contentInfo
+        let hasNewLocators = false
         for (const fingerprint of params.fingerprints) {
-            if (fingerprintInArray(contentInfo.locators, fingerprint)) {
+            if (
+                contentInfo.locators.find(
+                    (locator) =>
+                        fingerprintsEqual(locator, fingerprint) &&
+                        locator.originalLocation ===
+                            params.locator.originalLocation,
+                )
+            ) {
                 continue
             }
+            hasNewLocators = true
+
             const isFile = isFileUrl(params.locator.originalLocation)
-            contentInfo.locators.push({
+            const newLocator: ContentLocator = {
                 ...params.locator,
                 originalLocation: params.locator.originalLocation,
                 locationType: isFile
@@ -157,7 +197,11 @@ export class PageIndexingBackground {
                 valid: true,
                 version: 0,
                 lastVisited: this.options.getNow(),
-            })
+            }
+            contentInfo.locators.push(newLocator)
+        }
+        if (stored && hasNewLocators) {
+            await this.storeLocators(primaryIdentifier)
         }
         return primaryIdentifier
     }

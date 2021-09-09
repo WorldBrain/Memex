@@ -318,8 +318,11 @@ export default class PageStorage extends StorageModule {
     async getContentIdentifier(params: {
         regularNormalizedUrl: string
         fingerprints: Array<ContentFingerprint>
-    }): Promise<ContentIdentifier> {
-        const existingLocators: Array<ContentLocator> = flatten(
+    }): Promise<{
+        identifier: ContentIdentifier
+        locators: ContentLocator[]
+    } | null> {
+        const locators: Array<ContentLocator> = flatten(
             await Promise.all(
                 params.fingerprints.map((fingerprint) =>
                     this.operation('findLocatorsByFingerprint', {
@@ -328,7 +331,7 @@ export default class PageStorage extends StorageModule {
                 ),
             ),
         )
-        const locator = existingLocators.find(
+        const locator = locators.find(
             (existingLocator) =>
                 !!params.fingerprints.find((fingerprint) =>
                     fingerprintsEqual(
@@ -344,12 +347,16 @@ export default class PageStorage extends StorageModule {
             return null
         }
         const page = await this.getPage(locator.normalizedUrl)
-        return (
-            page && {
+        if (!page) {
+            return null
+        }
+        return {
+            locators,
+            identifier: {
                 normalizedUrl: page.url,
                 fullUrl: page.fullUrl,
-            }
-        )
+            },
+        }
     }
 
     async storeLocators(params: {
@@ -361,8 +368,10 @@ export default class PageStorage extends StorageModule {
             params.identifier,
         )
         const toStore = params.locators.filter((locator) => {
-            return !existingLocators.find((existing) =>
-                fingerprintsEqual(existing, locator),
+            return !existingLocators.find(
+                (existing) =>
+                    fingerprintsEqual(existing, locator) &&
+                    existing.originalLocation === locator.originalLocation,
             )
         })
         await Promise.all(
