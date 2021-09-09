@@ -87,7 +87,7 @@ export const renderAnnotationCacheChanges = ({
 }
 
 export interface SaveAndRenderHighlightDeps {
-    getUrlAndTitle: () => { pageUrl: string; title: string }
+    getUrlAndTitle: () => Promise<{ pageUrl: string; title: string }>
     getSelection: () => Selection
     annotationsCache: AnnotationsCacheInterface
     analyticsEvent?: AnalyticsEvent
@@ -165,7 +165,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const { pageUrl, title } = params.getUrlAndTitle()
+        const { pageUrl, title } = await params.getUrlAndTitle()
         const anchor = await extractAnchorFromSelection(selection)
         const body = anchor ? anchor.quote : ''
 

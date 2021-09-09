@@ -28,13 +28,14 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import { MaybePromise } from 'src/util/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
         topBarLeft?: JSX.Element
     }
     pageUrl?: string
-    getPageUrl: () => string
+    getPageUrl: () => MaybePromise<string>
     pageTitle?: string
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean

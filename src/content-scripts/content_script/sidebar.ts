@@ -42,7 +42,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,
-            pageUrl: dependencies.getPageUrl(),
+            pageUrl: await dependencies.getPageUrl(),
             initialState: options.showOnLoad ? 'visible' : 'hidden',
         })
     }

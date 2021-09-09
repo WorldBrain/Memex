@@ -152,7 +152,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     getAnnotationById = (id: string): CachedAnnotation =>
         this.annotations.find((annot) => annot.url === id)
 
-    load = async (url, args = {}) => {
+    load = async (url: string, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(
             url,
             args,

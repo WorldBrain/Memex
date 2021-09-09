@@ -36,7 +36,7 @@ export const main: RibbonScriptMain = async (options) => {
                 ...options,
                 currentTab: (await browser.tabs?.getCurrent()) ?? {
                     id: undefined,
-                    url: options.getPageUrl(),
+                    url: await options.getPageUrl(),
                 },
                 setSidebarEnabled: setSidebarState,
                 getSidebarEnabled: getSidebarState,

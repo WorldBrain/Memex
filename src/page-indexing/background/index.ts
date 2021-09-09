@@ -106,7 +106,7 @@ export class PageIndexingBackground {
             fullUrl: params.locator.originalLocation,
         }
         if (!params.fingerprints.length) {
-            return { identifier: regularIdentifier }
+            return regularIdentifier
         }
         const existingIndentifier = await this.storage.getContentIdentifier({
             regularNormalizedUrl,
@@ -159,7 +159,7 @@ export class PageIndexingBackground {
                 lastVisited: this.options.getNow(),
             })
         }
-        return { identifier: primaryIdentifier }
+        return primaryIdentifier
     }
 
     /**
@@ -320,6 +320,10 @@ export class PageIndexingBackground {
     }
 
     async storeLocators(identifier: ContentIdentifier) {
+        if (!identifier) {
+            return // there were no fingerprints, so there's no need to use locators
+        }
+
         const contentInfo = this.contentInfo[identifier.normalizedUrl]
         if (!contentInfo) {
             return

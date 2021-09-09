@@ -1,6 +1,7 @@
 import 'core-js'
 import { EventEmitter } from 'events'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -39,8 +40,10 @@ import { main as highlightMain } from 'src/content-scripts/content_script/highli
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { getUrl } from 'src/util/uri-utils'
+import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
+import { PageIndexingInterface } from '../../page-indexing/background/types'
+import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -52,9 +55,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     setupPageContentRPC()
     runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
-    const getPageUrl = () => getUrl(window.location.href)
-    const getPageTitle = () => document.title
-    const getNormalizedPageUrl = () => normalizeUrl(getPageUrl())
+    const pageInfo = new PageInfo()
 
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
@@ -85,7 +86,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
-        getNormalizedPageUrl,
+        getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
         loadComponent: (component) => {
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
@@ -103,15 +104,17 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             delete components[component]
         },
     })
-    const loadAnnotationsPromise = annotationsCache.load(getPageUrl())
+    const loadAnnotationsPromise = annotationsCache.load(
+        await pageInfo.getPageUrl(),
+    )
 
     const annotationFunctionsParams = {
         inPageUI,
         annotationsCache,
         getSelection: () => document.getSelection(),
-        getUrlAndTitle: () => ({
-            title: getPageTitle(),
-            pageUrl: getPageUrl(),
+        getUrlAndTitle: async () => ({
+            title: pageInfo.getPageTitle(),
+            pageUrl: await pageInfo.getPageUrl(),
         }),
     }
 
@@ -156,7 +159,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl,
+                getPageUrl: pageInfo.getPageUrl,
             })
             components.ribbon?.resolve()
         },
@@ -187,7 +190,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
-                getPageUrl,
+                getPageUrl: pageInfo.getPageUrl,
                 copyPaster,
                 subscription,
                 contentConversationsBG: runInBackground(),
@@ -332,4 +335,43 @@ export function loadRibbonOnMouseOver(loadRibbon: () => void) {
         }
     }
     document.addEventListener('mousemove', listener)
+}
+
+class PageInfo {
+    _href?: string
+    _identifier?: ContentIdentifier
+
+    async refreshIfNeeded() {
+        if (window.location.href === this._href) {
+            return
+        }
+        const fullUrl = getUrl(window.location.href)
+        const isPdf = isFullUrlPDF(fullUrl)
+        this._identifier = await runInBackground<
+            PageIndexingInterface<'caller'>
+        >().initContentIdentifier({
+            locator: {
+                format: isPdf
+                    ? ContentLocatorFormat.PDF
+                    : ContentLocatorFormat.HTML,
+                originalLocation: fullUrl,
+            },
+            fingerprints: [],
+        })
+        console.log(this._identifier)
+    }
+
+    getPageUrl = async () => {
+        await this.refreshIfNeeded()
+        return this._identifier.fullUrl
+    }
+
+    getPageTitle = () => {
+        return document.title
+    }
+
+    getNormalizedPageUrl = async () => {
+        await this.refreshIfNeeded()
+        return this._identifier.normalizedUrl
+    }
 }

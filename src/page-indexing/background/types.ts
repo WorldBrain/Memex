@@ -21,9 +21,7 @@ export interface InitContentIdentifierParams {
     fingerprints: ContentFingerprint[]
 }
 
-export interface InitContentIdentifierReturns {
-    identifier: ContentIdentifier
-}
+export type InitContentIdentifierReturns = ContentIdentifier
 
 export enum StoredContentType {
     HtmlBody = 'htmlBody',

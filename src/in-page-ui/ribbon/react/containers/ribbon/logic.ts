@@ -109,7 +109,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
-            pageUrl: this.dependencies.getPageUrl(),
+            pageUrl: null,
             loadState: 'pristine',
             areExtraButtonsShown: false,
             isRibbonEnabled: null,
@@ -144,7 +144,8 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
-            const url = this.dependencies.getPageUrl()
+            const url = await this.dependencies.getPageUrl()
+            this.emitMutation({ pageUrl: { $set: url } })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
