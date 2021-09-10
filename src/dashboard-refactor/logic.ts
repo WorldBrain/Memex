@@ -68,7 +68,7 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
-    syncSettings: Pick<UISyncSettings, 'contentSharing'>
+    syncSettings: Pick<UISyncSettings, 'contentSharing' | 'dashboard'>
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -202,20 +202,23 @@ export class DashboardLogic extends UILogic<State, Events> {
     ): Promise<State> {
         const { personalCloudBG, localStorage } = this.options
         const {
-            [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
-            [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
-            [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
             [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await localStorage.get([
-            STORAGE_KEYS.subBannerDismissed,
-            STORAGE_KEYS.listSidebarLocked,
-            STORAGE_KEYS.onboardingMsgSeen,
             CLOUD_STORAGE_KEYS.lastSeen,
             STORAGE_KEYS.mobileAdSeen,
         ])
 
         const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
+        const listsSidebarLocked = await this.syncSettings.dashboard.get(
+            'listSidebarLocked',
+        )
+        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
+            'onboardingMsgSeen',
+        )
+        const subBannerDismissed = await this.syncSettings.dashboard.get(
+            'subscribeBannerDismissed',
+        )
 
         const mutation: UIMutation<State> = {
             searchResults: {
@@ -1603,9 +1606,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dismissSubscriptionBanner: EventHandler<
         'dismissSubscriptionBanner'
     > = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.subBannerDismissed]: true,
-        })
+        await this.syncSettings.dashboard.set('subscribeBannerDismissed', true)
         this.emitMutation({
             searchResults: { isSubscriptionBannerShown: { $set: false } },
         })
@@ -1621,9 +1622,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dismissOnboardingMsg: EventHandler<'dismissOnboardingMsg'> = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.onboardingMsgSeen]: true,
-        })
+        await this.syncSettings.dashboard.set('onboardingMsgSeen', true)
         this.emitMutation({
             searchResults: { showOnboardingMsg: { $set: false } },
         })
@@ -2027,9 +2026,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.listSidebarLocked]: event.isLocked,
-        })
+        await this.syncSettings.dashboard.set(
+            'listSidebarLocked',
+            event.isLocked,
+        )
     }
 
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({

@@ -23,11 +23,11 @@ export const localStorageToSettingsStorage = (values: {
     [SETTING_NAMES.contentSharing.lastSharedAnnotationTimestamp]:
         values[__OLD_LAST_SHARED_ANNOTS],
     [SETTING_NAMES.dashboard.listSidebarLocked]:
-        values[DASHBOARD_SETTING_NAMES.listSidebarLocked],
+        values[DASHBOARD_SETTING_NAMES.__OLD_listSidebarLocked],
     [SETTING_NAMES.dashboard.onboardingMsgSeen]:
-        values[DASHBOARD_SETTING_NAMES.onboardingMsgSeen],
+        values[DASHBOARD_SETTING_NAMES.__OLD_onboardingMsgSeen],
     [SETTING_NAMES.dashboard.subscribeBannerDismissed]:
-        values[DASHBOARD_SETTING_NAMES.subBannerDismissed],
+        values[DASHBOARD_SETTING_NAMES.__OLD_subBannerDismissed],
     [SETTING_NAMES.searchInjection.showMemexResults]: values[HIDE_RESULTS_KEY],
     [SETTING_NAMES.searchInjection.memexResultsPosition]: values[POSITION_KEY],
     [SETTING_NAMES.searchInjection.searchEnginesEnabled]:

@@ -1,6 +1,5 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
-import { STORAGE_KEYS } from './constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 
 describe('Dashboard Refactor misc logic', () => {
@@ -77,10 +76,13 @@ describe('Dashboard Refactor misc logic', () => {
             logic: logicA,
         } = await setupTest(device)
 
+        await logicA.syncSettings.dashboard.set('listSidebarLocked', false)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerDismissed',
+            false,
+        )
         await logicA['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: false,
-            [STORAGE_KEYS.listSidebarLocked]: false,
-            [STORAGE_KEYS.subBannerDismissed]: false,
         })
 
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
@@ -104,10 +106,13 @@ describe('Dashboard Refactor misc logic', () => {
             logic: logicB,
         } = await setupTest(device)
 
+        await logicA.syncSettings.dashboard.set('listSidebarLocked', true)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerDismissed',
+            true,
+        )
         await logicB['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: true,
-            [STORAGE_KEYS.listSidebarLocked]: true,
-            [STORAGE_KEYS.subBannerDismissed]: true,
         })
 
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(false)

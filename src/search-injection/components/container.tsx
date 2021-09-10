@@ -1,7 +1,6 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
@@ -20,13 +19,15 @@ import type { SearchEngineName, ResultItemProps } from '../types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { STORAGE_KEYS as DASHBOARD_STORAGE_KEYS } from 'src/dashboard-refactor/constants'
+import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
+import { RemoteSettingsInterface } from 'src/settings/background/types'
 
 export interface Props {
     results: ResultItemProps[]
     len: number
     rerender: () => void
     searchEngine: SearchEngineName
+    syncSettingsBG: RemoteSettingsInterface
 }
 
 interface State {
@@ -46,8 +47,13 @@ class Container extends React.Component<Props, State> {
     fetchNotifById: any
     processEvent: any
     openOverviewRPC: any
+    syncSettings: Pick<UISyncSettings, 'dashboard'>
 
-    constructor(props) {
+    static defaultProps: Pick<Props, 'syncSettingsBG'> = {
+        syncSettingsBG: runInBackground(),
+    }
+
+    constructor(props: Props) {
         super(props)
         this.renderResultItems = this.renderResultItems.bind(this)
         this.seeMoreResults = this.seeMoreResults.bind(this)
@@ -63,6 +69,7 @@ class Container extends React.Component<Props, State> {
         this.fetchNotifById = remoteFunction('fetchNotifById')
         this.processEvent = remoteFunction('processEvent')
         this.openOverviewRPC = remoteFunction('openOverviewTab')
+        this.syncSettings = createUISyncSettings(props)
     }
 
     state: State = {
@@ -93,8 +100,9 @@ class Container extends React.Component<Props, State> {
             false,
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
-        const subBannerDismissed = await getLocalStorage(
-            DASHBOARD_STORAGE_KEYS.subBannerDismissed,
+
+        const subBannerDismissed = await this.syncSettings.dashboard.get(
+            'subscribeBannerDismissed',
         )
         const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
 
@@ -259,7 +267,7 @@ class Container extends React.Component<Props, State> {
 
     private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
         this.setState({ isSubscriptionBannerShown: false })
-        await setLocalStorage(DASHBOARD_STORAGE_KEYS.subBannerDismissed, true)
+        await this.syncSettings.dashboard.set('subscribeBannerDismissed', true)
     }
 
     renderButton() {

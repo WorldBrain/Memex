@@ -19,10 +19,10 @@ export const SETTING_NAMES: UserSettingNames = {
             FEATURE_PREFIX.CONTENT_SHARING + 'lastSharedAnnotationTimestamp',
     },
     dashboard: {
-        listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'list_sidebar_locked',
-        onboardingMsgSeen: FEATURE_PREFIX.DASHBOARD + 'onboarding_msg_seen',
+        listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'listSidebarLocked',
+        onboardingMsgSeen: FEATURE_PREFIX.DASHBOARD + 'onboardingMsgSeen',
         subscribeBannerDismissed:
-            FEATURE_PREFIX.DASHBOARD + 'subscribe_banner_dismissed',
+            FEATURE_PREFIX.DASHBOARD + 'subscribeBannerDismissed',
     },
     extension: {
         blocklist: FEATURE_PREFIX.EXTENSION + 'blocklist',
