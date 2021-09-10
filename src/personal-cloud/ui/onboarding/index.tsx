@@ -36,7 +36,7 @@ export default class CloudOnboardingModal extends UIElement<
     > = {
         supportLink: 'mailto:' + SUPPORT_EMAIL,
         browser: checkBrowser(),
-        dataCleanReadMoreLink: 'https://getmemex.com', // TODO: fix this
+        dataCleanReadMoreLink: 'https://worldbrain.notion.site/Cleaning-out-unnecessary-data-before-Migration-69f82d016898405e9586714445e38ff4',
     }
 
     constructor(props: Props) {
@@ -121,15 +121,15 @@ export default class CloudOnboardingModal extends UIElement<
         if (this.state.stage === 'old-version-backup') {
             return (
                 <Container>
-                    <Header>Create backup to migrate to old version</Header>
-                    <Text bold>Important:</Text>
+                    <Header>Create backup to migrate to offline-only version</Header>
                     <Text>
-                        Memex last version (2.20.0) is made available for users
+                        <strong>Important:</strong>
+                        <br/>
+                        Memex last version (<a target="_blank" href="https://worldbrain.io/downloads/offline-only-2-20-0">2.20.0</a>) is made available for users
                         who really want to keep using an offline-only product.
                         Be aware that development on this version is
                         discontinued and will not have mobile sync.
-                    </Text>
-                    <Text>
+                        <br/>
                         Backup your data, install 2.20.0 and then restore your
                         data there.
                     </Text>
