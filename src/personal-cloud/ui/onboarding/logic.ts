@@ -58,7 +58,7 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
             this.emitMutation({
                 shouldBackupViaDump: {
                     $set:
-                        this.dependencies.browser !== 'firefox' &&
+                        this.dependencies.browser === 'chrome' &&
                         lastBackup == null,
                 },
             })

@@ -4,9 +4,10 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import type { BrowserName } from 'src/util/check-browser'
 
 export interface Dependencies {
-    browser: 'firefox' | 'chrome'
+    browser: BrowserName
     personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>

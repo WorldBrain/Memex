@@ -17,7 +17,7 @@ import {
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SUPPORT_EMAIL } from 'src/constants'
-import browserIsChrome from 'src/util/check-browser'
+import checkBrowser from 'src/util/check-browser'
 
 export interface Props extends Dependencies {
     supportLink: string
@@ -35,7 +35,7 @@ export default class CloudOnboardingModal extends UIElement<
         'supportLink' | 'dataCleanReadMoreLink' | 'browser'
     > = {
         supportLink: 'mailto:' + SUPPORT_EMAIL,
-        browser: browserIsChrome() ? 'chrome' : 'firefox',
+        browser: checkBrowser(),
         dataCleanReadMoreLink: 'https://getmemex.com', // TODO: fix this
     }
 

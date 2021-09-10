@@ -26,7 +26,7 @@ function setupTest({ isChrome }: { isChrome: boolean }) {
     const notificationsAPI = new MockNotifsAPI()
     const creator = new Creator({
         notificationsAPI: notificationsAPI as any,
-        browserIsChrome: () => isChrome,
+        browser: isChrome ? 'chrome' : 'firefox',
     })
 
     return { notificationsAPI, creator }
