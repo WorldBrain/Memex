@@ -16,7 +16,7 @@ export const FEATURE_PREFIX = {
 export const SETTING_NAMES: UserSettingNames = {
     contentSharing: {
         lastSharedAnnotationTimestamp:
-            FEATURE_PREFIX.CONTENT_SHARING + 'last_shared_annotation_timestamp',
+            FEATURE_PREFIX.CONTENT_SHARING + 'lastSharedAnnotationTimestamp',
     },
     dashboard: {
         listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'list_sidebar_locked',

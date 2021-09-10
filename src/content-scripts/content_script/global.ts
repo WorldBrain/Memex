@@ -185,6 +185,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 auth: runInBackground(),
                 customLists: runInBackground(),
                 contentSharing: runInBackground(),
+                syncSettingsBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,

@@ -14,14 +14,14 @@ import {
     TRACKING_STORAGE_NAME,
 } from 'src/in-page-ui/tooltip/constants'
 import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
-import { LAST_SHARED_ANNOTS } from 'src/annotations/utils'
+import { __OLD_LAST_SHARED_ANNOTS } from 'src/annotations/utils'
 import { SETTING_NAMES } from './constants'
 
 export const localStorageToSettingsStorage = (values: {
     [name: string]: any
 }): { [name: string]: any } => ({
     [SETTING_NAMES.contentSharing.lastSharedAnnotationTimestamp]:
-        values[LAST_SHARED_ANNOTS],
+        values[__OLD_LAST_SHARED_ANNOTS],
     [SETTING_NAMES.dashboard.listSidebarLocked]:
         values[DASHBOARD_SETTING_NAMES.listSidebarLocked],
     [SETTING_NAMES.dashboard.onboardingMsgSeen]:

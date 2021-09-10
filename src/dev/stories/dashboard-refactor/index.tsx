@@ -48,6 +48,7 @@ async function createDependencies(): Promise<DashboardProps> {
             backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
+        syncSettingsBG: backgroundModules.settings.remoteFunctions,
         openFeed: () => undefined,
         openCollectionPage: () => undefined,
         renderDashboardSwitcherLink: () => null,

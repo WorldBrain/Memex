@@ -23,15 +23,12 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import {
-    generateUrl,
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
+import { generateUrl } from 'src/annotations/utils'
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
+import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -64,8 +61,14 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
+    syncSettings: Pick<UISyncSettings, 'contentSharing'>
+
     constructor(private options: SidebarLogicOptions) {
         super()
+
+        this.syncSettings = createUISyncSettings({
+            syncSettingsBG: options.syncSettingsBG,
+        })
 
         Object.assign(
             this,
@@ -787,6 +790,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: { $set: event.annotationUrl },
             immediatelyShareNotes: { $set: !!immediateShare },
         })
+
         await this.setLastSharedAnnotationTimestamp()
     }
 
@@ -1117,13 +1121,18 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async setLastSharedAnnotationTimestamp() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async setLastSharedAnnotationTimestamp(now = Date.now()) {
+        const lastShared = await this.syncSettings.contentSharing.get(
+            'lastSharedAnnotationTimestamp',
+        )
 
         if (lastShared == null) {
             this.options.showAnnotationShareModal?.()
         }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 }

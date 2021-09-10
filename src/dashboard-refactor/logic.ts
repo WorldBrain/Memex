@@ -6,10 +6,6 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
-import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
@@ -29,6 +25,7 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -71,10 +68,14 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
+    syncSettings: Pick<UISyncSettings, 'contentSharing'>
 
     constructor(private options: DashboardDependencies) {
         super()
         this.setupRemoteEventListeners()
+        this.syncSettings = createUISyncSettings({
+            syncSettingsBG: options.syncSettingsBG,
+        })
     }
 
     private setupRemoteEventListeners() {
@@ -1661,8 +1662,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async showShareOnboardingIfNeeded() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async showShareOnboardingIfNeeded(now = Date.now()) {
+        const lastShared = await this.syncSettings.contentSharing.get(
+            'lastSharedAnnotationTimestamp',
+        )
 
         if (lastShared == null) {
             this.emitMutation({
@@ -1670,7 +1673,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 
     setNoteEditCommentValue: EventHandler<'setNoteEditCommentValue'> = ({

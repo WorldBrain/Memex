@@ -71,6 +71,7 @@ const setupLogicHelper = async ({
             .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
+        syncSettingsBG: backgroundModules.settings,
         annotations: annotationsBG,
         events: fakeEmitter as any,
         annotationsCache,

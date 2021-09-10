@@ -68,6 +68,7 @@ export class DashboardContainer extends StatefulUIElement<
         activityIndicatorBG: runInBackground(),
         personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
+        syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         backupBG: runInBackground(),
