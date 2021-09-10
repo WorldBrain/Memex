@@ -215,6 +215,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
         async registerSearchInjectionScript(execute): Promise<void> {
             await execute({
                 requestSearcher: remoteFunction('search'),
+                syncSettingsBG: runInBackground(),
             })
         },
     }

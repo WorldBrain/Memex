@@ -1,8 +1,8 @@
 import { STORAGE_KEYS as DASHBOARD_SETTING_NAMES } from 'src/dashboard-refactor/constants'
 import {
-    HIDE_RESULTS_KEY,
-    SEARCH_INJECTION_KEY,
-    POSITION_KEY,
+    __OLD_HIDE_RESULTS_KEY,
+    __OLD_SEARCH_INJECTION_KEY,
+    __OLD_POSITION_KEY,
 } from 'src/search-injection/constants'
 import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
 import { STORAGE_KEY as BLOCKLIST_STORAGE_KEY } from 'src/options/blacklist/constants'
@@ -28,10 +28,12 @@ export const localStorageToSettingsStorage = (values: {
         values[DASHBOARD_SETTING_NAMES.__OLD_onboardingMsgSeen],
     [SETTING_NAMES.dashboard.subscribeBannerDismissed]:
         values[DASHBOARD_SETTING_NAMES.__OLD_subBannerDismissed],
-    [SETTING_NAMES.searchInjection.showMemexResults]: values[HIDE_RESULTS_KEY],
-    [SETTING_NAMES.searchInjection.memexResultsPosition]: values[POSITION_KEY],
+    [SETTING_NAMES.searchInjection.hideMemexResults]:
+        values[__OLD_HIDE_RESULTS_KEY],
+    [SETTING_NAMES.searchInjection.memexResultsPosition]:
+        values[__OLD_POSITION_KEY],
     [SETTING_NAMES.searchInjection.searchEnginesEnabled]:
-        values[SEARCH_INJECTION_KEY],
+        values[__OLD_SEARCH_INJECTION_KEY],
     [SETTING_NAMES.pdfIntegration.shouldAutoOpen]:
         values[SHOULD_OPEN_STORAGE_KEY],
     [SETTING_NAMES.extension.blocklist]: values[BLOCKLIST_STORAGE_KEY],

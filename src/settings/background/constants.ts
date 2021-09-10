@@ -40,11 +40,10 @@ export const SETTING_NAMES: UserSettingNames = {
         highlightsEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'highlights_enabled',
     },
     searchInjection: {
-        showMemexResults:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'show_memex_results',
+        hideMemexResults: FEATURE_PREFIX.SEARCH_INJECTION + 'hideMemexResults',
         memexResultsPosition:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'memex_results_position',
+            FEATURE_PREFIX.SEARCH_INJECTION + 'memexResultsPosition',
         searchEnginesEnabled:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'search_engines_enabled',
+            FEATURE_PREFIX.SEARCH_INJECTION + 'searchEnginesEnabled',
     },
 }

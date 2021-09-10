@@ -7,13 +7,17 @@ import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import Container from './components/container'
-import * as utils from './utils'
 import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import type { UISyncSettings } from 'src/settings/ui/util'
 
-export const handleRender = async ({ docs, totalCount }, searchEngine) => {
+export const handleRender = async (
+    { docs, totalCount },
+    searchEngine,
+    syncSettings: UISyncSettings,
+) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
@@ -24,10 +28,9 @@ export const handleRender = async ({ docs, totalCount }, searchEngine) => {
         // Gets position from settings
         // Renders React Component on the respective container
 
-        const position = await utils.getLocalStorage(
-            constants.POSITION_KEY,
-            'side',
-        )
+        const position =
+            (await syncSettings.searchInjection.get('memexResultsPosition')) ??
+            'side'
 
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
         if (!searchEngineObj) {
@@ -64,6 +67,7 @@ export const handleRender = async ({ docs, totalCount }, searchEngine) => {
                         len={totalCount}
                         rerender={renderComponent}
                         searchEngine={searchEngine}
+                        syncSettings={syncSettings}
                     />
                 </ThemeProvider>
             </StyleSheetManager>,
@@ -72,10 +76,9 @@ export const handleRender = async ({ docs, totalCount }, searchEngine) => {
     }
 
     const renderLoading = async () => {
-        const position = await utils.getLocalStorage(
-            constants.POSITION_KEY,
-            'side',
-        )
+        const position =
+            (await syncSettings.searchInjection.get('memexResultsPosition')) ??
+            'side'
 
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
         if (!searchEngineObj) {

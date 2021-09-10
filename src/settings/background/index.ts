@@ -4,6 +4,7 @@ import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type { SettingValue, RemoteSettingsInterface } from './types'
 import SettingsStorage from './storage'
 import { localStorageToSettingsStorage } from './migrate'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
 export interface Dependencies {
     storageManager: StorageManager
@@ -33,6 +34,10 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
             get: this.get,
             set: this.set,
         }
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     async migrateLocalStorage() {

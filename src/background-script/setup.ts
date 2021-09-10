@@ -726,6 +726,7 @@ export async function setupBackgroundModules(
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
     backgroundModules.contentConversations.setupRemoteFunctions()
+    backgroundModules.settings.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

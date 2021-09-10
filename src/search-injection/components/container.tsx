@@ -6,7 +6,7 @@ import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
-import { getLocalStorage, setLocalStorage } from '../utils'
+import { getLocalStorage } from '../utils'
 import Notification from './Notification'
 import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
@@ -19,15 +19,14 @@ import type { SearchEngineName, ResultItemProps } from '../types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
-import { RemoteSettingsInterface } from 'src/settings/background/types'
+import type { UISyncSettings } from 'src/settings/ui/util'
 
 export interface Props {
     results: ResultItemProps[]
     len: number
     rerender: () => void
     searchEngine: SearchEngineName
-    syncSettingsBG: RemoteSettingsInterface
+    syncSettings: Pick<UISyncSettings, 'dashboard' | 'searchInjection'>
 }
 
 interface State {
@@ -47,11 +46,7 @@ class Container extends React.Component<Props, State> {
     fetchNotifById: any
     processEvent: any
     openOverviewRPC: any
-    syncSettings: Pick<UISyncSettings, 'dashboard'>
-
-    static defaultProps: Pick<Props, 'syncSettingsBG'> = {
-        syncSettingsBG: runInBackground(),
-    }
+    syncSettings: Props['syncSettings']
 
     constructor(props: Props) {
         super(props)
@@ -69,7 +64,7 @@ class Container extends React.Component<Props, State> {
         this.fetchNotifById = remoteFunction('fetchNotifById')
         this.processEvent = remoteFunction('processEvent')
         this.openOverviewRPC = remoteFunction('openOverviewTab')
-        this.syncSettings = createUISyncSettings(props)
+        this.syncSettings = props.syncSettings
     }
 
     state: State = {
@@ -95,13 +90,16 @@ class Container extends React.Component<Props, State> {
             }
         }
 
-        const hideResults = await getLocalStorage(
-            constants.HIDE_RESULTS_KEY,
-            false,
-        )
-        const position = await getLocalStorage(constants.POSITION_KEY, 'side')
+        const hideResults =
+            (await this.props.syncSettings.searchInjection.get(
+                'hideMemexResults',
+            )) ?? false
+        const position =
+            (await this.props.syncSettings.searchInjection.get(
+                'memexResultsPosition',
+            )) ?? 'side'
 
-        const subBannerDismissed = await this.syncSettings.dashboard.get(
+        const subBannerDismissed = await this.props.syncSettings.dashboard.get(
             'subscribeBannerDismissed',
         )
         const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
@@ -150,7 +148,10 @@ class Container extends React.Component<Props, State> {
         // Toggles hideResults (minimize) state
         // And also, sets dropdown to false
         const toggled = !this.state.hideResults
-        await setLocalStorage(constants.HIDE_RESULTS_KEY, toggled)
+        await this.props.syncSettings.searchInjection.set(
+            'hideMemexResults',
+            toggled,
+        )
         this.setState({
             hideResults: toggled,
             dropdown: false,
@@ -177,15 +178,18 @@ class Container extends React.Component<Props, State> {
      * @param {boolean} isEnabled
      */
     async _persistEnabledChange(isEnabled) {
-        const prevState = await getLocalStorage(
-            constants.SEARCH_INJECTION_KEY,
-            constants.SEARCH_INJECTION_DEFAULT,
-        )
+        const prevState =
+            (await this.props.syncSettings.searchInjection.get(
+                'searchEnginesEnabled',
+            )) ?? constants.SEARCH_INJECTION_DEFAULT
 
-        await setLocalStorage(constants.SEARCH_INJECTION_KEY, {
-            ...prevState,
-            [this.props.searchEngine]: isEnabled,
-        })
+        await this.props.syncSettings.searchInjection.set(
+            'searchEnginesEnabled',
+            {
+                ...prevState,
+                [this.props.searchEngine]: isEnabled,
+            },
+        )
     }
 
     async removeResults() {
@@ -217,7 +221,10 @@ class Container extends React.Component<Props, State> {
     async changePosition() {
         const currPos = this.state.position
         const newPos = currPos === 'above' ? 'side' : 'above'
-        await setLocalStorage(constants.POSITION_KEY, newPos)
+        await this.props.syncSettings.searchInjection.set(
+            'memexResultsPosition',
+            newPos,
+        )
         this.props.rerender()
     }
 
@@ -267,7 +274,10 @@ class Container extends React.Component<Props, State> {
 
     private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
         this.setState({ isSubscriptionBannerShown: false })
-        await this.syncSettings.dashboard.set('subscribeBannerDismissed', true)
+        await this.props.syncSettings.dashboard.set(
+            'subscribeBannerDismissed',
+            true,
+        )
     }
 
     renderButton() {

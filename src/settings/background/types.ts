@@ -24,7 +24,7 @@ export interface UserSettingsByFeature {
         subscribeBannerDismissed: boolean
     }
     searchInjection: {
-        showMemexResults: boolean
+        hideMemexResults: boolean
         memexResultsPosition: 'side' | 'above'
         searchEnginesEnabled: {
             duckduckgo: boolean
