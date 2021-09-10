@@ -1,4 +1,5 @@
 import type Dexie from 'dexie'
+import type { Storage } from 'webextension-polyfill-ts'
 import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
@@ -38,10 +39,13 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
 import { prepareDataMigration } from 'src/personal-cloud/storage/migration-preparation'
-import { SettingStore } from 'src/util/settings'
+import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
 import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { LocalExtensionSettings } from 'src/background-script/types'
+import { migrateInstallTime } from '../storage/migrate-install-time'
+import { INSTALL_TIME_KEY } from 'src/constants'
 
 export interface PersonalCloudBackgroundOptions {
     storageManager: StorageManager
@@ -51,6 +55,8 @@ export interface PersonalCloudBackgroundOptions {
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
     settingStore: SettingStore<PersonalCloudSettings>
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
+    localStorage: Storage.StorageArea
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
         storageType: PersonalCloudClientStorageType
@@ -621,13 +627,21 @@ export class PersonalCloudBackground {
     }
 
     private isPassiveDataRemovalNeeded: () => Promise<boolean> = async () => {
-        const { storageManager } = this.options
+        const {
+            storageManager,
+            localExtSettingStore,
+            localStorage,
+        } = this.options
 
-        const oldVisits = await storageManager
-            .collection('visits')
-            .findAllObjects({
-                time: { $lte: PASSIVE_DATA_CUTOFF_DATE.getTime() },
-            })
-        return oldVisits.length > 0
+        await migrateInstallTime({
+            storageManager,
+            getOldInstallTime: async () =>
+                (await localStorage.get(INSTALL_TIME_KEY))[INSTALL_TIME_KEY],
+            setInstallTime: (time) =>
+                localExtSettingStore.set('installTimestamp', time),
+        })
+
+        const installTime = await localExtSettingStore.get('installTimestamp')
+        return installTime < PASSIVE_DATA_CUTOFF_DATE.getTime()
     }
 }

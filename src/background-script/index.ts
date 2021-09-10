@@ -20,7 +20,7 @@ import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import { INSTALL_TIME_KEY, OVERVIEW_URL } from 'src/constants'
+import { OVERVIEW_URL } from 'src/constants'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
@@ -34,11 +34,14 @@ import analytics from 'src/analytics'
 import TabManagementBackground from 'src/tab-management/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
+import { SettingStore } from 'src/util/settings'
+import { LocalExtensionSettings } from './types'
 
 // TODO: clean this types mess up
 class BackgroundScript {
     private utils: typeof utils
     private tabManagement: TabManagementBackground
+    private localExtSettingStore: SettingStore<LocalExtensionSettings>
     private copyPasterBackground: CopyPasterBackground
     private customListsBackground: CustomListBackground
     private notifsBackground: NotifsBackground
@@ -63,6 +66,7 @@ class BackgroundScript {
         tabManagement,
         utilFns = utils,
         storageChangesMan,
+        localExtSettingStore,
         urlNormalizer = normalizeUrl,
         storageAPI = browser.storage,
         historyAPI = browser.history,
@@ -77,6 +81,7 @@ class BackgroundScript {
         copyPasterBackground: CopyPasterBackground
         customListsBackground: CustomListBackground
         readwiseBackground: ReadwiseBackground
+        localExtSettingStore: SettingStore<LocalExtensionSettings>
         urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
@@ -102,6 +107,7 @@ class BackgroundScript {
         this.alarmsAPI = alarmsAPI
         this.tabsAPI = tabsAPI
         this.urlNormalizer = urlNormalizer
+        this.localExtSettingStore = localExtSettingStore
     }
 
     get defaultUninstallURL() {
@@ -139,7 +145,7 @@ class BackgroundScript {
         await this.runOnboarding()
 
         // Store the timestamp of when the extension was installed
-        this.storageAPI.local.set({ [INSTALL_TIME_KEY]: Date.now() })
+        await this.localExtSettingStore.set('installTimestamp', Date.now())
         await insertDefaultTemplates({
             copyPaster: this.copyPasterBackground,
             localStorage: this.storageAPI.local,

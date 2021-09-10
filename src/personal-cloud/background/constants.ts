@@ -5,7 +5,7 @@ import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/me
 import { COLLECTION_NAMES as TEMPLATE_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/copy-paster/constants'
 import { COLLECTION_NAMES as SETTINGS_COLLECTION_NAMES } from 'src/settings/background/constants'
 
-export const PASSIVE_DATA_CUTOFF_DATE = new Date('2020-09-09')
+export const PASSIVE_DATA_CUTOFF_DATE = new Date('2019-09-09')
 
 export const PERSONAL_CLOUD_ACTION_RETRY_INTERVAL = 1000 * 60 * 5
 

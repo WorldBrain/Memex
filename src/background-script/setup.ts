@@ -97,6 +97,7 @@ import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
+import type { LocalExtensionSettings } from './types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -409,9 +410,16 @@ export function createBackgroundModules(options: {
         search,
     })
 
+    const localExtSettingStore = new BrowserSettingsStore<
+        LocalExtensionSettings
+    >(options.browserAPIs.storage.local, {
+        prefix: 'localSettings.',
+    })
+
     const bgScript = new BackgroundScript({
         storageManager,
         tabManagement,
+        localExtSettingStore,
         storageChangesMan: options.localStorageChangesManager,
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
@@ -500,6 +508,8 @@ export function createBackgroundModules(options: {
             return device.id
         },
         settingStore: personalCloudSettingStore,
+        localExtSettingStore,
+        localStorage: options.browserAPIs.storage.local,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
         userIdChanges: async function* () {
