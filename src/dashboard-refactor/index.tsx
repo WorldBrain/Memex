@@ -301,8 +301,13 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderHeader() {
-        const { searchFilters, listsSidebar, syncMenu } = this.state
-        const syncStatusIconState = deriveStatusIconColor(syncMenu)
+        const {
+            searchFilters,
+            listsSidebar,
+            currentUser,
+            syncMenu,
+        } = this.state
+        const syncStatusIconState = deriveStatusIconColor(this.state)
         return (
             <HeaderContainer
                 searchBarProps={{
@@ -342,8 +347,13 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusMenuProps={{
                     ...syncMenu,
                     syncStatusIconState,
+                    isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
+                    onLoginClick: () =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: true,
+                        }),
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,

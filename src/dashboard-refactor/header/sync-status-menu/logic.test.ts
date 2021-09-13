@@ -38,6 +38,7 @@ describe('Dashboard sync menu logic', () => {
         expect(
             searchResults.state.syncMenu.lastSuccessfulSyncDate.getTime(),
         ).toEqual(testTime)
+        await searchResults.cleanup()
     })
 
     it('should be able to set unsynced item count display states', async ({
@@ -80,6 +81,8 @@ describe('Dashboard sync menu logic', () => {
     }) => {
         const { searchResults } = await setupTest(device)
 
+        await searchResults.init()
+
         expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(0)
         expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(0)
 
@@ -100,5 +103,7 @@ describe('Dashboard sync menu logic', () => {
         expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(
             54,
         )
+
+        await searchResults.cleanup()
     })
 })

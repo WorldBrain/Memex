@@ -13,6 +13,7 @@ import {
 } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import { createUIServices } from 'src/services/ui'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -109,12 +110,10 @@ export async function setupTest(
     const analytics = new FakeAnalytics()
 
     if (args.withAuth) {
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
-            id: 'test-user',
-            displayName: 'test',
-            email: 'test@test.com',
-            emailVerified: true,
-        })
+        await device.backgroundModules.auth.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
     }
 
     if (args.withBeta) {

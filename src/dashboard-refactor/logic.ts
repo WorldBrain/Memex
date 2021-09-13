@@ -72,7 +72,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     constructor(private options: DashboardDependencies) {
         super()
-        this.setupRemoteEventListeners()
         this.syncSettings = createUISyncSettings({
             syncSettingsBG: options.syncSettingsBG,
         })
@@ -92,6 +91,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
+            loadState: 'pristine',
+            currentUser: null,
             modals: {
                 showLogin: false,
                 showBetaFeature: false,
@@ -99,7 +100,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showCloudOnboarding: false,
                 showNoteShareOnboarding: false,
             },
-            loadState: 'pristine',
             searchResults: {
                 sharingAccess: 'feature-disabled',
                 noteSharingInfo: {},
@@ -182,6 +182,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        this.setupRemoteEventListeners()
+
         await loadInitial(this, async () => {
             const nextState = await this.hydrateStateFromLocalStorage(
                 previousState,
@@ -191,9 +193,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.getSharingAccess(),
+                this.loadAuthStates(),
             ])
         })
+    }
+
+    cleanup: EventHandler<'cleanup'> = async ({}) => {
+        this.personalCloudEvents.removeAllListeners()
     }
 
     /* START - Misc helper methods */
@@ -254,14 +260,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = () =>
-        this.getSharingAccess()
+        this.loadAuthStates()
 
-    private async getSharingAccess() {
-        const isAllowed = await this.options.authBG.isAuthorizedForFeature(
-            'beta',
-        )
+    private async loadAuthStates() {
+        const { authBG } = this.options
+        const user = await authBG.getCurrentUser()
+        const isAllowed = await authBG.isAuthorizedForFeature('beta')
 
         this.emitMutation({
+            currentUser: { $set: user },
             searchResults: {
                 sharingAccess: {
                     $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
@@ -559,6 +566,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             const isBetaAuthd = true // TODO : REMOVE THIS
 
             const mutation: UIMutation<State> = {
+                currentUser: { $set: user },
                 searchResults: {
                     sharingAccess: {
                         $set: isBetaAuthd
@@ -581,6 +589,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         this.emitMutation({
+            currentUser: { $set: null },
             modals: { showLogin: { $set: true } },
         })
         return false

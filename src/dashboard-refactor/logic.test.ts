@@ -1,6 +1,7 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -162,6 +163,26 @@ describe('Dashboard Refactor misc logic', () => {
         )
     })
 
+    it('should get current user state during init logic', async ({
+        device,
+    }) => {
+        const { searchResults: searchResultsA } = await setupTest(device, {
+            withAuth: true,
+        })
+
+        expect(searchResultsA.state.currentUser).toBeNull()
+        await searchResultsA.processEvent('init', null)
+        expect(searchResultsA.state.currentUser).toEqual(TEST_USER)
+
+        const { searchResults: searchResultsB } = await setupTest(device, {
+            withAuth: false,
+        })
+
+        expect(searchResultsB.state.currentUser).toBeNull()
+        await searchResultsB.processEvent('init', null)
+        expect(searchResultsB.state.currentUser).toEqual(TEST_USER)
+    })
+
     it('should get feed activity status during init logic', async ({
         device,
     }) => {
@@ -199,6 +220,11 @@ describe('Dashboard Refactor misc logic', () => {
         expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicD.init()
         expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
+
+        await logicA.cleanup()
+        await logicB.cleanup()
+        await logicC.cleanup()
+        await logicD.cleanup()
     })
 
     it('should get feed activity status during init logic', async ({

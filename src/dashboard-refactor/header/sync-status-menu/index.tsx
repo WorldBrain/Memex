@@ -10,6 +10,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { SyncStatusIcon } from './sync-status-icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { SyncStatusIconState } from '../types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
@@ -89,8 +90,6 @@ const TextContainer = styled.div`
     align-items: flex-start;
 `
 
-
-
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
         return 'Never'
@@ -132,9 +131,11 @@ export const timeSinceNowToString = (date: Date | null): string => {
 }
 
 export interface SyncStatusMenuProps extends RootState {
+    isLoggedIn: boolean
     outsideClickIgnoreClass?: string
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
+    onLoginClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
@@ -158,10 +159,39 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         return 'in progress'
     }
 
+    private renderStatus() {
+        const { isLoggedIn, onLoginClick, syncStatusIconState } = this.props
+        if (!isLoggedIn) {
+            return (
+                <RowContainer>
+                    <Row>
+                        <TextBlock bold>
+                            You're not logged in and syncing
+                        </TextBlock>
+                        <PrimaryAction label="Login" onClick={onLoginClick} />
+                    </Row>
+                </RowContainer>
+            )
+        }
+
+        return (
+            <RowContainer>
+                <Row>
+                    <SyncStatusIcon color={syncStatusIconState} />
+                    <TextContainer>
+                        <TextBlock bold>{this.renderTitleText()}</TextBlock>
+                        <TextBlockSmall>
+                            {this.renderLastSyncText()}
+                        </TextBlockSmall>
+                    </TextContainer>
+                </Row>
+            </RowContainer>
+        )
+    }
+
     render() {
         const {
             isDisplayed,
-            syncStatusIconState,
             pendingLocalChangeCount,
             pendingRemoteChangeCount,
         } = this.props
@@ -172,17 +202,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
-                <RowContainer>
-                    <Row>
-                        <SyncStatusIcon color={syncStatusIconState} />
-                        <TextContainer>
-                            <TextBlock bold>{this.renderTitleText()}</TextBlock>
-                            <TextBlockSmall>
-                                {this.renderLastSyncText()}
-                            </TextBlockSmall>
-                        </TextContainer>
-                    </Row>
-                </RowContainer>
+                {this.renderStatus()}
                 <Separator />
                 <RowContainer>
                     <Row>
@@ -190,7 +210,11 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         <TextBlock> pending local changes</TextBlock>
                     </Row>
                     <Row>
-                        <Count>{pendingRemoteChangeCount ? pendingRemoteChangeCount : 0}</Count>
+                        <Count>
+                            {pendingRemoteChangeCount
+                                ? pendingRemoteChangeCount
+                                : 0}
+                        </Count>
                         <TextBlock> pending remote changes</TextBlock>
                     </Row>
                 </RowContainer>

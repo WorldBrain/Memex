@@ -30,9 +30,11 @@ import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { RemoteSettingsInterface } from 'src/settings/background/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface RootState {
     loadState: TaskState
+    currentUser: AuthenticatedUser | null
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
