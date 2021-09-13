@@ -34,6 +34,7 @@ async function setupTest(
             backgroundModules.backupModule.remoteFunctions,
         ) as any,
         personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
+        syncSettingsBG: backgroundModules.syncSettings.remoteFunctions,
         onModalClose: args?.onModalClose ?? (() => undefined),
     })
 
@@ -98,6 +99,28 @@ describe('Cloud onboarding UI logic', () => {
         expect(didFinish).toBe(false)
         await logic.processEvent('closeMigration', null)
         expect(didFinish).toBe(true)
+    })
+
+    it('should set subscribe banner to show upon final modal close', async ({
+        device,
+    }) => {
+        const { logic, _logic } = await setupTest(device, {
+            isSyncDisabled: true,
+        })
+
+        logic.processMutation({ needsToRemovePassiveData: { $set: false } })
+
+        expect(logic.state.isMigrationPrepped).toBe(false)
+        await logic.processEvent('continueToMigration', null)
+        expect(logic.state.isMigrationPrepped).toBe(true)
+
+        expect(
+            await _logic.syncSettings.dashboard.get('subscribeBannerShown'),
+        ).toBeNull()
+        await logic.processEvent('closeMigration', null)
+        expect(
+            await _logic.syncSettings.dashboard.get('subscribeBannerShown'),
+        ).toBe(true)
     })
 
     it('should disable DB backup change recording before performing passive data wipe', async ({

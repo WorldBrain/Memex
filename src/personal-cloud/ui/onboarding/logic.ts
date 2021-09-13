@@ -6,6 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
+import { UISyncSettings, createUISyncSettings } from 'src/sync-settings/ui/util'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -14,8 +15,12 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 >
 
 export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
+    syncSettings: UISyncSettings<'dashboard'>
+
     constructor(private dependencies: Dependencies) {
         super()
+
+        this.syncSettings = createUISyncSettings(dependencies)
     }
 
     getInitialState = (): State => ({
@@ -153,9 +158,11 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     closeMigration: EventHandler<'closeMigration'> = async ({
         previousState,
     }) => {
-        this.dependencies.onModalClose({
-            didFinish: previousState.isMigrationPrepped,
-        })
+        const didFinish = previousState.isMigrationPrepped
+        if (didFinish) {
+            await this.syncSettings.dashboard.set('subscribeBannerShown', true)
+        }
+        this.dependencies.onModalClose({ didFinish })
     }
 
     continueToMigration: EventHandler<'continueToMigration'> = async ({

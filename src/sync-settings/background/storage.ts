@@ -1,4 +1,4 @@
-import type {
+import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'

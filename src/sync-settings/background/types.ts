@@ -21,7 +21,7 @@ export interface SyncSettingsByFeature {
     dashboard: {
         listSidebarLocked: boolean
         onboardingMsgSeen: boolean
-        subscribeBannerDismissed: boolean
+        subscribeBannerShown: boolean
     }
     searchInjection: {
         hideMemexResults: boolean
