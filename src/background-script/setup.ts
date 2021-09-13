@@ -425,6 +425,7 @@ export function createBackgroundModules(options: {
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
+        userSettingsBG: settings,
         urlNormalizer: normalizeUrl,
         commandsAPI: browser.commands,
         readwiseBackground: readwise,
@@ -516,7 +517,6 @@ export function createBackgroundModules(options: {
         },
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
-        localStorage: options.browserAPIs.storage.local,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
         userIdChanges: async function* () {

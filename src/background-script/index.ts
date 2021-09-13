@@ -18,9 +18,10 @@ import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import { OVERVIEW_URL } from 'src/constants'
+import { OVERVIEW_URL, INSTALL_TIME_KEY } from 'src/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import type { ReadwiseBackground } from 'src/readwise-integration/background'
+import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
 
 // TODO: pass these deps down via constructor
 import {
@@ -28,11 +29,12 @@ import {
     blacklist,
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
-import TabManagementBackground from 'src/tab-management/background'
-import CustomListBackground from 'src/custom-lists/background'
+import type TabManagementBackground from 'src/tab-management/background'
+import type CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
-import { SettingStore } from 'src/util/settings'
-import { LocalExtensionSettings } from './types'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalExtensionSettings } from './types'
+import type { UserSettingsBackground } from 'src/settings/background'
 
 interface Dependencies {
     storageManager: Storex
@@ -41,7 +43,8 @@ interface Dependencies {
     copyPasterBackground: CopyPasterBackground
     customListsBackground: CustomListBackground
     readwiseBackground: ReadwiseBackground
-    localExtSettingStore: SettingStore<LocalExtensionSettings>
+    userSettingsBG: UserSettingsBackground
+    localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
@@ -99,14 +102,29 @@ class BackgroundScript {
     }
 
     private async handleUpdateLogic() {
+        const {
+            storageManager,
+            localExtSettingStore,
+            storageAPI,
+            runtimeAPI,
+            userSettingsBG,
+        } = this.deps
+
         if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {
-            await this.deps.storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
+            await storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
         }
 
-        await insertDefaultTemplates({
-            copyPaster: this.deps.copyPasterBackground,
-            localStorage: this.deps.storageAPI.local,
-        })
+        const { version } = runtimeAPI.getManifest()
+        if (version === '2.20.0') {
+            await userSettingsBG.migrateLocalStorage()
+            await migrateInstallTime({
+                storageManager,
+                getOldInstallTime: () =>
+                    localExtSettingStore.__rawGet(INSTALL_TIME_KEY),
+                setInstallTime: (time) =>
+                    localExtSettingStore.set('installTimestamp', time),
+            })
+        }
     }
 
     /**

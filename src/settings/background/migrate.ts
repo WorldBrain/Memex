@@ -34,15 +34,16 @@ export const localStorageToSettingsStorage = (values: {
         values[__OLD_POSITION_KEY],
     [SETTING_NAMES.searchInjection.searchEnginesEnabled]:
         values[__OLD_SEARCH_INJECTION_KEY],
-    [SETTING_NAMES.pdfIntegration.shouldAutoOpen]:
-        values[SHOULD_OPEN_STORAGE_KEY],
-    [SETTING_NAMES.extension.blocklist]: values[BLOCKLIST_STORAGE_KEY],
-    [SETTING_NAMES.extension.installTime]: values[INSTALL_TIME_KEY],
-    [SETTING_NAMES.extension.keyboardShortcuts]:
-        values[KEYBOARDSHORTCUTS_STORAGE_NAME],
-    [SETTING_NAMES.extension.shouldTrackAnalytics]:
-        values[TRACKING_STORAGE_NAME],
-    [SETTING_NAMES.inPageUI.tooltipEnabled]: values[TOOLTIP_STORAGE_NAME],
-    [SETTING_NAMES.inPageUI.highlightsEnabled]: values[HIGHLIGHTS_STORAGE_NAME],
-    [SETTING_NAMES.inPageUI.ribbonEnabled]: values[SIDEBAR_STORAGE_NAME],
+
+    // TODO: These should be migrated over separately, when ready
+    // [SETTING_NAMES.pdfIntegration.shouldAutoOpen]:
+    //     values[SHOULD_OPEN_STORAGE_KEY],
+    // [SETTING_NAMES.extension.blocklist]: values[BLOCKLIST_STORAGE_KEY],
+    // [SETTING_NAMES.extension.keyboardShortcuts]:
+    //     values[KEYBOARDSHORTCUTS_STORAGE_NAME],
+    // [SETTING_NAMES.extension.shouldTrackAnalytics]:
+    //     values[TRACKING_STORAGE_NAME],
+    // [SETTING_NAMES.inPageUI.tooltipEnabled]: values[TOOLTIP_STORAGE_NAME],
+    // [SETTING_NAMES.inPageUI.highlightsEnabled]: values[HIGHLIGHTS_STORAGE_NAME],
+    // [SETTING_NAMES.inPageUI.ribbonEnabled]: values[SIDEBAR_STORAGE_NAME],
 })
