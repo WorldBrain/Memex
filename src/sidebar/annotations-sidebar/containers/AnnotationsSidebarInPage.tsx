@@ -40,8 +40,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
-            showLoginModal: () =>
-                this.processEvent('setLoginModalShown', { shown: true }),
             showBetaFeatureNotifModal: () =>
                 this.processEvent('setBetaFeatureNotifModalShown', {
                     shown: true,

@@ -42,7 +42,6 @@ export interface SidebarContainerDependencies {
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
-    showLoginModal?: () => void
     showAnnotationShareModal?: () => void
     showBetaFeatureNotifModal?: () => void
 

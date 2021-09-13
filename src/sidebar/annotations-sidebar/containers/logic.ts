@@ -36,6 +36,7 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
+    setLoginModalShown?: (isShown: boolean) => void
 }
 
 type EventHandler<
@@ -269,7 +270,7 @@ export class SidebarContainerLogic extends UILogic<
             ensureBetaAccess?: boolean
         } = {},
     ): Promise<boolean> {
-        const { auth } = this.options
+        const { auth, setLoginModalShown } = this.options
 
         const user = await auth.getCurrentUser()
         if (user != null) {
@@ -289,10 +290,12 @@ export class SidebarContainerLogic extends UILogic<
                 return false
             }
 
+            setLoginModalShown?.(false)
             this.emitMutation(mutation)
             return true
         }
 
+        setLoginModalShown?.(true)
         this.emitMutation({ showLoginModal: { $set: true } })
         return false
     }

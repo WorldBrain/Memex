@@ -604,7 +604,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                if (!(await this.ensureLoggedIn({ ensureBetaAccess: true }))) {
+                if (!(await this.ensureLoggedIn())) {
                     return
                 }
 

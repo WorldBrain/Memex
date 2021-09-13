@@ -933,10 +933,8 @@ export class DashboardContainer extends StatefulUIElement<
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
                     contentConversationsBG={this.props.contentConversationsBG}
-                    showLoginModal={() =>
-                        this.processEvent('setShowLoginModal', {
-                            isShown: true,
-                        })
+                    setLoginModalShown={(isShown) =>
+                        this.processEvent('setShowLoginModal', { isShown })
                     }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
