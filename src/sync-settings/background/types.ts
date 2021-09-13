@@ -1,20 +1,20 @@
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 
-export type SettingValue =
+export type SyncSettingValue =
     | string
     | number
     | string[]
     | number[]
     | { [key: string]: any }
 
-export interface Setting {
+export interface SyncSetting {
     key: string
-    value: SettingValue
+    value: SyncSettingValue
 }
 
-export interface RemoteSettingsInterface extends LimitedBrowserStorage {}
+export interface RemoteSyncSettingsInterface extends LimitedBrowserStorage {}
 
-export interface UserSettingsByFeature {
+export interface SyncSettingsByFeature {
     contentSharing: {
         lastSharedAnnotationTimestamp: number
     }
@@ -67,8 +67,8 @@ export interface UserSettingsByFeature {
     }
 }
 
-export type UserSettingNames = {
-    [featureName in keyof UserSettingsByFeature]: {
-        [s in keyof UserSettingsByFeature[featureName]]: string
+export type SyncSettingNames = {
+    [featureName in keyof SyncSettingsByFeature]: {
+        [s in keyof SyncSettingsByFeature[featureName]]: string
     }
 }

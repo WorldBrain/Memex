@@ -35,7 +35,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     {
                         execute: async ({
                             setup: {
-                                backgroundModules: { readwise, settings },
+                                backgroundModules: {
+                                    readwise,
+                                    syncSettings: settings,
+                                },
                             },
                         }) => {
                             await readwise['options'].settingsStore.set(
@@ -62,7 +65,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 expect(
-                                    await setup.backgroundModules.settings.get(
+                                    await setup.backgroundModules.syncSettings.get(
                                         'readwise.apiKey',
                                     ),
                                 ).toEqual({

@@ -19,14 +19,14 @@ import type { SearchEngineName, ResultItemProps } from '../types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import type { UISyncSettings } from 'src/settings/ui/util'
+import type { UISyncSettings } from 'src/sync-settings/ui/util'
 
 export interface Props {
     results: ResultItemProps[]
     len: number
     rerender: () => void
     searchEngine: SearchEngineName
-    syncSettings: Pick<UISyncSettings, 'dashboard' | 'searchInjection'>
+    syncSettings: UISyncSettings<'dashboard' | 'searchInjection'>
 }
 
 interface State {

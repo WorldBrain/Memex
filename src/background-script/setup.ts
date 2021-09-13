@@ -67,7 +67,7 @@ import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
-import { UserSettingsBackground } from 'src/settings/background'
+import { SyncSettingsBackground } from 'src/sync-settings/background'
 import { Services } from 'src/services/types'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -117,7 +117,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
-    settings: UserSettingsBackground
+    syncSettings: SyncSettingsBackground
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -370,13 +370,13 @@ export function createBackgroundModules(options: {
         generateServerId,
     })
 
-    const settings = new UserSettingsBackground({
+    const syncSettings = new SyncSettingsBackground({
         storageManager,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
-        settings,
+        syncSettings,
         { prefix: 'readwise.' },
     )
 
@@ -425,7 +425,7 @@ export function createBackgroundModules(options: {
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
-        userSettingsBG: settings,
+        syncSettingsBG: syncSettings,
         urlNormalizer: normalizeUrl,
         commandsAPI: browser.commands,
         readwiseBackground: readwise,
@@ -593,7 +593,7 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
-        settings,
+        syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -733,7 +733,7 @@ export async function setupBackgroundModules(
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
     backgroundModules.contentConversations.setupRemoteFunctions()
-    backgroundModules.settings.setupRemoteFunctions()
+    backgroundModules.syncSettings.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
@@ -768,7 +768,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        settings: backgroundModules.settings.storage,
+        syncSettings: backgroundModules.syncSettings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }

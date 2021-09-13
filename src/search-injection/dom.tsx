@@ -11,12 +11,12 @@ import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { theme } from 'src/common-ui/components/design-library/theme'
-import type { UISyncSettings } from 'src/settings/ui/util'
+import type { SyncSettings } from 'src/sync-settings/ui/util'
 
 export const handleRender = async (
     { docs, totalCount },
     searchEngine,
-    syncSettings: UISyncSettings,
+    syncSettings: SyncSettings,
 ) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found

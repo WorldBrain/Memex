@@ -25,7 +25,7 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
+import { UISyncSettings, createUISyncSettings } from 'src/sync-settings/ui/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -68,7 +68,7 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
-    syncSettings: Pick<UISyncSettings, 'contentSharing' | 'dashboard'>
+    syncSettings: UISyncSettings<'contentSharing' | 'dashboard'>
 
     constructor(private options: DashboardDependencies) {
         super()

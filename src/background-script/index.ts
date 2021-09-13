@@ -34,7 +34,7 @@ import type CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalExtensionSettings } from './types'
-import type { UserSettingsBackground } from 'src/settings/background'
+import type { SyncSettingsBackground } from 'src/sync-settings/background'
 
 interface Dependencies {
     storageManager: Storex
@@ -43,7 +43,7 @@ interface Dependencies {
     copyPasterBackground: CopyPasterBackground
     customListsBackground: CustomListBackground
     readwiseBackground: ReadwiseBackground
-    userSettingsBG: UserSettingsBackground
+    syncSettingsBG: SyncSettingsBackground
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
@@ -107,7 +107,7 @@ class BackgroundScript {
             localExtSettingStore,
             storageAPI,
             runtimeAPI,
-            userSettingsBG,
+            syncSettingsBG: userSettingsBG,
         } = this.deps
 
         if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {

@@ -1,28 +1,30 @@
 import type {
-    RemoteSettingsInterface,
-    UserSettingsByFeature,
+    RemoteSyncSettingsInterface,
+    SyncSettingsByFeature,
 } from '../background/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { FEATURE_PREFIX } from '../background/constants'
 
-export interface UISyncSettings {
-    inPageUI: BrowserSettingsStore<UserSettingsByFeature['inPageUI']>
-    dashboard: BrowserSettingsStore<UserSettingsByFeature['dashboard']>
-    extension: BrowserSettingsStore<UserSettingsByFeature['extension']>
+export type UISyncSettings<T extends keyof SyncSettings> = Pick<SyncSettings, T>
+
+export interface SyncSettings {
+    inPageUI: BrowserSettingsStore<SyncSettingsByFeature['inPageUI']>
+    dashboard: BrowserSettingsStore<SyncSettingsByFeature['dashboard']>
+    extension: BrowserSettingsStore<SyncSettingsByFeature['extension']>
     contentSharing: BrowserSettingsStore<
-        UserSettingsByFeature['contentSharing']
+        SyncSettingsByFeature['contentSharing']
     >
     pdfIntegration: BrowserSettingsStore<
-        UserSettingsByFeature['pdfIntegration']
+        SyncSettingsByFeature['pdfIntegration']
     >
     searchInjection: BrowserSettingsStore<
-        UserSettingsByFeature['searchInjection']
+        SyncSettingsByFeature['searchInjection']
     >
 }
 
-export const createUISyncSettings = <T extends keyof UISyncSettings>(args: {
-    syncSettingsBG: RemoteSettingsInterface
-}): Pick<UISyncSettings, T> =>
+export const createUISyncSettings = <T extends keyof SyncSettings>(args: {
+    syncSettingsBG: RemoteSyncSettingsInterface
+}): UISyncSettings<T> =>
     ({
         inPageUI: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.IN_PAGE_UI,
@@ -42,4 +44,4 @@ export const createUISyncSettings = <T extends keyof UISyncSettings>(args: {
         searchInjection: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.SEARCH_INJECTION,
         }),
-    } as UISyncSettings)
+    } as SyncSettings)

@@ -6,7 +6,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
-import type { RemoteSettingsInterface } from 'src/settings/background/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -39,7 +39,7 @@ export interface HighlightDependencies {
 
 export interface SearchInjectionDependencies {
     requestSearcher: any
-    syncSettingsBG: RemoteSettingsInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
 export type HighlightsScriptMain = (

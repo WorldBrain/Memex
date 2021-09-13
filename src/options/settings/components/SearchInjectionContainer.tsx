@@ -5,11 +5,11 @@ import SearchInjection from './SearchInjection'
 import { Checkbox } from '../../../common-ui/components'
 
 import { SEARCH_INJECTION_DEFAULT } from 'src/search-injection/constants'
-import { UISyncSettings, createUISyncSettings } from 'src/settings/ui/util'
+import { UISyncSettings, createUISyncSettings } from 'src/sync-settings/ui/util'
 import { runInBackground } from 'src/util/webextensionRPC'
 
 class SearchInjectionContainer extends React.Component {
-    syncSettings: Pick<UISyncSettings, 'searchInjection'>
+    syncSettings: UISyncSettings<'searchInjection'>
 
     state = {
         injectionPreference: { ...SEARCH_INJECTION_DEFAULT },

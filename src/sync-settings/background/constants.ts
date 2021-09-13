@@ -1,4 +1,4 @@
-import type { UserSettingNames } from './types'
+import type { SyncSettingNames } from './types'
 
 export const COLLECTION_NAMES = {
     settings: 'settings',
@@ -13,7 +13,7 @@ export const FEATURE_PREFIX = {
     EXTENSION: '@Extension-',
 }
 
-export const SETTING_NAMES: UserSettingNames = {
+export const SETTING_NAMES: SyncSettingNames = {
     contentSharing: {
         lastSharedAnnotationTimestamp:
             FEATURE_PREFIX.CONTENT_SHARING + 'lastSharedAnnotationTimestamp',

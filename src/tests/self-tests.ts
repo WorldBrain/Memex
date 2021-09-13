@@ -93,7 +93,7 @@ export function createSelfTests(options: {
             console.log('Generated device ID:', personalCloud.deviceId!)
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
-                await backgroundModules.settings.set({
+                await backgroundModules.syncSettings.set({
                     [SYNCED_SETTING_KEYS.ReadwiseAPIKey]:
                         process.env.TEST_READWISE_API_KEY,
                 })

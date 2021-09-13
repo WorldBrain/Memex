@@ -1,8 +1,8 @@
 import StorageManager from '@worldbrain/storex'
 import type { Storage } from 'webextension-polyfill-ts'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import type { SettingValue, RemoteSettingsInterface } from './types'
-import SettingsStorage from './storage'
+import type { SyncSettingValue, RemoteSyncSettingsInterface } from './types'
+import SyncSettingsStorage from './storage'
 import { localStorageToSettingsStorage } from './migrate'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
@@ -11,13 +11,13 @@ export interface Dependencies {
     localBrowserStorage: Storage.LocalStorageArea
 }
 
-export class UserSettingsBackground implements LimitedBrowserStorage {
-    storage: SettingsStorage
-    remoteFunctions: RemoteSettingsInterface
+export class SyncSettingsBackground implements LimitedBrowserStorage {
+    storage: SyncSettingsStorage
+    remoteFunctions: RemoteSyncSettingsInterface
 
     private static formatKeyValsTuplesToDict = (
-        keyVals: [string, SettingValue][],
-    ): { [key: string]: SettingValue } => {
+        keyVals: [string, SyncSettingValue][],
+    ): { [key: string]: SyncSettingValue } => {
         const storage = {}
         for (const [key, value] of keyVals) {
             storage[key as string] = value
@@ -26,7 +26,7 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
     }
 
     constructor(private options: Dependencies) {
-        this.storage = new SettingsStorage({
+        this.storage = new SyncSettingsStorage({
             storageManager: options.storageManager,
         })
         this.remoteFunctions = {
@@ -58,8 +58,8 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
                     name,
                     await this.storage.getSetting(name),
                 ]),
-            )) as Array<[string, SettingValue]>
-            return UserSettingsBackground.formatKeyValsTuplesToDict(keyVals)
+            )) as Array<[string, SyncSettingValue]>
+            return SyncSettingsBackground.formatKeyValsTuplesToDict(keyVals)
         }
 
         const keyVals = (await Promise.all(
@@ -67,9 +67,9 @@ export class UserSettingsBackground implements LimitedBrowserStorage {
                 name,
                 await this.storage.getSetting(name),
             ]),
-        )) as Array<[string, SettingValue]>
+        )) as Array<[string, SyncSettingValue]>
 
-        return UserSettingsBackground.formatKeyValsTuplesToDict(keyVals)
+        return SyncSettingsBackground.formatKeyValsTuplesToDict(keyVals)
     }
 
     set: LimitedBrowserStorage['set'] = async (items) => {

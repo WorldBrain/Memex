@@ -1,7 +1,7 @@
 import * as constants from './constants'
 import * as utils from './utils'
 import { handleRender } from './dom'
-import { createUISyncSettings } from 'src/settings/ui/util'
+import { createUISyncSettings } from 'src/sync-settings/ui/util'
 
 const url = window.location.href
 const matched = utils.matchURL(url)
