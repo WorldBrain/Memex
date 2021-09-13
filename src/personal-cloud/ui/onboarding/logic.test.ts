@@ -186,6 +186,12 @@ describe('Cloud onboarding UI logic', () => {
     it('should determine whether passive data removal is needed, based on whether data exists from earlier than 2020-09-09', async ({
         device,
     }) => {
+        const {
+            localExtSettingStore,
+        } = device.backgroundModules.personalCloud.options
+
+        await localExtSettingStore.set('installTimestamp', Date.now())
+
         const { logic: logicA } = await setupTest(device)
         expect(logicA.state.needsToRemovePassiveData).toBe(false)
         await logicA.init()
@@ -195,11 +201,11 @@ describe('Cloud onboarding UI logic', () => {
         await logicA.processEvent('continueToMigration', null)
         expect(logicA.state.stage).toEqual('data-migration')
 
-        // Try again, this time with old data
-        await device.storageManager.collection('visits').createObject({
-            url: 'getmemex.com',
-            time: new Date('2020-01-01').getTime(),
-        })
+        // Try again, this time with old install time
+        await localExtSettingStore.set(
+            'installTimestamp',
+            new Date('2018-01-01').getTime(),
+        )
 
         const { logic: logicB } = await setupTest(device)
         expect(logicB.state.needsToRemovePassiveData).toBe(false)
