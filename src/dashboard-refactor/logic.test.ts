@@ -75,7 +75,7 @@ describe('Dashboard Refactor misc logic', () => {
         const {
             searchResults: searchResultsA,
             logic: logicA,
-        } = await setupTest(device)
+        } = await setupTest(device, { withAuth: true })
 
         await logicA.syncSettings.dashboard.set('listSidebarLocked', false)
         await logicA.syncSettings.dashboard.set(
@@ -105,7 +105,7 @@ describe('Dashboard Refactor misc logic', () => {
         const {
             searchResults: searchResultsB,
             logic: logicB,
-        } = await setupTest(device)
+        } = await setupTest(device, { withAuth: true })
 
         await logicA.syncSettings.dashboard.set('listSidebarLocked', true)
         await logicA.syncSettings.dashboard.set(
@@ -128,6 +128,44 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
+        expect(
+            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+    })
+
+    it('should not show cloud upgrade banner during init logic if logged out', async ({
+        device,
+    }) => {
+        const {
+            searchResults: searchResultsA,
+            logic: logicA,
+        } = await setupTest(device, { withAuth: false })
+
+        await logicA['options'].localStorage.set({
+            [CLOUD_STORAGE_KEYS.isSetUp]: false,
+        })
+
+        expect(
+            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+        await searchResultsA.processEvent('init', null)
+        expect(
+            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+
+        const {
+            searchResults: searchResultsB,
+            logic: logicB,
+        } = await setupTest(device, { withAuth: false })
+
+        await logicB['options'].localStorage.set({
+            [CLOUD_STORAGE_KEYS.isSetUp]: true,
+        })
+
+        expect(
+            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+        await searchResultsB.processEvent('init', null)
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)

@@ -185,15 +185,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.setupRemoteEventListeners()
 
         await loadInitial(this, async () => {
-            const nextState = await this.hydrateStateFromLocalStorage(
-                previousState,
-            )
+            let nextState = await this.loadAuthStates(previousState)
+            nextState = await this.hydrateStateFromLocalStorage(nextState)
             await Promise.all([
                 this.loadListsData(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.loadAuthStates(),
             ])
         })
     }
@@ -230,7 +228,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
-                isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
+                isCloudUpgradeBannerShown: {
+                    $set: previousState.currentUser != null && !isCloudEnabled,
+                },
                 isSubscriptionBannerShown: { $set: !subBannerDismissed },
             },
             listsSidebar: {
@@ -259,22 +259,29 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    checkSharingAccess: EventHandler<'checkSharingAccess'> = () =>
-        this.loadAuthStates()
+    checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
+        previousState,
+    }) => {
+        await this.loadAuthStates(previousState)
+    }
 
-    private async loadAuthStates() {
+    private async loadAuthStates(previousState: State): Promise<State> {
         const { authBG } = this.options
         const user = await authBG.getCurrentUser()
         const isAllowed = await authBG.isAuthorizedForFeature('beta')
 
-        this.emitMutation({
+        const mutation: UIMutation<State> = {
             currentUser: { $set: user },
             searchResults: {
                 sharingAccess: {
                     $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
                 },
             },
-        })
+        }
+
+        const nextState = this.withMutation(previousState, mutation)
+        this.emitMutation(mutation)
+        return nextState
     }
 
     private async getInboxUnreadCount() {
