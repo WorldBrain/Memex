@@ -1,4 +1,4 @@
-import { Browser } from 'webextension-polyfill-ts'
+import { browser, Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
@@ -98,6 +98,7 @@ import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-shar
 import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -424,7 +425,13 @@ export function createBackgroundModules(options: {
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
+        urlNormalizer: normalizeUrl,
+        commandsAPI: browser.commands,
         readwiseBackground: readwise,
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
+        alarmsAPI: browser.alarms,
+        tabsAPI: browser.tabs,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({

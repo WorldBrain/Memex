@@ -1,28 +1,26 @@
-import Storex from '@worldbrain/storex'
-import {
-    browser,
+import type Storex from '@worldbrain/storex'
+import type {
     Alarms,
     Runtime,
     Commands,
-    History,
     Storage,
     Tabs,
 } from 'webextension-polyfill-ts'
-import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
+import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import NotifsBackground from '../notifications/background'
+import type NotifsBackground from '../notifications/background'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
-import { StorageChangesManager } from '../util/storage-changes'
+import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations } from './quick-and-dirty-migrations'
-import { AlarmsConfig } from './alarms'
+import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
-import CopyPasterBackground from 'src/copy-paster/background'
+import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
 import { OVERVIEW_URL } from 'src/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
-import { ReadwiseBackground } from 'src/readwise-integration/background'
+import type { ReadwiseBackground } from 'src/readwise-integration/background'
 
 // TODO: pass these deps down via constructor
 import {
@@ -36,78 +34,27 @@ import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import { SettingStore } from 'src/util/settings'
 import { LocalExtensionSettings } from './types'
 
-// TODO: clean this types mess up
-class BackgroundScript {
-    private utils: typeof utils
-    private tabManagement: TabManagementBackground
-    private localExtSettingStore: SettingStore<LocalExtensionSettings>
-    private copyPasterBackground: CopyPasterBackground
-    private customListsBackground: CustomListBackground
-    private notifsBackground: NotifsBackground
-    private storageChangesMan: StorageChangesManager
-    private readwiseBackground: ReadwiseBackground
-    private storageManager: Storex
-    private urlNormalizer: URLNormalizer
-    private storageAPI: Storage.Static
-    private historyAPI: History.Static
-    private runtimeAPI: Runtime.Static
-    private commandsAPI: Commands.Static
-    private alarmsAPI: Alarms.Static
-    private tabsAPI: Tabs.Static
-    private alarmsListener
+interface Dependencies {
+    storageManager: Storex
+    tabManagement: TabManagementBackground
+    notifsBackground: NotifsBackground
+    copyPasterBackground: CopyPasterBackground
+    customListsBackground: CustomListBackground
+    readwiseBackground: ReadwiseBackground
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
+    urlNormalizer: URLNormalizer
+    storageChangesMan: StorageChangesManager
+    storageAPI: Storage.Static
+    runtimeAPI: Runtime.Static
+    commandsAPI: Commands.Static
+    alarmsAPI: Alarms.Static
+    tabsAPI: Tabs.Static
+}
 
-    constructor({
-        storageManager,
-        notifsBackground,
-        readwiseBackground,
-        copyPasterBackground,
-        customListsBackground,
-        tabManagement,
-        utilFns = utils,
-        storageChangesMan,
-        localExtSettingStore,
-        urlNormalizer = normalizeUrl,
-        storageAPI = browser.storage,
-        historyAPI = browser.history,
-        runtimeAPI = browser.runtime,
-        commandsAPI = browser.commands,
-        alarmsAPI = browser.alarms,
-        tabsAPI = browser.tabs,
-    }: {
-        storageManager: Storex
-        tabManagement: TabManagementBackground
-        notifsBackground: NotifsBackground
-        copyPasterBackground: CopyPasterBackground
-        customListsBackground: CustomListBackground
-        readwiseBackground: ReadwiseBackground
-        localExtSettingStore: SettingStore<LocalExtensionSettings>
-        urlNormalizer?: URLNormalizer
-        utilFns?: typeof utils
-        storageChangesMan: StorageChangesManager
-        storageAPI?: Storage.Static
-        historyAPI?: History.Static
-        runtimeAPI?: Runtime.Static
-        commandsAPI?: Commands.Static
-        alarmsAPI?: Alarms.Static
-        tabsAPI?: Tabs.Static
-    }) {
-        this.storageManager = storageManager
-        this.tabManagement = tabManagement
-        this.notifsBackground = notifsBackground
-        this.copyPasterBackground = copyPasterBackground
-        this.customListsBackground = customListsBackground
-        this.readwiseBackground = readwiseBackground
-        this.utils = utilFns
-        this.storageChangesMan = storageChangesMan
-        this.storageAPI = storageAPI
-        this.historyAPI = historyAPI
-        this.runtimeAPI = runtimeAPI
-        this.commandsAPI = commandsAPI
-        this.alarmsAPI = alarmsAPI
-        this.tabsAPI = tabsAPI
-        this.urlNormalizer = urlNormalizer
-        this.localExtSettingStore = localExtSettingStore
-    }
+class BackgroundScript {
+    private alarmsListener: (alarm: Alarms.Alarm) => void
+
+    constructor(private deps: Dependencies) {}
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
@@ -120,17 +67,17 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
      */
     private setupCommands() {
-        this.commandsAPI.onCommand.addListener((command) => {
+        this.deps.commandsAPI.onCommand.addListener((command) => {
             switch (command) {
                 case 'openOverview':
-                    return this.utils.openOverview()
+                    return utils.openOverview()
                 default:
             }
         })
     }
 
     private async runOnboarding() {
-        await this.tabsAPI.create({
+        await this.deps.tabsAPI.create({
             url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
         })
     }
@@ -144,21 +91,21 @@ class BackgroundScript {
         await this.runOnboarding()
 
         // Store the timestamp of when the extension was installed
-        await this.localExtSettingStore.set('installTimestamp', Date.now())
+        await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
         await insertDefaultTemplates({
-            copyPaster: this.copyPasterBackground,
-            localStorage: this.storageAPI.local,
+            copyPaster: this.deps.copyPasterBackground,
+            localStorage: this.deps.storageAPI.local,
         })
     }
 
     private async handleUpdateLogic() {
         if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {
-            await this.storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
+            await this.deps.storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
         }
 
         await insertDefaultTemplates({
-            copyPaster: this.copyPasterBackground,
-            localStorage: this.storageAPI.local,
+            copyPaster: this.deps.copyPasterBackground,
+            localStorage: this.deps.storageAPI.local,
         })
     }
 
@@ -166,9 +113,9 @@ class BackgroundScript {
      * Runs on both extension update and install.
      */
     private async handleUnifiedLogic() {
-        await this.customListsBackground.createInboxListIfAbsent()
-        await this.notifsBackground.deliverStaticNotifications()
-        await this.tabManagement.trackExistingTabs()
+        await this.deps.customListsBackground.createInboxListIfAbsent()
+        await this.deps.notifsBackground.deliverStaticNotifications()
+        await this.deps.tabManagement.trackExistingTabs()
     }
 
     /**
@@ -176,7 +123,7 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
      */
     private setupInstallHooks() {
-        this.runtimeAPI.onInstalled.addListener(async (details) => {
+        this.deps.runtimeAPI.onInstalled.addListener(async (details) => {
             switch (details.reason) {
                 case 'install':
                     await this.handleUnifiedLogic()
@@ -191,8 +138,8 @@ class BackgroundScript {
     }
 
     private setupStartupHooks() {
-        this.runtimeAPI.onStartup.addListener(async () => {
-            this.tabManagement.trackExistingTabs()
+        this.deps.runtimeAPI.onStartup.addListener(async () => {
+            this.deps.tabManagement.trackExistingTabs()
         })
     }
 
@@ -201,22 +148,22 @@ class BackgroundScript {
      */
     private async runQuickAndDirtyMigrations() {
         for (const [storageKey, migration] of Object.entries(migrations)) {
-            const storage = await this.storageAPI.local.get(storageKey)
+            const storage = await this.deps.storageAPI.local.get(storageKey)
 
             if (storage[storageKey]) {
                 continue
             }
 
             await migration({
-                storex: this.storageManager,
-                db: this.storageManager.backend['dexieInstance'],
-                localStorage: this.storageAPI.local,
-                normalizeUrl: this.urlNormalizer,
+                storex: this.deps.storageManager,
+                db: this.deps.storageManager.backend['dexieInstance'],
+                localStorage: this.deps.storageAPI.local,
+                normalizeUrl: this.deps.urlNormalizer,
                 backgroundModules: {
-                    readwise: this.readwiseBackground,
+                    readwise: this.deps.readwiseBackground,
                 },
             })
-            await this.storageAPI.local.set({ [storageKey]: true })
+            await this.deps.storageAPI.local.set({ [storageKey]: true })
         }
     }
 
@@ -225,33 +172,35 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/setUninstallURL
      */
     private setupUninstallURL() {
-        this.runtimeAPI.setUninstallURL(this.defaultUninstallURL)
+        this.deps.runtimeAPI.setUninstallURL(this.defaultUninstallURL)
         setTimeout(async () => {
-            const userId = await generateUserId({ storage: this.storageAPI })
-            this.runtimeAPI.setUninstallURL(
+            const userId = await generateUserId({
+                storage: this.deps.storageAPI,
+            })
+            this.deps.runtimeAPI.setUninstallURL(
                 `${this.defaultUninstallURL}?user=${userId}`,
             )
         }, 1000)
 
-        this.storageChangesMan.addListener(
+        this.deps.storageChangesMan.addListener(
             'local',
             STORAGE_KEYS.USER_ID,
             ({ newValue }) =>
-                this.runtimeAPI.setUninstallURL(
+                this.deps.runtimeAPI.setUninstallURL(
                     `${this.defaultUninstallURL}?user=${newValue}`,
                 ),
         )
     }
 
     sendNotification(notifId: string) {
-        return this.notifsBackground.dispatchNotification(notifId)
+        return this.deps.notifsBackground.dispatchNotification(notifId)
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable({
-            openOverviewTab: this.utils.openOverviewURL,
-            openOptionsTab: this.utils.openOptionsURL,
-            openLearnMoreTab: this.utils.openLearnMoreURL,
+            openOptionsTab: utils.openOptionsURL,
+            openOverviewTab: utils.openOverviewURL,
+            openLearnMoreTab: utils.openLearnMoreURL,
         })
     }
 
@@ -268,7 +217,7 @@ class BackgroundScript {
         for (const [name, { listener, ...alarmInfo }] of Object.entries(
             alarms,
         )) {
-            this.alarmsAPI.create(name, alarmInfo)
+            this.deps.alarmsAPI.create(name, alarmInfo)
             alarmListeners.set(name, listener)
         }
 
@@ -279,12 +228,12 @@ class BackgroundScript {
             }
         }
 
-        this.alarmsAPI.onAlarm.addListener(this.alarmsListener)
+        this.deps.alarmsAPI.onAlarm.addListener(this.alarmsListener)
     }
 
     clearAlarms() {
-        this.alarmsAPI.clearAll()
-        this.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
+        this.deps.alarmsAPI.clearAll()
+        this.deps.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
     }
 }
 
