@@ -80,7 +80,7 @@ const TextBlockSmall = styled.div`
     color: ${(props) => props.theme.colors.darkgrey};
     font-size: 10px;
     line-height: 12px;
-    text-align: center;
+    text-align: left;
 `
 
 const TextContainer = styled.div`
@@ -145,9 +145,15 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     handleClickOutside = this.props.onClickOutside
 
     private renderTitleText(): string {
-        if (this.props.syncStatusIconState === 'green') {
+        const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
+        if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
             return 'Everything is synced'
         }
+
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green'){
+            return 'Nothing to sync yet'
+        }
+
         return 'Syncing changes...'
     }
 
@@ -155,6 +161,9 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
+        }
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green'){
+            return 'Save your first page or annotation'
         }
         return 'in progress'
     }
