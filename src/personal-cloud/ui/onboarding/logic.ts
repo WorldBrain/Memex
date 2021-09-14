@@ -6,7 +6,10 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
-import { UISyncSettings, createUISyncSettings } from 'src/sync-settings/ui/util'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -15,12 +18,12 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 >
 
 export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
-    syncSettings: UISyncSettings<'dashboard'>
+    syncSettings: SyncSettingsStore<'dashboard'>
 
     constructor(private dependencies: Dependencies) {
         super()
 
-        this.syncSettings = createUISyncSettings(dependencies)
+        this.syncSettings = createSyncSettingsStore(dependencies)
     }
 
     getInitialState = (): State => ({

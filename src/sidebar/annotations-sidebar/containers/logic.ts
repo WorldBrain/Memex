@@ -28,7 +28,10 @@ import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
-import { UISyncSettings, createUISyncSettings } from 'src/sync-settings/ui/util'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -62,12 +65,12 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    syncSettings: UISyncSettings<'contentSharing'>
+    syncSettings: SyncSettingsStore<'contentSharing'>
 
     constructor(private options: SidebarLogicOptions) {
         super()
 
-        this.syncSettings = createUISyncSettings({
+        this.syncSettings = createSyncSettingsStore({
             syncSettingsBG: options.syncSettingsBG,
         })
 

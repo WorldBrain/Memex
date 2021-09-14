@@ -1,7 +1,7 @@
 import * as constants from './constants'
 import * as utils from './utils'
 import { handleRender } from './dom'
-import { createUISyncSettings } from 'src/sync-settings/ui/util'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 const url = window.location.href
 const matched = utils.matchURL(url)
@@ -11,7 +11,7 @@ const matched = utils.matchURL(url)
  * If set, proceed with matching URL and fetching search query
  */
 export async function initSearchInjection({ requestSearcher, syncSettingsBG }) {
-    const syncSettings = createUISyncSettings({ syncSettingsBG })
+    const syncSettings = createSyncSettingsStore({ syncSettingsBG })
     const searchInjection =
         (await syncSettings.searchInjection.get('searchEnginesEnabled')) ??
         constants.SEARCH_INJECTION_DEFAULT

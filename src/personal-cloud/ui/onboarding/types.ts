@@ -5,14 +5,14 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { BrowserName } from 'src/util/check-browser'
-import type { SyncSettingsBackground } from 'src/sync-settings/background'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface Dependencies {
     browser: BrowserName
     personalCloudBG: PersonalCloudRemoteInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
-    syncSettingsBG: SyncSettingRem
+    syncSettingsBG: RemoteSyncSettingsInterface
     onModalClose: (args?: { didFinish?: boolean }) => void
 }
 

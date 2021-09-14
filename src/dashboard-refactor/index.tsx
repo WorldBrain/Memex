@@ -895,6 +895,7 @@ export class DashboardContainer extends StatefulUIElement<
                     services={this.props.services}
                     authBG={this.props.authBG}
                     backupBG={this.props.backupBG}
+                    syncSettingsBG={this.props.syncSettingsBG}
                     personalCloudBG={this.props.personalCloudBG}
                     onModalClose={(args) => {
                         this.processEvent('setShowCloudOnboardingModal', {
