@@ -99,8 +99,8 @@ class Container extends React.Component<Props, State> {
                 'memexResultsPosition',
             )) ?? 'side'
 
-        const subBannerShown = await this.props.syncSettings.dashboard.get(
-            'subscribeBannerShown',
+        const subBannerShownAfter = await this.props.syncSettings.dashboard.get(
+            'subscribeBannerShownAfter',
         )
         const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
 
@@ -115,7 +115,8 @@ class Container extends React.Component<Props, State> {
             isNotif: fetchNotif && !fetchNotif.readTime,
             notification,
             isCloudUpgradeBannerShown: !isCloudEnabled,
-            isSubscriptionBannerShown: subBannerShown,
+            isSubscriptionBannerShown:
+                subBannerShownAfter != null && subBannerShownAfter < Date.now(),
         })
     }
 
@@ -275,8 +276,8 @@ class Container extends React.Component<Props, State> {
     private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
         this.setState({ isSubscriptionBannerShown: false })
         await this.props.syncSettings.dashboard.set(
-            'subscribeBannerShown',
-            false,
+            'subscribeBannerShownAfter',
+            null,
         )
     }
 

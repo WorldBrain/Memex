@@ -223,8 +223,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         const onboardingMsgSeen = await this.syncSettings.dashboard.get(
             'onboardingMsgSeen',
         )
-        const subBannerShown = await this.syncSettings.dashboard.get(
-            'subscribeBannerShown',
+        const subBannerShownAfter = await this.syncSettings.dashboard.get(
+            'subscribeBannerShownAfter',
         )
 
         const mutation: UIMutation<State> = {
@@ -234,7 +234,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isCloudUpgradeBannerShown: {
                     $set: previousState.currentUser != null && !isCloudEnabled,
                 },
-                isSubscriptionBannerShown: { $set: subBannerShown },
+                isSubscriptionBannerShown: {
+                    $set:
+                        subBannerShownAfter != null &&
+                        subBannerShownAfter < Date.now(),
+                },
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
@@ -1625,7 +1629,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dismissSubscriptionBanner: EventHandler<
         'dismissSubscriptionBanner'
     > = async () => {
-        await this.syncSettings.dashboard.set('subscribeBannerShown', false)
+        await this.syncSettings.dashboard.set('subscribeBannerShownAfter', null)
         this.emitMutation({
             searchResults: { isSubscriptionBannerShown: { $set: false } },
         })

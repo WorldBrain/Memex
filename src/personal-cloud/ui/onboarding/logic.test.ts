@@ -114,13 +114,18 @@ describe('Cloud onboarding UI logic', () => {
         await logic.processEvent('continueToMigration', null)
         expect(logic.state.isMigrationPrepped).toBe(true)
 
+        const now = Date.now()
         expect(
-            await _logic.syncSettings.dashboard.get('subscribeBannerShown'),
+            await _logic.syncSettings.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
         ).toBeNull()
-        await logic.processEvent('closeMigration', null)
+        await logic.processEvent('closeMigration', { now })
         expect(
-            await _logic.syncSettings.dashboard.get('subscribeBannerShown'),
-        ).toBe(true)
+            await _logic.syncSettings.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
+        ).toBe(now)
     })
 
     it('should disable DB backup change recording before performing passive data wipe', async ({

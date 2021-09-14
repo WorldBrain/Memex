@@ -45,7 +45,7 @@ export default class Logic extends UILogic<State, Event> {
 
         if (!this.isExistingUser) {
             this.syncPromise = executeUITask(this, 'syncState', async () =>
-                this.dependencies.personalCloudBG.enableCloudSync(),
+                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
             )
         }
     }

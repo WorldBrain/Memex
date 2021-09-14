@@ -21,7 +21,8 @@ export const SETTING_NAMES: SyncSettingNames = {
     dashboard: {
         listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'listSidebarLocked',
         onboardingMsgSeen: FEATURE_PREFIX.DASHBOARD + 'onboardingMsgSeen',
-        subscribeBannerShown: FEATURE_PREFIX.DASHBOARD + 'subscribeBannerShown',
+        subscribeBannerShownAfter:
+            FEATURE_PREFIX.DASHBOARD + 'subscribeBannerShownAfter',
     },
     extension: {
         blocklist: FEATURE_PREFIX.EXTENSION + 'blocklist',

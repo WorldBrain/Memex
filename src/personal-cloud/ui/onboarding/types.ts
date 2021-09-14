@@ -43,7 +43,7 @@ export interface Event {
     retryDataClean: null
     cancelDataClean: null
 
-    closeMigration: null
+    closeMigration: { now?: number }
     retryMigration: null
     cancelMigration: null
 

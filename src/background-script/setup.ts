@@ -85,10 +85,7 @@ import {
     PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import {
-    PersonalCloudSettings,
-    PersonalCloudBackgroundEvents,
-} from 'src/personal-cloud/background/types'
+import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
@@ -99,6 +96,7 @@ import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/con
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -375,6 +373,10 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
+    const syncSettingsStore = createSyncSettingsStore({
+        syncSettingsBG: syncSettings,
+    })
+
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
         { prefix: 'readwise.' },
@@ -463,12 +465,13 @@ export function createBackgroundModules(options: {
             : undefined
 
     const personalCloudSettingStore = new BrowserSettingsStore<
-        PersonalCloudSettings
+        LocalPersonalCloudSettings
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
+        syncSettingsStore,
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??

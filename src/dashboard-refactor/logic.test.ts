@@ -77,8 +77,12 @@ describe('Dashboard Refactor misc logic', () => {
             logic: logicA,
         } = await setupTest(device, { withAuth: true })
 
+        const now = Date.now()
         await logicA.syncSettings.dashboard.set('listSidebarLocked', false)
-        await logicA.syncSettings.dashboard.set('subscribeBannerShown', true)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerShownAfter',
+            now,
+        )
         await logicA['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: false,
         })
@@ -105,7 +109,10 @@ describe('Dashboard Refactor misc logic', () => {
         } = await setupTest(device, { withAuth: true })
 
         await logicA.syncSettings.dashboard.set('listSidebarLocked', true)
-        await logicA.syncSettings.dashboard.set('subscribeBannerShown', false)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerShownAfter',
+            null,
+        )
         await logicB['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: true,
         })

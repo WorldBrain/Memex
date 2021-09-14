@@ -22,7 +22,7 @@ import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authenticat
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
-    PersonalCloudSettings,
+    LocalPersonalCloudSettings,
     PersonalCloudDeviceID,
     PersonalCloudRemoteInterface,
     PersonalCloudStats,
@@ -43,15 +43,17 @@ import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
 import { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 export interface PersonalCloudBackgroundOptions {
+    backend: PersonalCloudBackend
     storageManager: StorageManager
+    syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
     remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
-    backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
-    settingStore: SettingStore<PersonalCloudSettings>
+    settingStore: SettingStore<LocalPersonalCloudSettings>
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
@@ -96,10 +98,10 @@ export class PersonalCloudBackground {
         this.setupEventListeners()
 
         this.remoteFunctions = {
-            enableCloudSync: this.enableSync,
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
             runDataMigrationPreparation: this.prepareDataMigration,
+            enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
                 wipePassiveData({ db: this.dexie, visitLimit: 20 }),
@@ -194,9 +196,19 @@ export class PersonalCloudBackground {
         }
     }
 
-    enableSync = async () => {
+    async enableSync() {
         await this.options.settingStore.set('isSetUp', true)
+    }
+
+    enableSyncForNewInstall = async (now = Date.now()) => {
+        await this.enableSync()
         this.startSync()
+
+        const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
+        await this.options.syncSettingsStore.dashboard.set(
+            'subscribeBannerShownAfter',
+            fortnightFromNow,
+        )
     }
 
     startSync() {

@@ -21,7 +21,8 @@ export interface SyncSettingsByFeature {
     dashboard: {
         listSidebarLocked: boolean
         onboardingMsgSeen: boolean
-        subscribeBannerShown: boolean
+        /** Timestamp after which the pioneer sub banner will be shown. Or `null` to always hide. */
+        subscribeBannerShownAfter: number | null
     }
     searchInjection: {
         hideMemexResults: boolean

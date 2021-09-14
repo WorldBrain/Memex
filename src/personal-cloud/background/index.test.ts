@@ -484,4 +484,29 @@ describe('Personal cloud', () => {
         expect(personalCloud.authChangesObserved).not.toBeUndefined()
         expect(personalCloud.changesIntegrating).not.toBeUndefined()
     })
+
+    it(`should schedule showing pioneer subscription banner in 2 weeks after enabling on new install`, async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startWithSyncDisabled: true,
+            useDownloadTranslationLayer: true,
+        })
+
+        const { personalCloud } = setups[0].backgroundModules
+
+        const now = Date.now()
+        const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
+
+        expect(
+            await personalCloud.options.syncSettingsStore.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
+        ).toEqual(null)
+        await personalCloud.enableSyncForNewInstall(now)
+        expect(
+            await personalCloud.options.syncSettingsStore.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
+        ).toEqual(fortnightFromNow)
+    })
 })

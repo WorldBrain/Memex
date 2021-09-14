@@ -160,10 +160,14 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
 
     closeMigration: EventHandler<'closeMigration'> = async ({
         previousState,
+        event,
     }) => {
         const didFinish = previousState.isMigrationPrepped
         if (didFinish) {
-            await this.syncSettings.dashboard.set('subscribeBannerShown', true)
+            await this.syncSettings.dashboard.set(
+                'subscribeBannerShownAfter',
+                event?.now ?? Date.now(),
+            )
         }
         this.dependencies.onModalClose({ didFinish })
     }

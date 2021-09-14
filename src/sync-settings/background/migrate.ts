@@ -26,9 +26,11 @@ export const localStorageToSettingsStorage = (values: {
         values[DASHBOARD_SETTING_NAMES.__OLD_listSidebarLocked],
     [SETTING_NAMES.dashboard.onboardingMsgSeen]:
         values[DASHBOARD_SETTING_NAMES.__OLD_onboardingMsgSeen],
-    [SETTING_NAMES.dashboard.subscribeBannerShown]: !values[
+    [SETTING_NAMES.dashboard.subscribeBannerShownAfter]: values[
         DASHBOARD_SETTING_NAMES.__OLD_subBannerDismissed
-    ],
+    ]
+        ? null
+        : Date.now(),
     [SETTING_NAMES.searchInjection.hideMemexResults]:
         values[__OLD_HIDE_RESULTS_KEY],
     [SETTING_NAMES.searchInjection.memexResultsPosition]:

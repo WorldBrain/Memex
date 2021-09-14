@@ -22,7 +22,7 @@ export interface ExecuteClientInstructionsAction {
     clientInstructions: PersonalCloudClientInstruction[]
 }
 
-export interface PersonalCloudSettings {
+export interface LocalPersonalCloudSettings {
     deviceId?: PersonalCloudDeviceID
     lastSeen?: number
     isSetUp?: boolean
@@ -31,7 +31,7 @@ export interface PersonalCloudSettings {
 export type PersonalCloudDeviceID = number | string
 
 export interface PersonalCloudRemoteInterface {
-    enableCloudSync: () => Promise<void>
+    enableCloudSyncForNewInstall: () => Promise<void>
     isCloudSyncEnabled: () => Promise<boolean>
     runPassiveDataClean: () => Promise<void>
     isPassiveDataRemovalNeeded: () => Promise<boolean>
