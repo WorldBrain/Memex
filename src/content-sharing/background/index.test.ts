@@ -16,6 +16,7 @@ import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integra
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
+import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -40,6 +41,7 @@ async function setupTest(options: {
     setup.authService.setUser(TEST_USER)
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
+    await personalCloud.startSync()
 
     const serverStorage = await setup.getServerStorage()
     await serverStorage.storageManager.operation(
@@ -64,10 +66,19 @@ async function setupTest(options: {
         testData.remoteListId = listShareResult.remoteListId
     }
 
+    const getShared = (collection: string) =>
+        serverStorage.storageManager.operation(
+            'findObjects',
+            collection,
+            {},
+            { order: [['id', 'asc']] },
+        )
+
     return {
         contentSharing,
         personalCloud,
         shareTestList,
+        getShared,
     }
 }
 
@@ -139,7 +150,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedList: convertRemoteId(
                                             testData.remoteListId,
                                         ),
-                                        createdWhen: localListEntries[1].createdAt.getTime(),
+                                        createdWhen: localListEntries[0].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.eggs.com/foo',
                                         normalizedUrl: 'eggs.com/foo',
@@ -151,7 +162,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedList: convertRemoteId(
                                             testData.remoteListId,
                                         ),
-                                        createdWhen: localListEntries[2].createdAt.getTime(),
+                                        createdWhen: localListEntries[1].createdAt.getTime(),
                                         updatedWhen: expect.any(Number),
                                         originalUrl: 'https://www.spam.com/foo',
                                         normalizedUrl: 'spam.com/foo',
@@ -541,6 +552,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     contentSharing,
                                     personalCloud,
+                                    getShared,
                                 } = await setupTest({
                                     setup,
                                     testData,
@@ -613,14 +625,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await personalCloud.waitForSync()
 
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                        { order: [['id', 'asc']] },
-                                    )
                                 const sharedAnnotations = await getShared(
                                     'sharedAnnotation',
                                 )
@@ -764,7 +768,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     contentSharing,
                                     personalCloud,
-                                    shareTestList,
+                                    getShared,
                                 } = await setupTest({ setup, testData })
 
                                 firstLocalListId = await data.createContentSharingTestList(
@@ -826,14 +830,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                        { order: [['id', 'asc']] },
-                                    )
                                 const sharedAnnotations = await getShared(
                                     'sharedAnnotation',
                                 )
@@ -926,7 +922,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     contentSharing,
                                     personalCloud,
-                                    shareTestList,
+                                    getShared,
                                 } = await setupTest({ setup, testData })
 
                                 localListIds = [
@@ -961,14 +957,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await personalCloud.waitForSync()
 
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                        { order: [['id', 'asc']] },
-                                    )
                                 expect(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
@@ -1025,7 +1013,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     contentSharing,
                                     personalCloud,
-                                    shareTestList,
+                                    getShared,
                                 } = await setupTest({ setup, testData })
 
                                 localListIds = [
@@ -1060,14 +1048,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await personalCloud.waitForSync()
 
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                        { order: [['id', 'asc']] },
-                                    )
                                 expect(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
@@ -1132,7 +1112,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     contentSharing,
                                     personalCloud,
-                                    shareTestList,
+                                    getShared,
                                 } = await setupTest({ setup, testData })
 
                                 localListIds = [
@@ -1167,14 +1147,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await personalCloud.waitForSync()
 
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                        { order: [['id', 'asc']] },
-                                    )
                                 expect(
                                     await getShared('sharedAnnotation'),
                                 ).toEqual([
@@ -1257,6 +1229,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await (personalCloud.options
                                     .backend as StorexPersonalCloudBackend).forceUpdateCheck()
                                 await personalCloud.waitForSync()
+
                                 const customLists = await setup.storageManager.operation(
                                     'findObjects',
                                     'customLists',

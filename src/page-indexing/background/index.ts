@@ -507,7 +507,7 @@ export class PageIndexingBackground {
         }
 
         const contentInfo = this.contentInfo[normalizeUrl(fullUrl)]
-        for (const locator of contentInfo.locators) {
+        for (const locator of contentInfo?.locators ?? []) {
             foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
                 locator.originalLocation,
             )

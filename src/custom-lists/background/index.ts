@@ -406,19 +406,16 @@ export default class CustomListBackground {
         })
     }
 
-    insertPageToList = async ({
-        id,
-        url,
-        tabId,
-        skipPageIndexing,
-        suppressVisitCreation,
-    }: {
+    insertPageToList = async (params: {
         id: number
         url: string
         tabId?: number
         skipPageIndexing?: boolean
         suppressVisitCreation?: boolean
+        suppressInboxEntry?: boolean
     }): Promise<{ object: PageListEntry }> => {
+        const { id, url } = params
+
         if (!isFullUrl(url)) {
             throw new Error(
                 'Tried to insert page to list with a normalized, instead of a full URL',
@@ -429,14 +426,16 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        if (!skipPageIndexing) {
+        if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
-                    tabId,
+                    tabId: params.tabId,
                     fullUrl: url,
-                    visitTime: !suppressVisitCreation ? '$now' : undefined,
+                    visitTime: !params.suppressVisitCreation
+                        ? '$now'
+                        : undefined,
                 },
-                { addInboxEntryOnCreate: true },
+                { addInboxEntryOnCreate: !params.suppressInboxEntry },
             )
         }
 

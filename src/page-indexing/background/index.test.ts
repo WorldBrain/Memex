@@ -1,53 +1,13 @@
 import { setupBackgroundIntegrationTest } from '../../tests/background-integration-tests'
-import {
-    FingerprintSchemeType,
-    ContentLocatorType,
-    ContentLocatorFormat,
-} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { injectFakeTabs } from '../../tab-management/background/index.tests'
+import { indexTestFingerprintedPdf } from './index.tests'
 
 describe('Page indexing background', () => {
     it('should generate and remember normalized URLs for local PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
-        const fullUrl = 'file:////home/bla/test.pdf'
-        const contentSize = 456
-        const fingerprints = [
-            {
-                fingerprintScheme: FingerprintSchemeType.PdfV1,
-                fingerprint: 'goldfinger',
-            },
-            {
-                fingerprintScheme: FingerprintSchemeType.PdfV1,
-                fingerprint: 'billfingers',
-            },
-        ]
-        const locator = {
-            contentSize,
-            format: ContentLocatorFormat.PDF,
-            originalLocation: fullUrl,
-        }
-        const identifier = await setup.backgroundModules.pages.initContentIdentifier(
-            {
-                locator,
-                fingerprints,
-            },
+        const { identifier, contentSize } = await indexTestFingerprintedPdf(
+            setup,
         )
-        expect(identifier).toEqual({
-            normalizedUrl: 'memex.cloud/ct/1337.pdf',
-            fullUrl: 'https://memex.cloud/ct/1337.pdf',
-        })
-        injectFakeTabs({
-            tabManagement: setup.backgroundModules.tabManagement,
-            tabsAPI: setup.browserAPIs.tabs,
-            tabs: [
-                {
-                    url: fullUrl,
-                },
-            ],
-        })
-        expect(
-            await setup.storageManager.collection('locators').findObjects({}),
-        ).toEqual([])
+
         await setup.backgroundModules.bookmarks.addBookmark({
             url: identifier.normalizedUrl,
             fullUrl: identifier.fullUrl,
