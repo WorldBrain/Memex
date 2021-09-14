@@ -757,6 +757,8 @@ export function getBackgroundStorageModules(
     return {
         pageFetchBacklog: backgroundModules.pageFetchBacklog.storage,
         annotations: backgroundModules.directLinking.annotationStorage,
+        readwiseAction:
+            backgroundModules.readwise.__deprecatedActionQueue.storage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,
         bookmarks: backgroundModules.bookmarks.storage,

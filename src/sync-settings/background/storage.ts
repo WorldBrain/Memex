@@ -10,7 +10,7 @@ export default class SyncSettingsStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         collections: {
             [COLLECTION_NAMES.settings]: {
-                version: STORAGE_VERSIONS[20].version,
+                version: STORAGE_VERSIONS[25].version,
                 fields: {
                     key: { type: 'string' },
                     value: { type: 'json' },

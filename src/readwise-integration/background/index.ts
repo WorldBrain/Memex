@@ -19,6 +19,8 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
+import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -29,6 +31,7 @@ type GetPageData = (normalizedUrl: string) => Promise<PageData>
 type GetAnnotationTags = (annotationUrl: string) => Promise<string[]>
 
 export class ReadwiseBackground {
+    __deprecatedActionQueue: ActionQueue<any>
     remoteFunctions: ReadwiseInterface<'provider'>
     readwiseAPI: ReadwiseAPI
     private _apiKey: string | null = null
@@ -45,6 +48,14 @@ export class ReadwiseBackground {
     ) {
         this.readwiseAPI = new HTTPReadwiseAPI({
             fetch: options.fetch,
+        })
+
+        this.__deprecatedActionQueue = new ActionQueue({
+            storageManager: options.storageManager,
+            collectionName: 'readwiseAction',
+            versions: { initial: STORAGE_VERSIONS[22].version },
+            retryIntervalInMs: 1000,
+            executeAction: async () => {},
         })
 
         this.remoteFunctions = {

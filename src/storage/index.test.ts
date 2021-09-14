@@ -738,6 +738,7 @@ describe('Storage initialization', () => {
                         personalCloudAction: '++id, createdWhen',
                         readablePageArchives: 'url, createdWhen, lastEdited',
                         readwiseAction: '++id, createdWhen',
+                        settings: 'key',
                         sharedAnnotationMetadata: 'localId, remoteId',
                         sharedListMetadata: 'localId',
                         socialBookmarks: '++id, createdAt, postId',
