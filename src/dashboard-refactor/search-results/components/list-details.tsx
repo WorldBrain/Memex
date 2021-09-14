@@ -17,7 +17,6 @@ export interface Props {
 }
 
 export default class ListDetails extends PureComponent<Props> {
-
     render() {
         return (
             <>
@@ -36,29 +35,27 @@ export default class ListDetails extends PureComponent<Props> {
                                 )}
                             </DetailsContainer>
                             <BtnsContainer>
-
-                            {this.props.remoteLink ? (
-                                <>
-                                    <Margin right='10px'>
-                                    <ButtonTooltip
-                                        tooltipText="Invite people to this collection"
-                                        position="bottom"
-                                    >
-                                        <Icon
-                                            height="18px"
-                                            icon="addPeople"
-                                            color="grey"
-                                        />
-                                        </ButtonTooltip>
-                                    </Margin>
-                                    <Button
-                                    type="primary-action"
-                                    externalHref={this.props.remoteLink}
-                                    >
-                                        Open
-                                    </Button>
-                                </>
-                                    
+                                {this.props.remoteLink ? (
+                                    <>
+                                        <Margin right="10px">
+                                            <ButtonTooltip
+                                                tooltipText="Invite people to this collection"
+                                                position="bottom"
+                                            >
+                                                <Icon
+                                                    height="18px"
+                                                    icon="addPeople"
+                                                    color="grey"
+                                                />
+                                            </ButtonTooltip>
+                                        </Margin>
+                                        <Button
+                                            type="primary-action"
+                                            externalHref={this.props.remoteLink}
+                                        >
+                                            Open
+                                        </Button>
+                                    </>
                                 ) : (
                                     <ButtonTooltip
                                         tooltipText="Invite people to this collection"
@@ -66,18 +63,24 @@ export default class ListDetails extends PureComponent<Props> {
                                     >
                                         <Button
                                             type="primary-action"
-                                            onClick={this.props.onAddContributorsClick}
-                                            //TODO clean up this type error. Problem: With adhering to the syntax () => this.props... it does not work anymore when you click on the button
+                                            onClick={
+                                                this.props
+                                                    .onAddContributorsClick
+                                            }
                                         >
-                                            <ShareCollectionBtn><Icon
-                                            height="18px"
-                                            icon="addPeople"
-                                            color='white'
-                                            /><ShareCollectionBtnLabel>Share Collection</ShareCollectionBtnLabel></ShareCollectionBtn>
+                                            <ShareCollectionBtn>
+                                                <Icon
+                                                    height="18px"
+                                                    icon="addPeople"
+                                                    color="white"
+                                                />
+                                                <ShareCollectionBtnLabel>
+                                                    Share Collection
+                                                </ShareCollectionBtnLabel>
+                                            </ShareCollectionBtn>
                                         </Button>
                                     </ButtonTooltip>
-                                )
-                            }
+                                )}
                             </BtnsContainer>
                         </Container>
                     </Margin>
