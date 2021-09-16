@@ -206,6 +206,17 @@ export class PageIndexingBackground {
         return primaryIdentifier
     }
 
+    getContentFingerprints(
+        contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,
+    ) {
+        return this.contentInfo[contentIdentifier.normalizedUrl]?.locators.map(
+            (locator): ContentFingerprint => ({
+                fingerprintScheme: locator.fingerprintScheme,
+                fingerprint: locator.fingerprint,
+            }),
+        )
+    }
+
     /**
      * Adds/updates a page + associated visit (pages never exist without either an assoc.
      * visit or bookmark in current model).

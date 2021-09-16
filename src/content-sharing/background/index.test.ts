@@ -17,6 +17,8 @@ import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
+import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
+import { setupSyncBackgroundTest } from 'src/personal-cloud/background/index.tests'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -55,15 +57,11 @@ async function setupTest(options: {
     }
 
     const shareTestList = async (shareOptions: { shareEntries: boolean }) => {
-        const listShareResult = await contentSharing.shareList({
-            listId: testData.localListId,
-        })
-        if (shareOptions.shareEntries) {
-            await contentSharing.shareListEntries({
-                listId: testData.localListId,
-            })
-        }
-        testData.remoteListId = listShareResult.remoteListId
+        testData.remoteListId = await data.shareContentSharingTestList(
+            setup,
+            testData.localListId,
+            shareOptions,
+        )
     }
 
     const getShared = (collection: string) =>
@@ -1176,6 +1174,77 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await getShared(
                                         'sharedAnnotationListEntry',
                                     ),
+                                ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should share PDF fingerprints and locators',
+            { skipConflictTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    personalCloud,
+                                    shareTestList,
+                                    getShared,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                    createTestList: true,
+                                })
+                                await shareTestList({ shareEntries: true })
+                                const {
+                                    identifier,
+                                    fingerprints,
+                                } = await indexTestFingerprintedPdf(setup, {
+                                    expectedServerId: 1338,
+                                })
+                                await setup.backgroundModules.customLists.insertPageToList(
+                                    {
+                                        id: testData.localListId,
+                                        contentIdentifier: identifier,
+                                    },
+                                )
+                                await personalCloud.waitForSync()
+                                expect(
+                                    await getShared('sharedContentFingerprint'),
+                                ).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
+                                        normalizedUrl: identifier.normalizedUrl,
+                                        fingerprintScheme:
+                                            fingerprints[0].fingerprintScheme,
+                                        fingerprint:
+                                            fingerprints[0].fingerprint,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
+                                        normalizedUrl: identifier.normalizedUrl,
+                                        fingerprintScheme:
+                                            fingerprints[1].fingerprintScheme,
+                                        fingerprint:
+                                            fingerprints[1].fingerprint,
+                                    },
+                                ])
+                                expect(
+                                    await getShared('sharedContentLocator'),
                                 ).toEqual([])
                             },
                         },

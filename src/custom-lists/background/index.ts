@@ -22,6 +22,7 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -192,6 +193,16 @@ export default class CustomListBackground {
             return true
         })
 
+        const fingerprints = this.options.pages.getContentFingerprints({
+            normalizedUrl: normalizedPageUrl,
+        })
+        const sharedFingerprintsByList = fingerprints.length
+            ? await contentSharing.getNormalizedUrlsByFingerprints({
+                  fingerprints,
+                  listReferences: uniqueListReferences,
+              })
+            : {}
+
         const annotListEntriesByList = new Map<
             string | number,
             GetAnnotationListEntriesElement[]
@@ -202,15 +213,22 @@ export default class CustomListBackground {
         )
 
         for (const listReference of uniqueListReferences) {
+            let normalizedUrlInList = normalizedPageUrl
+            const sharedFingerprint = sharedFingerprintsByList[listReference.id]
+            if (sharedFingerprint) {
+                normalizedUrlInList = sharedFingerprint.normalizedUrl
+            }
+
             if (
-                !listEntriesByPageByList[listReference.id]?.[normalizedPageUrl]
-                    ?.length
+                !listEntriesByPageByList[listReference.id]?.[
+                    normalizedUrlInList
+                ]?.length
             ) {
                 continue
             }
             annotListEntriesByList.set(
                 listReference.id,
-                listEntriesByPageByList[listReference.id][normalizedPageUrl],
+                listEntriesByPageByList[listReference.id][normalizedUrlInList],
             )
         }
 
@@ -406,15 +424,20 @@ export default class CustomListBackground {
         })
     }
 
-    insertPageToList = async (params: {
-        id: number
-        url: string
-        tabId?: number
-        skipPageIndexing?: boolean
-        suppressVisitCreation?: boolean
-        suppressInboxEntry?: boolean
-    }): Promise<{ object: PageListEntry }> => {
-        const { id, url } = params
+    insertPageToList = async (
+        params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
+            id: number
+            tabId?: number
+            skipPageIndexing?: boolean
+            suppressVisitCreation?: boolean
+            suppressInboxEntry?: boolean
+        },
+    ): Promise<{ object: PageListEntry }> => {
+        const { id } = params
+        const url =
+            'contentIdentifier' in params
+                ? params.contentIdentifier?.fullUrl
+                : params.url
 
         if (!isFullUrl(url)) {
             throw new Error(
