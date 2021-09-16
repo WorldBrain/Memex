@@ -2,6 +2,7 @@ import type Dexie from 'dexie'
 
 interface Dependencies {
     db: Dexie
+    chunkSize: number
     queueObjs: (actionData: {
         collection: string
         objs: any[]
@@ -35,35 +36,27 @@ async function findAllObjectsChunked<T = any>(args: {
 const _prepareDataMigration = ({
     db,
     queueObjs,
+    chunkSize = 500,
 }: Dependencies) => async (): Promise<void> => {
-    const queueAllObjects = async (
-        collection: string,
-        args?: { chunkSize?: number },
-    ) => {
-        if (args?.chunkSize > 0) {
-            await findAllObjectsChunked({
-                db,
-                collection: collection,
-                chunkSize: args.chunkSize,
-                cb: async (objs) => queueObjs({ collection, objs }),
-            })
-        } else {
-            const objs = await db.table(collection).toArray()
-            await queueObjs({ collection, objs })
-        }
-    }
+    const queueAllObjects = async (collection: string) =>
+        findAllObjectsChunked({
+            db,
+            chunkSize,
+            collection: collection,
+            cb: async (objs) => queueObjs({ collection, objs }),
+        })
 
     // Step 1.1: pages
-    await queueAllObjects('pages', { chunkSize: 500 })
+    await queueAllObjects('pages')
 
     // Step 1.2: visits
-    await queueAllObjects('visits', { chunkSize: 500 })
+    await queueAllObjects('visits')
 
     // Step 1.3: bookmarks
     await queueAllObjects('bookmarks')
 
     // Step 2.1: annotations
-    await queueAllObjects('annotations', { chunkSize: 500 })
+    await queueAllObjects('annotations')
 
     // Step 2.2: annotation privacy levels
     await queueAllObjects('annotationPrivacyLevels')

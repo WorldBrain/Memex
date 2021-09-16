@@ -134,6 +134,7 @@ export class PersonalCloudBackground {
     private prepareDataMigration = async () => {
         await prepareDataMigration({
             db: this.dexie,
+            chunkSize: 350,
             queueObjs: (actionData) =>
                 this.actionQueue.scheduleManyActions(
                     actionData.objs.map((object) => ({
