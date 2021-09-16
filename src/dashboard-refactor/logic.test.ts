@@ -94,6 +94,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsA.state.isCloudEnabled).toBe(true)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
         expect(
@@ -102,6 +103,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(true)
+        expect(searchResultsA.state.isCloudEnabled).toBe(false)
 
         const {
             searchResults: searchResultsB,
@@ -124,6 +126,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.isCloudEnabled).toBe(true)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
         expect(
@@ -132,6 +135,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 
     it('should not show cloud upgrade banner during init logic if logged out', async ({

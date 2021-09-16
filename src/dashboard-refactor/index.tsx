@@ -302,6 +302,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const {
+            isCloudEnabled,
             searchFilters,
             listsSidebar,
             currentUser,
@@ -346,12 +347,17 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
+                    isCloudEnabled,
                     syncStatusIconState,
                     isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     onLoginClick: () =>
                         this.processEvent('setShowLoginModal', {
+                            isShown: true,
+                        }),
+                    onMigrateClick: () =>
+                        this.processEvent('setShowCloudOnboardingModal', {
                             isShown: true,
                         }),
                     onClickOutside: () =>

@@ -95,6 +95,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     getInitialState(): State {
         return {
             loadState: 'pristine',
+            isCloudEnabled: true,
             currentUser: null,
             modals: {
                 showLogin: false,
@@ -228,6 +229,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         const mutation: UIMutation<State> = {
+            isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },

@@ -35,6 +35,7 @@ import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authenticat
 export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
+    isCloudEnabled: boolean
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState

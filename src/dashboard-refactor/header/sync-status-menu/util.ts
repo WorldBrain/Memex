@@ -7,9 +7,10 @@ const getDaysSinceDate = (date: Date | null): number =>
 
 export const deriveStatusIconColor = ({
     currentUser,
+    isCloudEnabled,
     syncMenu: { pendingLocalChangeCount, pendingRemoteChangeCount },
 }: RootState): 'green' | 'red' | 'yellow' => {
-    if (currentUser == null) {
+    if (currentUser == null || !isCloudEnabled) {
         return 'red'
     }
 

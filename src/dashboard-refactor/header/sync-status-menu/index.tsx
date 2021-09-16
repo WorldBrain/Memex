@@ -132,10 +132,12 @@ export const timeSinceNowToString = (date: Date | null): string => {
 
 export interface SyncStatusMenuProps extends RootState {
     isLoggedIn: boolean
+    isCloudEnabled: boolean
     outsideClickIgnoreClass?: string
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
+    onMigrateClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
@@ -150,7 +152,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return 'Everything is synced'
         }
 
-        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green'){
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
             return 'Nothing to sync yet'
         }
 
@@ -162,14 +164,21 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
-        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green'){
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
             return 'Save your first page or annotation'
         }
         return 'in progress'
     }
 
     private renderStatus() {
-        const { isLoggedIn, onLoginClick, syncStatusIconState } = this.props
+        const {
+            isLoggedIn,
+            isCloudEnabled,
+            onLoginClick,
+            onMigrateClick,
+            syncStatusIconState,
+        } = this.props
+
         if (!isLoggedIn) {
             return (
                 <RowContainer>
@@ -178,6 +187,22 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             You're not logged in and syncing
                         </TextBlock>
                         <PrimaryAction label="Login" onClick={onLoginClick} />
+                    </Row>
+                </RowContainer>
+            )
+        }
+
+        if (!isCloudEnabled) {
+            return (
+                <RowContainer>
+                    <Row>
+                        <TextBlock bold>
+                            You haven't migrated to Memex Cloud
+                        </TextBlock>
+                        <PrimaryAction
+                            label="Migrate"
+                            onClick={onMigrateClick}
+                        />
                     </Row>
                 </RowContainer>
             )
