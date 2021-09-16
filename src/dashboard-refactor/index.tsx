@@ -899,7 +899,6 @@ export class DashboardContainer extends StatefulUIElement<
             return (
                 <CloudOnboardingModal
                     services={this.props.services}
-                    authBG={this.props.authBG}
                     backupBG={this.props.backupBG}
                     syncSettingsBG={this.props.syncSettingsBG}
                     personalCloudBG={this.props.personalCloudBG}

@@ -29,7 +29,6 @@ async function setupTest(
 
     const _logic = new Logic({
         browser: args?.browser ?? 'chrome',
-        authBG: backgroundModules.auth.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
             backgroundModules.backupModule.remoteFunctions,
         ) as any,
@@ -45,20 +44,6 @@ async function setupTest(
 
 describe('Cloud onboarding UI logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
-
-    it('should close modal if not logged in', async ({ device }) => {
-        let hasModalClosed = false
-        const { logic } = await setupTest(device, {
-            isLoggedOut: true,
-            onModalClose: () => {
-                hasModalClosed = true
-            },
-        })
-
-        expect(hasModalClosed).toBe(false)
-        await logic.init()
-        expect(hasModalClosed).toBe(true)
-    })
 
     it('should set local storage flag upon data migration', async ({
         device,

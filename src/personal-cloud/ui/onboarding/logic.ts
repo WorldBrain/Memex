@@ -31,7 +31,6 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         migrationState: 'pristine',
         dataCleaningState: 'pristine',
 
-        currentUser: null,
         stage: 'data-dump',
 
         isMigrationPrepped: false,
@@ -41,22 +40,8 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     })
 
     async init() {
-        const {
-            authBG,
-            backupBG,
-            personalCloudBG,
-            onModalClose,
-        } = this.dependencies
+        const { backupBG, personalCloudBG, onModalClose } = this.dependencies
         await loadInitial(this, async () => {
-            const user = await authBG.getCurrentUser()
-
-            if (user) {
-                this.emitMutation({ currentUser: { $set: user } })
-            } else {
-                // We can't do the migration if not logged in
-                return onModalClose()
-            }
-
             const needsToRemovePassiveData = await personalCloudBG.isPassiveDataRemovalNeeded()
             this.emitMutation({
                 needsToRemovePassiveData: { $set: needsToRemovePassiveData },

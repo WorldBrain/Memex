@@ -233,9 +233,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
-                isCloudUpgradeBannerShown: {
-                    $set: previousState.currentUser != null && !isCloudEnabled,
-                },
+                isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: {
                     $set:
                         subBannerShownAfter != null &&
@@ -693,7 +691,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setShowCloudOnboardingModal: EventHandler<
         'setShowCloudOnboardingModal'
-    > = ({ event }) => {
+    > = ({ event, previousState }) => {
+        if (previousState.currentUser == null) {
+            this.emitMutation({
+                modals: { showLogin: { $set: true } },
+            })
+            return
+        }
+
         this.emitMutation({
             modals: {
                 showCloudOnboarding: { $set: event.isShown },

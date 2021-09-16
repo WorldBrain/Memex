@@ -1,7 +1,5 @@
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
-import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { BrowserName } from 'src/util/check-browser'
@@ -9,10 +7,9 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 
 export interface Dependencies {
     browser: BrowserName
-    personalCloudBG: PersonalCloudRemoteInterface
-    authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     syncSettingsBG: RemoteSyncSettingsInterface
+    personalCloudBG: PersonalCloudRemoteInterface
     onModalClose: (args?: { didFinish?: boolean }) => void
 }
 
@@ -22,7 +19,6 @@ export interface State {
     dataCleaningState: UITaskState
 
     stage: 'data-dump' | 'data-clean' | 'data-migration' | 'old-version-backup'
-    currentUser: AuthenticatedUser | null
 
     isMigrationPrepped: boolean
     giveControlToDumper: boolean
