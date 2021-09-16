@@ -38,6 +38,9 @@ const _prepareDataMigration = ({
     queueObjs,
     chunkSize = 500,
 }: Dependencies) => async (): Promise<void> => {
+    // Wipe anything already in the personalCloudActions queue
+    await db.table('personalCloudAction').clear()
+
     const queueAllObjects = async (collection: string) =>
         findAllObjectsChunked({
             db,
