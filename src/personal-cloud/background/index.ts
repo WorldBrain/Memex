@@ -68,6 +68,7 @@ export interface PersonalCloudBackgroundOptions {
 export class PersonalCloudBackground {
     currentSchemaVersion?: Date
     actionQueue: ActionQueue<PersonalCloudAction>
+    pendingActionsExecuting: Promise<void>
     authChangesObserved: Promise<void>
     changesIntegrating: Promise<void>
     pushMutex = new AsyncMutex()
@@ -222,6 +223,9 @@ export class PersonalCloudBackground {
     startSync() {
         this.actionQueue.unpause()
 
+        if (!this.pendingActionsExecuting) {
+            this.pendingActionsExecuting = this.actionQueue.executePendingActions()
+        }
         // These will never return, so don't await for it
         if (!this.authChangesObserved) {
             this.authChangesObserved = this.observeAuthChanges()
