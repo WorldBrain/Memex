@@ -213,7 +213,6 @@ export type Events = UIEvent<{
     setAllNotesShown: { areShown: boolean }
     setListShareMenuShown: { isShown: boolean }
     setSearchCopyPasterShown: { isShown: boolean }
-    setCloudUpgradeBannerShown: { isShown: boolean }
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
     setAnnotationSearchResult: { result: AnnotationsSearchResponse }

@@ -12,7 +12,7 @@ import {
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { ListData } from './lists-sidebar/types'
+import { ListData, RootState } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
@@ -1416,13 +1416,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setCloudUpgradeBannerShown: EventHandler<'setCloudUpgradeBannerShown'> = ({
+    closeCloudOnboardingModal: EventHandler<'closeCloudOnboardingModal'> = ({
         event,
     }) => {
         this.emitMutation({
             searchResults: {
-                isCloudUpgradeBannerShown: { $set: event.isShown },
+                isCloudUpgradeBannerShown: { $set: !event.didFinish },
             },
+            modals: {
+                showCloudOnboarding: { $set: false },
+            },
+            isCloudEnabled: { $set: event.didFinish },
         })
     }
 

@@ -50,6 +50,7 @@ export type Events = UIEvent<
         ListsSidebarEvents &
         SyncModalEvents & {
             search: { paginate?: boolean }
+            closeCloudOnboardingModal: { didFinish: boolean }
         }
 >
 

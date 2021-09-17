@@ -138,44 +138,6 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 
-    it('should not show cloud upgrade banner during init logic if logged out', async ({
-        device,
-    }) => {
-        const {
-            searchResults: searchResultsA,
-            logic: logicA,
-        } = await setupTest(device, { withAuth: false })
-
-        await logicA['options'].localStorage.set({
-            [CLOUD_STORAGE_KEYS.isSetUp]: false,
-        })
-
-        expect(
-            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
-        await searchResultsA.processEvent('init', null)
-        expect(
-            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
-
-        const {
-            searchResults: searchResultsB,
-            logic: logicB,
-        } = await setupTest(device, { withAuth: false })
-
-        await logicB['options'].localStorage.set({
-            [CLOUD_STORAGE_KEYS.isSetUp]: true,
-        })
-
-        expect(
-            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
-        await searchResultsB.processEvent('init', null)
-        expect(
-            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
-    })
-
     it('should get sharing access state during init logic', async ({
         device,
     }) => {
@@ -295,5 +257,48 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
         expect(feedUrlOpened).toBe(true)
         expect(activitiesMarkedAsSeen).toBe(true)
+    })
+
+    it('should hide banner and set cloud enabled flag on migration finish', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        const initState = () =>
+            searchResults.processMutation({
+                modals: { showCloudOnboarding: { $set: true } },
+                searchResults: { isCloudUpgradeBannerShown: { $set: true } },
+                isCloudEnabled: { $set: false },
+            })
+
+        initState()
+
+        expect(searchResults.state.isCloudEnabled).toBe(false)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(true)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(true)
+
+        await searchResults.processEvent('closeCloudOnboardingModal', {
+            didFinish: false,
+        })
+
+        expect(searchResults.state.isCloudEnabled).toBe(false)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(true)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
+
+        initState()
+
+        await searchResults.processEvent('closeCloudOnboardingModal', {
+            didFinish: true,
+        })
+
+        expect(searchResults.state.isCloudEnabled).toBe(true)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
     })
 })
