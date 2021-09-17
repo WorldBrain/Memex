@@ -76,6 +76,7 @@ describe('cloud migration preparation tests', () => {
         await prepareDataMigration({
             db,
             chunkSize,
+            resetQueue: async () => queuedData.clear(),
             queueObjs: async (actionData) => {
                 const prev = queuedData.get(actionData.collection) ?? []
                 queuedData.set(actionData.collection, [
@@ -108,40 +109,5 @@ describe('cloud migration preparation tests', () => {
         for (const chunkSize of [1, 10, 50, 100, 500, 1000]) {
             await runTest(device, chunkSize)
         }
-    })
-
-    it('should clear personalCloudAction table before running prep', async ({
-        device,
-    }) => {
-        const db = device.storageManager.backend['dexie'] as Dexie
-
-        const createdWhens = []
-        const now = Date.now()
-
-        for (let i = 0; i < 100; i++) {
-            createdWhens.push(now - i)
-        }
-
-        await db.table('personalCloudAction').bulkPut(
-            createdWhens.map((createdWhen) => ({
-                createdWhen,
-                action: {
-                    type: 'push-object',
-                    updates: [],
-                },
-            })),
-        )
-
-        expect(
-            (await db.table('personalCloudAction').toArray()).map(
-                (entry) => entry.createdWhen,
-            ),
-        ).toEqual(createdWhens)
-
-        await runTest(device, 350)
-
-        // Note we're just checking the table is empty here, rather than being populated again,
-        //  due to this collection not being written to in this test setup (see passed down `queueObjs` fn)
-        expect(await db.table('personalCloudAction').toArray()).toEqual([])
     })
 })

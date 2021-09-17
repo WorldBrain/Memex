@@ -3,6 +3,7 @@ import type Dexie from 'dexie'
 interface Dependencies {
     db: Dexie
     chunkSize: number
+    resetQueue: () => Promise<void>
     queueObjs: (actionData: {
         collection: string
         objs: any[]
@@ -36,10 +37,10 @@ async function findAllObjectsChunked<T = any>(args: {
 const _prepareDataMigration = ({
     db,
     queueObjs,
+    resetQueue,
     chunkSize = 500,
 }: Dependencies) => async (): Promise<void> => {
-    // Wipe anything already in the personalCloudActions queue
-    await db.table('personalCloudAction').clear()
+    await resetQueue()
 
     const queueAllObjects = async (collection: string) =>
         findAllObjectsChunked({
