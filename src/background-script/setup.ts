@@ -248,12 +248,11 @@ export function createBackgroundModules(options: {
     const pdfBg = new PDFBackground({
         extensionGetURL: options.browserAPIs.extension.getURL,
         localBrowserStorage: options.browserAPIs.storage.local,
+        webRequestAPI: options.browserAPIs.webRequest,
         tabs: options.browserAPIs.tabs,
     })
 
-    pdfBg.setupRequestInterceptors({
-        webRequest: options.browserAPIs.webRequest,
-    })
+    pdfBg.setupRequestInterceptors()
 
     const notifications = new NotificationBackground({ storageManager })
 

@@ -35,6 +35,10 @@ import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalExtensionSettings } from './types'
 import type { SyncSettingsBackground } from 'src/sync-settings/background'
+import {
+    createSyncSettingsStore,
+    SyncSettingsStore,
+} from 'src/sync-settings/util'
 
 interface Dependencies {
     storageManager: Storex
@@ -56,8 +60,11 @@ interface Dependencies {
 
 class BackgroundScript {
     private alarmsListener: (alarm: Alarms.Alarm) => void
+    private syncSettings: SyncSettingsStore<'pdfIntegration'>
 
-    constructor(private deps: Dependencies) {}
+    constructor(private deps: Dependencies) {
+        this.syncSettings = createSyncSettingsStore(deps)
+    }
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
@@ -95,6 +102,10 @@ class BackgroundScript {
 
         // Store the timestamp of when the extension was installed
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
+
+        // Enable PDF integration by default
+        await this.syncSettings.pdfIntegration.set('shouldAutoOpen', true)
+
         await insertDefaultTemplates({
             copyPaster: this.deps.copyPasterBackground,
             localStorage: this.deps.storageAPI.local,
@@ -107,7 +118,7 @@ class BackgroundScript {
             localExtSettingStore,
             storageAPI,
             runtimeAPI,
-            syncSettingsBG: userSettingsBG,
+            syncSettingsBG,
         } = this.deps
 
         if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {
@@ -116,7 +127,7 @@ class BackgroundScript {
 
         const { version } = runtimeAPI.getManifest()
         if (version === '2.20.0') {
-            await userSettingsBG.migrateLocalStorage()
+            await syncSettingsBG.migrateLocalStorage()
             await migrateInstallTime({
                 storageManager,
                 getOldInstallTime: () =>

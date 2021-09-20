@@ -36,7 +36,7 @@ class PDFOptionsContainer extends React.PureComponent {
             await browser.storage.local.set({ [SHOULD_OPEN]: shouldOpen })
         }
 
-        pdf.refreshSetting()
+        await pdf.refreshSetting()
     }
 
     render() {

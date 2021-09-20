@@ -4,7 +4,6 @@ import {
     __OLD_SEARCH_INJECTION_KEY,
     __OLD_POSITION_KEY,
 } from 'src/search-injection/constants'
-import { SHOULD_OPEN_STORAGE_KEY } from 'src/options/PDF/constants'
 import { STORAGE_KEY as BLOCKLIST_STORAGE_KEY } from 'src/options/blacklist/constants'
 import { INSTALL_TIME_KEY } from 'src/constants'
 import { KEYBOARDSHORTCUTS_STORAGE_NAME } from 'src/in-page-ui/keyboard-shortcuts/constants'
@@ -37,10 +36,9 @@ export const localStorageToSettingsStorage = (values: {
         values[__OLD_POSITION_KEY],
     [SETTING_NAMES.searchInjection.searchEnginesEnabled]:
         values[__OLD_SEARCH_INJECTION_KEY],
+    [SETTING_NAMES.pdfIntegration.shouldAutoOpen]: true,
 
     // TODO: These should be migrated over separately, when ready
-    // [SETTING_NAMES.pdfIntegration.shouldAutoOpen]:
-    //     values[SHOULD_OPEN_STORAGE_KEY],
     // [SETTING_NAMES.extension.blocklist]: values[BLOCKLIST_STORAGE_KEY],
     // [SETTING_NAMES.extension.keyboardShortcuts]:
     //     values[KEYBOARDSHORTCUTS_STORAGE_NAME],
