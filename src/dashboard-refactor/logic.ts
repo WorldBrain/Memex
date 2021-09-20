@@ -105,7 +105,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showNoteShareOnboarding: false,
             },
             searchResults: {
-                sharingAccess: 'feature-disabled',
+                sharingAccess: 'sharing-allowed',
                 noteSharingInfo: {},
                 results: {},
                 noResultsType: null,
@@ -275,16 +275,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async loadAuthStates(previousState: State): Promise<State> {
         const { authBG } = this.options
         const user = await authBG.getCurrentUser()
-        // const isAllowed = await authBG.isAuthorizedForFeature('beta')
 
         const mutation: UIMutation<State> = {
             currentUser: { $set: user },
-            searchResults: {
-                sharingAccess: {
-                    // $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-                    $set: 'sharing-allowed',
-                },
-            },
         }
 
         const nextState = this.withMutation(previousState, mutation)
@@ -568,38 +561,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
+    private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            // const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
-            const isBetaAuthd = true // TODO : REMOVE THIS
-
-            const mutation: UIMutation<State> = {
-                currentUser: { $set: user },
-                searchResults: {
-                    sharingAccess: {
-                        $set: isBetaAuthd
-                            ? 'sharing-allowed'
-                            : 'feature-disabled',
-                    },
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
-                this.emitMutation({
-                    ...mutation,
-                    modals: { showBetaFeature: { $set: true } },
-                })
-                return false
-            }
-
-            this.emitMutation(mutation)
+            this.emitMutation({ currentUser: { $set: user } })
             return true
         }
 

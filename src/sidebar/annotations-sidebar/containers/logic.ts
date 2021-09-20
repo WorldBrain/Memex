@@ -157,7 +157,7 @@ export class SidebarContainerLogic extends UILogic<
                 searchResults: {},
             },
             annotationSharingInfo: {},
-            annotationSharingAccess: 'feature-disabled',
+            annotationSharingAccess: 'sharing-allowed',
 
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
@@ -208,8 +208,6 @@ export class SidebarContainerLogic extends UILogic<
             if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
             }
-
-            await this.loadBeta()
         })
     }
 
@@ -258,39 +256,13 @@ export class SidebarContainerLogic extends UILogic<
         event: { sortingFn },
     }) => this.options.annotationsCache.sort(sortingFn)
 
-    private async loadBeta() {
-        const isAllowed = await this.options.auth.isAuthorizedForFeature('beta')
-
-        this.emitMutation({
-            annotationSharingAccess: {
-                $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-            },
-        })
-    }
-
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
+    private async ensureLoggedIn(): Promise<boolean> {
         const { auth, setLoginModalShown } = this.options
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const isBetaAuthd = await auth.isAuthorizedForFeature('beta')
-
             const mutation: UIMutation<SidebarContainerState> = {
-                annotationSharingAccess: {
-                    $set: isBetaAuthd ? 'sharing-allowed' : 'feature-disabled',
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
-                this.emitMutation({
-                    ...mutation,
-                    showBetaFeatureNotifModal: { $set: true },
-                })
-                return false
+                annotationSharingAccess: { $set: 'sharing-allowed' },
             }
 
             setLoginModalShown?.(false)

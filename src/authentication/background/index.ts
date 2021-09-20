@@ -106,9 +106,6 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
-            setBetaEnabled: async (enabled) => {
-                null
-            },
             getUserProfile: async () => {
                 if (this._userProfile) {
                     return this._userProfile

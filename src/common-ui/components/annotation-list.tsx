@@ -106,7 +106,7 @@ class AnnotationList extends Component<Props, State> {
             (acc, curr) => ({ ...acc, [curr.url]: 'default' }),
             {},
         ),
-        sharingAccess: 'feature-disabled',
+        sharingAccess: 'sharing-allowed',
         annotationsSharingInfo: {},
     }
 
@@ -126,15 +126,7 @@ class AnnotationList extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        await this.detectPageSharingStatus()
         await this.detectSharedAnnotations()
-    }
-
-    private async detectPageSharingStatus() {
-        const isAllowed = true
-        this.setState({
-            sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-        })
     }
 
     private async detectSharedAnnotations() {
