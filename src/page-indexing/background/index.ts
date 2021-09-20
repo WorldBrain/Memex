@@ -66,13 +66,6 @@ export class PageIndexingBackground {
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
         visits = !visits.length ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
-
-        if (favIconURI != null) {
-            await this.storage.createFavIconIfNeeded(
-                pageData.hostname,
-                favIconURI,
-            )
-        }
     }
 
     async addFavIconIfNeeded(url: string, favIcon: string) {
@@ -177,6 +170,7 @@ export class PageIndexingBackground {
         pageData: PipelineRes,
         opts: PageCreationOpts = {},
     ) {
+        const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
 
         const existingPage = await this.storage.getPage(pageData.url)
@@ -188,6 +182,10 @@ export class PageIndexingBackground {
 
         if (opts.addInboxEntryOnCreate) {
             await this.options.createInboxEntry(pageData.fullUrl)
+        }
+
+        if (favIconURI != null) {
+            await this.addFavIconIfNeeded(pageData.url, favIconURI)
         }
     }
 
@@ -306,7 +304,7 @@ export class PageIndexingBackground {
             ? await this.processPageDataFromTab(props)
             : await this.processPageDataFromUrl(props)
 
-        if (pageData === null) {
+        if (pageData == null) {
             return
         }
 
