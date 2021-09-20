@@ -66,10 +66,12 @@ export class AuthBackground {
         )
 
         this.remoteFunctions = {
+            refreshUserInfo: this.refreshUserInfo,
             getCurrentUser: () => this.authService.getCurrentUser(),
-            signOut: () => this.authService.signOut(),
-            refreshUserInfo: () => this.refreshUserInfo(),
-
+            signOut: () => {
+                delete this._userProfile
+                this.authService.signOut()
+            },
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(
                     await this.subscriptionService.getCurrentUserClaims(),

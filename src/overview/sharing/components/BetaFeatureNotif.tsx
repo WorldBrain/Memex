@@ -18,8 +18,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 import { auth } from 'src/util/remote-functions-background'
 
-
-
 export interface Props {
     auth?: AuthRemoteFunctionsInterface
     contentScriptBackground?: ContentScriptsInterface<'caller'>
@@ -181,7 +179,6 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
         }
     }
 
-
     // private openPortal = async () => {
     //     this.setState({ chargebeeState: 'running' })
     //     const portalLink = await this.props.subscription.getManageLink()
@@ -247,34 +244,35 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
             return <LoadingIndicator />
         }
 
-        if (!this.state.displayName && this.state.betaActivationState === 'success') {
+        if (
+            !this.state.displayName &&
+            this.state.betaActivationState === 'success'
+        ) {
             return (
                 <>
-                     <InstructionsContainer>
+                    <InstructionsContainer>
                         <InstructionsBox>
                             <TypographyHeadingBigger>
                                 What's your name?
                             </TypographyHeadingBigger>
                             <TypographyTextNormal>
-                                This is how people know who the shared content is
-                                from.
+                                This is how people know who the shared content
+                                is from.
                                 <br />
-                                You can change this via the account settings later. 
+                                You can change this via the account settings
+                                later.
                             </TypographyTextNormal>
                         </InstructionsBox>
                     </InstructionsContainer>
-                    <DisplayNameSetup
-                        name={this.state.newDisplayName}
-                        onChange={(newDisplayName) => {
-                            this.setState({ newDisplayName })
-                        }}
-                        onClickNext={this.updateDisplayName}
-                    />
+                    <DisplayNameSetup authBG={this.props.auth} />
                 </>
             )
         }
 
-        if (this.state.betaActivationState === 'success' && this.state.displayName) {
+        if (
+            this.state.betaActivationState === 'success' &&
+            this.state.displayName
+        ) {
             return (
                 <SuccessBox>
                     <IconStyled src={icons.saveIcon} />

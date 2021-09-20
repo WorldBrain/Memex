@@ -163,15 +163,7 @@ class ShareListModal extends Component<Props, State> {
 
         // if display name is not set - prompt to set
         if (!this.state.displayName) {
-            return (
-                <DisplayNameSetup
-                    name={this.state.newDisplayName}
-                    onChange={(newDisplayName) => {
-                        this.setState({ newDisplayName })
-                    }}
-                    onClickNext={this.updateDisplayName}
-                />
-            )
+            return <DisplayNameSetup authBG={this.props.auth} />
         }
 
         // otherwise -  show the main modal content

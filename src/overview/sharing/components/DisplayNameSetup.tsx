@@ -1,22 +1,21 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
-import { LoadingIndicator } from 'src/common-ui/components'
-import {
-    TypographyHeadingBig,
-    TypographyTextNormal,
-    TypographyHeadingBigger,
-    TypographySubTextNormal,
-    TypographyHeadingNormal,
-    TypographyHeadingSmall,
-} from 'src/common-ui/components/design-library/typography'
+import styled from 'styled-components'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 import { formBackground } from 'src/common-ui/components/design-library/colors'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 
-interface DisplayNameSetupProps {
-    name: string
-    onChange: (newName: string) => void
-    onClickNext: () => void
+export interface Props {
+    refreshUserInfoOnInit?: boolean
+    authBG: AuthRemoteFunctionsInterface
+}
+
+interface State {
+    loadState: TaskState
+    buttonLabel: string
+    displayNameInput: string
+    displayName: string
 }
 
 const NameInput = styled.input`
@@ -36,26 +35,48 @@ const InputContainer = styled.div`
     align-items: center;
 `
 
-
-export default class DisplayNameSetup extends PureComponent<
-    DisplayNameSetupProps
-> {
-    state = {
-        buttonLabel: 'Update'
+export default class DisplayNameSetup extends PureComponent<Props, State> {
+    state: State = {
+        loadState: 'pristine',
+        buttonLabel: 'Update',
+        displayNameInput: '',
+        displayName: '',
     }
 
-    private ChangeInput = (e) => {
-        this.setState({
-            buttonLabel: 'Update'
-        })
-        this.props.onChange(e.target.value)
+    async componentDidMount() {
+        const { authBG, refreshUserInfoOnInit } = this.props
+        this.setState({ loadState: 'running' })
+
+        try {
+            const profile = await authBG.getUserProfile()
+            this.setState({
+                loadState: 'success',
+                displayNameInput: profile?.displayName ?? '',
+                displayName: profile?.displayName ?? '',
+            })
+        } catch (e) {
+            this.setState({ loadState: 'error' })
+            throw e
+        }
+
+        if (refreshUserInfoOnInit) {
+            await authBG.refreshUserInfo()
+        }
     }
 
-    private confirmSave = () => {
-        this.setState({
-            buttonLabel: 'Saved!'
-        })
-        this.props.onClickNext()
+    private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+        const displayName = (e.target as HTMLInputElement).value
+        this.setState({ buttonLabel: 'Update', displayNameInput: displayName })
+    }
+
+    private confirmSave: React.MouseEventHandler = async () => {
+        const displayName = this.state.displayNameInput.trim()
+        if (!displayName.length || displayName === this.state.displayName) {
+            return
+        }
+
+        await this.props.authBG.updateUserProfile({ displayName })
+        this.setState({ buttonLabel: 'Saved!' })
     }
 
     render() {
@@ -63,13 +84,13 @@ export default class DisplayNameSetup extends PureComponent<
             <div>
                 <InputContainer>
                     <NameInput
-                        value={this.props.name || ''}
-                        onChange={(e) => this.ChangeInput(e)}
+                        value={this.state.displayNameInput}
+                        onChange={this.changeInput}
                     />
 
                     <PrimaryAction
                         label={this.state.buttonLabel}
-                        onClick={() => this.confirmSave()}
+                        onClick={this.confirmSave}
                     />
                 </InputContainer>
             </div>
