@@ -137,6 +137,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     .firebaseui-input-floating-button {
         height: 34px;
         width: 44px;
+        top: 0px;
     }
 
     .firebaseui-card-actions {

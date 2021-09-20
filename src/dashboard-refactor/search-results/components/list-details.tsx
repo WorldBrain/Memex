@@ -112,6 +112,7 @@ const ShareCollectionBtn = styled.div`
 
 const ShareCollectionBtnLabel = styled.div`
     padding-left: 10px;
+    font-size: 12px;
 `
 
 const BtnsContainer = styled.div`
