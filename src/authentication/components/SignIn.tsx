@@ -22,7 +22,11 @@ export class SignInScreen extends React.Component<Props> {
                 uiConfig={{
                     signInFlow: 'popup',
                     signInOptions: [
-                        getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
+                        {
+                            provider: getFirebase().auth.EmailAuthProvider
+                                .PROVIDER_ID,
+                            requireDisplayName: false,
+                        },
                     ],
                     callbacks: {
                         signInSuccessWithAuthResult: () => {
