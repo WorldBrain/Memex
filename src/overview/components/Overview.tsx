@@ -48,7 +48,6 @@ export interface Props {
     handleReaderViewClick: (url: string) => void
     showSubscriptionModal: () => void
     showAnnotationShareModal: () => void
-    showBetaFeatureNotifModal: () => void
     resetActiveSidebarIndex: () => void
     localStorage?: Browser['storage']['local']
 }
@@ -292,9 +291,6 @@ class Overview extends PureComponent<Props, State> {
                             showAnnotationShareModal={
                                 this.props.showAnnotationShareModal
                             }
-                            showBetaFeatureNotifModal={
-                                this.props.showBetaFeatureNotifModal
-                            }
                             copyPaster={this.copyPasterBG}
                         />
 
@@ -368,8 +364,6 @@ const mapDispatchToProps = (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
     showAnnotationShareModal: () =>
         dispatch(show({ modalId: 'ShareAnnotationOnboardingModal' })),
-    showBetaFeatureNotifModal: () =>
-        dispatch(show({ modalId: 'BetaFeatureNotifModal' })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

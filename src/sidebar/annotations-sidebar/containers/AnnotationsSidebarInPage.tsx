@@ -14,7 +14,6 @@ import {
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
-import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import { SidebarDisplayMode } from './types'
@@ -40,10 +39,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
-            showBetaFeatureNotifModal: () =>
-                this.processEvent('setBetaFeatureNotifModalShown', {
-                    shown: true,
-                }),
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
@@ -271,24 +266,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                                 'https://worldbrain.io/tutorials/memex-social',
                             )
                         }}
-                    />
-                )}
-                {this.state.showBetaFeatureNotifModal && (
-                    <BetaFeatureNotifModal
-                        auth={this.props.auth}
-                        contentScriptBackground={
-                            this.props.contentScriptBackground
-                        }
-                        ignoreReactPortal
-                        betaRequestStrategy="go-to-options-page"
-                        onClose={() =>
-                            this.processEvent('setBetaFeatureNotifModalShown', {
-                                shown: false,
-                            })
-                        }
-                        showSubscriptionModal={() =>
-                            console.log('UPGRADE BTN PRESSED')
-                        }
                     />
                 )}
             </>

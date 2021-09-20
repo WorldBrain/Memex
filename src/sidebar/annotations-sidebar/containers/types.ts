@@ -43,7 +43,6 @@ export interface SidebarContainerDependencies {
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
     showAnnotationShareModal?: () => void
-    showBetaFeatureNotifModal?: () => void
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
@@ -168,7 +167,6 @@ export interface SidebarContainerState
     isListFilterActive: boolean
     showLoginModal: boolean
     showAnnotationsShareModal: boolean
-    showBetaFeatureNotifModal: boolean
 
     showAllNotesShareMenu: boolean
     activeShareMenuNoteId: string | undefined

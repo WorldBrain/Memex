@@ -878,23 +878,6 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showBetaFeature) {
-            return (
-                <BetaFeatureNotifModal
-                    showSubscriptionModal={() =>
-                        this.processEvent('setShowSubscriptionModal', {
-                            isShown: true,
-                        })
-                    }
-                    onClose={() =>
-                        this.processEvent('setShowBetaFeatureModal', {
-                            isShown: false,
-                        })
-                    }
-                />
-            )
-        }
-
         if (modalsState.showCloudOnboarding) {
             return (
                 <CloudOnboardingModal
@@ -948,11 +931,6 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
-                            isShown: true,
-                        })
-                    }
-                    showBetaFeatureNotifModal={() =>
-                        this.processEvent('setShowBetaFeatureModal', {
                             isShown: true,
                         })
                     }

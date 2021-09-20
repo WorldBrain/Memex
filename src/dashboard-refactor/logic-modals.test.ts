@@ -107,22 +107,6 @@ describe('Dashboard Refactor modals logic', () => {
         expect(searchResults.state.modals.showLogin).toEqual(false)
     })
 
-    it('should be able to set the Beta Feature modal visibility', async ({
-        device,
-    }) => {
-        const { searchResults } = await setupTest(device)
-
-        expect(searchResults.state.modals.showBetaFeature).toEqual(false)
-        await searchResults.processEvent('setShowBetaFeatureModal', {
-            isShown: true,
-        })
-        expect(searchResults.state.modals.showBetaFeature).toEqual(true)
-        await searchResults.processEvent('setShowBetaFeatureModal', {
-            isShown: false,
-        })
-        expect(searchResults.state.modals.showBetaFeature).toEqual(false)
-    })
-
     it('should be able to set the Show Subscription modal visibility', async ({
         device,
     }) => {

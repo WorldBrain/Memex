@@ -186,7 +186,6 @@ export class SidebarContainerLogic extends UILogic<
 
             showLoginModal: false,
             showAnnotationsShareModal: false,
-            showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
@@ -390,11 +389,6 @@ export class SidebarContainerLogic extends UILogic<
         'setAllNotesShareMenuShown'
     > = async ({ previousState, event }) => {
         if (!(await this.ensureLoggedIn())) {
-            return
-        }
-
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
             return
         }
 
@@ -756,11 +750,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
         const immediateShare =
             event.mouseEvent.metaKey && event.mouseEvent.altKey
 
@@ -1021,12 +1010,6 @@ export class SidebarContainerLogic extends UILogic<
         'setAnnotationShareModalShown'
     > = ({ event }) => {
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
-    }
-
-    setBetaFeatureNotifModalShown: EventHandler<
-        'setBetaFeatureNotifModalShown'
-    > = ({ event }) => {
-        this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
     }
 
     private async _detectSharedAnnotations(annotationUrls: string[]) {

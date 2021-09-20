@@ -99,7 +99,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             currentUser: null,
             modals: {
                 showLogin: false,
-                showBetaFeature: false,
                 showSubscription: false,
                 showCloudOnboarding: false,
                 showNoteShareOnboarding: false,
@@ -623,16 +622,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 showLogin: { $set: event.isShown },
-            },
-        })
-    }
-
-    setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            modals: {
-                showBetaFeature: { $set: event.isShown },
             },
         })
     }

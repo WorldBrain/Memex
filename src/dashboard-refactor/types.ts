@@ -109,7 +109,6 @@ export interface SelectedState {
 export interface DashboardModalsState {
     shareListId?: number
     showLogin?: boolean
-    showBetaFeature?: boolean
     showSubscription?: boolean
     showCloudOnboarding?: boolean
     showNoteShareOnboarding?: boolean
@@ -122,7 +121,6 @@ export interface DashboardModalsState {
 export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: number }
     setShowLoginModal: { isShown: boolean }
-    setShowBetaFeatureModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
     setShowCloudOnboardingModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
