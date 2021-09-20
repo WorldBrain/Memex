@@ -15,10 +15,7 @@ import { shareListAndAllEntries } from './lists-sidebar/util'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import {
-    isDuringInstall,
-    isExistingUserOnboarding,
-} from 'src/overview/onboarding/utils'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
@@ -45,6 +42,7 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
+import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -68,14 +66,15 @@ export class DashboardContainer extends StatefulUIElement<
         localStorage: browser.storage.local,
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
+        personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
+        syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         backupBG: runInBackground(),
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
-        syncBG: runInBackground(),
         openFeed: () => window.open(getFeedUrl(), '_blank'),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
@@ -302,8 +301,14 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderHeader() {
-        const { searchFilters, listsSidebar, syncMenu } = this.state
-
+        const {
+            isCloudEnabled,
+            searchFilters,
+            listsSidebar,
+            currentUser,
+            syncMenu,
+        } = this.state
+        const syncStatusIconState = deriveStatusIconColor(this.state)
         return (
             <HeaderContainer
                 searchBarProps={{
@@ -339,35 +344,30 @@ export class DashboardContainer extends StatefulUIElement<
                 selectedListName={
                     listsSidebar.listData[listsSidebar.selectedListId]?.name
                 }
-                syncStatusIconState={deriveStatusIconColor(syncMenu)}
+                syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
+                    isCloudEnabled,
+                    syncStatusIconState,
+                    isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
+                    onLoginClick: () =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: true,
+                        }),
+                    onMigrateClick: () =>
+                        this.processEvent('setShowCloudOnboardingModal', {
+                            isShown: true,
+                        }),
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
                         }),
-                    onToggleAutoBackup: () =>
-                        this.processEvent('toggleAutoBackup', null),
                     onToggleDisplayState: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: !syncMenu.isDisplayed,
                         }),
-                    onHideUnsyncedItemCount: () =>
-                        this.processEvent('setUnsyncedItemCountShown', {
-                            isShown: false,
-                        }),
-                    onShowUnsyncedItemCount: () =>
-                        this.processEvent('setUnsyncedItemCountShown', {
-                            isShown: true,
-                        }),
-                    onInitiateBackup: () =>
-                        this.processEvent('initiateBackup', null),
-                    onInitiateSync: () =>
-                        this.processEvent('initiateSync', null),
-                    goToBackupRoute: this.bindRouteGoTo('backup'),
-                    goToSyncRoute: this.bindRouteGoTo('sync'),
                 }}
             />
         )
@@ -504,6 +504,11 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
+                }
+                showCloudOnboardingModal={() =>
+                    this.processEvent('setShowCloudOnboardingModal', {
+                        isShown: true,
+                    })
                 }
                 noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
@@ -890,6 +895,22 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
+        if (modalsState.showCloudOnboarding) {
+            return (
+                <CloudOnboardingModal
+                    services={this.props.services}
+                    backupBG={this.props.backupBG}
+                    syncSettingsBG={this.props.syncSettingsBG}
+                    personalCloudBG={this.props.personalCloudBG}
+                    onModalClose={(args) =>
+                        this.processEvent('closeCloudOnboardingModal', {
+                            didFinish: !!args.didFinish,
+                        })
+                    }
+                />
+            )
+        }
+
         return null
     }
 
@@ -897,14 +918,10 @@ export class DashboardContainer extends StatefulUIElement<
         const { listsSidebar } = this.state
         if (isDuringInstall(this.props.location)) {
             return (
-                <>
-                    <Onboarding
-                        startOnLoginStep={isExistingUserOnboarding(
-                            this.props.location,
-                        )}
-                    />
-                    <HelpBtn />
-                </>
+                <Onboarding
+                    authBG={this.props.authBG}
+                    personalCloudBG={this.props.personalCloudBG}
+                />
             )
         }
 
@@ -926,10 +943,8 @@ export class DashboardContainer extends StatefulUIElement<
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
                     contentConversationsBG={this.props.contentConversationsBG}
-                    showLoginModal={() =>
-                        this.processEvent('setShowLoginModal', {
-                            isShown: true,
-                        })
+                    setLoginModalShown={(isShown) =>
+                        this.processEvent('setShowLoginModal', { isShown })
                     }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {

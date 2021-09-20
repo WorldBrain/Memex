@@ -1,33 +1,20 @@
 import moment from 'moment'
 
-import type { RootState } from './types'
+import type { RootState } from '../../types'
 
 const getDaysSinceDate = (date: Date | null): number =>
     date == null ? 0 : moment().diff(moment(date), 'days')
 
 export const deriveStatusIconColor = ({
-    syncState,
-    backupState,
-    lastSuccessfulSyncDate,
-    lastSuccessfulBackupDate,
+    currentUser,
+    isCloudEnabled,
+    syncMenu: { pendingLocalChangeCount, pendingRemoteChangeCount },
 }: RootState): 'green' | 'red' | 'yellow' => {
-    const daysSinceLastSync = getDaysSinceDate(lastSuccessfulSyncDate)
-    const daysSinceLastBackup = getDaysSinceDate(lastSuccessfulBackupDate)
-
-    if (
-        syncState === 'error' ||
-        backupState === 'error' ||
-        daysSinceLastSync > 7 ||
-        daysSinceLastBackup > 7
-    ) {
+    if (currentUser == null || !isCloudEnabled) {
         return 'red'
     }
 
-    if (
-        (syncState === 'disabled' && backupState === 'disabled') ||
-        daysSinceLastBackup > 3 ||
-        daysSinceLastSync > 3
-    ) {
+    if (pendingLocalChangeCount > 0 || pendingRemoteChangeCount > 0) {
         return 'yellow'
     }
 

@@ -2,9 +2,7 @@ import React, { PureComponent } from 'react'
 
 const styles = require('./onboarding-box.css')
 
-export interface Props {
-    navToOverview: () => void
-}
+export interface Props {}
 
 class OnboardingBox extends PureComponent<Props> {
     render() {

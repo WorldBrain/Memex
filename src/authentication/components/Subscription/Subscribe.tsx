@@ -13,9 +13,6 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
-import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
-import { STORAGE_KEYS as DASHBOARD_STORAGE_KEYS } from 'src/dashboard-refactor/constants'
-
 import SubscriptionOptionsChargebee from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
@@ -138,11 +135,6 @@ class Subscribe extends React.Component<Props, State> {
                 })
             }
         }
-    }
-
-    private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
-        this.setState({ isSubscriptionBannerShown: false })
-        await setLocalStorage(DASHBOARD_STORAGE_KEYS.subBannerDismissed, true)
     }
 
     renderLoading = () => (

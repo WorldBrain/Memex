@@ -23,6 +23,11 @@
     margin-bottom: 30px;
 }
 
+.contentBox {
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+
 .startingPage {
     width: 90%;
     max-width: 900px;
@@ -341,6 +346,23 @@
 
 .videoBox {
     margin-bottom: 30px;
+    height: 500px;
+    width: 50%;
+}
+
+@media (max-width: 1300px) {
+    .videoBox {
+        height: 400px;
+    }
+}
+
+.videoBox iframe {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
 }
 
 .welcomeScreen {
@@ -363,12 +385,30 @@
     color: #3a2f45;
     font-weight: bold;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .horizontalLine {
     width: 200px;
     border-bottom: 2px solid #00000020;
     margin: 20px 0 40px 0;
+}
+
+.betaTag {
+    background-color: #ff9494;
+    color: #545454;
+    padding: 4px 6px;
+    border-radius: 3px;
+    text-align: center;
+    vertical-align: center;
+    font-weight: bold;
+}
+
+.descriptionText {
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+    font-weight: normal;
 }
 
 .shortcutContainer {

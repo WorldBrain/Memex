@@ -4,7 +4,6 @@ import { bindMethod } from 'src/util/functions'
 import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template } from '../types'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import generateTemplateDocs from '../template-doc-generation'
 import { joinTemplateDocs, analyzeTemplate } from '../utils'
 import ContentSharingBackground from 'src/content-sharing/background'
@@ -48,8 +47,6 @@ export default class CopyPasterBackground {
             renderTemplateForAnnotationSearch: this
                 .renderTemplateForAnnotationSearch,
         }
-
-        makeRemotelyCallable(this.remoteFunctions)
     }
 
     async createTemplate(params: Omit<Template, 'id'>) {

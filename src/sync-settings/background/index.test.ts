@@ -12,7 +12,9 @@ describe('user settings background tests', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should write single settings to storage', async ({ device }) => {
-        await device.backgroundModules.settings.set({ test1: TEST_DATA.test1 })
+        await device.backgroundModules.syncSettings.set({
+            test1: TEST_DATA.test1,
+        })
 
         expect(
             await device.storageManager
@@ -22,7 +24,7 @@ describe('user settings background tests', () => {
     })
 
     it('should write multiple settings to storage', async ({ device }) => {
-        await device.backgroundModules.settings.set(TEST_DATA)
+        await device.backgroundModules.syncSettings.set(TEST_DATA)
 
         expect(
             await device.storageManager
@@ -36,21 +38,29 @@ describe('user settings background tests', () => {
     })
 
     it('should read settings from storage', async ({ device }) => {
-        await device.backgroundModules.settings.set(TEST_DATA)
+        await device.backgroundModules.syncSettings.set(TEST_DATA)
 
         expect(
-            await device.backgroundModules.settings.get(Object.keys(TEST_DATA)),
+            await device.backgroundModules.syncSettings.get(
+                Object.keys(TEST_DATA),
+            ),
         ).toEqual(TEST_DATA)
-        expect(await device.backgroundModules.settings.get(TEST_DATA)).toEqual(
-            TEST_DATA,
-        )
-        expect(await device.backgroundModules.settings.get('test1')).toEqual({
+        expect(
+            await device.backgroundModules.syncSettings.get(TEST_DATA),
+        ).toEqual(TEST_DATA)
+        expect(
+            await device.backgroundModules.syncSettings.get('test1'),
+        ).toEqual({
             test1: TEST_DATA.test1,
         })
-        expect(await device.backgroundModules.settings.get('test2')).toEqual({
+        expect(
+            await device.backgroundModules.syncSettings.get('test2'),
+        ).toEqual({
             test2: TEST_DATA.test2,
         })
-        expect(await device.backgroundModules.settings.get('test3')).toEqual({
+        expect(
+            await device.backgroundModules.syncSettings.get('test3'),
+        ).toEqual({
             test3: TEST_DATA.test3,
         })
     })

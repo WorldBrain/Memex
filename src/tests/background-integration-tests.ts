@@ -58,6 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
+    startWithSyncDisabled?: boolean
     services?: Services
 }
 
@@ -98,6 +99,7 @@ export async function setupBackgroundIntegrationTest(
     const auth: AuthBackground = new AuthBackground({
         authService: services.auth,
         subscriptionService: services.subscriptions,
+        remoteEmitter: { emit: async () => {} },
         scheduleJob: (job: JobDefinition) => {
             console['info'](
                 'Running job immediately while in testing, job:',
@@ -199,7 +201,8 @@ export async function setupBackgroundIntegrationTest(
                         ?.id,
                 getNow,
                 useDownloadTranslationLayer: true,
-                getDeviceId: () => backgroundModules.personalCloud.deviceId,
+                getDeviceId: async () =>
+                    backgroundModules.personalCloud.deviceId,
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.storageManager,

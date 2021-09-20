@@ -1,4 +1,5 @@
-import StorageManager from '@worldbrain/storex'
+import type Dexie from 'dexie'
+import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
 import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
@@ -13,31 +14,47 @@ import {
     PersonalCloudUpdateBatch,
     PersonalCloudClientInstructionType,
     PersonalCloudClientStorageType,
+    PersonalCloudUpdate,
+    PersonalCloudOverwriteUpdate,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
-    PersonalCloudSettings,
+    LocalPersonalCloudSettings,
     PersonalCloudDeviceID,
+    PersonalCloudRemoteInterface,
+    PersonalCloudStats,
 } from './types'
-import { PERSONAL_CLOUD_ACTION_RETRY_INTERVAL } from './constants'
+import {
+    PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
+    PASSIVE_DATA_CUTOFF_DATE,
+} from './constants'
 import {
     ActionExecutor,
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { SettingStore } from 'src/util/settings'
+import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
+import { prepareDataMigration } from 'src/personal-cloud/storage/migration-preparation'
+import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
+import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { LocalExtensionSettings } from 'src/background-script/types'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 export interface PersonalCloudBackgroundOptions {
-    storageManager: StorageManager
-    persistentStorageManager: StorageManager
     backend: PersonalCloudBackend
+    storageManager: StorageManager
+    syncSettingsStore: SyncSettingsStore<'dashboard'>
+    persistentStorageManager: StorageManager
+    remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
     getUserId(): Promise<string | number | null>
-    userIdChanges(): AsyncIterableIterator<void>
-    settingStore: SettingStore<PersonalCloudSettings>
+    userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
+    settingStore: SettingStore<LocalPersonalCloudSettings>
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
         storageType: PersonalCloudClientStorageType
@@ -51,11 +68,23 @@ export interface PersonalCloudBackgroundOptions {
 export class PersonalCloudBackground {
     currentSchemaVersion?: Date
     actionQueue: ActionQueue<PersonalCloudAction>
+    pendingActionsExecuting: Promise<void>
+    authChangesObserved: Promise<void>
+    changesIntegrating: Promise<void>
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
     deviceId?: string | number
     reportExecutingAction?: (action: PersonalCloudAction) => void
+    remoteFunctions: PersonalCloudRemoteInterface
+    emitEvents = true
     debug = false
+
+    stats: PersonalCloudStats = {
+        // countingDownloads: false,
+        // countingUploads: true,
+        pendingDownloads: 0,
+        pendingUploads: 0,
+    }
 
     constructor(public options: PersonalCloudBackgroundOptions) {
         this.actionQueue = new ActionQueue({
@@ -66,45 +95,198 @@ export class PersonalCloudBackground {
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
         })
+
+        this.setupEventListeners()
+
+        this.remoteFunctions = {
+            runDataMigration: this.waitForSync,
+            isCloudSyncEnabled: this.isCloudSyncEnabled,
+            runDataMigrationPreparation: this.prepareDataMigration,
+            enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
+            isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
+            runPassiveDataClean: () =>
+                wipePassiveData({ db: this.dexie, visitLimit: 20 }),
+        }
+    }
+
+    private get dexie(): Dexie {
+        return this.options.storageManager.backend['dexie']
+    }
+
+    private setupEventListeners() {
+        this.actionQueue.events.on('statsChanged', (stats) => {
+            this._modifyStats({
+                pendingUploads: stats.pendingActionCount,
+            })
+        })
+        this.options.backend.events.on('incomingChangesPending', (event) => {
+            this._modifyStats({
+                pendingDownloads:
+                    this.stats.pendingDownloads + event.changeCountDelta,
+            })
+        })
+        this.options.backend.events.on('incomingChangesProcessed', (event) => {
+            this._modifyStats({
+                pendingDownloads: this.stats.pendingDownloads - event.count,
+            })
+        })
+    }
+
+    private prepareDataMigration = async () => {
+        const db = this.dexie
+
+        await prepareDataMigration({
+            db,
+            chunkSize: 350,
+            resetQueue: async () => {
+                await db.table('personalCloudAction').clear()
+                await this.actionQueue.resetPendingActionCount()
+                this._modifyStats({ pendingDownloads: 0, pendingUploads: 0 })
+            },
+            queueObjs: (actionData) =>
+                this.actionQueue.scheduleManyActions(
+                    actionData.objs.map((object) => ({
+                        type: PersonalCloudActionType.PushObject,
+                        updates: [
+                            {
+                                type: PersonalCloudUpdateType.Overwrite,
+                                schemaVersion: this.currentSchemaVersion!,
+                                deviceId: this.deviceId,
+                                collection: actionData.collection,
+                                object: this.preprocessObjectForPush({
+                                    collection: actionData.collection,
+                                    object,
+                                }),
+                            },
+                        ],
+                    })),
+                    { queueInteraction: 'queue-and-return' },
+                ),
+        })
+
+        await this.enableSync()
+        this.startSync()
+    }
+
+    private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
+
+    private async startCloudSyncIfEnabled() {
+        if (await this.isCloudSyncEnabled()) {
+            this.startSync()
+        }
     }
 
     async setup() {
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )
-        await this.actionQueue.setup({ paused: true })
-        await this.loadDeviceId()
 
-        // These will never return, so don't await for it
-        this.observeAuthChanges()
-        this.integrateContinuously()
+        await this.actionQueue.setup({ paused: true })
+        this._modifyStats({
+            pendingUploads: this.actionQueue.pendingActionCount,
+            // countingUploads: false,
+        })
+
+        const userId = await this.options.getUserId()
+        if (userId) {
+            await this.createOrLoadDeviceId(userId)
+        }
+
+        await this.startCloudSyncIfEnabled()
     }
 
     async observeAuthChanges() {
-        for await (const _ of this.options.userIdChanges()) {
-            await this.loadDeviceId()
+        for await (const nextUser of this.options.userIdChanges()) {
+            await this.handleAuthChange(nextUser?.id)
+
+            if (nextUser) {
+                await this.startCloudSyncIfEnabled()
+            }
         }
     }
 
-    async loadDeviceId() {
-        const userId = await this.options.getUserId()
+    async enableSync() {
+        await this.options.settingStore.set('isSetUp', true)
+    }
+
+    enableSyncForNewInstall = async (now = Date.now()) => {
+        await this.enableSync()
+        this.startSync()
+
+        const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
+        await this.options.syncSettingsStore.dashboard.set(
+            'subscribeBannerShownAfter',
+            fortnightFromNow,
+        )
+    }
+
+    startSync() {
+        this.actionQueue.unpause()
+
+        if (!this.pendingActionsExecuting) {
+            this.pendingActionsExecuting = this.actionQueue.executePendingActions()
+        }
+        // These will never return, so don't await for it
+        if (!this.authChangesObserved) {
+            this.authChangesObserved = this.observeAuthChanges()
+        }
+        if (!this.changesIntegrating) {
+            this.changesIntegrating = this.integrateContinuously()
+        }
+    }
+
+    private async createOrLoadDeviceId(userId: string | number) {
+        const { settingStore, createDeviceId } = this.options
+
+        this.deviceId = await settingStore.get('deviceId')
+        if (!this.deviceId) {
+            this.deviceId = await createDeviceId(userId)
+            await settingStore.set('deviceId', this.deviceId!)
+        }
+    }
+
+    async handleAuthChange(userId: string | number | null) {
         if (userId) {
-            this.deviceId = await this.options.settingStore.get('deviceId')
-            if (!this.deviceId) {
-                this.deviceId = await this.options.createDeviceId(userId)
-                await this.options.settingStore.set('deviceId', this.deviceId!)
-            }
-            this.actionQueue.unpause()
+            await this.createOrLoadDeviceId(userId)
         } else {
             this.actionQueue.pause()
             delete this.deviceId
+        }
+
+        const isAuthenticated = !!this.deviceId
+        if (!isAuthenticated) {
+            this._modifyStats({
+                // countingDownloads: false,
+                pendingDownloads: 0,
+                pendingUploads: 0,
+            })
+            return
+        }
+    }
+
+    _modifyStats(updates: Partial<PersonalCloudStats>) {
+        this.stats = { ...this.stats, ...updates }
+        this._debugLog('Updated stats', this.stats)
+        if (this.emitEvents) {
+            try {
+                this.options.remoteEventEmitter.emit('cloudStatsUpdated', {
+                    stats: this.stats,
+                })
+            } catch (err) {
+                console.error('Error while emitting updated stats:', err)
+            }
         }
     }
 
     async integrateContinuously() {
         try {
             for await (const updates of this.options.backend.streamUpdates()) {
-                await this.integrateUpdates(updates)
+                try {
+                    await this.integrateUpdates(updates)
+                } catch (err) {
+                    console.error(`Error integrating update from cloud`, err)
+                    Raven.captureException(err)
+                }
             }
         } catch (err) {
             console.error(err)
@@ -114,73 +296,80 @@ export class PersonalCloudBackground {
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
-            this._debugLog('Processing update', update)
-            try {
-                const { collection } = update
-                const storageManager =
-                    update.storage === 'persistent'
-                        ? this.options.persistentStorageManager
-                        : this.options.storageManager
-
-                if (update.type === PersonalCloudUpdateType.Overwrite) {
-                    const object = update.object
-                    preprocessPulledObject({
-                        storageRegistry: storageManager.registry,
-                        collection,
-                        object,
-                    })
-                    if (update.media) {
-                        await Promise.all(
-                            Object.entries(update.media).map(
-                                async ([fieldName, { path, type }]) => {
-                                    let fieldValue:
-                                        | Blob
-                                        | string = await this.options.backend.downloadFromMedia(
-                                        { path },
-                                    )
-                                    if (type === 'text' || type === 'json') {
-                                        if (fieldValue instanceof Blob) {
-                                            fieldValue = await blobToString(
-                                                fieldValue,
-                                            )
-                                        }
-                                    }
-                                    if (type === 'json') {
-                                        fieldValue = JSON.parse(
-                                            fieldValue as string,
-                                        )
-                                    }
-
-                                    object[fieldName] = fieldValue
-                                },
-                            ),
-                        )
-                    }
-
-                    await this.options.writeIncomingData({
-                        storageType:
-                            update.storage ??
-                            PersonalCloudClientStorageType.Normal,
-                        collection: update.collection,
-                        updates: update.object,
-                        where: update.where,
-                    })
-                } else if (update.type === PersonalCloudUpdateType.Delete) {
-                    await storageManager.backend.operation(
-                        'deleteObjects',
-                        update.collection,
-                        update.where,
-                    )
-                }
-            } catch (err) {
-                console.error(`Error integrating update from cloud`, err)
-                Raven.captureException(err)
-            }
+            await this.integrateUpdate(update)
         }
         releaseMutex()
     }
 
-    async waitForSync() {
+    async integrateUpdate(update: PersonalCloudUpdate) {
+        this._debugLog('Processing update', update)
+
+        const { collection } = update
+        const storageManager =
+            update.storage === 'persistent'
+                ? this.options.persistentStorageManager
+                : this.options.storageManager
+
+        if (update.type === PersonalCloudUpdateType.Overwrite) {
+            preprocessPulledObject({
+                storageRegistry: storageManager.registry,
+                collection,
+                object: update.object,
+            })
+            if (update.media) {
+                try {
+                    await this.downloadMedia(update)
+                } catch (err) {
+                    const errorMsg = `Error while downloading media for update`
+                    console.error(`${errorMsg}:`, err)
+                    Raven.captureBreadcrumb({ update })
+                    Raven.captureException(new Error(err))
+                }
+            }
+
+            await this.options.writeIncomingData({
+                storageType:
+                    update.storage ?? PersonalCloudClientStorageType.Normal,
+                collection: update.collection,
+                updates: update.object,
+                where: update.where,
+            })
+        } else if (update.type === PersonalCloudUpdateType.Delete) {
+            await storageManager.backend.operation(
+                'deleteObjects',
+                update.collection,
+                update.where,
+            )
+        }
+    }
+
+    async downloadMedia(
+        update: Pick<PersonalCloudOverwriteUpdate, 'media' | 'object'>,
+    ) {
+        await Promise.all(
+            Object.entries(update.media).map(
+                async ([fieldName, { path, type }]) => {
+                    let fieldValue:
+                        | Blob
+                        | string = await this.options.backend.downloadFromMedia(
+                        { path },
+                    )
+                    if (type === 'text' || type === 'json') {
+                        if (fieldValue instanceof Blob) {
+                            fieldValue = await blobToString(fieldValue)
+                        }
+                    }
+                    if (type === 'json') {
+                        fieldValue = JSON.parse(fieldValue as string)
+                    }
+
+                    update.object[fieldName] = fieldValue
+                },
+            ),
+        )
+    }
+
+    waitForSync = async () => {
         await this.pushMutex.wait()
         await this.pullMutex.wait()
         await this.actionQueue.waitForSync()
@@ -455,5 +644,12 @@ export class PersonalCloudBackground {
         if (this.debug) {
             console['log']('Personal Cloud -', ...args)
         }
+    }
+
+    private isPassiveDataRemovalNeeded: () => Promise<boolean> = async () => {
+        const { localExtSettingStore } = this.options
+
+        const installTime = await localExtSettingStore.get('installTimestamp')
+        return installTime < PASSIVE_DATA_CUTOFF_DATE.getTime()
     }
 }

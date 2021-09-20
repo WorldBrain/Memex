@@ -39,8 +39,6 @@ import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 
 export async function main() {
-    setupRpcConnection({ sideName: 'background', role: 'background' })
-
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
@@ -129,6 +127,7 @@ export async function main() {
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
         auth: backgroundModules.auth.remoteFunctions,
+        analytics: backgroundModules.analytics.remoteFunctions,
         subscription: {
             getCheckoutLink:
                 backgroundModules.auth.subscriptionService.getCheckoutLink,
@@ -147,6 +146,7 @@ export async function main() {
         readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
 
@@ -167,3 +167,4 @@ export async function main() {
 }
 
 main()
+setupRpcConnection({ sideName: 'background', role: 'background' })

@@ -1,5 +1,4 @@
 import StorageManager from '@worldbrain/storex'
-import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type {
     ReadwiseAPI,
     ReadwiseHighlight,
@@ -11,8 +10,8 @@ import {
     formatReadwiseHighlightLocation,
 } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import * as Raven from 'src/util/raven'
-import { ReadwiseSettings } from './types/settings'
-import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
+import type { ReadwiseSettings } from './types/settings'
+import type { BrowserSettingsStore } from 'src/util/settings'
 import { Annotation } from 'src/annotations/types'
 import { ReadwiseInterface } from './types/remote-interface'
 import {
@@ -20,6 +19,8 @@ import {
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
 import { Page } from 'src/search'
+import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -30,29 +31,31 @@ type GetPageData = (normalizedUrl: string) => Promise<PageData>
 type GetAnnotationTags = (annotationUrl: string) => Promise<string[]>
 
 export class ReadwiseBackground {
+    __deprecatedActionQueue: ActionQueue<any>
     remoteFunctions: ReadwiseInterface<'provider'>
-    settingsStore: SettingStore<ReadwiseSettings>
     readwiseAPI: ReadwiseAPI
     private _apiKey: string | null = null
 
     constructor(
         private options: {
             storageManager: StorageManager
-            browserStorage: LimitedBrowserStorage
+            settingsStore: BrowserSettingsStore<ReadwiseSettings>
             fetch: typeof fetch
             getPageData: GetPageData
             getAnnotationTags: GetAnnotationTags
             streamAnnotations(): AsyncIterableIterator<Annotation>
         },
     ) {
-        this.settingsStore = new BrowserSettingsStore<ReadwiseSettings>(
-            options.browserStorage,
-            {
-                prefix: 'readwise.',
-            },
-        )
         this.readwiseAPI = new HTTPReadwiseAPI({
             fetch: options.fetch,
+        })
+
+        this.__deprecatedActionQueue = new ActionQueue({
+            storageManager: options.storageManager,
+            collectionName: 'readwiseAction',
+            versions: { initial: STORAGE_VERSIONS[22].version },
+            retryIntervalInMs: 1000,
+            executeAction: async () => {},
         })
 
         this.remoteFunctions = {
@@ -77,18 +80,19 @@ export class ReadwiseBackground {
     }
 
     getAPIKey: ReadwiseInterfaceMethod<'getAPIKey'> = async () => {
-        if (this._apiKey) {
+        if (this._apiKey != null) {
             return this._apiKey
         }
 
-        this._apiKey = (await this.settingsStore.get('apiKey')) ?? null
+        const a = await this.options.settingsStore.get('apiKey')
+        this._apiKey = a ?? null
         return this._apiKey
     }
 
     setAPIKey: ReadwiseInterfaceMethod<'setAPIKey'> = async ({
         validatedKey,
     }) => {
-        await this.settingsStore.set('apiKey', validatedKey)
+        await this.options.settingsStore.set('apiKey', validatedKey)
         this._apiKey = validatedKey
     }
 

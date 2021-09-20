@@ -9,17 +9,13 @@ import { Analytics } from 'src/analytics/types'
 import AnnotationStorage from 'src/annotations/background/storage'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import {
-    remoteEventEmitter,
-    RemoteEventEmitter,
-} from 'src/util/webextensionRPC'
+import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { Services } from 'src/services/types'
 import { ServerStorageModules } from 'src/storage/types'
 import { ContentSharingInterface, ContentSharingEvents } from './types'
 import { ContentSharingClientStorage } from './storage'
 export default class ContentSharingBackground {
-    remoteEmitter: RemoteEventEmitter<ContentSharingEvents>
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
 
@@ -36,6 +32,7 @@ export default class ContentSharingBackground {
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             userMessages: UserMessageService
             services: Pick<Services, 'contentSharing'>
+            remoteEmitter: RemoteEventEmitter<'contentSharing'>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
             >
@@ -44,10 +41,6 @@ export default class ContentSharingBackground {
     ) {
         this.storage = new ContentSharingClientStorage({
             storageManager: options.storageManager,
-        })
-
-        this.remoteEmitter = remoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
         })
 
         this.remoteFunctions = {
@@ -132,6 +125,13 @@ export default class ContentSharingBackground {
     }
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
+        const existingRemoteId = await this.storage.getRemoteListId({
+            localId: options.listId,
+        })
+        if (existingRemoteId) {
+            return { remoteListId: existingRemoteId }
+        }
+
         const localList = await this.options.customLists.fetchListById(
             options.listId,
         )
@@ -140,6 +140,7 @@ export default class ContentSharingBackground {
                 `Tried to share non-existing list: ID ${options.listId}`,
             )
         }
+
         const remoteListId = this.options
             .generateServerId('sharedList')
             .toString()
@@ -226,8 +227,13 @@ export default class ContentSharingBackground {
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
         options,
     ) => {
-        await this.storage.setAnnotationsExcludedFromLists({
+        const allMetadata = await this.storage.getRemoteAnnotationMetadata({
             localIds: options.annotationUrls,
+        })
+        await this.storage.setAnnotationsExcludedFromLists({
+            localIds: options.annotationUrls.filter(
+                (url) => allMetadata[url]?.excludeFromLists,
+            ),
             excludeFromLists: false,
         })
     }
@@ -269,8 +275,13 @@ export default class ContentSharingBackground {
     unshareAnnotationsFromLists: ContentSharingInterface['unshareAnnotationsFromLists'] = async (
         options,
     ) => {
-        await this.storage.setAnnotationsExcludedFromLists({
+        const allMetadata = await this.storage.getRemoteAnnotationMetadata({
             localIds: options.annotationUrls,
+        })
+        await this.storage.setAnnotationsExcludedFromLists({
+            localIds: options.annotationUrls.filter(
+                (url) => !allMetadata[url]?.excludeFromLists,
+            ),
             excludeFromLists: true,
         })
     }

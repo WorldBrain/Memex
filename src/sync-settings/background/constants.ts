@@ -1,4 +1,4 @@
-import type { UserSettingNames } from './types'
+import type { SyncSettingNames } from './types'
 
 export const COLLECTION_NAMES = {
     settings: 'settings',
@@ -13,16 +13,16 @@ export const FEATURE_PREFIX = {
     EXTENSION: '@Extension-',
 }
 
-export const SETTING_NAMES: UserSettingNames = {
+export const SETTING_NAMES: SyncSettingNames = {
     contentSharing: {
         lastSharedAnnotationTimestamp:
-            FEATURE_PREFIX.CONTENT_SHARING + 'last_shared_annotation_timestamp',
+            FEATURE_PREFIX.CONTENT_SHARING + 'lastSharedAnnotationTimestamp',
     },
     dashboard: {
-        listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'list_sidebar_locked',
-        onboardingMsgSeen: FEATURE_PREFIX.DASHBOARD + 'onboarding_msg_seen',
-        subscribeBannerDismissed:
-            FEATURE_PREFIX.DASHBOARD + 'subscribe_banner_dismissed',
+        listSidebarLocked: FEATURE_PREFIX.DASHBOARD + 'listSidebarLocked',
+        onboardingMsgSeen: FEATURE_PREFIX.DASHBOARD + 'onboardingMsgSeen',
+        subscribeBannerShownAfter:
+            FEATURE_PREFIX.DASHBOARD + 'subscribeBannerShownAfter',
     },
     extension: {
         blocklist: FEATURE_PREFIX.EXTENSION + 'blocklist',
@@ -40,11 +40,10 @@ export const SETTING_NAMES: UserSettingNames = {
         highlightsEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'highlights_enabled',
     },
     searchInjection: {
-        showMemexResults:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'show_memex_results',
+        hideMemexResults: FEATURE_PREFIX.SEARCH_INJECTION + 'hideMemexResults',
         memexResultsPosition:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'memex_results_position',
+            FEATURE_PREFIX.SEARCH_INJECTION + 'memexResultsPosition',
         searchEnginesEnabled:
-            FEATURE_PREFIX.SEARCH_INJECTION + 'search_engines_enabled',
+            FEATURE_PREFIX.SEARCH_INJECTION + 'searchEnginesEnabled',
     },
 }

@@ -1,6 +1,6 @@
 import uuid from 'uuid/v1'
-import { Events } from 'webextension-polyfill-ts/src/generated/events'
-import { Runtime } from 'webextension-polyfill-ts'
+import type { Events } from 'webextension-polyfill-ts/src/generated/events'
+import type { Runtime } from 'webextension-polyfill-ts'
 import { filterTabUrl } from 'src/util/uri-utils'
 
 interface RPCObject {

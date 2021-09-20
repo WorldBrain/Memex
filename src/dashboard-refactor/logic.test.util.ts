@@ -1,4 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
 import { TestLogicContainer } from 'ui-logic-core/lib/testing'
 
 import {
@@ -13,7 +12,8 @@ import {
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
-import { createServices } from 'src/services/ui'
+import { createUIServices } from 'src/services/ui'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -110,12 +110,10 @@ export async function setupTest(
     const analytics = new FakeAnalytics()
 
     if (args.withAuth) {
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
-            id: 'test-user',
-            displayName: 'test',
-            email: 'test@test.com',
-            emailVerified: true,
-        })
+        await device.backgroundModules.auth.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
     }
 
     if (args.withBeta) {
@@ -130,9 +128,11 @@ export async function setupTest(
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,
-        localStorage: browser.storage.local,
+        localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
+        personalCloudBG: device.backgroundModules.personalCloud.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
+        syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
         document: args.mockDocument,
         listsBG: {
             ...device.backgroundModules.customLists.remoteFunctions,
@@ -142,7 +142,6 @@ export async function setupTest(
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
-        syncBG: device.backgroundModules.sync.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
             device.backgroundModules.backupModule.remoteFunctions,
         ) as any,
@@ -158,7 +157,7 @@ export async function setupTest(
         renderDashboardSwitcherLink:
             args.renderDashboardSwitcherLink ?? (() => null),
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
-        services: createServices(),
+        services: createUIServices(),
     })
 
     if (args.overrideSearchTrigger) {

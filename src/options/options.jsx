@@ -11,7 +11,9 @@ import Router from './router'
 import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
+import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
+import { createUIServices } from 'src/services/ui'
 
 // Include development tools if we are not building for production
 const ReduxDevTools = undefined
@@ -25,12 +27,17 @@ const store = configureStore({ ReduxDevTools })
 
 window.store = store
 
+const routeData = {
+    services: createUIServices(),
+}
+
 ReactDOM.render(
     <Provider store={store}>
         <ThemeProvider theme={theme}>
             <ErrorBoundary component={RuntimeError}>
                 <AuthContextProvider>
-                    <Router routes={routes} />
+                    <OverlayContainer services={routeData.services} />
+                    <Router routes={routes} routeData={routeData} />
                     {ReduxDevTools && <ReduxDevTools />}
                     <ModalsContainer />
                 </AuthContextProvider>

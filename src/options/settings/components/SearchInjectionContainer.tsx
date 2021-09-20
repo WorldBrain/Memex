@@ -4,32 +4,45 @@ import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
 import { Checkbox } from '../../../common-ui/components'
 
-import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
+import { SEARCH_INJECTION_DEFAULT } from 'src/search-injection/constants'
 import {
-    SEARCH_INJECTION_KEY,
-    SEARCH_INJECTION_DEFAULT,
-} from 'src/search-injection/constants'
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 class SearchInjectionContainer extends React.Component {
+    syncSettings: SyncSettingsStore<'searchInjection'>
+
     state = {
         injectionPreference: { ...SEARCH_INJECTION_DEFAULT },
     }
 
-    async componentDidMount() {
-        const injectionPreference = await getLocalStorage(
-            SEARCH_INJECTION_KEY,
-            SEARCH_INJECTION_DEFAULT,
-        )
-        this.setState({
-            injectionPreference,
+    constructor(props) {
+        super(props)
+
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: runInBackground(),
         })
+    }
+
+    async componentDidMount() {
+        const injectionPreference = await this.syncSettings.searchInjection.get(
+            'searchEnginesEnabled',
+        )
+        if (injectionPreference) {
+            this.setState({ injectionPreference })
+        }
     }
 
     private bindToggleInjection = (name) => async () => {
         const { injectionPreference } = this.state
         // Toggle that particular search engine key
         injectionPreference[name] = !injectionPreference[name]
-        await setLocalStorage(SEARCH_INJECTION_KEY, injectionPreference)
+        await this.syncSettings.searchInjection.set(
+            'searchEnginesEnabled',
+            injectionPreference,
+        )
 
         if (!injectionPreference[name]) {
             analytics.trackEvent({

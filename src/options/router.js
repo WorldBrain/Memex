@@ -7,6 +7,7 @@ import Layout from './layout'
 class MemexRouter extends React.Component {
     static propTypes = {
         routes: PropTypes.array.isRequired,
+        routeData: PropTypes.object.isRequired,
     }
 
     constructor(props) {
@@ -21,7 +22,9 @@ class MemexRouter extends React.Component {
             <Route
                 key={route.pathname}
                 path={route.pathname}
-                component={route.component}
+                component={(props) => (
+                    <route.component {...props} {...this.props.routeData} />
+                )}
             />
         ))
     }

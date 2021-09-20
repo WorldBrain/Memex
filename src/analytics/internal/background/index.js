@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import EventLogStorage from './storage'
-import sendToServer from '../send-to-server'
+// import sendToServer from '../send-to-server'
 import internalAnalytics from '../'
 
 export default class EventLogBackground {
@@ -16,9 +16,9 @@ export default class EventLogBackground {
             getLatestTimeWithCount: (...params) => {
                 return this.getLatestTimeWithCount(...params)
             },
-            trackEvent: (...params) => {
-                return sendToServer.trackEvent(...params)
-            },
+            // trackEvent: (...params) => {
+            //     return sendToServer.trackEvent(...params)
+            // },
             processEvent: (...params) => {
                 return internalAnalytics.processEvent(...params)
             },

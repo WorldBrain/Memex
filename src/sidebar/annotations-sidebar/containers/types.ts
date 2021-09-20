@@ -28,6 +28,7 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -41,7 +42,6 @@ export interface SidebarContainerDependencies {
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
-    showLoginModal?: () => void
     showAnnotationShareModal?: () => void
     showBetaFeatureNotifModal?: () => void
 
@@ -50,6 +50,7 @@ export interface SidebarContainerDependencies {
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
     auth: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: Partial<SidebarTheme>

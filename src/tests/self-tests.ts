@@ -4,7 +4,7 @@ import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { EXTENSION_SETTINGS_NAME } from '@worldbrain/memex-common/lib/extension-settings/constants'
+import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
@@ -46,7 +46,10 @@ export function createSelfTests(options: {
     }
 
     const tests = {
-        cloudSend: async () => {
+        cloudSend: async (testOptions?: {
+            deleteSharedAnnotation?: boolean
+            lotsOfData?: boolean
+        }) => {
             await clearDb(options.storageManager)
             await clearDb(options.persistentStorageManager)
             console.log('Cleared local databases')
@@ -59,6 +62,13 @@ export function createSelfTests(options: {
             await clearDb(serverStorage.storageManager, {
                 getWhere: async (collectionName) => {
                     if (!collectionName.startsWith('personal')) {
+                        return null
+                    }
+                    if (
+                        collectionName === 'personalBlockStats' ||
+                        collectionName === 'personalCloudError' ||
+                        collectionName === 'personalReadwiseAction'
+                    ) {
                         return null
                     }
                     const objects = (await serverStorage.storageManager
@@ -79,12 +89,12 @@ export function createSelfTests(options: {
             console.log('Cleared Firestore personal cloud collections')
 
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.loadDeviceId()
+            await personalCloud.startSync()
             console.log('Generated device ID:', personalCloud.deviceId!)
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
-                await backgroundModules.settings.set({
-                    [EXTENSION_SETTINGS_NAME.ReadwiseAPIKey]:
+                await backgroundModules.syncSettings.set({
+                    [SYNCED_SETTING_KEYS.ReadwiseAPIKey]:
                         process.env.TEST_READWISE_API_KEY,
                 })
                 console.log('Set test Readwise API Key')
@@ -128,6 +138,36 @@ export function createSelfTests(options: {
                 { skipPageIndexing: true },
             )
             console.log(`Added protected note to '${testPageUrl}'`)
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: upload error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added upload error generating note to '${testPageUrl}'`,
+            )
+            await backgroundModules.directLinking.createAnnotation(
+                {
+                    tab: {} as any,
+                },
+                {
+                    pageUrl: normalizedTestPageUrl,
+                    comment: `*memex-debug*: download error`,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    createdWhen: new Date('2021-07-21'),
+                },
+                { skipPageIndexing: true },
+            )
+            console.log(
+                `Added download error generating note to '${testPageUrl}'`,
+            )
             const testListId1 = await backgroundModules.customLists.createCustomList(
                 {
                     name: 'My test list #1',
@@ -157,12 +197,25 @@ export function createSelfTests(options: {
             console.log(`Added test copy-paster template`)
 
             const {
-                remoteListId,
+                remoteListId: remoteListId1,
             } = await backgroundModules.contentSharing.shareList({
                 listId: testListId1,
             })
-            console.log('Shared test list #1, remote ID:', remoteListId)
+            console.log('Shared test list #1, remote ID:', remoteListId1)
+            const {
+                remoteListId: remoteListId2,
+            } = await backgroundModules.contentSharing.shareList({
+                listId: testListId2,
+            })
+            console.log('Shared test list #2, remote ID:', remoteListId2)
 
+            await serverStorage.storageModules.contentSharing.ensurePageInfo({
+                creatorReference: { type: 'user-reference', id: user.id },
+                pageInfo: {
+                    normalizedUrl: normalizedTestPageUrl,
+                    originalUrl: testPageUrl,
+                },
+            })
             await backgroundModules.contentSharing.shareAnnotation({
                 annotationUrl: publicAnnotationUrl,
             })
@@ -176,13 +229,21 @@ export function createSelfTests(options: {
             )
             console.log('Shared and edited annotation')
 
-            await serverStorage.storageModules.contentSharing.ensurePageInfo({
-                creatorReference: { type: 'user-reference', id: user.id },
-                pageInfo: {
-                    normalizedUrl: normalizedTestPageUrl,
-                    originalUrl: testPageUrl,
-                },
-            })
+            let sharedAnnotationId: string | number
+            if (testOptions?.deleteSharedAnnotation) {
+                sharedAnnotationId = (
+                    await backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                        {
+                            localIds: [publicAnnotationUrl],
+                        },
+                    )
+                )[publicAnnotationUrl]
+                await backgroundModules.directLinking.annotationStorage.deleteAnnotation(
+                    publicAnnotationUrl,
+                )
+                console.log('Deleted shared annotation', sharedAnnotationId)
+            }
+
             await serverStorage.storageModules.contentSharing.createAnnotations(
                 {
                     annotationsByPage: {
@@ -202,6 +263,42 @@ export function createSelfTests(options: {
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
 
+            if (testOptions?.deleteSharedAnnotation) {
+                const sharedAnnotationEntries = await serverStorage.storageModules.contentSharing.getAnnotationListEntries(
+                    {
+                        listReference: {
+                            type: 'shared-list-reference',
+                            id: remoteListId1,
+                        },
+                    },
+                )
+                console.log({ sharedAnnotationEntries })
+            }
+
+            if (testOptions?.lotsOfData) {
+                for (let i = 0; i < 50; ++i) {
+                    const normalizedUrl = `example.com/test-${i}`
+                    const fullUrl = `https://www.example.com/test-${i}`
+                    await backgroundModules.pages.storage.createPage({
+                        url: normalizedUrl,
+                        domain: 'www.example.com',
+                        hostname: 'example.com',
+                        fullTitle: `Example.com test ${i}`,
+                        titleTerms: ['example', 'test'],
+                        fullUrl,
+                        tags: [],
+                        terms: [],
+                        text: '',
+                        urlTerms: [],
+                    })
+                    await backgroundModules.bookmarks.addBookmark({
+                        url: normalizedUrl,
+                        fullUrl,
+                        skipIndexing: true,
+                    })
+                }
+            }
+
             console.log('End of self test')
         },
         cloudReceive: async () => {
@@ -210,7 +307,7 @@ export function createSelfTests(options: {
 
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
-            await personalCloud.loadDeviceId()
+            await personalCloud.startSync()
         },
     }
     return tests
