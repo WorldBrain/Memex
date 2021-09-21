@@ -43,6 +43,7 @@ import type { Props as ListDetailsProps } from './search-results/components/list
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
+import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -823,11 +824,13 @@ export class DashboardContainer extends StatefulUIElement<
         }
 
         if (modalsState.showLogin) {
-            const closeLoginModal = () =>
-                this.processEvent('setShowLoginModal', { isShown: false })
             return (
                 <LoginModal
-                    onClose={closeLoginModal}
+                    onClose={() =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: false,
+                        })
+                    }
                     authBG={this.props.authBG}
                     contentSharingBG={this.props.contentShareBG}
                     onSuccess={() =>
@@ -835,6 +838,19 @@ export class DashboardContainer extends StatefulUIElement<
                             () => this.processEvent('checkSharingAccess', null),
                             1000,
                         )
+                    }
+                />
+            )
+        }
+
+        if (modalsState.showDisplayNameSetup) {
+            return (
+                <DisplayNameModal
+                    authBG={this.props.authBG}
+                    onClose={() =>
+                        this.processEvent('setShowDisplayNameSetupModal', {
+                            isShown: false,
+                        })
                     }
                 />
             )

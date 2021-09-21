@@ -107,6 +107,22 @@ describe('Dashboard Refactor modals logic', () => {
         expect(searchResults.state.modals.showLogin).toEqual(false)
     })
 
+    it('should be able to set the display name setup modal visibility', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(false)
+        await searchResults.processEvent('setShowDisplayNameSetupModal', {
+            isShown: true,
+        })
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(true)
+        await searchResults.processEvent('setShowDisplayNameSetupModal', {
+            isShown: false,
+        })
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(false)
+    })
+
     it('should be able to set the Show Subscription modal visibility', async ({
         device,
     }) => {

@@ -31,9 +31,7 @@ export default class DisplayNameModal extends React.PureComponent<Props> {
     render() {
         return (
             <Modal {...this.props}>
-                <TitleText>
-                    Please set a display name then share again
-                </TitleText>
+                <TitleText>Please set a display name before sharing</TitleText>
                 {this.props.routeToLoginBtn ? (
                     <>
                         <Margin />

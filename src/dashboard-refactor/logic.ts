@@ -101,6 +101,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showLogin: false,
                 showSubscription: false,
                 showCloudOnboarding: false,
+                showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
             },
             searchResults: {
@@ -566,6 +567,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         const user = await authBG.getCurrentUser()
         if (user != null) {
             this.emitMutation({ currentUser: { $set: user } })
+
+            const userProfile = await authBG.getUserProfile()
+            if (!userProfile?.displayName?.length) {
+                this.emitMutation({
+                    modals: { showDisplayNameSetup: { $set: true } },
+                })
+                return false
+            }
+
             return true
         }
 
@@ -622,6 +632,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 showLogin: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowDisplayNameSetupModal: EventHandler<
+        'setShowDisplayNameSetupModal'
+    > = ({ event }) => {
+        this.emitMutation({
+            modals: {
+                showDisplayNameSetup: { $set: event.isShown },
             },
         })
     }
