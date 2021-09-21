@@ -56,6 +56,7 @@ import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 
+
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
 
@@ -367,13 +368,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         if (this.props.noResultsType === 'onboarding-msg') {
             return (
                 <NoResults title="You don't have anything saved yet">
-                    <DismissibleResultsMessage
-                        onDismiss={this.props.onDismissOnboardingMsg}
-                    >
                         <OnboardingMsg
                             goToImportRoute={this.props.goToImportRoute}
                         />
-                    </DismissibleResultsMessage>
                 </NoResults>
             )
         }
@@ -405,7 +402,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             )
         }
 
-        return <NoResults title="No Results">¯\_(ツ)_/¯</NoResults>
+        return <NoResults title="Nothing found for this query">¯\_(ツ)_/¯</NoResults>
     }
 
     private renderResultsByDay() {

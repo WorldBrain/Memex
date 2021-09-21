@@ -366,6 +366,7 @@ class Container extends React.Component<Props, State> {
                     <PioneerPlanBanner
                         onHideClick={this.handleSubBannerDismiss}
                         direction="column"
+                        showCloseButton={true}
                         width="415px"
                     />
                 )}

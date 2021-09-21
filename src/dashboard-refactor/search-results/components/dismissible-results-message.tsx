@@ -40,10 +40,6 @@ const Container = styled.div`
     box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
-    &:hover {
-        transition: background 120ms ease-in 0s;
-        background-color: rgba(55, 53, 47, 0.03);
-    }
 
     // composes: fadeIn from 'src/common-ui/elements.css';
     animation: fadeIn 500ms ease;
@@ -54,11 +50,9 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    padding: 1rem;
-    margin: 40px auto 17px;
-    max-width: 95%;
-    min-width: 700px;
-    padding-bottom: 30px;
+    padding: 2rem;
+    margin: 20px 0 40px 0;
+    width: 100%;
 `
 
 const DismissButton = styled.button`

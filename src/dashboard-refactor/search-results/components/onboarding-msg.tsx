@@ -13,21 +13,16 @@ export default class OnboardingMsg extends React.PureComponent<Props> {
                 <Container>
                     <Description>
                         <span>
-                            <strong>
-                                Import your bookmarks to make them full-text
-                                searchable
-                            </strong>{' '}
-                            <br /> From Pocket, Diigo, Raindrop.io and many
-                            more.
+                            <u
+                                onClick={this.props.goToImportRoute}
+                            >Import</u> your bookmarks 
+                            or {' '}
+                            <u
+                                onClick={()=>window.open('https://worldbrain.io/tutorials')}
+                            >learn</u> how to use Memex
                         </span>
                     </Description>
                 </Container>
-                <Button
-                    type="primary-action"
-                    onClick={this.props.goToImportRoute}
-                >
-                    Get Started
-                </Button>
             </>
         )
     }
@@ -39,13 +34,14 @@ const Container = styled.div`
     flex-direction: column;
     justify-content: center;
     width: 100%;
+    align-items: center;
+    margin-top: -10px;
 `
 
 const Description = styled.div`
     font-size: 16px;
     font-weight: normal;
     width: 75%;
-    margin: 1rem auto;
     text-align: center;
 `
 

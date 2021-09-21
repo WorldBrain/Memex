@@ -42,7 +42,7 @@ const Sidebar = styled.div<{
         css`
             height: max-content;
             background-color: ${colors.white};
-            box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.25);
+            box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;
             height: 90vh;
