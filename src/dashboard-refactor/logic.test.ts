@@ -138,35 +138,35 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 
-    it('should get sharing access state during init logic', async ({
-        device,
-    }) => {
-        const { searchResults: searchResultsA } = await setupTest(device)
+    // it('should get sharing access state during init logic', async ({
+    //     device,
+    // }) => {
+    //     const { searchResults: searchResultsA } = await setupTest(device)
 
-        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
-            true
+    //     device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
+    //         true
 
-        expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
-        await searchResultsA.processEvent('init', null)
-        expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
-            'sharing-allowed',
-        )
+    //     expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    //     await searchResultsA.processEvent('init', null)
+    //     expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
+    //         'sharing-allowed',
+    //     )
 
-        const { searchResults: searchResultsB } = await setupTest(device)
+    //     const { searchResults: searchResultsB } = await setupTest(device)
 
-        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
-            false
+    //     device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
+    //         false
 
-        expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
-        await searchResultsB.processEvent('init', null)
-        expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
-    })
+    //     expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    //     await searchResultsB.processEvent('init', null)
+    //     expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    // })
 
     it('should get current user state during init logic', async ({
         device,
@@ -240,9 +240,9 @@ describe('Dashboard Refactor misc logic', () => {
         device.backgroundModules.activityIndicator.remoteFunctions.markActivitiesAsSeen = async () => {
             activitiesMarkedAsSeen = true
         }
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () =>
-            ({ id: 1 } as any)
+
         const { searchResults } = await setupTest(device, {
+            withAuth: true,
             openFeedUrl: () => {
                 feedUrlOpened = true
             },

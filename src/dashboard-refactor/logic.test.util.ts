@@ -95,7 +95,6 @@ export async function setupTest(
     device: UILogicTestDevice,
     args: {
         withAuth?: boolean
-        withBeta?: boolean
         mockDocument?: any
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
@@ -114,12 +113,9 @@ export async function setupTest(
             TEST_USER.email,
             'password',
         )
-    }
-
-    if (args.withBeta) {
-        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async (
-            feature,
-        ) => feature === 'beta'
+        await device.backgroundModules.auth.remoteFunctions.updateUserProfile({
+            displayName: TEST_USER.displayName,
+        })
     }
 
     const logic = new DashboardLogic({
