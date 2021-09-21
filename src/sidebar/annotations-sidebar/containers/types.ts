@@ -166,6 +166,7 @@ export interface SidebarContainerState
 
     isListFilterActive: boolean
     showLoginModal: boolean
+    showDisplayNameSetupModal: boolean
     showAnnotationsShareModal: boolean
 
     showAllNotesShareMenu: boolean
@@ -265,6 +266,7 @@ export type SidebarContainerEvents = UIEvent<
         }
 
         setLoginModalShown: { shown: boolean }
+        setDisplayNameSetupModalShown: { shown: boolean }
         setAnnotationShareModalShown: { shown: boolean }
         setBetaFeatureNotifModalShown: { shown: boolean }
 

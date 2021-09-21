@@ -40,6 +40,7 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
     setLoginModalShown?: (isShown: boolean) => void
+    setDisplayNameModalShown?: (isShown: boolean) => void
 }
 
 type EventHandler<
@@ -185,6 +186,7 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             showLoginModal: false,
+            showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
@@ -256,16 +258,26 @@ export class SidebarContainerLogic extends UILogic<
     }) => this.options.annotationsCache.sort(sortingFn)
 
     private async ensureLoggedIn(): Promise<boolean> {
-        const { auth, setLoginModalShown } = this.options
+        const {
+            auth,
+            setLoginModalShown,
+            setDisplayNameModalShown,
+        } = this.options
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const mutation: UIMutation<SidebarContainerState> = {
-                annotationSharingAccess: { $set: 'sharing-allowed' },
+            const userProfile = await auth.getUserProfile()
+            if (!userProfile?.displayName?.length) {
+                setDisplayNameModalShown?.(true)
+                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
+                return false
             }
 
             setLoginModalShown?.(false)
-            this.emitMutation(mutation)
+            setDisplayNameModalShown?.(false)
+            this.emitMutation({
+                annotationSharingAccess: { $set: 'sharing-allowed' },
+            })
             return true
         }
 
@@ -399,6 +411,12 @@ export class SidebarContainerLogic extends UILogic<
 
     setLoginModalShown: EventHandler<'setLoginModalShown'> = ({ event }) => {
         this.emitMutation({ showLoginModal: { $set: event.shown } })
+    }
+
+    setDisplayNameSetupModalShown: EventHandler<
+        'setDisplayNameSetupModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showDisplayNameSetupModal: { $set: event.shown } })
     }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({

@@ -17,6 +17,7 @@ import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/Shar
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import { SidebarDisplayMode } from './types'
+import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -240,6 +241,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         contentScriptBG={this.props.contentScriptBackground}
                         onClose={() =>
                             this.processEvent('setLoginModalShown', {
+                                shown: false,
+                            })
+                        }
+                    />
+                )}
+                {this.state.showDisplayNameSetupModal && (
+                    <DisplayNameModal
+                        ignoreReactPortal
+                        authBG={this.props.auth}
+                        onClose={() =>
+                            this.processEvent('setDisplayNameSetupModalShown', {
                                 shown: false,
                             })
                         }

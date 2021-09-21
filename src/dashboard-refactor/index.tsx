@@ -945,6 +945,11 @@ export class DashboardContainer extends StatefulUIElement<
                     setLoginModalShown={(isShown) =>
                         this.processEvent('setShowLoginModal', { isShown })
                     }
+                    setDisplayNameModalShown={(isShown) =>
+                        this.processEvent('setShowDisplayNameSetupModal', {
+                            isShown,
+                        })
+                    }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
                             isShown: true,
