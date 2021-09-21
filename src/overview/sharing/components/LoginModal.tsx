@@ -7,7 +7,6 @@ import {
     SignInScreen,
     Props as SignInProps,
 } from 'src/authentication/components/SignIn'
-import styles, { fonts } from 'src/dashboard-refactor/styles'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
@@ -49,15 +48,13 @@ export default class LoginModal extends React.PureComponent<Props> {
     render() {
         return (
             <Modal {...this.props}>
-                <TitleText>
-                    Login or Sign Up
-                </TitleText>
+                <TitleText>Login or Sign Up</TitleText>
                 {this.props.routeToLoginBtn ? (
                     <>
-                        <Margin/>
+                        <Margin />
                         <Button
                             type="primary-action"
-                            onClick={() => this.handleGoToClick()}
+                            onClick={this.handleGoToClick}
                         >
                             Next
                         </Button>
@@ -84,7 +81,7 @@ const TitleText = styled.div`
     font-size: 18px;
     font-weight: 600;
 
-    padding-bottom: ${(props) => props.routeToLoginBtn ? '20px' : '0px'}
+    padding-bottom: ${(props) => (props.routeToLoginBtn ? '20px' : '0px')};
 `
 
 const SubTitleText = styled.div`

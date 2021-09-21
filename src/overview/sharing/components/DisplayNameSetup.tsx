@@ -9,6 +9,7 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 export interface Props {
     refreshUserInfoOnInit?: boolean
     authBG: AuthRemoteFunctionsInterface
+    onSaveComplete?: React.MouseEventHandler
 }
 
 interface State {
@@ -69,7 +70,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
         this.setState({ buttonLabel: 'Update', displayNameInput: displayName })
     }
 
-    private confirmSave: React.MouseEventHandler = async () => {
+    private confirmSave: React.MouseEventHandler = async (e) => {
         const displayName = this.state.displayNameInput.trim()
         if (!displayName.length || displayName === this.state.displayName) {
             return
@@ -77,6 +78,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
 
         await this.props.authBG.updateUserProfile({ displayName })
         this.setState({ buttonLabel: 'Saved!' })
+        this.props.onSaveComplete?.(e)
     }
 
     render() {
