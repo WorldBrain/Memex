@@ -20,7 +20,7 @@ describe('user settings background tests', () => {
             await device.storageManager
                 .collection(COLLECTION_NAMES.settings)
                 .findAllObjects({}),
-        ).toEqual([{ name: 'test1', value: TEST_DATA.test1 }])
+        ).toEqual([{ key: 'test1', value: TEST_DATA.test1 }])
     })
 
     it('should write multiple settings to storage', async ({ device }) => {
@@ -31,9 +31,9 @@ describe('user settings background tests', () => {
                 .collection(COLLECTION_NAMES.settings)
                 .findAllObjects({}),
         ).toEqual([
-            { name: 'test1', value: TEST_DATA.test1 },
-            { name: 'test2', value: TEST_DATA.test2 },
-            { name: 'test3', value: TEST_DATA.test3 },
+            { key: 'test1', value: TEST_DATA.test1 },
+            { key: 'test2', value: TEST_DATA.test2 },
+            { key: 'test3', value: TEST_DATA.test3 },
         ])
     })
 

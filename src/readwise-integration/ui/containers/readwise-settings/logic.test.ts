@@ -60,40 +60,6 @@ describe('Readwise integration settings UI', () => {
             showSyncRunning: false,
             showSyncScreen: false,
             showSyncSuccessMessage: false,
-            showUnauthorized: false,
-        })
-    })
-
-    it('should initialize the UI without being authorized to use the feature', async ({
-        device,
-    }) => {
-        const { settings } = await setupTest({
-            device,
-            checkFeatureAuthorized: async () => false,
-        })
-        await settings.init()
-        expect(settings.state).toEqual({
-            ...INITIAL_STATE,
-            loadState: 'success',
-            isFeatureAuthorized: false,
-            apiKeyEditable: true,
-        })
-        expect(allSelectors(settings.state)).toEqual({
-            apiKeyDisabled: true,
-            formEditable: false,
-            keySaveErrorMessage: '',
-            showForm: false,
-            showKeyRemoveButton: false,
-            showKeySaveButton: false,
-            showKeySaveError: false,
-            showKeySaving: false,
-            showKeySuccessMessage: false,
-            showLoadingError: false,
-            showSyncError: false,
-            showSyncRunning: false,
-            showSyncScreen: false,
-            showSyncSuccessMessage: false,
-            showUnauthorized: true,
         })
     })
 
