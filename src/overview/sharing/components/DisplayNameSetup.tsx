@@ -5,6 +5,7 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { formBackground } from 'src/common-ui/components/design-library/colors'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { TaskState } from 'ui-logic-core/lib/types'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 export interface Props {
     refreshUserInfoOnInit?: boolean
@@ -14,7 +15,7 @@ export interface Props {
 
 interface State {
     loadState: TaskState
-    buttonLabel: string
+    saveState: TaskState
     displayNameInput: string
     displayName: string
 }
@@ -39,7 +40,7 @@ const InputContainer = styled.div`
 export default class DisplayNameSetup extends PureComponent<Props, State> {
     state: State = {
         loadState: 'pristine',
-        buttonLabel: 'Update',
+        saveState: 'pristine',
         displayNameInput: '',
         displayName: '',
     }
@@ -66,8 +67,8 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
     }
 
     private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-        const displayName = (e.target as HTMLInputElement).value
-        this.setState({ buttonLabel: 'Update', displayNameInput: displayName })
+        const displayNameInput = (e.target as HTMLInputElement).value
+        this.setState({ displayNameInput, saveState: 'pristine' })
     }
 
     private confirmSave: React.MouseEventHandler = async (e) => {
@@ -76,9 +77,25 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
             return
         }
 
-        await this.props.authBG.updateUserProfile({ displayName })
-        this.setState({ buttonLabel: 'Saved!' })
-        this.props.onSaveComplete?.(e)
+        this.setState({ saveState: 'running' })
+        try {
+            await this.props.authBG.updateUserProfile({ displayName })
+            this.setState({ saveState: 'success' })
+            this.props.onSaveComplete?.(e)
+        } catch (err) {
+            this.setState({ saveState: 'error' })
+            throw err
+        }
+    }
+
+    private renderBtnLabel() {
+        if (this.state.saveState === 'running') {
+            return <LoadingIndicator />
+        }
+        if (this.state.saveState === 'success') {
+            return 'Saved!'
+        }
+        return 'Update'
     }
 
     render() {
@@ -88,10 +105,10 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
                     <NameInput
                         value={this.state.displayNameInput}
                         onChange={this.changeInput}
+                        disabled={this.state.saveState === 'running'}
                     />
-
                     <PrimaryAction
-                        label={this.state.buttonLabel}
+                        label={this.renderBtnLabel()}
                         onClick={this.confirmSave}
                     />
                 </InputContainer>
