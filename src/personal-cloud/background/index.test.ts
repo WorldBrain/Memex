@@ -222,6 +222,7 @@ describe('Personal cloud', () => {
             }
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.integrateAllUpdates()
             await expectPageContent(setups[1])
         }
         await test()

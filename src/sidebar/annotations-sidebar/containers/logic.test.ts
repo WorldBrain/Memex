@@ -616,7 +616,15 @@ describe('SidebarContainerLogic', () => {
         it('should share annotations, simulating sidebar share process', async ({
             device,
         }) => {
-            const { contentSharing, directLinking } = device.backgroundModules
+            const {
+                contentSharing,
+                directLinking,
+                personalCloud,
+            } = device.backgroundModules
+
+            // Make sure sync is enabled and running as sharing is handled in cloud translation layer
+            await personalCloud.enableSync()
+            await personalCloud.setup()
 
             const localListId = await sharingTestData.createContentSharingTestList(
                 device,
@@ -677,7 +685,8 @@ describe('SidebarContainerLogic', () => {
                 queueInteraction: 'skip-queue',
             })
 
-            await contentSharing.waitForSync()
+            await personalCloud.waitForSync()
+
             const serverStorage = await device.getServerStorage()
             expect(
                 await serverStorage.storageManager
