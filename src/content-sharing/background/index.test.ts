@@ -1213,7 +1213,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should add a list to local lists and store its metadata when the user joined a new list',
-            { skipConflictTests: true },
+            { skipConflictTests: true, skipSyncTests: true },
             () => {
                 const testData: TestData = {}
 
@@ -1254,9 +1254,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
-                                await (personalCloud.options
-                                    .backend as StorexPersonalCloudBackend).forceUpdateCheck()
+                                await personalCloud.integrateAllUpdates()
                                 await personalCloud.waitForSync()
+
                                 const customLists = await setup.storageManager.operation(
                                     'findObjects',
                                     'customLists',
@@ -1287,12 +1287,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should add an annotation and store its metadata when the user creates a new annotation to their own page via the web UI',
-            { skipConflictTests: true },
+            { skipConflictTests: true, skipSyncTests: true },
             () => makeAnnotationFromWebUiTest({ ownPage: true }),
         ),
         backgroundIntegrationTest(
             `should add an annotation and store its metadata when the user creates a new annotation to another user's page via the web UI`,
-            { skipConflictTests: true },
+            { skipConflictTests: true, skipSyncTests: true },
             () => makeAnnotationFromWebUiTest({ ownPage: false }),
         ),
     ],
@@ -1536,7 +1536,7 @@ function makeAnnotationFromWebUiTest(options: {
         setup: async (context) => {
             const fakeFetch = new FakeFetch()
 
-            await storageHooksChangeWatcher.setUp({
+            storageHooksChangeWatcher.setUp({
                 fetch: fakeFetch.fetch,
                 getCurrentUserReference: async () => ({
                     type: 'user-reference',
@@ -1617,9 +1617,9 @@ function makeAnnotationFromWebUiTest(options: {
                         },
                     )
 
-                    await (personalCloud.options
-                        .backend as StorexPersonalCloudBackend).forceUpdateCheck()
                     await personalCloud.waitForSync() // wait for receival
+                    await personalCloud.integrateAllUpdates()
+
                     const annotations = await setup.storageManager.operation(
                         'findObjects',
                         'annotations',

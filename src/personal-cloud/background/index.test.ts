@@ -93,20 +93,18 @@ describe('Personal cloud', () => {
                               ],
                 })
             }
-            if (testOptions.source === 'url') {
-                setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
-                    await pipeline({
-                        pageDoc: {
-                            url: fullUrl,
-                            content: {
-                                fullText,
-                                title: fullTitle,
-                            },
+            setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
+                await pipeline({
+                    pageDoc: {
+                        url: fullUrl,
+                        content: {
+                            fullText,
+                            title: fullTitle,
                         },
-                    }),
-                    { htmlBody },
-                )
-            }
+                    },
+                }),
+                { htmlBody },
+            )
             await setups[0].backgroundModules.pages.indexPage({
                 fullUrl,
                 tabId: 667,

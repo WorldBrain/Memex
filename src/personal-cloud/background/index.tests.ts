@@ -211,9 +211,12 @@ async function runSyncBackgroundTest(
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
-    const { setups, sync } = await setupSyncBackgroundTest(options)
-
     const testInstance = options.test.instantiate({ isSyncTest: true })
+    const { setups, sync } = await setupSyncBackgroundTest({
+        ...options,
+        testInstance,
+    })
+
     for (const setup of setups) {
         await testInstance.setup?.({ setup })
         await setup.backgroundModules.personalCloud.setup()
@@ -263,14 +266,17 @@ export async function setupSyncBackgroundTest(
             'storageManager'
         >
         useDownloadTranslationLayer?: boolean
+        testInstance?: BackgroundIntegrationTestInstance
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
     const userId = TEST_USER.id
 
-    const getServerStorage = createLazyTestServerStorage({
-        changeWatchSettings: options.serverChangeWatchSettings,
-    })
+    const getServerStorage =
+        options.testInstance?.getSetupOptions?.().getServerStorage ??
+        createLazyTestServerStorage({
+            changeWatchSettings: options.serverChangeWatchSettings,
+        })
     const serverStorage = await getServerStorage()
     const cloudHub = new PersonalCloudHub()
 

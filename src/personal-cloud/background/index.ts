@@ -278,6 +278,11 @@ export class PersonalCloudBackground {
         }
     }
 
+    async integrateAllUpdates(): Promise<void> {
+        const updateBatch = await this.options.backend.bulkDownloadUpdates()
+        return this.integrateUpdates(updateBatch)
+    }
+
     async integrateContinuously() {
         try {
             for await (const updates of this.options.backend.streamUpdates()) {
