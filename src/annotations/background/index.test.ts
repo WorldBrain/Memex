@@ -9,11 +9,7 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
-import {
-    FakeTab,
-    injectFakeTabs,
-} from 'src/tab-management/background/index.tests'
-import { object } from '@storybook/addon-knobs'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import {
     PAGE_1_CREATION,
     PAGE_2_CREATION,
@@ -521,8 +517,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             }
         },
     ),
+    // Annot bookmarks are functional, but currentyl unused in Memex ext + ignored from Memex cloud
     backgroundIntegrationTest(
         'should create a page, create an annotation, bookmark it, then retrieve it via a filtered search',
+        { skipSyncTests: true },
         () => {
             return {
                 setup: testSetupFactory(),
@@ -609,7 +607,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         },
     ),
     backgroundIntegrationTest(
-        'should create a page, create an annotation, tag+star+add it to list, then delete it - deleting all assoc. data',
+        'should create a page, create an annotation, tag+add it to list, then delete it - deleting all assoc. data',
+        { skipSyncTests: true },
         () => {
             let listId: number
             const findAllObjects = (collection, setup) =>

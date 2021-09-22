@@ -292,7 +292,7 @@ export function registerBackgroundIntegrationTest(
         await runBackgroundIntegrationTest(test, options)
     })
     const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
-    if (!skipSyncTests) {
+    if (!skipSyncTests && !test.skipSyncTests) {
         registerSyncBackgroundIntegrationTests(test, options)
     }
 }
