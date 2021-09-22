@@ -213,7 +213,7 @@ async function runSyncBackgroundTest(
 ) {
     const { setups, sync } = await setupSyncBackgroundTest(options)
 
-    const testInstance = await options.test.instantiate({ isSyncTest: true })
+    const testInstance = options.test.instantiate({ isSyncTest: true })
     for (const setup of setups) {
         await testInstance.setup?.({ setup })
         await setup.backgroundModules.personalCloud.setup()
@@ -268,7 +268,7 @@ export async function setupSyncBackgroundTest(
 ) {
     const userId = TEST_USER.id
 
-    const getServerStorage = await createLazyTestServerStorage({
+    const getServerStorage = createLazyTestServerStorage({
         changeWatchSettings: options.serverChangeWatchSettings,
     })
     const serverStorage = await getServerStorage()
