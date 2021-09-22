@@ -1,3 +1,4 @@
+import createResolvable, { Resolvable } from '@josephg/resolvable'
 import StorageManager from '@worldbrain/storex'
 import { normalizeUrl, isFileUrl } from '@worldbrain/memex-url-utils'
 import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
@@ -38,6 +39,7 @@ import {
     PageIndexingInterface,
     InitContentIdentifierParams,
     InitContentIdentifierReturns,
+    WaitForContentIdentifierReturns,
 } from './types'
 import { GenerateServerID } from '../../background-script/types'
 import {
@@ -58,6 +60,12 @@ export class PageIndexingBackground {
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
+
+    _identifiersForTabPages: {
+        [tabId: number]: {
+            [fullPageUrl: string]: Resolvable<ContentIdentifier>
+        }
+    } = {}
 
     contentInfo: {
         // will contain multiple entries for the same content info because of multiple normalized URLs pointing to one
@@ -85,6 +93,9 @@ export class PageIndexingBackground {
             initContentIdentifier: remoteFunctionWithExtraArgs(
                 this.initContentIdentifierRemote,
             ),
+            waitForContentIdentifier: remoteFunctionWithExtraArgs(
+                this.waitForContentIdentifierRemote,
+            ),
         }
     }
 
@@ -95,12 +106,29 @@ export class PageIndexingBackground {
     initContentIdentifierRemote: PageIndexingInterface<
         'provider'
     >['initContentIdentifier']['function'] = async (info, params) => {
-        return this.initContentIdentifier(params)
+        return this.initContentIdentifier({
+            ...params,
+            tabId: params.tabId ?? info.tab.id,
+        })
+    }
+
+    waitForContentIdentifierRemote: PageIndexingInterface<
+        'provider'
+    >['waitForContentIdentifier']['function'] = async (info, params) => {
+        return this.waitForContentIdentifier({
+            ...params,
+            tabId: params.tabId ?? info.tab.id,
+        })
     }
 
     async initContentIdentifier(
-        params: InitContentIdentifierParams,
+        params: InitContentIdentifierParams & { tabId: number },
     ): Promise<InitContentIdentifierReturns> {
+        const resolvable = this._resolvableForIdentifierTabPage({
+            tabId: params.tabId,
+            fullUrl: params.locator.originalLocation,
+        })
+
         const regularNormalizedUrl = normalizeUrl(
             params.locator.originalLocation,
         )
@@ -109,6 +137,7 @@ export class PageIndexingBackground {
             fullUrl: params.locator.originalLocation,
         }
         if (!params.fingerprints.length) {
+            resolvable.resolve(regularIdentifier)
             return regularIdentifier
         }
         let contentInfo = this.contentInfo[regularNormalizedUrl]
@@ -203,7 +232,16 @@ export class PageIndexingBackground {
         if (stored && hasNewLocators) {
             await this.storeLocators(primaryIdentifier)
         }
+
+        resolvable.resolve(primaryIdentifier)
         return primaryIdentifier
+    }
+
+    async waitForContentIdentifier(params: {
+        tabId: number
+        fullUrl: string
+    }): Promise<WaitForContentIdentifierReturns> {
+        return this._resolvableForIdentifierTabPage(params)
     }
 
     getContentFingerprints(
@@ -579,6 +617,22 @@ export class PageIndexingBackground {
 
     handleTabClose(event: { tabId: number }) {
         delete this.indexedTabPages[event.tabId]
+        delete this._resolvableForIdentifierTabPage[event.tabId]
+    }
+
+    _resolvableForIdentifierTabPage(params: {
+        tabId: number
+        fullUrl: string
+    }) {
+        const resolvablesForTab =
+            this._identifiersForTabPages[params.tabId] ?? {}
+        this._identifiersForTabPages[params.tabId] = resolvablesForTab
+
+        const resolvable =
+            resolvablesForTab[params.fullUrl] ?? createResolvable()
+        resolvablesForTab[params.fullUrl] = resolvable
+
+        return resolvable
     }
 
     _getTime(time?: number | '$now') {

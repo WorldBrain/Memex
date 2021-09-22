@@ -36,6 +36,7 @@ export async function indexTestFingerprintedPdf(
     }
     const identifier = await setup.backgroundModules.pages.initContentIdentifier(
         {
+            tabId: 1,
             locator,
             fingerprints,
         },

@@ -114,9 +114,8 @@ export async function main(
             delete components[component]
         },
     })
-    const loadAnnotationsPromise = annotationsCache.load(
-        await pageInfo.getPageUrl(),
-    )
+    const pageUrl = await pageInfo.getPageUrl()
+    const loadAnnotationsPromise = annotationsCache.load(pageUrl)
 
     const annotationFunctionsParams = {
         inPageUI,
@@ -375,6 +374,10 @@ class PageInfo {
             fingerprints:
                 (await this.options?.getContentFingerprints?.()) ?? [],
         })
+        if (!this._identifier?.normalizedUrl || !this._identifier?.fullUrl) {
+            console.error(`Invalid content identifier`, this._identifier)
+            throw new Error(`Got invalid content identifier`)
+        }
         this._href = window.location.href
     }
 
