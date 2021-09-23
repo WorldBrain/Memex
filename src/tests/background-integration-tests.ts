@@ -249,7 +249,6 @@ export async function setupBackgroundIntegrationTest(
     }
 
     await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
         personalCloud: backgroundModules.personalCloud,

@@ -112,7 +112,6 @@ export async function main() {
     const { setStorageLoggingEnabled } = await setStorageMiddleware(
         storageManager,
         {
-            syncService: backgroundModules.sync,
             storexHub: backgroundModules.storexHub,
             contentSharing: backgroundModules.contentSharing,
             personalCloud: backgroundModules.personalCloud,
