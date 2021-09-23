@@ -59,6 +59,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
     startWithSyncDisabled?: boolean
+    useDownloadTranslationLayer?: boolean
     services?: Services
 }
 
@@ -200,7 +201,8 @@ export async function setupBackgroundIntegrationTest(
                     (await backgroundModules.auth.authService.getCurrentUser())
                         ?.id,
                 getNow,
-                useDownloadTranslationLayer: true,
+                useDownloadTranslationLayer:
+                    options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
             }),

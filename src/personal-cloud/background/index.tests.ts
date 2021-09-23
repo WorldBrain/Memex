@@ -296,7 +296,8 @@ export async function setupSyncBackgroundTest(
             view: cloudHub.getView(),
             getUserId: async () => userId,
             getNow,
-            useDownloadTranslationLayer: options.useDownloadTranslationLayer,
+            useDownloadTranslationLayer:
+                options.useDownloadTranslationLayer ?? true,
             getDeviceId: async () =>
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
@@ -329,6 +330,7 @@ export async function setupSyncBackgroundTest(
         syncOptions: { debug: boolean },
     ) => {
         const setup = setups[deviceIndex]
+        await setup.backgroundModules.personalCloud.integrateAllUpdates()
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
