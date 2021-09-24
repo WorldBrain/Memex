@@ -75,7 +75,7 @@ const PioneerPlanBanner = ({
     >
         <PioneerPlanContentBox direction={props.direction}>
             <PioneerPlanTitle direction={props.direction}>
-                Memex is in Beta
+                Memex goes "back-to-beta"
             </PioneerPlanTitle>
             <PioneerPlanDescription>
                 Support our development and a VC-free business with the Pioneer plan <br/> and get a <strong> 60% early bird discount</strong>. 

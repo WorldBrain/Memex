@@ -38,6 +38,14 @@ const Row = styled(Margin)`
     }
 `
 
+const BottomRow = styled.div`
+    padding: 5px 10px 5px 10px;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+}
+`
+
 const RowContainer = styled.div`
     height: max-content;
     width: 100%;
@@ -72,6 +80,32 @@ const TextBlock = styled.div<{
                 ? fonts.primary.weight.bold
                 : fonts.primary.weight.normal};
         `}
+`
+
+const HelpTextBlock = styled.span<{
+    bold: boolean
+}>`
+    height: 18px;
+    ${textStyles}
+    font-size: 10px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: ${colors.midGrey};
+    text-decoration: none;
+`
+
+const HelpTextBlockLink = styled.a<{
+    bold: boolean
+}>`
+    height: 18px;
+    ${textStyles}
+    font-size: 10px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: ${colors.midGrey};
+    padding-left: 5px;
 `
 
 const TextBlockSmall = styled.div`
@@ -162,6 +196,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
+            console.log(lastSuccessfulSyncDate)
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
         if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
@@ -250,8 +285,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 : 0}
                         </Count>
                         <TextBlock> pending remote changes</TextBlock>
-                    </Row>
+                    </Row>    
                 </RowContainer>
+                <Separator />
+                <BottomRow>
+                        <HelpTextBlock> Report sync problems:</HelpTextBlock><HelpTextBlockLink target="_blank" href="https://worldbrain.io/faq/new-sync"> Forum</HelpTextBlockLink><HelpTextBlockLink target="_blank" href="mailto:support@worldbrain.io"> Email</HelpTextBlockLink>
+                </BottomRow>
             </StyledHoverBox>
         )
     }
