@@ -86,33 +86,6 @@ describe('Cloud onboarding UI logic', () => {
         expect(didFinish).toBe(true)
     })
 
-    it('should set subscribe banner to show upon final modal close', async ({
-        device,
-    }) => {
-        const { logic, _logic } = await setupTest(device, {
-            isSyncDisabled: true,
-        })
-
-        logic.processMutation({ needsToRemovePassiveData: { $set: false } })
-
-        expect(logic.state.isMigrationPrepped).toBe(false)
-        await logic.processEvent('continueToMigration', null)
-        expect(logic.state.isMigrationPrepped).toBe(true)
-
-        const now = Date.now()
-        expect(
-            await _logic.syncSettings.dashboard.get(
-                'subscribeBannerShownAfter',
-            ),
-        ).toBeNull()
-        await logic.processEvent('closeMigration', { now })
-        expect(
-            await _logic.syncSettings.dashboard.get(
-                'subscribeBannerShownAfter',
-            ),
-        ).toBe(now)
-    })
-
     it('should disable DB backup change recording before performing passive data wipe', async ({
         device,
     }) => {

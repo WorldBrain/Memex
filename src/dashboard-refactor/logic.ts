@@ -237,7 +237,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSubscriptionBannerShown: {
                     $set:
                         subBannerShownAfter != null &&
-                        subBannerShownAfter > Date.now(),
+                        subBannerShownAfter < Date.now(),
                 },
             },
             listsSidebar: {

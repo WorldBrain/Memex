@@ -59,8 +59,8 @@ interface Dependencies {
 }
 
 class BackgroundScript {
+    syncSettings: SyncSettingsStore<'pdfIntegration' | 'dashboard'>
     private alarmsListener: (alarm: Alarms.Alarm) => void
-    private syncSettings: SyncSettingsStore<'pdfIntegration'>
 
     constructor(private deps: Dependencies) {
         this.syncSettings = createSyncSettingsStore(deps)
@@ -92,7 +92,7 @@ class BackgroundScript {
         })
     }
 
-    private async handleInstallLogic() {
+    async handleInstallLogic(now = Date.now()) {
         // Ensure default blacklist entries are stored (before doing anything else)
         await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
@@ -106,13 +106,24 @@ class BackgroundScript {
         // Enable PDF integration by default
         await this.syncSettings.pdfIntegration.set('shouldAutoOpen', true)
 
+        // TODO: Set up pioneer subscription banner to show up in 2 weeks
+        // const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
+        // await this.syncSettings.dashboard.set(
+        //     'subscribeBannerShownAfter',
+        //     fortnightFromNow,
+        // )
+        this.syncSettings.dashboard.set(
+            'subscribeBannerShownAfter',
+            now, // Instead, show it immediately
+        )
+
         await insertDefaultTemplates({
             copyPaster: this.deps.copyPasterBackground,
             localStorage: this.deps.storageAPI.local,
         })
     }
 
-    private async handleUpdateLogic() {
+    async handleUpdateLogic(now = Date.now()) {
         const {
             storageManager,
             localExtSettingStore,
@@ -127,6 +138,10 @@ class BackgroundScript {
 
         const { version } = runtimeAPI.getManifest()
         if (version === '2.20.0') {
+            await this.syncSettings.dashboard.set(
+                'subscribeBannerShownAfter',
+                now,
+            )
             await syncSettingsBG.migrateLocalStorage()
             await migrateInstallTime({
                 storageManager,

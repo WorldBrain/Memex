@@ -212,12 +212,6 @@ export class PersonalCloudBackground {
     enableSyncForNewInstall = async (now = Date.now()) => {
         await this.enableSync()
         this.startSync()
-
-        const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
-        await this.options.syncSettingsStore.dashboard.set(
-            'subscribeBannerShownAfter',
-            fortnightFromNow,
-        )
     }
 
     startSync() {
