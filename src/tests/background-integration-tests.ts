@@ -59,6 +59,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
     startWithSyncDisabled?: boolean
+    useDownloadTranslationLayer?: boolean
     services?: Services
 }
 
@@ -200,7 +201,8 @@ export async function setupBackgroundIntegrationTest(
                     (await backgroundModules.auth.authService.getCurrentUser())
                         ?.id,
                 getNow,
-                useDownloadTranslationLayer: true,
+                useDownloadTranslationLayer:
+                    options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
             }),
@@ -247,7 +249,6 @@ export async function setupBackgroundIntegrationTest(
     }
 
     await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
         personalCloud: backgroundModules.personalCloud,
@@ -292,7 +293,7 @@ export function registerBackgroundIntegrationTest(
         await runBackgroundIntegrationTest(test, options)
     })
     const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
-    if (!skipSyncTests) {
+    if (!skipSyncTests && !test.skipSyncTests) {
         registerSyncBackgroundIntegrationTests(test, options)
     }
 }

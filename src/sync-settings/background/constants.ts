@@ -26,7 +26,6 @@ export const SETTING_NAMES: SyncSettingNames = {
     },
     extension: {
         blocklist: FEATURE_PREFIX.EXTENSION + 'blocklist',
-        installTime: FEATURE_PREFIX.EXTENSION + 'install_time',
         keyboardShortcuts: FEATURE_PREFIX.EXTENSION + 'keyboard_shortcuts',
         shouldTrackAnalytics:
             FEATURE_PREFIX.EXTENSION + 'should_track_analytics',

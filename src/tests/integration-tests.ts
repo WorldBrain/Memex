@@ -26,10 +26,9 @@ export interface IntegrationTestSuite<StepContext> {
     tests: Array<IntegrationTest<StepContext>>
 }
 
-export interface IntegrationTest<StepContext> {
+export interface IntegrationTest<StepContext>
+    extends BackgroundIntegrationTestOptions {
     description: string
-    mark?: boolean
-    skipConflictTests?: boolean
     instantiate: (options: {
         isSyncTest?: boolean
     }) => IntegrationTestInstance<StepContext>
@@ -107,6 +106,7 @@ export function backgroundIntegrationTestSuite(
 
 export interface BackgroundIntegrationTestOptions {
     mark?: boolean
+    skipSyncTests?: boolean
     skipConflictTests?: boolean
 }
 export function backgroundIntegrationTest(

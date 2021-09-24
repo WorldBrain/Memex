@@ -11,7 +11,6 @@ import { WATCHED_COLLECTIONS } from './constants'
 export async function setStorageMiddleware(
     storageManager: StorageManager,
     options: {
-        syncService: SyncService
         storexHub?: StorexHubBackground
         contentSharing?: ContentSharingBackground
         personalCloud?: PersonalCloudBackground
@@ -60,7 +59,6 @@ export async function setStorageMiddleware(
                 shouldLog: () => shouldLogStorageOperations,
             }),
             changeWatchMiddleware,
-            await options.syncService.createSyncLoggingMiddleware(),
         ]),
     )
 

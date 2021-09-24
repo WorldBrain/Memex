@@ -29,7 +29,6 @@ describe('Personal cloud', () => {
     }) => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 2,
-            useDownloadTranslationLayer: true,
         })
 
         const fullUrl =
@@ -93,20 +92,18 @@ describe('Personal cloud', () => {
                               ],
                 })
             }
-            if (testOptions.source === 'url') {
-                setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
-                    await pipeline({
-                        pageDoc: {
-                            url: fullUrl,
-                            content: {
-                                fullText,
-                                title: fullTitle,
-                            },
+            setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
+                await pipeline({
+                    pageDoc: {
+                        url: fullUrl,
+                        content: {
+                            fullText,
+                            title: fullTitle,
                         },
-                    }),
-                    { htmlBody },
-                )
-            }
+                    },
+                }),
+                { htmlBody },
+            )
             await setups[0].backgroundModules.pages.indexPage({
                 fullUrl,
                 tabId: 667,
@@ -224,6 +221,7 @@ describe('Personal cloud', () => {
             }
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.integrateAllUpdates()
             await expectPageContent(setups[1])
         }
         await test()
@@ -257,7 +255,6 @@ describe('Personal cloud', () => {
     }) => {
         const { setups, serverStorage } = await setupSyncBackgroundTest({
             deviceCount: 2,
-            useDownloadTranslationLayer: true,
         })
         // setups[0].backgroundModules.personalCloud.debug = true
         // setups[1].backgroundModules.personalCloud.debug = true
@@ -382,7 +379,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: false,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -399,7 +395,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: false,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -437,7 +432,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -463,7 +457,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -489,7 +482,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
