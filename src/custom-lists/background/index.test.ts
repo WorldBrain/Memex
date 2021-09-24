@@ -38,6 +38,7 @@ function testSetupFactory() {
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: TEST_TABS,
+            includeTitle: true,
         })
     }
 }
@@ -419,6 +420,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                 SPECIAL_LIST_NAMES.INBOX,
                                                 TEST_LIST_2,
                                             ],
+                                            title: DATA.PAGE_1.title,
                                             tags: [],
                                             url: TEST_TABS[0].normalized,
                                             fullUrl: TEST_TABS[0].url,
@@ -535,7 +537,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
-
         backgroundIntegrationTest(
             'should create a list, add an entry to it, then remove the list and its entries',
             () => {

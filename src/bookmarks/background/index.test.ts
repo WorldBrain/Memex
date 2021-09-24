@@ -81,6 +81,7 @@ function testSetupFactory() {
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: [DATA.TEST_TAB_1],
+            includeTitle: true,
         })
     }
 }
@@ -182,7 +183,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -314,7 +315,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },

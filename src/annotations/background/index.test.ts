@@ -35,6 +35,7 @@ function testSetupFactory() {
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+            includeTitle: true,
         })
     }
 }
