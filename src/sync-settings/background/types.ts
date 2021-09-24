@@ -37,7 +37,6 @@ export interface SyncSettingsByFeature {
     }
     extension: {
         blocklist: string
-        installTime: number
         shouldTrackAnalytics: boolean
         keyboardShortcuts: {
             shortcutsEnabled: boolean
