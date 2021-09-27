@@ -20,7 +20,7 @@ export const ANNOT_1 = {
 }
 
 export const ANNOT_2 = {
-    url: PAGE_2.url + '/#1',
+    url: PAGE_2.url + '/#2',
     title: PAGE_2.title,
     pageUrl: PAGE_2.url,
     comment: 'some test text',
@@ -28,7 +28,7 @@ export const ANNOT_2 = {
 }
 
 export const HIGHLIGHT_1 = {
-    url: PAGE_1.url + '/#2',
+    url: PAGE_1.url + '/#3',
     title: PAGE_1.title,
     body: 'test body',
     pageUrl: PAGE_1.url,
