@@ -1,57 +1,97 @@
 import * as React from 'react'
+import type Firebase from 'firebase/app'
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import { FirebaseAuth } from 'react-firebaseui'
 import styled from 'styled-components'
 import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 import { fontSizeBigger } from 'src/common-ui/components/design-library/typography'
+import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { AuthRemoteFunctionsInterface } from '../background/types'
+import { executeReactStateUITask } from 'src/util/ui-logic'
+import { LoadingIndicator } from 'src/common-ui/components'
 import { auth } from 'src/util/remote-functions-background'
 
 const styles = require('src/authentication/components/styles.css')
 
 export interface Props {
-    onSuccess?(): void
-    onFail?(): void
+    authBG: AuthRemoteFunctionsInterface
     redirectTo?: string
+    onSuccess?(): void | Promise<void>
+    onFail?(): void | Promise<void>
 }
 
-export class SignInScreen extends React.Component<Props> {
-    render = () => {
+interface State {
+    postSignInState: UITaskState
+}
+
+export class SignInScreen extends React.Component<Props, State> {
+    static defaultProps: Pick<Props, 'authBG'> = { authBG: auth }
+
+    state: State = { postSignInState: 'pristine' }
+    private firebase: typeof Firebase
+
+    constructor(props: Props) {
+        super(props)
+        this.firebase = getFirebase()
+    }
+
+    private async handlePostSignInLogic() {
+        const { authBG, onSuccess, redirectTo } = this.props
+        await executeReactStateUITask(this, 'postSignInState', async () => {
+            await authBG.runPostLoginLogic()
+
+            // Avoid redirects after sign-in.
+            if (redirectTo) {
+                window.location.href = redirectTo
+            }
+
+            await onSuccess?.()
+        })
+    }
+
+    render() {
         return (
-            <StyledFirebaseAuth
-                className={styles.firebaseAuth}
-                uiConfig={{
-                    signInFlow: 'popup',
-                    signInOptions: [
-                        {
-                            provider: getFirebase().auth.EmailAuthProvider
-                                .PROVIDER_ID,
-                            requireDisplayName: false,
-                        },
-                    ],
-                    callbacks: {
-                        signInSuccessWithAuthResult: () => {
-                            auth.refreshUserInfo()
-                            // Avoid redirects after sign-in.
-                            if (this.props.redirectTo) {
-                                window.location.href = this.props.redirectTo
-                            }
-                            this.props.onSuccess?.()
-                            return false
-                        },
-                        signInFailure: () => {
-                            this.props.onFail?.()
-                        },
-                    },
-                }}
-                firebaseAuth={getFirebase().auth()}
-            />
+            <Container>
+                {this.state.postSignInState !== 'pristine' ? (
+                    <LoadingIndicator />
+                ) : (
+                    <StyledFirebaseAuth
+                        className={styles.firebaseAuth}
+                        firebaseAuth={this.firebase.auth()}
+                        uiConfig={{
+                            signInFlow: 'popup',
+                            signInOptions: [
+                                {
+                                    provider: this.firebase.auth
+                                        .EmailAuthProvider.PROVIDER_ID,
+                                    requireDisplayName: false,
+                                },
+                            ],
+                            callbacks: {
+                                signInSuccessWithAuthResult: async () => {
+                                    await this.handlePostSignInLogic()
+                                    return false
+                                },
+                                signInFailure: async () => {
+                                    await this.props.onFail?.()
+                                },
+                            },
+                        }}
+                    />
+                )}
+            </Container>
         )
     }
 }
 
-const StyledFirebaseAuth = styled(FirebaseAuth)`
+const Container = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 450px;
+`
 
+const StyledFirebaseAuth = styled(FirebaseAuth)`
     .firebaseui-id-submit {
         background-color: ${colorPrimary};
         border-radius: 3px;

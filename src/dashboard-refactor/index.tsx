@@ -833,12 +833,12 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                     authBG={this.props.authBG}
                     contentSharingBG={this.props.contentShareBG}
-                    onSuccess={() =>
+                    onSuccess={() => {
                         setTimeout(
                             () => this.processEvent('checkSharingAccess', null),
                             1000,
                         )
-                    }
+                    }}
                 />
             )
         }
