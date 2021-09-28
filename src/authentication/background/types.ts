@@ -11,6 +11,7 @@ import type {
 } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export interface AuthRemoteFunctionsInterface {
+    runPostLoginLogic(): Promise<void>
     getCurrentUser(): Promise<AuthenticatedUser | null>
     signOut(): void
     refreshUserInfo(): Promise<void>

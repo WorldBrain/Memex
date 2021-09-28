@@ -176,6 +176,12 @@ export function createBackgroundModules(options: {
         ((collectionName) =>
             getFirebase().firestore().collection(collectionName).doc().id)
 
+    const localExtSettingStore = new BrowserSettingsStore<
+        LocalExtensionSettings
+    >(options.browserAPIs.storage.local, {
+        prefix: 'localSettings.',
+    })
+
     const { storageManager } = options
     const getServerStorage = async () =>
         (await options.getServerStorage()).storageModules
@@ -297,6 +303,8 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
+            storageManager,
+            localExtSettingStore,
             authService: options.services.auth,
             remoteEmitter: createRemoteEventEmitter('auth'),
             subscriptionService: options.services.subscriptions,
@@ -412,12 +420,6 @@ export function createBackgroundModules(options: {
         search,
     })
 
-    const localExtSettingStore = new BrowserSettingsStore<
-        LocalExtensionSettings
-    >(options.browserAPIs.storage.local, {
-        prefix: 'localSettings.',
-    })
-
     const bgScript = new BackgroundScript({
         storageManager,
         tabManagement,
@@ -468,6 +470,9 @@ export function createBackgroundModules(options: {
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
+
+    const userChanges = () => authChanges(auth.authService)
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -482,7 +487,7 @@ export function createBackgroundModules(options: {
                 getServerStorageManager,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
-                userChanges: () => authChanges(auth.authService),
+                userChanges,
                 getUserChangesReference: async () => {
                     const currentUser = await auth.authService.getCurrentUser()
                     if (!currentUser) {
@@ -521,11 +526,7 @@ export function createBackgroundModules(options: {
         localExtSettingStore,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
-        userIdChanges: async function* () {
-            for await (const nextUser of authChanges(auth.authService)) {
-                yield nextUser
-            }
-        },
+        userIdChanges: userChanges,
         writeIncomingData: async (params) => {
             const incomingStorageManager =
                 params.storageType === PersonalCloudClientStorageType.Persistent

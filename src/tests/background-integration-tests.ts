@@ -45,6 +45,8 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { Services } from 'src/services/types'
+import { BrowserSettingsStore } from 'src/util/settings'
+import { LocalExtensionSettings } from 'src/background-script/types'
 
 fetchMock.restore()
 
@@ -98,6 +100,11 @@ export async function setupBackgroundIntegrationTest(
         }))
 
     const auth: AuthBackground = new AuthBackground({
+        localExtSettingStore: new BrowserSettingsStore<LocalExtensionSettings>(
+            browserLocalStorage,
+            { prefix: 'localSettings.' },
+        ),
+        storageManager,
         authService: services.auth,
         subscriptionService: services.subscriptions,
         remoteEmitter: { emit: async () => {} },

@@ -1,8 +1,9 @@
-import {
+import type StorageManager from '@worldbrain/storex'
+import type {
     AuthenticatedUser,
     AuthService,
 } from '@worldbrain/memex-common/lib/authentication/types'
-import {
+import type {
     UserPlan,
     SubscriptionsService,
     UserFeature,
@@ -16,20 +17,21 @@ import {
     getSubscriptionStatus,
     getAuthorizedPlans,
 } from './utils'
-import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import {
-    AuthRemoteEvents,
+import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import type {
     AuthRemoteFunctionsInterface,
     AuthSettings,
     AuthBackendFunctions,
 } from './types'
-import { JobDefinition } from 'src/job-scheduler/background/types'
+import type { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
-import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
-import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import type { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
-import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
+import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
+import type { LocalExtensionSettings } from 'src/background-script/types'
+import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
 
 export class AuthBackground {
     authService: AuthService
@@ -45,12 +47,14 @@ export class AuthBackground {
     constructor(
         public options: {
             authService: AuthService
+            storageManager: StorageManager
             subscriptionService: SubscriptionsService
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
             getUserManagement: () => Promise<UserStorage>
             scheduleJob: (job: JobDefinition) => void
             remoteEmitter: RemoteEventEmitter<'auth'>
+            localExtSettingStore: SettingStore<LocalExtensionSettings>
         },
     ) {
         this.authService = options.authService
@@ -68,6 +72,7 @@ export class AuthBackground {
         this.remoteFunctions = {
             refreshUserInfo: this.refreshUserInfo,
             getCurrentUser: () => this.authService.getCurrentUser(),
+            runPostLoginLogic: this.handlePostLoginLogic,
             signOut: () => {
                 delete this._userProfile
                 this.authService.signOut()
@@ -219,5 +224,38 @@ export class AuthBackground {
                 userWithClaims,
             )
         })
+    }
+
+    private async ___wipeLocalUserData() {
+        await dangerousPleaseBeSureDeleteAndRecreateDatabase(
+            this.options.storageManager,
+        )
+        // TODO: Figure out which local storage data to delete
+    }
+
+    handlePostLoginLogic = async () => {
+        const { localExtSettingStore } = this.options
+
+        await this.refreshUserInfo()
+        const prevUser = await localExtSettingStore.get('mostRecentUser')
+        const nextUser = await this.authService.getCurrentUser()
+
+        if (!nextUser) {
+            return
+        }
+
+        const rememberUser = () =>
+            localExtSettingStore.set('mostRecentUser', nextUser)
+
+        if (!prevUser) {
+            await rememberUser()
+            return
+        }
+
+        if (prevUser.id !== nextUser.id) {
+            await rememberUser()
+            await this.___wipeLocalUserData()
+            return
+        }
     }
 }
