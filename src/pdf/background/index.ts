@@ -1,5 +1,6 @@
 import type { WebRequest, Tabs, Storage } from 'webextension-polyfill-ts'
 import { BrowserSettingsStore } from 'src/util/settings'
+import { PDF_VIEWER_HTML } from '../constants'
 
 export interface PDFSettings {
     shouldAutomaticallyOpen?: boolean
@@ -23,7 +24,7 @@ export class PDFBackground {
             webRequestAPI: WebRequest.Static
         },
     ) {
-        this.routeViewer = deps.extensionGetURL('pdfjs/viewer.html')
+        this.routeViewer = deps.extensionGetURL(PDF_VIEWER_HTML)
         this.settingsStore = new BrowserSettingsStore<PDFSettings>(
             deps.localBrowserStorage,
             { prefix: 'PDFSettings_' },
