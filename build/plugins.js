@@ -80,7 +80,7 @@ export default function ({
                     files: [
                         'yarn.lock',
                         'package-lock.json',
-                        'private/.env.example',
+                        '.env.example',
                         'private/.env.production',
                         'private/.env.development',
                     ],
