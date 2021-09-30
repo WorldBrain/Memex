@@ -4,11 +4,12 @@ import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
 import styled from 'styled-components'
 
+import { StatefulUIElement } from 'src/util/ui-logic'
 import * as constants from '../constants'
-
+import Logic, { State, Event } from './logic'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
-import { remoteFunction } from '../util/webextensionRPC'
+import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import ButtonIcon from './components/ButtonIcon'
@@ -39,6 +40,9 @@ const styles = require('./components/Popup.css')
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { isFullUrlPDF } from 'src/util/uri-utils'
+import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 
 export interface OwnProps {}
 
@@ -63,16 +67,35 @@ interface DispatchProps {
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class PopupContainer extends PureComponent<Props> {
-    componentDidMount() {
+class PopupContainer extends StatefulUIElement<Props, State, Event> {
+    constructor(props: Props) {
+        super(
+            props,
+            new Logic({
+                currentPageUrl: props.url,
+                tabsAPI: runInBackground(),
+                runtimeAPI: runInBackground(),
+                syncSettings: createSyncSettingsStore({
+                    syncSettingsBG: runInBackground(),
+                }),
+            }),
+        )
+    }
+
+    private get isCurrentPagePDF(): boolean {
+        return isFullUrlPDF(this.props.url)
+    }
+
+    async componentDidMount() {
+        await super.componentDidMount()
         analytics.trackEvent({
             category: 'Global',
             action: 'openPopup',
         })
-        this.props.initState()
+        await this.props.initState()
     }
 
-    processEvent = remoteFunction('processEvent')
+    processAnalyticsEvent = remoteFunction('processEvent')
 
     closePopup = () => window.close()
 
@@ -84,7 +107,7 @@ class PopupContainer extends PureComponent<Props> {
                 action: 'searchViaPopup',
             })
 
-            this.processEvent({
+            this.processAnalyticsEvent({
                 type: EVENT_NAMES.SEARCH_POPUP,
             })
 
@@ -210,6 +233,28 @@ class PopupContainer extends PureComponent<Props> {
                 <div className={styles.item}>
                     <TooltipButton closePopup={this.closePopup} />
                 </div>
+
+                {this.isCurrentPagePDF && (
+                    <div className={styles.item}>
+                        <ToggleSwitchButton
+                            btnIcon=""
+                            contentType="PDFs"
+                            btnText="Enable Memex PDF reader"
+                            btnHoverText="Open current PDF in Memex PDF reader"
+                            toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
+                            isEnabled={this.state.isPDFReaderEnabled}
+                            onBtnClick={() =>
+                                this.processEvent('openPDFReader', null)
+                            }
+                            onToggleClick={() =>
+                                this.processEvent(
+                                    'togglePDFReaderEnabled',
+                                    null,
+                                )
+                            }
+                        />
+                    </div>
+                )}
 
                 <hr />
 

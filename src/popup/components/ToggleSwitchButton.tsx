@@ -12,6 +12,7 @@ export interface Props {
     btnSubText?: string
     btnHoverText?: string
     toggleHoverText?: string
+    contentType?: 'pages' | 'PDFs'
     onBtnClick: React.MouseEventHandler
     onToggleClick: React.MouseEventHandler
 }
@@ -37,6 +38,7 @@ export const ToggleSwitchButton = (props: Props) => (
             <ToggleSwitch
                 isChecked={props.isEnabled}
                 onChange={props.onToggleClick}
+                contentType={props.contentType}
             />
         </div>
     </div>
