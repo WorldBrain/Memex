@@ -1,4 +1,4 @@
-import React, { PureComponent, KeyboardEventHandler } from 'react'
+import React, { KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
@@ -38,8 +38,6 @@ import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
-import * as icons from 'src/common-ui/components/design-library/icons'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
@@ -72,9 +70,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         super(
             props,
             new Logic({
-                currentPageUrl: props.url,
-                tabsAPI: runInBackground(),
-                runtimeAPI: runInBackground(),
+                tabsAPI: browser.tabs,
+                runtimeAPI: browser.runtime,
+                pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
                 }),
@@ -239,7 +237,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         <ToggleSwitchButton
                             btnIcon=""
                             contentType="PDFs"
-                            btnText="Enable Memex PDF reader"
+                            btnText="Open Memex PDF reader"
                             btnHoverText="Open current PDF in Memex PDF reader"
                             toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
                             isEnabled={this.state.isPDFReaderEnabled}

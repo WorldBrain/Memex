@@ -24,12 +24,13 @@ async function setupTest(
             create: args?.openPage
                 ? ({ url }) => args.openPage(url) as any
                 : browserAPIs.tabs.create,
+            query: () => [{ url: args?.currentPageUrl ?? DEFAULT_PAGE }] as any,
         },
         runtimeAPI: {
             getURL: () => TEST_EXT_PAGE,
         },
         syncSettings: syncSettingsStore,
-        currentPageUrl: args?.currentPageUrl ?? DEFAULT_PAGE,
+        pdfIntegrationBG: backgroundModules.pdfBg.remoteFunctions,
     })
 
     const logic = createElement<State, Event>(_logic)
@@ -40,16 +41,21 @@ async function setupTest(
 describe('Popup UI logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    it('should hydrate PDF reader enabled state based on sync settings', async ({
+    it('should hydrate PDF reader enabled state based on sync settings+current URL on init', async ({
         device,
     }) => {
-        const { logic, syncSettingsStore } = await setupTest(device)
+        const currentPageUrl = 'https://memex.memex'
+        const { logic, syncSettingsStore } = await setupTest(device, {
+            currentPageUrl,
+        })
 
         await syncSettingsStore.pdfIntegration.set('shouldAutoOpen', true)
         expect(logic.state.isPDFReaderEnabled).toBe(false)
+        expect(logic.state.currentPageUrl).toBe('')
         expect(logic.state.loadState).toBe('pristine')
         await logic.init()
         expect(logic.state.isPDFReaderEnabled).toBe(true)
+        expect(logic.state.currentPageUrl).toBe(currentPageUrl)
         expect(logic.state.loadState).toBe('success')
 
         await syncSettingsStore.pdfIntegration.set('shouldAutoOpen', false)
@@ -89,6 +95,7 @@ describe('Popup UI logic', () => {
             },
         })
 
+        await logic.init()
         expect(openedPage).toBe(undefined)
         await logic.processEvent('openPDFReader', null)
         expect(openedPage).toBe(TEST_EXT_PAGE + '?file=' + DEFAULT_PAGE)

@@ -3,17 +3,17 @@ import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classe
 import {
     UILogic,
     loadInitial,
-    executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
-import { constructPDFViewerUrl } from 'src/pdf/util'
+import type { PDFRemoteInterface } from 'src/pdf/background/types'
+import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface Dependencies {
-    tabsAPI: Pick<Tabs.Static, 'create'>
+    tabsAPI: Pick<Tabs.Static, 'create' | 'query'>
     runtimeAPI: Pick<Runtime.Static, 'getURL'>
     syncSettings: SyncSettingsStore<'pdfIntegration'>
-    currentPageUrl: string
+    pdfIntegrationBG: PDFRemoteInterface
 }
 
 export interface Event {
@@ -23,6 +23,7 @@ export interface Event {
 
 export interface State {
     loadState: UITaskState
+    currentPageUrl: string
     isPDFReaderEnabled: boolean
 }
 
@@ -40,21 +41,36 @@ export default class PopupLogic extends UILogic<State, Event> {
     getInitialState = (): State => ({
         loadState: 'pristine',
         isPDFReaderEnabled: false,
+        currentPageUrl: '',
     })
 
     async init() {
+        const { syncSettings, tabsAPI } = this.dependencies
         await loadInitial(this, async () => {
-            const isPDFReaderEnabled = await this.dependencies.syncSettings.pdfIntegration.get(
+            const isPDFReaderEnabled = await syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
             )
+            const [currentTab] = await tabsAPI.query({
+                active: true,
+                currentWindow: true,
+            })
             this.emitMutation({
+                currentPageUrl: { $set: currentTab?.url },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
             })
         })
     }
 
-    openPDFReader: EventHandler<'openPDFReader'> = async ({}) => {
-        const { runtimeAPI, tabsAPI, currentPageUrl } = this.dependencies
+    openPDFReader: EventHandler<'openPDFReader'> = async ({
+        previousState: { currentPageUrl },
+    }) => {
+        const { runtimeAPI, tabsAPI } = this.dependencies
+
+        if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
+            console.log('already on it')
+            return
+        }
+
         const pdfViewerUrl = constructPDFViewerUrl(currentPageUrl, {
             runtimeAPI,
         })
@@ -64,12 +80,14 @@ export default class PopupLogic extends UILogic<State, Event> {
     togglePDFReaderEnabled: EventHandler<'togglePDFReaderEnabled'> = async ({
         previousState,
     }) => {
+        const { syncSettings, pdfIntegrationBG } = this.dependencies
         this.emitMutation({
             isPDFReaderEnabled: { $set: !previousState.isPDFReaderEnabled },
         })
-        await this.dependencies.syncSettings.pdfIntegration.set(
+        await syncSettings.pdfIntegration.set(
             'shouldAutoOpen',
             !previousState.isPDFReaderEnabled,
         )
+        await pdfIntegrationBG.refreshSetting()
     }
 }

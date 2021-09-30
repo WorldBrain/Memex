@@ -182,6 +182,15 @@ export function createBackgroundModules(options: {
     const getServerStorageManager = async () =>
         (await options.getServerStorage()).storageManager
 
+    const syncSettings = new SyncSettingsBackground({
+        storageManager,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
+    const syncSettingsStore = createSyncSettingsStore({
+        syncSettingsBG: syncSettings,
+    })
+
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
         tabManager,
@@ -246,13 +255,11 @@ export function createBackgroundModules(options: {
     const reader = new ReaderBackground({ storageManager })
 
     const pdfBg = new PDFBackground({
-        extensionGetURL: options.browserAPIs.extension.getURL,
-        localBrowserStorage: options.browserAPIs.storage.local,
         webRequestAPI: options.browserAPIs.webRequest,
-        tabs: options.browserAPIs.tabs,
+        runtimeAPI: options.browserAPIs.runtime,
+        tabsAPI: options.browserAPIs.tabs,
+        syncSettings: syncSettingsStore,
     })
-
-    pdfBg.setupRequestInterceptors()
 
     const notifications = new NotificationBackground({ storageManager })
 
@@ -365,15 +372,6 @@ export function createBackgroundModules(options: {
         getServerStorage,
         services: options.services,
         generateServerId,
-    })
-
-    const syncSettings = new SyncSettingsBackground({
-        storageManager,
-        localBrowserStorage: options.browserAPIs.storage.local,
-    })
-
-    const syncSettingsStore = createSyncSettingsStore({
-        syncSettingsBG: syncSettings,
     })
 
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
@@ -740,6 +738,7 @@ export async function setupBackgroundModules(
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
 
+    await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
