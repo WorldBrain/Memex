@@ -8,6 +8,7 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
+import { isFullUrlPDF } from 'src/util/uri-utils'
 
 export type FetchPageData = (args: {
     url: string
@@ -61,7 +62,7 @@ const fetchPageData: FetchPageData = ({
     let cancel: CancelXHR
 
     // Check if pdf and run code for pdf instead
-    if (normalizedUrl.endsWith('.pdf')) {
+    if (isFullUrlPDF(normalizedUrl)) {
         run = async () => ({
             content: opts.includePageContent
                 ? await extractPdfContent({ url })
