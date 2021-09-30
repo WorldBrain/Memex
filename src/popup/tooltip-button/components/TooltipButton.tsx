@@ -1,13 +1,11 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import Button from '../../components/Button'
-import ToggleSwitch from '../../components/ToggleSwitch'
-import { RootState, ClickHandler } from '../../types'
+import { ToggleSwitchButton } from '../../components/ToggleSwitchButton'
+import type { RootState } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 
-const styles = require('./TooltipButton.css')
 const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
@@ -19,43 +17,29 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleChange: ClickHandler<HTMLButtonElement>
-    showTooltip: ClickHandler<HTMLButtonElement>
+    handleChange: React.MouseEventHandler
+    showTooltip: React.MouseEventHandler
     initState: () => Promise<void>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
 class InPageSwitches extends PureComponent<Props> {
-    componentDidMount() {
-        this.props.initState()
+    async componentDidMount() {
+        await this.props.initState()
     }
 
     render() {
         return (
-            <div className={styles.switchBlocks}>
-                <div className={styles.option}>
-                    <Button
-                        onClick={this.props.showTooltip}
-                        itemClass={styles.button}
-                        btnClass={buttonStyles.highlighterIcon}
-                        title={'Open Memex annotation tooltip'}
-                    >
-                        Show Highlighter
-                    </Button>
-                </div>
-                <div
-                    className={styles.switch}
-                    title={
-                        'Enable/disable Memex highlighter tooltip on all pages'
-                    }
-                >
-                    <ToggleSwitch
-                        isChecked={this.props.isEnabled}
-                        onChange={this.props.handleChange}
-                    />
-                </div>
-            </div>
+            <ToggleSwitchButton
+                btnIcon={buttonStyles.highlighterIcon}
+                btnText="Show Highlighter"
+                btnHoverText="Open Memex annotation tooltip"
+                toggleHoverText="Enable/disable Memex highlighter tooltip on all pages"
+                isEnabled={this.props.isEnabled}
+                onBtnClick={this.props.showTooltip}
+                onToggleClick={this.props.handleChange}
+            />
         )
     }
 }

@@ -1,14 +1,12 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import Button from '../../components/Button'
-import ToggleSwitch from '../../components/ToggleSwitch'
-import { RootState, ClickHandler } from '../../types'
+import { ToggleSwitchButton } from '../../components/ToggleSwitchButton'
+import type { RootState } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
-const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
@@ -20,26 +18,24 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleChange: ClickHandler<HTMLButtonElement>
-    openSidebar: ClickHandler<HTMLButtonElement>
+    handleChange: React.MouseEventHandler
+    openSidebar: React.MouseEventHandler
     initState: () => Promise<void>
 }
 
 interface State {
-    highlightInfo: string
+    highlightInfo?: string
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class TooltipButton extends PureComponent<Props> {
+class TooltipButton extends PureComponent<Props, State> {
     async componentDidMount() {
-        this.props.initState()
+        await this.props.initState()
         await this.getHighlightContextMenuTitle()
     }
 
-    state = {
-        highlightInfo: undefined,
-    }
+    state: State = { highlightInfo: undefined }
 
     private async getHighlightContextMenuTitle() {
         const {
@@ -51,40 +47,21 @@ class TooltipButton extends PureComponent<Props> {
             this.setState({
                 highlightInfo: `${toggleSidebar.shortcut} (disabled)`,
             })
-        } else
-            this.setState({
-                highlightInfo: `${toggleSidebar.shortcut}`,
-            })
+        } else this.setState({ highlightInfo: `${toggleSidebar.shortcut}` })
     }
 
     render() {
         return (
-            <div className={styles.switchBlocks}>
-                <div className={styles.option}>
-                    <Button
-                        onClick={this.props.openSidebar}
-                        itemClass={styles.button}
-                        btnClass={buttonStyles.sidebarIcon}
-                        title={'Open Memex annotation sidebar'}
-                    >
-                        Open Sidebar
-                        <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
-                        </p>
-                    </Button>
-                </div>
-                <div
-                    className={styles.switch}
-                    title={
-                        'Enable/disable Memex annotation sidebar on all pages'
-                    }
-                >
-                    <ToggleSwitch
-                        isChecked={this.props.isEnabled}
-                        onChange={this.props.handleChange}
-                    />
-                </div>
-            </div>
+            <ToggleSwitchButton
+                btnIcon={buttonStyles.sidebarIcon}
+                btnText="Open Sidebar"
+                btnHoverText="Open Memex annotation sidebar"
+                toggleHoverText="Enable/disable Memex annotation sidebar on all pages"
+                btnSubText={this.state.highlightInfo}
+                isEnabled={this.props.isEnabled}
+                onBtnClick={this.props.openSidebar}
+                onToggleClick={this.props.handleChange}
+            />
         )
     }
 }
