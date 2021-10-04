@@ -7,20 +7,17 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface Props {
+    icon: IconKeys
     title: string
     shortcut: string
     description: string
-    icon: IconKeys
+    isSelected?: boolean
     onClick: React.MouseEventHandler
 }
 
 const SharePrivacyOption = (props: Props) => (
-    <PrivacyOptionItem onClick={props.onClick}>
-        <Icon 
-            height="18px" 
-            icon={props.icon}
-            color="primary"
-        />
+    <PrivacyOptionItem onClick={props.onClick} isSelected={props.isSelected}>
+        <Icon height="18px" icon={props.icon} color="primary" />
         <PrivacyOptionBox>
             <PrivacyOptionTitleBox>
                 <PrivacyOptionTitle>{props.title}</PrivacyOptionTitle>
@@ -50,6 +47,9 @@ const PrivacyOptionItem = styled(Margin)`
     &:last-child {
         margin-bottom: 0px;
     }
+
+    ${(props) =>
+        props.isSelected ? `background-color: ${colors.onSelect};` : ''}
 `
 
 const PrivacyOptionBox = styled.div`

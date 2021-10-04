@@ -27,7 +27,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 
     private setPrivacyLevel = (privacyLevel: AnnotationPrivacyLevels) => () =>
-        this.setState({ privacyLevel })
+        this.setState({ privacyLevel, isPrivacyLevelShown: false })
 
     render() {
         return (
@@ -60,21 +60,29 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         }
                     >
                         <SharePrivacyOption
+                            icon="shared"
                             title="Shared"
                             shortcut={`shift+${getKeyName({
                                 key: 'alt',
                             })}+enter`}
                             description="Added to shared collections this page is in"
-                            icon="shared"
+                            isSelected={
+                                this.state.privacyLevel ===
+                                AnnotationPrivacyLevels.SHARED
+                            }
                             onClick={this.setPrivacyLevel(
                                 AnnotationPrivacyLevels.SHARED,
                             )}
                         />
                         <SharePrivacyOption
+                            icon="person"
                             title="Private"
                             shortcut={`${getKeyName({ key: 'mod' })}+enter`}
                             description="Private to you, until shared (in bulk)"
-                            icon="person"
+                            isSelected={
+                                this.state.privacyLevel ===
+                                AnnotationPrivacyLevels.PRIVATE
+                            }
                             onClick={this.setPrivacyLevel(
                                 AnnotationPrivacyLevels.PRIVATE,
                             )}
