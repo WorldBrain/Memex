@@ -206,12 +206,12 @@ export class AnnotationCreate extends React.Component<Props, State>
                         }
                     >
                         <SharePrivacyOption
-                            title="Protected"
-                            shortcut={`shift+${AnnotationCreate.MOD_KEY}+enter`}
-                            description="Sharing status will not change in bulk actions"
-                            icon="lock"
+                            title="Shared"
+                            shortcut={`shift+${AnnotationCreate.ALT_KEY}+enter`}
+                            description="Added to shared collections this page is in"
+                            icon="shared"
                             onClick={this.setSavePrivacyLevel(
-                                AnnotationPrivacyLevels.PROTECTED,
+                                AnnotationPrivacyLevels.SHARED,
                             )}
                         />
                         <SharePrivacyOption
@@ -221,15 +221,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                             icon="person"
                             onClick={this.setSavePrivacyLevel(
                                 AnnotationPrivacyLevels.PRIVATE,
-                            )}
-                        />
-                        <SharePrivacyOption
-                            title="Shared"
-                            shortcut={`shift+${AnnotationCreate.ALT_KEY}+enter`}
-                            description="Added to shared collections this page is in"
-                            icon="shared"
-                            onClick={this.setSavePrivacyLevel(
-                                AnnotationPrivacyLevels.SHARED,
                             )}
                         />
                     </DropdownMenuBtn>

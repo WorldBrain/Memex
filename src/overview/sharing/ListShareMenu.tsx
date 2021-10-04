@@ -237,18 +237,18 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 }
                 privacyOptions={[
                     {
-                        title: 'Private',
-                        shortcut: `${ListShareMenu.MOD_KEY}+enter`,
-                        description: 'Only locally available to you',
-                        icon: 'person',
-                        onClick: this.handleSetPrivate,
-                    },
-                    {
                         title: 'Shared',
                         shortcut: `shift+${ListShareMenu.ALT_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,
+                    },
+                    {
+                        title: 'Private',
+                        shortcut: `${ListShareMenu.MOD_KEY}+enter`,
+                        description: 'Only locally available to you',
+                        icon: 'person',
+                        onClick: this.handleSetPrivate,
                     },
                 ]}
                 shortcutHandlerDict={{
