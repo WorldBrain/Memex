@@ -15,6 +15,7 @@ import AnnotationEdit, {
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
+import SaveBtn from 'src/annotations/components/save-btn'
 import { SidebarAnnotationTheme, AnnotationPrivacyLevels } from '../types'
 import type {
     AnnotationSharingInfo,
@@ -372,19 +373,10 @@ export default class AnnotationEditable extends React.Component<Props> {
     private renderFooter() {
         const { mode, annotationFooterDependencies: footerDeps } = this.props
 
-        let actionBtnText: string
-        let actionBtnHandler: React.MouseEventHandler
+        let confirmBtn: JSX.Element
         let cancelBtnHandler: React.MouseEventHandler
 
-        if (mode === 'delete' && footerDeps != null) {
-            actionBtnText = 'Delete'
-            actionBtnHandler = footerDeps.onDeleteConfirm
-            cancelBtnHandler = footerDeps.onDeleteCancel
-        } else if (mode === 'edit' && footerDeps != null) {
-            actionBtnText = 'Save'
-            actionBtnHandler = footerDeps.onEditConfirm
-            cancelBtnHandler = footerDeps.onEditCancel
-        } else {
+        if (mode === 'default' || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
                     <ItemBoxBottom
@@ -396,6 +388,18 @@ export default class AnnotationEditable extends React.Component<Props> {
                     />
                 </DefaultFooterStyled>
             )
+        }
+
+        if (mode === 'delete') {
+            cancelBtnHandler = footerDeps.onDeleteCancel
+            confirmBtn = (
+                <ActionBtnStyled onClick={footerDeps.onDeleteConfirm}>
+                    Delete
+                </ActionBtnStyled>
+            )
+        } else {
+            cancelBtnHandler = footerDeps.onEditCancel
+            confirmBtn = <SaveBtn onSave={footerDeps.onEditConfirm} />
         }
 
         return (
@@ -413,9 +417,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
                         position="bottom"
                     >
-                        <ActionBtnStyled onClick={actionBtnHandler}>
-                            {actionBtnText}
-                        </ActionBtnStyled>
+                        {confirmBtn}
                     </ButtonTooltip>
                 </BtnContainerStyled>
             </DeletionBox>

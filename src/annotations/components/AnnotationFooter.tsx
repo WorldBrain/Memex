@@ -1,10 +1,11 @@
 import * as React from 'react'
 
-import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import {
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
+import type { AnnotationPrivacyLevels } from '../types'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
@@ -18,7 +19,7 @@ export interface AnnotationFooterEventProps {
     onDeleteConfirm: React.MouseEventHandler
     onDeleteCancel: React.MouseEventHandler
     onDeleteIconClick: React.MouseEventHandler
-    onEditConfirm: React.MouseEventHandler
+    onEditConfirm: (privacyLevel: AnnotationPrivacyLevels) => void
     onEditCancel: React.MouseEventHandler
     onEditIconClick: React.MouseEventHandler
     onTagIconClick: React.MouseEventHandler

@@ -1,21 +1,21 @@
-import { TaskState } from 'ui-logic-core/lib/types'
-import { UIEvent } from 'ui-logic-core'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type { UIEvent } from 'ui-logic-core'
 
-import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
-import {
+import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
+import type {
     AnnotationsSearchResponse,
     StandardSearchResponse,
 } from 'src/search/background/types'
-import { PipelineRes } from 'src/search'
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import {
+import type { PipelineRes } from 'src/search'
+import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import type {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import { Anchor } from 'src/highlighting/types'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import type { Anchor } from 'src/highlighting/types'
+import type { AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
-import { NormalizedState } from 'src/common-ui/types'
+import type { NormalizedState } from 'src/common-ui/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -55,7 +55,7 @@ export type NoteInteractionProps = Omit<
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: React.MouseEventHandler
+    onEditConfirm: (privacyLevel: AnnotationPrivacyLevels) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
