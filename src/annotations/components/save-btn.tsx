@@ -60,6 +60,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         }
                     >
                         <SharePrivacyOption
+                            hasProtectedOption
                             icon="shared"
                             title="Shared"
                             shortcut={`shift+${getKeyName({
@@ -75,6 +76,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             )}
                         />
                         <SharePrivacyOption
+                            hasProtectedOption
                             icon="person"
                             title="Private"
                             shortcut={`${getKeyName({ key: 'mod' })}+enter`}

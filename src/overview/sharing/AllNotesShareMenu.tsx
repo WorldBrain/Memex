@@ -109,7 +109,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         })
     }
 
-    private handleSetShared: React.MouseEventHandler = async (e) => {
+    private handleSetShared = async (isProtected?: boolean) => {
         const { annotationsBG } = this.props
         const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
             AnnotationPrivacyLevels.SHARED,
@@ -128,7 +128,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         )
     }
 
-    private handleSetPrivate: React.MouseEventHandler = async (e) => {
+    private handleSetPrivate = async (isProtected?: boolean) => {
         const { annotationsBG } = this.props
         const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
             AnnotationPrivacyLevels.PRIVATE,

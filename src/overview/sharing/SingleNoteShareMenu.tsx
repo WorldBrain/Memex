@@ -98,7 +98,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         })
     }
 
-    private handleSetShared: React.MouseEventHandler = async (e) => {
+    private handleSetShared = async (isProtected?: boolean) => {
         const { annotationUrl, annotationsBG } = this.props
         await executeReactStateUITask<State, 'shareState'>(
             this,
@@ -113,22 +113,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
     }
 
-    private handleSetProtected: React.MouseEventHandler = async (e) => {
-        const { annotationUrl, annotationsBG } = this.props
-        await executeReactStateUITask<State, 'shareState'>(
-            this,
-            'shareState',
-            async () => {
-                await this.unshareAnnotation(AnnotationPrivacyLevels.PROTECTED)
-                await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotation: annotationUrl,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
-            },
-        )
-    }
-
-    private handleSetPrivate: React.MouseEventHandler = async (e) => {
+    private handleSetPrivate = async (isProtected?: boolean) => {
         const { annotationUrl, annotationsBG } = this.props
         await executeReactStateUITask<State, 'shareState'>(
             this,
@@ -173,7 +158,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'mod+shift+enter': this.handleSetProtected,
+                    // 'mod+shift+enter': this.handleSetProtected,
                     'alt+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}

@@ -17,7 +17,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 const COPY_TIMEOUT = 2000
 
 export interface ShorcutHandlerDict {
-    [shortcut: string]: React.MouseEventHandler | (() => Promise<void>)
+    [shortcut: string]: () => Promise<void>
 }
 
 export interface Props {
@@ -129,7 +129,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     )}
                     <PrivacyContainer>
                         {this.props.isLoading ? (
-                            <LoadingBox><LoadingIndicator /></LoadingBox>
+                            <LoadingBox>
+                                <LoadingIndicator />
+                            </LoadingBox>
                         ) : (
                             <>
                                 <PrivacyTitle>
