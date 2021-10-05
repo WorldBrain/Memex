@@ -1239,7 +1239,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     {
                         pageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
-                        privacyLevel: event.privacyLevel,
+                        isBulkShareProtected:
+                            event.privacyLevel ===
+                            AnnotationPrivacyLevels.PROTECTED,
                     },
                     { skipPageIndexing: true },
                 )

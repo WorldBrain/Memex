@@ -61,7 +61,6 @@ export type RibbonContainerEvents = UIEvent<
         highlightAnnotations: null
         toggleShowExtraButtons: null
         hydrateStateFromDB: { url: string }
-        saveNewPageComment: (annotation: NewAnnotationOptions) => void
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &

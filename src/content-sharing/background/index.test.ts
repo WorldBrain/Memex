@@ -2,7 +2,6 @@ import orderBy from 'lodash/orderBy'
 import expect from 'expect'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
     backgroundIntegrationTestSuite,
@@ -11,7 +10,6 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import * as data from './index.test.data'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
@@ -1346,9 +1344,8 @@ function makeShareAnnotationTest(options: {
                         {} as any,
                         {
                             ...data.ANNOTATION_1_2_DATA,
-                            privacyLevel: options.testProtectedBulkShare
-                                ? AnnotationPrivacyLevels.PROTECTED
-                                : AnnotationPrivacyLevels.PRIVATE,
+                            isBulkShareProtected:
+                                options.testProtectedBulkShare,
                         },
                         { skipPageIndexing: true },
                     )

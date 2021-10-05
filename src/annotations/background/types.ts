@@ -129,6 +129,6 @@ export interface CreateAnnotationParams {
     selector?: Anchor
     isBookmarked?: boolean
     isSocialPost?: boolean
+    isBulkShareProtected?: boolean
     createdWhen?: Date
-    privacyLevel?: AnnotationPrivacyLevels
 }

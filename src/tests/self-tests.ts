@@ -132,8 +132,8 @@ export function createSelfTests(options: {
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `Yet another test comment! This one's protected`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
+                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
             )
@@ -145,8 +145,8 @@ export function createSelfTests(options: {
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: upload error`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
+                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
             )
@@ -160,8 +160,8 @@ export function createSelfTests(options: {
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: download error`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
+                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
             )
