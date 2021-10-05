@@ -182,10 +182,10 @@ export default class ContentSharingBackground {
         await this.storage.storeAnnotationMetadata([
             {
                 localId: options.annotationUrl,
+                excludeFromLists: !options.shareToLists ?? true,
                 remoteId:
                     options.remoteAnnotationId ??
                     this.generateRemoteAnnotationId(),
-                excludeFromLists: true,
             },
         ])
 

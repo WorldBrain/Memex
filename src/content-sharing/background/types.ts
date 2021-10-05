@@ -11,6 +11,7 @@ export interface ContentSharingInterface
     shareAnnotation(options: {
         annotationUrl: string
         remoteAnnotationId?: string
+        shareToLists?: boolean
         queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
     }): Promise<void>

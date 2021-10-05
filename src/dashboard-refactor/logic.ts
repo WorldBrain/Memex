@@ -29,6 +29,7 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import { createAnnotation, updateAnnotation } from 'src/annotations/annotation-save-logic'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1235,16 +1236,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const newNoteId = await annotationsBG.createAnnotation(
-                    {
-                        pageUrl: event.fullPageUrl,
+                const shouldShare = event.privacyLevel === AnnotationPrivacyLevels.SHARED
+
+                if (shouldShare) {
+                    await this.ensureLoggedIn()
+                }
+
+                const { savePromise } = await createAnnotation({
+                    annotationData: {
+                        fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
-                        isBulkShareProtected:
-                            event.privacyLevel ===
-                            AnnotationPrivacyLevels.PROTECTED,
+                        isBulkShareProtected: event.isProtected,
+                        shouldShare,
+                        shouldShareToList: shouldShare,
                     },
-                    { skipPageIndexing: true },
-                )
+                    annotationsBG,
+                    contentSharingBG: contentShareBG,
+                    skipPageIndexing: true
+                })
+
+                const newNoteId = await savePromise
+
                 if (formState.tags.length) {
                     await annotationsBG.updateAnnotationTags({
                         url: newNoteId,
@@ -1301,22 +1313,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
-
-                if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-                    await contentShareBG
-                        .shareAnnotation({
-                            annotationUrl: newNoteId,
-                            queueInteraction: 'queue-and-return',
-                        })
-                        .catch(() => {})
-                    await contentShareBG
-                        .shareAnnotationsToLists({
-                            annotationUrls: [newNoteId],
-                            queueInteraction: 'queue-and-return',
-                        })
-                        .catch(() => {})
-                    await this.ensureLoggedIn()
-                }
             },
         )
     }

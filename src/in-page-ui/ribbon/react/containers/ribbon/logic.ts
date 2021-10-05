@@ -12,6 +12,7 @@ import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -318,7 +319,11 @@ export class RibbonContainerLogic extends UILogic<
         event: { privacyLevel, isProtected },
         previousState: { pageUrl, commentBox },
     }) => {
-        const { annotationsCache, contentSharing } = this.dependencies
+        const {
+            annotationsCache,
+            contentSharing,
+            annotations,
+        } = this.dependencies
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -337,28 +342,37 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
 
-        await annotationsCache.create({
-            url: annotationUrl,
-            pageUrl,
-            comment,
-            tags: commentBox.tags,
-            privacyLevel,
+        const shouldShare = privacyLevel === AnnotationPrivacyLevels.SHARED
+
+        const { savePromise } = await createAnnotation({
+            annotationsBG: annotations,
+            contentSharingBG: contentSharing,
+            annotationData: {
+                comment,
+                shouldShare,
+                shouldShareToList: shouldShare,
+                isBulkShareProtected: isProtected,
+                fullPageUrl: pageUrl,
+            },
+            customSaveCb: async () => {
+                await annotationsCache.create({
+                    url: annotationUrl,
+                    pageUrl,
+                    comment,
+                    tags: commentBox.tags,
+                    privacyLevel,
+                })
+                return annotationUrl
+            },
         })
 
         this.dependencies.setRibbonShouldAutoHide(true)
+        await savePromise
 
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),
         )
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
-
-        if (privacyLevel === AnnotationPrivacyLevels.SHARED) {
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
-            })
-        }
     }
 
     cancelComment: EventHandler<'cancelComment'> = () => {

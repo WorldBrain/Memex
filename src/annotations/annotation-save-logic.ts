@@ -10,6 +10,7 @@ type AnnotationCreateData = {
     createdWhen?: Date
     selector?: Anchor
     shouldShare?: boolean
+    shouldShareToList?: boolean
     isBulkShareProtected?: boolean
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
@@ -18,6 +19,7 @@ interface AnnotationUpdateData {
     comment: string
     /** Denotes whether to share (true) or unshare (false). */
     shouldShare: boolean
+    shouldShareToList?: boolean
     isBulkShareProtected?: boolean
 }
 
@@ -27,17 +29,22 @@ export interface SaveAnnotationParams<
     annotationData: T
     annotationsBG: AnnotationInterface<'caller'>
     contentSharingBG: ContentSharingInterface
+    skipPageIndexing?: boolean
+    /** Note this overwrites the default save remote endpoint call. Return the annotation ID (URL). */
+    customSaveCb?: () => Promise<string>
 }
 
 export interface SaveAnnotationReturnValue {
-    remoteAnnotationLink?: string
-    savePromise: Promise<void>
+    remoteAnnotationLink: string | null
+    savePromise: Promise<string>
 }
 
 export async function createAnnotation({
     annotationData,
     annotationsBG,
     contentSharingBG,
+    skipPageIndexing,
+    customSaveCb,
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
 > {
@@ -47,29 +54,34 @@ export async function createAnnotation({
     }
 
     return {
-        remoteAnnotationLink: getNoteShareUrl({ remoteAnnotationId }),
+        remoteAnnotationLink: annotationData.shouldShare
+            ? getNoteShareUrl({ remoteAnnotationId })
+            : null,
         savePromise: (async () => {
-            const annotationUrl = await annotationsBG.createAnnotation({
-                createdWhen: annotationData.createdWhen,
-                pageUrl: annotationData.fullPageUrl,
-                selector: annotationData.selector,
-                title: annotationData.pageTitle,
-                comment: annotationData.comment,
-                body: annotationData.body,
-            })
+            const annotationUrl = await (customSaveCb?.() ??
+                annotationsBG.createAnnotation(
+                    {
+                        createdWhen: annotationData.createdWhen,
+                        pageUrl: annotationData.fullPageUrl,
+                        selector: annotationData.selector,
+                        title: annotationData.pageTitle,
+                        comment: annotationData.comment,
+                        body: annotationData.body,
+                        isBulkShareProtected:
+                            annotationData.isBulkShareProtected,
+                    },
+                    { skipPageIndexing },
+                ))
 
-            await Promise.all([
-                annotationData.shouldShare &&
-                    contentSharingBG.shareAnnotation({
-                        annotationUrl,
-                        remoteAnnotationId,
-                    }),
-                annotationData.isBulkShareProtected &&
-                    annotationsBG.updateAnnotationPrivacyLevel({
-                        annotation: annotationUrl,
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    }),
-            ])
+            if (annotationData.shouldShare) {
+                await contentSharingBG.shareAnnotation({
+                    annotationUrl,
+                    remoteAnnotationId,
+                    shareToLists: annotationData.shouldShareToList,
+                })
+            }
+
+            return annotationUrl
         })(),
     }
 }
@@ -87,7 +99,9 @@ export async function updateAnnotation({
     }
 
     return {
-        remoteAnnotationLink: getNoteShareUrl({ remoteAnnotationId }),
+        remoteAnnotationLink: annotationData.shouldShare
+            ? getNoteShareUrl({ remoteAnnotationId })
+            : null,
         savePromise: (async () => {
             await annotationsBG.editAnnotation(
                 annotationData.localId,
@@ -97,8 +111,9 @@ export async function updateAnnotation({
             await Promise.all([
                 annotationData.shouldShare
                     ? contentSharingBG.shareAnnotation({
-                          annotationUrl: annotationData.localId,
                           remoteAnnotationId,
+                          annotationUrl: annotationData.localId,
+                          shareToLists: annotationData.shouldShareToList,
                       })
                     : contentSharingBG.unshareAnnotation({
                           annotationUrl: annotationData.localId,
@@ -109,6 +124,7 @@ export async function updateAnnotation({
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     }),
             ])
+            return annotationData.localId
         })(),
     }
 }
