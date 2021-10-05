@@ -519,7 +519,7 @@ export function createBackgroundModules(options: {
         localExtSettingStore,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
-        userIdChanges: async function* () {
+        async *userIdChanges() {
             for await (const nextUser of authChanges(auth.authService)) {
                 yield nextUser
             }
