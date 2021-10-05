@@ -61,6 +61,7 @@ async function setupTest(options: {
                 listId: testData.localListId,
             })
         }
+        testData.remoteListId = listShareResult.remoteListId
         return listShareResult.remoteListId
     }
 
