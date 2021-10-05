@@ -1,19 +1,19 @@
 import pick from 'lodash/pick'
-import StorageManager from '@worldbrain/storex'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import { ContentSharingInterface } from './types'
-import { ContentSharingClientStorage } from './storage'
-import CustomListStorage from 'src/custom-lists/background/storage'
-import { AuthBackground } from 'src/authentication/background'
-import { Analytics } from 'src/analytics/types'
-import AnnotationStorage from 'src/annotations/background/storage'
+import type StorageManager from '@worldbrain/storex'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import type CustomListStorage from 'src/custom-lists/background/storage'
+import type { AuthBackground } from 'src/authentication/background'
+import type { Analytics } from 'src/analytics/types'
+import type AnnotationStorage from 'src/annotations/background/storage'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import ActivityStreamsBackground from 'src/activity-streams/background'
-import { Services } from 'src/services/types'
-import { ServerStorageModules } from 'src/storage/types'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import type ActivityStreamsBackground from 'src/activity-streams/background'
+import type { Services } from 'src/services/types'
+import type { ServerStorageModules } from 'src/storage/types'
+import type { ContentSharingInterface } from './types'
+import { ContentSharingClientStorage } from './storage'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -55,6 +55,8 @@ export default class ContentSharingBackground {
             unshareAnnotation: this.unshareAnnotation,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
+            generateRemoteAnnotationId: async () =>
+                this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
@@ -88,6 +90,9 @@ export default class ContentSharingBackground {
     async setup() {}
 
     async executePendingActions() {}
+
+    private generateRemoteAnnotationId = (): string =>
+        this.options.generateServerId('sharedAnnotation').toString()
 
     private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] = async ({
         annotationUrl,
@@ -177,9 +182,9 @@ export default class ContentSharingBackground {
         await this.storage.storeAnnotationMetadata([
             {
                 localId: options.annotationUrl,
-                remoteId: this.options
-                    .generateServerId('sharedAnnotation')
-                    .toString(),
+                remoteId:
+                    options.remoteAnnotationId ??
+                    this.generateRemoteAnnotationId(),
                 excludeFromLists: true,
             },
         ])
@@ -215,9 +220,7 @@ export default class ContentSharingBackground {
             await this.storage.storeAnnotationMetadata([
                 {
                     localId: annnotation.url,
-                    remoteId: this.options
-                        .generateServerId('sharedAnnotation')
-                        .toString(),
+                    remoteId: this.generateRemoteAnnotationId(),
                     excludeFromLists: true, // TODO: should this be true or false?
                 },
             ])

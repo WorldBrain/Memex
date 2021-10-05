@@ -10,6 +10,7 @@ export interface ContentSharingInterface
     }): Promise<void>
     shareAnnotation(options: {
         annotationUrl: string
+        remoteAnnotationId?: string
         queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
     }): Promise<void>
@@ -33,6 +34,7 @@ export interface ContentSharingInterface
     getRemoteAnnotationLink(params: {
         annotationUrl: string
     }): Promise<string | null>
+    generateRemoteAnnotationId(): Promise<string>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     getRemoteListIds(options: {
         localListIds: number[]
