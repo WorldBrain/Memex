@@ -190,7 +190,10 @@ export type SidebarContainerEvents = UIEvent<
         changeNewPageCommentText: { comment: string }
         cancelEdit: { annotationUrl: string }
         changeEditCommentText: { annotationUrl: string; comment: string }
-        saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
+        saveNewPageComment: {
+            privacyLevel: AnnotationPrivacyLevels
+            isProtected?: boolean
+        }
         cancelNewPageComment: null
         updateNewPageCommentTags: { tags: string[] }
 

@@ -14,6 +14,7 @@ import * as sharingTestData from 'src/content-sharing/background/index.test.data
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 const setupLogicHelper = async ({
     device,
@@ -379,7 +380,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: 0,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             })
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
@@ -416,7 +417,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: 0,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({

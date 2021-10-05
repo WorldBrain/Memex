@@ -207,8 +207,11 @@ export class AnnotationsSidebarContainer<
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: (privacyLevel) =>
-                this.processEvent('saveNewPageComment', { privacyLevel }),
+            onSave: (privacyLevel, isProtected) =>
+                this.processEvent('saveNewPageComment', {
+                    privacyLevel,
+                    isProtected,
+                }),
             queryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
             loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,

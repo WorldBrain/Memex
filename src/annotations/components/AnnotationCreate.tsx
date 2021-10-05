@@ -19,7 +19,10 @@ interface State {
 }
 
 export interface AnnotationCreateEventProps {
-    onSave: (privacyLevel: AnnotationPrivacyLevels) => Promise<void>
+    onSave: (
+        privacyLevel: AnnotationPrivacyLevels,
+        isProtected?: boolean,
+    ) => Promise<void>
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
@@ -75,8 +78,11 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     private handleCancel = () => this.props.onCancel()
-    private handleSave = async (privacyLevel: AnnotationPrivacyLevels) => {
-        const saveP = this.props.onSave(privacyLevel)
+    private handleSave = async (
+        privacyLevel: AnnotationPrivacyLevels,
+        isProtected?: boolean,
+    ) => {
+        const saveP = this.props.onSave(privacyLevel, isProtected)
 
         if (
             this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state

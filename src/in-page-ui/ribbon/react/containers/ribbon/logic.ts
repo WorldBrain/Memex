@@ -19,6 +19,10 @@ export type PropKeys<Base, ValueCondition> = keyof Pick<
         [Key in keyof Base]: Base[Key] extends ValueCondition ? Key : never
     }[keyof Base]
 >
+
+// TODO: get rid of this stuff. I think it was added in an attempt to derive more from what already is there,
+//   but ultimately it adds a lot more complexity around the types here, which doesn't exist on any other
+//   UI logic class in the project. Makes it really difficult to alter the signatures of events here
 type ValuesOf<Props> = Omit<Props, PropKeys<Props, Function>> // tslint:disable-line
 type HandlersOf<Props> = {
     // tslint:disable-next-line
@@ -61,8 +65,12 @@ export type RibbonContainerEvents = UIEvent<
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
-        SubcomponentHandlers<'commentBox'> &
-        SubcomponentHandlers<'bookmark'> &
+        Omit<SubcomponentHandlers<'commentBox'>, 'saveComment'> & {
+            saveComment: {
+                privacyLevel: AnnotationPrivacyLevels
+                isProtected?: boolean
+            }
+        } & SubcomponentHandlers<'bookmark'> &
         SubcomponentHandlers<'tagging'> &
         SubcomponentHandlers<'lists'> &
         SubcomponentHandlers<'search'> &
@@ -308,7 +316,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     saveComment: EventHandler<'saveComment'> = async ({
-        event,
+        event: { privacyLevel, isProtected },
         previousState: { pageUrl, commentBox },
     }) => {
         const { annotationsCache, contentSharing } = this.dependencies
@@ -335,7 +343,7 @@ export class RibbonContainerLogic extends UILogic<
             pageUrl,
             comment,
             tags: commentBox.tags,
-            privacyLevel: event.value,
+            privacyLevel,
         })
 
         this.dependencies.setRibbonShouldAutoHide(true)
@@ -345,7 +353,7 @@ export class RibbonContainerLogic extends UILogic<
         )
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
 
-        if (event.value === AnnotationPrivacyLevels.SHARED) {
+        if (privacyLevel === AnnotationPrivacyLevels.SHARED) {
             await contentSharing.shareAnnotation({ annotationUrl })
             await contentSharing.shareAnnotationsToLists({
                 annotationUrls: [annotationUrl],

@@ -268,6 +268,7 @@ export type Events = UIEvent<{
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
         privacyLevel: AnnotationPrivacyLevels
+        isProtected?: boolean
     }
 
     // Note result state mutations

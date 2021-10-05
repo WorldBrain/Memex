@@ -122,8 +122,11 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    saveComment: (value) =>
-                        this.processEvent('saveComment', { value }),
+                    saveComment: (privacyLevel, isProtected) =>
+                        this.processEvent('saveComment', {
+                            privacyLevel,
+                            isProtected,
+                        }),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
                     setShowCommentBox: (value) =>

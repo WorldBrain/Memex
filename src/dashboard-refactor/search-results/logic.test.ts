@@ -1164,7 +1164,7 @@ describe('Dashboard search results logic', () => {
                         day,
                         pageId,
                         fullPageUrl: 'https://' + pageId,
-                        privacyLevel: 0,
+                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     },
                 )
                 expect(
@@ -1756,7 +1756,9 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('show-n-share')
             })
 
-            it('should be update note share info', async ({ device }) => {
+            it('should be able to update note share info', async ({
+                device,
+            }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })

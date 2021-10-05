@@ -693,10 +693,11 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onSave: (day, pageId) => (privacyLevel) =>
+                    onSave: (day, pageId) => (privacyLevel, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
+                            isProtected,
                             privacyLevel,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,

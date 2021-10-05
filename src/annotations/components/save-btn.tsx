@@ -9,7 +9,10 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 
 export interface Props {
-    onSave: (privacyLevel: AnnotationPrivacyLevels) => void | Promise<void>
+    onSave: (
+        privacyLevel: AnnotationPrivacyLevels,
+        isProtected?: boolean,
+    ) => void | Promise<void>
     privacyLevel: AnnotationPrivacyLevels
 }
 
@@ -27,9 +30,9 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
     state: State = { isPrivacyLevelShown: false }
 
-    private saveWithPrivacyLevel = (
-        privacyLevel: AnnotationPrivacyLevels,
-    ) => () => this.props.onSave(privacyLevel)
+    private saveWithPrivacyLevel = (privacyLevel: AnnotationPrivacyLevels) => (
+        isProtected?: boolean,
+    ) => this.props.onSave(privacyLevel, isProtected)
 
     render() {
         const { privacyLevel } = this.props
