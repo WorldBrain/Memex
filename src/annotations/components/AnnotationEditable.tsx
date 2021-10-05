@@ -371,7 +371,11 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderFooter() {
-        const { mode, annotationFooterDependencies: footerDeps } = this.props
+        const {
+            mode,
+            sharingInfo,
+            annotationFooterDependencies: footerDeps,
+        } = this.props
 
         let confirmBtn: JSX.Element
         let cancelBtnHandler: React.MouseEventHandler
@@ -399,7 +403,16 @@ export default class AnnotationEditable extends React.Component<Props> {
             )
         } else {
             cancelBtnHandler = footerDeps.onEditCancel
-            confirmBtn = <SaveBtn onSave={footerDeps.onEditConfirm} />
+            confirmBtn = (
+                <SaveBtn
+                    onSave={footerDeps.onEditConfirm}
+                    privacyLevel={
+                        sharingInfo?.status === 'shared'
+                            ? AnnotationPrivacyLevels.SHARED
+                            : AnnotationPrivacyLevels.PRIVATE
+                    }
+                />
+            )
         }
 
         return (

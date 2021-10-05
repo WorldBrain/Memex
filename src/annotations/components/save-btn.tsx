@@ -9,38 +9,39 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 
 export interface Props {
-    onSave: (privacyLevel: AnnotationPrivacyLevels) => void
+    onSave: (privacyLevel: AnnotationPrivacyLevels) => void | Promise<void>
+    privacyLevel: AnnotationPrivacyLevels
 }
 
 interface State {
     isPrivacyLevelShown: boolean
-    privacyLevel: AnnotationPrivacyLevels
 }
 
 export default class AnnotationSaveBtn extends React.PureComponent<
     Props,
     State
 > {
-    state: State = {
-        isPrivacyLevelShown: false,
+    static defaultProps: Pick<Props, 'privacyLevel'> = {
         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
     }
 
-    private setPrivacyLevel = (privacyLevel: AnnotationPrivacyLevels) => () =>
-        this.setState({ privacyLevel, isPrivacyLevelShown: false })
+    state: State = { isPrivacyLevelShown: false }
+
+    private saveWithPrivacyLevel = (
+        privacyLevel: AnnotationPrivacyLevels,
+    ) => () => this.props.onSave(privacyLevel)
 
     render() {
+        const { privacyLevel } = this.props
+
         return (
             <SaveBtn>
-                <SaveBtnText
-                    onClick={() => this.props.onSave(this.state.privacyLevel)}
-                >
+                <SaveBtnText onClick={this.saveWithPrivacyLevel(privacyLevel)}>
                     <Icon
                         icon={
-                            this.state.privacyLevel ===
-                            AnnotationPrivacyLevels.PROTECTED
+                            privacyLevel === AnnotationPrivacyLevels.PROTECTED
                                 ? 'lock'
-                                : this.state.privacyLevel ===
+                                : privacyLevel ===
                                   AnnotationPrivacyLevels.PRIVATE
                                 ? 'person'
                                 : 'shared'
@@ -68,10 +69,9 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             })}+enter`}
                             description="Added to shared collections this page is in"
                             isSelected={
-                                this.state.privacyLevel ===
-                                AnnotationPrivacyLevels.SHARED
+                                privacyLevel === AnnotationPrivacyLevels.SHARED
                             }
-                            onClick={this.setPrivacyLevel(
+                            onClick={this.saveWithPrivacyLevel(
                                 AnnotationPrivacyLevels.SHARED,
                             )}
                         />
@@ -82,10 +82,9 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             shortcut={`${getKeyName({ key: 'mod' })}+enter`}
                             description="Private to you, until shared (in bulk)"
                             isSelected={
-                                this.state.privacyLevel ===
-                                AnnotationPrivacyLevels.PRIVATE
+                                privacyLevel === AnnotationPrivacyLevels.PRIVATE
                             }
-                            onClick={this.setPrivacyLevel(
+                            onClick={this.saveWithPrivacyLevel(
                                 AnnotationPrivacyLevels.PRIVATE,
                             )}
                         />
