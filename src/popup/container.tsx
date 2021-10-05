@@ -235,9 +235,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 {this.isCurrentPagePDF && (
                     <div className={styles.item}>
                         <ToggleSwitchButton
-                            btnIcon=""
+                            btnIcon={btnStyles.PDFIcon}
                             contentType="PDFs"
-                            btnText="Open Memex PDF reader"
+                            btnText="Open PDF reader"
                             btnHoverText="Open current PDF in Memex PDF reader"
                             toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
                             isEnabled={this.state.isPDFReaderEnabled}
