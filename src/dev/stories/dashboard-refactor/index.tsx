@@ -17,7 +17,7 @@ import {
 import { insertBackgroundFunctionTab } from 'src/tests/ui-logic-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { FakeAnalytics } from 'src/analytics/mock'
-import { createServices } from 'src/services/ui'
+import { createUIServices } from 'src/services/ui'
 
 // TODO: Try to get this working - currently fails due to `browser.runtime.onMessage.addListener` not being defineddddd
 async function createDependencies(): Promise<DashboardProps> {
@@ -36,7 +36,6 @@ async function createDependencies(): Promise<DashboardProps> {
         ) as any,
         localStorage: browser.storage.local,
         authBG: backgroundModules.auth.remoteFunctions,
-        syncBG: backgroundModules.sync.remoteFunctions,
         tagsBG: backgroundModules.tags.remoteFunctions,
         listsBG: backgroundModules.customLists.remoteFunctions,
         backupBG: insertBackgroundFunctionTab(
@@ -44,15 +43,17 @@ async function createDependencies(): Promise<DashboardProps> {
         ) as any,
         searchBG: backgroundModules.search.remoteFunctions.search,
         contentShareBG: backgroundModules.contentSharing.remoteFunctions,
+        personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
+        syncSettingsBG: backgroundModules.syncSettings.remoteFunctions,
         openFeed: () => undefined,
         openCollectionPage: () => undefined,
         renderDashboardSwitcherLink: () => null,
         renderUpdateNotifBanner: () => null,
-        services: createServices(),
+        services: createUIServices(),
     }
 }
 

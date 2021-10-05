@@ -1,45 +1,35 @@
-import { WebRequest, Tabs, Storage } from 'webextension-polyfill-ts'
-import { BrowserSettingsStore } from 'src/util/settings'
-import {
-    UserFeatureOptIn,
-    UserFeatureOptInMap,
-} from 'src/features/background/feature-opt-ins'
-
-export interface PDFSettings {
-    shouldAutomaticallyOpen?: boolean
-}
-
-export interface PDFInterface {
-    refreshSetting(): Promise<void>
-}
+import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { PDFRemoteInterface } from './types'
+import { PDF_VIEWER_HTML } from '../constants'
 
 export class PDFBackground {
     private routeViewer: string
-    private routeExtension: string
-    private webRequest: WebRequest.Static
-    private localStorage: BrowserSettingsStore<PDFSettings>
     private shouldOpen: boolean
-    private tabs: Tabs.Static
-    remoteFunctions: PDFInterface
+    remoteFunctions: PDFRemoteInterface
 
-    constructor(opts: {
-        extensionGetURL: (url: string) => string
-        tabs: Tabs.Static
-        localBrowserStorage: Storage.LocalStorageArea
-    }) {
-        this.tabs = opts.tabs
-        this.routeViewer = opts.extensionGetURL('pdfjs/viewer.html')
-        this.routeExtension = opts.extensionGetURL('/')
-        this.localStorage = new BrowserSettingsStore<PDFSettings>(
-            opts.localBrowserStorage,
-            { prefix: 'PDFSettings_' },
-        )
+    constructor(
+        private deps: {
+            tabsAPI: Pick<Tabs.Static, 'update'>
+            runtimeAPI: Pick<Runtime.Static, 'getURL'>
+            webRequestAPI: Pick<WebRequest.Static, 'onBeforeRequest'>
+            syncSettings: SyncSettingsStore<'pdfIntegration'>
+        },
+    ) {
+        this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
         this.remoteFunctions = {
             refreshSetting: this.refreshSetting,
         }
     }
 
-    listener = (details) => {
+    private refreshSetting = async () => {
+        this.shouldOpen =
+            (await this.deps.syncSettings.pdfIntegration.get(
+                'shouldAutoOpen',
+            )) ?? true
+    }
+
+    private listener = (details: WebRequest.OnBeforeRequestDetailsType) => {
         if (this.shouldOpen && details.url) {
             let url = this.routeViewer + '?file=' + details.url
             const i = details.url.indexOf('#')
@@ -47,12 +37,10 @@ export class PDFBackground {
                 url += details.url.slice(i)
             }
 
-            // console.log('Redirecting ' + details.url + ' to ' + url)
-
             // to get around the blocked state of the request, we update the original tab with the account screen.
             // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.
             setTimeout(() => {
-                this.tabs.update(details.tabId, { active: true, url })
+                this.deps.tabsAPI.update(details.tabId, { active: true, url })
             }, 1)
 
             return { redirectUrl: url }
@@ -60,12 +48,9 @@ export class PDFBackground {
         return undefined
     }
 
-    setupRequestInterceptors = async (opts: {
-        webRequest: WebRequest.Static
-    }) => {
-        this.webRequest = opts.webRequest
+    setupRequestInterceptors = async () => {
         await this.refreshSetting()
-        this.webRequest.onBeforeRequest.addListener(
+        this.deps.webRequestAPI.onBeforeRequest.addListener(
             this.listener,
             {
                 types: ['main_frame', 'sub_frame'],
@@ -73,9 +58,5 @@ export class PDFBackground {
             },
             ['blocking'],
         )
-    }
-
-    refreshSetting = async () => {
-        this.shouldOpen = await this.localStorage.get('shouldAutomaticallyOpen')
     }
 }

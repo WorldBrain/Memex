@@ -18,8 +18,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 import { auth } from 'src/util/remote-functions-background'
 
-
-
 export interface Props {
     auth?: AuthRemoteFunctionsInterface
     contentScriptBackground?: ContentScriptsInterface<'caller'>
@@ -147,9 +145,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     async componentDidMount() {
         const user = await this.props.auth.getCurrentUser()
         const plans = await this.props.auth.getAuthorizedPlans()
-        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
-            'beta',
-        )
+        const isBetaAuthorized = true
 
         this.getDisplayName()
 
@@ -182,7 +178,6 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
             throw e
         }
     }
-
 
     // private openPortal = async () => {
     //     this.setState({ chargebeeState: 'running' })
@@ -228,12 +223,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     async activateBeta() {
         this.setState({ betaActivationState: 'running' })
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        const isBetaAuthorized = await this.props.auth.isAuthorizedForFeature(
-            'beta',
-        )
-        if (!isBetaAuthorized) {
-            await this.props.auth.setBetaEnabled(true)
-        }
+        const isBetaAuthorized = true
         this.setState({ betaActivationState: 'success' })
     }
 
@@ -254,34 +244,35 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
             return <LoadingIndicator />
         }
 
-        if (!this.state.displayName && this.state.betaActivationState === 'success') {
+        if (
+            !this.state.displayName &&
+            this.state.betaActivationState === 'success'
+        ) {
             return (
                 <>
-                     <InstructionsContainer>
+                    <InstructionsContainer>
                         <InstructionsBox>
                             <TypographyHeadingBigger>
                                 What's your name?
                             </TypographyHeadingBigger>
                             <TypographyTextNormal>
-                                This is how people know who the shared content is
-                                from.
+                                This is how people know who the shared content
+                                is from.
                                 <br />
-                                You can change this via the account settings later. 
+                                You can change this via the account settings
+                                later.
                             </TypographyTextNormal>
                         </InstructionsBox>
                     </InstructionsContainer>
-                    <DisplayNameSetup
-                        name={this.state.newDisplayName}
-                        onChange={(newDisplayName) => {
-                            this.setState({ newDisplayName })
-                        }}
-                        onClickNext={this.updateDisplayName}
-                    />
+                    <DisplayNameSetup authBG={this.props.auth} />
                 </>
             )
         }
 
-        if (this.state.betaActivationState === 'success' && this.state.displayName) {
+        if (
+            this.state.betaActivationState === 'success' &&
+            this.state.displayName
+        ) {
             return (
                 <SuccessBox>
                     <IconStyled src={icons.saveIcon} />

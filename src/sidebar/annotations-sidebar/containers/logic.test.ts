@@ -50,12 +50,13 @@ const setupLogicHelper = async ({
     }
 
     if (withAuth) {
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
-            id: 'test-user',
-            displayName: 'test',
-            email: 'test@test.com',
-            emailVerified: true,
-        })
+        await device.backgroundModules.auth.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
+        await device.backgroundModules.auth.remoteFunctions.updateUserProfile(
+            TEST_USER,
+        )
     }
 
     const analytics = new FakeAnalytics()
@@ -71,6 +72,7 @@ const setupLogicHelper = async ({
             .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
+        syncSettingsBG: backgroundModules.syncSettings,
         annotations: annotationsBG,
         events: fakeEmitter as any,
         annotationsCache,
@@ -263,29 +265,29 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations.length).toBe(0)
         })
 
-        it('should be able to change annotation sharing access', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+        // it('should be able to change annotation sharing access', async ({
+        //     device,
+        // }) => {
+        //     const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'feature-disabled',
+        //     )
 
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'sharing-allowed',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'sharing-allowed',
-            )
+        //     await sidebar.processEvent('receiveSharingAccessChange', {
+        //         sharingAccess: 'sharing-allowed',
+        //     })
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'sharing-allowed',
+        //     )
 
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'feature-disabled',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
-        })
+        //     await sidebar.processEvent('receiveSharingAccessChange', {
+        //         sharingAccess: 'feature-disabled',
+        //     })
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'feature-disabled',
+        //     )
+        // })
 
         it('should be able to toggle sidebar lock', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
@@ -614,8 +616,15 @@ describe('SidebarContainerLogic', () => {
         it('should share annotations, simulating sidebar share process', async ({
             device,
         }) => {
-            const { contentSharing, directLinking } = device.backgroundModules
-            await device.authService.setUser(TEST_USER)
+            const {
+                contentSharing,
+                directLinking,
+                personalCloud,
+            } = device.backgroundModules
+
+            // Make sure sync is enabled and running as sharing is handled in cloud translation layer
+            await personalCloud.enableSync()
+            await personalCloud.setup()
 
             const localListId = await sharingTestData.createContentSharingTestList(
                 device,
@@ -645,7 +654,11 @@ describe('SidebarContainerLogic', () => {
                 { skipPageIndexing: true },
             )
 
-            const { sidebar } = await setupLogicHelper({ device, pageUrl })
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl,
+                withAuth: true,
+            })
 
             await sidebar.processEvent('receiveSharingAccessChange', {
                 sharingAccess: 'sharing-allowed',
@@ -672,7 +685,8 @@ describe('SidebarContainerLogic', () => {
                 queueInteraction: 'skip-queue',
             })
 
-            await contentSharing.waitForSync()
+            await personalCloud.waitForSync()
+
             const serverStorage = await device.getServerStorage()
             expect(
                 await serverStorage.storageManager

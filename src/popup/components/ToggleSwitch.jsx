@@ -9,10 +9,12 @@ class ToggleSwitch extends PureComponent {
         isChecked: PropTypes.bool.isRequired,
         onChange: PropTypes.func.isRequired,
         className: PropTypes.string,
+        contentType: PropTypes.string,
         activeClassName: PropTypes.string,
     }
 
     static defaultProps = {
+        contentType: 'pages',
         className: styles.switch,
         activeClassName: styles.activeSwitch,
     }
@@ -44,7 +46,9 @@ class ToggleSwitch extends PureComponent {
                 >
                     {this.props.isChecked ? 'On' : 'Off'}
                 </span>
-                <p className={styles.subTitle}>on all pages</p>
+                <p className={styles.subTitle}>
+                    on all {this.props.contentType}
+                </p>
             </span>
         )
     }

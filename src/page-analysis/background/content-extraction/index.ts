@@ -6,9 +6,15 @@ import { PageContent } from 'src/search'
 
 export default function extractPageMetadataFromRawContent(
     rawContent: RawPageContent,
-): Promise<PageContent> {
+    options?: { fetch?: typeof fetch },
+): Promise<
+    PageContent & {
+        pdfMetadata?: { [key: string]: any }
+        pdfPageTexts?: string[]
+    }
+> {
     if (rawContent.type === 'pdf') {
-        return extractPdfContent(rawContent)
+        return extractPdfContent(rawContent, options)
     } else {
         return extractHtmlContent(rawContent)
     }

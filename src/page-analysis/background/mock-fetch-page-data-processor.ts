@@ -17,14 +17,17 @@ export class MockFetchPageDataProcessor implements FetchPageProcessor {
 
     constructor(
         private pageToProcess: PageContent = MockFetchPageDataProcessor.DEF_PAGE,
+        private options?: { htmlBody?: string },
     ) {}
 
     set mockPage(page: PageContent) {
         this.pageToProcess = page
     }
 
-    async process(url: string): Promise<PageContent> {
+    async process(
+        url: string,
+    ): Promise<{ content: PageContent; htmlBody?: string }> {
         this.lastProcessedUrl = url
-        return this.pageToProcess
+        return { content: this.pageToProcess, htmlBody: this.options?.htmlBody }
     }
 }

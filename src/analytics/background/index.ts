@@ -1,5 +1,4 @@
 import { Storage } from 'webextension-polyfill-ts'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { updateLastActive } from '../utils'
 import { AnalyticsInterface } from './types'
 import { bindMethod } from 'src/util/functions'
@@ -32,7 +31,6 @@ export class AnalyticsBackground {
     }
 
     async setup() {
-        makeRemotelyCallable(this.remoteFunctions)
         await this.activityPings.setup()
     }
 

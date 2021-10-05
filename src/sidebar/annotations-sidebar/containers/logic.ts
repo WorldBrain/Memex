@@ -23,15 +23,15 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import {
-    generateUrl,
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
+import { generateUrl } from 'src/annotations/utils'
 import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -39,6 +39,8 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
+    setLoginModalShown?: (isShown: boolean) => void
+    setDisplayNameModalShown?: (isShown: boolean) => void
 }
 
 type EventHandler<
@@ -64,8 +66,14 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
+    syncSettings: SyncSettingsStore<'contentSharing'>
+
     constructor(private options: SidebarLogicOptions) {
         super()
+
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: options.syncSettingsBG,
+        })
 
         Object.assign(
             this,
@@ -150,7 +158,7 @@ export class SidebarContainerLogic extends UILogic<
                 searchResults: {},
             },
             annotationSharingInfo: {},
-            annotationSharingAccess: 'feature-disabled',
+            annotationSharingAccess: 'sharing-allowed',
 
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
@@ -178,8 +186,8 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             showLoginModal: false,
+            showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
-            showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
@@ -201,8 +209,6 @@ export class SidebarContainerLogic extends UILogic<
             if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
             }
-
-            await this.loadBeta()
         })
     }
 
@@ -251,45 +257,31 @@ export class SidebarContainerLogic extends UILogic<
         event: { sortingFn },
     }) => this.options.annotationsCache.sort(sortingFn)
 
-    private async loadBeta() {
-        const isAllowed = await this.options.auth.isAuthorizedForFeature('beta')
-
-        this.emitMutation({
-            annotationSharingAccess: {
-                $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-            },
-        })
-    }
-
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
-        const { auth } = this.options
+    private async ensureLoggedIn(): Promise<boolean> {
+        const {
+            auth,
+            setLoginModalShown,
+            setDisplayNameModalShown,
+        } = this.options
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const isBetaAuthd = await auth.isAuthorizedForFeature('beta')
-
-            const mutation: UIMutation<SidebarContainerState> = {
-                annotationSharingAccess: {
-                    $set: isBetaAuthd ? 'sharing-allowed' : 'feature-disabled',
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
-                this.emitMutation({
-                    ...mutation,
-                    showBetaFeatureNotifModal: { $set: true },
-                })
+            const userProfile = await auth.getUserProfile()
+            if (!userProfile?.displayName?.length) {
+                setDisplayNameModalShown?.(true)
+                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
                 return false
             }
 
-            this.emitMutation(mutation)
+            setLoginModalShown?.(false)
+            setDisplayNameModalShown?.(false)
+            this.emitMutation({
+                annotationSharingAccess: { $set: 'sharing-allowed' },
+            })
             return true
         }
 
+        setLoginModalShown?.(true)
         this.emitMutation({ showLoginModal: { $set: true } })
         return false
     }
@@ -412,11 +404,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })
@@ -424,6 +411,12 @@ export class SidebarContainerLogic extends UILogic<
 
     setLoginModalShown: EventHandler<'setLoginModalShown'> = ({ event }) => {
         this.emitMutation({ showLoginModal: { $set: event.shown } })
+    }
+
+    setDisplayNameSetupModalShown: EventHandler<
+        'setDisplayNameSetupModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showDisplayNameSetupModal: { $set: event.shown } })
     }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({
@@ -775,11 +768,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
         const immediateShare =
             event.mouseEvent.metaKey && event.mouseEvent.altKey
 
@@ -787,6 +775,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: { $set: event.annotationUrl },
             immediatelyShareNotes: { $set: !!immediateShare },
         })
+
         await this.setLastSharedAnnotationTimestamp()
     }
 
@@ -1041,12 +1030,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
     }
 
-    setBetaFeatureNotifModalShown: EventHandler<
-        'setBetaFeatureNotifModalShown'
-    > = ({ event }) => {
-        this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
-    }
-
     private async _detectSharedAnnotations(annotationUrls: string[]) {
         const annotationSharingInfo: UIMutation<
             SidebarContainerState['annotationSharingInfo']
@@ -1117,13 +1100,18 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async setLastSharedAnnotationTimestamp() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async setLastSharedAnnotationTimestamp(now = Date.now()) {
+        const lastShared = await this.syncSettings.contentSharing.get(
+            'lastSharedAnnotationTimestamp',
+        )
 
         if (lastShared == null) {
             this.options.showAnnotationShareModal?.()
         }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 }

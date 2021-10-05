@@ -1,4 +1,5 @@
-import { isUrlForAnnotation, generateUrl } from './utils'
+import { generateUrl } from './utils'
+import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 
 const NORMALIZED_PAGE_URLS = [
     'getmemex.com',

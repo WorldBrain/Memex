@@ -8,6 +8,7 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
+import { isFullUrlPDF } from 'src/util/uri-utils'
 
 export type FetchPageData = (args: {
     url: string
@@ -61,7 +62,7 @@ const fetchPageData: FetchPageData = ({
     let cancel: CancelXHR
 
     // Check if pdf and run code for pdf instead
-    if (normalizedUrl.endsWith('.pdf')) {
+    if (isFullUrlPDF(normalizedUrl)) {
         run = async () => ({
             content: opts.includePageContent
                 ? await extractPdfContent({ url })
@@ -89,17 +90,22 @@ const fetchPageData: FetchPageData = ({
                     rawContent,
                 )
                 const fullText = await getPageFullText(rawContent, metadata)
-                return { ...metadata, fullText }
+                return { content: { ...metadata, fullText }, rawContent }
             }
 
-            return {
-                favIconURI: opts.includeFavIcon
-                    ? await extractFavIcon(url, doc)
-                    : undefined,
-                content: opts.includePageContent
-                    ? await extractPageContent()
-                    : undefined,
+            const result: PageDataResult = {}
+            if (opts.includePageContent) {
+                const { content, rawContent } = await extractPageContent()
+                result.content = content
+                if (rawContent.type === 'html') {
+                    result.htmlBody = rawContent.body
+                }
             }
+            if (opts.includeFavIcon) {
+                result.favIconURI = await extractFavIcon(url, doc)
+            }
+
+            return result
         }
     }
 

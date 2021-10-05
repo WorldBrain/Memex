@@ -19,7 +19,7 @@ import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
-import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
+import { registerSyncBackgroundIntegrationTests } from 'src/personal-cloud/background/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
@@ -33,6 +33,18 @@ import { Browser } from 'webextension-polyfill-ts'
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
+import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
+import { createPersistentStorageManager } from 'src/storage/persistent-storage'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import {
+    PersonalCloudHub,
+    StorexPersonalCloudBackend,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
+import { Services } from 'src/services/types'
 
 fetchMock.restore()
 
@@ -41,10 +53,14 @@ export interface BackgroundIntegrationTestSetupOpts {
     tabManager?: TabManager
     signalTransportFactory?: SignalTransportFactory
     getServerStorage?: () => Promise<ServerStorage>
+    personalCloudBackend?: PersonalCloudBackend
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
+    startWithSyncDisabled?: boolean
+    useDownloadTranslationLayer?: boolean
+    services?: Services
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -53,6 +69,8 @@ export async function setupBackgroundIntegrationTest(
     if (typeof window === 'undefined') {
         ;(global as any)['URL'] = URL
     }
+
+    clearRemotelyCallableFunctions()
 
     // We want to allow tests to be able to override time
     let getTime = () => Date.now()
@@ -64,18 +82,25 @@ export async function setupBackgroundIntegrationTest(
     const browserLocalStorage =
         options?.browserLocalStorage ?? new MemoryBrowserStorage()
     const storageManager = initStorex()
+    const persistentStorageManager = createPersistentStorageManager({
+        idbImplementation: inMemory(),
+    })
 
     const getServerStorage =
         options?.getServerStorage ?? createLazyMemoryServerStorage()
+    const serverStorage = await getServerStorage()
 
-    const services = await createServices({
-        backend: 'memory',
-        getServerStorage,
-    })
+    const services =
+        options?.services ??
+        (await createServices({
+            backend: 'memory',
+            getServerStorage,
+        }))
 
     const auth: AuthBackground = new AuthBackground({
         authService: services.auth,
         subscriptionService: services.subscriptions,
+        remoteEmitter: { emit: async () => {} },
         scheduleJob: (job: JobDefinition) => {
             console['info'](
                 'Running job immediately while in testing, job:',
@@ -142,9 +167,13 @@ export async function setupBackgroundIntegrationTest(
             `Tried to call Firebase function, but no mock was for that`,
         )
     }
+
+    let nextServerId = 1337
+    const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
         getNow,
         storageManager,
+        persistentStorageManager,
         analyticsManager,
         localStorageChangesManager: null,
         getServerStorage,
@@ -156,17 +185,48 @@ export async function setupBackgroundIntegrationTest(
         disableSyncEnryption: !options?.enableSyncEncyption,
         services,
         fetch,
-        userMessageService: new MemoryUserMessageService(),
+        userMessageService: userMessages,
         callFirebaseFunction: (name, ...args) => {
             return callFirebaseFunction(name, ...args)
         },
+        personalCloudBackend:
+            options?.personalCloudBackend ??
+            new StorexPersonalCloudBackend({
+                storageManager: serverStorage.storageManager,
+                storageModules: serverStorage.storageModules,
+                services,
+                clientSchemaVersion: STORAGE_VERSIONS[25].version,
+                view: new PersonalCloudHub().getView(),
+                getUserId: async () =>
+                    (await backgroundModules.auth.authService.getCurrentUser())
+                        ?.id,
+                getNow,
+                useDownloadTranslationLayer:
+                    options?.useDownloadTranslationLayer ?? true,
+                getDeviceId: async () =>
+                    backgroundModules.personalCloud.deviceId,
+            }),
+        contentSharingBackend: new ContentSharingBackend({
+            storageManager: serverStorage.storageManager,
+            activityFollows: serverStorage.storageModules.activityFollows,
+            contentSharing: serverStorage.storageModules.contentSharing,
+            getCurrentUserId: async () =>
+                (await auth.authService.getCurrentUser()).id,
+            userMessages,
+        }),
+        generateServerId: () => nextServerId++,
     })
     backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
 
-    registerBackgroundModuleCollections(storageManager, backgroundModules)
+    registerBackgroundModuleCollections({
+        storageManager,
+        persistentStorageManager,
+        backgroundModules,
+    })
 
     await storageManager.finishInitialization()
+    await persistentStorageManager.finishInitialization()
 
     const storageOperationLogger = new StorageOperationLogger({
         enabled: false,
@@ -189,10 +249,9 @@ export async function setupBackgroundIntegrationTest(
     }
 
     await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
-        readwise: backgroundModules.readwise,
+        personalCloud: backgroundModules.personalCloud,
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
@@ -207,6 +266,7 @@ export async function setupBackgroundIntegrationTest(
 
     return {
         storageManager,
+        persistentStorageManager,
         backgroundModules,
         browserLocalStorage,
         storageOperationLogger,
@@ -229,21 +289,27 @@ export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    it(test.description, async () => {
+    it(test.description + ' - single device', async () => {
         await runBackgroundIntegrationTest(test, options)
     })
+    const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
+    if (!skipSyncTests && !test.skipSyncTests) {
+        registerSyncBackgroundIntegrationTests(test, options)
+    }
 }
 
 export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    const setup = await setupBackgroundIntegrationTest({
+    const testOptions = await test.instantiate({ isSyncTest: false })
+    const setupOptions: BackgroundIntegrationTestSetupOpts = {
         customMiddleware: [],
         ...options,
-    })
-    const testOptions = await test.instantiate({ isSyncTest: false })
-    testOptions.setup?.({ setup })
+        ...(testOptions.getSetupOptions?.() ?? {}),
+    }
+    const setup = await setupBackgroundIntegrationTest(setupOptions)
+    await testOptions.setup?.({ setup })
 
     let changeDetectorUsed = false
 
@@ -258,9 +324,9 @@ export async function runBackgroundIntegrationTest(
             await setup.storageChangeDetector.capture()
             changeDetectorUsed = true
         }
-        if (step.expectedStorageOperations) {
-            setup.storageOperationLogger.enabled = true
-        }
+        // if (step.expectedStorageOperations) {
+        //     setup.storageOperationLogger.enabled = true
+        // }
 
         await step.execute({ setup })
         setup.storageOperationLogger.enabled = false
@@ -268,13 +334,17 @@ export async function runBackgroundIntegrationTest(
         if (step.postCheck) {
             await step.postCheck({ setup })
         }
-        if (step.expectedStorageOperations) {
-            const executedOperations = setup.storageOperationLogger.popOperations()
-            expect(executedOperations).toEqual(step.expectedStorageOperations())
-        }
+        // if (step.expectedStorageOperations) {
+        //     const executedOperations = setup.storageOperationLogger.popOperations()
+        //     expect(executedOperations).toEqual(step.expectedStorageOperations())
+        // }
         const changes = changeDetectorUsed
             ? await setup.storageChangeDetector.compare()
             : undefined
+        if (changes) {
+            delete changes.personalCloudAction
+        }
+
         if (step.validateStorageChanges) {
             step.validateStorageChanges({ changes })
         }

@@ -1,6 +1,5 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from '../../logic.test.util'
-import * as DATA from '../../logic.test.data'
 
 describe('Dashboard sync menu logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -21,19 +20,90 @@ describe('Dashboard sync menu logic', () => {
         expect(searchResults.state.syncMenu.isDisplayed).toBe(false)
     })
 
-    it('should be able to set unsynced item count display state', async ({
+    it('should set last synced date based of sync last seen value', async ({
+        device,
+    }) => {
+        const testTime = Date.now()
+        await device.backgroundModules.personalCloud.options.settingStore.set(
+            'lastSeen',
+            testTime,
+        )
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.syncMenu.lastSuccessfulSyncDate).toBeNull()
+        await searchResults.init()
+        expect(
+            searchResults.state.syncMenu.lastSuccessfulSyncDate,
+        ).not.toBeNull()
+        expect(
+            searchResults.state.syncMenu.lastSuccessfulSyncDate.getTime(),
+        ).toEqual(testTime)
+        await searchResults.cleanup()
+    })
+
+    it('should be able to set unsynced item count display states', async ({
         device,
     }) => {
         const { searchResults } = await setupTest(device)
 
-        expect(searchResults.state.syncMenu.showUnsyncedItemCount).toBe(false)
-        await searchResults.processEvent('setUnsyncedItemCountShown', {
-            isShown: true,
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(0)
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(0)
+
+        await searchResults.processEvent('setPendingChangeCounts', {
+            remote: 10,
         })
-        expect(searchResults.state.syncMenu.showUnsyncedItemCount).toBe(true)
-        await searchResults.processEvent('setUnsyncedItemCountShown', {
-            isShown: false,
+
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(0)
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(
+            10,
+        )
+
+        await searchResults.processEvent('setPendingChangeCounts', {
+            local: 15,
         })
-        expect(searchResults.state.syncMenu.showUnsyncedItemCount).toBe(false)
+
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(
+            10,
+        )
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(15)
+
+        await searchResults.processEvent('setPendingChangeCounts', {
+            local: 1,
+            remote: 1,
+        })
+
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(1)
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(1)
+    })
+
+    it('should set unsynced item count display states on remote event emission', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        await searchResults.init()
+
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(0)
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(0)
+
+        await device.backgroundModules.personalCloud.options.remoteEventEmitter.emit(
+            'cloudStatsUpdated',
+            { stats: { pendingDownloads: 5, pendingUploads: 8 } },
+        )
+
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(8)
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(5)
+
+        await device.backgroundModules.personalCloud.options.remoteEventEmitter.emit(
+            'cloudStatsUpdated',
+            { stats: { pendingDownloads: 54, pendingUploads: 18 } },
+        )
+
+        expect(searchResults.state.syncMenu.pendingLocalChangeCount).toEqual(18)
+        expect(searchResults.state.syncMenu.pendingRemoteChangeCount).toEqual(
+            54,
+        )
+
+        await searchResults.cleanup()
     })
 })

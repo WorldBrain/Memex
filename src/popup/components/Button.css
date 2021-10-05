@@ -178,6 +178,13 @@
     opacity: 0.8;
 }
 
+.PDFIcon {
+    background-image: url('/img/file-pdf.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    opacity: 0.8;
+}
+
 .openIcon {
     background-image: url('/img/open.svg');
     background-repeat: no-repeat;

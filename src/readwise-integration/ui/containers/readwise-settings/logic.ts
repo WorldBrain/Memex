@@ -12,6 +12,7 @@ export const INITIAL_STATE: ReadwiseSettingsState = {
     syncState: 'pristine',
     syncExistingNotes: true,
     apiKeyEditable: false,
+    apiKey: null,
 }
 
 type EventHandler<
@@ -91,9 +92,7 @@ export default class ReadwiseSettingsLogic extends UILogic<
             this,
             'syncState',
             async () => {
-                await this.dependencies.readwise.uploadAllAnnotations({
-                    queueInteraction: 'queue-and-return',
-                })
+                await this.dependencies.readwise.uploadAllAnnotations()
             },
         )
     }

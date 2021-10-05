@@ -12,7 +12,7 @@ const settingsStyle = require('src/options/settings/components/settings.css')
 
 class SetupManualOrAutomatic extends React.Component {
     state = {
-        mode: null,
+        mode: 'automatic',
         automatic: false,
     }
 
@@ -58,31 +58,17 @@ class SetupManualOrAutomatic extends React.Component {
                                     label={'Continue'}
                                 />
                             )}
-                            {this.state.mode === 'automatic' &&
-                                this.state.automatic && (
-                                    <PrimaryAction
-                                        disabled={false}
-                                        onClick={
-                                            this.state.automatic
-                                                ? () =>
-                                                      this.props.onChoice({
-                                                          type: 'automatic',
-                                                      })
-                                                : () => false
-                                        }
-                                        label={'Next'}
-                                    />
-                                )}
-                            {this.state.automatic === false &&
-                                this.state.mode === 'automatic' && (
-                                    <PrimaryAction
-                                        disabled={false}
-                                        onClick={
-                                            this.props.showSubscriptionModal
-                                        }
-                                        label={'Upgrade to Memex Pro'}
-                                    />
-                                )}
+                            {this.state.mode === 'automatic' && (
+                                <PrimaryAction
+                                    disabled={false}
+                                    onClick={() =>
+                                        this.props.onChoice({
+                                            type: 'automatic',
+                                        })
+                                    }
+                                    label={'Next'}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

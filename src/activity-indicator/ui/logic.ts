@@ -33,7 +33,7 @@ export default class Logic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
-            isShown: false,
+            isShown: true,
             hasFeedActivity: false,
         }
     }
@@ -43,9 +43,6 @@ export default class Logic extends UILogic<State, Events> {
         this.emitMutation({
             hasFeedActivity: { $set: activityStatus === 'has-unseen' },
         })
-
-        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
-        this.emitMutation({ isShown: { $set: isBetaAllowed } })
     }
 
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({

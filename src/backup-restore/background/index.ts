@@ -73,6 +73,13 @@ export class BackupBackgroundModule {
             disableAutomaticBackup: this.disableAutomaticBackup,
             isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
             isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
+            disableRecordingChanges: async () => {
+                this.storage.stopRecordingChanges()
+                await this.disableAutomaticBackup()
+
+                // This is needed so the recording of changes are not restarted on next ext setup
+                await this.backupInfoStorage.storeDate('lastBackup', null)
+            },
             getBackupTimes: async () => {
                 return this.getBackupTimes()
             },
@@ -326,13 +333,13 @@ export class BackupBackgroundModule {
             'lastBackupFinish',
         )
         let nextBackup = null
-        if (this.backupProcedure.running) {
+        if (this.backupProcedure?.running) {
             nextBackup = 'running'
         } else if (await this.isAutomaticBackupEnabled()) {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
         const times = {
-            lastBackup: lastBackup && lastBackup.getTime(),
+            lastBackup: lastBackup?.getTime() ?? null,
             nextBackup:
                 nextBackup && nextBackup.getTime
                     ? nextBackup.getTime()

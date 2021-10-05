@@ -124,9 +124,9 @@ export class StorexHubBackground {
 
         let processedData: PipelineRes
         try {
-            processedData = await this.dependencies.fetchPageData.process(
-                fullUrl,
-            )
+            processedData = (
+                await this.dependencies.fetchPageData.process(fullUrl)
+            ).content
         } catch (e) {
             return {
                 status: 'internal-error',

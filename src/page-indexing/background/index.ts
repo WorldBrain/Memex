@@ -13,20 +13,27 @@ import pipeline, { transformUrl } from 'src/search/pipeline'
 import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
-import analysePage from 'src/page-analysis/background/analyse-page'
+import analysePage, {
+    PageAnalysis,
+} from 'src/page-analysis/background/analyse-page'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
+import PersistentPageStorage from './persistent-storage'
+import { StoredContentType } from './types'
 
 export class PageIndexingBackground {
     storage: PageStorage
+    persistentStorage: PersistentPageStorage
+    fetch?: typeof fetch
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
 
     constructor(
-        private options: {
+        public options: {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
+            persistentStorageManager: StorageManager
             fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
@@ -34,6 +41,9 @@ export class PageIndexingBackground {
     ) {
         this.storage = new PageStorage({
             storageManager: options.storageManager,
+        })
+        this.persistentStorage = new PersistentPageStorage({
+            storageManager: options.persistentStorageManager,
         })
     }
 
@@ -56,13 +66,6 @@ export class PageIndexingBackground {
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
         visits = !visits.length ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
-
-        if (favIconURI != null) {
-            await this.storage.createFavIconIfNeeded(
-                pageData.hostname,
-                favIconURI,
-            )
-        }
     }
 
     async addFavIconIfNeeded(url: string, favIcon: string) {
@@ -167,6 +170,7 @@ export class PageIndexingBackground {
         pageData: PipelineRes,
         opts: PageCreationOpts = {},
     ) {
+        const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
 
         const existingPage = await this.storage.getPage(pageData.url)
@@ -178,6 +182,10 @@ export class PageIndexingBackground {
 
         if (opts.addInboxEntryOnCreate) {
             await this.options.createInboxEntry(pageData.fullUrl)
+        }
+
+        if (favIconURI != null) {
+            await this.addFavIconIfNeeded(pageData.url, favIconURI)
         }
     }
 
@@ -199,9 +207,10 @@ export class PageIndexingBackground {
         }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
-        const analysisRes = await analysePage({
+        const analysis = await analysePage({
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
+            fetch: this.fetch,
             includeContent: props.stubOnly
                 ? 'metadata-only'
                 : 'metadata-with-full-text',
@@ -209,18 +218,50 @@ export class PageIndexingBackground {
         })
 
         const pageData = await pipeline({
-            pageDoc: { ...analysisRes, url: props.fullUrl },
+            pageDoc: { ...analysis, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
+        await this.storeDocContent(normalizeUrl(pageData.url), analysis)
 
-        if (analysisRes.favIconURI) {
+        if (analysis.favIconURI) {
             await this.storage.createFavIconIfNeeded(
                 pageData.hostname,
-                analysisRes.favIconURI,
+                analysis.favIconURI,
             )
         }
 
         return pageData
+    }
+
+    async storeDocContent(
+        normalizedUrl: string,
+        analysis: Pick<
+            PageAnalysis,
+            'htmlBody' | 'pdfMetadata' | 'pdfPageTexts'
+        >,
+    ) {
+        if (analysis.htmlBody) {
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.HtmlBody,
+                content: analysis.htmlBody,
+            })
+        } else if (analysis.pdfMetadata && analysis.pdfPageTexts) {
+            for (const key of Object.keys(analysis.pdfMetadata)) {
+                if (analysis.pdfMetadata[key] === null) {
+                    delete analysis.pdfMetadata[key]
+                }
+            }
+
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.PdfContent,
+                content: {
+                    metadata: analysis.pdfMetadata,
+                    pageTexts: analysis.pdfPageTexts,
+                },
+            })
+        }
     }
 
     private async processPageDataFromUrl(
@@ -232,7 +273,11 @@ export class PageIndexingBackground {
             )
         }
 
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+        const processed = await this.options.fetchPageData.process(
+            props.fullUrl,
+        )
+        const { content: pageData } = processed
+        await this.storeDocContent(normalizeUrl(pageData.url), processed)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text
@@ -259,7 +304,7 @@ export class PageIndexingBackground {
             ? await this.processPageDataFromTab(props)
             : await this.processPageDataFromUrl(props)
 
-        if (pageData === null) {
+        if (pageData == null) {
             return
         }
 

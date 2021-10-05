@@ -26,16 +26,17 @@ export interface IntegrationTestSuite<StepContext> {
     tests: Array<IntegrationTest<StepContext>>
 }
 
-export interface IntegrationTest<StepContext> {
+export interface IntegrationTest<StepContext>
+    extends BackgroundIntegrationTestOptions {
     description: string
-    mark?: boolean
-    skipConflictTests?: boolean
     instantiate: (options: {
         isSyncTest?: boolean
     }) => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
+    getSetupOptions?(): BackgroundIntegrationTestSetupOpts
     setup?: (options: StepContext) => Promise<void>
+    debug?: boolean
     steps: Array<IntegrationTestStep<StepContext>>
 }
 
@@ -60,6 +61,7 @@ export interface IntegrationTestStep<StepContext> {
 
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
+    persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
     services: Services
@@ -104,6 +106,7 @@ export function backgroundIntegrationTestSuite(
 
 export interface BackgroundIntegrationTestOptions {
     mark?: boolean
+    skipSyncTests?: boolean
     skipConflictTests?: boolean
 }
 export function backgroundIntegrationTest(

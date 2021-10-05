@@ -1,19 +1,19 @@
 import StorageManager from '@worldbrain/storex'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import ContentSharingBackground from 'src/content-sharing/background'
-import { ReadwiseBackground } from 'src/readwise-integration/background'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import { PersonalCloudBackground } from 'src/personal-cloud/background'
+import { WATCHED_COLLECTIONS } from './constants'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
     options: {
-        syncService: SyncService
         storexHub?: StorexHubBackground
         contentSharing?: ContentSharingBackground
-        readwise?: ReadwiseBackground
+        personalCloud?: PersonalCloudBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
@@ -21,26 +21,35 @@ export async function setStorageMiddleware(
 ) {
     const modifyMiddleware =
         options.modifyMiddleware ?? ((middleware) => middleware)
+    const watchedCollections = new Set(WATCHED_COLLECTIONS)
 
-    const syncedCollections = new Set(SYNCED_COLLECTIONS)
+    const postProcessChange = async (
+        event: StorageOperationEvent<'post'>,
+        source: 'local' | 'sync',
+    ) => {
+        const promises = [
+            options.storexHub?.handlePostStorageChange(event),
+            options.contentSharing?.handlePostStorageChange(event, {
+                source,
+            }),
+        ]
+        if (source !== 'sync') {
+            promises.push(options.personalCloud?.handlePostStorageChange(event))
+        }
+        await Promise.all(promises)
+    }
+
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
         shouldWatchCollection: (collection) =>
-            syncedCollections.has(collection),
+            watchedCollections.has(collection),
         postprocessOperation: async (event) => {
-            await Promise.all([
-                options.storexHub?.handlePostStorageChange(event),
-                options.contentSharing?.handlePostStorageChange(event, {
-                    source: 'local',
-                }),
-                options.readwise?.handlePostStorageChange(event, {
-                    source: 'local',
-                }),
-            ])
+            await postProcessChange(event, 'local')
         },
     })
 
-    let shouldLogStorageOperations = false
+    let shouldLogStorageOperations =
+        process.env.LOG_STORAGE_OPERATIONS === 'true'
     const setStorageLoggingEnabled = (value: boolean) =>
         (shouldLogStorageOperations = value)
 
@@ -50,43 +59,34 @@ export async function setStorageMiddleware(
                 shouldLog: () => shouldLogStorageOperations,
             }),
             changeWatchMiddleware,
-            await options.syncService.createSyncLoggingMiddleware(),
         ]),
     )
 
-    const syncChangeWatchMiddleware = new ChangeWatchMiddleware({
-        storageManager,
-        shouldWatchCollection: (collection) =>
-            syncedCollections.has(collection),
-        postprocessOperation: async (event) => {
-            await Promise.all([
-                options.storexHub?.handlePostStorageChange(event),
-                options.contentSharing?.handlePostStorageChange(event, {
-                    source: 'sync',
-                }),
-                options.readwise?.handlePostStorageChange(event, {
-                    source: 'sync',
-                }),
-            ])
-        },
-    })
-    options.syncService.executeReconciliationOperation = async (
-        operationName: string,
-        ...operationArgs: any[]
-    ) => {
-        return syncChangeWatchMiddleware.process({
-            operation: [operationName, ...operationArgs],
-            extraData: {},
-            next: {
-                process: (context) => {
-                    return storageManager.backend.operation(
-                        context.operation[0],
-                        ...context.operation.slice(1),
-                    )
-                },
-            },
-        })
-    }
+    // const syncChangeWatchMiddleware = new ChangeWatchMiddleware({
+    //     storageManager,
+    //     shouldWatchCollection: (collection) =>
+    //         syncedCollections.has(collection),
+    //     postprocessOperation: async (event) => {
+    //         await postProcessChange(event, 'sync')
+    //     },
+    // })
+    // options.syncService.executeReconciliationOperation = async (
+    //     operationName: string,
+    //     ...operationArgs: any[]
+    // ) => {
+    //     return syncChangeWatchMiddleware.process({
+    //         operation: [operationName, ...operationArgs],
+    //         extraData: {},
+    //         next: {
+    //             process: (context) => {
+    //                 return storageManager.backend.operation(
+    //                     context.operation[0],
+    //                     ...context.operation.slice(1),
+    //                 )
+    //             },
+    //         },
+    //     })
+    // }
 
     return {
         setStorageLoggingEnabled,
@@ -109,27 +109,21 @@ export function createOperationLoggingMiddleware(options: {
             if (typeof context.operation[1] === 'string') {
                 info.push(context.operation[1])
             }
-            console.groupCollapsed('operation', ...info)
-            console.time('operation execution time')
+            console.log('executing operation', ...info)
 
             try {
                 const result = await next()
 
-                console.timeEnd('operation execution time')
-                console['log']({
+                console['log']('done operation', {
                     operation: context.operation,
                     result,
                 })
-                console['trace']()
-                console.groupEnd()
                 return result
             } catch (e) {
-                console.timeEnd('operation execution time')
-                console['log']({
+                console['log']('failed operation', {
                     operation: context.operation,
                     result: 'error',
                 })
-                console.groupEnd()
                 throw e
             }
         },

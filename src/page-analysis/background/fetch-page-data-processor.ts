@@ -12,7 +12,9 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
         },
     ) {}
 
-    async process(url: string): Promise<PageContent> {
+    async process(
+        url: string,
+    ): Promise<{ content: PageContent; htmlBody?: string }> {
         const fetch = this.props.fetchPageData({
             url,
             domParser: this.props.domParser,
@@ -37,11 +39,13 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
             fetchResult = { content: { title: url } }
         }
 
+        const { htmlBody } = fetchResult
+        delete fetchResult.htmlBody
         const pageData = await this.props.pagePipeline({
-            pageDoc: { ...fetchResult, url },
+            pageDoc: { ...fetchResult, content: fetchResult.content!, url },
             rejectNoContent: false,
         })
 
-        return pageData
+        return { content: pageData, htmlBody }
     }
 }

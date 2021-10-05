@@ -7,7 +7,7 @@ import { doesFileExist } from './util'
 export const envPaths = {
     development: path.resolve(__dirname, '../private/.env.development'),
     production: path.resolve(__dirname, '../private/.env.production'),
-    fallback: path.resolve(__dirname, '../private/.env.example'),
+    fallback: path.resolve(__dirname, '../.env.example'),
 }
 
 export function determineEnvPath({ mode }) {
@@ -47,6 +47,7 @@ export default ({ mode }) => {
         BACKUP_TEST_SIZE_ESTIMATION: '',
         DEV_AUTH_STATE: '',
         USE_FIREBASE_EMULATOR: process.env.USE_FIREBASE_EMULATOR || 'false',
+        TEST_READWISE_API_KEY: process.env.TEST_READWISE_API_KEY ?? '',
     }
 
     if (mode === 'development') {

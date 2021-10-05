@@ -9,11 +9,7 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
-import {
-    FakeTab,
-    injectFakeTabs,
-} from 'src/tab-management/background/index.tests'
-import { object } from '@storybook/addon-knobs'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import {
     PAGE_1_CREATION,
     PAGE_2_CREATION,
@@ -39,6 +35,7 @@ function testSetupFactory() {
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+            includeTitle: true,
         })
     }
 }
@@ -63,7 +60,7 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                     pageTitle: DATA.ANNOT_1.title,
                     comment: DATA.ANNOT_1.comment,
                     _comment_terms: ['test', 'comment'],
-                    _pageTitle_terms: ['test'],
+                    _pageTitle_terms: ['test', 'title'],
                     body: undefined,
                     selector: undefined,
                     createdWhen: expect.any(Date),
@@ -141,7 +138,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         url: annotUrl,
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: DATA.HIGHLIGHT_1.title,
-                                        _pageTitle_terms: ['test'],
+                                        _pageTitle_terms: ['test', 'title'],
                                         body: DATA.HIGHLIGHT_1.body,
                                         _body_terms: ['test', 'body'],
                                         comment: undefined,
@@ -205,15 +202,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         annotations: [
                                             {
                                                 url: annotUrl,
-                                                _body_terms: ['test', 'body'],
-                                                _pageTitle_terms: ['test'],
-                                                body: 'test body',
+                                                _body_terms: expect.any(Array),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                body: DATA.HIGHLIGHT_1.body,
                                                 comment: undefined,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle:
+                                                    DATA.HIGHLIGHT_1.title,
+                                                pageUrl:
+                                                    DATA.HIGHLIGHT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -226,7 +227,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -278,18 +279,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         annotations: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'updated',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
                                                 comment: 'updated comment',
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -302,7 +304,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -380,14 +382,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                     'updated',
                                                     'comment',
                                                 ],
-                                                _pageTitle_terms: ['test'],
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
                                                 comment: 'updated comment',
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -449,18 +453,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
                                             },
@@ -478,7 +483,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -521,8 +526,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             }
         },
     ),
+    // Annot bookmarks are functional, but currentyl unused in Memex ext + ignored from Memex cloud
     backgroundIntegrationTest(
         'should create a page, create an annotation, bookmark it, then retrieve it via a filtered search',
+        { skipSyncTests: true },
         () => {
             return {
                 setup: testSetupFactory(),
@@ -564,18 +571,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         'lorem.com': [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: true,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -589,13 +597,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         displayTime: expect.any(Number),
                                         favIcon: undefined,
                                         hasBookmark: false,
-                                        pageId: 'lorem.com',
+                                        pageId: DATA.PAGE_1.url,
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
-                                        url: 'lorem.com',
-                                        fullUrl: 'https://www.lorem.com',
+                                        title: DATA.PAGE_1.title,
+                                        url: DATA.PAGE_1.url,
+                                        fullUrl: DATA.PAGE_1.fullUrl,
                                     },
                                 ],
                                 isAnnotsSearch: true,
@@ -609,7 +617,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         },
     ),
     backgroundIntegrationTest(
-        'should create a page, create an annotation, tag+star+add it to list, then delete it - deleting all assoc. data',
+        'should create a page, create an annotation, tag+add it to list, then delete it - deleting all assoc. data',
+        { skipSyncTests: true },
         () => {
             let listId: number
             const findAllObjects = (collection, setup) =>
@@ -781,8 +790,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: testAnnot.title,
                                         comment: testAnnot.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -796,8 +805,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: testAnnot.title,
                                         comment: testAnnot.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -892,8 +901,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     pageUrl: DATA.PAGE_1.url,
                                     pageTitle: testAnnot.title,
                                     comment: testAnnot.comment,
-                                    _comment_terms: ['test', 'comment'],
-                                    _pageTitle_terms: ['test'],
+                                    _comment_terms: expect.any(Array),
+                                    _pageTitle_terms: expect.any(Array),
                                     body: undefined,
                                     selector: undefined,
                                     createdWhen: expect.any(Date),
@@ -967,21 +976,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             expect(searchResults).toEqual({
                                 annotsByDay: {
                                     [firstDay]: {
-                                        'lorem.com': [
+                                        [DATA.ANNOT_1.pageUrl]: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 lastEdited: expect.any(Date),
                                                 hasBookmark: false,
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -1038,8 +1048,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.ANNOT_1.pageUrl,
                                         pageTitle: DATA.ANNOT_1.title,
                                         comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1053,8 +1063,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.ANNOT_2.pageUrl,
                                         pageTitle: DATA.ANNOT_2.title,
                                         comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: ['test', 'text'],
-                                        _pageTitle_terms: ['annotation'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1192,18 +1202,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrlA,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
                                             },
@@ -1222,20 +1233,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['test.com']: [
                                             {
                                                 url: annotUrlB,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'text',
-                                                ],
-                                                _pageTitle_terms: [
-                                                    'annotation',
-                                                ],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'some test text',
+                                                comment: DATA.ANNOT_2.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'annotation',
-                                                pageUrl: 'test.com',
+                                                pageTitle: DATA.ANNOT_2.title,
+                                                pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_2],
                                             },
@@ -1298,8 +1308,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: DATA.ANNOT_1.title,
                                         comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1313,8 +1323,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_2.url,
                                         pageTitle: DATA.ANNOT_2.title,
                                         comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: ['test', 'text'],
-                                        _pageTitle_terms: ['annotation'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1418,18 +1428,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrlA,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -1448,20 +1459,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['test.com']: [
                                             {
                                                 url: annotUrlB,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'text',
-                                                ],
-                                                _pageTitle_terms: [
-                                                    'annotation',
-                                                ],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'some test text',
+                                                comment: DATA.ANNOT_2.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'annotation',
-                                                pageUrl: 'test.com',
+                                                pageTitle: DATA.ANNOT_2.title,
+                                                pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },

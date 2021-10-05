@@ -11,7 +11,6 @@ class ToggleSwitch extends Component {
         className: PropTypes.string,
         activeClassName: PropTypes.string,
         defaultValue: PropTypes.bool,
-        fromSearch: PropTypes.bool,
     }
 
     static defaultProps = {
@@ -39,14 +38,13 @@ class ToggleSwitch extends Component {
     deriveClass = () =>
         cx(this.props.className, {
             [this.props.activeClassName]: this.isCheckedValue,
-            [this.props.fromSearch]: localStorage.searchSwitch,
         })
 
-    handleClick = event => {
+    handleClick = (event) => {
         this.props.onChange(!this.isCheckedValue)
 
         if (!this.isControlled) {
-            this.setState(state => ({
+            this.setState((state) => ({
                 ...state,
                 isChecked: !this.isCheckedValue,
             }))

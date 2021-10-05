@@ -119,16 +119,16 @@ export class PageFetchBacklogBackground {
 
         await Promise.all(
             backlogEntries
-                .filter(entry => this.shouldRetry(entry))
-                .map(entry => this.processEntry(entry)),
+                .filter((entry) => this.shouldRetry(entry))
+                .map((entry) => this.processEntry(entry)),
         )
     }
 
     private async processEntry(entry: BacklogEntry) {
         try {
-            const processedData = await this.props.fetchPageData.process(
-                entry.url,
-            )
+            const {
+                content: processedData,
+            } = await this.props.fetchPageData.process(entry.url)
 
             await this.storeProcessedPageContent(processedData)
         } catch (err) {

@@ -134,7 +134,6 @@ export interface PageCreationProps {
     tabId?: number
     stubOnly?: boolean
     allowScreenshot?: boolean
-    save?: boolean
     visitTime?: number | '$now'
 }
 
