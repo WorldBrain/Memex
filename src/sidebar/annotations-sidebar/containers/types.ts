@@ -227,7 +227,9 @@ export type SidebarContainerEvents = UIEvent<
         }
         editAnnotation: {
             context: AnnotationEventContext
+            privacyLevel: AnnotationPrivacyLevels
             annotationUrl: string
+            isProtected?: boolean
         }
         deleteAnnotation: {
             context: AnnotationEventContext

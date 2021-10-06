@@ -713,9 +713,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => () =>
+                    onEditConfirm: (noteId) => (privacyLevel, isProtected) =>
                         this.processEvent('saveNoteEdit', {
                             noteId,
+                            privacyLevel,
+                            isProtected,
                         }),
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),

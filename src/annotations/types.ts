@@ -32,6 +32,7 @@ export interface Annotation {
     privacyLevel?: AnnotationPrivacyLevels
     tags: string[]
     isSocialPost?: boolean
+    isBulkShareProtected?: boolean
 }
 
 export interface AnnotationPrivacyLevel {

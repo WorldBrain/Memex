@@ -143,9 +143,11 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
                 }),
-            onEditConfirm: () =>
+            onEditConfirm: (privacyLevel, isProtected) =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
+                    privacyLevel,
+                    isProtected,
                     ...DEF_CONTEXT,
                 }),
             onShareClick: (mouseEvent) =>
@@ -191,6 +193,8 @@ export class AnnotationsSidebarContainer<
             onEditConfirm: () =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
+                    privacyLevel: annotation.privacyLevel,
+                    isProtected: annotation.isBulkShareProtected,
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>

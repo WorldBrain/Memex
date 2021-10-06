@@ -1756,17 +1756,25 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { noteUpdateState: { $set: taskState } },
             }),
             async () => {
-                // await updateAnnotation({
-                //     annotationData: {
-                //         localId: event.noteId,
-                //         comment: editNoteForm.inputValue,
-                //        isBulkShareProtected: event.
-                //     }
-                // })
-                await this.options.annotationsBG.editAnnotation(
-                    event.noteId,
-                    editNoteForm.inputValue,
-                )
+                const shouldShare =
+                    event.privacyLevel === AnnotationPrivacyLevels.SHARED
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: editNoteForm.inputValue,
+                    },
+                    shareOpts: {
+                        shouldShare,
+                        shouldUnshare:
+                            noteData.privacyLevel ===
+                                AnnotationPrivacyLevels.SHARED && !shouldShare,
+                        shouldShareToList: shouldShare,
+                        isBulkShareProtected: event.isProtected,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                })
+
                 if (tagsHaveChanged) {
                     await this.options.annotationsBG.updateAnnotationTags({
                         url: event.noteId,

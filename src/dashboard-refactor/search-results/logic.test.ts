@@ -1932,6 +1932,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('pristine')
                 const editP = searchResults.processEvent('saveNoteEdit', {
                     noteId,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 })
                 expect(
                     searchResults.state.searchResults.noteUpdateState,

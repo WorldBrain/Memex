@@ -1,15 +1,15 @@
-import TypedEventEmitter from 'typed-emitter'
+import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
+import type { Annotation } from 'src/annotations/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 import {
     AnnotationsSorter,
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import {
     createAnnotation,
     updateAnnotation,

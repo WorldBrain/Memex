@@ -127,6 +127,7 @@ describe('SidebarContainerLogic', () => {
                 comment: editedComment,
             })
             await sidebar.processEvent('editAnnotation', {
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 annotationUrl: DATA.ANNOT_1.url,
                 context,
             })
@@ -177,6 +178,7 @@ describe('SidebarContainerLogic', () => {
                 added: DATA.TAG_2,
             })
             await sidebar.processEvent('editAnnotation', {
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 annotationUrl: DATA.ANNOT_1.url,
                 context,
             })

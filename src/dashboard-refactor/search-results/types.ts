@@ -55,7 +55,10 @@ export type NoteInteractionProps = Omit<
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: (privacyLevel: AnnotationPrivacyLevels) => void
+    onEditConfirm: (
+        privacyLevel: AnnotationPrivacyLevels,
+        isProtected?: boolean,
+    ) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
@@ -104,6 +107,8 @@ export interface NoteData {
     displayTime: number
     createdWhen?: Date
     selector?: Anchor
+    privacyLevel: AnnotationPrivacyLevels
+    isBulkShareProtected?: boolean
 }
 
 export type PageData = Pick<
@@ -292,5 +297,8 @@ export type Events = UIEvent<{
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }
     cancelNoteEdit: NoteEventArgs
-    saveNoteEdit: NoteEventArgs
+    saveNoteEdit: NoteEventArgs & {
+        privacyLevel: AnnotationPrivacyLevels
+        isProtected?: boolean
+    }
 }>

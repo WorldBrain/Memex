@@ -545,7 +545,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState: { commentBox, pageUrl },
     }) => {
-        const { annotationsCache, contentSharing } = this.options
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -558,29 +557,27 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: { $set: false },
         })
 
-        await annotationsCache.create({
-            url: annotationUrl,
-            pageUrl,
-            comment,
-            tags: commentBox.tags,
-            privacyLevel: event.privacyLevel,
-        })
+        const shouldShare =
+            event.privacyLevel === AnnotationPrivacyLevels.SHARED
 
-        if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-            await contentSharing
-                .shareAnnotation({
-                    annotationUrl,
-                    queueInteraction: 'queue-and-return',
-                })
-                .catch(() => {})
-            await contentSharing
-                .shareAnnotationsToLists({
-                    annotationUrls: [annotationUrl],
-                    queueInteraction: 'queue-and-return',
-                })
-                .catch(() => {})
+        if (shouldShare) {
             await this.ensureLoggedIn()
         }
+
+        await this.options.annotationsCache.create(
+            {
+                url: annotationUrl,
+                pageUrl,
+                comment,
+                tags: commentBox.tags,
+                privacyLevel: event.privacyLevel,
+            },
+            {
+                shouldShare,
+                shouldShareToList: shouldShare,
+                isBulkShareProtected: event.isProtected,
+            },
+        )
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -724,15 +721,29 @@ export class SidebarContainerLogic extends UILogic<
 
         const somethingChanged = !(
             existing.comment === comment &&
-            areTagsEquivalent(existing.tags, form.tags)
+            areTagsEquivalent(existing.tags, form.tags) &&
+            existing.privacyLevel === event.privacyLevel &&
+            existing.isBulkShareProtected === event.isProtected
         )
 
         if (somethingChanged) {
-            this.options.annotationsCache.update({
-                ...existing,
-                comment,
-                tags: form.tags,
-            })
+            const shouldShare =
+                event.privacyLevel === AnnotationPrivacyLevels.SHARED
+            await this.options.annotationsCache.update(
+                {
+                    ...existing,
+                    comment,
+                    tags: form.tags,
+                },
+                {
+                    shouldShare,
+                    shouldShareToList: shouldShare,
+                    shouldUnshare:
+                        existing.privacyLevel ===
+                            AnnotationPrivacyLevels.SHARED && !shouldShare,
+                    isBulkShareProtected: event.isProtected,
+                },
+            )
         }
 
         this.emitMutation({
