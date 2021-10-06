@@ -211,11 +211,12 @@ export class PersonalCloudBackground {
 
     enableSyncForNewInstall = async (now = Date.now()) => {
         await this.enableSync()
-        this.startSync()
+        await this.startSync()
     }
 
-    startSync() {
-        this.actionQueue.unpause()
+    async startSync() {
+        const userId = await this.options.getUserId()
+        await this.handleAuthChange(userId)
 
         if (!this.pendingActionsExecuting) {
             this.pendingActionsExecuting = this.actionQueue.executePendingActions()
@@ -242,6 +243,7 @@ export class PersonalCloudBackground {
     async handleAuthChange(userId: string | number | null) {
         if (userId) {
             await this.createOrLoadDeviceId(userId)
+            this.actionQueue.unpause()
         } else {
             this.actionQueue.pause()
             delete this.deviceId
@@ -487,6 +489,9 @@ export class PersonalCloudBackground {
 
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
         if (!this.deviceId) {
+            console.warn(
+                'Tried to execute action without deviceId, so pausing the action queue',
+            )
             return { pauseAndRetry: true }
         }
         this._debugLog('Executing action', action)

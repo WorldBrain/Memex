@@ -92,6 +92,13 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .toArray()
 
         for (const { favIcon, hostname } of favIcons) {
+            if (!favIcon) {
+                console.warn(
+                    'found a favicon entry without favicon, hostname: ',
+                    hostname,
+                )
+                continue
+            }
             favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
         }
     }
