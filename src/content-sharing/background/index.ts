@@ -53,6 +53,7 @@ export default class ContentSharingBackground {
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
+            unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
             generateRemoteAnnotationId: async () =>
@@ -213,7 +214,7 @@ export default class ContentSharingBackground {
             (annotation) =>
                 !remoteIds[annotation.url] &&
                 (!annotPrivacyLevels[annotation.url] ||
-                    annotPrivacyLevels[annotation.url]?.privacyLevel >
+                    annotPrivacyLevels[annotation.url]?.privacyLevel !==
                         AnnotationPrivacyLevels.PROTECTED),
         )
         for (const annnotation of annotations) {
@@ -221,7 +222,7 @@ export default class ContentSharingBackground {
                 {
                     localId: annnotation.url,
                     remoteId: this.generateRemoteAnnotationId(),
-                    excludeFromLists: true, // TODO: should this be true or false?
+                    excludeFromLists: !options.shareToLists ?? true,
                 },
             ])
         }
@@ -286,6 +287,25 @@ export default class ContentSharingBackground {
                 (url) => !allMetadata[url]?.excludeFromLists,
             ),
             excludeFromLists: true,
+        })
+    }
+
+    unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
+        options,
+    ) => {
+        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
+            {
+                annotations: options.annotationUrls,
+            },
+        )
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (annotationUrl) =>
+                !annotPrivacyLevels[annotationUrl] ||
+                annotPrivacyLevels[annotationUrl]?.privacyLevel !==
+                    AnnotationPrivacyLevels.PROTECTED,
+        )
+        await this.storage.deleteAnnotationMetadata({
+            localIds: nonProtectedAnnotations,
         })
     }
 

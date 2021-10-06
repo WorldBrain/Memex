@@ -72,11 +72,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         try {
             await this.props.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
-                queueInteraction: 'skip-queue',
-            })
-            await this.props.contentSharingBG.shareAnnotationsToLists({
-                annotationUrls: this.annotationUrls,
-                queueInteraction: 'skip-queue',
+                shareToLists: true,
             })
             success = true
         } catch (err) {}
@@ -90,16 +86,9 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     private unshareAllAnnotations = async () => {
         let success = false
         try {
-            await Promise.all(
-                this.annotationUrls.map((annotationUrl) =>
-                    this.props.contentSharingBG
-                        .unshareAnnotation({
-                            annotationUrl,
-                            queueInteraction: 'skip-queue',
-                        })
-                        .catch((err) => {}),
-                ),
-            )
+            await this.props.contentSharingBG.unshareAnnotations({
+                annotationUrls: this.annotationUrls,
+            })
             success = true
         } catch (err) {}
 
