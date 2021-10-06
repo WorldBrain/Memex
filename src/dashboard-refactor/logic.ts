@@ -29,7 +29,10 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { createAnnotation, updateAnnotation } from 'src/annotations/annotation-save-logic'
+import {
+    createAnnotation,
+    updateAnnotation,
+} from 'src/annotations/annotation-save-logic'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1236,7 +1239,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const shouldShare = event.privacyLevel === AnnotationPrivacyLevels.SHARED
+                const shouldShare =
+                    event.privacyLevel === AnnotationPrivacyLevels.SHARED
 
                 if (shouldShare) {
                     await this.ensureLoggedIn()
@@ -1246,13 +1250,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationData: {
                         fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
+                    },
+                    shareOpts: {
                         isBulkShareProtected: event.isProtected,
                         shouldShare,
                         shouldShareToList: shouldShare,
                     },
                     annotationsBG,
                     contentSharingBG: contentShareBG,
-                    skipPageIndexing: true
+                    skipPageIndexing: true,
                 })
 
                 const newNoteId = await savePromise
@@ -1750,6 +1756,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { noteUpdateState: { $set: taskState } },
             }),
             async () => {
+                // await updateAnnotation({
+                //     annotationData: {
+                //         localId: event.noteId,
+                //         comment: editNoteForm.inputValue,
+                //        isBulkShareProtected: event.
+                //     }
+                // })
                 await this.options.annotationsBG.editAnnotation(
                     event.noteId,
                     editNoteForm.inputValue,

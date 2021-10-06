@@ -4,15 +4,11 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import {
-    NewAnnotationOptions,
-    AnnotationPrivacyLevels,
-} from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
-import { createAnnotation } from 'src/annotations/annotation-save-logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -319,11 +315,6 @@ export class RibbonContainerLogic extends UILogic<
         event: { privacyLevel, isProtected },
         previousState: { pageUrl, commentBox },
     }) => {
-        const {
-            annotationsCache,
-            contentSharing,
-            annotations,
-        } = this.dependencies
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -343,31 +334,21 @@ export class RibbonContainerLogic extends UILogic<
         })
 
         const shouldShare = privacyLevel === AnnotationPrivacyLevels.SHARED
-
-        const { savePromise } = await createAnnotation({
-            annotationsBG: annotations,
-            contentSharingBG: contentSharing,
-            annotationData: {
+        await this.dependencies.annotationsCache.create(
+            {
+                pageUrl,
                 comment,
+                url: annotationUrl,
+                tags: commentBox.tags,
+            },
+            {
                 shouldShare,
                 shouldShareToList: shouldShare,
                 isBulkShareProtected: isProtected,
-                fullPageUrl: pageUrl,
             },
-            customSaveCb: async () => {
-                await annotationsCache.create({
-                    url: annotationUrl,
-                    pageUrl,
-                    comment,
-                    tags: commentBox.tags,
-                    privacyLevel,
-                })
-                return annotationUrl
-            },
-        })
+        )
 
         this.dependencies.setRibbonShouldAutoHide(true)
-        await savePromise
 
         await new Promise((resolve) =>
             setTimeout(resolve, this.commentSavedTimeout),
