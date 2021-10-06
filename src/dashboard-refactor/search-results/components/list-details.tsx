@@ -45,7 +45,11 @@ export default class ListDetails extends PureComponent<Props> {
                                                 <Icon
                                                     height="18px"
                                                     icon="addPeople"
-                                                    color="grey"
+                                                    color="darkgrey"
+                                                    onClick={
+                                                        this.props
+                                                            .onAddContributorsClick
+                                                    }
                                                 />
                                             </ButtonTooltip>
                                         </Margin>
