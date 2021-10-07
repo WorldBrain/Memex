@@ -1,4 +1,6 @@
+import kebabCase from 'lodash/kebabCase'
 import { browser, Browser } from 'webextension-polyfill-ts'
+import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
@@ -168,6 +170,7 @@ export function createBackgroundModules(options: {
         name: ModuleName,
         options?: { broadcastToTabs?: boolean },
     ): RemoteEventEmitter<ModuleName>
+    userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
         options.createRemoteEventEmitter ?? remoteEventEmitter
@@ -503,13 +506,14 @@ export function createBackgroundModules(options: {
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {
+            const uaParser = new UAParser(options.userAgentString)
             const serverStorage = await options.getServerStorage()
             const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
                 {
                     device: {
                         type: PersonalDeviceType.DesktopBrowser,
-                        os: PersonalDeviceOs.Windows,
-                        browser: PersonalDeviceBrowser.Edge,
+                        os: kebabCase(uaParser.getOS().name),
+                        browser: kebabCase(uaParser.getBrowser().name),
                         product: PersonalDeviceProduct.Extension,
                     },
                     userId,
