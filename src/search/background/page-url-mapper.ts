@@ -4,7 +4,11 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
-import { Annotation } from 'src/annotations/types'
+import {
+    Annotation,
+    AnnotationPrivacyLevels,
+    AnnotationPrivacyLevel,
+} from 'src/annotations/types'
 import { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 import {
@@ -226,26 +230,56 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         annotMap: Map<string, Annotation[]>,
     ) {
         const annotTagMap = new Map<string, string[]>()
+        const protectedAnnotUrlsSet = new Set<string>()
+        const sharedAnnotUrlsSet = new Set<string>()
+
         const annots = (await this.backend.dexieInstance
             .table('annotations')
             .where('pageUrl')
             .anyOf(pageUrls)
             .toArray()) as Annotation[]
 
+        const annotUrls = annots.map((annot) => annot.url)
+
         await this.backend.dexieInstance
             .table('tags')
             .where('url')
-            .anyOf(annots.map((annot) => annot.url))
+            .anyOf(annotUrls)
             .eachPrimaryKey(([name, url]: [string, string]) => {
                 const prev = annotTagMap.get(url) ?? []
                 annotTagMap.set(url, [...prev, name])
+            })
+
+        await this.backend.dexieInstance
+            .table('annotationPrivacyLevels')
+            .where('annotation')
+            .anyOf(annotUrls)
+            .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
+                if (privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                    protectedAnnotUrlsSet.add(annotation)
+                }
+            })
+
+        await this.backend.dexieInstance
+            .table('sharedAnnotationMetadata')
+            .where('localId')
+            .anyOf(annotUrls)
+            .each((shareMetadata: { localId: string }) => {
+                sharedAnnotUrlsSet.add(shareMetadata.localId)
             })
 
         annots.forEach((annot) => {
             const prev = annotMap.get(annot.pageUrl) ?? []
             annotMap.set(annot.pageUrl, [
                 ...prev,
-                { ...annot, tags: annotTagMap.get(annot.url) ?? [] },
+                {
+                    ...annot,
+                    tags: annotTagMap.get(annot.url) ?? [],
+                    isBulkShareProtected: protectedAnnotUrlsSet.has(annot.url),
+                    privacyLevel: sharedAnnotUrlsSet.has(annot.url)
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE,
+                },
             ])
         })
     }

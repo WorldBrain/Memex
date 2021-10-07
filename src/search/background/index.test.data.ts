@@ -1,3 +1,5 @@
+import type { Anchor } from 'src/highlighting/types'
+
 export const normalizedPageUrl1 = 'annotation.url'
 export const fullPageUrl1 = `https://${normalizedPageUrl1}`
 
@@ -14,13 +16,14 @@ export const coll2 = 'testB'
 // - coll 2
 export const highlight = {
     fullPageUrl: fullPageUrl1,
+    isProtected: true,
+    isShared: true,
     object: {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl1,
         body: 'Whooo this is a highlight',
         url: `${fullPageUrl1}/#12124124124`,
-        comment: '',
-        selector: {},
+        selector: {} as Anchor,
         createdWhen: new Date('2019-01-25T12:04Z'),
     },
 }
@@ -29,13 +32,15 @@ export const highlight = {
 // - coll 1
 export const hybrid = {
     fullPageUrl: fullPageUrl2,
+    isProtected: true,
+    isShared: false,
     object: {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl2,
         body: 'Whooo this is a highlight bla',
         url: `${fullPageUrl2}#12124124124`,
         comment: 'Great quote in that highlight term',
-        selector: {} as any,
+        selector: {} as Anchor,
         createdWhen: new Date('2019-01-30T13:02Z'),
     },
 }
@@ -44,26 +49,29 @@ export const hybrid = {
 // - tag 2
 export const annotation = {
     fullPageUrl: fullPageUrl1,
+    isProtected: false,
+    isShared: true,
     object: {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl1,
         body: 'Whooo this is an annotation ',
         url: `${fullPageUrl1}/#12124124134`,
         comment: 'Hmm this is the annotation comment bla',
-        selector: {},
+        selector: {} as Anchor,
         createdWhen: new Date('2019-01-29T18:42Z'),
     },
 }
 
 export const comment = {
     fullPageUrl: fullPageUrl1,
+    isProtected: false,
+    isShared: false,
     object: {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl1,
         body: 'some test text term',
         url: `${fullPageUrl1}/#12124124159`,
         comment: 'Hmm this is just a comment',
-        selector: {},
         createdWhen: new Date('2019-01-28T07:01Z'),
     },
 }

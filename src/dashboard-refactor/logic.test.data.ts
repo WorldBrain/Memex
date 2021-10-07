@@ -29,6 +29,8 @@ const noteDataToSearchRes = (
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
     lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,
+    isBulkShareProtected: note.isBulkShareProtected,
+    privacyLevel: note.privacyLevel,
     pageUrl: page.normalizedUrl,
     comment: note.comment,
     body: note.highlight,
