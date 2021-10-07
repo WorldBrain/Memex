@@ -1164,7 +1164,7 @@ describe('Dashboard search results logic', () => {
                         day,
                         pageId,
                         fullPageUrl: 'https://' + pageId,
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                        shouldShare: false,
                     },
                 )
                 expect(
@@ -1932,7 +1932,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('pristine')
                 const editP = searchResults.processEvent('saveNoteEdit', {
                     noteId,
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    shouldShare: false,
                 })
                 expect(
                     searchResults.state.searchResults.noteUpdateState,

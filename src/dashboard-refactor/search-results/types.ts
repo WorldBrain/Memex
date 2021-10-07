@@ -13,7 +13,6 @@ import type {
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
 import type { Anchor } from 'src/highlighting/types'
-import type { AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
 
@@ -55,10 +54,7 @@ export type NoteInteractionProps = Omit<
     updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
     updateTags: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: (
-        privacyLevel: AnnotationPrivacyLevels,
-        isProtected?: boolean,
-    ) => void
+    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
@@ -107,7 +103,7 @@ export interface NoteData {
     displayTime: number
     createdWhen?: Date
     selector?: Anchor
-    privacyLevel: AnnotationPrivacyLevels
+    isShared?: boolean
     isBulkShareProtected?: boolean
 }
 
@@ -272,7 +268,7 @@ export type Events = UIEvent<{
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
-        privacyLevel: AnnotationPrivacyLevels
+        shouldShare: boolean
         isProtected?: boolean
     }
 
@@ -298,7 +294,7 @@ export type Events = UIEvent<{
     setNoteEditCommentValue: NoteEventArgs & { value: string }
     cancelNoteEdit: NoteEventArgs
     saveNoteEdit: NoteEventArgs & {
-        privacyLevel: AnnotationPrivacyLevels
+        shouldShare: boolean
         isProtected?: boolean
     }
 }>

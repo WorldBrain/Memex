@@ -236,7 +236,7 @@ describe('Ribbon logic', () => {
 
         ribbonLogic.commentSavedTimeout = 1
         await ribbon.processEvent('saveComment', {
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            shouldShare: false,
         })
 
         expect(ribbon.state.commentBox).toEqual({
@@ -293,7 +293,7 @@ describe('Ribbon logic', () => {
 
         ribbonLogic.commentSavedTimeout = 1
         await ribbon.processEvent('saveComment', {
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            shouldShare: false,
             isProtected: true,
         })
 
@@ -358,7 +358,7 @@ describe('Ribbon logic', () => {
 
         ribbonLogic.commentSavedTimeout = 1
         await ribbon.processEvent('saveComment', {
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            shouldShare: false,
         })
 
         expect(ribbon.state.commentBox).toEqual({
@@ -419,7 +419,7 @@ describe('Ribbon logic', () => {
 
         ribbonLogic.commentSavedTimeout = 1
         await ribbon.processEvent('saveComment', {
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            shouldShare: true,
         })
 
         expect(ribbon.state.commentBox).toEqual({
@@ -482,7 +482,7 @@ describe('Ribbon logic', () => {
 
         ribbonLogic.commentSavedTimeout = 1
         await ribbon.processEvent('saveComment', {
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            shouldShare: true,
             isProtected: true,
         })
 

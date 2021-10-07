@@ -187,7 +187,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     shareStateChanged,
                                 }) =>
                                     interactionProps.updateShareInfo({
-                                        privacyLevel,
+                                        privacyLevel: privacyLevel,
                                         taskState: 'success',
                                         status: shareStateChanged
                                             ? 'shared'
@@ -199,7 +199,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     shareStateChanged,
                                 }) =>
                                     interactionProps.updateShareInfo({
-                                        privacyLevel,
+                                        privacyLevel: privacyLevel,
                                         taskState: 'success',
                                         status: shareStateChanged
                                             ? 'unshared'
@@ -340,7 +340,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     ? 'shared'
                                     : undefined,
                                 taskState: 'success',
-                                privacyLevel,
+                                privacyLevel: privacyLevel,
                             }),
                         postUnshareHook: ({
                             privacyLevel,
@@ -351,7 +351,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     ? 'unshared'
                                     : undefined,
                                 taskState: 'success',
-                                privacyLevel,
+                                privacyLevel: privacyLevel,
                             }),
                     }}
                     {...interactionProps}
@@ -483,7 +483,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                         ? 'shared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 })
                             }
                             postUnshareHook={({
@@ -495,7 +495,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                         ? 'unshared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 })
                             }
                         />

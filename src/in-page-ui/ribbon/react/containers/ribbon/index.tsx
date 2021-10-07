@@ -122,9 +122,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    saveComment: (privacyLevel, isProtected) =>
+                    saveComment: (shouldShare, isProtected) =>
                         this.processEvent('saveComment', {
-                            privacyLevel,
+                            shouldShare,
                             isProtected,
                         }),
                     cancelComment: () =>

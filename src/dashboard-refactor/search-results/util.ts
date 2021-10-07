@@ -142,7 +142,7 @@ const annotationToNoteData = (
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
     isEdited: annotation.lastEdited != null,
-    privacyLevel: annotation.privacyLevel,
+    isShared: annotation.isShared,
     isBulkShareProtected: annotation.isBulkShareProtected,
     ...getInitialNoteResultState(),
     editNoteForm: {

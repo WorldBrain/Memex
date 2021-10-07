@@ -4,7 +4,6 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { generateUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
@@ -63,7 +62,7 @@ export type RibbonContainerEvents = UIEvent<
         // SubcomponentHandlers<'sidebar'> &
         Omit<SubcomponentHandlers<'commentBox'>, 'saveComment'> & {
             saveComment: {
-                privacyLevel: AnnotationPrivacyLevels
+                shouldShare: boolean
                 isProtected?: boolean
             }
         } & SubcomponentHandlers<'bookmark'> &
@@ -312,7 +311,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     saveComment: EventHandler<'saveComment'> = async ({
-        event: { privacyLevel, isProtected },
+        event: { shouldShare, isProtected },
         previousState: { pageUrl, commentBox },
     }) => {
         const comment = commentBox.commentText.trim()
@@ -333,7 +332,6 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
 
-        const shouldShare = privacyLevel === AnnotationPrivacyLevels.SHARED
         await this.dependencies.annotationsCache.create(
             {
                 pageUrl,

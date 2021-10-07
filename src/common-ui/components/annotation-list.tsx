@@ -324,7 +324,7 @@ class AnnotationList extends Component<Props, State> {
                                     ? 'shared'
                                     : undefined,
                                 taskState: 'success',
-                                privacyLevel,
+                                privacyLevel: privacyLevel,
                             })
                         }
                         postUnshareHook={({
@@ -336,7 +336,7 @@ class AnnotationList extends Component<Props, State> {
                                     ? 'unshared'
                                     : undefined,
                                 taskState: 'success',
-                                privacyLevel,
+                                privacyLevel: privacyLevel,
                             })
                         }
                         closeShareMenu={() =>

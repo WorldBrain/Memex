@@ -19,10 +19,7 @@ interface State {
 }
 
 export interface AnnotationCreateEventProps {
-    onSave: (
-        privacyLevel: AnnotationPrivacyLevels,
-        isProtected?: boolean,
-    ) => Promise<void>
+    onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
@@ -79,10 +76,10 @@ export class AnnotationCreate extends React.Component<Props, State>
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     private handleCancel = () => this.props.onCancel()
     private handleSave = async (
-        privacyLevel: AnnotationPrivacyLevels,
+        shouldShare: boolean,
         isProtected?: boolean,
     ) => {
-        const saveP = this.props.onSave(privacyLevel, isProtected)
+        const saveP = this.props.onSave(shouldShare, isProtected)
 
         if (
             this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
@@ -108,15 +105,15 @@ export class AnnotationCreate extends React.Component<Props, State>
         e.stopPropagation()
 
         if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.handleSave(AnnotationPrivacyLevels.PROTECTED)
+            return this.handleSave(false, true)
         }
 
         if (e.key === 'Enter' && e.altKey && e.shiftKey) {
-            return this.handleSave(AnnotationPrivacyLevels.SHARED)
+            return this.handleSave(true, false)
         }
 
         if (e.key === 'Enter' && e.metaKey) {
-            return this.handleSave(AnnotationPrivacyLevels.PRIVATE)
+            return this.handleSave(false, false)
         }
 
         if (e.key === 'Tab' && !e.shiftKey) {

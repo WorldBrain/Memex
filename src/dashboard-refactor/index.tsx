@@ -693,12 +693,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onSave: (day, pageId) => (privacyLevel, isProtected) =>
+                    onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
                             isProtected,
-                            privacyLevel,
+                            shouldShare,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
@@ -713,10 +713,10 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => (privacyLevel, isProtected) =>
+                    onEditConfirm: (noteId) => (shouldShare, isProtected) =>
                         this.processEvent('saveNoteEdit', {
                             noteId,
-                            privacyLevel,
+                            shouldShare,
                             isProtected,
                         }),
                     onGoToHighlightClick: (noteId) => () =>

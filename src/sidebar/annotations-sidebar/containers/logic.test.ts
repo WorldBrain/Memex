@@ -127,8 +127,8 @@ describe('SidebarContainerLogic', () => {
                 comment: editedComment,
             })
             await sidebar.processEvent('editAnnotation', {
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: false,
                 context,
             })
             expect(
@@ -178,8 +178,8 @@ describe('SidebarContainerLogic', () => {
                 added: DATA.TAG_2,
             })
             await sidebar.processEvent('editAnnotation', {
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: false,
                 context,
             })
             expect(
@@ -382,7 +382,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                shouldShare: false,
             })
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
@@ -419,7 +419,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                shouldShare: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({

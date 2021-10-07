@@ -1,7 +1,7 @@
 import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
-import type { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import {
@@ -37,14 +37,23 @@ export const createAnnotationsCache = (
                     },
                 )
 
-                // TODO: Update this to support share metadata
+                const annotationUrls = annotations.map((a) => a.url)
                 const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
-                    { annotationUrls: annotations.map((a) => a.url) },
+                    {
+                        annotationUrls,
+                    },
+                )
+
+                const annotationShareMetadata = await bgModules.contentSharing.getRemoteAnnotationMetadata(
+                    { annotationUrls },
                 )
 
                 return annotations.map((a) => ({
                     ...a,
-                    privacyLevel: privacyLevels[a.url],
+                    isShared: !!annotationShareMetadata[a.url],
+                    isBulkShareProtected:
+                        privacyLevels[a.url] ===
+                        AnnotationPrivacyLevels.PROTECTED,
                 }))
             },
             create: async (annotation, shareOpts) => {

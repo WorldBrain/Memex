@@ -234,22 +234,6 @@ export class SidebarContainerLogic extends UILogic<
             },
         }
 
-        for (const { privacyLevel, url } of annotations) {
-            mutation.annotationSharingInfo = {
-                ...(mutation.annotationSharingInfo || {}),
-                [url]: {
-                    $set: {
-                        status:
-                            privacyLevel === AnnotationPrivacyLevels.SHARED
-                                ? 'shared'
-                                : 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel,
-                    },
-                },
-            }
-        }
-
         this.emitMutation(mutation)
     }
 
@@ -557,10 +541,7 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: { $set: false },
         })
 
-        const shouldShare =
-            event.privacyLevel === AnnotationPrivacyLevels.SHARED
-
-        if (shouldShare) {
+        if (event.shouldShare) {
             await this.ensureLoggedIn()
         }
 
@@ -570,11 +551,10 @@ export class SidebarContainerLogic extends UILogic<
                 pageUrl,
                 comment,
                 tags: commentBox.tags,
-                privacyLevel: event.privacyLevel,
             },
             {
-                shouldShare,
-                shouldShareToList: shouldShare,
+                shouldShare: event.shouldShare,
+                shouldShareToList: event.shouldShare,
                 isBulkShareProtected: event.isProtected,
             },
         )
@@ -722,13 +702,11 @@ export class SidebarContainerLogic extends UILogic<
         const somethingChanged = !(
             existing.comment === comment &&
             areTagsEquivalent(existing.tags, form.tags) &&
-            existing.privacyLevel === event.privacyLevel &&
+            existing.isShared === event.shouldShare &&
             existing.isBulkShareProtected === event.isProtected
         )
 
         if (somethingChanged) {
-            const shouldShare =
-                event.privacyLevel === AnnotationPrivacyLevels.SHARED
             await this.options.annotationsCache.update(
                 {
                     ...existing,
@@ -736,11 +714,9 @@ export class SidebarContainerLogic extends UILogic<
                     tags: form.tags,
                 },
                 {
-                    shouldShare,
-                    shouldShareToList: shouldShare,
-                    shouldUnshare:
-                        existing.privacyLevel ===
-                            AnnotationPrivacyLevels.SHARED && !shouldShare,
+                    shouldShare: event.shouldShare,
+                    shouldShareToList: event.shouldShare,
+                    shouldUnshare: existing.isShared && !event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
             )
@@ -1041,70 +1017,49 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
     }
 
-    private async _detectSharedAnnotations(annotationUrls: string[]) {
-        const annotationSharingInfo: UIMutation<
-            SidebarContainerState['annotationSharingInfo']
-        > = {}
-        const remoteIds = await this.options.contentSharing.getRemoteAnnotationIds(
-            { annotationUrls },
-        )
-
-        const privacyLevels = await this.options.annotations.findAnnotationPrivacyLevels(
-            { annotationUrls },
-        )
-
-        for (const localId of annotationUrls) {
-            annotationSharingInfo[localId] = {
-                $set: {
-                    taskState: 'pristine',
-                    privacyLevel: privacyLevels[localId],
-                    status:
-                        remoteIds[localId] ||
-                        privacyLevels[localId] ===
-                            AnnotationPrivacyLevels.SHARED
-                            ? 'shared'
-                            : 'not-yet-shared',
-                },
-            }
-        }
-
-        this.emitMutation({ annotationSharingInfo })
-    }
-
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
-    > = ({ previousState: { annotations, annotationSharingInfo }, event }) => {
-        const sharingInfo = {}
+    > = ({ previousState, event }) => {
+        const nextAnnotations = previousState.annotations.map((annotation) =>
+            annotation.isBulkShareProtected
+                ? annotation
+                : {
+                      ...annotation,
+                      isShared:
+                          event.info?.status === 'shared' ??
+                          annotation.isShared,
+                      isBulkShareProtected:
+                          event.info.privacyLevel ===
+                              AnnotationPrivacyLevels.PROTECTED ??
+                          annotation.isBulkShareProtected,
+                  },
+        )
 
-        for (const { url } of annotations) {
-            const prev = annotationSharingInfo[url]
-            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
-                sharingInfo[url] = prev
-                continue
-            }
-
-            sharingInfo[url] = {
-                ...event.info,
-                privacyLevel:
-                    event.info.privacyLevel ??
-                    annotationSharingInfo[url].privacyLevel,
-                status: event.info.status ?? annotationSharingInfo[url].status,
-            }
-        }
-
-        this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })
+        this.emitMutation({ annotations: { $set: nextAnnotations } })
     }
 
     updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({
-        previousState: { annotationSharingInfo },
+        previousState,
         event,
     }) => {
+        const annotationIndex = previousState.annotations.findIndex(
+            (a) => a.url === event.annotationUrl,
+        )
         this.emitMutation({
-            annotationSharingInfo: {
-                $merge: {
-                    [event.annotationUrl]: {
-                        ...annotationSharingInfo[event.annotationUrl],
-                        ...event.info,
+            annotations: {
+                [annotationIndex]: {
+                    isShared: {
+                        $set: event.info.status
+                            ? event.info.status === 'shared'
+                            : previousState.annotations[annotationIndex]
+                                  .isShared,
+                    },
+                    isBulkShareProtected: {
+                        $set:
+                            event.info.privacyLevel ===
+                                AnnotationPrivacyLevels.PROTECTED ??
+                            previousState.annotations[annotationIndex]
+                                .isBulkShareProtected,
                     },
                 },
             },

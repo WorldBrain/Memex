@@ -104,6 +104,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private get sharingData() {
+        // TODO: update this to use the flags from annot data
         const sharingProps: SharingProps = {
             sharingInfo: this.props.sharingInfo,
             sharingAccess: this.props.sharingAccess,
@@ -286,9 +287,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (this.props.hoverState === null) {
             return ['already-shared', 'sharing-success'].includes(
                 this.sharingData.state,
-            ) ||
-                this.props.sharingInfo?.privacyLevel ===
-                    AnnotationPrivacyLevels.PROTECTED
+            ) || this.props.sharingInfo?.privacyLevel
                 ? [
                       {
                           key: 'share-note-btn',
@@ -406,10 +405,10 @@ export default class AnnotationEditable extends React.Component<Props> {
             confirmBtn = (
                 <SaveBtn
                     onSave={footerDeps.onEditConfirm}
-                    privacyLevel={
-                        sharingInfo?.status === 'shared'
-                            ? AnnotationPrivacyLevels.SHARED
-                            : AnnotationPrivacyLevels.PRIVATE
+                    isShared={sharingInfo?.status === 'shared'}
+                    isProtected={
+                        sharingInfo?.privacyLevel ===
+                        AnnotationPrivacyLevels.PROTECTED
                     }
                 />
             )

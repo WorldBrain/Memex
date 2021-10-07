@@ -143,10 +143,10 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
                 }),
-            onEditConfirm: (privacyLevel, isProtected) =>
+            onEditConfirm: (shouldShare, isProtected) =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
-                    privacyLevel,
+                    shouldShare,
                     isProtected,
                     ...DEF_CONTEXT,
                 }),
@@ -193,8 +193,8 @@ export class AnnotationsSidebarContainer<
             onEditConfirm: () =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
-                    privacyLevel: annotation.privacyLevel,
                     isProtected: annotation.isBulkShareProtected,
+                    shouldShare: false,
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
@@ -211,9 +211,9 @@ export class AnnotationsSidebarContainer<
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: (privacyLevel, isProtected) =>
+            onSave: (shouldShare, isProtected) =>
                 this.processEvent('saveNewPageComment', {
-                    privacyLevel,
+                    shouldShare,
                     isProtected,
                 }),
             queryEntries: (query) =>
@@ -325,7 +325,7 @@ export class AnnotationsSidebarContainer<
                                         ? 'shared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 },
                             })
                         }
@@ -340,7 +340,7 @@ export class AnnotationsSidebarContainer<
                                         ? 'unshared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 },
                             })
                         }
@@ -375,7 +375,7 @@ export class AnnotationsSidebarContainer<
                                         ? 'shared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 },
                             })
                         }
@@ -389,7 +389,7 @@ export class AnnotationsSidebarContainer<
                                         ? 'unshared'
                                         : undefined,
                                     taskState: 'success',
-                                    privacyLevel,
+                                    privacyLevel: privacyLevel,
                                 },
                             })
                         }

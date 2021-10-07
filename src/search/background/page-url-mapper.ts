@@ -1,15 +1,15 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { Page } from 'src/search/models'
+import type { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
-import { AnnotPage } from './types'
+import type { AnnotPage } from './types'
 import {
     Annotation,
-    AnnotationPrivacyLevels,
     AnnotationPrivacyLevel,
+    AnnotationPrivacyLevels,
 } from 'src/annotations/types'
-import { User, SocialPage } from 'src/social-integration/types'
+import type { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 import {
     buildPostUrlId,
@@ -255,8 +255,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .where('annotation')
             .anyOf(annotUrls)
             .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
+                protectedAnnotUrlsSet.add(annotation)
                 if (privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
-                    protectedAnnotUrlsSet.add(annotation)
                 }
             })
 
@@ -275,10 +275,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 {
                     ...annot,
                     tags: annotTagMap.get(annot.url) ?? [],
+                    isShared: sharedAnnotUrlsSet.has(annot.url),
                     isBulkShareProtected: protectedAnnotUrlsSet.has(annot.url),
-                    privacyLevel: sharedAnnotUrlsSet.has(annot.url)
-                        ? AnnotationPrivacyLevels.SHARED
-                        : AnnotationPrivacyLevels.PRIVATE,
                 },
             ])
         })

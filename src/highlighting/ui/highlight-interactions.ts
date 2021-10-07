@@ -180,10 +180,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } as Annotation
 
         await Promise.all([
-            params.annotationsCache.create({
-                ...annotation,
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-            }),
+            params.annotationsCache.create(annotation),
             this.renderHighlight(
                 annotation,
                 ({ openInEdit, annotationUrl }) => {
