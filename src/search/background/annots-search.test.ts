@@ -1,4 +1,3 @@
-import StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import * as DATA from './index.test.data'
@@ -468,18 +467,18 @@ describe('Annotations search', () => {
                     annotations: [
                         expect.objectContaining({
                             url: DATA.highlight.object.url,
-                            privacyLevel: AnnotationPrivacyLevels.SHARED,
                             isBulkShareProtected: true,
+                            isShared: true,
                         }),
                         expect.objectContaining({
                             url: DATA.annotation.object.url,
-                            privacyLevel: AnnotationPrivacyLevels.SHARED,
                             isBulkShareProtected: false,
+                            isShared: true,
                         }),
                         expect.objectContaining({
                             url: DATA.comment.object.url,
-                            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                             isBulkShareProtected: false,
+                            isShared: false,
                         }),
                     ],
                 }),
@@ -488,8 +487,8 @@ describe('Annotations search', () => {
                     annotations: [
                         expect.objectContaining({
                             url: DATA.hybrid.object.url,
-                            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                             isBulkShareProtected: true,
+                            isShared: false,
                         }),
                     ],
                 }),

@@ -517,10 +517,6 @@ describe('Dashboard search results logic', () => {
                         .pageUrl === pageId,
             )
 
-            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
-                {},
-            )
-
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
@@ -532,12 +528,13 @@ describe('Dashboard search results logic', () => {
             })
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
             }
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
@@ -552,12 +549,13 @@ describe('Dashboard search results logic', () => {
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
             }
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
@@ -572,12 +570,35 @@ describe('Dashboard search results logic', () => {
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+            }
+
+            // NOTE: Now that they're all protected, the next call shouldn't change anything
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                info: {
+                    status: 'shared',
                     taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                },
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
             }
         })
 
@@ -589,10 +610,6 @@ describe('Dashboard search results logic', () => {
             })
 
             const noteIds = searchResults.state.searchResults.noteData.allIds
-
-            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
-                {},
-            )
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
@@ -606,12 +623,13 @@ describe('Dashboard search results logic', () => {
             )
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
             }
 
             await searchResults.processEvent(
@@ -627,12 +645,13 @@ describe('Dashboard search results logic', () => {
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
             }
 
             await searchResults.processEvent(
@@ -648,12 +667,36 @@ describe('Dashboard search results logic', () => {
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+            }
+
+            // NOTE: Now that they're all protected, the next call shouldn't change anything
+            await searchResults.processEvent(
+                'updateAllPageResultNotesShareInfo',
+                {
+                    info: {
+                        status: 'shared',
+                        taskState: 'error',
+                        privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    },
+                },
+            )
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
             }
         })
     })
@@ -1765,8 +1808,13 @@ describe('Dashboard search results logic', () => {
                 const noteId = DATA.NOTE_2.url
 
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual(undefined)
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: undefined,
+                        isShared: false,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
@@ -1776,13 +1824,15 @@ describe('Dashboard search results logic', () => {
                         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     },
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
@@ -1792,13 +1842,15 @@ describe('Dashboard search results logic', () => {
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                     },
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
@@ -1808,13 +1860,33 @@ describe('Dashboard search results logic', () => {
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     },
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    info: {
+                        status: 'shared',
+                        taskState: 'error',
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    },
                 })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: true,
+                    }),
+                )
             })
 
             it('should be able to set note edit comment value state', async ({

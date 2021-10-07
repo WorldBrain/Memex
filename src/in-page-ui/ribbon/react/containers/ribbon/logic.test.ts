@@ -305,13 +305,13 @@ describe('Ribbon logic', () => {
             .collection('annotations')
             .findObjects({})) as Annotation[]
 
-        expect(savedAnnotation).toEqual([
+        expect(savedAnnotation).toEqual(
             expect.objectContaining({
                 comment: COMMENT_TEXT,
                 pageTitle: 'Foo.com: Home',
                 pageUrl: 'foo.com',
             }),
-        ])
+        )
 
         expect(
             await device.storageManager
@@ -324,11 +324,10 @@ describe('Ribbon logic', () => {
                 .collection('annotationPrivacyLevels')
                 .findObjects({}),
         ).toEqual([
-            {
-                localId: savedAnnotation.url,
-                remoteId: expect.any(String),
-                excludeFromLists: false,
-            },
+            expect.objectContaining({
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                annotation: savedAnnotation.url,
+            }),
         ])
 
         expect(
@@ -524,7 +523,6 @@ describe('Ribbon logic', () => {
                 annotation: savedAnnotation.url,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                 createdWhen: expect.any(Date),
-                updatedWhen: expect.any(Date),
             },
         ])
 

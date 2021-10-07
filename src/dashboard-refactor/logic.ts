@@ -755,7 +755,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State
         info: Partial<AnnotationSharingInfo>
     }) => {
-        const mutation: UIMutation<State['searchResults']> = {}
+        const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
         for (const noteId of params.noteIds) {
             const prev =
@@ -764,26 +764,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                 continue
             }
 
-            mutation.noteData = {
-                byId: {
-                    [noteId]: {
-                        isShared: {
-                            $set: params.info?.status
-                                ? params.info.status === 'shared'
-                                : prev.isShared,
-                        },
-                        isBulkShareProtected: {
-                            $set: !!(
-                                params.info.privacyLevel ??
-                                prev.isBulkShareProtected
-                            ),
-                        },
+            mutation.byId = {
+                ...(mutation.byId ?? {}),
+                [noteId]: {
+                    isShared: {
+                        $set: params.info?.status
+                            ? params.info.status === 'shared'
+                            : prev.isShared,
+                    },
+                    isBulkShareProtected: {
+                        $set:
+                            params.info.privacyLevel != null
+                                ? params.info.privacyLevel ===
+                                  AnnotationPrivacyLevels.PROTECTED
+                                : prev.isBulkShareProtected,
                     },
                 },
             }
         }
 
-        this.emitMutation({ searchResults: mutation })
+        this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
     updateAllPageResultNotesShareInfo: EventHandler<
@@ -1536,7 +1536,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.noteId]: {
                             isShared: { $set: event.info.status === 'shared' },
                             isBulkShareProtected: {
-                                $set: !!event.info.privacyLevel,
+                                $set:
+                                    event.info.privacyLevel ===
+                                    AnnotationPrivacyLevels.PROTECTED,
                             },
                         },
                     },

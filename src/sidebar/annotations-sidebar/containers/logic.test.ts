@@ -576,44 +576,53 @@ describe('SidebarContainerLogic', () => {
             const id1 = 'test1'
             const id2 = 'test2'
 
-            expect(sidebar.state.annotationSharingInfo).toEqual({})
+            sidebar.processMutation({
+                annotations: { $set: [{ url: id1 }, { url: id2 }] as any },
+            })
+
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 info: { status: 'not-yet-shared', taskState: 'pristine' },
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'not-yet-shared', taskState: 'pristine' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 info: { status: 'shared', taskState: 'success' },
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'shared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: true, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 info: { status: 'unshared' },
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
                 info: { status: 'shared', taskState: 'error' },
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-                [id2]: { status: 'shared', taskState: 'error' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2, isShared: true, isBulkShareProtected: false },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                info: { taskState: 'success' },
+                info: {
+                    taskState: 'success',
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-                [id2]: { status: 'shared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2, isShared: true, isBulkShareProtected: true },
+            ])
         })
 
         it('should share annotations, simulating sidebar share process', async ({
@@ -830,6 +839,10 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
+            await directLinking.updateAnnotationPrivacyLevel(undefined, {
+                annotation: annotationUrl2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             await contentSharing.waitForSync()
 
             const { sidebar, sidebarLogic } = await setupLogicHelper({
@@ -838,26 +851,17 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({ url: annotationUrl1 }),
-                expect.objectContaining({ url: annotationUrl2 }),
+                expect.objectContaining({
+                    url: annotationUrl1,
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: annotationUrl2,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                }),
             ])
-            await sidebarLogic['_detectSharedAnnotations']([
-                annotationUrl1,
-                annotationUrl2,
-            ])
-
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [annotationUrl1]: {
-                    status: 'shared',
-                    privacyLevel: 100,
-                    taskState: 'pristine',
-                },
-                [annotationUrl2]: {
-                    status: 'not-yet-shared',
-                    privacyLevel: 100,
-                    taskState: 'pristine',
-                },
-            })
         })
     })
 
