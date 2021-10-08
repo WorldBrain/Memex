@@ -8,10 +8,7 @@ import type {
 } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
+import type { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
@@ -161,9 +158,6 @@ export type NestedResults = {
 }
 
 export interface RootState {
-    sharingAccess: AnnotationSharingAccess
-    noteSharingInfo: { [noteId: string]: AnnotationSharingInfo }
-
     searchType: SearchType
     draggedPageId?: string
     noResultsType: NoResultsType

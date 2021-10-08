@@ -109,8 +109,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showNoteShareOnboarding: false,
             },
             searchResults: {
-                sharingAccess: 'sharing-allowed',
-                noteSharingInfo: {},
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,

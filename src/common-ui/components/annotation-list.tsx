@@ -372,9 +372,9 @@ class AnnotationList extends Component<Props, State> {
                 comment={annot.comment}
                 className={styles.annotation}
                 createdWhen={annot.createdWhen!}
+                isShared={false}
+                isBulkShareProtected={false}
                 mode={this.state.annotationModes[annot.url]}
-                sharingAccess={this.state.sharingAccess}
-                sharingInfo={this.state.annotationsSharingInfo[annot.url]}
                 onGoToAnnotation={this.handleGoToAnnotation(annot)}
                 renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
                 renderCopyPasterForAnnotation={() =>

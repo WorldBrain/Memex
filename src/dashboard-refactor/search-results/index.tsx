@@ -130,6 +130,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 tags={noteData.tags}
                 body={noteData.highlight}
                 comment={noteData.comment}
+                isShared={noteData.isShared}
+                isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
@@ -139,8 +141,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         : undefined
                 }
                 mode={noteData.isEditing ? 'edit' : 'default'}
-                sharingInfo={this.props.noteSharingInfo[noteId]}
-                sharingAccess={this.props.sharingAccess}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
                         <HoverBox right="0" withRelativeContainer>

@@ -224,6 +224,8 @@ class AnnotationsSidebar extends React.Component<
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable
+                                isShared
+                                isBulkShareProtected
                                 url={data.id}
                                 body={data.body}
                                 comment={data.comment}
@@ -382,9 +384,9 @@ class AnnotationsSidebar extends React.Component<
                     body={annot.body}
                     comment={annot.comment}
                     createdWhen={annot.createdWhen!}
-                    sharingAccess={this.props.sharingAccess}
+                    isShared={annot.isShared}
+                    isBulkShareProtected={annot.isBulkShareProtected}
                     mode={this.props.annotationModes[annot.url]}
-                    sharingInfo={this.props.annotationSharingInfo[annot.url]}
                     isActive={this.props.activeAnnotationUrl === annot.url}
                     onHighlightClick={this.props.setActiveAnnotationUrl(
                         annot.url,

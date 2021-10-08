@@ -119,7 +119,6 @@ export class DashboardContainer extends StatefulUIElement<
             remoteLink,
             listName: listData.name,
             localListId: listData.id,
-            sharingAccess: searchResults.sharingAccess,
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {

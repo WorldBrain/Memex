@@ -16,24 +16,14 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
-import { SidebarAnnotationTheme, AnnotationPrivacyLevels } from '../types'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
-import {
-    SharingProps,
-    SHARE_BUTTON_LABELS,
-    getShareButtonIcon,
-    getShareAnnotationBtnState,
-    getShareAnnotationBtnAction,
-} from '../sharing-utils'
+import type { SidebarAnnotationTheme } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import { getShareButtonData } from '../sharing-utils'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -49,13 +39,13 @@ export interface AnnotationProps {
     createdWhen: Date | number
     mode: AnnotationMode
     hoverState: NoteResultHoverState
-    sharingAccess: AnnotationSharingAccess
-    sharingInfo?: AnnotationSharingInfo
     /** Required to decide how to go to an annotation when it's clicked. */
     url?: string
     className?: string
     isActive?: boolean
+    isShared: boolean
     hasReplies?: boolean
+    isBulkShareProtected: boolean
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
@@ -89,32 +79,14 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
-    static defaultProps: Pick<
-        Props,
-        'mode' | 'hoverState' | 'sharingAccess' | 'tags'
-    > = {
+    static defaultProps: Pick<Props, 'mode' | 'hoverState' | 'tags'> = {
         tags: [],
         mode: 'default',
         hoverState: null,
-        sharingAccess: 'feature-disabled',
     }
 
     focus() {
         this.annotEditRef?.current?.focusOnInputEnd()
-    }
-
-    private get sharingData() {
-        // TODO: update this to use the flags from annot data
-        const sharingProps: SharingProps = {
-            sharingInfo: this.props.sharingInfo,
-            sharingAccess: this.props.sharingAccess,
-            onShare: this.props.annotationFooterDependencies?.onShareClick,
-            onUnshare: this.props.annotationFooterDependencies?.onShareClick,
-        }
-        return {
-            state: getShareAnnotationBtnState(sharingProps),
-            action: getShareAnnotationBtnAction(sharingProps),
-        }
     }
 
     private get creationInfo() {
@@ -264,9 +236,12 @@ export default class AnnotationEditable extends React.Component<Props> {
     private calcFooterActions(): ItemBoxBottomAction[] {
         const {
             annotationFooterDependencies: footerDeps,
+            isBulkShareProtected,
             repliesLoadingState,
             onReplyBtnClick,
+            hoverState,
             hasReplies,
+            isShared,
         } = this.props
 
         if (!footerDeps) {
@@ -284,24 +259,23 @@ export default class AnnotationEditable extends React.Component<Props> {
             ]
         }
 
-        if (this.props.hoverState === null) {
-            return ['already-shared', 'sharing-success'].includes(
-                this.sharingData.state,
-            ) || this.props.sharingInfo?.privacyLevel
-                ? [
-                      {
-                          key: 'share-note-btn',
-                          isDisabled: true,
-                          image: getShareButtonIcon(
-                              this.sharingData.state,
-                              this.props.sharingInfo?.privacyLevel,
-                          ),
-                      },
-                  ]
-                : []
+        const shareIconData = getShareButtonData(isShared, isBulkShareProtected)
+
+        if (hoverState === null) {
+            if (isShared || isBulkShareProtected) {
+                return [
+                    {
+                        key: 'share-note-btn',
+                        isDisabled: true,
+                        image: shareIconData.icon,
+                    },
+                ]
+            }
+
+            return []
         }
 
-        if (this.props.hoverState === 'footer') {
+        if (hoverState === 'footer') {
             return [
                 {
                     key: 'delete-note-btn',
@@ -326,15 +300,9 @@ export default class AnnotationEditable extends React.Component<Props> {
                 },
                 {
                     key: 'share-note-btn',
-                    image: getShareButtonIcon(
-                        this.sharingData.state,
-                        this.props.sharingInfo?.privacyLevel,
-                    ),
+                    image: shareIconData.icon,
                     onClick: footerDeps.onShareClick,
-                    tooltipText: SHARE_BUTTON_LABELS[this.sharingData.state],
-                    isDisabled: ['sharing', 'unsharing'].includes(
-                        this.sharingData.state,
-                    ),
+                    tooltipText: shareIconData.label,
                 },
             ]
         }
@@ -361,10 +329,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             {
                 key: 'share-note-btn',
                 isDisabled: true,
-                image: getShareButtonIcon(
-                    this.sharingData.state,
-                    this.props.sharingInfo?.privacyLevel,
-                ),
+                image: shareIconData.icon,
             },
         ]
     }
@@ -372,7 +337,8 @@ export default class AnnotationEditable extends React.Component<Props> {
     private renderFooter() {
         const {
             mode,
-            sharingInfo,
+            isShared,
+            isBulkShareProtected,
             annotationFooterDependencies: footerDeps,
         } = this.props
 
@@ -405,11 +371,8 @@ export default class AnnotationEditable extends React.Component<Props> {
             confirmBtn = (
                 <SaveBtn
                     onSave={footerDeps.onEditConfirm}
-                    isShared={sharingInfo?.status === 'shared'}
-                    isProtected={
-                        sharingInfo?.privacyLevel ===
-                        AnnotationPrivacyLevels.PROTECTED
-                    }
+                    isProtected={isBulkShareProtected}
+                    isShared={isShared}
                 />
             )
         }

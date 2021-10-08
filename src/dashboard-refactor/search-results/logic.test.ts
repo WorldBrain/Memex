@@ -821,12 +821,6 @@ describe('Dashboard search results logic', () => {
                 const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
 
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
-
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
@@ -1733,12 +1727,6 @@ describe('Dashboard search results logic', () => {
                 })
                 const noteId = DATA.NOTE_2.url
 
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
-
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .shareMenuShowStatus,
@@ -1775,12 +1763,6 @@ describe('Dashboard search results logic', () => {
                     withAuth: true,
                 })
                 const noteId = DATA.NOTE_2.url
-
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
