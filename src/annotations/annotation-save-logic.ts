@@ -14,6 +14,7 @@ export interface AnnotationShareOpts {
 type AnnotationCreateData = {
     fullPageUrl: string
     pageTitle?: string
+    localId?: string
     createdWhen?: Date
     selector?: Anchor
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
@@ -51,7 +52,6 @@ export async function createAnnotation({
     if (shareOpts?.shouldShare) {
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
     }
-
     return {
         remoteAnnotationLink: shareOpts?.shouldShare
             ? getNoteShareUrl({ remoteAnnotationId })
@@ -59,6 +59,7 @@ export async function createAnnotation({
         savePromise: (async () => {
             const annotationUrl = await annotationsBG.createAnnotation(
                 {
+                    url: annotationData.localId,
                     createdWhen: annotationData.createdWhen,
                     pageUrl: annotationData.fullPageUrl,
                     selector: annotationData.selector,

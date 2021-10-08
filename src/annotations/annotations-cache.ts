@@ -63,9 +63,10 @@ export const createAnnotationsCache = (
                     contentSharingBG: bgModules.contentSharing,
                     skipPageIndexing: options.skipPageIndexing,
                     annotationData: {
-                        fullPageUrl: annotation.pageUrl,
+                        localId: annotation.url,
                         body: annotation.body,
                         comment: annotation.comment,
+                        fullPageUrl: annotation.pageUrl,
                         createdWhen: annotation.createdWhen,
                         pageTitle: annotation.pageTitle,
                         selector: annotation.selector,
