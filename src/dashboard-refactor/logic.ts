@@ -1249,7 +1249,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: event.isProtected,
-                                        ...utils.getInitialNoteResultState(),
+                                        ...utils.getInitialNoteResultState(
+                                            formState.inputValue,
+                                        ),
                                     },
                                 }),
                             },
@@ -1732,8 +1734,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     isEditing: { $set: false },
-                                    comment: { $set: editNoteForm.inputValue },
                                     tags: { $set: editNoteForm.tags },
+                                    isShared: { $set: event.shouldShare },
+                                    comment: { $set: editNoteForm.inputValue },
+                                    isBulkShareProtected: {
+                                        $set: event.isProtected,
+                                    },
                                 },
                             },
                         },

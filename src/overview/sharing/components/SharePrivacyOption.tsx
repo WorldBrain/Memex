@@ -35,7 +35,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
     render() {
         return (
             <PrivacyOptionItem
-                onClick={this.props.onClick}
+                onClick={() => this.props.onClick(false)}
                 isSelected={this.props.isSelected}
                 onMouseEnter={this.setHoverState(true)}
                 onMouseLeave={this.setHoverState(false)}

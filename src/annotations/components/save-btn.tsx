@@ -33,9 +33,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     render() {
         return (
             <SaveBtn>
-                <SaveBtnText
-                    onClick={this.saveWithShareIntent(this.props.isShared)}
-                >
+                <SaveBtnText onClick={() => this.props.onSave(false)}>
                     <Icon
                         icon={
                             this.props.isProtected

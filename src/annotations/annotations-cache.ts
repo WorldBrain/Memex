@@ -213,12 +213,16 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 
-        this.annotations = [
-            { ...annotation, createdWhen: new Date() },
-            ...stateBeforeModifications,
-        ]
+        const nextAnnotation = {
+            ...annotation,
+            createdWhen: new Date(),
+            isShared: shareOpts.shouldShare,
+            isBulkShareProtected: shareOpts.isBulkShareProtected,
+        }
 
-        this.annotationChanges.emit('created', annotation)
+        this.annotations = [nextAnnotation, ...stateBeforeModifications]
+
+        this.annotationChanges.emit('created', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
@@ -247,13 +251,20 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
+        const nextAnnotation = {
+            ...annotation,
+            lastEdited: new Date(),
+            isShared: shareOpts.shouldShare,
+            isBulkShareProtected: shareOpts.isBulkShareProtected,
+        }
+
         this.annotations = [
             ...stateBeforeModifications.slice(0, resultIndex),
-            { ...annotation, lastEdited: new Date() },
+            nextAnnotation,
             ...stateBeforeModifications.slice(resultIndex + 1),
         ]
 
-        this.annotationChanges.emit('updated', annotation)
+        this.annotationChanges.emit('updated', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
