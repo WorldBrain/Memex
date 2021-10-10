@@ -437,6 +437,7 @@ export function createBackgroundModules(options: {
         storageAPI: browser.storage,
         alarmsAPI: browser.alarms,
         tabsAPI: browser.tabs,
+        syncSettingsStore,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
