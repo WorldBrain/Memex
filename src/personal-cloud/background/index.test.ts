@@ -400,7 +400,7 @@ describe('Personal cloud', () => {
         const { personalCloud } = setups[0].backgroundModules
 
         await personalCloud.enableSync()
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
@@ -412,7 +412,7 @@ describe('Personal cloud', () => {
         const authChangesPromiseBefore = personalCloud.authChangesObserved
         const changesIntegratingPromiseBefore = personalCloud.changesIntegrating
 
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
