@@ -1673,15 +1673,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async showShareOnboardingIfNeeded(now = Date.now()) {
-        const lastShared = await this.syncSettings.contentSharing.get(
-            'lastSharedAnnotationTimestamp',
-        )
+        // const lastShared = await this.syncSettings.contentSharing.get(
+        //     'lastSharedAnnotationTimestamp',
+        // )
 
-        if (lastShared == null) {
-            this.emitMutation({
-                modals: { showNoteShareOnboarding: { $set: true } },
-            })
-        }
+        // if (lastShared == null) {
+        //     this.emitMutation({
+        //         modals: { showNoteShareOnboarding: { $set: true } },
+        //     })
+        // }
 
         await this.syncSettings.contentSharing.set(
             'lastSharedAnnotationTimestamp',
