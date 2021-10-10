@@ -26,6 +26,7 @@ export default class Logic extends UILogic<State, Event> {
         loadState: 'pristine',
         syncState: 'pristine',
         shouldShowLogin: true,
+        newSignUp: false,
     })
 
     async init() {
@@ -35,13 +36,16 @@ export default class Logic extends UILogic<State, Event> {
             const user = await authBG.getCurrentUser()
             if (user != null) {
                 this.isExistingUser = true
-                await this._onUserLogIn()
+                await this._onUserLogIn(false)
             }
         })
     }
 
-    private async _onUserLogIn() {
-        this.emitMutation({ shouldShowLogin: { $set: false } })
+    private async _onUserLogIn(newSignUp: boolean) {
+        this.emitMutation({
+            shouldShowLogin: { $set: false },
+            newSignUp: { $set: newSignUp },
+        })
 
         if (!this.isExistingUser) {
             this.syncPromise = executeUITask(this, 'syncState', async () =>
@@ -50,12 +54,12 @@ export default class Logic extends UILogic<State, Event> {
         }
     }
 
-    onUserLogIn: EventHandler<'onUserLogIn'> = async ({}) => {
-        await this._onUserLogIn()
+    onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
+        await this._onUserLogIn(!!event.newSignUp)
     }
 
     goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {
-        if (!this.isExistingUser) {
+        if (!this.isExistingUser && !previousState.newSignUp) {
             this.emitMutation({ step: { $set: 'sync' } })
 
             await (previousState.syncState === 'success'
