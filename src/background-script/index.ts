@@ -135,7 +135,7 @@ class BackgroundScript {
         }
 
         const { version } = runtimeAPI.getManifest()
-        if (version === '2.20.0') {
+        if (version === '3.0.0') {
             await this.deps.syncSettingsStore.dashboard.set(
                 'subscribeBannerShownAfter',
                 now,
