@@ -81,7 +81,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
                         </TopComponent>
                         <Header>Cloud Migration in Progress</Header>
                         <Text>
-                            This process will run and continue in the background.
+                            You can close this modal, as the sync process will continue in the background.
                             <br />
                             Login on other devices to sync them too.
                             <br />
