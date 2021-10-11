@@ -48,7 +48,7 @@ function renderFailMessage(errorId: string) {
         </React.Fragment>
     ) : (
         <div className={settingsStyle.infoText}>
-            There has been an issue with your backup process. <br/> 
+            There has been an issue with your backup process. <br />
             Try again, and if the problem persists, please{' '}
             <a href="mailto:support@worldbrain.io">contact support</a>.
         </div>

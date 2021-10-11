@@ -3,7 +3,6 @@ import { PageList } from 'src/custom-lists/background/types'
 import ShareNonPioneerInfo from './ShareNonPioneerInfo'
 import ShareListModalContent from './ShareListModalContent'
 import DisplayNameSetup from './DisplayNameSetup'
-import BetaFeatureNotif from './BetaFeatureNotif'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
@@ -34,7 +33,6 @@ interface State {
     displayName?: string
     newDisplayName?: string
     remoteListId?: string
-    showBetaNotif: boolean
     hasSubscription: boolean
 }
 
@@ -47,7 +45,6 @@ class ShareListModal extends Component<Props, State> {
             listCreationState: 'pristine',
             entriesUploadState: 'pristine',
             updateProfileState: 'pristine',
-            showBetaNotif: true,
             hasSubscription: false,
         }
     }
@@ -55,14 +52,7 @@ class ShareListModal extends Component<Props, State> {
     componentDidMount() {
         this.setState({ loadState: 'running' })
         this.getListOverview()
-        this.getBetaNotifStatus()
         this.hasSubscription()
-    }
-
-    async getBetaNotifStatus() {
-        if (await auth.isAuthorizedForFeature('beta')) {
-            this.setState({ showBetaNotif: false })
-        }
     }
 
     async hasSubscription() {
@@ -173,23 +163,7 @@ class ShareListModal extends Component<Props, State> {
 
         // if display name is not set - prompt to set
         if (!this.state.displayName) {
-            return (
-                <DisplayNameSetup
-                    name={this.state.newDisplayName}
-                    onChange={(newDisplayName) => {
-                        this.setState({ newDisplayName })
-                    }}
-                    onClickNext={this.updateDisplayName}
-                />
-            )
-        }
-
-        if (this.state.showBetaNotif) {
-            return (
-                <BetaFeatureNotif
-                    showSubscriptionModal={this.props.showSubscriptionModal}
-                />
-            )
+            return <DisplayNameSetup authBG={this.props.auth} />
         }
 
         // otherwise -  show the main modal content

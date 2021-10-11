@@ -1,6 +1,5 @@
 import 'core-js'
 import { browser } from 'webextension-polyfill-ts'
-import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
@@ -36,14 +35,28 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
+import { captureException } from 'src/util/raven'
+import { createSelfTests } from './tests/self-tests'
+import { createPersistentStorageManager } from './storage/persistent-storage'
 
 export async function main() {
-    setupRpcConnection({ sideName: 'background', role: 'background' })
-
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
+
+    if (process.env.USE_FIREBASE_EMULATOR === 'true') {
+        const firebase = getFirebase()
+        firebase.firestore().settings({
+            host: 'localhost:8080',
+            ssl: false,
+        })
+        firebase.database().useEmulator('localhost', 9000)
+        firebase.firestore().useEmulator('localhost', 8080)
+        firebase.auth().useEmulator('http://localhost:9099/')
+        firebase.functions().useFunctionsEmulator('http://localhost:5001')
+        firebase.storage().useEmulator('localhost', 9199)
+    }
 
     const getServerStorage = createLazyServerStorage(
         createServerStorageManager,
@@ -57,6 +70,7 @@ export async function main() {
     })
 
     const storageManager = initStorex()
+    const persistentStorageManager = createPersistentStorageManager()
     const services = await createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
@@ -70,7 +84,9 @@ export async function main() {
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
+        captureException,
         storageManager,
+        persistentStorageManager,
         getIceServers: async () => {
             const firebase = await getFirebase()
             const generateToken = firebase
@@ -79,23 +95,28 @@ export async function main() {
             const response = await generateToken({})
             return response.data.iceServers
         },
-        callFirebaseFunction: <Returns>(name: string, ...args: any[]) => {
+        callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
             const firebase = getFirebase()
             const callable = firebase.functions().httpsCallable(name)
-            return (callable(...args) as any) as Promise<Returns>
+            const result = await callable(...args)
+            return result.data as Promise<Returns>
         },
     })
-    registerBackgroundModuleCollections(storageManager, backgroundModules)
+    registerBackgroundModuleCollections({
+        storageManager,
+        persistentStorageManager,
+        backgroundModules,
+    })
 
     await storageManager.finishInitialization()
+    await persistentStorageManager.finishInitialization()
 
     const { setStorageLoggingEnabled } = await setStorageMiddleware(
         storageManager,
         {
-            syncService: backgroundModules.sync,
             storexHub: backgroundModules.storexHub,
             contentSharing: backgroundModules.contentSharing,
-            readwise: backgroundModules.readwise,
+            personalCloud: backgroundModules.personalCloud,
         },
     )
     await setupBackgroundModules(backgroundModules, storageManager)
@@ -107,6 +128,7 @@ export async function main() {
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
         auth: backgroundModules.auth.remoteFunctions,
+        analytics: backgroundModules.analytics.remoteFunctions,
         subscription: {
             getCheckoutLink:
                 backgroundModules.auth.subscriptionService.getCheckoutLink,
@@ -125,6 +147,7 @@ export async function main() {
         readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
 
@@ -136,49 +159,13 @@ export async function main() {
     window['dataSeeders'] = setupDataSeeders(storageManager)
     window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
-    window['selfTests'] = await createSelfTests({
-        storage: {
-            manager: storageManager,
-        },
-        services: {
-            sync: backgroundModules.sync,
-        },
-        // auth: {
-        //     setUser: async ({ id }) => {
-        //         ;(backgroundModules.auth
-        //             .authService as MemoryAuthService).setUser({
-        //             ...TEST_USER,
-        //             id: id as string,
-        //         })
-        //     },
-        // },
-        intergrationTestData: {
-            insert: async () => {
-                console['log']('Inserting integration test data')
-                const listId = await backgroundModules.customLists.createCustomList(
-                    {
-                        name: 'My list',
-                    },
-                )
-                await backgroundModules.customLists.insertPageToList({
-                    id: listId,
-                    url:
-                        'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-                })
-                await backgroundModules.pages.addPage({
-                    pageDoc: {
-                        url:
-                            'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-                        content: {
-                            fullText: 'home page content',
-                            title: 'bla.com title',
-                        },
-                    },
-                    visits: [],
-                })
-            },
-        },
+    window['selfTests'] = createSelfTests({
+        backgroundModules,
+        storageManager,
+        persistentStorageManager,
+        getServerStorage,
     })
 }
 
 main()
+setupRpcConnection({ sideName: 'background', role: 'background' })

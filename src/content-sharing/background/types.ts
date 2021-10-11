@@ -65,6 +65,7 @@ export interface ContentSharingEvents {
 }
 
 export type ContentSharingQueueInteraction =
+    | 'queue-only'
     | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'

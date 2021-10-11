@@ -6,25 +6,29 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
-import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
-import { ListData } from './lists-sidebar/types'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
+import { ListData, RootState } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
-import { DisableableState } from './header/sync-status-menu/types'
 import { DRAG_EL_ID } from './components/DragElement'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
+import {
+    getRemoteEventEmitter,
+    TypedRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -66,21 +70,42 @@ export const removeAllResultOccurrencesOfPage = (
 }
 
 export class DashboardLogic extends UILogic<State, Events> {
+    personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
+    syncSettings: SyncSettingsStore<'contentSharing' | 'dashboard'>
+
     constructor(private options: DashboardDependencies) {
         super()
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: options.syncSettingsBG,
+        })
+    }
+
+    private setupRemoteEventListeners() {
+        this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
+        this.personalCloudEvents.on('cloudStatsUpdated', ({ stats }) => {
+            this.emitMutation({
+                syncMenu: {
+                    pendingLocalChangeCount: { $set: stats.pendingUploads },
+                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                },
+            })
+        })
     }
 
     getInitialState(): State {
         return {
+            loadState: 'pristine',
+            isCloudEnabled: true,
+            currentUser: null,
             modals: {
                 showLogin: false,
-                showBetaFeature: false,
                 showSubscription: false,
+                showCloudOnboarding: false,
+                showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
             },
-            loadState: 'pristine',
             searchResults: {
-                sharingAccess: 'feature-disabled',
+                sharingAccess: 'sharing-allowed',
                 noteSharingInfo: {},
                 results: {},
                 noResultsType: null,
@@ -90,6 +115,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 shouldFormsAutoFocus: false,
                 isListShareMenuShown: false,
                 isSearchCopyPasterShown: false,
+                isCloudUpgradeBannerShown: false,
                 isSubscriptionBannerShown: false,
                 pageData: {
                     allIds: [],
@@ -152,95 +178,82 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             syncMenu: {
                 isDisplayed: false,
-                syncState: 'disabled',
-                backupState: 'disabled',
-                isAutoBackupEnabled: false,
-                lastSuccessfulBackupDate: null,
+                pendingLocalChangeCount: 0,
+                pendingRemoteChangeCount: 0,
                 lastSuccessfulSyncDate: null,
-                showUnsyncedItemCount: false,
-                unsyncedItemCount: 0,
             },
         }
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        this.setupRemoteEventListeners()
+
         await loadInitial(this, async () => {
-            const nextState = await this.hydrateStateFromLocalStorage(
-                previousState,
-            )
+            let nextState = await this.loadAuthStates(previousState)
+            nextState = await this.hydrateStateFromLocalStorage(nextState)
             await Promise.all([
                 this.loadListsData(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.getSyncMenuStatus(),
-                this.getSharingAccess(),
             ])
         })
+    }
+
+    cleanup: EventHandler<'cleanup'> = async ({}) => {
+        this.personalCloudEvents.removeAllListeners()
     }
 
     /* START - Misc helper methods */
     private async hydrateStateFromLocalStorage(
         previousState: State,
     ): Promise<State> {
+        const { personalCloudBG, localStorage } = this.options
         const {
-            [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
-            [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
-            [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
+            [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
-        } = await this.options.localStorage.get([
-            STORAGE_KEYS.subBannerDismissed,
-            STORAGE_KEYS.listSidebarLocked,
-            STORAGE_KEYS.onboardingMsgSeen,
+        } = await localStorage.get([
+            CLOUD_STORAGE_KEYS.lastSeen,
             STORAGE_KEYS.mobileAdSeen,
         ])
 
+        const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
+        const listsSidebarLocked = await this.syncSettings.dashboard.get(
+            'listSidebarLocked',
+        )
+        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
+            'onboardingMsgSeen',
+        )
+        const subBannerShownAfter = await this.syncSettings.dashboard.get(
+            'subscribeBannerShownAfter',
+        )
+
         const mutation: UIMutation<State> = {
+            isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
-                isSubscriptionBannerShown: { $set: !subBannerDismissed },
+                isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
+                isSubscriptionBannerShown: {
+                    $set:
+                        subBannerShownAfter != null &&
+                        subBannerShownAfter < Date.now(),
+                },
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
+            syncMenu: {
+                lastSuccessfulSyncDate: {
+                    $set:
+                        cloudLastSynced == null
+                            ? null
+                            : new Date(cloudLastSynced),
+                },
+            },
         }
         this.emitMutation(mutation)
         return this.withMutation(previousState, mutation)
-    }
-
-    private async getSyncMenuStatus() {
-        const { syncBG, backupBG } = this.options
-        const syncDevices = await syncBG.listDevices()
-
-        const autoBackupEnabled = await backupBG.isAutomaticBackupEnabled()
-        const { lastBackup } = await backupBG.getBackupTimes()
-        const lastSuccessfulBackup =
-            typeof lastBackup === 'number' ? new Date(lastBackup) : null
-
-        const backupState: DisableableState =
-            autoBackupEnabled || lastSuccessfulBackup != null
-                ? 'enabled'
-                : 'disabled'
-
-        let lastSuccessfulSync: Date = null
-        try {
-            lastSuccessfulSync = new Date(
-                await syncBG.retrieveLastSyncTimestamp(),
-            )
-        } catch (err) {}
-
-        this.emitMutation({
-            syncMenu: {
-                lastSuccessfulBackupDate: { $set: lastSuccessfulBackup },
-                lastSuccessfulSyncDate: { $set: lastSuccessfulSync },
-                backupState: { $set: backupState },
-                isAutoBackupEnabled: { $set: autoBackupEnabled },
-                syncState: {
-                    $set: syncDevices.length > 0 ? 'enabled' : 'disabled',
-                },
-            },
-        })
     }
 
     private async getFeedActivityStatus() {
@@ -253,21 +266,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    checkSharingAccess: EventHandler<'checkSharingAccess'> = () =>
-        this.getSharingAccess()
+    checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
+        previousState,
+    }) => {
+        await this.loadAuthStates(previousState)
+    }
 
-    private async getSharingAccess() {
-        const isAllowed = await this.options.authBG.isAuthorizedForFeature(
-            'beta',
-        )
+    private async loadAuthStates(previousState: State): Promise<State> {
+        const { authBG } = this.options
+        const user = await authBG.getCurrentUser()
 
-        this.emitMutation({
-            searchResults: {
-                sharingAccess: {
-                    $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-                },
-            },
-        })
+        const mutation: UIMutation<State> = {
+            currentUser: { $set: user },
+        }
+
+        const nextState = this.withMutation(previousState, mutation)
+        this.emitMutation(mutation)
+        return nextState
     }
 
     private async getInboxUnreadCount() {
@@ -546,40 +561,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
+    private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
+            this.emitMutation({ currentUser: { $set: user } })
 
-            const mutation: UIMutation<State> = {
-                searchResults: {
-                    sharingAccess: {
-                        $set: isBetaAuthd
-                            ? 'sharing-allowed'
-                            : 'feature-disabled',
-                    },
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
+            const userProfile = await authBG.getUserProfile()
+            if (!userProfile?.displayName?.length) {
                 this.emitMutation({
-                    ...mutation,
-                    modals: { showBetaFeature: { $set: true } },
+                    modals: { showDisplayNameSetup: { $set: true } },
                 })
                 return false
             }
 
-            this.emitMutation(mutation)
             return true
         }
 
         this.emitMutation({
+            currentUser: { $set: null },
             modals: { showLogin: { $set: true } },
         })
         return false
@@ -603,7 +604,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                if (!(await this.ensureLoggedIn({ ensureBetaAccess: true }))) {
+                if (!(await this.ensureLoggedIn())) {
                     return
                 }
 
@@ -635,12 +636,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
-        event,
-    }) => {
+    setShowDisplayNameSetupModal: EventHandler<
+        'setShowDisplayNameSetupModal'
+    > = ({ event }) => {
         this.emitMutation({
             modals: {
-                showBetaFeature: { $set: event.isShown },
+                showDisplayNameSetup: { $set: event.isShown },
             },
         })
     }
@@ -661,6 +662,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 showNoteShareOnboarding: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowCloudOnboardingModal: EventHandler<
+        'setShowCloudOnboardingModal'
+    > = ({ event, previousState }) => {
+        if (previousState.currentUser == null) {
+            this.emitMutation({
+                modals: { showLogin: { $set: true } },
+            })
+            return
+        }
+
+        this.emitMutation({
+            modals: {
+                showCloudOnboarding: { $set: event.isShown },
             },
         })
     }
@@ -1375,6 +1393,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    closeCloudOnboardingModal: EventHandler<'closeCloudOnboardingModal'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                isCloudUpgradeBannerShown: { $set: !event.didFinish },
+            },
+            modals: {
+                showCloudOnboarding: { $set: false },
+            },
+            isCloudEnabled: { $set: event.didFinish },
+        })
+    }
+
     setListShareMenuShown: EventHandler<'setListShareMenuShown'> = async ({
         event,
     }) => {
@@ -1585,9 +1617,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dismissSubscriptionBanner: EventHandler<
         'dismissSubscriptionBanner'
     > = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.subBannerDismissed]: true,
-        })
+        await this.syncSettings.dashboard.set('subscribeBannerShownAfter', null)
         this.emitMutation({
             searchResults: { isSubscriptionBannerShown: { $set: false } },
         })
@@ -1603,9 +1633,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dismissOnboardingMsg: EventHandler<'dismissOnboardingMsg'> = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.onboardingMsgSeen]: true,
-        })
+        await this.syncSettings.dashboard.set('onboardingMsgSeen', true)
         this.emitMutation({
             searchResults: { showOnboardingMsg: { $set: false } },
         })
@@ -1644,16 +1672,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async showShareOnboardingIfNeeded() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async showShareOnboardingIfNeeded(now = Date.now()) {
+        // const lastShared = await this.syncSettings.contentSharing.get(
+        //     'lastSharedAnnotationTimestamp',
+        // )
 
-        if (lastShared == null) {
-            this.emitMutation({
-                modals: { showNoteShareOnboarding: { $set: true } },
-            })
-        }
+        // if (lastShared == null) {
+        //     this.emitMutation({
+        //         modals: { showNoteShareOnboarding: { $set: true } },
+        //     })
+        // }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 
     setNoteEditCommentValue: EventHandler<'setNoteEditCommentValue'> = ({
@@ -2004,9 +2037,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.listSidebarLocked]: event.isLocked,
-        })
+        await this.syncSettings.dashboard.set(
+            'listSidebarLocked',
+            event.isLocked,
+        )
     }
 
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
@@ -2444,87 +2478,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setUnsyncedItemCountShown: EventHandler<
-        'setUnsyncedItemCountShown'
-    > = async ({ event }) => {
-        this.emitMutation({
-            syncMenu: { showUnsyncedItemCount: { $set: event.isShown } },
-        })
-    }
-
-    initiateSync: EventHandler<'initiateSync'> = async ({
+    setPendingChangeCounts: EventHandler<'setPendingChangeCounts'> = async ({
         event,
         previousState,
     }) => {
-        if (previousState.syncMenu.syncState === 'disabled') {
-            return
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                syncMenu: {
-                    syncState: { $set: taskState },
-                },
-            }),
-            async () => {
-                await this.options.syncBG.forceIncrementalSync()
-            },
-        )
-
         this.emitMutation({
-            syncMenu: { lastSuccessfulSyncDate: { $set: new Date() } },
-        })
-    }
-
-    initiateBackup: EventHandler<'initiateBackup'> = async ({
-        event,
-        previousState,
-    }) => {
-        if (previousState.syncMenu.backupState === 'disabled') {
-            return
-        }
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                syncMenu: {
-                    backupState: { $set: taskState },
+            syncMenu: {
+                pendingLocalChangeCount: {
+                    $set:
+                        event.local ??
+                        previousState.syncMenu.pendingLocalChangeCount,
                 },
-            }),
-            async () => {
-                await this.options.backupBG.startBackup()
+                pendingRemoteChangeCount: {
+                    $set:
+                        event.remote ??
+                        previousState.syncMenu.pendingRemoteChangeCount,
+                },
             },
-        )
-
-        this.emitMutation({
-            syncMenu: { lastSuccessfulBackupDate: { $set: new Date() } },
         })
-    }
-
-    toggleAutoBackup: EventHandler<'toggleAutoBackup'> = async ({
-        previousState,
-    }) => {
-        const { backupBG } = this.options
-        if (!(await backupBG.isAutomaticBackupAllowed())) {
-            this.emitMutation({
-                modals: { showSubscription: { $set: true } },
-                syncMenu: { isDisplayed: { $set: false } },
-            })
-            return
-        }
-
-        if (previousState.syncMenu.isAutoBackupEnabled) {
-            this.emitMutation({
-                syncMenu: { isAutoBackupEnabled: { $set: false } },
-            })
-            await backupBG.disableAutomaticBackup()
-        } else {
-            this.emitMutation({
-                syncMenu: { isAutoBackupEnabled: { $set: true } },
-            })
-            await backupBG.enableAutomaticBackup()
-        }
     }
     /* END - sync status menu event handlers */
 }

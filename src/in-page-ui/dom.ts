@@ -58,12 +58,11 @@ export function createShadowRootIfSupported(
          */
         shadow = container.attachShadow({ mode: 'open' })
 
-        var innerHTML = '';
-        innerHTML += '<style>';
-        innerHTML += ':host {all: initial}';
-        innerHTML += '</style>';           
-        shadow.innerHTML = innerHTML;
-
+        var innerHTML = ''
+        innerHTML += '<style>'
+        innerHTML += ':host {all: initial}'
+        innerHTML += '</style>'
+        shadow.innerHTML = innerHTML
 
         shadow.appendChild(rootElement)
         injectCSS(cssFile, shadow)

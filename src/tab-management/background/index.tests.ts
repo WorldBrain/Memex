@@ -1,8 +1,18 @@
 import TabManagementBackground from '.'
 import { Tabs } from 'webextension-polyfill-ts'
 
-export interface FakeTab {
-    id: number
+export type FakeTab = FakeHtmlTab | FakePdfTab
+export interface FakeHtmlTab {
+    type?: 'html'
+    id?: number
+    url: string
+    favIcon?: string
+    htmlBody?: string
+    title?: string
+}
+export interface FakePdfTab {
+    type: 'pdf'
+    id?: number
     url: string
     favIcon?: string
 }
@@ -14,16 +24,32 @@ export function injectFakeTabs(params: {
     excludeBody?: boolean
     includeTitle?: boolean
 }) {
-    params.tabManagement.getOpenTabsInCurrentWindow = async () => params.tabs
+    for (const [index, fakeTab] of params.tabs.entries()) {
+        fakeTab.id = fakeTab.id ?? index + 1
+    }
+    params.tabManagement.getOpenTabsInCurrentWindow = async () =>
+        params.tabs.map((fakeTab) => ({
+            id: fakeTab.id,
+            url: fakeTab.url,
+        }))
     params.tabManagement.extractRawPageContent = async (tabId) => {
+        const fakeTab = params.tabs.find((tab) => tab.id === tabId)
+        if (fakeTab.type === 'pdf') {
+            return {
+                type: 'pdf',
+                url: fakeTab.url,
+            }
+        }
         return {
             type: 'html',
-            url: params.tabs[tabId - 1].url,
-            body: !params.excludeBody ? `Body ${tabId}` : undefined,
+            url: fakeTab.url,
+            body: !params.excludeBody
+                ? fakeTab.htmlBody ?? `Body ${tabId}`
+                : undefined,
             lang: 'en',
             metadata: params.includeTitle
                 ? {
-                      title: `Title ${tabId}`,
+                      title: fakeTab.title ?? `Title ${tabId}`,
                   }
                 : {},
         }
@@ -31,5 +57,9 @@ export function injectFakeTabs(params: {
     params.tabManagement.findTabIdByFullUrl = async (fullUrl) =>
         params.tabs.find((tab) => tab.url === fullUrl)?.id
     // For favIcon extraction
-    params.tabsAPI.get = async () => null
+    params.tabManagement.getFavIcon = async ({ tabId }) => {
+        const fakeTab = params.tabs.find((tab) => tab.id === tabId)
+        return fakeTab.favIcon ?? null
+    }
+    params.tabsAPI.get = () => null
 }

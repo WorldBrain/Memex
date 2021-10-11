@@ -1,252 +1,156 @@
-import expect from 'expect'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import {
+    makeSingleDeviceUILogicTestFactory,
+    UILogicTestDevice,
+} from 'src/tests/ui-logic-tests'
 import Logic from './logic'
 
-describe('onboarding screen UI logic tests', () => {
-    function setupTest() {
-        const logic = new Logic()
-        const state = logic.getInitialState()
-
-        return { logic, state }
+async function setupTest(
+    { backgroundModules, services, createElement }: UILogicTestDevice,
+    args?: {
+        isLoggedIn?: boolean
+        onDashboardNav?: () => void
+    },
+) {
+    if (args?.isLoggedIn) {
+        await services.auth.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
     }
 
-    it('should be able to set current step', () => {
-        const { logic, state } = setupTest()
-
-        let nextState = state
-        for (const step of [1, 2, 3, 4]) {
-            expect(nextState.currentStep).not.toBe(step)
-            nextState = logic.withMutation(
-                nextState,
-                logic.setStep({ event: { step }, previousState: nextState }),
-            )
-            expect(nextState.currentStep).toBe(step)
-        }
+    const _logic = new Logic({
+        authBG: backgroundModules.auth.remoteFunctions,
+        personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
+        navToDashboard: args?.onDashboardNav ?? (() => undefined),
     })
 
-    it('should be able to set visit delay', () => {
-        const { logic, state } = setupTest()
+    const logic = createElement(_logic)
 
-        let nextState = state
-        for (const delay of [1, 2, 3, 4, 5, 6]) {
-            expect(nextState.visitDelay).not.toBe(delay)
-            nextState = logic.withMutation(
-                nextState,
-                logic.setVisitDelay({
-                    event: { delay },
-                    previousState: nextState,
-                }),
-            )
-            expect(nextState.visitDelay).toBe(delay)
-        }
+    return { logic, _logic }
+}
+
+describe('New install onboarding UI logic', () => {
+    const it = makeSingleDeviceUILogicTestFactory()
+
+    it('should show login first, unless user already logged in', async ({
+        device,
+    }) => {
+        const { logic: logicA, _logic: _logicA } = await setupTest(device, {
+            isLoggedIn: false,
+        })
+
+        expect(logicA.state.shouldShowLogin).toBe(true)
+        expect(logicA.state.loadState).toEqual('pristine')
+        await logicA.init()
+        expect(logicA.state.shouldShowLogin).toBe(true)
+        expect(logicA.state.loadState).toEqual('success')
+
+        const { logic: logicB, _logic: _logicB } = await setupTest(device, {
+            isLoggedIn: true,
+        })
+
+        expect(logicB.state.shouldShowLogin).toBe(true)
+        expect(logicB.state.loadState).toEqual('pristine')
+        await logicB.init()
+        expect(logicB.state.shouldShowLogin).toBe(false)
+        expect(logicB.state.loadState).toEqual('success')
+
+        await _logicA.syncPromise
+        await _logicB.syncPromise
     })
 
-    it('should be able to set tooltip enabled state', () => {
-        const { logic, state } = setupTest()
+    it('should nav to dashboard upon finishing onboarding', async ({
+        device,
+    }) => {
+        let dashboardNavHappened = false
+        const { logic } = await setupTest(device, {
+            onDashboardNav: () => {
+                dashboardNavHappened = true
+            },
+        })
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setTooltipEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.isTooltipEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setTooltipEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.isTooltipEnabled).toBe(false)
+        expect(dashboardNavHappened).toBe(false)
+        await logic.processEvent('finishOnboarding', null)
+        expect(dashboardNavHappened).toBe(true)
     })
 
-    it('should be able to set sidebar enabled state', () => {
-        const { logic, state } = setupTest()
+    it('should enable sync and set local storage flag upon login', async ({
+        device,
+    }) => {
+        const { logic } = await setupTest(device, { isLoggedIn: true })
+        const { settingStore } = device.backgroundModules.personalCloud.options
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setSidebarEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.isSidebarEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setSidebarEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.isSidebarEnabled).toBe(false)
+        expect(await settingStore.get('isSetUp')).not.toBe(true)
+        await logic.processEvent('onUserLogIn', { newSignUp: false })
+        expect(await settingStore.get('isSetUp')).toBe(true)
     })
 
-    it('should be able to set keyboard shortcuts enabled state', () => {
-        const { logic, state } = setupTest()
+    it('should skip sync and sync wait screen on existing user re-run', async ({
+        device,
+    }) => {
+        let hasNavdToDashboard = false
+        const { logic, _logic } = await setupTest(device, {
+            isLoggedIn: true,
+            onDashboardNav: () => {
+                hasNavdToDashboard = true
+            },
+        })
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setShortcutsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areShortcutsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setShortcutsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areShortcutsEnabled).toBe(false)
+        expect(hasNavdToDashboard).toBe(false)
+        expect(_logic.isExistingUser).toBe(false)
+        expect(_logic.syncPromise).toBeUndefined()
+        expect(logic.state.shouldShowLogin).toBe(true)
+
+        await logic.init()
+
+        expect(hasNavdToDashboard).toBe(false)
+        expect(_logic.isExistingUser).toBe(true)
+        expect(_logic.syncPromise).toBeUndefined()
+        expect(logic.state.shouldShowLogin).toBe(false)
+
+        await logic.processEvent('goToSyncStep', null)
+
+        expect(hasNavdToDashboard).toBe(true)
+        expect(_logic.syncPromise).toBeUndefined()
     })
 
-    it('should be able to set index page stubs enabled state', () => {
-        const { logic, state } = setupTest()
+    it('should enable sync and auto-nav to dashboard from wait screen on sync finish', async ({
+        device,
+    }) => {
+        let hasNavdToDashboard = false
+        const { logic, _logic } = await setupTest(device, {
+            isLoggedIn: false,
+            onDashboardNav: () => {
+                hasNavdToDashboard = true
+            },
+        })
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setStubsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areStubsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setStubsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areStubsEnabled).toBe(false)
-    })
+        await logic.init()
 
-    it('should be able to set index page visits enabled state', () => {
-        const { logic, state } = setupTest()
+        expect(hasNavdToDashboard).toBe(false)
+        expect(_logic.isExistingUser).toBe(false)
+        expect(_logic.syncPromise).toBeUndefined()
+        expect(logic.state.syncState).toBe('pristine')
+        expect(logic.state.shouldShowLogin).toBe(true)
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setVisitsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
+        await device.backgroundModules.auth.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
         )
-        expect(nextStateA.areVisitsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setVisitsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areVisitsEnabled).toBe(false)
-    })
+        await logic.processEvent('onUserLogIn', { newSignUp: false })
 
-    it('should be able to set index page bookmarks enabled state', () => {
-        const { logic, state } = setupTest()
+        expect(hasNavdToDashboard).toBe(false)
+        expect(_logic.syncPromise).not.toBeUndefined()
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setBookmarksEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areBookmarksEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setBookmarksEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areBookmarksEnabled).toBe(false)
-    })
+        expect(logic.state.step).toBe('tutorial')
+        const syncStepPromise = logic.processEvent('goToSyncStep', null)
+        expect(logic.state.step).toBe('sync')
 
-    it('should be able to set index page annotations enabled state', () => {
-        const { logic, state } = setupTest()
+        expect(hasNavdToDashboard).toBe(false)
+        await syncStepPromise
+        expect(hasNavdToDashboard).toBe(true)
 
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setAnnotationsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areAnnotationsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setAnnotationsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areAnnotationsEnabled).toBe(false)
-    })
-
-    it('should be able to set index page screenshots enabled state', () => {
-        const { logic, state } = setupTest()
-
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setScreenshotsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areScreenshotsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setScreenshotsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areScreenshotsEnabled).toBe(false)
-    })
-
-    it('should be able to set index page collections enabled state', () => {
-        const { logic, state } = setupTest()
-
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setCollectionsEnabled({
-                event: { enabled: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.areCollectionsEnabled).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setCollectionsEnabled({
-                event: { enabled: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.areCollectionsEnabled).toBe(false)
-    })
-
-    it('should be able to set search settings shown state', () => {
-        const { logic, state } = setupTest()
-
-        const nextStateA = logic.withMutation(
-            state,
-            logic.setSearchSettingsShown({
-                event: { shown: true },
-                previousState: state,
-            }),
-        )
-        expect(nextStateA.showSearchSettings).toBe(true)
-        const nextStateB = logic.withMutation(
-            nextStateA,
-            logic.setSearchSettingsShown({
-                event: { shown: false },
-                previousState: nextStateA,
-            }),
-        )
-        expect(nextStateB.showSearchSettings).toBe(false)
+        expect(logic.state.syncState).toBe('success')
     })
 })

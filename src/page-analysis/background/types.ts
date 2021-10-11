@@ -4,7 +4,8 @@ export type PageContent = PipelineRes
 
 export interface PageDataResult {
     favIconURI?: string
-    content: {
+    htmlBody?: string
+    content?: {
         canonicalUrl?: string
         description?: string
         keywords?: string[]
@@ -15,5 +16,5 @@ export interface PageDataResult {
 }
 
 export interface FetchPageProcessor {
-    process(url: string): Promise<PageContent>
+    process(url: string): Promise<{ content: PageContent; htmlBody?: string }>
 }

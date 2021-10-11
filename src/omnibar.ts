@@ -11,12 +11,13 @@ import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
-import browserIsChrome from './util/check-browser'
+import checkBrowser from './util/check-browser'
 import { EVENT_NAMES } from './analytics/internal/constants'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import { combineSearchIndex } from './search/search-index'
 import { getDb } from './search'
 import initStorex from './search/memex-storex'
+import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
@@ -40,6 +41,7 @@ export async function main() {
         storageManager,
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
+        persistentStorageManager: createPersistentStorageManager(),
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,
@@ -49,17 +51,6 @@ export async function main() {
     const searchIndex = combineSearchIndex({
         getDb,
     })
-
-    // Read which browser we are running in.
-    let browserName
-    ;(async () => {
-        // XXX Firefox seems the only one currently implementing this function, but
-        // luckily that is enough for our current needs.
-        if (!browserIsChrome()) {
-            const browserInfo = await window['browser'].runtime.getBrowserInfo()
-            browserName = browserInfo.name
-        }
-    })()
 
     function formatTime(timestamp, showTime) {
         const m = moment(timestamp)
@@ -87,7 +78,7 @@ export async function main() {
         return {
             content: doc.url,
             description:
-                browserName === 'Firefox'
+                checkBrowser() === 'firefox'
                     ? `${url} ${title} - ${time}`
                     : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
         }

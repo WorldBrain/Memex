@@ -40,6 +40,7 @@ export async function getInitialState({
         isAuthenticated,
         runningRestore,
         runningBackup,
+        isDumpModalShown: false,
         screen: await getStartScreen(
             {
                 isAuthenticated,
@@ -236,6 +237,7 @@ export async function processEvent({
                 return { screen: 'restore-where' }
             },
             onBlobPreferenceChange: _onBlobPreferenceChange,
+            onDumpRequested: () => ({ isDumpModalShown: true }),
         },
         'onboarding-where': {
             onChoice: async () => {
@@ -349,8 +351,7 @@ export async function processEvent({
     }
 
     const handler = handlers[state.screen][event.type]
-    const { screen, redirect } = await handler()
-    return { screen, redirect }
+    return handler()
 }
 
 export interface ScreenConfig {
@@ -396,10 +397,10 @@ export const getScreenHandlers = ({
                 event: handlerEvent,
                 ...dependencies,
             })
-            if (result.screen) {
-                onStateChange({ screen: result.screen })
-            } else if (result.redirect) {
+            if (result.redirect) {
                 onRedirect(result.redirect)
+            } else {
+                onStateChange(result)
             }
         }
     })

@@ -1,5 +1,4 @@
 import { featuresBeta } from 'src/util/remote-functions-background'
-import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 import React from 'react'
@@ -8,21 +7,14 @@ import {
     TypographyHeadingNormal,
     TypographyHeadingBigger,
     TypographyLink,
-    TypographyTextSmall,
     TypographyTextNormal,
 } from 'src/common-ui/components/design-library/typography'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { auth, subscription } from 'src/util/remote-functions-background'
-import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
-
-
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 import {
@@ -42,7 +34,6 @@ interface State {
     featureOptions: UserBetaFeature[]
     featureEnabled: { [key in UserBetaFeatureId]: boolean }
     loadingChargebee: boolean
-    isPioneer?: boolean
     loadState: TaskState
     displayName?: string
     newDisplayName?: string
@@ -58,18 +49,15 @@ class BetaFeaturesScreen extends React.Component<
         featureOptions: {},
         featureEnabled: {},
         loadingChargebee: false,
-        isPioneer: false,
         updateProfileState: 'pristine',
     } as State
 
     componentDidMount = async () => {
         await this.refreshFeatures()
-        const isBetaAuthorized = await auth.isAuthorizedForFeature('beta')
         this.getDisplayName()
 
         this.setState({
             loadState: 'success',
-            isPioneer: isBetaAuthorized,
         })
     }
 
@@ -136,15 +124,6 @@ class BetaFeaturesScreen extends React.Component<
         await this.refreshFeatures()
     }
 
-    private renderUpgradeBtn() {
-        return (
-            <PrimaryAction
-                label="Activate"
-                onClick={this.props.showBetaFeatureNotifModal}
-            />
-        )
-    }
-
     render() {
         return (
             <div>
@@ -155,8 +134,7 @@ class BetaFeaturesScreen extends React.Component<
                                 Beta Features
                             </TypographyHeadingBigger>
 
-                            {this.state.isPioneer &&
-                            this.state.loadState === 'success' ? (
+                            {this.state.loadState === 'success' ? (
                                 <TypographyTextNormal>
                                     👍 You're set up for using the beta
                                     features.
@@ -180,9 +158,6 @@ class BetaFeaturesScreen extends React.Component<
                             )}
                         </div>
                         <div className={settingsStyle.buttonBox}>
-                            {!this.state.isPioneer &&
-                                this.state.loadState === 'success' &&
-                                this.renderUpgradeBtn()}
                             <SecondaryAction
                                 onClick={() =>
                                     window.open(
@@ -245,7 +220,6 @@ class BetaFeaturesScreen extends React.Component<
                                             </div>
                                         </div>
                                         {feature.id === 'pdf-annotations' &&
-                                            this.state.isPioneer &&
                                             this.state.loadState ===
                                                 'success' && <PDFSetting />}
                                     </section>

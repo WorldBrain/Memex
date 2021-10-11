@@ -17,7 +17,7 @@ class MockDeviceService implements DeviceServiceInterface {
     processRootResize() {}
 }
 
-export function createServices(): UIServices {
+export function createUIServices(): UIServices {
     return {
         device: new MockDeviceService(),
         overlay: new OverlayService(),

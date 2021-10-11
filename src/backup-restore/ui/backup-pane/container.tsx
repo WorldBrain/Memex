@@ -11,6 +11,10 @@ import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
 import RestoreRunning from 'src/backup-restore/ui/backup-pane/panes/restore-running'
+import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
+import type { UIServices } from 'src/services/ui/types'
+import DataDumper from 'src/personal-cloud/ui/components/data-dumper'
+import { SUPPORT_EMAIL } from 'src/constants'
 
 const styles = require('../styles.css')
 
@@ -23,6 +27,7 @@ export const SCREENS = {
             onBackupSetupRequested: true,
             onBlobPreferenceChange: { argument: 'saveBlobs' },
             onSubscribeRequested: { argument: 'choice' },
+            onDumpRequested: true,
         },
     },
     'running-backup': {
@@ -68,8 +73,12 @@ export const SCREENS = {
     },
 }
 
-export default class BackupSettingsContainer extends Component {
-    state = { screen: null, isAuthenticated: null }
+export interface Props {
+    services: UIServices
+}
+
+export default class BackupSettingsContainer extends Component<Props> {
+    state = { screen: null, isAuthenticated: null, isDumpModalShown: false }
 
     async componentDidMount() {
         const state = await logic.getInitialState({
@@ -79,6 +88,8 @@ export default class BackupSettingsContainer extends Component {
         })
         this.setState(state)
     }
+
+    private hideDumpModal = () => this.setState({ isDumpModalShown: false })
 
     renderScreen() {
         const { screen } = this.state
@@ -105,7 +116,7 @@ export default class BackupSettingsContainer extends Component {
                 analytics,
                 remoteFunction,
             },
-            onStateChange: changes => this.setState(changes),
+            onStateChange: (changes) => this.setState(changes),
             onRedirect: logic.doRedirect,
         })
 
@@ -118,6 +129,16 @@ export default class BackupSettingsContainer extends Component {
     render() {
         return (
             <div>
+                {this.state.isDumpModalShown && (
+                    <Overlay services={this.props.services}>
+                        <DataDumper
+                            supportLink={'mailto:' + SUPPORT_EMAIL}
+                            services={this.props.services}
+                            onComplete={this.hideDumpModal}
+                            onCancel={this.hideDumpModal}
+                        />
+                    </Overlay>
+                )}
                 <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>

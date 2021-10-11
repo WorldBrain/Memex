@@ -23,21 +23,12 @@ const StyledSecondaryAction = styled.div`
     justify-content: center;
 
     &: hover {
-        background-color: ${colorMidPurple};
-        color: ${colorWhite};
-
-        & * {
-            color: ${colorWhite};
-        }
+        background-color: ${colorMidPurple}30;
     }
 `
 const StyledSecondaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
     color: ${colorMidPurple};
-
-    &: hover {
-        color: ${colorWhite};
-    }
 `
 export const SecondaryAction = ({
     label,
@@ -46,7 +37,7 @@ export const SecondaryAction = ({
 }: {
     label: React.ReactNode
     disabled?: boolean
-    onClick: () => void
+    onClick: React.MouseEventHandler
 }) => (
     <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}

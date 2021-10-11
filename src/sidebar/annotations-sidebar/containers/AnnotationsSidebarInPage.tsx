@@ -14,10 +14,10 @@ import {
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
-import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import { SidebarDisplayMode } from './types'
+import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -40,12 +40,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
-            showLoginModal: () =>
-                this.processEvent('setLoginModalShown', { shown: true }),
-            showBetaFeatureNotifModal: () =>
-                this.processEvent('setBetaFeatureNotifModalShown', {
-                    shown: true,
-                }),
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
@@ -252,6 +246,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         }
                     />
                 )}
+                {this.state.showDisplayNameSetupModal && (
+                    <DisplayNameModal
+                        ignoreReactPortal
+                        authBG={this.props.auth}
+                        onClose={() =>
+                            this.processEvent('setDisplayNameSetupModalShown', {
+                                shown: false,
+                            })
+                        }
+                    />
+                )}
                 {this.state.showAnnotationsShareModal && (
                     <ShareAnnotationOnboardingModal
                         ignoreReactPortal
@@ -273,24 +278,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                                 'https://worldbrain.io/tutorials/memex-social',
                             )
                         }}
-                    />
-                )}
-                {this.state.showBetaFeatureNotifModal && (
-                    <BetaFeatureNotifModal
-                        auth={this.props.auth}
-                        contentScriptBackground={
-                            this.props.contentScriptBackground
-                        }
-                        ignoreReactPortal
-                        betaRequestStrategy="go-to-options-page"
-                        onClose={() =>
-                            this.processEvent('setBetaFeatureNotifModalShown', {
-                                shown: false,
-                            })
-                        }
-                        showSubscriptionModal={() =>
-                            console.log('UPGRADE BTN PRESSED')
-                        }
                     />
                 )}
             </>

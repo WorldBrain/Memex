@@ -111,7 +111,7 @@
     display: inline-block;
     font-size: 16px;
     font-weight: 600;
-    width: 71%;
+    width: 67%;
     margin-right: 10px;
     padding-left: 11px;
 }
@@ -148,7 +148,7 @@
 
 .google_above {
     & .settingsButton {
-        right: -10px;
+        right: 5px;
     }
 
     & .resultsText {
@@ -169,10 +169,10 @@
 }
 
 .google_side {
-    width: 454px;
+    width: 435px;
 
     & .settingsButton {
-        right: -7px;
+        right: 5px;
     }
 
     & .mainContainer {

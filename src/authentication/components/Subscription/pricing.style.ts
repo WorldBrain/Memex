@@ -335,7 +335,10 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props) => (props.active ? '${(props) => props.theme.colors.secondary}' : '${(props) => props.theme.colors.primary}')};
+    color: ${(props) =>
+        props.active
+            ? '${(props) => props.theme.colors.secondary}'
+            : '${(props) => props.theme.colors.primary}'};
     font-size: 18px;
 `
 

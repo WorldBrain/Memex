@@ -4,7 +4,6 @@ import * as Raven from 'src/util/raven'
 import { Services } from 'src/services/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
-
 export type ActivityStatus =
     | 'has-unseen'
     | 'all-seen'

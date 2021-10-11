@@ -9,7 +9,7 @@ import { auth } from 'src/util/remote-functions-background'
 const styles = require('src/authentication/components/styles.css')
 
 export interface Props {
-    onSuccess?(): void
+    onSuccess?(isNewUser?: boolean): void
     onFail?(): void
     redirectTo?: string
 }
@@ -22,16 +22,24 @@ export class SignInScreen extends React.Component<Props> {
                 uiConfig={{
                     signInFlow: 'popup',
                     signInOptions: [
-                        getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
+                        {
+                            provider: getFirebase().auth.EmailAuthProvider
+                                .PROVIDER_ID,
+                            requireDisplayName: false,
+                        },
                     ],
                     callbacks: {
-                        signInSuccessWithAuthResult: () => {
+                        signInSuccessWithAuthResult: ({
+                            additionalUserInfo,
+                        }) => {
                             auth.refreshUserInfo()
                             // Avoid redirects after sign-in.
                             if (this.props.redirectTo) {
                                 window.location.href = this.props.redirectTo
                             }
-                            this.props.onSuccess?.()
+                            this.props.onSuccess?.(
+                                additionalUserInfo?.isNewUser,
+                            )
                             return false
                         },
                         signInFailure: () => {
@@ -137,6 +145,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
     .firebaseui-input-floating-button {
         height: 34px;
         width: 44px;
+        top: 0px;
     }
 
     .firebaseui-card-actions {

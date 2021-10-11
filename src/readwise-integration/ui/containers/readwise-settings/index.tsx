@@ -182,7 +182,7 @@ class ReadwiseSettings extends StatefulUIElement<
                                 )
                             }
                         />{' '}
-                        Sync existing higlights
+                        Sync existing highlights
                     </ExistingHighlightBox>
                 )}
             </div>
@@ -194,8 +194,6 @@ class ReadwiseSettings extends StatefulUIElement<
             <>
                 {selectors.showSyncScreen(this.state) &&
                     this.renderSyncScreen()}
-                {selectors.showUnauthorized(this.state) &&
-                    this.renderUnauthorized()}
                 {selectors.showForm(this.state) && this.renderForm()}
                 {selectors.showLoadingError(this.state) &&
                     'Something went wrong loading your ReadWise.io settings'}
@@ -212,11 +210,12 @@ const KeyBox = styled.input`
     background: #e0e0e0;
     border-radius: 3px;
     padding: 5px 10px;
-    border: none
+    border: none;
     width: 100%;
     outline: none;
     height: 36px;
     margin-left: 0;
+    margin-right: 15px;
 `
 
 const MainBox = styled.div`

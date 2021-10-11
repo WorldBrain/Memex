@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './onboarding-backup-mode.css'
-import classNames from 'classnames'
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
@@ -12,7 +11,7 @@ export default class OnboardingBackupModeContainer extends React.Component {
     }
 
     state = {
-        mode: null,
+        mode: 'automatic',
     }
 
     componentDidMount() {
@@ -27,7 +26,7 @@ export default class OnboardingBackupModeContainer extends React.Component {
                 <OnboardingBackupMode
                     {...this.props}
                     mode={this.state.mode}
-                    onModeChange={mode => {
+                    onModeChange={(mode) => {
                         this.setState({ mode })
                         this.props.onModeChange && this.props.onModeChange(mode)
                     }}
@@ -55,31 +54,6 @@ export function OnboardingBackupMode({
                     <div className={Styles.selection}>
                         <input
                             type="radio"
-                            checked={mode === 'manual'}
-                            onChange={() => onModeChange('manual')}
-                        />{' '}
-                        <div className={Styles.textBlock}>
-                            <div className={Styles.selectionTitle}>
-                                Manual Backup
-                            </div>
-                            <p className={Styles.subname}>
-                                You need to regularly remember to back up
-                                yourself.
-                            </p>
-                        </div>
-                    </div>
-                    <div>
-                        <span className={classNames(Styles.labelFree)}>
-                            Free
-                        </span>
-                    </div>
-                </label>
-            </div>
-            <div className={Styles.selectionContainer}>
-                <label className={Styles.option}>
-                    <div className={Styles.selection}>
-                        <input
-                            type="radio"
                             checked={mode === 'automatic'}
                             onChange={() => onModeChange('automatic')}
                         />{' '}
@@ -92,19 +66,25 @@ export function OnboardingBackupMode({
                             </p>
                         </div>
                     </div>
-                    <div>
-                        {isAuthorizedForAutomaticBackup ? (
-                            <span className={classNames(Styles.labelFree)}>
-                                Subscribed
-                            </span>
-                        ) : (
-                            <span
-                                className={Styles.labelFree}
-                                onClick={() => launchSubscriptionFlow()}
-                            >
-                                ⭐️ Pro Feature
-                            </span>
-                        )}
+                </label>
+            </div>
+            <div className={Styles.selectionContainer}>
+                <label className={Styles.option}>
+                    <div className={Styles.selection}>
+                        <input
+                            type="radio"
+                            checked={mode === 'manual'}
+                            onChange={() => onModeChange('manual')}
+                        />{' '}
+                        <div className={Styles.textBlock}>
+                            <div className={Styles.selectionTitle}>
+                                Manual Backup
+                            </div>
+                            <p className={Styles.subname}>
+                                You need to regularly remember to back up
+                                yourself.
+                            </p>
+                        </div>
                     </div>
                 </label>
             </div>

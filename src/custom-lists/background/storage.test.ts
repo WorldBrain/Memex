@@ -83,10 +83,7 @@ describe('Custom List Integrations', () => {
 
             const fullUrl = 'http://www.test.com'
             const normalizedUrl = normalizeUrl(fullUrl)
-            await pages.indexTestPage({
-                fullUrl,
-                save: true,
-            })
+            await pages.indexTestPage({ fullUrl })
 
             await customLists.insertPageToList({ id: 1, url: fullUrl })
             const lists = await customLists.fetchListPagesByUrl({
