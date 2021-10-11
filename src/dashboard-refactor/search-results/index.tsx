@@ -471,12 +471,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {this.props.isSubscriptionBannerShown && (
-                    <PioneerPlanBanner
-                        onHideClick={this.props.onDismissSubscriptionBanner}
-                        width="fill-available"
-                    />
-                )}
                 {this.props.selectedListId != null && (
                     <ListDetails {...this.props.listDetailsProps} />
                 )}
