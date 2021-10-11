@@ -62,7 +62,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
         const { migrationState, supportLink, isPrepping } = this.props
         if (migrationState === 'running') {
             return (
-                isPrepping && (
+                isPrepping ? (
                     <>
                         <TopComponent>
                             <LoadingIndicator />
@@ -71,6 +71,22 @@ export default class DataMigrator extends React.PureComponent<Props> {
                         <Text>
                             Don't close your browser or shut off your computer
                             in this stage or you have to restart the migration.
+                        </Text>
+                    </>
+                ):(
+                    
+                    <>
+                        <TopComponent>
+                            <LoadingIndicator />
+                        </TopComponent>
+                        <Header>Cloud Migration in Progress</Header>
+                        <Text>
+                            This process will run and continue in the background.
+                            <br />
+                            Login on other devices to sync them too.
+                            <br />
+                            It may take a while for all content to appear on all your
+                            devices.
                         </Text>
                     </>
                 )
@@ -99,7 +115,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
                 </TopComponent>
                 <Header>Cloud Migration in Progress</Header>
                 <Text>
-                    This process with run and continue in the background.
+                    You can close this modal, as the sync process will continue in the background.
                     <br />
                     Login on other devices to sync them too.
                     <br />
