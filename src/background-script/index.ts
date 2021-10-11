@@ -18,7 +18,7 @@ import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import { OVERVIEW_URL, INSTALL_TIME_KEY } from 'src/constants'
+import { OVERVIEW_URL, __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import type { ReadwiseBackground } from 'src/readwise-integration/background'
 import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
@@ -144,7 +144,7 @@ class BackgroundScript {
             await migrateInstallTime({
                 storageManager,
                 getOldInstallTime: () =>
-                    localExtSettingStore.__rawGet(INSTALL_TIME_KEY),
+                    localExtSettingStore.__rawGet(__OLD_INSTALL_TIME_KEY),
                 setInstallTime: (time) =>
                     localExtSettingStore.set('installTimestamp', time),
             })

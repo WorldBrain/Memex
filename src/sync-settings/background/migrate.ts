@@ -5,7 +5,7 @@ import {
     __OLD_POSITION_KEY,
 } from 'src/search-injection/constants'
 import { STORAGE_KEY as BLOCKLIST_STORAGE_KEY } from 'src/options/blacklist/constants'
-import { INSTALL_TIME_KEY } from 'src/constants'
+import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { KEYBOARDSHORTCUTS_STORAGE_NAME } from 'src/in-page-ui/keyboard-shortcuts/constants'
 import {
     TOOLTIP_STORAGE_NAME,
