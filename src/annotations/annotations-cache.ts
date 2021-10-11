@@ -216,8 +216,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const nextAnnotation = {
             ...annotation,
             createdWhen: new Date(),
-            isShared: shareOpts.shouldShare,
-            isBulkShareProtected: shareOpts.isBulkShareProtected,
+            isShared: shareOpts?.shouldShare,
+            isBulkShareProtected: shareOpts?.isBulkShareProtected,
         }
 
         this.annotations = [nextAnnotation, ...stateBeforeModifications]
@@ -254,8 +254,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const nextAnnotation = {
             ...annotation,
             lastEdited: new Date(),
-            isShared: shareOpts.shouldShare,
-            isBulkShareProtected: shareOpts.isBulkShareProtected,
+            isShared: shareOpts?.shouldShare,
+            isBulkShareProtected: shareOpts?.isBulkShareProtected,
         }
 
         this.annotations = [
