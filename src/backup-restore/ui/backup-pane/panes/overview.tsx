@@ -276,14 +276,6 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                         </div>
                     </div>
                 )}
-                <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>
-                        Restore & Replace
-                    </div>
-                    <div className={styles.option}>
-                        <div className={localStyles.statusLine}></div>
-                    </div>
-                </div>
             </>
         )
     }
@@ -321,7 +313,8 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                 {!this.state.isCloudSyncEnabled ? (
                     this.renderOldBackupPanes()
                 ) : (
-                    <DumpPane onDumpClick={this.props.onDumpRequested} />
+                    this.renderOldBackupPanes()
+                    //<DumpPane onDumpClick={this.props.onDumpRequested} />
                 )}
                 {this.state.isDev && (
                     <div className={settingsStyle.section}>
