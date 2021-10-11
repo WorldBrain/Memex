@@ -82,7 +82,7 @@ describe('New install onboarding UI logic', () => {
         const { settingStore } = device.backgroundModules.personalCloud.options
 
         expect(await settingStore.get('isSetUp')).not.toBe(true)
-        await logic.processEvent('onUserLogIn', null)
+        await logic.processEvent('onUserLogIn', { newSignUp: false })
         expect(await settingStore.get('isSetUp')).toBe(true)
     })
 
@@ -138,7 +138,7 @@ describe('New install onboarding UI logic', () => {
             TEST_USER.email,
             'password',
         )
-        await logic.processEvent('onUserLogIn', null)
+        await logic.processEvent('onUserLogIn', { newSignUp: false })
 
         expect(hasNavdToDashboard).toBe(false)
         expect(_logic.syncPromise).not.toBeUndefined()

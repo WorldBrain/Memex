@@ -109,10 +109,6 @@ export class AuthBackground {
                 )
             },
             getUserProfile: async () => {
-                if (this._userProfile) {
-                    return this._userProfile
-                }
-
                 const user = await this.authService.getCurrentUser()
                 if (!user) {
                     return null

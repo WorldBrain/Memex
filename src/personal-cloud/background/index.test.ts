@@ -400,7 +400,7 @@ describe('Personal cloud', () => {
         const { personalCloud } = setups[0].backgroundModules
 
         await personalCloud.enableSync()
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
@@ -412,7 +412,7 @@ describe('Personal cloud', () => {
         const authChangesPromiseBefore = personalCloud.authChangesObserved
         const changesIntegratingPromiseBefore = personalCloud.changesIntegrating
 
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
@@ -490,13 +490,13 @@ describe('Personal cloud', () => {
         const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
 
         expect(
-            await bgScript.syncSettings.dashboard.get(
+            await bgScript.deps.syncSettingsStore.dashboard.get(
                 'subscribeBannerShownAfter',
             ),
         ).toEqual(null)
         await bgScript.handleInstallLogic(now)
         expect(
-            await bgScript.syncSettings.dashboard.get(
+            await bgScript.deps.syncSettingsStore.dashboard.get(
                 'subscribeBannerShownAfter',
             ),
         ).toEqual(fortnightFromNow)

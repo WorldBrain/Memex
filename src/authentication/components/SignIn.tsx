@@ -9,7 +9,7 @@ import { auth } from 'src/util/remote-functions-background'
 const styles = require('src/authentication/components/styles.css')
 
 export interface Props {
-    onSuccess?(): void
+    onSuccess?(isNewUser?: boolean): void
     onFail?(): void
     redirectTo?: string
 }
@@ -29,13 +29,17 @@ export class SignInScreen extends React.Component<Props> {
                         },
                     ],
                     callbacks: {
-                        signInSuccessWithAuthResult: () => {
+                        signInSuccessWithAuthResult: ({
+                            additionalUserInfo,
+                        }) => {
                             auth.refreshUserInfo()
                             // Avoid redirects after sign-in.
                             if (this.props.redirectTo) {
                                 window.location.href = this.props.redirectTo
                             }
-                            this.props.onSuccess?.()
+                            this.props.onSuccess?.(
+                                additionalUserInfo?.isNewUser,
+                            )
                             return false
                         },
                         signInFailure: () => {

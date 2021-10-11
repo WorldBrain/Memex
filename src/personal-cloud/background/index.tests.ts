@@ -321,7 +321,7 @@ export async function setupSyncBackgroundTest(
 
         if (!options.startWithSyncDisabled) {
             await setup.backgroundModules.personalCloud.enableSync()
-            setup.backgroundModules.personalCloud.startSync()
+            await setup.backgroundModules.personalCloud.startSync()
         }
     }
 

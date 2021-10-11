@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { getLocalStorage } from 'src/util/storage'
-import { INSTALL_TIME_KEY } from 'src/constants'
+import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
 
 export const shouldShowDeprecatedSearchWarning = async (): Promise<boolean> => {
@@ -11,7 +11,7 @@ export const shouldShowDeprecatedSearchWarning = async (): Promise<boolean> => {
         DEPRECATED_SEARCH_WARNING_KEY,
         true,
     )
-    const installTime = await getLocalStorage(INSTALL_TIME_KEY)
+    const installTime = await getLocalStorage(__OLD_INSTALL_TIME_KEY)
 
     return installTime < new Date('2020-08-27').getTime() && showWarning
 }

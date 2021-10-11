@@ -18,7 +18,7 @@ import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import { OVERVIEW_URL, INSTALL_TIME_KEY } from 'src/constants'
+import { OVERVIEW_URL, __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import type { ReadwiseBackground } from 'src/readwise-integration/background'
 import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
@@ -35,10 +35,7 @@ import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalExtensionSettings } from './types'
 import type { SyncSettingsBackground } from 'src/sync-settings/background'
-import {
-    createSyncSettingsStore,
-    SyncSettingsStore,
-} from 'src/sync-settings/util'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 interface Dependencies {
     storageManager: Storex
@@ -49,6 +46,7 @@ interface Dependencies {
     readwiseBackground: ReadwiseBackground
     syncSettingsBG: SyncSettingsBackground
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
+    syncSettingsStore: SyncSettingsStore<'pdfIntegration' | 'dashboard'>
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
@@ -59,12 +57,9 @@ interface Dependencies {
 }
 
 class BackgroundScript {
-    syncSettings: SyncSettingsStore<'pdfIntegration' | 'dashboard'>
     private alarmsListener: (alarm: Alarms.Alarm) => void
 
-    constructor(private deps: Dependencies) {
-        this.syncSettings = createSyncSettingsStore(deps)
-    }
+    constructor(public deps: Dependencies) {}
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
@@ -104,15 +99,18 @@ class BackgroundScript {
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
 
         // Enable PDF integration by default
-        await this.syncSettings.pdfIntegration.set('shouldAutoOpen', true)
+        await this.deps.syncSettingsStore.pdfIntegration.set(
+            'shouldAutoOpen',
+            true,
+        )
 
         // TODO: Set up pioneer subscription banner to show up in 2 weeks
         // const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
-        // await this.syncSettings.dashboard.set(
+        // await this.deps.syncSettings.dashboard.set(
         //     'subscribeBannerShownAfter',
         //     fortnightFromNow,
         // )
-        this.syncSettings.dashboard.set(
+        this.deps.syncSettingsStore.dashboard.set(
             'subscribeBannerShownAfter',
             now, // Instead, show it immediately
         )
@@ -137,8 +135,8 @@ class BackgroundScript {
         }
 
         const { version } = runtimeAPI.getManifest()
-        if (version === '2.20.0') {
-            await this.syncSettings.dashboard.set(
+        if (version === '3.0.0') {
+            await this.deps.syncSettingsStore.dashboard.set(
                 'subscribeBannerShownAfter',
                 now,
             )
@@ -146,7 +144,7 @@ class BackgroundScript {
             await migrateInstallTime({
                 storageManager,
                 getOldInstallTime: () =>
-                    localExtSettingStore.__rawGet(INSTALL_TIME_KEY),
+                    localExtSettingStore.__rawGet(__OLD_INSTALL_TIME_KEY),
                 setInstallTime: (time) =>
                     localExtSettingStore.set('installTimestamp', time),
             })

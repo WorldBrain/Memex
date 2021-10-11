@@ -1067,13 +1067,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async setLastSharedAnnotationTimestamp(now = Date.now()) {
-        const lastShared = await this.syncSettings.contentSharing.get(
-            'lastSharedAnnotationTimestamp',
-        )
+        // const lastShared = await this.syncSettings.contentSharing.get(
+        //     'lastSharedAnnotationTimestamp',
+        // )
 
-        if (lastShared == null) {
-            this.options.showAnnotationShareModal?.()
-        }
+        // if (lastShared == null) {
+        //     this.options.showAnnotationShareModal?.()
+        // }
 
         await this.syncSettings.contentSharing.set(
             'lastSharedAnnotationTimestamp',

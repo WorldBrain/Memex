@@ -1,4 +1,4 @@
-export const INSTALL_TIME_KEY = 'extension_install_time'
+export const __OLD_INSTALL_TIME_KEY = 'extension_install_time'
 export const OPTIONS_URL = '/options.html'
 export const SETTINGS_URL = `${OPTIONS_URL}#/settings`
 export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`

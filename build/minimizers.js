@@ -6,8 +6,10 @@ export default () => [
     new TerserPlugin({
         // cache: true,
         parallel: true,
+        minify: TerserPlugin.uglifyJsMinify,
         // sourceMap: true, // Must be set to true if using source-maps in production
         terserOptions: {
+            output: { ascii_only: true },
             // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
         },
     }),
