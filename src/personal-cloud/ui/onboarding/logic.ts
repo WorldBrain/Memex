@@ -47,14 +47,14 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
                 needsToRemovePassiveData: { $set: needsToRemovePassiveData },
             })
 
-            const { lastBackup } = await backupBG.getBackupTimes()
-            this.emitMutation({
-                shouldBackupViaDump: {
-                    $set:
-                        this.dependencies.browser === 'chrome' &&
-                        lastBackup == null,
-                },
-            })
+            // const { lastBackup } = await backupBG.getBackupTimes()
+            // this.emitMutation({
+            //     shouldBackupViaDump: {
+            //         $set:
+            //             this.dependencies.browser === 'chrome' &&
+            //             lastBackup == null,
+            //     },
+            // })
         })
     }
 
