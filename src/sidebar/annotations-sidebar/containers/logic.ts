@@ -541,8 +541,8 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: { $set: false },
         })
 
-        if (event.shouldShare) {
-            await this.ensureLoggedIn()
+        if (event.shouldShare && !(await this.ensureLoggedIn())) {
+            return
         }
 
         await this.options.annotationsCache.create(
@@ -693,6 +693,10 @@ export class SidebarContainerLogic extends UILogic<
         const {
             editForms: { [event.annotationUrl]: form },
         } = previousState
+
+        if (event.shouldShare && !(await this.ensureLoggedIn())) {
+            return
+        }
 
         const comment = form.commentText.trim()
         const existing = previousState.annotations.find(

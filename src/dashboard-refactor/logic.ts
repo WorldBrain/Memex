@@ -1206,8 +1206,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                if (event.shouldShare) {
-                    await this.ensureLoggedIn()
+                if (event.shouldShare && !(await this.ensureLoggedIn())) {
+                    return
                 }
 
                 const { savePromise } = await createAnnotation({
@@ -1706,6 +1706,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { noteUpdateState: { $set: taskState } },
             }),
             async () => {
+                if (event.shouldShare && !(await this.ensureLoggedIn())) {
+                    return
+                }
+
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,

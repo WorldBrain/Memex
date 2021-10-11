@@ -195,6 +195,47 @@ describe('SidebarContainerLogic', () => {
             )
         })
 
+        it('should block annotation edit with login modal if logged out + save has share intent', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
+            })
+
+            const annotation = sidebar.state.annotations[0]
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+            })
+
+            expect(sidebar.state.showLoginModal).toBe(false)
+            expect(sidebar.state.annotations).toEqual([annotation])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: true,
+                context,
+            })
+
+            expect(sidebar.state.showLoginModal).toBe(true)
+            expect(sidebar.state.annotations).toEqual([annotation])
+        })
+
         it('should be able to interrupt an edit, preserving comment and tag inputs', async ({
             device,
         }) => {
@@ -430,6 +471,24 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.commentBox.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should block save a new comment with login modal if logged out + share intent set', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+
+            await sidebar.processEvent('changeNewPageCommentText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showLoginModal).toBe(false)
+            await sidebar.processEvent('saveNewPageComment', {
+                shouldShare: true,
+            })
+            expect(sidebar.state.showLoginModal).toBe(true)
         })
 
         it('should be able to hydrate new comment box with state', async ({

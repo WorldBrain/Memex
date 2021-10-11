@@ -1241,13 +1241,44 @@ describe('Dashboard search results logic', () => {
                         tags: newNoteTags,
                         url: latestNoteId,
                         isEditing: false,
-                        editNoteForm: utils.getInitialFormState(),
+                        editNoteForm: {
+                            ...utils.getInitialFormState(),
+                            inputValue: newNoteComment,
+                        },
                     }),
                 )
 
                 expect(
                     searchResults.state.searchResults.noteData.allIds,
                 ).toEqual([latestNoteId])
+            })
+
+            it('should block new note save with login modal if logged out + save has share intent', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                    withAuth: false,
+                })
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_1.normalizedUrl
+
+                expect(searchResults.state.modals.showLogin).toBe(false)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds,
+                ).toEqual([])
+
+                await searchResults.processEvent('savePageNewNote', {
+                    day,
+                    pageId,
+                    fullPageUrl: 'https://' + pageId,
+                    shouldShare: true,
+                })
+
+                expect(searchResults.state.modals.showLogin).toBe(true)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds,
+                ).toEqual([])
             })
 
             describe('note search results', () => {
@@ -2007,6 +2038,59 @@ describe('Dashboard search results logic', () => {
                         }),
                     }),
                 )
+            })
+
+            it('should block save of edited note state with login modal if logged out + save has share intent', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    withAuth: false,
+                })
+                const noteId = DATA.NOTE_2.url
+                const updatedComment = 'test'
+
+                await searchResults.processEvent('setNoteEditing', {
+                    noteId,
+                    isEditing: true,
+                })
+                await searchResults.processEvent('setNoteEditCommentValue', {
+                    noteId,
+                    value: updatedComment,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        tags: [],
+                        comment: DATA.NOTE_2.comment,
+                        isEditing: true,
+                        editNoteForm: expect.objectContaining({
+                            inputValue: updatedComment,
+                        }),
+                    }),
+                )
+
+                expect(searchResults.state.modals.showLogin).toBe(false)
+                await searchResults.processEvent('saveNoteEdit', {
+                    noteId,
+                    shouldShare: true,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        tags: [],
+                        comment: DATA.NOTE_2.comment,
+                        isEditing: true,
+                        editNoteForm: expect.objectContaining({
+                            inputValue: updatedComment,
+                        }),
+                    }),
+                )
+                expect(searchResults.state.modals.showLogin).toBe(true)
             })
 
             it('should be able to cancel note deletion', async ({ device }) => {
