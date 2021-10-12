@@ -100,27 +100,28 @@ describe('Cloud onboarding UI logic', () => {
         expect(recordingChanges).toBe(false)
     })
 
-    it('should determine whether dump is needed, based on last backup time existence', async ({
-        device,
-    }) => {
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: null, // As there isn't a last backup time, it should tell user to dump
-            nextBackup: null,
-        })
-        const { logic: logicA } = await setupTest(device)
-        expect(logicA.state.shouldBackupViaDump).toBe(false)
-        await logicA.init()
-        expect(logicA.state.shouldBackupViaDump).toBe(true)
+    // NOTE: dump was disabled at last minute due to concerns with non-constant space usage leading to crashes (on browser that supports the new API)
+    // it('should determine whether dump is needed, based on last backup time existence', async ({
+    //     device,
+    // }) => {
+    //     device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
+    //         lastBackup: null, // As there isn't a last backup time, it should tell user to dump
+    //         nextBackup: null,
+    //     })
+    //     const { logic: logicA } = await setupTest(device)
+    //     expect(logicA.state.shouldBackupViaDump).toBe(false)
+    //     await logicA.init()
+    //     expect(logicA.state.shouldBackupViaDump).toBe(true)
 
-        device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
-            lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
-            nextBackup: null,
-        })
-        const { logic: logicB } = await setupTest(device)
-        expect(logicB.state.shouldBackupViaDump).toBe(false)
-        await logicB.init()
-        expect(logicB.state.shouldBackupViaDump).toBe(false)
-    })
+    //     device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({
+    //         lastBackup: Date.now(), // As there now is a last backup time, it shouldn't tell user to dump
+    //         nextBackup: null,
+    //     })
+    //     const { logic: logicB } = await setupTest(device)
+    //     expect(logicB.state.shouldBackupViaDump).toBe(false)
+    //     await logicB.init()
+    //     expect(logicB.state.shouldBackupViaDump).toBe(false)
+    // })
 
     it('should not ask user to dump if using firefox', async ({ device }) => {
         device.backgroundModules.backupModule.remoteFunctions.getBackupTimes = async () => ({

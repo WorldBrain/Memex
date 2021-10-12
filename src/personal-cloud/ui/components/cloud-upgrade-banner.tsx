@@ -54,14 +54,14 @@ const CloudUpgradeBanner = ({ onGetStartedClick, ...props }: Props) => (
     <Container {...props}>
         <ContentBox {...props}>
             <Title {...props}>
-                Memex now supports Multi-Device Sync & has a new pricing model
+                Memex now supports multi-device sync & automatic cloud backup
             </Title>
             <Description>
                 Sync between an unlimited amount of devices for free
             </Description>
         </ContentBox>
         <ButtonBox>
-            <PrimaryAction label="Get Started" onClick={onGetStartedClick} />
+            <PrimaryAction label="Start Migration" onClick={onGetStartedClick} />
         </ButtonBox>
     </Container>
 )
