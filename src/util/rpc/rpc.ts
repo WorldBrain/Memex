@@ -1,3 +1,4 @@
+import { serializeError, deserializeError, ErrorObject } from 'serialize-error'
 import uuid from 'uuid/v1'
 import type { Events } from 'webextension-polyfill-ts/src/generated/events'
 import type { Runtime } from 'webextension-polyfill-ts'
@@ -13,6 +14,7 @@ interface RPCObject {
     }
     payload: any
     error?: any
+    serializedError?: ErrorObject
 }
 
 interface PendingRequest {
@@ -30,19 +32,25 @@ export class PortBasedRPCManager {
     private ports = new Map<string, Runtime.Port>()
     private pendingRequests = new Map<string, PendingRequest>()
 
-    static createRPCResponseObject = ({
-        packet,
-        payload,
-        error = null,
-    }): RPCObject => ({
-        headers: {
-            type: 'RPC_RESPONSE',
-            id: packet.headers.id,
-            name: packet.headers.name,
+    static createRPCResponseObject = (
+        params: Omit<RPCObject, 'headers'> & {
+            packet: { headers: { id: string; name: string } }
         },
-        payload,
-        error,
-    })
+    ): RPCObject => {
+        const {
+            packet: { headers },
+        } = params
+        return {
+            headers: {
+                type: 'RPC_RESPONSE',
+                id: headers.id,
+                name: headers.name,
+            },
+            payload: params.payload,
+            error: params.error,
+            serializedError: params.serializedError,
+        }
+    }
 
     static createRPCRequestObject = ({ name, payload }): RPCObject => ({
         headers: {
@@ -210,7 +218,16 @@ export class PortBasedRPCManager {
             { request },
         )
 
-        const ret = await pendingRequest
+        let ret: any
+        try {
+            ret = await pendingRequest
+        } catch (err) {
+            if (err.fromBgScript) {
+                throw new Error('Error occured in bg script')
+            } else {
+                throw err
+            }
+        }
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Response for [${name}]`,
             { ret },
@@ -223,14 +240,14 @@ export class PortBasedRPCManager {
     }
 
     private messageResponder = (packet, port) => {
-        const { headers, payload, error } = packet
+        const { headers, payload, error, serializedError } = packet
         const { id, name, type } = headers
 
         if (type === 'RPC_RESPONSE') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: RESPONSE received for [${name}]`,
             )
-            this.resolvePendingRequest(id, payload, error)
+            this.resolvePendingRequest(id, payload, error, serializedError)
         } else if (type === 'RPC_REQUEST') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: REQUEST received for [${name}]`,
@@ -272,25 +289,26 @@ export class PortBasedRPCManager {
                             `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
                         )
                     })
-                    .catch((e) => {
-                        console.error(e.mesage)
+                    .catch((err) => {
+                        console.error(err.mesage)
                         port.postMessage(
                             PortBasedRPCManager.createRPCResponseObject({
                                 packet,
                                 payload: null,
-                                error: e.message,
+                                error: err.message,
+                                serializedError: serializeError(err),
                             }),
                         )
                         this.log(
                             `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
                         )
-                        throw e
+                        throw err
                     })
             }
         }
     }
 
-    private resolvePendingRequest = (id, payload, error) => {
+    private resolvePendingRequest = (id, payload, error, serializedError) => {
         const request = this.pendingRequests.get(id)
 
         if (!request) {
@@ -301,9 +319,12 @@ export class PortBasedRPCManager {
         }
         if (error) {
             console.error(
-                `Calling ${request.request.headers.name} errored`,
-                error,
+                `Calling ${request.request.headers.name} errored, bg stack trace below`,
             )
+            console.error(deserializeError(serializedError))
+
+            error = new Error('From bg script')
+            error.fromBgScript = true
             request.promise.reject(error)
         } else {
             request.promise.resolve(payload)
