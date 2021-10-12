@@ -641,7 +641,7 @@ describe('SidebarContainerLogic', () => {
 
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'not-yet-shared', taskState: 'pristine' },
+                isShared: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -649,7 +649,7 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'shared', taskState: 'success' },
+                isShared: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: true, isBulkShareProtected: false },
@@ -657,7 +657,7 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'unshared' },
+                isShared: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -665,7 +665,7 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                info: { status: 'shared', taskState: 'error' },
+                isShared: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -673,10 +673,8 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                info: {
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
+                isShared: true,
+                isProtected: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },

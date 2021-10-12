@@ -1,18 +1,13 @@
 import * as React from 'react'
 
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
-import type { AnnotationPrivacyLevels } from '../types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 
 export interface Props extends AnnotationFooterEventProps {
     mode: AnnotationMode
     isEdited?: boolean
     timestamp?: string
     sharingAccess: AnnotationSharingAccess
-    sharingInfo?: AnnotationSharingInfo
 }
 
 export interface AnnotationFooterEventProps {

@@ -15,11 +15,9 @@ import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
-import { NoResultsType } from './search-results/types'
+import { NoResultsType, NoteShareInfo } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
 import {
     getRemoteEventEmitter,
@@ -751,7 +749,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private updateShareInfoForNoteIds = (params: {
         noteIds: string[]
         previousState: State
-        info: Partial<AnnotationSharingInfo>
+        info: NoteShareInfo
     }) => {
         const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
@@ -766,16 +764,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ...(mutation.byId ?? {}),
                 [noteId]: {
                     isShared: {
-                        $set: params.info?.status
-                            ? params.info.status === 'shared'
-                            : prev.isShared,
+                        $set: params.info.isShared,
                     },
                     isBulkShareProtected: {
-                        $set:
-                            params.info.privacyLevel != null
-                                ? params.info.privacyLevel ===
-                                  AnnotationPrivacyLevels.PROTECTED
-                                : prev.isBulkShareProtected,
+                        $set: !!(
+                            params.info.isProtected ?? prev.isBulkShareProtected
+                        ),
                     },
                 },
             }
@@ -789,7 +783,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ event, previousState }) => {
         this.updateShareInfoForNoteIds({
             previousState,
-            info: event.info,
+            info: event,
             noteIds: previousState.searchResults.noteData.allIds,
         })
     }
@@ -801,7 +795,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.updateShareInfoForNoteIds({
             previousState,
-            info: event.info,
+            info: event,
             noteIds: noteData.allIds.filter(
                 (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
             ),
@@ -1248,7 +1242,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         tags: formState.tags,
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
-                                        isBulkShareProtected: event.isProtected,
+                                        isBulkShareProtected: !!event.isProtected,
                                         ...utils.getInitialNoteResultState(
                                             formState.inputValue,
                                         ),
@@ -1528,17 +1522,20 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
         event,
+        previousState,
     }) => {
+        const prev = previousState.searchResults.noteData.byId[event.noteId]
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShared: { $set: event.info.status === 'shared' },
+                            isShared: { $set: event.isShared },
                             isBulkShareProtected: {
-                                $set:
-                                    event.info.privacyLevel ===
-                                    AnnotationPrivacyLevels.PROTECTED,
+                                $set: !!(
+                                    event.isProtected ??
+                                    prev.isBulkShareProtected
+                                ),
                             },
                         },
                     },

@@ -489,9 +489,7 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 updateAllResultNotesShareInfo={(info) =>
-                    this.processEvent('updateAllPageResultNotesShareInfo', {
-                        info,
-                    })
+                    this.processEvent('updateAllPageResultNotesShareInfo', info)
                 }
                 selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}
@@ -655,7 +653,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
                             pageId,
-                            info,
+                            ...info,
                         }),
                 }}
                 pagePickerProps={{
@@ -762,7 +760,7 @@ export class DashboardContainer extends StatefulUIElement<
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            info,
+                            ...info,
                         }),
                 }}
                 searchCopyPasterProps={{

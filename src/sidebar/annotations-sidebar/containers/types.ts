@@ -18,10 +18,7 @@ import type { Analytics } from 'src/analytics'
 import type { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { AnnotationsSorter } from '../sorting'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
@@ -29,6 +26,7 @@ import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import type { NoteShareInfo } from 'src/dashboard-refactor/search-results/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -124,9 +122,6 @@ export interface SidebarContainerState
     isLocked: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
-    annotationSharingInfo: {
-        [annotationUrl: string]: AnnotationSharingInfo
-    }
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
@@ -261,11 +256,8 @@ export type SidebarContainerEvents = UIEvent<
 
         updateAnnotationShareInfo: {
             annotationUrl: string
-            info: Partial<AnnotationSharingInfo>
-        }
-        updateAllAnnotationsShareInfo: {
-            info: AnnotationSharingInfo
-        }
+        } & NoteShareInfo
+        updateAllAnnotationsShareInfo: NoteShareInfo
 
         setLoginModalShown: { shown: boolean }
         setDisplayNameSetupModalShown: { shown: boolean }

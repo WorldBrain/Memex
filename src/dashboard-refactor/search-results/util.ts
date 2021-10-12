@@ -143,7 +143,7 @@ const annotationToNoteData = (
     ).getTime(),
     isEdited: annotation.lastEdited != null,
     isShared: annotation.isShared,
-    isBulkShareProtected: annotation.isBulkShareProtected,
+    isBulkShareProtected: !!annotation.isBulkShareProtected,
     ...getInitialNoteResultState(),
     editNoteForm: {
         inputValue: annotation.comment ?? '',

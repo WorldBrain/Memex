@@ -3,8 +3,7 @@ import React from 'react'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 
 interface State extends ShareMenuCommonState {
@@ -12,6 +11,7 @@ interface State extends ShareMenuCommonState {
 }
 
 export interface Props extends ShareMenuCommonProps {
+    isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
 }
@@ -88,8 +88,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         } catch (err) {}
 
         this.props.postShareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
-            shareStateChanged: success,
+            isShared: true,
+            isProtected: shouldProtect,
         })
     }
 
@@ -104,8 +104,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             success = true
         } catch (err) {}
 
-        this.props.postUnshareHook?.({
-            shareStateChanged: success,
+        this.props.postShareHook?.({
+            isShared: false,
+            isProtected: shouldProtect,
         })
     }
 
@@ -148,6 +149,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         title: 'Shared',
                         hasProtectedOption: true,
                         onClick: this.handleSetShared,
+                        isSelected: this.props.isShared,
                         shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
                         description: 'Added to shared collections & page links',
                     },
@@ -156,6 +158,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         title: 'Private',
                         hasProtectedOption: true,
                         onClick: this.handleSetPrivate,
+                        isSelected: !this.props.isShared,
                         shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until shared (in bulk)',
                     },

@@ -318,25 +318,13 @@ class AnnotationList extends Component<Props, State> {
                             await copyToClipboard(link)
                         }}
                         annotationUrl={annot.url}
-                        postShareHook={({ privacyLevel, shareStateChanged }) =>
+                        postShareHook={({ isShared, isProtected }) =>
                             this.updateAnnotationShareState(annot.url)({
-                                status: shareStateChanged
-                                    ? 'shared'
-                                    : undefined,
+                                status: isShared ? 'shared' : 'unshared',
                                 taskState: 'success',
-                                privacyLevel: privacyLevel,
-                            })
-                        }
-                        postUnshareHook={({
-                            privacyLevel,
-                            shareStateChanged,
-                        }) =>
-                            this.updateAnnotationShareState(annot.url)({
-                                status: shareStateChanged
-                                    ? 'unshared'
+                                privacyLevel: isProtected
+                                    ? AnnotationPrivacyLevels.PROTECTED
                                     : undefined,
-                                taskState: 'success',
-                                privacyLevel: privacyLevel,
                             })
                         }
                         closeShareMenu={() =>

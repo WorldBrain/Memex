@@ -317,31 +317,10 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyNoteLink', { link })
                         }
                         annotationUrl={currentAnnotationId}
-                        postShareHook={({ shareStateChanged, privacyLevel }) =>
+                        postShareHook={(shareInfo) =>
                             this.processEvent('updateAnnotationShareInfo', {
                                 annotationUrl: currentAnnotationId,
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'shared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel: privacyLevel,
-                                },
-                            })
-                        }
-                        postUnshareHook={({
-                            shareStateChanged,
-                            privacyLevel,
-                        }) =>
-                            this.processEvent('updateAnnotationShareInfo', {
-                                annotationUrl: currentAnnotationId,
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'unshared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel: privacyLevel,
-                                },
+                                ...shareInfo,
                             })
                         }
                         closeShareMenu={() =>
@@ -368,30 +347,11 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyPageLink', { link })
                         }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        postShareHook={({ shareStateChanged, privacyLevel }) =>
-                            this.processEvent('updateAllAnnotationsShareInfo', {
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'shared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel: privacyLevel,
-                                },
-                            })
-                        }
-                        postUnshareHook={({
-                            shareStateChanged,
-                            privacyLevel,
-                        }) =>
-                            this.processEvent('updateAllAnnotationsShareInfo', {
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'unshared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel: privacyLevel,
-                                },
-                            })
+                        postShareHook={(shareInfo) =>
+                            this.processEvent(
+                                'updateAllAnnotationsShareInfo',
+                                shareInfo,
+                            )
                         }
                         closeShareMenu={() =>
                             this.processEvent('setAllNotesShareMenuShown', {

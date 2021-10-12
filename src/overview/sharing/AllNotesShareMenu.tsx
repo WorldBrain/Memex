@@ -78,8 +78,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         } catch (err) {}
 
         this.props.postShareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
-            shareStateChanged: success,
+            isShared: true,
         })
     }
 
@@ -92,9 +91,8 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
             success = true
         } catch (err) {}
 
-        this.props.postUnshareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-            shareStateChanged: success,
+        this.props.postShareHook?.({
+            isShared: true,
         })
     }
 

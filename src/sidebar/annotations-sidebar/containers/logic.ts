@@ -157,7 +157,6 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
-            annotationSharingInfo: {},
             annotationSharingAccess: 'sharing-allowed',
 
             showAllNotesCopyPaster: false,
@@ -1029,13 +1028,10 @@ export class SidebarContainerLogic extends UILogic<
                 ? annotation
                 : {
                       ...annotation,
-                      isShared:
-                          event.info?.status === 'shared' ??
-                          annotation.isShared,
-                      isBulkShareProtected:
-                          event.info.privacyLevel ===
-                              AnnotationPrivacyLevels.PROTECTED ??
-                          annotation.isBulkShareProtected,
+                      isShared: event.isShared,
+                      isBulkShareProtected: !!(
+                          event.isProtected ?? annotation.isBulkShareProtected
+                      ),
                   },
         )
 
@@ -1052,18 +1048,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             annotations: {
                 [annotationIndex]: {
-                    isShared: {
-                        $set: event.info.status
-                            ? event.info.status === 'shared'
-                            : previousState.annotations[annotationIndex]
-                                  .isShared,
-                    },
+                    isShared: { $set: event.isShared },
                     isBulkShareProtected: {
-                        $set:
-                            event.info.privacyLevel ===
-                                AnnotationPrivacyLevels.PROTECTED ??
-                            previousState.annotations[annotationIndex]
-                                .isBulkShareProtected,
+                        $apply: (prev) => !!(event.isProtected ?? prev),
                     },
                 },
             },

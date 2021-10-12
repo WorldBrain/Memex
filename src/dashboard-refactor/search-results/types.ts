@@ -8,7 +8,6 @@ import type {
 } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import type { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
@@ -24,7 +23,7 @@ export type PageInteractionProps = Omit<
     CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
-    updatePageNotesShareInfo: (info: Partial<AnnotationSharingInfo>) => void
+    updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
@@ -48,7 +47,7 @@ export type NoteInteractionProps = Omit<
     CommonInteractionProps,
     'onNotesBtnClick' | 'onListPickerBtnClick'
 > & {
-    updateShareInfo: (info: Partial<AnnotationSharingInfo>) => void
+    updateShareInfo: (info: NoteShareInfo) => void
     updateTags: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
@@ -123,6 +122,10 @@ export type NoResultsType =
     | 'no-results'
     | null
 export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
+export interface NoteShareInfo {
+    isShared: boolean
+    isProtected?: boolean
+}
 
 export interface NoteResult {
     isEditing: boolean
@@ -250,10 +253,8 @@ export type Events = UIEvent<{
     removePageFromList: PageEventArgs
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
-    updatePageNotesShareInfo: PageEventArgs & {
-        info: Partial<AnnotationSharingInfo>
-    }
-    updateAllPageResultNotesShareInfo: { info: Partial<AnnotationSharingInfo> }
+    updatePageNotesShareInfo: PageEventArgs & NoteShareInfo
+    updateAllPageResultNotesShareInfo: NoteShareInfo
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
@@ -276,9 +277,7 @@ export type Events = UIEvent<{
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    updateNoteShareInfo: NoteEventArgs & {
-        info: Partial<AnnotationSharingInfo>
-    }
+    updateNoteShareInfo: NoteEventArgs & NoteShareInfo
     /** NOTE: Does not mutate state */
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null

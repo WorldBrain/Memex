@@ -22,10 +22,7 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -33,7 +30,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
-    annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
 

@@ -520,11 +520,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                },
+                isShared: false,
             })
             for (const noteId of noteIds) {
                 expect(
@@ -540,11 +536,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                },
+                isShared: true,
             })
 
             for (const noteId of noteIds) {
@@ -561,11 +553,8 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
+                isShared: false,
+                isProtected: true,
             })
 
             for (const noteId of noteIds) {
@@ -583,11 +572,8 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'shared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                },
+                isShared: false,
+                isProtected: false,
             })
 
             for (const noteId of noteIds) {
@@ -614,11 +600,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    },
+                    isShared: false,
                 },
             )
             for (const noteId of noteIds) {
@@ -635,11 +617,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'shared',
-                        taskState: 'success',
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    },
+                    isShared: true,
                 },
             )
 
@@ -657,11 +635,8 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'unshared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    },
+                    isProtected: true,
+                    isShared: false,
                 },
             )
 
@@ -680,11 +655,8 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'shared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    },
+                    isProtected: false,
+                    isShared: false,
                 },
             )
 
@@ -1824,18 +1796,14 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        isBulkShareProtected: undefined,
+                        isBulkShareProtected: false,
                         isShared: false,
                     }),
                 )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    },
+                    isShared: false,
                 })
 
                 expect(
@@ -1849,11 +1817,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'shared',
-                        taskState: 'success',
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    },
+                    isShared: true,
                 })
 
                 expect(
@@ -1867,11 +1831,8 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'unshared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    },
+                    isShared: false,
+                    isProtected: true,
                 })
 
                 expect(
@@ -1885,11 +1846,8 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'shared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    },
+                    isShared: true,
+                    isProtected: true,
                 })
 
                 expect(
