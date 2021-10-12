@@ -96,9 +96,8 @@ export default class DirectLinkingBackground {
             findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
                 this,
             ),
-            updateAnnotationPrivacyLevel: this.updateAnnotationPrivacyLevel.bind(
-                this,
-            ),
+            protectAnnotation: this.protectAnnotation,
+            dropAnnotationProtection: this.dropAnnotationProtection,
             updateAnnotationPrivacyLevels: this.updateAnnotationPrivacyLevels.bind(
                 this,
             ),
@@ -416,9 +415,8 @@ export default class DirectLinkingBackground {
         })
 
         if (toCreate.isBulkShareProtected) {
-            await this.annotationStorage.createAnnotationPrivacyLevel({
+            await this.annotationStorage.protectAnnotation({
                 annotation: annotationUrl,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
         }
 
@@ -457,13 +455,12 @@ export default class DirectLinkingBackground {
         return privacyLevels
     }
 
-    async updateAnnotationPrivacyLevel(
-        _,
-        params: { annotation: string; privacyLevel: AnnotationPrivacyLevels },
-    ) {
-        await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel(
-            params,
-        )
+    protectAnnotation = async (_, params: { annotation: string }) => {
+        await this.annotationStorage.protectAnnotation(params)
+    }
+
+    dropAnnotationProtection = async (_, params: { annotation: string }) => {
+        await this.annotationStorage.dropAnnotationProtection(params)
     }
 
     async updateAnnotationPrivacyLevels(
@@ -491,9 +488,8 @@ export default class DirectLinkingBackground {
                 continue
             }
 
-            await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+            await this.annotationStorage.protectAnnotation({
                 annotation,
-                privacyLevel,
             })
         }
     }

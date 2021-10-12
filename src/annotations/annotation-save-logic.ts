@@ -119,9 +119,8 @@ export async function updateAnnotation({
                           shareToLists: shareOpts?.shouldShareToList,
                       }),
                 shareOpts?.isBulkShareProtected &&
-                    annotationsBG.updateAnnotationPrivacyLevel({
+                    annotationsBG.protectAnnotation({
                         annotation: annotationData.localId,
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     }),
             ])
             return annotationData.localId

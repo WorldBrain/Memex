@@ -10,8 +10,8 @@ interface PostShareChanges {
 }
 
 export interface ShareMenuCommonProps {
-    contentSharingBG?: ContentSharingInterface
-    annotationsBG?: AnnotationInterface<'caller'>
+    contentSharingBG: ContentSharingInterface
+    annotationsBG: AnnotationInterface<'caller'>
     closeShareMenu: React.MouseEventHandler
     copyLink: (link: string) => Promise<void>
     postShareHook?: (changes: PostShareChanges) => void
