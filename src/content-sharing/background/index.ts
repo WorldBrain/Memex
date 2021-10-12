@@ -318,9 +318,7 @@ export default class ContentSharingBackground {
             })
         )[options.annotationUrl]
         if (!remoteAnnotationId) {
-            throw new Error(
-                `Tried to unshare an annotation which was not shared`,
-            )
+            return
         }
         await this.storage.deleteAnnotationMetadata({
             localIds: [options.annotationUrl],
