@@ -1211,8 +1211,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
-                        shouldShareToList: event.shouldShare,
                         isBulkShareProtected: event.isProtected,
+                        shouldCopyShareLink: event.shouldShare,
                     },
                     annotationsBG,
                     contentSharingBG: contentShareBG,
@@ -1714,9 +1714,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
-                        shouldUnshare: noteData.isShared && !event.shouldShare,
-                        shouldShareToList: event.shouldShare,
+                        shouldCopyShareLink: event.shouldShare,
                         isBulkShareProtected: event.isProtected,
+                        shouldUnshare: noteData.isShared && !event.shouldShare,
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,

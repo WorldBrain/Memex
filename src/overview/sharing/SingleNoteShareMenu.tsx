@@ -58,6 +58,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             return false
         }
         this.setState({ link, showLink: true })
+        await this.handleLinkCopy()
         return true
     }
 
@@ -74,18 +75,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     private shareAnnotation = async (shouldProtect?: boolean) => {
         const { annotationUrl, contentSharingBG } = this.props
-        let success = false
-        try {
-            await contentSharingBG.shareAnnotation({
-                annotationUrl,
-                shareToLists: true,
-            })
-            await this.setRemoteLinkIfExists()
-            if (shouldProtect != null) {
-                await this.handleAnnotationProtection(shouldProtect)
-            }
-            success = true
-        } catch (err) {}
+        await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToLists: true,
+        })
+        await this.setRemoteLinkIfExists()
+        if (shouldProtect != null) {
+            await this.handleAnnotationProtection(shouldProtect)
+        }
 
         this.props.postShareHook?.({
             isShared: true,
@@ -95,14 +92,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     private unshareAnnotation = async (shouldProtect: boolean) => {
         const { annotationUrl, contentSharingBG } = this.props
-
-        let success = false
-        try {
-            await contentSharingBG.unshareAnnotation({ annotationUrl })
-            this.setState({ showLink: false })
-            await this.handleAnnotationProtection(shouldProtect)
-            success = true
-        } catch (err) {}
+        await contentSharingBG.unshareAnnotation({ annotationUrl })
+        this.setState({ showLink: false })
+        await this.handleAnnotationProtection(shouldProtect)
 
         this.props.postShareHook?.({
             isShared: false,
@@ -111,23 +103,29 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private handleSetShared = async (shouldProtect?: boolean) => {
-        await executeReactStateUITask<State, 'shareState'>(
+        const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.shareAnnotation(shouldProtect)
             },
         )
+
+        this.props.closeShareMenu({} as any)
+        await p
     }
 
     private handleSetPrivate = async (shouldProtect?: boolean) => {
-        await executeReactStateUITask<State, 'shareState'>(
+        const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.unshareAnnotation(shouldProtect)
             },
         )
+
+        this.props.closeShareMenu({} as any)
+        await p
     }
 
     render() {

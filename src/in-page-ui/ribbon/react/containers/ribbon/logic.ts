@@ -341,7 +341,7 @@ export class RibbonContainerLogic extends UILogic<
             },
             {
                 shouldShare,
-                shouldShareToList: shouldShare,
+                shouldCopyShareLink: shouldShare,
                 isBulkShareProtected: isProtected,
             },
         )

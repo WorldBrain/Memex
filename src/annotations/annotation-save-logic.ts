@@ -1,13 +1,13 @@
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import { AnnotationPrivacyLevels } from './types'
 import type { AnnotationInterface } from './background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Anchor } from 'src/highlighting/types'
+import { copyToClipboard } from './content_script/utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
     shouldUnshare?: boolean
-    shouldShareToList?: boolean
+    shouldCopyShareLink?: boolean
     isBulkShareProtected?: boolean
 }
 
@@ -51,6 +51,10 @@ export async function createAnnotation({
     let remoteAnnotationId: string
     if (shareOpts?.shouldShare) {
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+
+        if (shareOpts.shouldCopyShareLink) {
+            await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+        }
     }
     return {
         remoteAnnotationLink: shareOpts?.shouldShare
@@ -75,7 +79,7 @@ export async function createAnnotation({
                 await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
-                    shareToLists: shareOpts?.shouldShareToList,
+                    shareToLists: true,
                 })
             }
 
@@ -95,6 +99,10 @@ export async function updateAnnotation({
     let remoteAnnotationId: string
     if (shareOpts?.shouldShare) {
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+
+        if (shareOpts.shouldCopyShareLink) {
+            await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+        }
     }
 
     return {
@@ -116,7 +124,7 @@ export async function updateAnnotation({
                       contentSharingBG.shareAnnotation({
                           remoteAnnotationId,
                           annotationUrl: annotationData.localId,
-                          shareToLists: shareOpts?.shouldShareToList,
+                          shareToLists: true,
                       }),
                 shareOpts?.isBulkShareProtected &&
                     annotationsBG.protectAnnotation({
