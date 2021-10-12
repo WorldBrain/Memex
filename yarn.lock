@@ -8996,6 +8996,11 @@ des.js@^1.0.0:
     inherits "^2.0.1"
     minimalistic-assert "^1.0.0"
 
+deserialize-error@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/deserialize-error/-/deserialize-error-0.0.3.tgz#f568633572d7c2cc46a55a5fc254b6dfce7b3fca"
+  integrity sha1-9WhjNXLXwsxGpVpfwlS23857P8o=
+
 destroy@^1.0.4, destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
