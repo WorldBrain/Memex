@@ -23,6 +23,7 @@ const TopBarContainer = styled.div`
     justify-content: space-between;
     width: 100%;
     align-items: center;
+    z-index: 0;
 `
 
 const TopBarSection = styled.div`

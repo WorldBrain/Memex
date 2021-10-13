@@ -56,7 +56,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                 </PrivacyOptionBox>
                 {this.props.hasProtectedOption && this.state.isHovered && (
                         <ButtonTooltip
-                            tooltipText={<span><strong>Lock Selection</strong><br/>Will not change in bulk actions</span>}
+                            tooltipText={<span><strong>Lock Selection</strong><br/>No status change in bulk action.</span>}
                             position="bottomRightEdge"
                         >
                                 <Icon

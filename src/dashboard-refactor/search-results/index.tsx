@@ -238,16 +238,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <PageNotesBox bottom="10px" left="10px">
+                <AnnotationCreate
+                    autoFocus={this.props.shouldFormsAutoFocus}
+                    comment={newNoteForm.inputValue}
+                    tags={newNoteForm.tags}
+                    {...boundAnnotCreateProps}
+                />
+                <Margin top='3px'/>
                 <NoteTopBarBox
-                    leftSide={
-                        <NotesTypeDropdownMenu
-                            notesTypeSelection={notesType}
-                            onNotesTypeSelection={this.props.onPageNotesTypeSelection(
-                                day,
-                                normalizedUrl,
-                            )}
-                        />
-                    }
                     rightSide={
                         <TopBarRightSideWrapper>
                             <ButtonTooltip
@@ -273,13 +271,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </TopBarRightSideWrapper>
                     }
                 />
-                <Margin bottom="3px" />
-                <AnnotationCreate
-                    autoFocus={this.props.shouldFormsAutoFocus}
-                    comment={newNoteForm.inputValue}
-                    tags={newNoteForm.tags}
-                    {...boundAnnotCreateProps}
-                />
+                <Separator/>
                 {noteIds[notesType].map(
                     this.renderNoteResult(day, normalizedUrl),
                 )}
@@ -531,6 +523,12 @@ const PageNotesBox = styled(Margin)`
     padding-left: 10px;
     padding-top: 5px;
     border-left: 4px solid #e0e0e0;
+`
+
+const Separator = styled.div`
+    width: 100%;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: -2px;
 `
 
 const Loader = styled.div`

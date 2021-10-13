@@ -27,6 +27,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     tooltipProps?: ButtonTooltipProps
     initSelectedIndex?: number
     btnId?: string
+    menuTitle?: string
 }
 
 interface State {
@@ -144,6 +145,9 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                                     e.stopPropagation
                                 }}
                             >
+                                {this.props.menuTitle && (
+                                    <MenuTitle>{this.props.menuTitle}</MenuTitle>
+                                )}
                                 {this.props.children ?? this.renderMenuItems()}
                             </Menu>
                         </ClickAway>
@@ -176,6 +180,14 @@ const MenuItem = styled.li`
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
+`
+
+const MenuTitle = styled.div`
+    font-size: 13px;
+    font-weight: normal;
+    padding: 8px ​15px 0px 15px;
+    opacity: 0.5;
+    color: ${(props) => props.theme.colors.primary}; 
 `
 
 const SoonPill = styled.span`
@@ -240,15 +252,14 @@ const Menu = styled.ul`
     ${({ theme }) => `left: ${theme.leftMenuOffset ?? 0};`}
     width: max-content;
     list-style: none;
-    padding: 10px 0;
+    padding: 5px 0;
     background: white;
     border-radius: 3px;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
-    overflow: hidden;
-    overflow-y: scroll;
-    z-index: 10;
+    width: 330px;
+    z-index: 1200000;
     margin-top: 5px;
     flex-direction: column;
     top: 25px;

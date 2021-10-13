@@ -58,6 +58,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 isPrivacyLevelShown: !state.isPrivacyLevelShown,
                             }))
                         }
+                        menuTitle={"Set & save privacy for this note"}
                     >
                         <SharePrivacyOption
                             hasProtectedOption

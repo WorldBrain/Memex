@@ -176,7 +176,7 @@ export default class PageResultView extends PureComponent<Props> {
                         ? icons.commentFull
                         : icons.commentEmpty,
                     onClick: this.props.onNotesBtnClick,
-                    tooltipText: 'Add/View Notes',
+                    tooltipText: <span><strong>Add/View Notes</strong><br/>shift+click to open in sidebar</span>,
                 },
             ]
         }
