@@ -3,7 +3,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
 import { createAndCopyDirectLink } from 'src/annotations/content_script/interactions'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { KeyboardShortcuts } from '../types'
+import type { KeyboardShortcuts, Shortcut } from '../types'
 import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
@@ -22,12 +22,27 @@ export async function initKeyboardShortcuts(
     const { shortcutsEnabled, ...shortcuts } = await getKeyboardShortcutsState()
     if (shortcutsEnabled) {
         const handlers = getShortcutHandlers(dependencies)
-        for (const [shortcutName, shortcutValue] of Object.entries(shortcuts)) {
+        const entries: Array<[string, Shortcut]> = Object.entries(shortcuts)
+        for (const [shortcutName, shortcutValue] of entries) {
             if (shortcutValue.enabled) {
                 Mousetrap.bind(
                     shortcutValue.shortcut,
                     prepareShortcutHandler(handlers[shortcutName]),
                 )
+            }
+
+            // Some shortcuts have an alternative handler that gets called when "Shift" held
+            if (
+                shortcutValue.altName != null &&
+                !shortcutValue.shortcut.includes('shift')
+            ) {
+                const altHandler = handlers[shortcutValue.altName]
+                if (altHandler != null) {
+                    Mousetrap.bind(
+                        shortcutValue.shortcut + '+shift',
+                        prepareShortcutHandler(altHandler),
+                    )
+                }
             }
         }
     }
@@ -60,6 +75,8 @@ function getShortcutHandlers({
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
         toggleHighlights: () => inPageUI.toggleHighlights(),
+        createSharedAnnotation: annotationFunctions.createHighlight,
+        createSharedHighlight: annotationFunctions.createHighlight,
         createHighlight: annotationFunctions.createHighlight,
         createAnnotation: annotationFunctions.createAnnotation,
         link: async () => {

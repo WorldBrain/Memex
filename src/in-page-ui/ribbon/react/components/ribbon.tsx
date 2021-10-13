@@ -9,9 +9,9 @@ import {
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
 import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import {
-    KeyboardShortcuts,
+import type {
     Shortcut,
+    BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
@@ -29,7 +29,7 @@ export interface Props extends RibbonSubcomponentProps {
     tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
-    shortcutsData?: ShortcutElData[]
+    shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     toggleShowExtraButtons: () => void
     handleRibbonToggle: () => void
@@ -44,9 +44,11 @@ interface State {
 }
 
 export default class Ribbon extends Component<Props, State> {
-    static defaultProps = { shortcutsData: shortcuts }
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
+        shortcutsData: shortcuts,
+    }
 
-    private keyboardShortcuts: KeyboardShortcuts
+    private keyboardShortcuts: BaseKeyboardShortcuts
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC

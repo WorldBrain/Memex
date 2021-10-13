@@ -7,7 +7,7 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/utils'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
-import { KeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
+import type { BaseKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
 import analytics from 'src/analytics'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
@@ -25,7 +25,7 @@ export interface Props {
     shortcutsData: ShortcutElData[]
 }
 
-export interface State extends KeyboardShortcuts {}
+export interface State extends BaseKeyboardShortcuts {}
 
 class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     static defaultProps: Pick<Props, 'shortcutsData'> = {

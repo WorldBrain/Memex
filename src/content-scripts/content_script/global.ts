@@ -117,16 +117,16 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     }
 
     const annotationsFunctions = {
-        createHighlight: (
-            analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => () =>
+        createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
+            shouldShare: boolean,
+        ) =>
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
             }),
-        createAnnotation: (
-            analyticsEvent?: AnalyticsEvent<'Annotations'>,
-        ) => () =>
+        createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
+            shouldShare: boolean,
+        ) =>
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 analyticsEvent,
