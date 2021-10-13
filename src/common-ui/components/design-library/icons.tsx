@@ -44,6 +44,7 @@ export const lock = browser.extension.getURL('/img/lock.svg')
 export const sort = browser.extension.getURL('/img/sort.svg')
 export const person = browser.extension.getURL('/img/person.svg')
 export const shared = browser.extension.getURL('/img/shared.svg')
+export const sharedProtected = browser.extension.getURL('/img/sharedprotected.svg')
 export const saveIcon = browser.extension.getURL('/img/saveIcon.svg')
 export const addPeople = browser.extension.getURL('/img/addPeople.svg')
 
