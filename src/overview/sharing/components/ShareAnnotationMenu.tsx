@@ -163,7 +163,6 @@ const Menu = styled.div`
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
-        line-height: 22px;
     }
 `
 
@@ -225,10 +224,6 @@ const LinkCopier = styled.button`
 const PrivacyContainer = styled.div`
     width: 100%;
 
-    & * {
-        color: ${(props) => props.theme.colors.primary};
-    }
-
     &:first-child {
         padding-top: 15px;
     }
@@ -240,6 +235,7 @@ const PrivacyTitle = styled.div`
     padding: 0px 15px;
     opacity: 0.5;
     margin-bottom: -5px;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const PrivacyOptionContainer = styled(Margin)`
