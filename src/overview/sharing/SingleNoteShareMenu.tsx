@@ -149,7 +149,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         onClick: this.handleSetShared,
                         isSelected: this.props.isShared,
                         shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
-                        description: 'Added to shared collections & page links',
+                        description: 'Added to shared collections the page is in',
                     },
                     {
                         icon: 'person',

@@ -179,8 +179,9 @@ const TitleContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: normal;
+    opacity: 0.5;
     color: ${(props) => props.theme.colors.primary};
 `
 
@@ -234,9 +235,11 @@ const PrivacyContainer = styled.div`
 `
 
 const PrivacyTitle = styled.div`
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: normal;
     padding: 0px 15px;
+    opacity: 0.5;
+    margin-bottom: -5px;
 `
 
 const PrivacyOptionContainer = styled(Margin)`

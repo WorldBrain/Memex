@@ -629,19 +629,19 @@ const NoteTypesWrapper = styled.div`
 const ShareMenuWrapper = styled.div`
     position: relative;
     left: 105px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
     position: fixed;
     right: 345px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
     position: fixed;
     right: 375px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const CopyPasterWrapper = styled.div`
@@ -652,7 +652,7 @@ const CopyPasterWrapper = styled.div`
 
 const TagPickerWrapper = styled.div`
     position: sticky;
-    left: 75px;
+    margin-left: 100px;
     z-index: 5;
 `
 

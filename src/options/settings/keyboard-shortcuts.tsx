@@ -64,9 +64,9 @@ export const shortcuts: ShortcutElData[] = [
     {
         id: 'create-bm-shortcut',
         name: 'createBookmark',
-        text: 'Favorite Page',
-        toggleOn: 'Favorite Page',
-        toggleOff: 'Un-Favorite Page',
+        text: 'Bookmark Page',
+        toggleOn: 'Bookmark Page',
+        toggleOff: 'Un-Bookmark Page',
     },
     {
         id: 'add-tag-shortcut',

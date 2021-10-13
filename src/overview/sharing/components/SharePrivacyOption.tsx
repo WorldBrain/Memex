@@ -82,9 +82,8 @@ const PrivacyOptionItem = styled(Margin)`
     align-items: center;
     flex-direction: row;
     cursor: pointer;
-    padding: 2px 20px;
+    padding: 5px 20px;
     width: fill-available;
-    margin-bottom: 10px;
 
     &:hover {
         background-color: ${colors.onHover};
@@ -94,8 +93,12 @@ const PrivacyOptionItem = styled(Margin)`
         margin-bottom: 0px;
     }
 
+    &:first-child {
+        margin-top: 0px;
+    }
+
     ${(props) =>
-        props.isSelected ? `background-color: ${colors.lightMidGrey};` : ''}
+        props.isSelected ? `background-color: ${colors.lightGrey};` : ''}
 `
 
 const PrivacyOptionBox = styled.div`
@@ -105,6 +108,7 @@ const PrivacyOptionBox = styled.div`
     justify-content: center;
     flex-direction: column;
     padding-left: 10px;
+    width: 200px;
 `
 
 const PrivacyOptionTitleBox = styled.div`
@@ -129,4 +133,9 @@ const PrivacyOptionShortcut = styled.div`
 const PrivacyOptionSubTitle = styled.div`
     font-size: 12px;
     font-weight: normal;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 `
+

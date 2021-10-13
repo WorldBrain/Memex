@@ -434,24 +434,27 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
-                                            {
-                                                [styles.saveIcon]: this.props
-                                                    .commentBox.isCommentSaved,
-                                            },
+                                {!this.props.sidebar
+                                .isSidebarOpen && (
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
                                         )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                </ButtonTooltip>
+                                        position="leftNarrow"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.comments,
+                                                {
+                                                    [styles.saveIcon]: this.props
+                                                        .commentBox.isCommentSaved,
+                                                },
+                                            )}
+                                            onClick={this.handleCommentIconBtnClick}
+                                        />
+                                    </ButtonTooltip>
+                                )}
                                 {this.props.commentBox.showCommentBox && (
                                     <Tooltip position="left">
                                         <AnnotationCreate
