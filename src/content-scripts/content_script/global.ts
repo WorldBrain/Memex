@@ -123,6 +123,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                shouldShare,
             }),
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
@@ -130,6 +131,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                shouldShare,
             }),
     }
 

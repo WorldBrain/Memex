@@ -39,7 +39,7 @@ export async function initKeyboardShortcuts(
                 const altHandler = handlers[shortcutValue.altName]
                 if (altHandler != null) {
                     Mousetrap.bind(
-                        shortcutValue.shortcut + '+shift',
+                        'shift+' + shortcutValue.shortcut,
                         prepareShortcutHandler(altHandler),
                     )
                 }
@@ -75,10 +75,11 @@ function getShortcutHandlers({
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
         toggleHighlights: () => inPageUI.toggleHighlights(),
-        createSharedAnnotation: annotationFunctions.createHighlight,
-        createSharedHighlight: annotationFunctions.createHighlight,
-        createHighlight: annotationFunctions.createHighlight,
-        createAnnotation: annotationFunctions.createAnnotation,
+        createSharedAnnotation: () =>
+            annotationFunctions.createAnnotation(true),
+        createSharedHighlight: () => annotationFunctions.createHighlight(true),
+        createHighlight: () => annotationFunctions.createHighlight(false),
+        createAnnotation: () => annotationFunctions.createAnnotation(false),
         link: async () => {
             if (userSelectedText()) {
                 await createAndCopyDirectLink()
