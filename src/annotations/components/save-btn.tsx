@@ -6,6 +6,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
+import { getShareButtonData } from '../sharing-utils'
 
 export interface Props {
     isShared?: boolean
@@ -26,6 +27,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 > {
     state: State = { isPrivacyLevelShown: false }
 
+    private get saveIcon(): string {
+        return getShareButtonData(this.props.isShared, this.props.isProtected)
+            .icon
+    }
+
     private saveWithShareIntent = (shouldShare: boolean) => (
         isProtected?: boolean,
     ) => this.props.onSave(shouldShare, isProtected)
@@ -33,18 +39,15 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     render() {
         return (
             <SaveBtn>
-                <SaveBtnText onClick={() => this.props.onSave(false)}>
-                    <Icon
-                        icon={
-                            this.props.isProtected
-                                ? 'lock'
-                                : this.props.isShared
-                                ? 'shared'
-                                : 'person'
-                        }
-                        height="14px"
-                    />{' '}
-                    Save
+                <SaveBtnText
+                    onClick={() =>
+                        this.props.onSave(
+                            !!this.props.isShared,
+                            !!this.props.isProtected,
+                        )
+                    }
+                >
+                    <Icon filePath={this.saveIcon} height="14px" /> Save
                 </SaveBtnText>
                 <SaveBtnArrow horizontal="1px">
                     <DropdownMenuBtn

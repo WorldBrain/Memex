@@ -12,5 +12,5 @@ export function getShareButtonData(
     } else if (isBulkShareProtected) {
         return { icon: icons.lock, label: 'Note protected' }
     }
-    return { icon: icons.plus, label: 'Note not yet shared' }
+    return { icon: icons.person, label: 'Note not yet shared' }
 }
