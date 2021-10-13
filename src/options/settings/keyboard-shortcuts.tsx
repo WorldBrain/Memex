@@ -1,7 +1,10 @@
+import React from 'react'
+
 export interface ShortcutElData {
     id: string
     name: string
-    children: string
+    text: React.ReactNode
+    subText?: React.ReactNode
     tooltip?: string
     toggleOn?: string
     toggleOff?: string
@@ -11,54 +14,64 @@ export const shortcuts: ShortcutElData[] = [
     {
         id: 'highlight-shortcut',
         name: 'createHighlight',
-        children: 'Highlight selected text',
+        text: 'Highlight selected text',
+        subText: (
+            <>
+                (hold <strong>Shift</strong> to share)
+            </>
+        ),
+    },
+    {
+        id: 'annotation-shortcut',
+        name: 'createAnnotation',
+        text: 'Annotate selected text',
+        subText: (
+            <>
+                (hold <strong>Shift</strong> to share)
+            </>
+        ),
+    },
+    {
+        id: 'add-comment-shortcut',
+        name: 'addComment',
+        text: 'Add note to current page',
+        tooltip: 'Add note to page',
     },
     {
         id: 'open-dashboard-shortcut',
         name: 'openDashboard',
-        children: 'Open Dashboard',
+        text: 'Open Dashboard',
     },
     {
         id: 'show-highlights-shortcut',
         name: 'toggleHighlights',
-        children: 'Toggle visibility of highlights (with no text selected)',
+        text: 'Toggle visibility of highlights (with no text selected)',
         tooltip: 'Toggle Highlights',
     },
     {
         id: 'sidebar-shortcut',
         name: 'toggleSidebar',
-        children: 'Open Sidebar',
+        text: 'Open Sidebar',
         toggleOn: 'Toggle Sidebar',
         toggleOff: 'Open Sidebar',
     },
     {
-        id: 'annotation-shortcut',
-        name: 'createAnnotation',
-        children: 'Create Annotation',
-    },
-    {
         id: 'add-to-coll-shortcut',
         name: 'addToCollection',
-        children: 'Add current page to collection (opens picker)',
+        text: 'Add current page to collection (opens picker)',
         tooltip: 'Add page to collections',
     },
     {
         id: 'create-bm-shortcut',
         name: 'createBookmark',
-        children: 'Favorite Page',
+        text: 'Favorite Page',
         toggleOn: 'Favorite Page',
         toggleOff: 'Un-Favorite Page',
     },
     {
         id: 'add-tag-shortcut',
         name: 'addTag',
-        children: 'Add tags to current page (opens picker)',
+        text: 'Add tags to current page (opens picker)',
         tooltip: 'Add tags to page',
-    },
-    {
-        id: 'add-comment-shortcut',
-        name: 'addComment',
-        children: 'Add comment to current page',
-        tooltip: 'Add notes to page',
     },
 ]

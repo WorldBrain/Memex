@@ -246,3 +246,8 @@
     padding-left: 25px;
     margin-top: 5px;
 }
+
+.kbShortcutSubText {
+    font-size: 85%;
+    color: blue;
+}

@@ -22,13 +22,13 @@ async function writeShortcutState(state: State) {
 }
 
 export interface Props {
-    shortcutsData?: ShortcutElData[]
+    shortcutsData: ShortcutElData[]
 }
 
 export interface State extends KeyboardShortcuts {}
 
 class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
-    static defaultProps = {
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
         shortcutsData: shortcuts,
     }
 
@@ -99,7 +99,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     renderCheckboxes() {
-        return this.props.shortcutsData.map(({ id, name, children }) => {
+        return this.props.shortcutsData.map(({ id, name, text, subText }) => {
             if (this.state[name]) {
                 return (
                     <Checkbox
@@ -110,7 +110,12 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                         isDisabled={!this.state.shortcutsEnabled}
                         name={name}
                     >
-                        {children}
+                        {text}
+                        {subText && (
+                            <span className={styles.kbShortcutSubText}>
+                                {subText}
+                            </span>
+                        )}
                         <input
                             type="text"
                             value={this.state[name].shortcut}
