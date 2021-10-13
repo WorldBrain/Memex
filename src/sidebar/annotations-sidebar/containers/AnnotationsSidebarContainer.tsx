@@ -38,6 +38,7 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -278,24 +279,29 @@ export class AnnotationsSidebarContainer<
         return (
             <TagPickerWrapper>
                 <HoverBox>
-                    <TagPicker
-                        initialSelectedEntries={() => annot.tags}
-                        queryEntries={(query) =>
-                            this.props.tags.searchForTagSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={
-                            this.props.tags.fetchInitialTagSuggestions
-                        }
-                        onUpdateEntrySelection={this.handleTagsUpdate(
-                            currentAnnotationId,
-                        )}
-                        onClickOutside={() =>
+                    <ClickAway
+                        onClickAway={() =>
                             this.processEvent(
                                 'resetTagPickerAnnotationId',
                                 null,
                             )
                         }
-                    />
+                    >
+                        <TagPicker
+                            initialSelectedEntries={() => annot.tags}
+                            queryEntries={(query) =>
+                                this.props.tags.searchForTagSuggestions({
+                                    query,
+                                })
+                            }
+                            loadDefaultSuggestions={
+                                this.props.tags.fetchInitialTagSuggestions
+                            }
+                            onUpdateEntrySelection={this.handleTagsUpdate(
+                                currentAnnotationId,
+                            )}
+                        />
+                    </ClickAway>
                 </HoverBox>
             </TagPickerWrapper>
         )
