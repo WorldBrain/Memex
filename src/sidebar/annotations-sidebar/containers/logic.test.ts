@@ -701,9 +701,6 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareList({
                 listId: localListId,
             })
-            await contentSharing.shareListEntries({
-                listId: localListId,
-            })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
             const annotationUrl = await directLinking.createAnnotation(
                 {} as any,
@@ -849,9 +846,6 @@ describe('SidebarContainerLogic', () => {
                 device,
             )
             await contentSharing.shareList({
-                listId: localListId,
-            })
-            await contentSharing.shareListEntries({
                 listId: localListId,
             })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url

@@ -3,11 +3,10 @@ import React from 'react'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { getKeyName } from 'src/util/os-specific-key-names'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 interface State extends ShareMenuCommonState {
@@ -68,7 +67,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
         const { contentSharingBG, listId } = this.props
 
         const { remoteListId } = await contentSharingBG.shareList({ listId })
-        await contentSharingBG.shareListEntries({ listId })
 
         this.setState({
             link: getListShareUrl({ remoteListId }),
@@ -95,17 +93,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
 
         this.annotationUrls = [...annotationUrlsSet]
     }
-
-    private createAnnotationPrivacyLevels = (
-        privacyLevel: AnnotationPrivacyLevels,
-    ) =>
-        this.annotationUrls.reduce(
-            (acc, annotation) => ({
-                ...acc,
-                [annotation]: privacyLevel,
-            }),
-            {},
-        )
 
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
@@ -170,40 +157,22 @@ export default class ListShareMenu extends React.Component<Props, State> {
         })
     }
 
-    private handleSetShared = async (isProtected?: boolean) => {
-        const { annotationsBG } = this.props
-        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
-            AnnotationPrivacyLevels.SHARED,
-        )
-
+    private handleSetShared = async () => {
         await executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.shareAllAnnotations()
-                await annotationsBG.updateAnnotationPrivacyLevels({
-                    annotationPrivacyLevels,
-                    respectProtected: true,
-                })
             },
         )
     }
 
-    private handleSetPrivate = async (isProtected?: boolean) => {
-        const { annotationsBG } = this.props
-        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
-            AnnotationPrivacyLevels.PRIVATE,
-        )
-
+    private handleSetPrivate = async () => {
         await executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.unshareAllAnnotations()
-                await annotationsBG.updateAnnotationPrivacyLevels({
-                    annotationPrivacyLevels,
-                    respectProtected: true,
-                })
             },
         )
     }

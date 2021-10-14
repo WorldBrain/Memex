@@ -4,10 +4,6 @@ import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/con
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
     shareList(options: { listId: number }): Promise<{ remoteListId: string }>
-    shareListEntries(options: {
-        listId: number
-        queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
     shareAnnotation(options: {
         annotationUrl: string
         remoteAnnotationId?: string

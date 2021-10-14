@@ -90,7 +90,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         })
     }
 
-    private unshareAnnotation = async (shouldProtect: boolean) => {
+    private unshareAnnotation = async (shouldProtect?: boolean) => {
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.unshareAnnotation({ annotationUrl })
         this.setState({ showLink: false })
@@ -149,7 +149,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         onClick: this.handleSetShared,
                         isSelected: this.props.isShared,
                         shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
-                        description: 'Added to shared collections the page is in',
+                        description:
+                            'Added to shared collections the page is in',
                     },
                     {
                         icon: 'person',

@@ -98,9 +98,6 @@ export default class DirectLinkingBackground {
             ),
             protectAnnotation: this.protectAnnotation,
             dropAnnotationProtection: this.dropAnnotationProtection,
-            updateAnnotationPrivacyLevels: this.updateAnnotationPrivacyLevels.bind(
-                this,
-            ),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
             updateAnnotationTags: this.updateAnnotationTags.bind(this),
@@ -461,37 +458,6 @@ export default class DirectLinkingBackground {
 
     dropAnnotationProtection = async (_, params: { annotation: string }) => {
         await this.annotationStorage.dropAnnotationProtection(params)
-    }
-
-    async updateAnnotationPrivacyLevels(
-        _,
-        params: {
-            annotationPrivacyLevels: {
-                [annotation: string]: AnnotationPrivacyLevels
-            }
-            respectProtected?: boolean
-        },
-    ) {
-        const existingLevels = params.respectProtected
-            ? await this.annotationStorage.getPrivacyLevelsByAnnotation({
-                  annotations: Object.keys(params.annotationPrivacyLevels),
-              })
-            : {}
-
-        for (const [annotation, privacyLevel] of Object.entries(
-            params.annotationPrivacyLevels,
-        )) {
-            if (
-                existingLevels[annotation]?.privacyLevel ===
-                AnnotationPrivacyLevels.PROTECTED
-            ) {
-                continue
-            }
-
-            await this.annotationStorage.protectAnnotation({
-                annotation,
-            })
-        }
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {

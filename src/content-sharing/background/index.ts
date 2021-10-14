@@ -46,7 +46,6 @@ export default class ContentSharingBackground {
         this.remoteFunctions = {
             ...options.services.contentSharing,
             shareList: this.shareList,
-            shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
@@ -165,10 +164,6 @@ export default class ContentSharingBackground {
         }
     }
 
-    shareListEntries: ContentSharingInterface['shareListEntries'] = async (
-        options,
-    ) => {}
-
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
@@ -199,28 +194,26 @@ export default class ContentSharingBackground {
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
         options,
     ) => {
+        const { annotationStorage } = this.options
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const allAnnotations = await this.options.annotationStorage.getAnnotations(
-            options.annotationUrls,
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: options.annotationUrls },
         )
-        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
-            {
-                annotations: options.annotationUrls,
-            },
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (url) =>
+                !remoteIds[url] &&
+                annotPrivacyLevels[url]?.privacyLevel !==
+                    AnnotationPrivacyLevels.PROTECTED,
         )
-        const annotations = allAnnotations.filter(
-            (annotation) =>
-                !remoteIds[annotation.url] &&
-                (!annotPrivacyLevels[annotation.url] ||
-                    annotPrivacyLevels[annotation.url]?.privacyLevel !==
-                        AnnotationPrivacyLevels.PROTECTED),
-        )
-        for (const annnotation of annotations) {
+        console.log('remote IDS:', remoteIds)
+        console.log('priv levels:', annotPrivacyLevels)
+        console.log('annots to share:', nonProtectedAnnotations)
+        for (const annnotationUrl of nonProtectedAnnotations) {
             await this.storage.storeAnnotationMetadata([
                 {
-                    localId: annnotation.url,
+                    localId: annnotationUrl,
                     remoteId: this.generateRemoteAnnotationId(),
                     excludeFromLists: !options.shareToLists ?? true,
                 },
@@ -294,15 +287,12 @@ export default class ContentSharingBackground {
         options,
     ) => {
         const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
-            {
-                annotations: options.annotationUrls,
-            },
+            { annotations: options.annotationUrls },
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (annotationUrl) =>
-                !annotPrivacyLevels[annotationUrl] ||
                 annotPrivacyLevels[annotationUrl]?.privacyLevel !==
-                    AnnotationPrivacyLevels.PROTECTED,
+                AnnotationPrivacyLevels.PROTECTED,
         )
         await this.storage.deleteAnnotationMetadata({
             localIds: nonProtectedAnnotations,

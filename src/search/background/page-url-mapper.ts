@@ -255,8 +255,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .where('annotation')
             .anyOf(annotUrls)
             .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
-                protectedAnnotUrlsSet.add(annotation)
                 if (privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                    protectedAnnotUrlsSet.add(annotation)
                 }
             })
 
