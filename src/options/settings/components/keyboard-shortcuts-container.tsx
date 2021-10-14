@@ -111,19 +111,19 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                         name={name}
                     >
                         {text}
-                        {subText && (
+                        <div className={styles.rightBox}>
+                            <input
+                                type="text"
+                                value={this.state[name].shortcut}
+                                onKeyDown={this.recordBinding}
+                                onChange={(e) => e.preventDefault()}
+                                disabled={!this.state.shortcutsEnabled}
+                                name={name}
+                            />{' '}
                             <span className={styles.kbShortcutSubText}>
                                 {subText}
                             </span>
-                        )}
-                        <input
-                            type="text"
-                            value={this.state[name].shortcut}
-                            onKeyDown={this.recordBinding}
-                            onChange={(e) => e.preventDefault()}
-                            disabled={!this.state.shortcutsEnabled}
-                            name={name}
-                        />{' '}
+                        </div>
                     </Checkbox>
                 )
             }

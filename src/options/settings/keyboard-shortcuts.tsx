@@ -17,7 +17,7 @@ export const shortcuts: ShortcutElData[] = [
         text: 'Highlight selected text',
         subText: (
             <>
-                (hold <strong>Shift</strong> to share)
+                +<strong>Shift</strong> to share
             </>
         ),
     },
@@ -27,7 +27,7 @@ export const shortcuts: ShortcutElData[] = [
         text: 'Annotate selected text',
         subText: (
             <>
-                (hold <strong>Shift</strong> to share)
+                +<strong>Shift</strong> to share
             </>
         ),
     },
