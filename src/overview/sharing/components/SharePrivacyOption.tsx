@@ -6,6 +6,7 @@ import colors from 'src/dashboard-refactor/colors'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface Props {
     icon: IconKeys
@@ -32,6 +33,15 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
         this.props.onClick(true)
     }
 
+    getKeyboardShortcut = (isSelected) => {
+        if (isSelected) {
+            return getKeyName({key: 'alt'}) + ' + enter'
+        } else {
+            return getKeyName({key: 'alt'}) + ' + shift + enter'
+        }
+
+    }
+
     render() {
         return (
             <PrivacyOptionItem
@@ -47,16 +57,16 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                             {this.props.title}
                         </PrivacyOptionTitle>
                         <PrivacyOptionShortcut>
-                            {this.props.shortcut}
+                             {this.props.shortcut}
                         </PrivacyOptionShortcut>
-                    </PrivacyOptionTitleBox>
+                      </PrivacyOptionTitleBox>
                     <PrivacyOptionSubTitle>
                         {this.props.description}
                     </PrivacyOptionSubTitle>
                 </PrivacyOptionBox>
                 {this.props.hasProtectedOption && this.state.isHovered && (
                         <ButtonTooltip
-                            tooltipText={<span><strong>Lock Selection</strong><br/>No status change in bulk action.</span>}
+                            tooltipText={<span><strong>Protect Status</strong><br/>No status change in bulk action.<br/><i>({this.getKeyboardShortcut(this.props.isSelected)})</i></span>}
                             position="bottomRightEdge"
                         >
                                 <Icon

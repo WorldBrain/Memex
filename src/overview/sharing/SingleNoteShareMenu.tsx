@@ -148,7 +148,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         hasProtectedOption: true,
                         onClick: this.handleSetShared,
                         isSelected: this.props.isShared,
-                        shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
+                        shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description:
                             'Added to shared collections the page is in',
                     },
@@ -164,8 +164,10 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 ]}
                 shortcutHandlerDict={{
                     // 'mod+shift+enter': this.handleSetProtected,
-                    'alt+shift+enter': this.handleSetShared,
-                    'mod+enter': this.handleSetPrivate,
+                    'mod+shift+enter': () => this.handleSetShared(false),
+                    'mod+enter': () => this.handleSetPrivate(false),
+                    'alt+enter': () => this.handleSetPrivate(true),
+                    'alt+shift+enter': () => this.handleSetShared(true),
                 }}
             />
         )

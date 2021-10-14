@@ -105,11 +105,15 @@ export class AnnotationCreate extends React.Component<Props, State>
         e.stopPropagation()
 
         if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.handleSave(false, true)
+            return this.handleSave(true, false)
         }
 
-        if (e.key === 'Enter' && e.altKey && e.shiftKey) {
-            return this.handleSave(true, false)
+        if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+            return this.handleSave(true, true)
+        }
+
+        if (e.key === 'Enter' && e.altKey) {
+            return this.handleSave(false, true)
         }
 
         if (e.key === 'Enter' && e.metaKey) {

@@ -46,11 +46,15 @@ class AnnotationEdit extends React.Component<Props>
         e.stopPropagation()
 
         if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.props.onEditConfirm(false, true)
+            return this.props.onEditConfirm(true, false)
         }
 
-        if (e.key === 'Enter' && e.altKey && e.shiftKey) {
-            return this.props.onEditConfirm(true, false)
+        if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+            return this.props.onEditConfirm(true, true)
+        }
+
+        if (e.key === 'Enter' && e.altKey) {
+            return this.props.onEditConfirm(false, true)
         }
 
         if (e.key === 'Enter' && e.metaKey) {

@@ -194,7 +194,7 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 privacyOptions={[
                     {
                         title: 'Shared',
-                        shortcut: `shift+${ListShareMenu.ALT_KEY}+enter`,
+                        shortcut: `shift+${ListShareMenu.MOD_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,
@@ -208,7 +208,7 @@ export default class ListShareMenu extends React.Component<Props, State> {
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'alt+shift+enter': this.handleSetShared,
+                    'mod+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />

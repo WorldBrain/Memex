@@ -7,6 +7,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import { getShareButtonData } from '../sharing-utils'
+import Mousetrap from 'mousetrap'
+
 
 export interface Props {
     isShared?: boolean
@@ -26,6 +28,20 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     State
 > {
     state: State = { isPrivacyLevelShown: false }
+
+    componentDidMount() {
+        Mousetrap.bind('mod+shift+enter', () => this.props.onSave(true, false))
+        Mousetrap.bind('mod+enter',  () => this.props.onSave(false, false))
+        Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
+        Mousetrap.bind('alt+enter',  () => this.props.onSave(false, true))
+    }
+
+    componentWillUnmount() {
+        Mousetrap.unbind('mod+shift+enter')
+        Mousetrap.unbind('mod+enter')
+        Mousetrap.unbind('alt+shift+enter')
+        Mousetrap.unbind('alt+enter')
+    }
 
     private get saveIcon(): string {
         return getShareButtonData(this.props.isShared, this.props.isProtected)
@@ -66,7 +82,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             icon="shared"
                             title="Shared"
                             shortcut={`shift+${getKeyName({
-                                key: 'alt',
+                                key: 'mod',
                             })}+enter`}
                             description="Added to shared collections this page is in"
                             onClick={this.saveWithShareIntent(true)}

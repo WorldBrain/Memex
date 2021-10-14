@@ -115,7 +115,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 privacyOptions={[
                     {
                         title: 'Shared',
-                        shortcut: `shift+${AllNotesShareMenu.ALT_KEY}+enter`,
+                        shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
                         description: 'Shared in collections this page is in',
                         icon: 'shared',
                         onClick: this.handleSetShared,
@@ -129,7 +129,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'alt+shift+enter': this.handleSetShared,
+                    'mod+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />

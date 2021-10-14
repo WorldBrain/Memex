@@ -243,8 +243,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
                 />
+                {noteIds[notesType].length > 0 && (<>
                 <Margin top="3px" />
-                <NoteTopBarBox
+                    <NoteTopBarBox
                     rightSide={
                         <TopBarRightSideWrapper>
                             <ButtonTooltip
@@ -271,6 +272,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     }
                 />
                 <Separator />
+                </>
+                )}
                 {noteIds[notesType].map(
                     this.renderNoteResult(day, normalizedUrl),
                 )}
