@@ -196,8 +196,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         } as any),
                     onEditCancel: () =>
                         interactionProps.onEditCancel(dummyEvent),
-                    onEditConfirm: () =>
-                        interactionProps.onEditConfirm(dummyEvent),
+                    onEditConfirm: interactionProps.onEditConfirm,
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -244,7 +243,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
                 />
-                <Margin top='3px'/>
+                <Margin top="3px" />
                 <NoteTopBarBox
                     rightSide={
                         <TopBarRightSideWrapper>
@@ -271,7 +270,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </TopBarRightSideWrapper>
                     }
                 />
-                <Separator/>
+                <Separator />
                 {noteIds[notesType].map(
                     this.renderNoteResult(day, normalizedUrl),
                 )}

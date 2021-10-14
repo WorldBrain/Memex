@@ -7,7 +7,7 @@ import { uninsertTab, insertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface AnnotationEditEventProps {
-    onEditConfirm: (url: string) => void
+    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
 }
@@ -45,9 +45,16 @@ class AnnotationEdit extends React.Component<Props>
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            this.props.onEditConfirm(this.props.url)
-            return
+        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+            return this.props.onEditConfirm(false, true)
+        }
+
+        if (e.key === 'Enter' && e.altKey && e.shiftKey) {
+            return this.props.onEditConfirm(true, false)
+        }
+
+        if (e.key === 'Enter' && e.metaKey) {
+            return this.props.onEditConfirm(false, false)
         }
 
         if (e.key === 'Escape') {
