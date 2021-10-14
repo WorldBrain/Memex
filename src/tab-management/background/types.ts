@@ -10,6 +10,11 @@ export interface TabManagementInterface<Role extends RemoteFunctionRole> {
     fetchTab: RemoteFunctionWithoutExtraArgs<Role, number, Tab>
     fetchTabByUrl: RemoteFunctionWithoutExtraArgs<Role, string, Tab>
     setTabAsIndexable: RemoteFunctionWithExtraArgs<Role, void>
+    confirmBackgroundScriptLoaded: RemoteFunctionWithoutExtraArgs<
+        Role,
+        void,
+        any
+    >
 }
 
 export type NavState = Partial<WebNavigation.OnCommittedDetailsType> & {

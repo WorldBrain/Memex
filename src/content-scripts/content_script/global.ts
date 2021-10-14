@@ -42,6 +42,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
 import { browser } from 'webextension-polyfill-ts'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -49,7 +50,6 @@ import { copyPaster, subscription } from 'src/util/remote-functions-background'
 
 export async function main({ loadRemotely } = { loadRemotely: true }) {
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
-
     setupPageContentRPC()
     runInBackground<PageIndexingInterface<'caller'>>().setTabAsIndexable()
 

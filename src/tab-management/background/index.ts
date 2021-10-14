@@ -58,6 +58,12 @@ export default class TabManagementBackground {
             setTabAsIndexable: remoteFunctionWithExtraArgs(
                 this.setTabAsIndexable,
             ),
+            confirmBackgroundScriptLoaded: remoteFunctionWithoutExtraArgs(
+                async () => {
+                    // not used for now
+                    return true
+                },
+            ),
         }
     }
 
