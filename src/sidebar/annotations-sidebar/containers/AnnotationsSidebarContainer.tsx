@@ -191,11 +191,11 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     comment,
                 }),
-            onEditConfirm: () =>
+            onEditConfirm: (shouldShare: boolean, isProtected?: boolean) =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
-                    isProtected: annotation.isBulkShareProtected,
-                    shouldShare: false,
+                    isProtected: isProtected ?? annotation.isBulkShareProtected,
+                    shouldShare,
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
