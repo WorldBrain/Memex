@@ -121,7 +121,7 @@ class BackgroundScript {
         })
     }
 
-    async handleUpdateLogic(now = Date.now()) {
+    async handleUpdateLogic(prevVersion: string, now = Date.now()) {
         const {
             storageManager,
             localExtSettingStore,
@@ -134,8 +134,11 @@ class BackgroundScript {
             await storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
         }
 
-        const { version } = runtimeAPI.getManifest()
-        if (version === '3.0.0') {
+        const { version: nextVersion } = runtimeAPI.getManifest()
+        if (
+            nextVersion === '3.0.0' ||
+            (nextVersion === '3.0.1' && prevVersion !== '3.0.0')
+        ) {
             await this.deps.syncSettingsStore.dashboard.set(
                 'subscribeBannerShownAfter',
                 now,
@@ -173,7 +176,7 @@ class BackgroundScript {
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
                     await this.handleUnifiedLogic()
-                    return this.handleUpdateLogic()
+                    return this.handleUpdateLogic(details.previousVersion!)
                 default:
             }
         })
