@@ -33,13 +33,12 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
         this.props.onClick(true)
     }
 
-    getKeyboardShortcut = (isSelected) => {
-        if (isSelected) {
-            return getKeyName({key: 'alt'}) + ' + enter'
-        } else {
-            return getKeyName({key: 'alt'}) + ' + shift + enter'
-        }
-
+    private get protectedModeShortcut(): string {
+        const [modKey, altKey] = [
+            getKeyName({ key: 'mod' }),
+            getKeyName({ key: 'alt' }),
+        ]
+        return `(${this.props.shortcut.replace(modKey, altKey)})`
     }
 
     render() {
@@ -57,26 +56,33 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                             {this.props.title}
                         </PrivacyOptionTitle>
                         <PrivacyOptionShortcut>
-                             {this.props.shortcut}
+                            {this.props.shortcut}
                         </PrivacyOptionShortcut>
-                      </PrivacyOptionTitleBox>
+                    </PrivacyOptionTitleBox>
                     <PrivacyOptionSubTitle>
                         {this.props.description}
                     </PrivacyOptionSubTitle>
                 </PrivacyOptionBox>
                 {this.props.hasProtectedOption && this.state.isHovered && (
-                        <ButtonTooltip
-                            tooltipText={<span><strong>Protect Status</strong><br/>No status change in bulk action.<br/><i>({this.getKeyboardShortcut(this.props.isSelected)})</i></span>}
-                            position="bottomRightEdge"
-                        >
-                                <Icon
-                                    onClick={this.handleProtectedClick}
-                                    height="14px"
-                                    icon="lock"
-                                    color="black"
-                                />
-                            
-                        </ButtonTooltip>
+                    <ButtonTooltip
+                        tooltipText={
+                            <span>
+                                <strong>Protect Status</strong>
+                                <br />
+                                No status change in bulk action.
+                                <br />
+                                <i>{this.protectedModeShortcut}</i>
+                            </span>
+                        }
+                        position="bottomRightEdge"
+                    >
+                        <Icon
+                            onClick={this.handleProtectedClick}
+                            height="14px"
+                            icon="lock"
+                            color="black"
+                        />
+                    </ButtonTooltip>
                 )}
             </PrivacyOptionItem>
         )
@@ -147,4 +153,3 @@ const PrivacyOptionSubTitle = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
 `
-
