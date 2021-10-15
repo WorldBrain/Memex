@@ -357,7 +357,7 @@ describe('Personal cloud', () => {
             errorType: PersonalCloudErrorType.DownloadError,
             errorMessage: `You created a special annotation meant to create a server-side download error`,
             stackSubstring: `download.ts:`,
-            createdWhen: 564,
+            createdWhen: 563,
             errorDeviceIndex: 1,
             errorData: (options) => ({
                 change: {
