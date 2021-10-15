@@ -16,7 +16,7 @@ import {
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
 import { blobToJson } from 'src/util/blob-utils'
-import { AnnotationPrivacyLevels, Annotation } from '../../annotations/types'
+import { Annotation } from '../../annotations/types'
 import {
     PersonalCloudErrorType,
     DataChangeType,
@@ -277,7 +277,7 @@ describe('Personal cloud', () => {
         const annotation = {
             pageUrl: testPageUrl,
             comment: options.annotationComment,
-            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            isBulkShareProtected: true,
             createdWhen: new Date('2021-07-21'),
         }
         const annotationUrl = await setups[0].backgroundModules.directLinking.createAnnotation(
@@ -357,7 +357,7 @@ describe('Personal cloud', () => {
             errorType: PersonalCloudErrorType.DownloadError,
             errorMessage: `You created a special annotation meant to create a server-side download error`,
             stackSubstring: `download.ts:`,
-            createdWhen: 563,
+            createdWhen: 564,
             errorDeviceIndex: 1,
             errorData: (options) => ({
                 change: {
