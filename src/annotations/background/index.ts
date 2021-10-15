@@ -96,12 +96,8 @@ export default class DirectLinkingBackground {
             findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
                 this,
             ),
-            updateAnnotationPrivacyLevel: this.updateAnnotationPrivacyLevel.bind(
-                this,
-            ),
-            updateAnnotationPrivacyLevels: this.updateAnnotationPrivacyLevels.bind(
-                this,
-            ),
+            protectAnnotation: this.protectAnnotation,
+            dropAnnotationProtection: this.dropAnnotationProtection,
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
             updateAnnotationTags: this.updateAnnotationTags.bind(this),
@@ -415,11 +411,11 @@ export default class DirectLinkingBackground {
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
         })
 
-        await this.annotationStorage.createAnnotationPrivacyLevel({
-            annotation: annotationUrl,
-            privacyLevel:
-                toCreate.privacyLevel ?? AnnotationPrivacyLevels.PRIVATE,
-        })
+        if (toCreate.isBulkShareProtected) {
+            await this.annotationStorage.protectAnnotation({
+                annotation: annotationUrl,
+            })
+        }
 
         if (toCreate.isBookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: annotationUrl })
@@ -456,45 +452,12 @@ export default class DirectLinkingBackground {
         return privacyLevels
     }
 
-    async updateAnnotationPrivacyLevel(
-        _,
-        params: { annotation: string; privacyLevel: AnnotationPrivacyLevels },
-    ) {
-        await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel(
-            params,
-        )
+    protectAnnotation = async (_, params: { annotation: string }) => {
+        await this.annotationStorage.protectAnnotation(params)
     }
 
-    async updateAnnotationPrivacyLevels(
-        _,
-        params: {
-            annotationPrivacyLevels: {
-                [annotation: string]: AnnotationPrivacyLevels
-            }
-            respectProtected?: boolean
-        },
-    ) {
-        const existingLevels = params.respectProtected
-            ? await this.annotationStorage.getPrivacyLevelsByAnnotation({
-                  annotations: Object.keys(params.annotationPrivacyLevels),
-              })
-            : {}
-
-        for (const [annotation, privacyLevel] of Object.entries(
-            params.annotationPrivacyLevels,
-        )) {
-            if (
-                existingLevels[annotation]?.privacyLevel ===
-                AnnotationPrivacyLevels.PROTECTED
-            ) {
-                continue
-            }
-
-            await this.annotationStorage.createOrUpdateAnnotationPrivacyLevel({
-                annotation,
-                privacyLevel,
-            })
-        }
+    dropAnnotationProtection = async (_, params: { annotation: string }) => {
+        await this.annotationStorage.dropAnnotationProtection(params)
     }
 
     async insertAnnotToList(_, params: AnnotListEntry) {

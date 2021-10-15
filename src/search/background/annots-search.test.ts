@@ -1,11 +1,10 @@
-import StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import * as DATA from './index.test.data'
 import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundModules } from 'src/background-script/setup'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
 const countAnnots = (res) => {
@@ -82,6 +81,27 @@ describe('Annotations search', () => {
             })
 
             await annotsStorage.createAnnotation({ ...annot.object })
+
+            if (annot.isShared) {
+                await storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject({
+                        localId: annot.object.url,
+                        remoteId: backgroundModules.contentSharing.options.generateServerId(
+                            'sharedAnnotationMetadata',
+                        ),
+                        excludeFromLists: false,
+                    })
+            }
+            if (annot.isProtected) {
+                await storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject({
+                        annotation: annot.object.url,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                        createdWhen: new Date(),
+                    })
+            }
         }
 
         // Insert bookmarks
@@ -444,9 +464,33 @@ describe('Annotations search', () => {
             expect(results).toEqual([
                 expect.objectContaining({
                     url: DATA.highlight.object.pageUrl,
+                    annotations: [
+                        expect.objectContaining({
+                            url: DATA.highlight.object.url,
+                            isBulkShareProtected: true,
+                            isShared: true,
+                        }),
+                        expect.objectContaining({
+                            url: DATA.annotation.object.url,
+                            isBulkShareProtected: false,
+                            isShared: true,
+                        }),
+                        expect.objectContaining({
+                            url: DATA.comment.object.url,
+                            isBulkShareProtected: false,
+                            isShared: false,
+                        }),
+                    ],
                 }),
                 expect.objectContaining({
                     url: DATA.hybrid.object.pageUrl,
+                    annotations: [
+                        expect.objectContaining({
+                            url: DATA.hybrid.object.url,
+                            isBulkShareProtected: true,
+                            isShared: false,
+                        }),
+                    ],
                 }),
             ])
         })

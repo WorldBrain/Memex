@@ -8,7 +8,7 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonLogicOptions,
 } from './logic'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
@@ -217,7 +217,7 @@ describe('Ribbon logic', () => {
         expect(arePopupsOpen).toBe(false)
     })
 
-    it('should save a comment', async ({ device }) => {
+    it('should save a private comment', async ({ device }) => {
         const { ribbon, ribbonLogic } = await setupTest(device)
         const COMMENT_TEXT = 'comment'
 
@@ -235,7 +235,9 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
 
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', { value: 0 })
+        await ribbon.processEvent('saveComment', {
+            shouldShare: false,
+        })
 
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
@@ -254,11 +256,86 @@ describe('Ribbon logic', () => {
         ])
 
         expect(
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
             await device.storageManager.collection('tags').findObjects({}),
         ).toEqual([])
     })
 
-    it('should save a comment with tags', async ({ device }) => {
+    it('should save a private comment, in protected mode', async ({
+        device,
+    }) => {
+        const { ribbon, ribbonLogic } = await setupTest(device)
+        const COMMENT_TEXT = 'comment'
+
+        await ribbon.init()
+        expect(ribbon.state.commentBox).toEqual(
+            INITIAL_RIBBON_COMMENT_BOX_STATE,
+        )
+
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+            showCommentBox: true,
+        })
+        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
+
+        ribbonLogic.commentSavedTimeout = 1
+        await ribbon.processEvent('saveComment', {
+            shouldShare: false,
+            isProtected: true,
+        })
+
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+        })
+
+        const [savedAnnotation] = (await device.storageManager
+            .collection('annotations')
+            .findObjects({})) as Annotation[]
+
+        expect(savedAnnotation).toEqual(
+            expect.objectContaining({
+                comment: COMMENT_TEXT,
+                pageTitle: 'Foo.com: Home',
+                pageUrl: 'foo.com',
+            }),
+        )
+
+        expect(
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                annotation: savedAnnotation.url,
+            }),
+        ])
+
+        expect(
+            await device.storageManager.collection('tags').findObjects({}),
+        ).toEqual([])
+    })
+
+    it('should save a private comment, with tags', async ({ device }) => {
         const { ribbon, ribbonLogic } = await setupTest(device)
         const COMMENT_TEXT = 'comment'
         const TAGS = ['a', 'b', 'c']
@@ -279,7 +356,9 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.commentBox.tags).toEqual(TAGS)
 
         ribbonLogic.commentSavedTimeout = 1
-        await ribbon.processEvent('saveComment', { value: 0 })
+        await ribbon.processEvent('saveComment', {
+            shouldShare: false,
+        })
 
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
@@ -298,6 +377,18 @@ describe('Ribbon logic', () => {
         ])
 
         expect(
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
             await device.storageManager.collection('tags').findObjects({}),
         ).toEqual(
             expect.arrayContaining([
@@ -306,6 +397,138 @@ describe('Ribbon logic', () => {
                 { url: annotations[0].url, name: TAGS[2] },
             ]),
         )
+    })
+
+    it('should save a comment and share it', async ({ device }) => {
+        const { ribbon, ribbonLogic } = await setupTest(device)
+        const COMMENT_TEXT = 'comment'
+
+        await ribbon.init()
+        expect(ribbon.state.commentBox).toEqual(
+            INITIAL_RIBBON_COMMENT_BOX_STATE,
+        )
+
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+            showCommentBox: true,
+        })
+        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
+
+        ribbonLogic.commentSavedTimeout = 1
+        await ribbon.processEvent('saveComment', {
+            shouldShare: true,
+        })
+
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+        })
+
+        const [savedAnnotation] = (await device.storageManager
+            .collection('annotations')
+            .findObjects({})) as Annotation[]
+
+        expect(savedAnnotation).toEqual(
+            expect.objectContaining({
+                comment: COMMENT_TEXT,
+                pageTitle: 'Foo.com: Home',
+                pageUrl: 'foo.com',
+            }),
+        )
+
+        expect(
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .findObjects({}),
+        ).toEqual([
+            {
+                localId: savedAnnotation.url,
+                remoteId: expect.any(String),
+                excludeFromLists: false,
+            },
+        ])
+
+        expect(
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({}),
+        ).toEqual([])
+
+        expect(
+            await device.storageManager.collection('tags').findObjects({}),
+        ).toEqual([])
+    })
+
+    it('should save a comment and share it, in protected mode', async ({
+        device,
+    }) => {
+        const { ribbon, ribbonLogic } = await setupTest(device)
+        const COMMENT_TEXT = 'comment'
+
+        await ribbon.init()
+        expect(ribbon.state.commentBox).toEqual(
+            INITIAL_RIBBON_COMMENT_BOX_STATE,
+        )
+
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+            showCommentBox: true,
+        })
+        await ribbon.processEvent('changeComment', { value: COMMENT_TEXT })
+        expect(ribbon.state.commentBox.commentText).toEqual(COMMENT_TEXT)
+
+        ribbonLogic.commentSavedTimeout = 1
+        await ribbon.processEvent('saveComment', {
+            shouldShare: true,
+            isProtected: true,
+        })
+
+        expect(ribbon.state.commentBox).toEqual({
+            ...INITIAL_RIBBON_COMMENT_BOX_STATE,
+        })
+
+        const [savedAnnotation] = (await device.storageManager
+            .collection('annotations')
+            .findObjects({})) as Annotation[]
+
+        expect(savedAnnotation).toEqual(
+            expect.objectContaining({
+                comment: COMMENT_TEXT,
+                pageTitle: 'Foo.com: Home',
+                pageUrl: 'foo.com',
+            }),
+        )
+
+        expect(
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .findObjects({}),
+        ).toEqual([
+            {
+                localId: savedAnnotation.url,
+                remoteId: expect.any(String),
+                excludeFromLists: false,
+            },
+        ])
+
+        expect(
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({}),
+        ).toEqual([
+            {
+                id: expect.any(Number),
+                annotation: savedAnnotation.url,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                createdWhen: expect.any(Date),
+            },
+        ])
+
+        expect(
+            await device.storageManager.collection('tags').findObjects({}),
+        ).toEqual([])
     })
 
     it('should be able to set focus on comment box', async ({ device }) => {

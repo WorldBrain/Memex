@@ -1,4 +1,4 @@
-import { Anchor } from 'src/highlighting/types'
+import type { Anchor } from 'src/highlighting/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -28,10 +28,11 @@ export interface Annotation {
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]
-    isBookmarked?: boolean
-    privacyLevel?: AnnotationPrivacyLevels
     tags: string[]
+    isShared?: boolean
+    isBookmarked?: boolean
     isSocialPost?: boolean
+    isBulkShareProtected?: boolean
 }
 
 export interface AnnotationPrivacyLevel {

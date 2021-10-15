@@ -3,8 +3,7 @@ import React from 'react'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 
 interface State extends ShareMenuCommonState {
@@ -12,8 +11,9 @@ interface State extends ShareMenuCommonState {
 }
 
 export interface Props extends ShareMenuCommonProps {
-    shareImmediately: boolean
+    isShared?: boolean
     annotationUrl: string
+    shareImmediately?: boolean
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
@@ -22,7 +22,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 > {
     static MOD_KEY = getKeyName({ key: 'mod' })
     static ALT_KEY = getKeyName({ key: 'alt' })
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<Props, 'contentSharingBG' | 'annotationsBG'> = {
         contentSharingBG: runInBackground(),
         annotationsBG: runInBackground(),
     }
@@ -58,89 +58,74 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             return false
         }
         this.setState({ link, showLink: true })
+        await this.handleLinkCopy()
         return true
     }
 
-    private shareAnnotation = async () => {
-        const { annotationUrl, contentSharingBG } = this.props
-
-        let success = false
-        try {
-            await contentSharingBG.shareAnnotation({ annotationUrl })
-            await contentSharingBG.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
+    private async handleAnnotationProtection(shouldProtect: boolean) {
+        const { annotationUrl, annotationsBG } = this.props
+        if (shouldProtect) {
+            await annotationsBG.protectAnnotation({ annotation: annotationUrl })
+        } else {
+            await annotationsBG.dropAnnotationProtection({
+                annotation: annotationUrl,
             })
-            await this.setRemoteLinkIfExists()
-            success = true
-        } catch (err) {}
-        this.props.postShareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
-            shareStateChanged: success,
-        })
+        }
     }
 
-    private unshareAnnotation = async (
-        privacyLevel: AnnotationPrivacyLevels,
-    ) => {
+    private shareAnnotation = async (shouldProtect?: boolean) => {
         const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToLists: true,
+        })
+        await this.setRemoteLinkIfExists()
+        if (shouldProtect != null) {
+            await this.handleAnnotationProtection(shouldProtect)
+        }
 
-        let success = false
-        try {
-            await contentSharingBG.unshareAnnotation({ annotationUrl })
-            this.setState({ showLink: false })
-            success = true
-        } catch (err) {}
-
-        this.props.postUnshareHook?.({
-            privacyLevel,
-            shareStateChanged: success,
+        this.props.postShareHook?.({
+            isShared: true,
+            isProtected: shouldProtect,
         })
     }
 
-    private handleSetShared: React.MouseEventHandler = async (e) => {
-        const { annotationUrl, annotationsBG } = this.props
-        await executeReactStateUITask<State, 'shareState'>(
-            this,
-            'shareState',
-            async () => {
-                await this.shareAnnotation()
-                await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotation: annotationUrl,
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
-            },
-        )
+    private unshareAnnotation = async (shouldProtect?: boolean) => {
+        const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.unshareAnnotation({ annotationUrl })
+        this.setState({ showLink: false })
+        await this.handleAnnotationProtection(shouldProtect)
+
+        this.props.postShareHook?.({
+            isShared: false,
+            isProtected: shouldProtect,
+        })
     }
 
-    private handleSetProtected: React.MouseEventHandler = async (e) => {
-        const { annotationUrl, annotationsBG } = this.props
-        await executeReactStateUITask<State, 'shareState'>(
+    private handleSetShared = async (shouldProtect?: boolean) => {
+        const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation(AnnotationPrivacyLevels.PROTECTED)
-                await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotation: annotationUrl,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
+                await this.shareAnnotation(shouldProtect)
             },
         )
+
+        this.props.closeShareMenu({} as any)
+        await p
     }
 
-    private handleSetPrivate: React.MouseEventHandler = async (e) => {
-        const { annotationUrl, annotationsBG } = this.props
-        await executeReactStateUITask<State, 'shareState'>(
+    private handleSetPrivate = async (shouldProtect?: boolean) => {
+        const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation(AnnotationPrivacyLevels.PRIVATE)
-                await annotationsBG.updateAnnotationPrivacyLevel({
-                    annotation: annotationUrl,
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                await this.unshareAnnotation(shouldProtect)
             },
         )
+
+        this.props.closeShareMenu({} as any)
+        await p
     }
 
     render() {
@@ -158,31 +143,31 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 }
                 privacyOptions={[
                     {
-                        title: 'Protected',
+                        icon: 'shared',
+                        title: 'Shared',
+                        hasProtectedOption: true,
+                        onClick: this.handleSetShared,
+                        isSelected: this.props.isShared,
                         shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                        description: 'Private & not shared in bulk actions',
-                        icon: 'lock',
-                        onClick: this.handleSetProtected,
+                        description:
+                            'Added to shared collections the page is in',
                     },
                     {
+                        icon: 'person',
                         title: 'Private',
+                        hasProtectedOption: true,
+                        onClick: this.handleSetPrivate,
+                        isSelected: !this.props.isShared,
                         shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until shared (in bulk)',
-                        icon: 'person',
-                        onClick: this.handleSetPrivate,
-                    },
-                    {
-                        title: 'Shared',
-                        shortcut: `shift+${SingleNoteShareMenu.ALT_KEY}+enter`,
-                        description: 'Added to shared collections & page links',
-                        icon: 'shared',
-                        onClick: this.handleSetShared,
                     },
                 ]}
                 shortcutHandlerDict={{
-                    'mod+shift+enter': this.handleSetProtected,
-                    'alt+shift+enter': this.handleSetShared,
-                    'mod+enter': this.handleSetPrivate,
+                    // 'mod+shift+enter': this.handleSetProtected,
+                    'mod+shift+enter': () => this.handleSetShared(false),
+                    'mod+enter': () => this.handleSetPrivate(false),
+                    'alt+enter': () => this.handleSetPrivate(true),
+                    'alt+shift+enter': () => this.handleSetShared(true),
                 }}
             />
         )

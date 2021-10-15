@@ -35,7 +35,7 @@ export interface RibbonCommentBoxProps {
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
-    saveComment: (privacyLevel: AnnotationPrivacyLevels) => Promise<void>
+    saveComment: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     cancelComment: () => void
     setShowCommentBox: (value: boolean) => void
     updateCommentBoxTags: (tags: string[]) => void

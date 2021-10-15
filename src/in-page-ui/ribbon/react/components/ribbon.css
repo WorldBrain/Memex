@@ -29,16 +29,16 @@
     line-height: normal;
     text-align: start;
     align-items: center;
+    background: #f6f8fb;
 }
 
 .ribbonExpanded {
-    transition: all 0.1s ease-in-out;
     align-items: flex-end;
 }
 
 .ribbonSidebarOpen {
     box-shadow: none;
-    background: #f6f8fb;
+    background: transparent;
     display: flex;
     justify-content: flex-end;
     height: 105vh;
@@ -64,6 +64,7 @@
     padding: 5px 0;
     display: none;
     width: 30px;
+    background-color: #f6f8fb;
 }
 
 .innerRibbonExpanded {
@@ -84,6 +85,7 @@
     width: 20px;
     align-items: flex-end;
     display: flex;
+    background: transparent;
 }
 
 /* SECTIONS */

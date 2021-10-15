@@ -1,9 +1,10 @@
 export interface Shortcut {
     enabled: boolean
     shortcut: string
+    altName?: keyof AlternativeKeyboardShortcuts
 }
 
-export interface KeyboardShortcuts {
+export interface BaseKeyboardShortcuts {
     shortcutsEnabled?: boolean
     createAnnotation: Shortcut
     createHighlight: Shortcut
@@ -16,3 +17,11 @@ export interface KeyboardShortcuts {
     addTag: Shortcut
     link: Shortcut
 }
+
+export interface AlternativeKeyboardShortcuts {
+    createSharedAnnotation: Shortcut
+    createSharedHighlight: Shortcut
+}
+
+export type KeyboardShortcuts = BaseKeyboardShortcuts &
+    AlternativeKeyboardShortcuts

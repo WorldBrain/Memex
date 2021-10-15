@@ -1,34 +1,32 @@
-import { UIEvent } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
-import {
+import type { UIEvent } from 'ui-logic-core'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type {
     AnnotationConversationEvent,
     AnnotationConversationsState,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import {
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type {
     RemoteCollectionsInterface,
     SharedAnnotationList,
 } from 'src/custom-lists/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
-import { SidebarTheme } from '../types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { Analytics } from 'src/analytics'
-import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
+import type { SidebarTheme } from '../types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { Analytics } from 'src/analytics'
+import type { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { AnnotationsSorter } from '../sorting'
-import type { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import type { NoteShareInfo } from 'src/dashboard-refactor/search-results/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -124,9 +122,6 @@ export interface SidebarContainerState
     isLocked: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
-    annotationSharingInfo: {
-        [annotationUrl: string]: AnnotationSharingInfo
-    }
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
@@ -190,7 +185,7 @@ export type SidebarContainerEvents = UIEvent<
         changeNewPageCommentText: { comment: string }
         cancelEdit: { annotationUrl: string }
         changeEditCommentText: { annotationUrl: string; comment: string }
-        saveNewPageComment: { privacyLevel: AnnotationPrivacyLevels }
+        saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
         cancelNewPageComment: null
         updateNewPageCommentTags: { tags: string[] }
 
@@ -225,6 +220,8 @@ export type SidebarContainerEvents = UIEvent<
         editAnnotation: {
             context: AnnotationEventContext
             annotationUrl: string
+            shouldShare: boolean
+            isProtected?: boolean
         }
         deleteAnnotation: {
             context: AnnotationEventContext
@@ -259,11 +256,8 @@ export type SidebarContainerEvents = UIEvent<
 
         updateAnnotationShareInfo: {
             annotationUrl: string
-            info: Partial<AnnotationSharingInfo>
-        }
-        updateAllAnnotationsShareInfo: {
-            info: AnnotationSharingInfo
-        }
+        } & NoteShareInfo
+        updateAllAnnotationsShareInfo: NoteShareInfo
 
         setLoginModalShown: { shown: boolean }
         setDisplayNameSetupModalShown: { shown: boolean }

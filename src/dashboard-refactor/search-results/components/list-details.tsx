@@ -5,14 +5,11 @@ import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export interface Props {
     listName: string
     remoteLink?: string
     localListId: number
-    sharingAccess: AnnotationSharingAccess
     onAddContributorsClick?: React.MouseEventHandler
 }
 

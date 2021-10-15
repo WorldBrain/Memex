@@ -38,6 +38,7 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -143,9 +144,11 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
                 }),
-            onEditConfirm: () =>
+            onEditConfirm: (shouldShare, isProtected) =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
+                    shouldShare,
+                    isProtected,
                     ...DEF_CONTEXT,
                 }),
             onShareClick: (mouseEvent) =>
@@ -188,9 +191,11 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     comment,
                 }),
-            onEditConfirm: () =>
+            onEditConfirm: (shouldShare: boolean, isProtected?: boolean) =>
                 this.processEvent('editAnnotation', {
                     annotationUrl: annotation.url,
+                    isProtected: isProtected ?? annotation.isBulkShareProtected,
+                    shouldShare,
                     ...DEF_CONTEXT,
                 }),
             onEditCancel: () =>
@@ -207,8 +212,11 @@ export class AnnotationsSidebarContainer<
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
-            onSave: (privacyLevel) =>
-                this.processEvent('saveNewPageComment', { privacyLevel }),
+            onSave: (shouldShare, isProtected) =>
+                this.processEvent('saveNewPageComment', {
+                    shouldShare,
+                    isProtected,
+                }),
             queryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
             loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
@@ -271,24 +279,29 @@ export class AnnotationsSidebarContainer<
         return (
             <TagPickerWrapper>
                 <HoverBox>
-                    <TagPicker
-                        initialSelectedEntries={() => annot.tags}
-                        queryEntries={(query) =>
-                            this.props.tags.searchForTagSuggestions({ query })
-                        }
-                        loadDefaultSuggestions={
-                            this.props.tags.fetchInitialTagSuggestions
-                        }
-                        onUpdateEntrySelection={this.handleTagsUpdate(
-                            currentAnnotationId,
-                        )}
-                        onClickOutside={() =>
+                    <ClickAway
+                        onClickAway={() =>
                             this.processEvent(
                                 'resetTagPickerAnnotationId',
                                 null,
                             )
                         }
-                    />
+                    >
+                        <TagPicker
+                            initialSelectedEntries={() => annot.tags}
+                            queryEntries={(query) =>
+                                this.props.tags.searchForTagSuggestions({
+                                    query,
+                                })
+                            }
+                            loadDefaultSuggestions={
+                                this.props.tags.fetchInitialTagSuggestions
+                            }
+                            onUpdateEntrySelection={this.handleTagsUpdate(
+                                currentAnnotationId,
+                            )}
+                        />
+                    </ClickAway>
                 </HoverBox>
             </TagPickerWrapper>
         )
@@ -310,31 +323,10 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyNoteLink', { link })
                         }
                         annotationUrl={currentAnnotationId}
-                        postShareHook={({ shareStateChanged, privacyLevel }) =>
+                        postShareHook={(shareInfo) =>
                             this.processEvent('updateAnnotationShareInfo', {
                                 annotationUrl: currentAnnotationId,
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'shared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                },
-                            })
-                        }
-                        postUnshareHook={({
-                            shareStateChanged,
-                            privacyLevel,
-                        }) =>
-                            this.processEvent('updateAnnotationShareInfo', {
-                                annotationUrl: currentAnnotationId,
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'unshared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                },
+                                ...shareInfo,
                             })
                         }
                         closeShareMenu={() =>
@@ -361,30 +353,11 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyPageLink', { link })
                         }
                         normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        postShareHook={({ shareStateChanged, privacyLevel }) =>
-                            this.processEvent('updateAllAnnotationsShareInfo', {
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'shared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                },
-                            })
-                        }
-                        postUnshareHook={({
-                            shareStateChanged,
-                            privacyLevel,
-                        }) =>
-                            this.processEvent('updateAllAnnotationsShareInfo', {
-                                info: {
-                                    status: shareStateChanged
-                                        ? 'unshared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                },
-                            })
+                        postShareHook={(shareInfo) =>
+                            this.processEvent(
+                                'updateAllAnnotationsShareInfo',
+                                shareInfo,
+                            )
                         }
                         closeShareMenu={() =>
                             this.processEvent('setAllNotesShareMenuShown', {
@@ -656,19 +629,19 @@ const NoteTypesWrapper = styled.div`
 const ShareMenuWrapper = styled.div`
     position: relative;
     left: 105px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
     position: fixed;
     right: 345px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
     position: fixed;
     right: 375px;
-    z-index: 1;
+    z-index: 3;
 `
 
 const CopyPasterWrapper = styled.div`
@@ -679,7 +652,7 @@ const CopyPasterWrapper = styled.div`
 
 const TagPickerWrapper = styled.div`
     position: sticky;
-    left: 75px;
+    margin-left: 100px;
     z-index: 5;
 `
 

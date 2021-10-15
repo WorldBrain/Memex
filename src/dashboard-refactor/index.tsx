@@ -119,7 +119,6 @@ export class DashboardContainer extends StatefulUIElement<
             remoteLink,
             listName: listData.name,
             localListId: listData.id,
-            sharingAccess: searchResults.sharingAccess,
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {
@@ -490,9 +489,7 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 updateAllResultNotesShareInfo={(info) =>
-                    this.processEvent('updateAllPageResultNotesShareInfo', {
-                        info,
-                    })
+                    this.processEvent('updateAllPageResultNotesShareInfo', info)
                 }
                 selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}
@@ -656,7 +653,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
                             pageId,
-                            info,
+                            ...info,
                         }),
                 }}
                 pagePickerProps={{
@@ -693,11 +690,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onSave: (day, pageId) => (privacyLevel) =>
+                    onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
-                            privacyLevel,
+                            isProtected,
+                            shouldShare,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
@@ -712,9 +710,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => () =>
+                    onEditConfirm: (noteId) => (shouldShare, isProtected) =>
                         this.processEvent('saveNoteEdit', {
                             noteId,
+                            shouldShare,
+                            isProtected,
                         }),
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
@@ -760,7 +760,7 @@ export class DashboardContainer extends StatefulUIElement<
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            info,
+                            ...info,
                         }),
                 }}
                 searchCopyPasterProps={{
@@ -941,6 +941,7 @@ export class DashboardContainer extends StatefulUIElement<
                     annotations={this.props.annotationsBG}
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
+                    syncSettingsBG={this.props.syncSettingsBG}
                     contentConversationsBG={this.props.contentConversationsBG}
                     setLoginModalShown={(isShown) =>
                         this.processEvent('setShowLoginModal', { isShown })

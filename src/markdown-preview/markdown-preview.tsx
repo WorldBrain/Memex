@@ -28,10 +28,9 @@ interface State {
 }
 
 export class MarkdownPreview extends React.Component<Props, State> {
-    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Partial<Props> = {
         isToggleKBShortcutKeyed: (e) =>
-            e.key === 'Enter' && e.altKey && !e.metaKey && !e.shiftKey,
+            e.key === 'Enter' && e.ctrlKey && !e.metaKey && !e.shiftKey,
         renderSecondaryBtn: () => null,
     }
 
@@ -124,7 +123,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
                             <ButtonTooltip
-                                tooltipText={`${MarkdownPreview.ALT_KEY} + Enter`}
+                                tooltipText={`Control + Enter`}
                                 position="bottomSidebar"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>

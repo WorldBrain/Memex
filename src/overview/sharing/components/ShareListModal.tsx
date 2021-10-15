@@ -93,6 +93,7 @@ class ShareListModal extends Component<Props, State> {
                 listId: this.props.list.id,
             })
             this.setState({
+                entriesUploadState: 'success',
                 listCreationState: 'success',
                 remoteListId,
             })
@@ -102,21 +103,6 @@ class ShareListModal extends Component<Props, State> {
                 entriesUploadState: 'error',
             })
             throw e
-        }
-
-        try {
-            // await new Promise((resolve) => setTimeout(resolve, 2000))
-            await this.props.contentSharing.shareListEntries({
-                listId: this.props.list.id,
-            })
-            this.setState({
-                entriesUploadState: 'success',
-            })
-        } catch (e) {
-            this.setState({
-                listCreationState: 'error',
-                entriesUploadState: 'error',
-            })
         }
     }
 

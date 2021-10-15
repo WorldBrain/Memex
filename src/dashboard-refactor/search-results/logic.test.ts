@@ -517,67 +517,74 @@ describe('Dashboard search results logic', () => {
                         .pageUrl === pageId,
             )
 
-            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
-                {},
-            )
-
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                },
+                isShared: false,
             })
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
             }
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                },
+                isShared: true,
             })
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
             }
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                info: {
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
+                isShared: false,
+                isProtected: true,
             })
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+            }
+
+            // NOTE: Now that they're all protected, the next call shouldn't change anything
+            await searchResults.processEvent('updatePageNotesShareInfo', {
+                day,
+                pageId,
+                isShared: false,
+                isProtected: false,
+            })
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
             }
         })
 
@@ -590,70 +597,78 @@ describe('Dashboard search results logic', () => {
 
             const noteIds = searchResults.state.searchResults.noteData.allIds
 
-            expect(searchResults.state.searchResults.noteSharingInfo).toEqual(
-                {},
-            )
-
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    },
+                    isShared: false,
                 },
             )
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
             }
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'shared',
-                        taskState: 'success',
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    },
+                    isShared: true,
                 },
             )
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
             }
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
                 {
-                    info: {
-                        status: 'unshared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    },
+                    isProtected: true,
+                    isShared: false,
                 },
             )
 
             for (const noteId of noteIds) {
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+            }
+
+            // NOTE: Now that they're all protected, the next call shouldn't change anything
+            await searchResults.processEvent(
+                'updateAllPageResultNotesShareInfo',
+                {
+                    isProtected: false,
+                    isShared: false,
+                },
+            )
+
+            for (const noteId of noteIds) {
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
             }
         })
     })
@@ -777,12 +792,6 @@ describe('Dashboard search results logic', () => {
                 })
                 const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_3.normalizedUrl
-
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
 
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
@@ -1164,7 +1173,7 @@ describe('Dashboard search results logic', () => {
                         day,
                         pageId,
                         fullPageUrl: 'https://' + pageId,
-                        privacyLevel: 0,
+                        shouldShare: false,
                     },
                 )
                 expect(
@@ -1204,13 +1213,44 @@ describe('Dashboard search results logic', () => {
                         tags: newNoteTags,
                         url: latestNoteId,
                         isEditing: false,
-                        editNoteForm: utils.getInitialFormState(),
+                        editNoteForm: {
+                            ...utils.getInitialFormState(),
+                            inputValue: newNoteComment,
+                        },
                     }),
                 )
 
                 expect(
                     searchResults.state.searchResults.noteData.allIds,
                 ).toEqual([latestNoteId])
+            })
+
+            it('should block new note save with login modal if logged out + save has share intent', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(),
+                    withAuth: false,
+                })
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_1.normalizedUrl
+
+                expect(searchResults.state.modals.showLogin).toBe(false)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds,
+                ).toEqual([])
+
+                await searchResults.processEvent('savePageNewNote', {
+                    day,
+                    pageId,
+                    fullPageUrl: 'https://' + pageId,
+                    shouldShare: true,
+                })
+
+                expect(searchResults.state.modals.showLogin).toBe(true)
+                expect(
+                    searchResults.state.searchResults.noteData.allIds,
+                ).toEqual([])
             })
 
             describe('note search results', () => {
@@ -1690,12 +1730,6 @@ describe('Dashboard search results logic', () => {
                 })
                 const noteId = DATA.NOTE_2.url
 
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
-
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .shareMenuShowStatus,
@@ -1733,12 +1767,6 @@ describe('Dashboard search results logic', () => {
                 })
                 const noteId = DATA.NOTE_2.url
 
-                await searchResults.processMutation({
-                    searchResults: {
-                        sharingAccess: { $set: 'sharing-allowed' },
-                    },
-                })
-
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .shareMenuShowStatus,
@@ -1756,63 +1784,80 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('show-n-share')
             })
 
-            it('should be update note share info', async ({ device }) => {
+            it('should be able to update note share info', async ({
+                device,
+            }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
                 const noteId = DATA.NOTE_2.url
 
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual(undefined)
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    },
+                    isShared: false,
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'not-yet-shared',
-                    taskState: 'pristine',
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'shared',
-                        taskState: 'success',
-                        privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    },
+                    isShared: true,
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'shared',
-                    taskState: 'success',
-                    privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                    }),
+                )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    info: {
-                        status: 'unshared',
-                        taskState: 'error',
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    },
+                    isShared: false,
+                    isProtected: true,
                 })
+
                 expect(
-                    searchResults.state.searchResults.noteSharingInfo[noteId],
-                ).toEqual({
-                    status: 'unshared',
-                    taskState: 'error',
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                    }),
+                )
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    isShared: true,
+                    isProtected: true,
                 })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: true,
+                    }),
+                )
             })
 
             it('should be able to set note edit comment value state', async ({
@@ -1930,6 +1975,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('pristine')
                 const editP = searchResults.processEvent('saveNoteEdit', {
                     noteId,
+                    shouldShare: false,
                 })
                 expect(
                     searchResults.state.searchResults.noteUpdateState,
@@ -1950,6 +1996,59 @@ describe('Dashboard search results logic', () => {
                         }),
                     }),
                 )
+            })
+
+            it('should block save of edited note state with login modal if logged out + save has share intent', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    withAuth: false,
+                })
+                const noteId = DATA.NOTE_2.url
+                const updatedComment = 'test'
+
+                await searchResults.processEvent('setNoteEditing', {
+                    noteId,
+                    isEditing: true,
+                })
+                await searchResults.processEvent('setNoteEditCommentValue', {
+                    noteId,
+                    value: updatedComment,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        tags: [],
+                        comment: DATA.NOTE_2.comment,
+                        isEditing: true,
+                        editNoteForm: expect.objectContaining({
+                            inputValue: updatedComment,
+                        }),
+                    }),
+                )
+
+                expect(searchResults.state.modals.showLogin).toBe(false)
+                await searchResults.processEvent('saveNoteEdit', {
+                    noteId,
+                    shouldShare: true,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        tags: [],
+                        comment: DATA.NOTE_2.comment,
+                        isEditing: true,
+                        editNoteForm: expect.objectContaining({
+                            inputValue: updatedComment,
+                        }),
+                    }),
+                )
+                expect(searchResults.state.modals.showLogin).toBe(true)
             })
 
             it('should be able to cancel note deletion', async ({ device }) => {

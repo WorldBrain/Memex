@@ -31,7 +31,7 @@ export interface Props
         PagePickerProps {
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
-    shareMenuProps: ShareMenuProps
+    shareMenuProps: Omit<ShareMenuProps, 'annotationsBG' | 'contentSharingBG'>
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -176,7 +176,13 @@ export default class PageResultView extends PureComponent<Props> {
                         ? icons.commentFull
                         : icons.commentEmpty,
                     onClick: this.props.onNotesBtnClick,
-                    tooltipText: 'Add/View Notes',
+                    tooltipText: (
+                        <span>
+                            <strong>Add/View Notes</strong>
+                            <br />
+                            shift+click to open in sidebar
+                        </span>
+                    ),
                 },
             ]
         }
@@ -217,7 +223,6 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     render() {
-
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
         return (
@@ -244,7 +249,9 @@ export default class PageResultView extends PureComponent<Props> {
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
-                            {hasTitle ? this.props.fullTitle : this.props.fullUrl}
+                            {hasTitle
+                                ? this.props.fullTitle
+                                : this.props.fullUrl}
                         </PageTitle>
                     </PageContentBox>
                     <TagsSegment

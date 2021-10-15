@@ -2,7 +2,6 @@ import orderBy from 'lodash/orderBy'
 import expect from 'expect'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
     backgroundIntegrationTestSuite,
@@ -11,7 +10,6 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import * as data from './index.test.data'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
@@ -52,15 +50,10 @@ async function setupTest(options: {
         testData.localListId = await data.createContentSharingTestList(setup)
     }
 
-    const shareTestList = async (shareOptions: { shareEntries: boolean }) => {
+    const shareTestList = async () => {
         const listShareResult = await contentSharing.shareList({
             listId: testData.localListId,
         })
-        if (shareOptions.shareEntries) {
-            await contentSharing.shareListEntries({
-                listId: testData.localListId,
-            })
-        }
         testData.remoteListId = listShareResult.remoteListId
         return listShareResult.remoteListId
     }
@@ -103,7 +96,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
-                                await shareTestList({ shareEntries: true })
+                                await shareTestList()
                                 await personalCloud.waitForSync()
 
                                 const serverStorage = await setup.getServerStorage()
@@ -190,7 +183,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 const {
-                                    contentSharing,
                                     personalCloud,
                                     shareTestList,
                                 } = await setupTest({
@@ -198,9 +190,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                     createTestList: true,
                                 })
-                                testData.remoteListId = await shareTestList({
-                                    shareEntries: true,
-                                })
+                                testData.remoteListId = await shareTestList()
 
                                 // Add new entry
                                 await setup.backgroundModules.pages.addPage({
@@ -272,9 +262,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                     createTestList: true,
                                 })
-                                testData.remoteListId = await shareTestList({
-                                    shareEntries: false,
-                                })
+                                testData.remoteListId = await shareTestList()
 
                                 const updatedTitle =
                                     'My shared list (updated title)'
@@ -355,9 +343,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                     createTestList: true,
                                 })
-                                testData.remoteListId = await shareTestList({
-                                    shareEntries: true,
-                                })
+                                testData.remoteListId = await shareTestList()
 
                                 await setup.backgroundModules.customLists.removePageFromList(
                                     {
@@ -451,9 +437,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                     createTestList: true,
                                 })
-                                testData.remoteListId = await shareTestList({
-                                    shareEntries: true,
-                                })
+                                testData.remoteListId = await shareTestList()
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
                                     data.ANNOTATION_1_1_DATA,
@@ -568,9 +552,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     secondLocalListId,
                                 ]) {
                                     await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                    await contentSharing.shareListEntries({
                                         listId: localListId,
                                     })
                                 }
@@ -717,9 +698,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                     createTestList: true,
                                 })
-                                testData.remoteListId = await shareTestList({
-                                    shareEntries: true,
-                                })
+                                testData.remoteListId = await shareTestList()
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
                                     data.ANNOTATION_1_1_DATA,
@@ -789,9 +768,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await contentSharing.shareList({
                                     listId: firstLocalListId,
                                 })
-                                await contentSharing.shareListEntries({
-                                    listId: firstLocalListId,
-                                })
                                 await personalCloud.waitForSync()
 
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
@@ -814,9 +790,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 await contentSharing.shareList({
-                                    listId: secondLocalListId,
-                                })
-                                await contentSharing.shareListEntries({
                                     listId: secondLocalListId,
                                 })
 
@@ -953,9 +926,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     await contentSharing.shareList({
                                         listId: localListId,
                                     })
-                                    await contentSharing.shareListEntries({
-                                        listId: localListId,
-                                    })
                                 }
                                 await personalCloud.waitForSync()
 
@@ -1050,9 +1020,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ]
                                 for (const localListId of localListIds) {
                                     await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                    await contentSharing.shareListEntries({
                                         listId: localListId,
                                     })
                                 }
@@ -1157,9 +1124,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ]
                                 for (const localListId of localListIds) {
                                     await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                    await contentSharing.shareListEntries({
                                         listId: localListId,
                                     })
                                 }
@@ -1334,9 +1298,6 @@ function makeShareAnnotationTest(options: {
                     await contentSharing.shareList({
                         listId: localListId,
                     })
-                    await contentSharing.shareListEntries({
-                        listId: localListId,
-                    })
                     const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                         {} as any,
                         data.ANNOTATION_1_1_DATA,
@@ -1346,9 +1307,8 @@ function makeShareAnnotationTest(options: {
                         {} as any,
                         {
                             ...data.ANNOTATION_1_2_DATA,
-                            privacyLevel: options.testProtectedBulkShare
-                                ? AnnotationPrivacyLevels.PROTECTED
-                                : AnnotationPrivacyLevels.PRIVATE,
+                            isBulkShareProtected:
+                                options.testProtectedBulkShare,
                         },
                         { skipPageIndexing: true },
                     )
@@ -1567,7 +1527,7 @@ function makeAnnotationFromWebUiTest(options: {
                         testData,
                         createTestList: true,
                     })
-                    await shareTestList({ shareEntries: true })
+                    await shareTestList()
                     await personalCloud.waitForSync()
 
                     const serverStorage = await setup.getServerStorage()

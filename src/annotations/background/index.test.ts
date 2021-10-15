@@ -18,6 +18,7 @@ import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import { AnnotationPrivacyLevels } from '../types'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
@@ -40,11 +41,16 @@ function testSetupFactory() {
     }
 }
 
-const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
+const createAnnotationStep = (args?: {
+    protectAnnotation?: boolean
+    postCheck?: IntegrationTestStep<
+        BackgroundIntegrationTestContext
+    >['postCheck']
+}): IntegrationTestStep<BackgroundIntegrationTestContext> => ({
     execute: async ({ setup }) => {
         annotUrl = await directLinking(setup).createAnnotation(
             { tab: DATA.TEST_TAB_1 },
-            DATA.ANNOT_1 as any,
+            { ...DATA.ANNOT_1, isBulkShareProtected: args?.protectAnnotation },
         )
         annotPrivacyLevel = await directLinking(
             setup,
@@ -68,17 +74,20 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                 },
             },
         }),
-        annotationPrivacyLevels: (): StorageCollectionDiff => ({
-            [annotPrivacyLevel.id]: {
-                type: 'create',
-                object: {
-                    annotation: annotUrl,
-                    createdWhen: expect.any(Date),
-                    id: annotPrivacyLevel.id,
-                    privacyLevel: 100,
-                },
-            },
-        }),
+        annotationPrivacyLevels: (): StorageCollectionDiff =>
+            args?.protectAnnotation
+                ? {
+                      [annotPrivacyLevel.id]: {
+                          type: 'create',
+                          object: {
+                              annotation: annotUrl,
+                              createdWhen: expect.any(Date),
+                              id: annotPrivacyLevel.id,
+                              privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                          },
+                      },
+                  }
+                : undefined,
         pages: (): StorageCollectionDiff => PAGE_1_CREATION,
         visits: (): StorageCollectionDiff => expect.anything(),
         customLists: (): StorageCollectionDiff => ({
@@ -107,7 +116,8 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
             },
         }),
     },
-}
+    postCheck: args?.postCheck,
+})
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
@@ -124,11 +134,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_1 },
                                 DATA.HIGHLIGHT_1 as any,
                             )
-                            annotPrivacyLevel = await directLinking(
-                                setup,
-                            ).annotationStorage.findAnnotationPrivacyLevel({
-                                annotation: annotUrl,
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -145,17 +150,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotPrivacyLevel.id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrl,
-                                        createdWhen: expect.any(Date),
-                                        id: annotPrivacyLevel.id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -247,7 +241,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).editAnnotation(
@@ -319,6 +313,38 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         },
     ),
     backgroundIntegrationTest(
+        'should create a page, create a protected annotation, and confirm the privacy level was created',
+        () => {
+            const findAllObjects = (collection, setup) =>
+                setup.storageManager.collection(collection).findObjects({})
+
+            return {
+                setup: testSetupFactory(),
+                steps: [
+                    createAnnotationStep({
+                        protectAnnotation: true,
+                        postCheck: async ({ setup }) => {
+                            expect(
+                                await findAllObjects(
+                                    'annotationPrivacyLevels',
+                                    setup,
+                                ),
+                            ).toEqual([
+                                {
+                                    annotation: annotUrl,
+                                    createdWhen: expect.any(Date),
+                                    id: annotPrivacyLevel.id,
+                                    privacyLevel:
+                                        AnnotationPrivacyLevels.PROTECTED,
+                                },
+                            ])
+                        },
+                    }),
+                ],
+            }
+        },
+    ),
+    backgroundIntegrationTest(
         'should create a page, create an annotation, edit its note, then retrieve it via a filtered search on edit time',
         () => {
             const runFilteredTimeSearch = (setup) =>
@@ -329,7 +355,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         preCheck: async ({ setup }) => {
                             const searchResults = await runFilteredTimeSearch(
@@ -420,7 +446,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).addTagForAnnotation(
@@ -534,7 +560,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).toggleAnnotBookmark(
@@ -627,7 +653,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).toggleAnnotBookmark(
@@ -714,11 +740,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotPrivacyLevel.id]: {
-                                    type: 'delete',
-                                },
-                            }),
                             tags: (): StorageCollectionDiff => ({
                                 [`["${DATA.TAG_1}","${annotUrl}"]`]: {
                                     type: 'delete',
@@ -754,7 +775,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotAUrl: string
             let annotBUrl: string
-            let annotationPrivacyLevels: any
 
             const { url, ...testAnnot } = DATA.ANNOT_1
 
@@ -775,11 +795,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_1 },
                                 testAnnot,
                             )
-                            annotationPrivacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotAUrl, annotBUrl],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -811,30 +826,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotAUrl].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotAUrl,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotAUrl]
-                                                .id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [annotationPrivacyLevels[annotBUrl].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotBUrl,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotBUrl]
-                                                .id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -884,11 +875,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotAUrl].id]: {
-                                    type: 'delete',
-                                },
-                            }),
                         },
                         postCheck: async ({ setup }) => {
                             expect(
@@ -923,7 +909,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             listId = await customLists(setup).createCustomList({
@@ -1014,7 +1000,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotUrlA: string
             let annotUrlB: string
-            let annotationPrivacyLevels: any
 
             return {
                 setup: testSetupFactory(),
@@ -1033,11 +1018,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_2 },
                                 DATA.ANNOT_2,
                             )
-                            annotationPrivacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotUrlA, annotUrlB],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -1069,30 +1049,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotUrlA].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlA,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotUrlA]
-                                                .id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [annotationPrivacyLevels[annotUrlB].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlB,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotUrlB]
-                                                .id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -1273,7 +1229,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotUrlA: string
             let annotUrlB: string
-            let privacyLevels: any
 
             return {
                 setup: testSetupFactory(),
@@ -1292,12 +1247,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_2 },
                                 DATA.ANNOT_2,
                             )
-
-                            privacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotUrlA, annotUrlB],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -1329,26 +1278,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [privacyLevels[annotUrlA].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlA,
-                                        createdWhen: expect.any(Date),
-                                        id: privacyLevels[annotUrlA].id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [privacyLevels[annotUrlB].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlB,
-                                        createdWhen: expect.any(Date),
-                                        id: privacyLevels[annotUrlB].id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),

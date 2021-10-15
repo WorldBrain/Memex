@@ -1,19 +1,19 @@
 import pick from 'lodash/pick'
-import StorageManager from '@worldbrain/storex'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import { ContentSharingInterface } from './types'
-import { ContentSharingClientStorage } from './storage'
-import CustomListStorage from 'src/custom-lists/background/storage'
-import { AuthBackground } from 'src/authentication/background'
-import { Analytics } from 'src/analytics/types'
-import AnnotationStorage from 'src/annotations/background/storage'
+import type StorageManager from '@worldbrain/storex'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import type CustomListStorage from 'src/custom-lists/background/storage'
+import type { AuthBackground } from 'src/authentication/background'
+import type { Analytics } from 'src/analytics/types'
+import type AnnotationStorage from 'src/annotations/background/storage'
 import { AnnotationPrivacyLevels } from 'src/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import ActivityStreamsBackground from 'src/activity-streams/background'
-import { Services } from 'src/services/types'
-import { ServerStorageModules } from 'src/storage/types'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import type ActivityStreamsBackground from 'src/activity-streams/background'
+import type { Services } from 'src/services/types'
+import type { ServerStorageModules } from 'src/storage/types'
+import type { ContentSharingInterface } from './types'
+import { ContentSharingClientStorage } from './storage'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -46,15 +46,17 @@ export default class ContentSharingBackground {
         this.remoteFunctions = {
             ...options.services.contentSharing,
             shareList: this.shareList,
-            shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
             unshareAnnotation: this.unshareAnnotation,
+            unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
+            generateRemoteAnnotationId: async () =>
+                this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
@@ -88,6 +90,9 @@ export default class ContentSharingBackground {
     async setup() {}
 
     async executePendingActions() {}
+
+    private generateRemoteAnnotationId = (): string =>
+        this.options.generateServerId('sharedAnnotation').toString()
 
     private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] = async ({
         annotationUrl,
@@ -159,10 +164,6 @@ export default class ContentSharingBackground {
         }
     }
 
-    shareListEntries: ContentSharingInterface['shareListEntries'] = async (
-        options,
-    ) => {}
-
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
@@ -177,10 +178,10 @@ export default class ContentSharingBackground {
         await this.storage.storeAnnotationMetadata([
             {
                 localId: options.annotationUrl,
-                remoteId: this.options
-                    .generateServerId('sharedAnnotation')
-                    .toString(),
-                excludeFromLists: true,
+                excludeFromLists: !options.shareToLists ?? true,
+                remoteId:
+                    options.remoteAnnotationId ??
+                    this.generateRemoteAnnotationId(),
             },
         ])
 
@@ -193,32 +194,28 @@ export default class ContentSharingBackground {
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
         options,
     ) => {
+        const { annotationStorage } = this.options
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const allAnnotations = await this.options.annotationStorage.getAnnotations(
-            options.annotationUrls,
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: options.annotationUrls },
         )
-        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
-            {
-                annotations: options.annotationUrls,
-            },
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (url) =>
+                !remoteIds[url] &&
+                annotPrivacyLevels[url]?.privacyLevel !==
+                    AnnotationPrivacyLevels.PROTECTED,
         )
-        const annotations = allAnnotations.filter(
-            (annotation) =>
-                !remoteIds[annotation.url] &&
-                (!annotPrivacyLevels[annotation.url] ||
-                    annotPrivacyLevels[annotation.url]?.privacyLevel >
-                        AnnotationPrivacyLevels.PROTECTED),
-        )
-        for (const annnotation of annotations) {
+        console.log('remote IDS:', remoteIds)
+        console.log('priv levels:', annotPrivacyLevels)
+        console.log('annots to share:', nonProtectedAnnotations)
+        for (const annnotationUrl of nonProtectedAnnotations) {
             await this.storage.storeAnnotationMetadata([
                 {
-                    localId: annnotation.url,
-                    remoteId: this.options
-                        .generateServerId('sharedAnnotation')
-                        .toString(),
-                    excludeFromLists: true, // TODO: should this be true or false?
+                    localId: annnotationUrl,
+                    remoteId: this.generateRemoteAnnotationId(),
+                    excludeFromLists: !options.shareToLists ?? true,
                 },
             ])
         }
@@ -286,6 +283,22 @@ export default class ContentSharingBackground {
         })
     }
 
+    unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
+        options,
+    ) => {
+        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: options.annotationUrls },
+        )
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (annotationUrl) =>
+                annotPrivacyLevels[annotationUrl]?.privacyLevel !==
+                AnnotationPrivacyLevels.PROTECTED,
+        )
+        await this.storage.deleteAnnotationMetadata({
+            localIds: nonProtectedAnnotations,
+        })
+    }
+
     unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
         options,
     ) => {
@@ -295,9 +308,7 @@ export default class ContentSharingBackground {
             })
         )[options.annotationUrl]
         if (!remoteAnnotationId) {
-            throw new Error(
-                `Tried to unshare an annotation which was not shared`,
-            )
+            return
         }
         await this.storage.deleteAnnotationMetadata({
             localIds: [options.annotationUrl],

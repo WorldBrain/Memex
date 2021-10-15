@@ -9,9 +9,9 @@ import {
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
 import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import {
-    KeyboardShortcuts,
+import type {
     Shortcut,
+    BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
@@ -29,7 +29,7 @@ export interface Props extends RibbonSubcomponentProps {
     tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
-    shortcutsData?: ShortcutElData[]
+    shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     toggleShowExtraButtons: () => void
     handleRibbonToggle: () => void
@@ -44,9 +44,11 @@ interface State {
 }
 
 export default class Ribbon extends Component<Props, State> {
-    static defaultProps = { shortcutsData: shortcuts }
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
+        shortcutsData: shortcuts,
+    }
 
-    private keyboardShortcuts: KeyboardShortcuts
+    private keyboardShortcuts: BaseKeyboardShortcuts
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
@@ -432,24 +434,29 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
-                                            {
-                                                [styles.saveIcon]: this.props
-                                                    .commentBox.isCommentSaved,
-                                            },
+                                {!this.props.sidebar.isSidebarOpen && (
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
                                         )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                </ButtonTooltip>
+                                        position="leftNarrow"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.comments,
+                                                {
+                                                    [styles.saveIcon]: this
+                                                        .props.commentBox
+                                                        .isCommentSaved,
+                                                },
+                                            )}
+                                            onClick={
+                                                this.handleCommentIconBtnClick
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                )}
                                 {this.props.commentBox.showCommentBox && (
                                     <Tooltip position="left">
                                         <AnnotationCreate

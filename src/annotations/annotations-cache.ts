@@ -1,19 +1,22 @@
-import TypedEventEmitter from 'typed-emitter'
+import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
 import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 import {
     AnnotationsSorter,
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import {
+    createAnnotation,
+    updateAnnotation,
+    AnnotationShareOpts,
+} from './annotation-save-logic'
 
-export interface CachedAnnotation extends Annotation {
-    privacyLevel: AnnotationPrivacyLevels
-}
+export type CachedAnnotation = Annotation
 
 export const createAnnotationsCache = (
     bgModules: {
@@ -33,29 +36,57 @@ export const createAnnotationsCache = (
                         withTags: true,
                     },
                 )
+
+                const annotationUrls = annotations.map((a) => a.url)
                 const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
-                    { annotationUrls: annotations.map((a) => a.url) },
+                    {
+                        annotationUrls,
+                    },
+                )
+
+                const annotationShareMetadata = await bgModules.contentSharing.getRemoteAnnotationMetadata(
+                    { annotationUrls },
                 )
 
                 return annotations.map((a) => ({
                     ...a,
-                    privacyLevel: privacyLevels[a.url],
+                    isShared: !!annotationShareMetadata[a.url],
+                    isBulkShareProtected:
+                        privacyLevels[a.url] ===
+                        AnnotationPrivacyLevels.PROTECTED,
                 }))
             },
-            create: async (annotation) =>
-                bgModules.annotations.createAnnotation(annotation, {
+            create: async (annotation, shareOpts) => {
+                const { savePromise } = await createAnnotation({
+                    shareOpts,
+                    annotationsBG: bgModules.annotations,
+                    contentSharingBG: bgModules.contentSharing,
                     skipPageIndexing: options.skipPageIndexing,
-                }),
-            update: async (annotation) => {
-                await bgModules.annotations.updateAnnotationBookmark({
-                    url: annotation.url,
-                    isBookmarked: annotation.isBookmarked,
+                    annotationData: {
+                        localId: annotation.url,
+                        body: annotation.body,
+                        comment: annotation.comment,
+                        fullPageUrl: annotation.pageUrl,
+                        createdWhen: annotation.createdWhen,
+                        pageTitle: annotation.pageTitle,
+                        selector: annotation.selector,
+                    },
                 })
-
-                return bgModules.annotations.editAnnotation(
-                    annotation.url,
-                    annotation.comment,
-                )
+                const localId = await savePromise
+                return localId
+            },
+            update: async (annotation, shareOpts) => {
+                const { savePromise } = await updateAnnotation({
+                    shareOpts,
+                    annotationsBG: bgModules.annotations,
+                    contentSharingBG: bgModules.contentSharing,
+                    skipPageIndexing: options.skipPageIndexing,
+                    annotationData: {
+                        comment: annotation.comment,
+                        localId: annotation.url,
+                    },
+                })
+                await savePromise
             },
             delete: async (annotation) =>
                 bgModules.annotations.deleteAnnotation(annotation.url),
@@ -88,8 +119,14 @@ export interface AnnotationsCacheDependencies {
             pageUrl: string,
             args?: { limit?: number; skip?: number },
         ) => Promise<CachedAnnotation[]> // url should become one concrete example of a contentFingerprint to load annotations for
-        create: (annotation: CachedAnnotation) => Promise<string>
-        update: (annotation: CachedAnnotation) => Promise<void>
+        create: (
+            annotation: CachedAnnotation,
+            shareOpts?: AnnotationShareOpts,
+        ) => Promise<string>
+        update: (
+            annotation: CachedAnnotation,
+            shareOpts?: AnnotationShareOpts,
+        ) => Promise<void>
         updateTags: (
             annotationUrl: CachedAnnotation['url'],
             tags: CachedAnnotation['tags'],
@@ -105,18 +142,14 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     create: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
+        shareOpts?: AnnotationShareOpts,
     ) => Promise<void>
     update: (
-        annotation: Omit<
-            CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'privacyLevel'
-        >,
+        annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
+        shareOpts?: AnnotationShareOpts,
     ) => Promise<void>
     delete: (
-        annotation: Omit<
-            CachedAnnotation,
-            'lastEdited' | 'createdWhen' | 'privacyLevel'
-        >,
+        annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
     getAnnotationById: (id: string) => CachedAnnotation
@@ -173,18 +206,30 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this.annotations)
     }
 
-    create = async (annotation: CachedAnnotation) => {
-        annotation.createdWhen = new Date()
+    create: AnnotationsCacheInterface['create'] = async (
+        annotation,
+        shareOpts,
+    ) => {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 
-        this.annotations = [annotation, ...stateBeforeModifications]
+        const nextAnnotation = {
+            ...annotation,
+            createdWhen: new Date(),
+            isShared: shareOpts?.shouldShare,
+            isBulkShareProtected: shareOpts?.isBulkShareProtected,
+        }
 
-        this.annotationChanges.emit('created', annotation)
+        this.annotations = [nextAnnotation, ...stateBeforeModifications]
+
+        this.annotationChanges.emit('created', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
-            const annotUrl = await backendOperations.create(annotation)
+            const annotUrl = await backendOperations.create(
+                annotation,
+                shareOpts,
+            )
 
             if (annotation.tags.length) {
                 await backendOperations.updateTags(annotUrl, annotation.tags)
@@ -196,25 +241,37 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
     }
 
-    update = async (annotation: CachedAnnotation) => {
-        annotation.lastEdited = new Date()
+    update: AnnotationsCacheInterface['update'] = async (
+        annotation,
+        shareOpts,
+    ) => {
         const stateBeforeModifications = [...this._annotations]
 
         const resultIndex = stateBeforeModifications.findIndex(
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
+        const nextAnnotation = {
+            ...annotation,
+            lastEdited: new Date(),
+            isShared: shareOpts?.shouldShare,
+            isBulkShareProtected: shareOpts?.isBulkShareProtected,
+        }
+
         this.annotations = [
             ...stateBeforeModifications.slice(0, resultIndex),
-            annotation,
+            nextAnnotation,
             ...stateBeforeModifications.slice(resultIndex + 1),
         ]
 
-        this.annotationChanges.emit('updated', annotation)
+        this.annotationChanges.emit('updated', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
-            await this.dependencies.backendOperations.update(annotation)
+            await this.dependencies.backendOperations.update(
+                annotation,
+                shareOpts,
+            )
 
             if (
                 haveTagsChanged(

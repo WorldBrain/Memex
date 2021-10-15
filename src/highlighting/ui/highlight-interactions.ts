@@ -92,7 +92,7 @@ export interface SaveAndRenderHighlightDeps {
     annotationsCache: AnnotationsCacheInterface
     analyticsEvent?: AnalyticsEvent
     inPageUI: SharedInPageUIInterface
-    options?: { clickToEdit?: boolean }
+    shouldShare?: boolean
 }
 
 export type HighlightRendererInterface = HighlightRenderInterface &
@@ -180,19 +180,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } as Annotation
 
         await Promise.all([
-            params.annotationsCache.create({
-                ...annotation,
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            params.annotationsCache.create(annotation, {
+                shouldShare: params.shouldShare,
+                shouldCopyShareLink: params.shouldShare,
             }),
             this.renderHighlight(
                 annotation,
                 ({ openInEdit, annotationUrl }) => {
                     params.inPageUI.showSidebar({
                         annotationUrl,
-                        action:
-                            params.options?.clickToEdit || openInEdit
-                                ? 'edit_annotation'
-                                : 'show_annotation',
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
                     })
                 },
             ),

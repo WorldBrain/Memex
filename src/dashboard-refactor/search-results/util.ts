@@ -51,9 +51,9 @@ export const formatDayGroupTime = (day: number) =>
         sameElse: 'dddd, DD MMMM, YYYY',
     })
 
-export const getInitialFormState = (): NoteFormState => ({
+export const getInitialFormState = (inputValue = ''): NoteFormState => ({
     tags: [],
-    inputValue: '',
+    inputValue,
     isTagPickerShown: false,
 })
 
@@ -108,13 +108,13 @@ export const getInitialPageResultState = (
     ...extra,
 })
 
-export const getInitialNoteResultState = (): NoteResult => ({
+export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     isEditing: false,
     areRepliesShown: false,
     isTagPickerShown: false,
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
-    editNoteForm: getInitialFormState(),
+    editNoteForm: getInitialFormState(inputValue),
 })
 
 const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
@@ -142,6 +142,8 @@ const annotationToNoteData = (
         annotation.lastEdited ?? annotation.createdWhen,
     ).getTime(),
     isEdited: annotation.lastEdited != null,
+    isShared: annotation.isShared,
+    isBulkShareProtected: !!annotation.isBulkShareProtected,
     ...getInitialNoteResultState(),
     editNoteForm: {
         inputValue: annotation.comment ?? '',

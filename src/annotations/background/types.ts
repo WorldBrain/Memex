@@ -43,21 +43,14 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             [annotationUrl: string]: AnnotationPrivacyLevels
         }
     >
-    updateAnnotationPrivacyLevel: RemotePositionalFunction<
+    protectAnnotation: RemotePositionalFunction<
         Role,
-        [{ annotation: string; privacyLevel: AnnotationPrivacyLevels }],
+        [{ annotation: string }],
         void
     >
-    updateAnnotationPrivacyLevels: RemotePositionalFunction<
+    dropAnnotationProtection: RemotePositionalFunction<
         Role,
-        [
-            {
-                annotationPrivacyLevels: {
-                    [annotation: string]: AnnotationPrivacyLevels
-                }
-                respectProtected?: boolean
-            },
-        ],
+        [{ annotation: string }],
         void
     >
     editAnnotation: RemotePositionalFunction<
@@ -129,6 +122,6 @@ export interface CreateAnnotationParams {
     selector?: Anchor
     isBookmarked?: boolean
     isSocialPost?: boolean
+    isBulkShareProtected?: boolean
     createdWhen?: Date
-    privacyLevel?: AnnotationPrivacyLevels
 }
