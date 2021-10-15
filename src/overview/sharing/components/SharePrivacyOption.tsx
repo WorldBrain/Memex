@@ -97,7 +97,7 @@ const PrivacyOptionItem = styled(Margin)`
     align-items: center;
     flex-direction: row;
     cursor: pointer;
-    padding: 5px 20px;
+    padding: 10px 20px;
     width: fill-available;
 
     &:hover {

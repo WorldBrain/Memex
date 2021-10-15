@@ -90,7 +90,7 @@ class AnnotationEdit extends React.Component<Props>
                         <StyledTextArea
                             {...inputProps}
                             value={this.props.comment}
-                            placeholder={`Add private note (save with ${AnnotationEdit.MOD_KEY}+enter)`}
+                            placeholder={`Add private note. Save with ${AnnotationEdit.MOD_KEY}+enter (+shift to share)`}
                             onChange={(e) =>
                                 this.props.onCommentChange(e.target.value)
                             }
@@ -118,6 +118,7 @@ const StyledTextArea = styled.textarea`
 
     &::placeholder {
         color: ${(props) => props.theme.colors.primary};
+        opacity: 0.5;
     }
 
     &:focus {
