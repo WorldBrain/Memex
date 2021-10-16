@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 const Container = styled.div<StyleProps>`
     display: flex;
@@ -61,6 +62,7 @@ const CloudUpgradeBanner = ({ onGetStartedClick, ...props }: Props) => (
             </Description>
         </ContentBox>
         <ButtonBox>
+            <SecondaryAction label="Learn More" onClick={()=>window.open('https://worldbrain.io/announcements/back-to-beta')} />
             <PrimaryAction label="Start Migration" onClick={onGetStartedClick} />
         </ButtonBox>
     </Container>
