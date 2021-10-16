@@ -22,11 +22,6 @@ module.exports = {
                         'last 10 Chrome versions',
                     ],
                 },
-                exclude: [
-                    '@babel/plugin-transform-async-to-generator',
-                    '@babel/plugin-proposal-async-generator-functions',
-                    '@babel/plugin-transform-regenerator',
-                ],
             },
         ],
         '@babel/preset-react',
