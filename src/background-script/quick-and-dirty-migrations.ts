@@ -1,29 +1,31 @@
-import Dexie from 'dexie'
-import Storex from '@worldbrain/storex'
-import { Storage } from 'webextension-polyfill-ts'
-import textStemmer from '@worldbrain/memex-stemmer'
-import { URLNormalizer } from '@worldbrain/memex-url-utils'
+import type Dexie from 'dexie'
+import type Storex from '@worldbrain/storex'
+import type { Storage } from 'webextension-polyfill-ts'
+import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import textStemmer from '@worldbrain/memex-stemmer'
 
-import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
+import type { BackgroundModules } from './setup'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 
 export interface MigrationProps {
     db: Dexie
     storex: Storex
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
-    backgroundModules: {
-        readwise: ReadwiseBackground
-    }
+    backgroundModules: Pick<BackgroundModules, 'readwise' | 'syncSettings'>
 }
 
 export interface Migrations {
     [storageKey: string]: (props: MigrationProps) => Promise<void>
 }
+
+export const MIGRATION_PREFIX = '@QnDMigration-'
 
 // __IMPORTANT NOTE__
 //     Please note that use of the Dexie `db` instance rather than the `storex` instance won't trigger
@@ -32,6 +34,30 @@ export interface Migrations {
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * Post 3.0.0 cloud release, we forgot to migrate the users' Readwise keys from local storage to
+     * the new synced settings collection. This meant that Readwise integration stopped working until
+     * the user re-entered their API key.
+     */
+    [MIGRATION_PREFIX + 'migrate-readwise-key']: async ({
+        backgroundModules,
+        localStorage,
+    }) => {
+        // Note I'm using the constant for the synced settings here because the name is the same as the old local storage key name
+        const {
+            [SETTING_NAMES.readwise.apiKey]: oldKey,
+        } = await localStorage.get(SETTING_NAMES.readwise.apiKey)
+
+        if (!oldKey) {
+            return
+        }
+
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+
+        await syncSettings.readwise.set('apiKey', oldKey)
+    },
     /*
      * We discovered further complications with our mobile list ID staticization attempts where,
      * as it was not also done on the mobile app, sync entries coming in from the mobile app would

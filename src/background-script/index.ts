@@ -43,7 +43,7 @@ interface Dependencies {
     notifsBackground: NotifsBackground
     copyPasterBackground: CopyPasterBackground
     customListsBackground: CustomListBackground
-    readwiseBackground: ReadwiseBackground
+    readwiseBG: ReadwiseBackground
     syncSettingsBG: SyncSettingsBackground
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
     syncSettingsStore: SyncSettingsStore<'pdfIntegration' | 'dashboard'>
@@ -205,7 +205,8 @@ class BackgroundScript {
                 localStorage: this.deps.storageAPI.local,
                 normalizeUrl: this.deps.urlNormalizer,
                 backgroundModules: {
-                    readwise: this.deps.readwiseBackground,
+                    readwise: this.deps.readwiseBG,
+                    syncSettings: this.deps.syncSettingsBG,
                 },
             })
             await this.deps.storageAPI.local.set({ [storageKey]: true })

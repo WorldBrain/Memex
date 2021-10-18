@@ -6,7 +6,12 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import range from 'lodash/range'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { migrations, MigrationProps } from './quick-and-dirty-migrations'
+import {
+    migrations,
+    MigrationProps,
+    MIGRATION_PREFIX,
+} from './quick-and-dirty-migrations'
+import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 
 const testPageUrls = ['test.com/1', 'test.com/2', 'test.com/3', 'test.com/4']
 
@@ -16,7 +21,7 @@ async function setupTest() {
         storex: setup.storageManager,
         db: setup.storageManager.backend['dexieInstance'],
         localStorage: setup.browserAPIs.storage.local,
-        backgroundModules: { readwise: setup.backgroundModules.readwise },
+        backgroundModules: setup.backgroundModules,
         normalizeUrl,
     }
 
@@ -24,6 +29,53 @@ async function setupTest() {
 }
 
 describe('quick-and-dirty migration tests', () => {
+    describe('post-cloud update readwise key migration', () => {
+        it('should do nothing if no existing key exists', async () => {
+            const { migrationProps } = await setupTest()
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+        })
+
+        it('should store the old value from local storage in the synced settings DB table', async () => {
+            const { migrationProps } = await setupTest()
+
+            const dummyKey = 'readwise-key'
+            await migrationProps.localStorage.set({
+                [SETTING_NAMES.readwise.apiKey]: dummyKey,
+            })
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toEqual({ key: SETTING_NAMES.readwise.apiKey, value: dummyKey })
+        })
+    })
+
     describe('point-old-mobile-list-entries-to-new', () => {
         it('should modify all list entries pointing to a non-existent list to point to the mobile list', async () => {
             const { migrationProps } = await setupTest()

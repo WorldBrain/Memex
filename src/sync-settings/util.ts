@@ -29,6 +29,9 @@ export const createSyncSettingsStore = <
         pdfIntegration: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.PDF_INTEGRATION,
         }),
+        readwise: new BrowserSettingsStore(args.syncSettingsBG, {
+            prefix: FEATURE_PREFIX.READWISE,
+        }),
         searchInjection: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.SEARCH_INJECTION,
         }),

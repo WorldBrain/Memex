@@ -2,6 +2,7 @@ import type { SettingStore } from 'src/util/settings'
 import type { SyncSettingsByFeature } from './background/types'
 
 export interface SyncSettingsStoreInterface {
+    readwise: SettingStore<SyncSettingsByFeature['readwise']>
     inPageUI: SettingStore<SyncSettingsByFeature['inPageUI']>
     dashboard: SettingStore<SyncSettingsByFeature['dashboard']>
     extension: SettingStore<SyncSettingsByFeature['extension']>

@@ -60,6 +60,9 @@ export interface SyncSettingsByFeature {
             createAnnotationShortcut: string
         }
     }
+    readwise: {
+        apiKey: string
+    }
     inPageUI: {
         ribbonEnabled: boolean
         tooltipEnabled: boolean

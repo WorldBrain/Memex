@@ -432,7 +432,7 @@ export function createBackgroundModules(options: {
         syncSettingsBG: syncSettings,
         urlNormalizer: normalizeUrl,
         commandsAPI: browser.commands,
-        readwiseBackground: readwise,
+        readwiseBG: readwise,
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
         alarmsAPI: browser.alarms,

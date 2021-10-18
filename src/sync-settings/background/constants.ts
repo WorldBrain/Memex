@@ -11,6 +11,7 @@ export const FEATURE_PREFIX = {
     IN_PAGE_UI: '@InPageUI-',
     DASHBOARD: '@Dashboard-',
     EXTENSION: '@Extension-',
+    READWISE: 'readwise.',
 }
 
 export const SETTING_NAMES: SyncSettingNames = {
@@ -44,5 +45,8 @@ export const SETTING_NAMES: SyncSettingNames = {
             FEATURE_PREFIX.SEARCH_INJECTION + 'memexResultsPosition',
         searchEnginesEnabled:
             FEATURE_PREFIX.SEARCH_INJECTION + 'searchEnginesEnabled',
+    },
+    readwise: {
+        apiKey: FEATURE_PREFIX.READWISE + 'apiKey',
     },
 }
