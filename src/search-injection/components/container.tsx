@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { browser } from 'webextension-polyfill-ts'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'
@@ -20,6 +20,7 @@ import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import { OVERVIEW_URL } from 'src/constants'
 
 export interface Props {
     results: ResultItemProps[]
@@ -273,6 +274,10 @@ class Container extends React.Component<Props, State> {
         window.open(url, '_blank').focus()
     }
 
+    async openDashboard() {
+        await browser.tabs.create({ url: OVERVIEW_URL })
+    }
+
     private handleSubBannerDismiss: React.MouseEventHandler = async (e) => {
         this.setState({ isSubscriptionBannerShown: false })
         await this.props.syncSettings.dashboard.set(
@@ -357,7 +362,7 @@ class Container extends React.Component<Props, State> {
             <>
                 {this.state.isCloudUpgradeBannerShown && (
                     <CloudUpgradeBanner
-                        onGetStartedClick={() => console.log('hi')}
+                        onGetStartedClick={() => this.openOverviewRPC()}
                         direction="column"
                         width="415px"
                     />
