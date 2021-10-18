@@ -12,11 +12,15 @@ import {
     MIGRATION_PREFIX,
 } from './quick-and-dirty-migrations'
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
+import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
 
 const testPageUrls = ['test.com/1', 'test.com/2', 'test.com/3', 'test.com/4']
 
 async function setupTest() {
     const setup = await setupBackgroundIntegrationTest()
+
+    setup.fetch.mock(READWISE_API_URL, 200)
+
     const migrationProps: MigrationProps = {
         storex: setup.storageManager,
         db: setup.storageManager.backend['dexieInstance'],
@@ -31,13 +35,14 @@ async function setupTest() {
 describe('quick-and-dirty migration tests', () => {
     describe('post-cloud update readwise key migration', () => {
         it('should do nothing if no existing key exists', async () => {
-            const { migrationProps } = await setupTest()
+            const { migrationProps, fetch } = await setupTest()
 
             expect(
                 await migrationProps.db
                     .table('settings')
                     .get(SETTING_NAMES.readwise.apiKey),
             ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
 
             await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
                 migrationProps,
@@ -48,12 +53,20 @@ describe('quick-and-dirty migration tests', () => {
                     .table('settings')
                     .get(SETTING_NAMES.readwise.apiKey),
             ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
         })
 
-        it('should store the old value from local storage in the synced settings DB table', async () => {
-            const { migrationProps } = await setupTest()
+        it('should store the old value from local storage in the synced settings DB table + resync all highlights', async () => {
+            const { migrationProps, fetch } = await setupTest()
 
             const dummyKey = 'readwise-key'
+
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com#123456789',
+                pageUrl: 'test.com',
+                body: 'test highlight',
+                createdWhen: new Date(),
+            })
             await migrationProps.localStorage.set({
                 [SETTING_NAMES.readwise.apiKey]: dummyKey,
             })
@@ -63,6 +76,7 @@ describe('quick-and-dirty migration tests', () => {
                     .table('settings')
                     .get(SETTING_NAMES.readwise.apiKey),
             ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
 
             await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
                 migrationProps,
@@ -73,6 +87,17 @@ describe('quick-and-dirty migration tests', () => {
                     .table('settings')
                     .get(SETTING_NAMES.readwise.apiKey),
             ).toEqual({ key: SETTING_NAMES.readwise.apiKey, value: dummyKey })
+
+            const [apiUrl, apiCallData] = fetch.lastCall()
+            expect(apiUrl).toEqual(READWISE_API_URL)
+            expect(apiCallData).toEqual({
+                body: expect.any(String),
+                headers: {
+                    Authorization: 'Token readwise-key',
+                    'Content-Type': 'application/json',
+                },
+                method: 'POST',
+            })
         })
     })
 

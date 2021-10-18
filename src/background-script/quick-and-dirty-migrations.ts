@@ -57,6 +57,7 @@ export const migrations: Migrations = {
         })
 
         await syncSettings.readwise.set('apiKey', oldKey)
+        await backgroundModules.readwise.uploadAllAnnotations()
     },
     /*
      * We discovered further complications with our mobile list ID staticization attempts where,
