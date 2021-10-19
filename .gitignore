@@ -17,3 +17,4 @@ local-backup
 *-debug.log
 private/
 .env
+OldVersions/
