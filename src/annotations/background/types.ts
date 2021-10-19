@@ -43,12 +43,12 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             [annotationUrl: string]: AnnotationPrivacyLevels
         }
     >
-    protectAnnotation: RemotePositionalFunction<
+    createOrUpdateAnnotationPrivacyLevel: RemotePositionalFunction<
         Role,
-        [{ annotation: string }],
+        [{ annotation: string; privacyLevel: AnnotationPrivacyLevels }],
         void
     >
-    dropAnnotationProtection: RemotePositionalFunction<
+    deleteAnnotationPrivacyLevel: RemotePositionalFunction<
         Role,
         [{ annotation: string }],
         void

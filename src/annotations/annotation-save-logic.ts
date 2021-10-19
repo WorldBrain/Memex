@@ -3,6 +3,7 @@ import type { AnnotationInterface } from './background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
+import { AnnotationPrivacyLevels } from './types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -127,8 +128,9 @@ export async function updateAnnotation({
                           shareToLists: true,
                       }),
                 shareOpts?.isBulkShareProtected &&
-                    annotationsBG.protectAnnotation({
+                    annotationsBG.createOrUpdateAnnotationPrivacyLevel({
                         annotation: annotationData.localId,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     }),
             ])
             return annotationData.localId

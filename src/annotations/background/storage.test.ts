@@ -37,8 +37,9 @@ async function insertTestData({
             url: annot.url,
         } as any)
 
-        await annotationStorage.protectAnnotation({
+        await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
             annotation: annot.url,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         })
     }
 
@@ -183,7 +184,7 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.dropAnnotationProtection({
+                await annotationStorage.deleteAnnotationPrivacyLevel({
                     annotation: url,
                 })
 
@@ -195,8 +196,9 @@ describe('Annotations storage', () => {
 
                 const updatedWhen = new Date()
 
-                await annotationStorage.protectAnnotation({
+                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
                     annotation: url,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     updatedWhen,
                 })
 
@@ -207,7 +209,43 @@ describe('Annotations storage', () => {
                 ).toEqual(
                     expect.objectContaining({
                         annotation: url,
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                        createdWhen: updatedWhen,
+                    }),
+                )
+
+                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                    annotation: url,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    updatedWhen,
+                })
+
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotation: url,
+                    }),
+                ).toEqual(
+                    expect.objectContaining({
+                        annotation: url,
+                        privacyLevel: AnnotationPrivacyLevels.SHARED,
+                        createdWhen: updatedWhen,
+                    }),
+                )
+
+                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                    annotation: url,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    updatedWhen,
+                })
+
+                expect(
+                    await annotationStorage.findAnnotationPrivacyLevel({
+                        annotation: url,
+                    }),
+                ).toEqual(
+                    expect.objectContaining({
+                        annotation: url,
+                        privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                         createdWhen: updatedWhen,
                     }),
                 )
@@ -357,7 +395,7 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.dropAnnotationProtection({
+                await annotationStorage.deleteAnnotationPrivacyLevel({
                     annotation: url,
                 })
 

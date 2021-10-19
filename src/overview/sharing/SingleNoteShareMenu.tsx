@@ -5,6 +5,7 @@ import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -65,9 +66,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private async handleAnnotationProtection(shouldProtect: boolean) {
         const { annotationUrl, annotationsBG } = this.props
         if (shouldProtect) {
-            await annotationsBG.protectAnnotation({ annotation: annotationUrl })
+            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+                annotation: annotationUrl,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
         } else {
-            await annotationsBG.dropAnnotationProtection({
+            await annotationsBG.deleteAnnotationPrivacyLevel({
                 annotation: annotationUrl,
             })
         }

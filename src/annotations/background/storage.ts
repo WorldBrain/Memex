@@ -238,7 +238,7 @@ export default class AnnotationStorage extends StorageModule {
         )
     }
 
-    async dropAnnotationProtection(params: {
+    async deleteAnnotationPrivacyLevel(params: {
         annotation: string
     }): Promise<void> {
         await this.operation('deleteAnnotationPrivacyLevel', {
@@ -246,17 +246,24 @@ export default class AnnotationStorage extends StorageModule {
         })
     }
 
-    async protectAnnotation(params: {
+    async createOrUpdateAnnotationPrivacyLevel(params: {
         annotation: string
+        privacyLevel: AnnotationPrivacyLevels
         updatedWhen?: Date
     }): Promise<void> {
         const existing = await this.findAnnotationPrivacyLevel(params)
 
-        if (!existing) {
+        if (existing != null) {
+            await this.operation('updateAnnotationPrivacyLevel', {
+                annotation: params.annotation,
+                privacyLevel: params.privacyLevel,
+                updatedWhen: params.updatedWhen ?? new Date(),
+            })
+        } else {
             await this.operation('createAnnotationPrivacyLevel', {
                 id: AnnotationStorage.generateAnnotationPrivacyLevelId(),
                 annotation: params.annotation,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                privacyLevel: params.privacyLevel,
                 createdWhen: params.updatedWhen ?? new Date(),
             })
         }
@@ -463,7 +470,7 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async deleteAnnotation(url: string) {
-        await this.dropAnnotationProtection({ annotation: url })
+        await this.deleteAnnotationPrivacyLevel({ annotation: url })
         return this.operation('deleteAnnotation', { url })
     }
 
