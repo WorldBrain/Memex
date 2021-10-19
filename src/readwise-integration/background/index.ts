@@ -98,7 +98,7 @@ export class ReadwiseBackground {
 
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
-    > = async () => {
+    > = async ({ annotationFilter }) => {
         const getFullPageUrl = makePageDataCache({
             getPageData: this.options.getPageData,
         })
@@ -112,6 +112,9 @@ export class ReadwiseBackground {
 
         const annotationBatch: Annotation[] = []
         for await (const annotation of this.options.streamAnnotations()) {
+            if (annotationFilter != null && !annotationFilter(annotation)) {
+                continue
+            }
             const tags = await this.options.getAnnotationTags(annotation.url)
             annotationBatch.push({ ...annotation, tags })
         }

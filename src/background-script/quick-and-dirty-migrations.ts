@@ -48,6 +48,8 @@ export const migrations: Migrations = {
             [SETTING_NAMES.readwise.apiKey]: oldKey,
         } = await localStorage.get(SETTING_NAMES.readwise.apiKey)
 
+        const cloudReleaseDate = new Date('2021-10-13T04:00:00.000+00:00')
+
         if (!oldKey) {
             return
         }
@@ -57,7 +59,10 @@ export const migrations: Migrations = {
         })
 
         await syncSettings.readwise.set('apiKey', oldKey)
-        await backgroundModules.readwise.uploadAllAnnotations()
+        await backgroundModules.readwise.uploadAllAnnotations({
+            annotationFilter: ({ createdWhen, lastEdited }) =>
+                createdWhen > cloudReleaseDate || lastEdited > cloudReleaseDate,
+        })
     },
     /*
      * We discovered further complications with our mobile list ID staticization attempts where,

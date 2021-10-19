@@ -56,16 +56,31 @@ describe('quick-and-dirty migration tests', () => {
             expect(fetch.lastCall()).toBeUndefined()
         })
 
-        it('should store the old value from local storage in the synced settings DB table + resync all highlights', async () => {
+        it('should store the old value from local storage in the synced settings DB table + uploads highlights after cut-off point', async () => {
             const { migrationProps, fetch } = await setupTest()
 
             const dummyKey = 'readwise-key'
 
+            const createdWhen = new Date('2021-10-14T10:00:00')
+
             await migrationProps.db.table('annotations').add({
-                url: 'test.com#123456789',
+                url: 'test.com/#123456789',
                 pageUrl: 'test.com',
                 body: 'test highlight',
-                createdWhen: new Date(),
+                createdWhen,
+            })
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test/#123456789',
+                pageUrl: 'test.com/test',
+                body: 'test highlight 2',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time - should NOT be synced
+            })
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test2/#123456789',
+                pageUrl: 'test.com/test2',
+                body: 'test highlight 3',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time, though edited time is after - SHOULD be synced
+                lastEdited: createdWhen,
             })
             await migrationProps.localStorage.set({
                 [SETTING_NAMES.readwise.apiKey]: dummyKey,
@@ -91,13 +106,63 @@ describe('quick-and-dirty migration tests', () => {
             const [apiUrl, apiCallData] = fetch.lastCall()
             expect(apiUrl).toEqual(READWISE_API_URL)
             expect(apiCallData).toEqual({
-                body: expect.any(String),
+                body: JSON.stringify({
+                    highlights: [
+                        {
+                            source_type: 'article',
+                            highlighted_at: createdWhen,
+                            location_type: 'order',
+                            text: 'test highlight',
+                        },
+                        {
+                            source_type: 'article',
+                            highlighted_at: new Date('2021-10-12'),
+                            location_type: 'order',
+                            text: 'test highlight 3',
+                        },
+                    ],
+                }),
                 headers: {
                     Authorization: 'Token readwise-key',
                     'Content-Type': 'application/json',
                 },
                 method: 'POST',
             })
+        })
+
+        it('should store the old value from local storage in the synced settings DB table + NOT upload highlights if none exist past the cut-off point', async () => {
+            const { migrationProps, fetch } = await setupTest()
+
+            const dummyKey = 'readwise-key'
+
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test/#123456789',
+                pageUrl: 'test.com/test',
+                body: 'test highlight 2',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time - should NOT be synced
+            })
+
+            await migrationProps.localStorage.set({
+                [SETTING_NAMES.readwise.apiKey]: dummyKey,
+            })
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toEqual({ key: SETTING_NAMES.readwise.apiKey, value: dummyKey })
+            expect(fetch.lastCall()).toBeUndefined()
         })
     })
 

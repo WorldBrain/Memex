@@ -92,7 +92,7 @@ export default class ReadwiseSettingsLogic extends UILogic<
             this,
             'syncState',
             async () => {
-                await this.dependencies.readwise.uploadAllAnnotations()
+                await this.dependencies.readwise.uploadAllAnnotations({})
             },
         )
     }

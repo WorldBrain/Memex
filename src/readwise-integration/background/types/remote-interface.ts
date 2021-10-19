@@ -1,4 +1,3 @@
-import type { ActionQueueInteraction } from '@worldbrain/memex-common/lib/action-queue/types'
 import type { ReadwiseAPIResponse } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import type {
     RemoteFunctionRole,
@@ -18,5 +17,11 @@ export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
         { validatedKey: string },
         void
     >
-    uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<Role, void, void>
+    uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<
+        Role,
+        {
+            annotationFilter?: (annotation: Annotation) => boolean
+        },
+        void
+    >
 }
