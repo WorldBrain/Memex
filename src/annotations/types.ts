@@ -115,4 +115,5 @@ export enum AnnotationPrivacyLevels {
     PROTECTED = 0,
     PRIVATE = 100,
     SHARED = 200,
+    SHARED_PROTECTED = 300,
 }

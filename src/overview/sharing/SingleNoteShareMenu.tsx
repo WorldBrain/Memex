@@ -63,18 +63,27 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return true
     }
 
-    private async handleAnnotationProtection(shouldProtect: boolean) {
+    private async handleAnnotationProtection(
+        shouldProtect: boolean,
+        isShared: boolean,
+    ) {
         const { annotationUrl, annotationsBG } = this.props
+
+        let privacyLevel: AnnotationPrivacyLevels
         if (shouldProtect) {
-            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
-                annotation: annotationUrl,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-            })
+            privacyLevel = isShared
+                ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                : AnnotationPrivacyLevels.PROTECTED
         } else {
-            await annotationsBG.deleteAnnotationPrivacyLevel({
-                annotation: annotationUrl,
-            })
+            privacyLevel = isShared
+                ? AnnotationPrivacyLevels.SHARED
+                : AnnotationPrivacyLevels.PRIVATE
         }
+
+        await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+            annotation: annotationUrl,
+            privacyLevel,
+        })
     }
 
     private shareAnnotation = async (shouldProtect?: boolean) => {
@@ -85,7 +94,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         })
         await this.setRemoteLinkIfExists()
         if (shouldProtect != null) {
-            await this.handleAnnotationProtection(shouldProtect)
+            await this.handleAnnotationProtection(shouldProtect, true)
         }
 
         this.props.postShareHook?.({
@@ -98,7 +107,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.unshareAnnotation({ annotationUrl })
         this.setState({ showLink: false })
-        await this.handleAnnotationProtection(shouldProtect)
+        await this.handleAnnotationProtection(shouldProtect, false)
 
         this.props.postShareHook?.({
             isShared: false,

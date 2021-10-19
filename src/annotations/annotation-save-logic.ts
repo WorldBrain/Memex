@@ -71,7 +71,6 @@ export async function createAnnotation({
                     title: annotationData.pageTitle,
                     comment: annotationData.comment,
                     body: annotationData.body,
-                    isBulkShareProtected: shareOpts?.isBulkShareProtected,
                 },
                 { skipPageIndexing },
             )
@@ -83,6 +82,11 @@ export async function createAnnotation({
                     shareToLists: true,
                 })
             }
+
+            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+                annotation: annotationData.localId,
+                privacyLevel: getPrivacyLevel(shareOpts),
+            })
 
             return annotationUrl
         })(),
@@ -127,13 +131,26 @@ export async function updateAnnotation({
                           annotationUrl: annotationData.localId,
                           shareToLists: true,
                       }),
-                shareOpts?.isBulkShareProtected &&
-                    annotationsBG.createOrUpdateAnnotationPrivacyLevel({
-                        annotation: annotationData.localId,
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    }),
+                annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+                    annotation: annotationData.localId,
+                    privacyLevel: getPrivacyLevel(shareOpts),
+                }),
             ])
             return annotationData.localId
         })(),
     }
+}
+
+function getPrivacyLevel(
+    shareOpts?: AnnotationShareOpts,
+): AnnotationPrivacyLevels {
+    if (shareOpts?.shouldShare) {
+        return shareOpts.isBulkShareProtected
+            ? AnnotationPrivacyLevels.SHARED_PROTECTED
+            : AnnotationPrivacyLevels.PROTECTED
+    }
+
+    return shareOpts.isBulkShareProtected
+        ? AnnotationPrivacyLevels.PROTECTED
+        : AnnotationPrivacyLevels.PRIVATE
 }
