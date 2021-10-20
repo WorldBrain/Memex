@@ -3,8 +3,8 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import * as DATA from './index.test.data'
 import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { BackgroundModules } from 'src/background-script/setup'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 
 const countAnnots = (res) => {

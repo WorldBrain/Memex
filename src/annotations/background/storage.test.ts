@@ -5,7 +5,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
-import { AnnotationPrivacyLevels } from '../types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 async function insertTestData({
     storageManager,

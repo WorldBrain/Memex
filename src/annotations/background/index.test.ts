@@ -18,7 +18,7 @@ import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
 } from '@worldbrain/memex-storage/lib/lists/constants'
-import { AnnotationPrivacyLevels } from '../types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking

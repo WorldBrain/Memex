@@ -8,7 +8,8 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonLogicOptions,
 } from './logic'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'

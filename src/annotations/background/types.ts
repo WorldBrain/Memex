@@ -3,7 +3,7 @@ import {
     RemotePositionalFunction,
     RemoteFunction,
 } from 'src/util/webextensionRPC'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import {
@@ -12,6 +12,7 @@ import {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     createDirectLink: RemotePositionalFunction<Role, any[], any>

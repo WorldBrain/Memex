@@ -12,7 +12,7 @@ import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import * as anchoring from 'src/highlighting/ui/anchoring'
 import {

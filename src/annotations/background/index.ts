@@ -24,8 +24,8 @@ import {
     Annotation,
     AnnotationSender,
     AnnotListEntry,
-    AnnotationPrivacyLevels,
 } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'

@@ -14,7 +14,7 @@ import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integra
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)

@@ -22,7 +22,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'

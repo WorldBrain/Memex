@@ -14,7 +14,7 @@ import * as sharingTestData from 'src/content-sharing/background/index.test.data
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const setupLogicHelper = async ({
     device,

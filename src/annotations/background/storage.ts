@@ -18,9 +18,9 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import {
     Annotation,
     AnnotListEntry,
-    AnnotationPrivacyLevels,
     AnnotationPrivacyLevel,
 } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class AnnotationStorage extends StorageModule {

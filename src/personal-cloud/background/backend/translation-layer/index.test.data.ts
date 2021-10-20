@@ -1,7 +1,7 @@
 import type StorageManager from '@worldbrain/storex'
 import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export async function insertTestPages(storageManager: StorageManager) {

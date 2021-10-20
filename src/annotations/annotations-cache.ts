@@ -1,7 +1,8 @@
 import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import {

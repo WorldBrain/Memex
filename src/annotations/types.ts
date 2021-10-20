@@ -1,3 +1,4 @@
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { Anchor } from 'src/highlighting/types'
 
 // export interface Annotation {
@@ -110,10 +111,3 @@ export type TextTruncator = (
 ) => { text: string; isTooLong: boolean }
 
 export type SelectionIndices = [number, number]
-
-export enum AnnotationPrivacyLevels {
-    PROTECTED = 0,
-    PRIVATE = 100,
-    SHARED = 200,
-    SHARED_PROTECTED = 300,
-}

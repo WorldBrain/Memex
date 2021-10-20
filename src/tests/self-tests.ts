@@ -3,7 +3,7 @@ import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export function createSelfTests(options: {

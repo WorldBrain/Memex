@@ -13,7 +13,7 @@ import {
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
