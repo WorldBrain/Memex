@@ -10,6 +10,8 @@ export interface ContentSharingInterface
         shareToLists?: boolean
         queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
+        setBulkShareProtected?: boolean
+        skipPrivacyLevelUpdate?: boolean
     }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]

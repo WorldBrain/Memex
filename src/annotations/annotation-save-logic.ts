@@ -79,6 +79,7 @@ export async function createAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
                     shareToLists: true,
+                    skipPrivacyLevelUpdate: true,
                 })
             }
 
@@ -125,6 +126,7 @@ export async function updateAnnotation({
                         remoteAnnotationId,
                         annotationUrl: annotationData.localId,
                         shareToLists: true,
+                        skipPrivacyLevelUpdate: true,
                     }),
                 annotationsBG.setAnnotationPrivacyLevel({
                     annotation: annotationData.localId,

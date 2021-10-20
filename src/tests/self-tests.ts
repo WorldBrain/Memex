@@ -236,9 +236,7 @@ export function createSelfTests(options: {
             })
             await backgroundModules.contentSharing.shareAnnotation({
                 annotationUrl: publicAnnotationUrl,
-            })
-            await backgroundModules.contentSharing.shareAnnotationsToLists({
-                annotationUrls: [publicAnnotationUrl],
+                shareToLists: true,
             })
             await backgroundModules.directLinking.editAnnotation(
                 null,

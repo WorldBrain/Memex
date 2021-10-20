@@ -745,10 +745,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
             // BG calls that run automatically upon share menu opening
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
+            await contentSharing.shareAnnotation({
+                annotationUrl,
+                shareToLists: true,
             })
 
             await personalCloud.waitForSync()
