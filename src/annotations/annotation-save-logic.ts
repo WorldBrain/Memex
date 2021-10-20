@@ -7,7 +7,6 @@ import { shareOptsToPrivacyLvl } from './utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
-    shouldUnshare?: boolean
     shouldCopyShareLink?: boolean
     isBulkShareProtected?: boolean
 }
@@ -83,7 +82,7 @@ export async function createAnnotation({
                 })
             }
 
-            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+            await annotationsBG.setAnnotationPrivacyLevel({
                 annotation: annotationUrl,
                 privacyLevel: shareOptsToPrivacyLvl(shareOpts),
             })
@@ -121,17 +120,13 @@ export async function updateAnnotation({
             )
 
             await Promise.all([
-                shareOpts?.shouldUnshare
-                    ? contentSharingBG.unshareAnnotation({
-                          annotationUrl: annotationData.localId,
-                      })
-                    : shareOpts?.shouldShare &&
-                      contentSharingBG.shareAnnotation({
-                          remoteAnnotationId,
-                          annotationUrl: annotationData.localId,
-                          shareToLists: true,
-                      }),
-                annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+                shareOpts?.shouldShare &&
+                    contentSharingBG.shareAnnotation({
+                        remoteAnnotationId,
+                        annotationUrl: annotationData.localId,
+                        shareToLists: true,
+                    }),
+                annotationsBG.setAnnotationPrivacyLevel({
                     annotation: annotationData.localId,
                     privacyLevel: shareOptsToPrivacyLvl(shareOpts),
                 }),

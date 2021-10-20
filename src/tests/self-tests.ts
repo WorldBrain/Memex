@@ -136,7 +136,7 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
                 {},
                 {
                     annotation: publicAnnotation2,
@@ -155,7 +155,7 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
                 {},
                 {
                     annotation: publicAnnotation3,
@@ -176,7 +176,7 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
                 {},
                 {
                     annotation: publicAnnotation4,

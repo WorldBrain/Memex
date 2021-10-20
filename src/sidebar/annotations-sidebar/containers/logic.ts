@@ -720,7 +720,6 @@ export class SidebarContainerLogic extends UILogic<
                     shouldShare: event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
-                    shouldUnshare: existing.isShared && !event.shouldShare,
                 },
             )
         }

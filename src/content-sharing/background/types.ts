@@ -14,6 +14,7 @@ export interface ContentSharingInterface
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
+        setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     shareAnnotationsToLists(options: {
@@ -24,10 +25,9 @@ export interface ContentSharingInterface
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
-    unshareAnnotations(options: { annotationUrls: string[] }): Promise<void>
-    unshareAnnotation(options: {
-        annotationUrl: string
-        queueInteraction?: ContentSharingQueueInteraction
+    unshareAnnotations(options: {
+        annotationUrls: string[]
+        setBulkShareProtected?: boolean
     }): Promise<void>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {

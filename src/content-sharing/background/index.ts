@@ -51,7 +51,6 @@ export default class ContentSharingBackground {
             executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
-            unshareAnnotation: this.unshareAnnotation,
             unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
@@ -285,7 +284,8 @@ export default class ContentSharingBackground {
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
         options,
     ) => {
-        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
+        const { annotationStorage } = this.options
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
             { annotations: options.annotationUrls },
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
@@ -295,24 +295,12 @@ export default class ContentSharingBackground {
                     AnnotationPrivacyLevels.SHARED_PROTECTED,
                 ].includes(annotPrivacyLevels[annotationUrl]?.privacyLevel),
         )
-        await this.storage.deleteAnnotationMetadata({
-            localIds: nonProtectedAnnotations,
-        })
-    }
 
-    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
-        options,
-    ) => {
-        const remoteAnnotationId = (
-            await this.storage.getRemoteAnnotationIds({
-                localIds: [options.annotationUrl],
-            })
-        )[options.annotationUrl]
-        if (!remoteAnnotationId) {
-            return
-        }
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
+            annotations: nonProtectedAnnotations,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.PROTECTED
+                : AnnotationPrivacyLevels.PRIVATE,
         })
     }
 

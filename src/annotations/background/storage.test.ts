@@ -37,7 +37,7 @@ async function insertTestData({
             url: annot.url,
         } as any)
 
-        await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+        await annotationStorage.setAnnotationPrivacyLevel({
             annotation: annot.url,
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         })
@@ -196,7 +196,7 @@ describe('Annotations storage', () => {
 
                 const updatedWhen = new Date()
 
-                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                await annotationStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     updatedWhen,
@@ -214,7 +214,7 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                await annotationStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
                     updatedWhen,
@@ -232,7 +232,7 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.createOrUpdateAnnotationPrivacyLevel({
+                await annotationStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                     updatedWhen,

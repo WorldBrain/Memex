@@ -246,7 +246,39 @@ export default class AnnotationStorage extends StorageModule {
         })
     }
 
-    async createOrUpdateAnnotationPrivacyLevel(params: {
+    async setAnnotationPrivacyLevelBulk(params: {
+        annotations: string[]
+        privacyLevel: AnnotationPrivacyLevels
+        updatedWhen?: Date
+    }): Promise<void> {
+        const privacyLevels = await this.getPrivacyLevelsByAnnotation(params)
+
+        for (const annotation of params.annotations) {
+            if (privacyLevels[annotation] == null) {
+                await this.operation('createAnnotationPrivacyLevel', {
+                    id: AnnotationStorage.generateAnnotationPrivacyLevelId(),
+                    annotation,
+                    privacyLevel: params.privacyLevel,
+                    createdWhen: params.updatedWhen ?? new Date(),
+                })
+                continue
+            }
+
+            if (
+                privacyLevels[annotation].privacyLevel === params.privacyLevel
+            ) {
+                continue
+            }
+
+            await this.operation('updateAnnotationPrivacyLevel', {
+                annotation,
+                privacyLevel: params.privacyLevel,
+                updatedWhen: params.updatedWhen ?? new Date(),
+            })
+        }
+    }
+
+    async setAnnotationPrivacyLevel(params: {
         annotation: string
         privacyLevel: AnnotationPrivacyLevels
         updatedWhen?: Date

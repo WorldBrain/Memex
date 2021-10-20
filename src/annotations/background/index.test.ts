@@ -53,7 +53,7 @@ const createAnnotationStep = (args?: {
             DATA.ANNOT_1,
         )
         if (args?.protectAnnotation) {
-            await directLinking(setup).createOrUpdateAnnotationPrivacyLevel(
+            await directLinking(setup).setAnnotationPrivacyLevel(
                 { tab: DATA.TEST_TAB_1 },
                 {
                     annotation: annotUrl,

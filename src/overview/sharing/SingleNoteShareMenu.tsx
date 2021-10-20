@@ -72,7 +72,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await this.setRemoteLinkIfExists()
 
         if (isBulkShareProtected != null) {
-            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+            await annotationsBG.setAnnotationPrivacyLevel({
                 annotation: annotationUrl,
                 privacyLevel: shareOptsToPrivacyLvl({
                     shouldShare: true,
@@ -89,10 +89,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     private unshareAnnotation = async (isBulkShareProtected?: boolean) => {
         const { annotationUrl, annotationsBG, contentSharingBG } = this.props
-        await contentSharingBG.unshareAnnotation({ annotationUrl })
         this.setState({ showLink: false })
 
-        await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+        await annotationsBG.setAnnotationPrivacyLevel({
             annotation: annotationUrl,
             privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare: false,

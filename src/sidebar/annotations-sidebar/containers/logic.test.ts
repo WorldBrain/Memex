@@ -890,13 +890,10 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
-            await directLinking.createOrUpdateAnnotationPrivacyLevel(
-                undefined,
-                {
-                    annotation: annotationUrl2,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await directLinking.setAnnotationPrivacyLevel(undefined, {
+                annotation: annotationUrl2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             await contentSharing.waitForSync()
 
             const { sidebar, sidebarLogic } = await setupLogicHelper({
