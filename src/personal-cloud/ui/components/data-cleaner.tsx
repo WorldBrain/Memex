@@ -74,7 +74,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
                         your Memex that must be cleaned out.
                         <br />
                         <a href={readMoreLink} target="_blank">
-                            Read more >
+                            Read more &gt;
                         </a>
                     </Text>
                 </>
