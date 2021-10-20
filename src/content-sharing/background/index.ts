@@ -204,8 +204,10 @@ export default class ContentSharingBackground {
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (url) =>
                 !remoteIds[url] &&
-                annotPrivacyLevels[url]?.privacyLevel !==
+                ![
                     AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[url]?.privacyLevel),
         )
         for (const annnotationUrl of nonProtectedAnnotations) {
             await this.storage.storeAnnotationMetadata([
@@ -288,8 +290,10 @@ export default class ContentSharingBackground {
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (annotationUrl) =>
-                annotPrivacyLevels[annotationUrl]?.privacyLevel !==
-                AnnotationPrivacyLevels.PROTECTED,
+                ![
+                    AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[annotationUrl]?.privacyLevel),
         )
         await this.storage.deleteAnnotationMetadata({
             localIds: nonProtectedAnnotations,
