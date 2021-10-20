@@ -1,5 +1,7 @@
-import { TextTruncator } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { TextTruncator } from './types'
+import type { AnnotationShareOpts } from './annotation-save-logic'
 
 export const __OLD_LAST_SHARED_ANNOTS =
     '@ContentSharing-last-shared-annotation-timestamp'
@@ -46,4 +48,18 @@ export const truncateText: TextTruncator = (
     }
 
     return { isTooLong: false, text }
+}
+
+export function shareOptsToPrivacyLvl(
+    shareOpts?: AnnotationShareOpts,
+): AnnotationPrivacyLevels {
+    if (shareOpts?.shouldShare) {
+        return shareOpts.isBulkShareProtected
+            ? AnnotationPrivacyLevels.SHARED_PROTECTED
+            : AnnotationPrivacyLevels.SHARED
+    }
+
+    return shareOpts.isBulkShareProtected
+        ? AnnotationPrivacyLevels.PROTECTED
+        : AnnotationPrivacyLevels.PRIVATE
 }

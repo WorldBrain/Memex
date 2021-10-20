@@ -3,7 +3,7 @@ import type { AnnotationInterface } from './background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
-import { AnnotationPrivacyLevels } from './types'
+import { shareOptsToPrivacyLvl } from './utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -85,7 +85,7 @@ export async function createAnnotation({
 
             await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
                 annotation: annotationUrl,
-                privacyLevel: getPrivacyLevel(shareOpts),
+                privacyLevel: shareOptsToPrivacyLvl(shareOpts),
             })
 
             return annotationUrl
@@ -133,24 +133,10 @@ export async function updateAnnotation({
                       }),
                 annotationsBG.createOrUpdateAnnotationPrivacyLevel({
                     annotation: annotationData.localId,
-                    privacyLevel: getPrivacyLevel(shareOpts),
+                    privacyLevel: shareOptsToPrivacyLvl(shareOpts),
                 }),
             ])
             return annotationData.localId
         })(),
     }
-}
-
-function getPrivacyLevel(
-    shareOpts?: AnnotationShareOpts,
-): AnnotationPrivacyLevels {
-    if (shareOpts?.shouldShare) {
-        return shareOpts.isBulkShareProtected
-            ? AnnotationPrivacyLevels.SHARED_PROTECTED
-            : AnnotationPrivacyLevels.SHARED
-    }
-
-    return shareOpts.isBulkShareProtected
-        ? AnnotationPrivacyLevels.PROTECTED
-        : AnnotationPrivacyLevels.PRIVATE
 }

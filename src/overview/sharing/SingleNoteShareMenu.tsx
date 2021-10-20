@@ -5,7 +5,7 @@ import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -63,64 +63,55 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return true
     }
 
-    private async handleAnnotationProtection(
-        shouldProtect: boolean,
-        isShared: boolean,
-    ) {
-        const { annotationUrl, annotationsBG } = this.props
-
-        let privacyLevel: AnnotationPrivacyLevels
-        if (shouldProtect) {
-            privacyLevel = isShared
-                ? AnnotationPrivacyLevels.SHARED_PROTECTED
-                : AnnotationPrivacyLevels.PROTECTED
-        } else {
-            privacyLevel = isShared
-                ? AnnotationPrivacyLevels.SHARED
-                : AnnotationPrivacyLevels.PRIVATE
-        }
-
-        await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
-            annotation: annotationUrl,
-            privacyLevel,
-        })
-    }
-
-    private shareAnnotation = async (shouldProtect?: boolean) => {
-        const { annotationUrl, contentSharingBG } = this.props
+    private shareAnnotation = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, annotationsBG, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({
             annotationUrl,
             shareToLists: true,
         })
         await this.setRemoteLinkIfExists()
-        if (shouldProtect != null) {
-            await this.handleAnnotationProtection(shouldProtect, true)
+
+        if (isBulkShareProtected != null) {
+            await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+                annotation: annotationUrl,
+                privacyLevel: shareOptsToPrivacyLvl({
+                    shouldShare: true,
+                    isBulkShareProtected,
+                }),
+            })
         }
 
         this.props.postShareHook?.({
             isShared: true,
-            isProtected: shouldProtect,
+            isProtected: isBulkShareProtected,
         })
     }
 
-    private unshareAnnotation = async (shouldProtect?: boolean) => {
-        const { annotationUrl, contentSharingBG } = this.props
+    private unshareAnnotation = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, annotationsBG, contentSharingBG } = this.props
         await contentSharingBG.unshareAnnotation({ annotationUrl })
         this.setState({ showLink: false })
-        await this.handleAnnotationProtection(shouldProtect, false)
+
+        await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
+            annotation: annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: false,
+                isBulkShareProtected,
+            }),
+        })
 
         this.props.postShareHook?.({
             isShared: false,
-            isProtected: shouldProtect,
+            isProtected: isBulkShareProtected,
         })
     }
 
-    private handleSetShared = async (shouldProtect?: boolean) => {
+    private handleSetShared = async (isBulkShareProtected?: boolean) => {
         const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.shareAnnotation(shouldProtect)
+                await this.shareAnnotation(isBulkShareProtected)
             },
         )
 
@@ -128,12 +119,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await p
     }
 
-    private handleSetPrivate = async (shouldProtect?: boolean) => {
+    private handleSetPrivate = async (isBulkShareProtected?: boolean) => {
         const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation(shouldProtect)
+                await this.unshareAnnotation(isBulkShareProtected)
             },
         )
 
