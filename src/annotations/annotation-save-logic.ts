@@ -84,7 +84,7 @@ export async function createAnnotation({
             }
 
             await annotationsBG.createOrUpdateAnnotationPrivacyLevel({
-                annotation: annotationData.localId,
+                annotation: annotationUrl,
                 privacyLevel: getPrivacyLevel(shareOpts),
             })
 
@@ -147,7 +147,7 @@ function getPrivacyLevel(
     if (shareOpts?.shouldShare) {
         return shareOpts.isBulkShareProtected
             ? AnnotationPrivacyLevels.SHARED_PROTECTED
-            : AnnotationPrivacyLevels.PROTECTED
+            : AnnotationPrivacyLevels.SHARED
     }
 
     return shareOpts.isBulkShareProtected

@@ -207,9 +207,6 @@ export default class ContentSharingBackground {
                 annotPrivacyLevels[url]?.privacyLevel !==
                     AnnotationPrivacyLevels.PROTECTED,
         )
-        console.log('remote IDS:', remoteIds)
-        console.log('priv levels:', annotPrivacyLevels)
-        console.log('annots to share:', nonProtectedAnnotations)
         for (const annnotationUrl of nonProtectedAnnotations) {
             await this.storage.storeAnnotationMetadata([
                 {

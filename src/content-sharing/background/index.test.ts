@@ -14,6 +14,7 @@ import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integra
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
+import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -1305,13 +1306,21 @@ function makeShareAnnotationTest(options: {
                     )
                     const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                         {} as any,
-                        {
-                            ...data.ANNOTATION_1_2_DATA,
-                            isBulkShareProtected:
-                                options.testProtectedBulkShare,
-                        },
+                        data.ANNOTATION_1_2_DATA,
                         { skipPageIndexing: true },
                     )
+
+                    if (options.testProtectedBulkShare) {
+                        await setup.backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+                            {} as any,
+                            {
+                                annotation: secondAnnotationUrl,
+                                privacyLevel:
+                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                            },
+                        )
+                    }
+
                     if (options.annotationSharingMethod === 'shareAnnotation') {
                         await contentSharing.shareAnnotation({
                             annotationUrl: firstAnnotationUrl,

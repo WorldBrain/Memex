@@ -50,8 +50,17 @@ const createAnnotationStep = (args?: {
     execute: async ({ setup }) => {
         annotUrl = await directLinking(setup).createAnnotation(
             { tab: DATA.TEST_TAB_1 },
-            { ...DATA.ANNOT_1, isBulkShareProtected: args?.protectAnnotation },
+            DATA.ANNOT_1,
         )
+        if (args?.protectAnnotation) {
+            await directLinking(setup).createOrUpdateAnnotationPrivacyLevel(
+                { tab: DATA.TEST_TAB_1 },
+                {
+                    annotation: annotUrl,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+            )
+        }
         annotPrivacyLevel = await directLinking(
             setup,
         ).annotationStorage.findAnnotationPrivacyLevel({ annotation: annotUrl })

@@ -125,7 +125,7 @@ export function createSelfTests(options: {
                 { skipPageIndexing: true },
             )
             console.log(`Added private note to '${testPageUrl}'`)
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation2 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
@@ -133,12 +133,18 @@ export function createSelfTests(options: {
                     pageUrl: normalizedTestPageUrl,
                     comment: `Yet another test comment! This one's protected`,
                     createdWhen: new Date('2021-07-21'),
-                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
             )
+            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation2,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+            )
             console.log(`Added protected note to '${testPageUrl}'`)
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
@@ -146,14 +152,20 @@ export function createSelfTests(options: {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: upload error`,
                     createdWhen: new Date('2021-07-21'),
-                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
+            )
+            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation3,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
             )
             console.log(
                 `Added upload error generating note to '${testPageUrl}'`,
             )
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation4 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
@@ -161,9 +173,15 @@ export function createSelfTests(options: {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: download error`,
                     createdWhen: new Date('2021-07-21'),
-                    isBulkShareProtected: true,
                 },
                 { skipPageIndexing: true },
+            )
+            await backgroundModules.directLinking.createOrUpdateAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation4,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
             )
             console.log(
                 `Added download error generating note to '${testPageUrl}'`,

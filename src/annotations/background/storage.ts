@@ -253,20 +253,25 @@ export default class AnnotationStorage extends StorageModule {
     }): Promise<void> {
         const existing = await this.findAnnotationPrivacyLevel(params)
 
-        if (existing != null) {
-            await this.operation('updateAnnotationPrivacyLevel', {
-                annotation: params.annotation,
-                privacyLevel: params.privacyLevel,
-                updatedWhen: params.updatedWhen ?? new Date(),
-            })
-        } else {
+        if (existing == null) {
             await this.operation('createAnnotationPrivacyLevel', {
                 id: AnnotationStorage.generateAnnotationPrivacyLevelId(),
                 annotation: params.annotation,
                 privacyLevel: params.privacyLevel,
                 createdWhen: params.updatedWhen ?? new Date(),
             })
+            return
         }
+
+        if (existing.privacyLevel === params.privacyLevel) {
+            return
+        }
+
+        await this.operation('updateAnnotationPrivacyLevel', {
+            annotation: params.annotation,
+            privacyLevel: params.privacyLevel,
+            updatedWhen: params.updatedWhen ?? new Date(),
+        })
     }
 
     async getAnnotations(urls: string[]): Promise<Annotation[]> {
