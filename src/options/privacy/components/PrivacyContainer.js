@@ -7,22 +7,22 @@ import * as selectors from '../selectors'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../constants'
 import Privacy from './Privacy'
 
-class PrivacyContainer extends React.PureComponent {
-    static DEF_TRACKING = true
+const DEF_TRACKING = true
 
+class PrivacyContainer extends React.PureComponent {
     static propTypes = {
         trackChange: PropTypes.func.isRequired,
     }
 
     async componentDidMount() {
         const storage = await browser.storage.local.get({
-            [SHOULD_TRACK]: PrivacyContainer.DEF_TRACKING,
+            [SHOULD_TRACK]: DEF_TRACKING,
         })
 
         this.props.trackChange(storage[SHOULD_TRACK], true)
     }
 
-    handleTrackChange = async event => {
+    handleTrackChange = async (event) => {
         const shouldTrack =
             event.target.value === 'y' || event.target.value === true
 
@@ -46,16 +46,13 @@ class PrivacyContainer extends React.PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     shouldTrack: selectors.shouldTrack(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     trackChange: (shouldTrack, skipEventTrack = false) =>
         dispatch(actions.toggleTrackingOptOut(shouldTrack, skipEventTrack)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(PrivacyContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(PrivacyContainer)

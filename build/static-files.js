@@ -74,11 +74,6 @@ export const copyPatterns = [
         to: 'pdfjs/images/[name].[ext]',
     },
 
-    { from: 'node_modules/pdfjs-dist/build/pdf.js', to: 'build/' },
-    {
-        from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js',
-        to: 'build/',
-    },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.js', to: 'build/' },
 
     {
@@ -94,7 +89,8 @@ export const copyPatterns = [
         to: 'fonts/Poppins/[name].[ext]',
     },
     {
-        from: 'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
+        from:
+            'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
         to: 'fonts/material-icons/[name].[ext]',
         toType: 'template',
     },

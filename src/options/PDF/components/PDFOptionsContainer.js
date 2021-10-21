@@ -8,16 +8,16 @@ import { SHOULD_OPEN_STORAGE_KEY as SHOULD_OPEN } from '../constants'
 import PDFOptions from './PDFOptions'
 import { pdf } from 'src/util/remote-functions-background'
 
-class PDFOptionsContainer extends React.PureComponent {
-    static DEF_OPENING = false
+const DEF_OPENING = false
 
+class PDFOptionsContainer extends React.PureComponent {
     static propTypes = {
         openChange: PropTypes.func.isRequired,
     }
 
     async componentDidMount() {
         const storage = await browser.storage.local.get({
-            [SHOULD_OPEN]: PDFOptionsContainer.DEF_OPENING,
+            [SHOULD_OPEN]: DEF_OPENING,
         })
 
         this.props.openChange(storage[SHOULD_OPEN], true)
