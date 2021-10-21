@@ -8,6 +8,7 @@ export const TEST_PDF_METADATA = {
         IsAcroFormPresent: false,
         IsCollectionPresent: false,
         IsLinearized: false,
+        IsSignaturesPresent: false,
         IsXFAPresent: false,
         PDFFormatVersion: '1.4',
         Producer: 'Skia/PDF m93 Google Docs Renderer',
