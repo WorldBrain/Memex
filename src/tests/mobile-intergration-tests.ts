@@ -96,7 +96,6 @@ export async function setupMobileIntegrationTest(options?: {
         }),
         disableEncryption: true,
     })
-    sync.initialSync.wrtc = wrtc
     registerModuleMapCollections(storageManager.registry, {
         ...storageModules,
         clientSyncLog: sync.clientSyncLog,
