@@ -47,7 +47,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderTutorialStep = () => (
         <div className={styles.welcomeScreen}>
             <div className={styles.titleText}>
-                Learn the basics nvmin less than 4 minutes
+                Learn the basics in less than 4 minutes
             </div>
             <div className={styles.videoBox}>
                 <iframe

@@ -1,4 +1,3 @@
-const wrtc = require('wrtc')
 import StorageManager from '@worldbrain/storex'
 import { TypeORMStorageBackend } from '@worldbrain/storex-backend-typeorm'
 import { extractUrlParts, normalizeUrl } from '@worldbrain/memex-url-utils'
