@@ -101,8 +101,10 @@ export async function updateAnnotation({
         const remoteAnnotMetadata = await contentSharingBG.getRemoteAnnotationMetadata(
             { annotationUrls: [annotationData.localId] },
         )
-        remoteAnnotationId = remoteAnnotMetadata[annotationData.localId]
-            ?.remoteId as string
+
+        remoteAnnotationId =
+            (remoteAnnotMetadata[annotationData.localId]?.remoteId as string) ??
+            (await contentSharingBG.generateRemoteAnnotationId())
 
         if (shareOpts.shouldCopyShareLink) {
             await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
