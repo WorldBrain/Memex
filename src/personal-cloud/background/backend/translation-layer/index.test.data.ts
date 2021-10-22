@@ -107,12 +107,14 @@ export const LOCAL_TEST_DATA_V24 = {
             annotation: LOCAL_ANNOTATIONS_V24.first.url,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
             createdWhen: new Date(1625190554983),
+            updatedWhen: new Date(1625190554983),
         },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
-            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
             createdWhen: new Date(1625190554984),
+            updatedWhen: new Date(1625190554984),
         },
     },
     sharedAnnotationMetadata: {

@@ -1067,11 +1067,16 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
                 .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
+
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
                 .updateOneObject(
@@ -1080,7 +1085,7 @@ describe('Personal cloud translation layer', () => {
                             LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
                                 .id,
                     },
-                    { privacyLevel: AnnotationPrivacyLevels.PRIVATE },
+                    { privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED },
                 )
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
@@ -1101,10 +1106,12 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalAnnotation',
                     'personalAnnotationSelector',
-                    'personalAnnotationPrivacyLevel'
+                    'personalAnnotationPrivacyLevel',
+                    'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skipChanges: 7 }),
                 personalBlockStats: [blockStats({ usedBlocks: 3 })],
@@ -1112,13 +1119,21 @@ describe('Personal cloud translation layer', () => {
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
                 personalAnnotationSelector: [testSelectors.first],
-                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
+                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED }],
+                sharedAnnotation: [
+                    expect.objectContaining({
+                        selector: JSON.stringify(LOCAL_TEST_DATA_V24.annotations.first.selector),
+                        body: LOCAL_TEST_DATA_V24.annotations.first.body,
+                        comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                    })
+                ],
             })
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED } },
             ], { skip: 3 })
         })
 
