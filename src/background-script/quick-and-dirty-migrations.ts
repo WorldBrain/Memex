@@ -12,6 +12,10 @@ import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/consta
 import type { BackgroundModules } from './setup'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
+import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
+import type { LocalExtensionSettings } from './types'
+import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
+import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 
 export interface MigrationProps {
     db: Dexie
@@ -19,6 +23,7 @@ export interface MigrationProps {
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
     backgroundModules: Pick<BackgroundModules, 'readwise' | 'syncSettings'>
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
 }
 
 export interface Migrations {
@@ -34,6 +39,35 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This is the migration to bring over old pre-cloud user data to the new cloud-based
+     * model. Previously this was done by version number in the calling BG script class, though
+     * that didn't work nicely to cover 100% of users with our frequent hotfix releases post-cloud release.
+     */
+    [MIGRATION_PREFIX + 'migrate-to-cloud']: async ({
+        localExtSettingStore,
+        storex: storageManager,
+        backgroundModules: { syncSettings },
+    }) => {
+        if ((await localExtSettingStore.get('installTimestamp')) != null) {
+            return
+        }
+
+        await this.deps.syncSettingsStore.dashboard.set(
+            'subscribeBannerShownAfter',
+            Date.now(),
+        )
+        await syncSettings.__migrateLocalStorage()
+        await migrateInstallTime({
+            storageManager,
+            getOldInstallTime: () =>
+                (localExtSettingStore as BrowserSettingsStore<any>).__rawGet(
+                    __OLD_INSTALL_TIME_KEY,
+                ),
+            setInstallTime: (time) =>
+                localExtSettingStore.set('installTimestamp', time),
+        })
+    },
     /*
      * Post 3.0.0 cloud release, we forgot to migrate the users' Readwise keys from local storage to
      * the new synced settings collection. This meant that Readwise integration stopped working until

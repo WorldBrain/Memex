@@ -12,16 +12,14 @@ import * as utils from './utils'
 import type NotifsBackground from '../notifications/background'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
-import { migrations } from './quick-and-dirty-migrations'
+import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
 import { OVERVIEW_URL, __OLD_INSTALL_TIME_KEY } from 'src/constants'
-import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import type { ReadwiseBackground } from 'src/readwise-integration/background'
-import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
 
 // TODO: pass these deps down via constructor
 import {
@@ -121,39 +119,6 @@ class BackgroundScript {
         })
     }
 
-    async handleUpdateLogic(prevVersion: string, now = Date.now()) {
-        const {
-            storageManager,
-            localExtSettingStore,
-            storageAPI,
-            runtimeAPI,
-            syncSettingsBG,
-        } = this.deps
-
-        if (process.env['SKIP_UPDATE_NOTIFICATION'] !== 'true') {
-            await storageAPI.local.set({ [READ_STORAGE_FLAG]: false })
-        }
-
-        const { version: nextVersion } = runtimeAPI.getManifest()
-        if (
-            nextVersion === '3.0.0' ||
-            (nextVersion === '3.0.1' && prevVersion !== '3.0.0')
-        ) {
-            await this.deps.syncSettingsStore.dashboard.set(
-                'subscribeBannerShownAfter',
-                now,
-            )
-            await syncSettingsBG.migrateLocalStorage()
-            await migrateInstallTime({
-                storageManager,
-                getOldInstallTime: () =>
-                    localExtSettingStore.__rawGet(__OLD_INSTALL_TIME_KEY),
-                setInstallTime: (time) =>
-                    localExtSettingStore.set('installTimestamp', time),
-            })
-        }
-    }
-
     /**
      * Runs on both extension update and install.
      */
@@ -175,8 +140,7 @@ class BackgroundScript {
                     return this.handleInstallLogic()
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
-                    await this.handleUnifiedLogic()
-                    return this.handleUpdateLogic(details.previousVersion!)
+                    return this.handleUnifiedLogic()
                 default:
             }
         })
@@ -191,11 +155,14 @@ class BackgroundScript {
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
-    private async runQuickAndDirtyMigrations() {
+    private async runQuickAndDirtyMigrations(allowLegacyMigrations = false) {
         for (const [storageKey, migration] of Object.entries(migrations)) {
             const storage = await this.deps.storageAPI.local.get(storageKey)
+            const isLegacyMigration = allowLegacyMigrations
+                ? false
+                : !storageKey.startsWith(MIGRATION_PREFIX)
 
-            if (storage[storageKey]) {
+            if (storage[storageKey] || isLegacyMigration) {
                 continue
             }
 
@@ -204,6 +171,7 @@ class BackgroundScript {
                 db: this.deps.storageManager.backend['dexieInstance'],
                 localStorage: this.deps.storageAPI.local,
                 normalizeUrl: this.deps.urlNormalizer,
+                localExtSettingStore: this.deps.localExtSettingStore,
                 backgroundModules: {
                     readwise: this.deps.readwiseBG,
                     syncSettings: this.deps.syncSettingsBG,

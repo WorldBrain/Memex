@@ -26,6 +26,8 @@ async function setupTest() {
         db: setup.storageManager.backend['dexieInstance'],
         localStorage: setup.browserAPIs.storage.local,
         backgroundModules: setup.backgroundModules,
+        localExtSettingStore:
+            setup.backgroundModules.personalCloud.options.localExtSettingStore,
         normalizeUrl,
     }
 

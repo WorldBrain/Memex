@@ -5,6 +5,7 @@ export type SyncSettingValue =
     | number
     | string[]
     | number[]
+    | boolean
     | { [key: string]: any }
 
 export interface SyncSetting {
