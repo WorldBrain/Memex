@@ -74,6 +74,7 @@ export const copyPatterns = [
         to: 'pdfjs/images/[name].[ext]',
     },
 
+    { from: 'node_modules/pdfjs-dist/build/pdf.js', to: 'build/' },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.js', to: 'build/' },
 
     {
