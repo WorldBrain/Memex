@@ -6,6 +6,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { Annotation } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 
 const countAnnots = (res) => {
     return res.docs.reduce(
@@ -93,15 +94,16 @@ describe('Annotations search', () => {
                         excludeFromLists: false,
                     })
             }
-            if (annot.isProtected) {
-                await storageManager
-                    .collection('annotationPrivacyLevels')
-                    .createObject({
-                        annotation: annot.object.url,
-                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                        createdWhen: new Date(),
-                    })
-            }
+            await storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject({
+                    annotation: annot.object.url,
+                    privacyLevel: shareOptsToPrivacyLvl({
+                        isBulkShareProtected: annot.isProtected,
+                        shouldShare: annot.isShared,
+                    }),
+                    createdWhen: new Date(),
+                })
         }
 
         // Insert bookmarks
