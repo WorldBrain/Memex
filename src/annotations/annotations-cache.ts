@@ -45,16 +45,16 @@ export const createAnnotationsCache = (
                     },
                 )
 
-                const annotationShareMetadata = await bgModules.contentSharing.getRemoteAnnotationMetadata(
-                    { annotationUrls },
-                )
-
                 return annotations.map((a) => ({
                     ...a,
-                    isShared: !!annotationShareMetadata[a.url],
-                    isBulkShareProtected:
-                        privacyLevels[a.url] ===
+                    isShared: [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevels[a.url]),
+                    isBulkShareProtected: [
                         AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevels[a.url]),
                 }))
             },
             create: async (annotation, shareOpts) => {

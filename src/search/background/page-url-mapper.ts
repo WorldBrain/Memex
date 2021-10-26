@@ -252,17 +252,22 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .where('annotation')
             .anyOf(annotUrls)
             .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
-                if (privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                if (
+                    [
+                        AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
                     protectedAnnotUrlsSet.add(annotation)
                 }
-            })
-
-        await this.backend.dexieInstance
-            .table('sharedAnnotationMetadata')
-            .where('localId')
-            .anyOf(annotUrls)
-            .each((shareMetadata: { localId: string }) => {
-                sharedAnnotUrlsSet.add(shareMetadata.localId)
+                if (
+                    [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
+                    sharedAnnotUrlsSet.add(annotation)
+                }
             })
 
         annots.forEach((annot) => {
