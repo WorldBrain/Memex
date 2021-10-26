@@ -246,7 +246,7 @@ const StyledTextArea = styled.textarea`
     padding: 10px 7px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
     width: auto;
-    min-height: 40px;
+    min-height: 70px;
 
     &::placeholder {
         color: ${(props) => props.theme.colors.primary};
