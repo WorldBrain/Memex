@@ -188,8 +188,8 @@ export default class ContentSharingBackground {
             await this.options.annotationStorage.setAnnotationPrivacyLevel({
                 annotation: options.annotationUrl,
                 privacyLevel: options.setBulkShareProtected
-                    ? AnnotationPrivacyLevels.PROTECTED
-                    : AnnotationPrivacyLevels.PRIVATE,
+                    ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                    : AnnotationPrivacyLevels.SHARED,
             })
         }
 
