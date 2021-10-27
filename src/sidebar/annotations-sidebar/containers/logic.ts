@@ -218,12 +218,33 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: CachedAnnotation[]) => {
+    private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
-            annotations: { $set: annotations },
+            annotations: {
+                // TODO: This complexity is a result of the fact that we're allowing changes to the share
+                //   state outside of the annots cache (SingleNoteShareMenu). We should eventually move all
+                //   data interactions to be done via the cache
+                $apply: (previousAnnots: Annotation[]) => {
+                    const previousAnnotsByUrl = new Map<string, Annotation>()
+                    previousAnnots.forEach((annot) =>
+                        previousAnnotsByUrl.set(annot.url, annot),
+                    )
+                    return nextAnnotations.map((annot) => {
+                        const prev = previousAnnotsByUrl.get(annot.url)
+
+                        return {
+                            ...annot,
+                            isShared: prev?.isShared ?? annot.isShared,
+                            isBulkShareProtected:
+                                prev?.isBulkShareProtected ??
+                                annot.isBulkShareProtected,
+                        }
+                    })
+                },
+            },
             editForms: {
                 $apply: (editForms: EditForms) => {
-                    for (const { url } of annotations) {
+                    for (const { url } of nextAnnotations) {
                         if (editForms[url] == null) {
                             editForms[url] = { ...INIT_FORM_STATE }
                         }

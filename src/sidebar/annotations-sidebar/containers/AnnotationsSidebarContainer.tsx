@@ -311,15 +311,16 @@ export class AnnotationsSidebarContainer<
         if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
             return null
         }
-        const currentAnnotation = this.props.annotationsCache.getAnnotationById(
-            currentAnnotationId,
+
+        const currentAnnotation = this.state.annotations.find(
+            (annot) => annot.url === currentAnnotationId,
         )
 
         return (
             <ShareMenuWrapper>
                 <HoverBox width="320px">
                     <SingleNoteShareMenu
-                        isShared={currentAnnotation.isShared}
+                        isShared={currentAnnotation?.isShared}
                         shareImmediately={this.state.immediatelyShareNotes}
                         contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}
