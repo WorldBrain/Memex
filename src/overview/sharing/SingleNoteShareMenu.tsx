@@ -51,14 +51,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLinkIfExists = async (): Promise<boolean> => {
-        const { annotationUrl, contentSharingBG } = this.props
+        const { annotationUrl, contentSharingBG, isShared } = this.props
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
         if (!link) {
             return false
         }
-        this.setState({ link, showLink: true })
+        this.setState({ link, showLink: isShared })
         await this.handleLinkCopy()
         return true
     }
