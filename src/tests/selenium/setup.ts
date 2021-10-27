@@ -1,8 +1,8 @@
 import { WebDriver, Builder, Capabilities } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import firefox from 'selenium-webdriver/firefox'
-import 'chromedriver'
-import 'geckodriver'
+//import 'chromedriver'
+//import 'geckodriver'
 import expect from 'expect'
 
 import {
@@ -53,24 +53,24 @@ export function setupChromeDriverWithExtension(props: {
     return driver
 }
 
-export async function setupTest({
-    initUrl = EXT_OVERVIEW_URL,
-}: TestSetupProps): Promise<TestDependencies> {
-    const driver = await setupChromeDriverWithExtension({
-        maximizeWindow: true,
-    })
-    // const driver = await setupFirefoxDriverWithExtension({})
+// export async function setupTest({
+//     initUrl = EXT_OVERVIEW_URL,
+// }: TestSetupProps): Promise<TestDependencies> {
+//     const driver = await setupChromeDriverWithExtension({
+//         maximizeWindow: true,
+//     })
+//     // const driver = await setupFirefoxDriverWithExtension({})
 
-    await driver.get(initUrl)
-    const currentUrl = await driver.getCurrentUrl()
-    expect(currentUrl).toContain(initUrl)
+//     await driver.get(initUrl)
+//     const currentUrl = await driver.getCurrentUrl()
+//     expect(currentUrl).toContain(initUrl)
 
-    // The new installation tab often pops up and steals focus
-    // Make sure focus is set to the tab we set
-    await driver.switchTo().window((await driver.getAllWindowHandles())[0])
+//     // The new installation tab often pops up and steals focus
+//     // Make sure focus is set to the tab we set
+//     await driver.switchTo().window((await driver.getAllWindowHandles())[0])
 
-    return { driver }
-}
+//     return { driver }
+// }
 
 export function makeTestFactory() {
     type TestFunction = (deps: TestDependencies) => Promise<void>
@@ -80,16 +80,15 @@ export function makeTestFactory() {
         test: TestFunction,
         props?: TestSetupProps,
     ) {
-        it(description, async () => {
-            const deps = await setupTest(props ?? {})
-
-            try {
-                await test(deps)
-            } catch (err) {
-                throw err
-            } finally {
-                await deps.driver.quit()
-            }
-        })
+        // it(description, async () => {
+        //     //const deps = await setupTest(props ?? {})
+        //     try {
+        //         await test(deps)
+        //     } catch (err) {
+        //         throw err
+        //     } finally {
+        //         await deps.driver.quit()
+        //     }
+        // })
     }
 }

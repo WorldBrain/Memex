@@ -1,12 +1,11 @@
-import { Storage } from 'webextension-polyfill-ts'
-import { LimitedBrowserStorage } from './tests/browser-storage'
+import type { LimitedBrowserStorage } from './tests/browser-storage'
 
 export interface SettingStore<Settings> {
     set<Key extends keyof Settings>(
         key: Key,
         value: Settings[Key],
     ): Promise<void>
-    get<Key extends keyof Settings>(key: Key): Promise<Settings[Key]>
+    get<Key extends keyof Settings>(key: Key): Promise<Settings[Key] | null>
 }
 
 export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {

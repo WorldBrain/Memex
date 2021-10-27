@@ -61,7 +61,7 @@
         "data:*",
         "filesystem:/*"
     ],
-    "content_security_policy": "script-src 'unsafe-eval' 'self'; object-src 'self'; connect-src http: https: data: blob: wss:",
+    "content_security_policy": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss:",
 
     "omnibox": {
         "keyword": "m"

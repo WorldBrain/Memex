@@ -1,4 +1,3 @@
-const wrtc = require('wrtc')
 import StorageManager from '@worldbrain/storex'
 import { TypeORMStorageBackend } from '@worldbrain/storex-backend-typeorm'
 import { extractUrlParts, normalizeUrl } from '@worldbrain/memex-url-utils'
@@ -97,7 +96,6 @@ export async function setupMobileIntegrationTest(options?: {
         }),
         disableEncryption: true,
     })
-    sync.initialSync.wrtc = wrtc
     registerModuleMapCollections(storageManager.registry, {
         ...storageModules,
         clientSyncLog: sync.clientSyncLog,

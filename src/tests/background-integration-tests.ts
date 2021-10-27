@@ -2,7 +2,6 @@ import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import expect from 'expect'
 import fetchMock from 'fetch-mock'
-const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
@@ -216,7 +215,6 @@ export async function setupBackgroundIntegrationTest(
         }),
         generateServerId: () => nextServerId++,
     })
-    backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections({

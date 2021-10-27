@@ -5,6 +5,7 @@ import type { SyncSettingValue, RemoteSyncSettingsInterface } from './types'
 import SyncSettingsStorage from './storage'
 import { localStorageToSettingsStorage } from './migrate'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { SETTING_NAMES } from './constants'
 
 export interface Dependencies {
     storageManager: StorageManager
@@ -40,7 +41,8 @@ export class SyncSettingsBackground implements LimitedBrowserStorage {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    async migrateLocalStorage() {
+    // TODO: phase out post-cloud release
+    async __migrateLocalStorage() {
         const { localBrowserStorage } = this.options
 
         const storageValues = await localBrowserStorage.get(null)
