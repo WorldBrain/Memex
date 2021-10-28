@@ -364,7 +364,9 @@ export default class Ribbon extends Component<Props, State> {
                                     </>
                                 )}
                                 <ButtonTooltip
-                                    tooltipText="Search Dashboard"
+                                    tooltipText={this.getTooltipText(
+                                        'openDashboard',
+                                    )}
                                     position="leftNarrow"
                                 >
                                     <div

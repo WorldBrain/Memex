@@ -4,6 +4,12 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.extraPanel {
+    all: initial;
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
 .horizontalLine {
     width: 18px;
     border: solid 0.5px #d8d8d8;
