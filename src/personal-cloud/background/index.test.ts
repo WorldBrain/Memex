@@ -255,6 +255,7 @@ describe('Personal cloud', () => {
     }) => {
         const { setups, serverStorage } = await setupSyncBackgroundTest({
             deviceCount: 2,
+            enableFailsafes: true,
         })
         // setups[0].backgroundModules.personalCloud.debug = true
         // setups[1].backgroundModules.personalCloud.debug = true
