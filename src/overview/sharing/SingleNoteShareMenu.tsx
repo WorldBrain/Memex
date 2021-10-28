@@ -59,7 +59,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             return false
         }
         this.setState({ link, showLink: isShared })
-        await this.handleLinkCopy()
         return true
     }
 
@@ -78,6 +77,10 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 isBulkShareProtected,
             }),
         })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+        await this.props.copyLink(link)
 
         this.props.postShareHook?.({
             isShared: true,
