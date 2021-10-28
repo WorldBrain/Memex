@@ -40,9 +40,8 @@ import { main as searchInjectionMain } from 'src/content-scripts/content_script/
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
-import { browser } from 'webextension-polyfill-ts'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -211,6 +210,8 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
+                isFeatureEnabled: (feature) =>
+                    runInBackground<FeaturesInterface>().getFeature(feature),
             })
             components.tooltip?.resolve()
         },
