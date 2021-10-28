@@ -320,6 +320,7 @@ export async function setupSyncBackgroundTest(
 
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
+        setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
 
         if (!options.startWithSyncDisabled) {
             await setup.backgroundModules.personalCloud.enableSync()
