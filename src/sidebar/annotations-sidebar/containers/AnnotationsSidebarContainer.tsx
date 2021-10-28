@@ -312,10 +312,15 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
+        const currentAnnotation = this.state.annotations.find(
+            (annot) => annot.url === currentAnnotationId,
+        )
+
         return (
             <ShareMenuWrapper>
                 <HoverBox width="320px">
                     <SingleNoteShareMenu
+                        isShared={currentAnnotation?.isShared}
                         shareImmediately={this.state.immediatelyShareNotes}
                         contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}

@@ -1716,7 +1716,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shouldShare: event.shouldShare,
                         shouldCopyShareLink: event.shouldShare,
                         isBulkShareProtected: event.isProtected,
-                        shouldUnshare: noteData.isShared && !event.shouldShare,
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,

@@ -8,7 +8,8 @@ import {
     INITIAL_RIBBON_COMMENT_BOX_STATE,
     RibbonLogicOptions,
 } from './logic'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
@@ -242,18 +243,17 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.commentBox).toEqual({
             ...INITIAL_RIBBON_COMMENT_BOX_STATE,
         })
+        const [savedAnnotation] = (await device.storageManager
+            .collection('annotations')
+            .findObjects({})) as Annotation[]
 
-        expect(
-            await device.storageManager
-                .collection('annotations')
-                .findObjects({}),
-        ).toEqual([
+        expect(savedAnnotation).toEqual(
             expect.objectContaining({
                 comment: COMMENT_TEXT,
                 pageTitle: 'Foo.com: Home',
                 pageUrl: 'foo.com',
             }),
-        ])
+        )
 
         expect(
             await device.storageManager
@@ -265,7 +265,12 @@ describe('Ribbon logic', () => {
             await device.storageManager
                 .collection('annotationPrivacyLevels')
                 .findObjects({}),
-        ).toEqual([])
+        ).toEqual([
+            expect.objectContaining({
+                annotation: savedAnnotation.url,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            }),
+        ])
 
         expect(
             await device.storageManager.collection('tags').findObjects({}),
@@ -386,7 +391,12 @@ describe('Ribbon logic', () => {
             await device.storageManager
                 .collection('annotationPrivacyLevels')
                 .findObjects({}),
-        ).toEqual([])
+        ).toEqual([
+            expect.objectContaining({
+                annotation: annotations[0].url,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            }),
+        ])
 
         expect(
             await device.storageManager.collection('tags').findObjects({}),
@@ -453,7 +463,14 @@ describe('Ribbon logic', () => {
             await device.storageManager
                 .collection('annotationPrivacyLevels')
                 .findObjects({}),
-        ).toEqual([])
+        ).toEqual([
+            {
+                id: expect.any(Number),
+                annotation: savedAnnotation.url,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                createdWhen: expect.any(Date),
+            },
+        ])
 
         expect(
             await device.storageManager.collection('tags').findObjects({}),
@@ -521,7 +538,7 @@ describe('Ribbon logic', () => {
             {
                 id: expect.any(Number),
                 annotation: savedAnnotation.url,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                 createdWhen: expect.any(Date),
             },
         ])

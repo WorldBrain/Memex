@@ -14,7 +14,7 @@ import * as sharingTestData from 'src/content-sharing/background/index.test.data
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const setupLogicHelper = async ({
     device,
@@ -745,10 +745,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
             // BG calls that run automatically upon share menu opening
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
+            await contentSharing.shareAnnotation({
+                annotationUrl,
+                shareToLists: true,
             })
 
             await personalCloud.waitForSync()
@@ -890,8 +889,9 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
-            await directLinking.protectAnnotation(undefined, {
+            await directLinking.setAnnotationPrivacyLevel(undefined, {
                 annotation: annotationUrl2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
             await contentSharing.waitForSync()
 

@@ -1,7 +1,8 @@
 import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import {
@@ -44,16 +45,16 @@ export const createAnnotationsCache = (
                     },
                 )
 
-                const annotationShareMetadata = await bgModules.contentSharing.getRemoteAnnotationMetadata(
-                    { annotationUrls },
-                )
-
                 return annotations.map((a) => ({
                     ...a,
-                    isShared: !!annotationShareMetadata[a.url],
-                    isBulkShareProtected:
-                        privacyLevels[a.url] ===
+                    isShared: [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevels[a.url]),
+                    isBulkShareProtected: [
                         AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevels[a.url]),
                 }))
             },
             create: async (annotation, shareOpts) => {
@@ -251,11 +252,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
 
+        const previousAnnotation = stateBeforeModifications[resultIndex]
         const nextAnnotation = {
             ...annotation,
             lastEdited: new Date(),
-            isShared: shareOpts?.shouldShare,
-            isBulkShareProtected: shareOpts?.isBulkShareProtected,
+            isShared: shareOpts?.shouldShare ?? previousAnnotation.isShared,
+            isBulkShareProtected:
+                shareOpts?.isBulkShareProtected ??
+                previousAnnotation.isBulkShareProtected,
         }
 
         this.annotations = [
@@ -268,16 +272,22 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
-            await this.dependencies.backendOperations.update(
-                annotation,
-                shareOpts,
-            )
+            const hasAnnotationChanged =
+                previousAnnotation.comment.trim() !==
+                    nextAnnotation.comment.trim() ||
+                previousAnnotation.isShared !== nextAnnotation.isShared ||
+                previousAnnotation.isBulkShareProtected !==
+                    nextAnnotation.isBulkShareProtected
+
+            if (hasAnnotationChanged) {
+                await this.dependencies.backendOperations.update(
+                    nextAnnotation,
+                    shareOpts,
+                )
+            }
 
             if (
-                haveTagsChanged(
-                    stateBeforeModifications[resultIndex]?.tags ?? [],
-                    annotation.tags,
-                )
+                haveTagsChanged(previousAnnotation.tags ?? [], annotation.tags)
             ) {
                 await this.dependencies.backendOperations.updateTags(
                     annotation.url,

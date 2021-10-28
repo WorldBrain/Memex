@@ -4,7 +4,7 @@ import {
     AnnotPage,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { ListData } from './lists-sidebar/types'
 
 const pageDataToSearchRes = (

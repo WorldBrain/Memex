@@ -2,10 +2,8 @@ import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
 import analytics from 'src/analytics'
-import {
-    Annotation as AnnotationFlawed,
-    AnnotationPrivacyLevels,
-} from 'src/annotations/types'
+import { Annotation as AnnotationFlawed } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
