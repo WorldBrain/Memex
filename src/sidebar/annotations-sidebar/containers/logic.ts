@@ -24,7 +24,6 @@ import type {
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { generateUrl } from 'src/annotations/utils'
-import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
@@ -723,27 +722,18 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
 
-        const somethingChanged = !(
-            existing.comment === comment &&
-            areTagsEquivalent(existing.tags, form.tags) &&
-            existing.isShared === event.shouldShare &&
-            existing.isBulkShareProtected === event.isProtected
+        await this.options.annotationsCache.update(
+            {
+                ...existing,
+                comment,
+                tags: form.tags,
+            },
+            {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected: event.isProtected,
+            },
         )
-
-        if (somethingChanged) {
-            await this.options.annotationsCache.update(
-                {
-                    ...existing,
-                    comment,
-                    tags: form.tags,
-                },
-                {
-                    shouldShare: event.shouldShare,
-                    shouldCopyShareLink: event.shouldShare,
-                    isBulkShareProtected: event.isProtected,
-                },
-            )
-        }
 
         this.emitMutation({
             annotationModes: {
