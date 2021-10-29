@@ -1006,7 +1006,16 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('annotations')
                 .createObject(LOCAL_TEST_DATA_V24.annotations.second)
-            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second,
+                )
             await setups[0].storageManager
                 .collection('annotationPrivacyLevels')
                 .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
@@ -1021,6 +1030,7 @@ describe('Personal cloud translation layer', () => {
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testAnnotations = remoteData.personalAnnotation
+            const testAnnotationShares = remoteData.personalAnnotationShare
             const testSelectors = remoteData.personalAnnotationSelector
             const testPrivacyLevels = remoteData.personalAnnotationPrivacyLevel
 
@@ -1034,10 +1044,13 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalAnnotation',
                     'personalAnnotationSelector',
-                    'personalAnnotationPrivacyLevel'
+                    'personalAnnotationPrivacyLevel',
+                    'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
+                    [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
                 ], { skipChanges: 7 }),
@@ -1047,10 +1060,22 @@ describe('Personal cloud translation layer', () => {
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
                 personalAnnotationSelector: [testSelectors.first],
                 personalAnnotationPrivacyLevel: [testPrivacyLevels.first, testPrivacyLevels.second],
+                sharedAnnotation: [
+                    expect.objectContaining({
+                        selector: JSON.stringify(LOCAL_TEST_DATA_V24.annotations.first.selector),
+                        body: LOCAL_TEST_DATA_V24.annotations.first.body,
+                        comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                    }),
+                    expect.objectContaining({
+                        comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
+                    }),
+                ],
             })
 
             // prettier-ignore
             await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second },
             ], { skip: 4 })
@@ -1093,6 +1118,7 @@ describe('Personal cloud translation layer', () => {
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
             const testAnnotations = remoteData.personalAnnotation
+            const testAnnotationShares = remoteData.personalAnnotationShare
             const testSelectors = remoteData.personalAnnotationSelector
             const testPrivacyLevels = remoteData.personalAnnotationPrivacyLevel
 
@@ -1111,9 +1137,10 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
-                ], { skipChanges: 7 }),
+                ], { skipChanges: 6 }),
                 personalBlockStats: [blockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
