@@ -101,9 +101,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -144,9 +147,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment and tags", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
