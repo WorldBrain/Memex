@@ -2120,6 +2120,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
+                                    isOwnedList: true,
                                 },
                             },
                         },

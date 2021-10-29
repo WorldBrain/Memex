@@ -424,7 +424,9 @@ describe('Dashboard search results logic', () => {
 
         expect(
             Object.values(searchResults.state.listsSidebar.listData)[0],
-        ).toEqual(expect.objectContaining({ name: listName }))
+        ).toEqual(
+            expect.objectContaining({ name: listName, isOwnedList: true }),
+        )
         expect(
             await device.storageManager
                 .collection('customLists')
