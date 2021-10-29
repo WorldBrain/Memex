@@ -584,6 +584,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shareListId: { $set: listId },
                     },
                     listsSidebar: {
+                        showMoreMenuListId: { $set: undefined },
                         listData: {
                             [listId]: {
                                 remoteId: { $set: remoteListId ?? undefined },
@@ -2370,6 +2371,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 deletingListId: { $set: event.listId },
+            },
+            listsSidebar: {
+                showMoreMenuListId: { $set: undefined },
             },
         })
     }

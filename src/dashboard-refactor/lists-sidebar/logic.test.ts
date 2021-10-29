@@ -549,6 +549,12 @@ describe('Dashboard search results logic', () => {
             searchResults.state.listsSidebar.listData,
         )[0]
 
+        searchResults.processMutation({
+            listsSidebar: {
+                showMoreMenuListId: { $set: listId },
+            },
+        })
+
         expect(
             await device.storageManager
                 .collection('customLists')
@@ -571,11 +577,19 @@ describe('Dashboard search results logic', () => {
             }),
         )
 
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            listId,
+        )
         expect(searchResults.state.listsSidebar.listDeleteState).toEqual(
             'pristine',
         )
         expect(searchResults.state.modals.deletingListId).toEqual(undefined)
+
         await searchResults.processEvent('setDeletingListId', { listId })
+
+        expect(
+            searchResults.state.listsSidebar.showMoreMenuListId,
+        ).toBeUndefined()
         expect(searchResults.state.modals.deletingListId).toEqual(listId)
 
         const deleteP = searchResults.processEvent('confirmListDelete', null)
