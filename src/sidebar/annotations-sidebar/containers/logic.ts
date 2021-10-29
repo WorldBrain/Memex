@@ -13,7 +13,7 @@ import {
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
@@ -24,7 +24,6 @@ import type {
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import { generateUrl } from 'src/annotations/utils'
-import { areTagsEquivalent } from 'src/tags/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
@@ -218,12 +217,33 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: CachedAnnotation[]) => {
+    private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
-            annotations: { $set: annotations },
+            annotations: {
+                // TODO: This complexity is a result of the fact that we're allowing changes to the share
+                //   state outside of the annots cache (SingleNoteShareMenu). We should eventually move all
+                //   data interactions to be done via the cache
+                $apply: (previousAnnots: Annotation[]) => {
+                    const previousAnnotsByUrl = new Map<string, Annotation>()
+                    previousAnnots.forEach((annot) =>
+                        previousAnnotsByUrl.set(annot.url, annot),
+                    )
+                    return nextAnnotations.map((annot) => {
+                        const prev = previousAnnotsByUrl.get(annot.url)
+
+                        return {
+                            ...annot,
+                            isShared: prev?.isShared ?? annot.isShared,
+                            isBulkShareProtected:
+                                prev?.isBulkShareProtected ??
+                                annot.isBulkShareProtected,
+                        }
+                    })
+                },
+            },
             editForms: {
                 $apply: (editForms: EditForms) => {
-                    for (const { url } of annotations) {
+                    for (const { url } of nextAnnotations) {
                         if (editForms[url] == null) {
                             editForms[url] = { ...INIT_FORM_STATE }
                         }
@@ -702,28 +722,18 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
 
-        const somethingChanged = !(
-            existing.comment === comment &&
-            areTagsEquivalent(existing.tags, form.tags) &&
-            existing.isShared === event.shouldShare &&
-            existing.isBulkShareProtected === event.isProtected
+        await this.options.annotationsCache.update(
+            {
+                ...existing,
+                comment,
+                tags: form.tags,
+            },
+            {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected: event.isProtected,
+            },
         )
-
-        if (somethingChanged) {
-            await this.options.annotationsCache.update(
-                {
-                    ...existing,
-                    comment,
-                    tags: form.tags,
-                },
-                {
-                    shouldShare: event.shouldShare,
-                    shouldCopyShareLink: event.shouldShare,
-                    isBulkShareProtected: event.isProtected,
-                    shouldUnshare: existing.isShared && !event.shouldShare,
-                },
-            )
-        }
 
         this.emitMutation({
             annotationModes: {

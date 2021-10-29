@@ -4,11 +4,8 @@ import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
 import type { AnnotPage } from './types'
-import {
-    Annotation,
-    AnnotationPrivacyLevel,
-    AnnotationPrivacyLevels,
-} from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevel } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 import {
@@ -255,17 +252,22 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .where('annotation')
             .anyOf(annotUrls)
             .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
-                if (privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+                if (
+                    [
+                        AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
                     protectedAnnotUrlsSet.add(annotation)
                 }
-            })
-
-        await this.backend.dexieInstance
-            .table('sharedAnnotationMetadata')
-            .where('localId')
-            .anyOf(annotUrls)
-            .each((shareMetadata: { localId: string }) => {
-                sharedAnnotUrlsSet.add(shareMetadata.localId)
+                if (
+                    [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
+                    sharedAnnotUrlsSet.add(annotation)
+                }
             })
 
         annots.forEach((annot) => {

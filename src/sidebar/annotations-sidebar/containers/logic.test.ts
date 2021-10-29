@@ -14,7 +14,7 @@ import * as sharingTestData from 'src/content-sharing/background/index.test.data
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const setupLogicHelper = async ({
     device,
@@ -101,9 +101,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -144,9 +147,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment and tags", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -745,10 +751,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
             // BG calls that run automatically upon share menu opening
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
+            await contentSharing.shareAnnotation({
+                annotationUrl,
+                shareToLists: true,
             })
 
             await personalCloud.waitForSync()
@@ -890,8 +895,9 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
-            await directLinking.protectAnnotation(undefined, {
+            await directLinking.setAnnotationPrivacyLevel(undefined, {
                 annotation: annotationUrl2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
             await contentSharing.waitForSync()
 

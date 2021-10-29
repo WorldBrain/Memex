@@ -14,6 +14,7 @@ import {
 import { Props as EditableItemProps } from './sidebar-editable-item'
 import { ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface Props {
     className?: string
@@ -62,22 +63,28 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     }
 
     private renderMenuBtns() {
-        if (!this.props.source) {
+        if (!this.props.source || !this.props.isMenuDisplayed) {
             return false
         }
 
+        const renderMenu = (children: React.ReactNode) => (
+            <ClickAway onClickAway={this.handleMoreActionClick}>
+                <MenuContainer>{children}</MenuContainer>
+            </ClickAway>
+        )
+
         if (this.props.source === 'followed-lists') {
-            return (
+            return renderMenu(
                 <MenuButton onClick={this.props.onUnfollowClick}>
                     <Margin horizontal="10px">
                         <Icon heightAndWidth="12px" path={'TODO.svg'} />
                     </Margin>
                     Unfollow
-                </MenuButton>
+                </MenuButton>,
             )
         }
 
-        return (
+        return renderMenu(
             <>
                 <MenuButton onClick={this.props.onShareClick}>
                     <Margin horizontal="10px">
@@ -97,7 +104,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     </Margin>
                     Rename
                 </MenuButton>
-            </>
+            </>,
         )
     }
 
@@ -135,7 +142,13 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (onMoreActionClick) {
-            return <Icon paddingHorizontal="10px" heightAndWidth="12px" path={icons.dots} />
+            return (
+                <Icon
+                    paddingHorizontal="10px"
+                    heightAndWidth="12px"
+                    path={icons.dots}
+                />
+            )
         }
     }
 
@@ -221,9 +234,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         {this.renderIcon()}
                     </IconBox>
                 </SidebarItem>
-                <MenuContainer isDisplayed={isMenuDisplayed}>
-                    {this.renderMenuBtns()}
-                </MenuContainer>
+                {this.renderMenuBtns()}
             </Container>
         )
     }
@@ -241,6 +252,8 @@ const Name = styled.div`
 `
 
 const MenuContainer = styled.div`
+    display: 'flex';
+    flex-direction: 'column';
     width: min-content;
     position: absolute;
     background-color: ${colors.white};
@@ -249,13 +262,6 @@ const MenuContainer = styled.div`
     left: 105px;
     top: 30px;
     z-index: 1;
-
-    ${(props) =>
-        css`
-            display: ${props.isDisplayed
-                ? `flex; flex-direction: column`
-                : `none`};
-        `};
 `
 
 const IconBox = styled.div<Props>`
@@ -392,7 +398,6 @@ const ListTitle = styled.span<Props>`
     justify-content: flex-start;
     width: 100%;
     pointer-events: none;
-
 `
 
 const ActivityBeacon = styled.div`

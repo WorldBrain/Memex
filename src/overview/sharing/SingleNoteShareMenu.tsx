@@ -5,6 +5,7 @@ import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -50,64 +51,67 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLinkIfExists = async (): Promise<boolean> => {
-        const { annotationUrl, contentSharingBG } = this.props
+        const { annotationUrl, contentSharingBG, isShared } = this.props
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
         if (!link) {
             return false
         }
-        this.setState({ link, showLink: true })
-        await this.handleLinkCopy()
+        this.setState({ link, showLink: isShared })
         return true
     }
 
-    private async handleAnnotationProtection(shouldProtect: boolean) {
-        const { annotationUrl, annotationsBG } = this.props
-        if (shouldProtect) {
-            await annotationsBG.protectAnnotation({ annotation: annotationUrl })
-        } else {
-            await annotationsBG.dropAnnotationProtection({
-                annotation: annotationUrl,
-            })
-        }
-    }
-
-    private shareAnnotation = async (shouldProtect?: boolean) => {
-        const { annotationUrl, contentSharingBG } = this.props
+    private shareAnnotation = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, annotationsBG, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({
             annotationUrl,
             shareToLists: true,
+            skipPrivacyLevelUpdate: true,
         })
-        await this.setRemoteLinkIfExists()
-        if (shouldProtect != null) {
-            await this.handleAnnotationProtection(shouldProtect)
-        }
+
+        await annotationsBG.setAnnotationPrivacyLevel({
+            annotation: annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: true,
+                isBulkShareProtected,
+            }),
+        })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+        await this.props.copyLink(link)
 
         this.props.postShareHook?.({
             isShared: true,
-            isProtected: shouldProtect,
+            isProtected: isBulkShareProtected,
         })
     }
 
-    private unshareAnnotation = async (shouldProtect?: boolean) => {
-        const { annotationUrl, contentSharingBG } = this.props
-        await contentSharingBG.unshareAnnotation({ annotationUrl })
+    private unshareAnnotation = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, annotationsBG } = this.props
         this.setState({ showLink: false })
-        await this.handleAnnotationProtection(shouldProtect)
+
+        await annotationsBG.setAnnotationPrivacyLevel({
+            annotation: annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: false,
+                isBulkShareProtected,
+            }),
+        })
 
         this.props.postShareHook?.({
             isShared: false,
-            isProtected: shouldProtect,
+            isProtected: isBulkShareProtected,
         })
     }
 
-    private handleSetShared = async (shouldProtect?: boolean) => {
+    private handleSetShared = async (isBulkShareProtected?: boolean) => {
         const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.shareAnnotation(shouldProtect)
+                await this.shareAnnotation(isBulkShareProtected)
             },
         )
 
@@ -115,12 +119,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await p
     }
 
-    private handleSetPrivate = async (shouldProtect?: boolean) => {
+    private handleSetPrivate = async (isBulkShareProtected?: boolean) => {
         const p = executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
-                await this.unshareAnnotation(shouldProtect)
+                await this.unshareAnnotation(isBulkShareProtected)
             },
         )
 

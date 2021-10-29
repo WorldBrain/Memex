@@ -1,5 +1,6 @@
 import * as React from 'react'
 import onClickOutside from 'react-onclickoutside'
+const styles = require('./ribbon.css')
 
 interface Props {
     closePanel: () => void
@@ -11,7 +12,7 @@ class ExtraButtonsPanel extends React.PureComponent<Props> {
     }
 
     render() {
-        return <div>{this.props.children}</div>
+        return <div className={styles.extraPanel}>{this.props.children}</div>
     }
 }
 

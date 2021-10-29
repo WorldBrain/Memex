@@ -584,6 +584,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shareListId: { $set: listId },
                     },
                     listsSidebar: {
+                        showMoreMenuListId: { $set: undefined },
                         listData: {
                             [listId]: {
                                 remoteId: { $set: remoteListId ?? undefined },
@@ -1716,7 +1717,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shouldShare: event.shouldShare,
                         shouldCopyShareLink: event.shouldShare,
                         isBulkShareProtected: event.isProtected,
-                        shouldUnshare: noteData.isShared && !event.shouldShare,
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,
@@ -2121,6 +2121,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
+                                    isOwnedList: true,
                                 },
                             },
                         },
@@ -2370,6 +2371,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 deletingListId: { $set: event.listId },
+            },
+            listsSidebar: {
+                showMoreMenuListId: { $set: undefined },
             },
         })
     }

@@ -85,11 +85,7 @@ export function getTemplateDataFetchers({
         getNoteLinks: async (annotationUrls) => {
             await contentSharing.shareAnnotations({
                 annotationUrls,
-                queueInteraction: 'skip-queue',
-            })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls,
-                queueInteraction: 'skip-queue',
+                shareToLists: true,
             })
             const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
                 {
@@ -113,11 +109,7 @@ export function getTemplateDataFetchers({
             )
             await contentSharing.shareAnnotations({
                 annotationUrls,
-                queueInteraction: 'skip-queue',
-            })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls,
-                queueInteraction: 'skip-queue',
+                shareToLists: true,
             })
             const pairs = await Promise.all(
                 Object.keys(notes).map(async (normalizedPageUrl) => [

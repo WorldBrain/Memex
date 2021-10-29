@@ -1,5 +1,4 @@
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps

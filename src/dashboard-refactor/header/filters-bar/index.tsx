@@ -26,7 +26,7 @@ const Container = styled.div<{ hidden: boolean }>`
     position: sticky;
     top: 45px;
     background: white;
-    z-index: 1;
+    z-index: 10;
     border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
 
     ${(props) =>
@@ -48,7 +48,6 @@ const PickersContainer = styled.div`
     position: relative;
     top: 30px;
 `
-
 
 const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     width: min-content;
