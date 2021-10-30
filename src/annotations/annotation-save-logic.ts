@@ -3,10 +3,10 @@ import type { AnnotationInterface } from './background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
+import { shareOptsToPrivacyLvl } from './utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
-    shouldUnshare?: boolean
     shouldCopyShareLink?: boolean
     isBulkShareProtected?: boolean
 }
@@ -70,7 +70,6 @@ export async function createAnnotation({
                     title: annotationData.pageTitle,
                     comment: annotationData.comment,
                     body: annotationData.body,
-                    isBulkShareProtected: shareOpts?.isBulkShareProtected,
                 },
                 { skipPageIndexing },
             )
@@ -80,8 +79,14 @@ export async function createAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
                     shareToLists: true,
+                    skipPrivacyLevelUpdate: true,
                 })
             }
+
+            await annotationsBG.setAnnotationPrivacyLevel({
+                annotation: annotationUrl,
+                privacyLevel: shareOptsToPrivacyLvl(shareOpts),
+            })
 
             return annotationUrl
         })(),
@@ -122,20 +127,17 @@ export async function updateAnnotation({
             )
 
             await Promise.all([
-                shareOpts?.shouldUnshare
-                    ? contentSharingBG.unshareAnnotation({
-                          annotationUrl: annotationData.localId,
-                      })
-                    : shareOpts?.shouldShare &&
-                      contentSharingBG.shareAnnotation({
-                          remoteAnnotationId,
-                          annotationUrl: annotationData.localId,
-                          shareToLists: true,
-                      }),
-                shareOpts?.isBulkShareProtected &&
-                    annotationsBG.protectAnnotation({
-                        annotation: annotationData.localId,
+                shareOpts?.shouldShare &&
+                    contentSharingBG.shareAnnotation({
+                        remoteAnnotationId,
+                        annotationUrl: annotationData.localId,
+                        shareToLists: true,
+                        skipPrivacyLevelUpdate: true,
                     }),
+                annotationsBG.setAnnotationPrivacyLevel({
+                    annotation: annotationData.localId,
+                    privacyLevel: shareOptsToPrivacyLvl(shareOpts),
+                }),
             ])
             return annotationData.localId
         })(),

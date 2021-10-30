@@ -6,7 +6,7 @@ import type CustomListStorage from 'src/custom-lists/background/storage'
 import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
 import type AnnotationStorage from 'src/annotations/background/storage'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import type ActivityStreamsBackground from 'src/activity-streams/background'
@@ -51,7 +51,6 @@ export default class ContentSharingBackground {
             executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
-            unshareAnnotation: this.unshareAnnotation,
             unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
@@ -172,18 +171,27 @@ export default class ContentSharingBackground {
                 localIds: [options.annotationUrl],
             })
         )[options.annotationUrl]
-        if (remoteAnnotationId) {
-            return
+
+        if (!remoteAnnotationId) {
+            await this.storage.storeAnnotationMetadata([
+                {
+                    localId: options.annotationUrl,
+                    excludeFromLists: !options.shareToLists ?? true,
+                    remoteId:
+                        options.remoteAnnotationId ??
+                        this.generateRemoteAnnotationId(),
+                },
+            ])
         }
-        await this.storage.storeAnnotationMetadata([
-            {
-                localId: options.annotationUrl,
-                excludeFromLists: !options.shareToLists ?? true,
-                remoteId:
-                    options.remoteAnnotationId ??
-                    this.generateRemoteAnnotationId(),
-            },
-        ])
+
+        if (!options.skipPrivacyLevelUpdate) {
+            await this.options.annotationStorage.setAnnotationPrivacyLevel({
+                annotation: options.annotationUrl,
+                privacyLevel: options.setBulkShareProtected
+                    ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                    : AnnotationPrivacyLevels.SHARED,
+            })
+        }
 
         this.options.analytics.trackEvent({
             category: 'ContentSharing',
@@ -203,22 +211,28 @@ export default class ContentSharingBackground {
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (url) =>
-                !remoteIds[url] &&
-                annotPrivacyLevels[url]?.privacyLevel !==
+                ![
                     AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[url]?.privacyLevel),
         )
-        console.log('remote IDS:', remoteIds)
-        console.log('priv levels:', annotPrivacyLevels)
-        console.log('annots to share:', nonProtectedAnnotations)
-        for (const annnotationUrl of nonProtectedAnnotations) {
-            await this.storage.storeAnnotationMetadata([
-                {
-                    localId: annnotationUrl,
+
+        await this.storage.storeAnnotationMetadata(
+            nonProtectedAnnotations
+                .filter((url) => !remoteIds[url])
+                .map((localId) => ({
+                    localId,
                     remoteId: this.generateRemoteAnnotationId(),
                     excludeFromLists: !options.shareToLists ?? true,
-                },
-            ])
-        }
+                })),
+        )
+
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
+            annotations: nonProtectedAnnotations,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                : AnnotationPrivacyLevels.SHARED,
+        })
     }
 
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
@@ -286,32 +300,23 @@ export default class ContentSharingBackground {
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
         options,
     ) => {
-        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
+        const { annotationStorage } = this.options
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
             { annotations: options.annotationUrls },
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
             (annotationUrl) =>
-                annotPrivacyLevels[annotationUrl]?.privacyLevel !==
-                AnnotationPrivacyLevels.PROTECTED,
+                ![
+                    AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[annotationUrl]?.privacyLevel),
         )
-        await this.storage.deleteAnnotationMetadata({
-            localIds: nonProtectedAnnotations,
-        })
-    }
 
-    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
-        options,
-    ) => {
-        const remoteAnnotationId = (
-            await this.storage.getRemoteAnnotationIds({
-                localIds: [options.annotationUrl],
-            })
-        )[options.annotationUrl]
-        if (!remoteAnnotationId) {
-            return
-        }
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
+            annotations: nonProtectedAnnotations,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.PROTECTED
+                : AnnotationPrivacyLevels.PRIVATE,
         })
     }
 

@@ -41,6 +41,7 @@ export const shortcuts: ShortcutElData[] = [
         id: 'open-dashboard-shortcut',
         name: 'openDashboard',
         text: 'Open Dashboard',
+        tooltip: 'Search Memex',
     },
     {
         id: 'show-highlights-shortcut',

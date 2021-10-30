@@ -201,20 +201,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <React.Fragment>
-                <hr />
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
-                </div>
-                <hr />
-                <BottomBarBox>
-                    <Search
-                        searchValue={this.props.searchValue}
-                        onSearchChange={this.props.handleSearchChange}
-                        onSearchEnter={this.onSearchEnter}
-                    />
-                </BottomBarBox>
-                <div className={styles.item}>
-                    <LinkButton goToDashboard={this.onSearchClick} />
                 </div>
                 <div className={styles.item}>
                     <TagsButton />
@@ -224,6 +212,13 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <CollectionsButton />
                 </div>
                 <hr />
+
+                <div className={styles.item}>
+                    <LinkButton goToDashboard={this.onSearchClick} />
+                </div>
+
+                <hr />
+
                 <div className={styles.item}>
                     <SidebarButton closePopup={this.closePopup} />
                 </div>

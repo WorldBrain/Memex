@@ -21,6 +21,7 @@ import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
 } from 'src/in-page-ui/tooltip/types'
+import { UserFeatureOptIn } from 'src/features/background/feature-opt-ins'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -28,6 +29,7 @@ export interface Props extends AnnotationFunctions {
     createAndCopyDirectLink: any
     openSettings: any
     destroyTooltip: any
+    isFeatureEnabled(feature: UserFeatureOptIn): Promise<boolean>
 }
 
 interface TooltipContainerState {
@@ -50,7 +52,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
         this.setState({
-            showCreateLink: await features.getFeature('DirectLink'),
+            showCreateLink: await this.props.isFeatureEnabled('DirectLink'),
         })
     }
 

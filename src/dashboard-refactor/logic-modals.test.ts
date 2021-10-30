@@ -13,6 +13,7 @@ describe('Dashboard Refactor modals logic', () => {
         const listId = 123
         searchResults.processMutation({
             listsSidebar: {
+                showMoreMenuListId: { $set: listId },
                 listData: {
                     [listId]: {
                         $set: {
@@ -25,6 +26,9 @@ describe('Dashboard Refactor modals logic', () => {
         })
 
         expect(searchResults.state.modals.shareListId).toBeUndefined()
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            listId,
+        )
         expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
             'pristine',
         )
@@ -34,6 +38,9 @@ describe('Dashboard Refactor modals logic', () => {
         })
 
         expect(searchResults.state.modals.shareListId).toEqual(listId)
+        expect(
+            searchResults.state.listsSidebar.showMoreMenuListId,
+        ).toBeUndefined()
         expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
             'success',
         )

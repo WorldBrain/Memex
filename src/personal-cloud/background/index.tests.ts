@@ -267,6 +267,7 @@ export async function setupSyncBackgroundTest(
         >
         useDownloadTranslationLayer?: boolean
         testInstance?: BackgroundIntegrationTestInstance
+        enableFailsafes?: boolean
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
@@ -294,6 +295,7 @@ export async function setupSyncBackgroundTest(
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
             services,
             view: cloudHub.getView(),
+            disableFailsafes: !options.enableFailsafes,
             getUserId: async () => userId,
             getNow,
             useDownloadTranslationLayer:
@@ -318,6 +320,7 @@ export async function setupSyncBackgroundTest(
 
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
+        // setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
 
         if (!options.startWithSyncDisabled) {
             await setup.backgroundModules.personalCloud.enableSync()

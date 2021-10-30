@@ -8,7 +8,6 @@ import * as DATA from '../logic.test.data'
 import * as utils from './util'
 import { ResultHoverState } from './types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({

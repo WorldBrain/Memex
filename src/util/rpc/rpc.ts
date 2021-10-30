@@ -108,6 +108,8 @@ export class PortBasedRPCManager {
     }
 
     _paused?: Resolvable<void>
+    _ensuredFirstConnection = false
+    _ensuringConnection?: Resolvable<void>
 
     constructor(
         private options: {
@@ -157,9 +159,62 @@ export class PortBasedRPCManager {
         const port = this.options.connect(undefined, { name: pid })
         const portId = this.getPortIdForExtBg()
         this.ports.set(portId, port)
+        port.onMessage.addListener(this.messageResponder)
+    }
 
-        const RPCResponder = this.messageResponder
-        port.onMessage.addListener(RPCResponder)
+    unregisterConnectionToBackground() {
+        const portId = this.getPortIdForExtBg()
+        const port = this.ports.get(portId)
+        if (!port) {
+            return
+        }
+
+        this.ports.delete(portId)
+        port.onMessage.removeListener(this.messageResponder)
+        try {
+            port.disconnect()
+        } catch (err) {
+            console.error(
+                `Ignored error while disconnecting from background script`,
+                err,
+            )
+        }
+    }
+
+    async ensureConnectionToBackground(options: {
+        timeout: number
+        reconnectOnTimeout?: boolean
+    }) {
+        if (this._ensuringConnection) {
+            return this._ensuringConnection
+        }
+
+        const ensuringConnection = createResolvable()
+        this._ensuringConnection = ensuringConnection
+        while (true) {
+            const sleeping = sleepPromise(options.timeout)
+            const result = await Promise.race([
+                this.postMessageRequestToExtension(
+                    'confirmBackgroundScriptLoaded',
+                    [],
+                    { skipEnsure: true },
+                ).then(() => 'success' as 'success'),
+                sleeping.then(() => 'timeout' as 'timeout'),
+            ]).catch(() => 'error' as 'error')
+
+            if (result === 'success') {
+                break
+            }
+            if (result === 'error') {
+                await sleeping
+            }
+            if (result === 'error' || options.reconnectOnTimeout) {
+                this.unregisterConnectionToBackground()
+                this.registerConnectionToBackground()
+            }
+        }
+        delete this._ensuringConnection
+        ensuringConnection.resolve()
     }
 
     registerListenerForIncomingConnections() {
@@ -179,12 +234,32 @@ export class PortBasedRPCManager {
         this.options.onConnect.addListener(connected)
     }
 
-    async postMessageRequestToExtension(name, payload) {
+    async postMessageRequestToExtension(
+        name: string,
+        payload: any,
+        options?: { skipEnsure?: boolean },
+    ) {
+        if (!options?.skipEnsure) {
+            if (this._ensuredFirstConnection) {
+                // await this._ensuringFirstConnection
+                await this.ensureConnectionToBackground({
+                    timeout: 1000,
+                    reconnectOnTimeout: true,
+                })
+            } else {
+                // this._ensuringFirstConnection = createResolvable()
+                await this.ensureConnectionToBackground({
+                    timeout: 300,
+                    reconnectOnTimeout: false,
+                })
+                // this._ensuringFirstConnection.resolve()
+            }
+        }
         const port = this.getExtensionPort(name)
         return this.postMessageToRPC(port, name, payload)
     }
 
-    public postMessageRequestToTab(tabId, name, payload) {
+    public postMessageRequestToTab(tabId: number, name: string, payload: any) {
         const port = this.getTabPort(tabId, name)
         return this.postMessageToRPC(port, name, payload)
     }
@@ -192,7 +267,11 @@ export class PortBasedRPCManager {
     // Since only the background script maintains a connection to all the other
     // content scripts and pages. To send a message from say the popup, to a tab,
     // the message is sent via the background script.
-    public postMessageRequestToTabViaExtension(tabId, name, payload) {
+    public postMessageRequestToTabViaExtension(
+        tabId: string,
+        name: string,
+        payload: any,
+    ) {
         const port = this.getExtensionPort(name)
         const request = PortBasedRPCManager.createRPCRequestViaBGObject({
             tabId,

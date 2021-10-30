@@ -6,7 +6,6 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
-import { AnnotationPrivacyLevels } from '../types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import TagHolder from 'src/tags/ui/tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
@@ -246,7 +245,7 @@ const StyledTextArea = styled.textarea`
     padding: 10px 7px;
     height: ${(props) => (props.value === '' ? '40px' : '150px')};
     width: auto;
-    min-height: 40px;
+    min-height: 70px;
 
     &::placeholder {
         color: ${(props) => props.theme.colors.primary};
