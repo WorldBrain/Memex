@@ -17,31 +17,31 @@ import {
     setupRpcConnection,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
-import { ContentScriptRegistry } from './types'
-import { ContentScriptsInterface } from '../background/types'
-import { ContentScriptComponent } from '../types'
+import type { ContentScriptRegistry } from './types'
+import type { ContentScriptsInterface } from '../background/types'
+import type { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
-import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
-import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import type { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
-import { AnalyticsEvent } from 'src/analytics/types'
+import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
-import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
-import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
+import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -73,7 +73,9 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-    const highlightRenderer = new HighlightRenderer()
+    const highlightRenderer = new HighlightRenderer({
+        notificationsBG: runInBackground(),
+    })
     const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     const annotationsCache = createAnnotationsCache({
