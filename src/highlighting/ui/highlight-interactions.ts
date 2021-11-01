@@ -22,7 +22,6 @@ import {
 import { generateUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
-import type { RemoteNotificationsInterface } from 'src/notifications/background/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -99,9 +98,7 @@ export interface SaveAndRenderHighlightDeps {
 export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
-export interface HighlightRendererDependencies {
-    notificationsBG: RemoteNotificationsInterface
-}
+export interface HighlightRendererDependencies {}
 
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer
@@ -203,22 +200,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 ),
             ])
         } catch (err) {
-            await this.handleFailedHighlight(annotation.url)
+            this.removeAnnotationHighlight(annotation.url)
             throw err
         }
 
         return annotation
-    }
-
-    private async handleFailedHighlight(annotationUrl: string) {
-        this.removeAnnotationHighlight(annotationUrl)
-
-        await this.deps.notificationsBG
-            .createNotification({
-                title: 'Saving annotation failed',
-                message: 'Reload page and try again',
-            })
-            .catch((err) => {})
     }
 
     renderHighlight = async (
