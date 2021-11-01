@@ -102,17 +102,11 @@ export async function createContentSharingTestList(
 export async function shareContentSharingTestList(
     setup: BackgroundIntegrationTestSetup,
     localListId: number,
-    options: { shareEntries: boolean },
 ) {
     const listShareResult = await setup.backgroundModules.contentSharing.shareList(
         {
             listId: localListId,
         },
     )
-    if (options.shareEntries) {
-        await setup.backgroundModules.contentSharing.shareListEntries({
-            listId: localListId,
-        })
-    }
     return listShareResult.remoteListId
 }

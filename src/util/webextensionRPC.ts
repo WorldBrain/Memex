@@ -20,14 +20,13 @@
 
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
-import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
-import TypedEventEmitter, { Arguments } from 'typed-emitter'
 import { EventEmitter } from 'events'
-import { AuthRemoteEvents } from 'src/authentication/background/types'
-import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
-import { ContentSharingEvents } from 'src/content-sharing/background/types'
-import { PortBasedRPCManager } from 'src/util/rpc/rpc'
-import { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
+import { PortBasedRPCManager, RpcSideName, RpcRole } from 'src/util/rpc/rpc'
+import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
+import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
+import type { AuthRemoteEvents } from 'src/authentication/background/types'
+import type { ContentSharingEvents } from 'src/content-sharing/background/types'
+import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
 
 export class RpcError extends Error {
     constructor(message) {
@@ -328,7 +327,6 @@ export type TypedRemoteEventEmitter<
 // Statically defined types for now, move this to a registry
 export interface RemoteEvents {
     auth: AuthRemoteEvents
-    sync: InitialSyncEvents
     contentSharing: ContentSharingEvents
     personalCloud: PersonalCloudBackgroundEvents
 }
@@ -372,23 +370,19 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
 // Containing the evil globals here
 let rpcConnection: PortBasedRPCManager
 export const setupRpcConnection = (options: {
-    sideName: string
-    role: 'content' | 'background'
+    sideName: RpcSideName
+    role: RpcRole
+    paused?: boolean
 }) => {
-    rpcConnection = new PortBasedRPCManager(
-        options.sideName,
-        (name) => remotelyCallableFunctions[name],
-        browser.runtime.connect,
-        browser.runtime.onConnect,
-    )
-
-    if (options.role === 'content') {
-        rpcConnection.registerConnectionToBackground()
-    }
-
-    if (options.role === 'background') {
-        rpcConnection.registerListenerForIncomingConnections()
-    }
+    rpcConnection = new PortBasedRPCManager({
+        sideName: options.sideName,
+        role: options.role,
+        getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
+        connect: browser.runtime.connect,
+        onConnect: browser.runtime.onConnect,
+        paused: options.paused,
+    })
+    rpcConnection.setup()
 
     return rpcConnection
 }

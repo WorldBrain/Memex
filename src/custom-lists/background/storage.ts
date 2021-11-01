@@ -312,10 +312,10 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async removeList({ id }: { id: number }) {
-        const list = await this.operation('deleteList', { id })
         const pages = await this.operation('deleteListEntriesByListId', {
             listId: id,
         })
+        const list = await this.operation('deleteList', { id })
         return { list, pages }
     }
 

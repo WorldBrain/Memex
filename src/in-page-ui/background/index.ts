@@ -80,8 +80,12 @@ export class InPageUIBackground {
     }
 
     private createHighlightInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight()
+        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight(
+            false,
+        )
 
     private createAnnotationInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation()
+        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation(
+            false,
+        )
 }

@@ -47,6 +47,7 @@ import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { PageIndexingInterface } from '../../page-indexing/background/types'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
+import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -61,7 +62,6 @@ export async function main(
     params.loadRemotely = params.loadRemotely ?? true
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
-
     setupPageContentRPC()
     runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
@@ -128,19 +128,21 @@ export async function main(
     }
 
     const annotationsFunctions = {
-        createHighlight: (
-            analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => () =>
+        createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
+            shouldShare: boolean,
+        ) =>
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                shouldShare,
             }),
-        createAnnotation: (
-            analyticsEvent?: AnalyticsEvent<'Annotations'>,
-        ) => () =>
+        createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
+            shouldShare: boolean,
+        ) =>
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                shouldShare,
             }),
     }
 
@@ -196,6 +198,7 @@ export async function main(
                 auth: runInBackground(),
                 customLists: runInBackground(),
                 contentSharing: runInBackground(),
+                syncSettingsBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
@@ -219,12 +222,15 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
+                isFeatureEnabled: (feature) =>
+                    runInBackground<FeaturesInterface>().getFeature(feature),
             })
             components.tooltip?.resolve()
         },
         async registerSearchInjectionScript(execute): Promise<void> {
             await execute({
                 requestSearcher: remoteFunction('search'),
+                syncSettingsBG: runInBackground(),
             })
         },
     }

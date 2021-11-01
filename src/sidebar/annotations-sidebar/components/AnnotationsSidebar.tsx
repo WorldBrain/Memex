@@ -22,10 +22,7 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import type {
-    AnnotationSharingInfo,
-    AnnotationSharingAccess,
-} from 'src/content-sharing/ui/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -33,7 +30,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
-    annotationSharingInfo: { [annotationUrl: string]: AnnotationSharingInfo }
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
 
@@ -224,6 +220,8 @@ class AnnotationsSidebar extends React.Component<
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable
+                                isShared
+                                isBulkShareProtected
                                 url={data.id}
                                 body={data.body}
                                 comment={data.comment}
@@ -382,9 +380,9 @@ class AnnotationsSidebar extends React.Component<
                     body={annot.body}
                     comment={annot.comment}
                     createdWhen={annot.createdWhen!}
-                    sharingAccess={this.props.sharingAccess}
+                    isShared={annot.isShared}
+                    isBulkShareProtected={annot.isBulkShareProtected}
                     mode={this.props.annotationModes[annot.url]}
-                    sharingInfo={this.props.annotationSharingInfo[annot.url]}
                     isActive={this.props.activeAnnotationUrl === annot.url}
                     onHighlightClick={this.props.setActiveAnnotationUrl(
                         annot.url,

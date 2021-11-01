@@ -6,10 +6,6 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
-import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
@@ -19,16 +15,22 @@ import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
-import { NoResultsType } from './search-results/types'
+import { NoResultsType, NoteShareInfo } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
 import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
+import {
+    createAnnotation,
+    updateAnnotation,
+} from 'src/annotations/annotation-save-logic'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -71,10 +73,13 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
+    syncSettings: SyncSettingsStore<'contentSharing' | 'dashboard'>
 
     constructor(private options: DashboardDependencies) {
         super()
-        this.setupRemoteEventListeners()
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: options.syncSettingsBG,
+        })
     }
 
     private setupRemoteEventListeners() {
@@ -91,17 +96,17 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     getInitialState(): State {
         return {
+            loadState: 'pristine',
+            isCloudEnabled: true,
+            currentUser: null,
             modals: {
                 showLogin: false,
-                showBetaFeature: false,
                 showSubscription: false,
                 showCloudOnboarding: false,
+                showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
             },
-            loadState: 'pristine',
             searchResults: {
-                sharingAccess: 'feature-disabled',
-                noteSharingInfo: {},
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
@@ -181,18 +186,22 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        this.setupRemoteEventListeners()
+
         await loadInitial(this, async () => {
-            const nextState = await this.hydrateStateFromLocalStorage(
-                previousState,
-            )
+            let nextState = await this.loadAuthStates(previousState)
+            nextState = await this.hydrateStateFromLocalStorage(nextState)
             await Promise.all([
                 this.loadListsData(nextState),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
-                this.getSharingAccess(),
             ])
         })
+    }
+
+    cleanup: EventHandler<'cleanup'> = async ({}) => {
+        this.personalCloudEvents.removeAllListeners()
     }
 
     /* START - Misc helper methods */
@@ -201,27 +210,35 @@ export class DashboardLogic extends UILogic<State, Events> {
     ): Promise<State> {
         const { personalCloudBG, localStorage } = this.options
         const {
-            [STORAGE_KEYS.subBannerDismissed]: subBannerDismissed,
-            [STORAGE_KEYS.listSidebarLocked]: listsSidebarLocked,
-            [STORAGE_KEYS.onboardingMsgSeen]: onboardingMsgSeen,
             [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await localStorage.get([
-            STORAGE_KEYS.subBannerDismissed,
-            STORAGE_KEYS.listSidebarLocked,
-            STORAGE_KEYS.onboardingMsgSeen,
             CLOUD_STORAGE_KEYS.lastSeen,
             STORAGE_KEYS.mobileAdSeen,
         ])
 
         const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
+        const listsSidebarLocked = await this.syncSettings.dashboard.get(
+            'listSidebarLocked',
+        )
+        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
+            'onboardingMsgSeen',
+        )
+        const subBannerShownAfter = await this.syncSettings.dashboard.get(
+            'subscribeBannerShownAfter',
+        )
 
         const mutation: UIMutation<State> = {
+            isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
                 isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
-                isSubscriptionBannerShown: { $set: !subBannerDismissed },
+                isSubscriptionBannerShown: {
+                    $set:
+                        subBannerShownAfter != null &&
+                        subBannerShownAfter < Date.now(),
+                },
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
@@ -249,21 +266,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    checkSharingAccess: EventHandler<'checkSharingAccess'> = () =>
-        this.getSharingAccess()
+    checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
+        previousState,
+    }) => {
+        await this.loadAuthStates(previousState)
+    }
 
-    private async getSharingAccess() {
-        const isAllowed = await this.options.authBG.isAuthorizedForFeature(
-            'beta',
-        )
+    private async loadAuthStates(previousState: State): Promise<State> {
+        const { authBG } = this.options
+        const user = await authBG.getCurrentUser()
 
-        this.emitMutation({
-            searchResults: {
-                sharingAccess: {
-                    $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-                },
-            },
-        })
+        const mutation: UIMutation<State> = {
+            currentUser: { $set: user },
+        }
+
+        const nextState = this.withMutation(previousState, mutation)
+        this.emitMutation(mutation)
+        return nextState
     }
 
     private async getInboxUnreadCount() {
@@ -483,8 +502,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation(mutation)
             },
         )
-
-        await this.fetchNoteShareStates(nextState)
     }
 
     private searchPages = async (state: State) => {
@@ -511,72 +528,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    private async fetchNoteShareStates({
-        searchResults: { noteData, noteSharingInfo },
-    }: State) {
-        const mutation: UIMutation<State['searchResults']> = {}
-        const annotationUrls = noteData.allIds.filter(
-            (noteId) => !noteSharingInfo[noteId],
-        )
-        const remoteIds = await this.options.contentShareBG.getRemoteAnnotationIds(
-            { annotationUrls },
-        )
-
-        const privacyLevels = await this.options.annotationsBG.findAnnotationPrivacyLevels(
-            { annotationUrls },
-        )
-
-        for (const noteId of annotationUrls) {
-            mutation.noteSharingInfo = {
-                ...mutation.noteSharingInfo,
-                [noteId]: {
-                    $set: {
-                        taskState: 'pristine',
-                        status: remoteIds[noteId] ? 'shared' : 'not-yet-shared',
-                        privacyLevel: privacyLevels[noteId],
-                    },
-                },
-            }
-        }
-
-        this.emitMutation({ searchResults: mutation })
-    }
-
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
+    private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
 
         const user = await authBG.getCurrentUser()
         if (user != null) {
-            // const isBetaAuthd = await authBG.isAuthorizedForFeature('beta')
-            const isBetaAuthd = true // TODO : REMOVE THIS
+            this.emitMutation({ currentUser: { $set: user } })
 
-            const mutation: UIMutation<State> = {
-                searchResults: {
-                    sharingAccess: {
-                        $set: isBetaAuthd
-                            ? 'sharing-allowed'
-                            : 'feature-disabled',
-                    },
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
+            const userProfile = await authBG.getUserProfile()
+            if (!userProfile?.displayName?.length) {
                 this.emitMutation({
-                    ...mutation,
-                    modals: { showBetaFeature: { $set: true } },
+                    modals: { showDisplayNameSetup: { $set: true } },
                 })
                 return false
             }
 
-            this.emitMutation(mutation)
             return true
         }
 
         this.emitMutation({
+            currentUser: { $set: null },
             modals: { showLogin: { $set: true } },
         })
         return false
@@ -600,7 +571,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listShareLoadingState: { $set: taskState } },
             }),
             async () => {
-                if (!(await this.ensureLoggedIn({ ensureBetaAccess: true }))) {
+                if (!(await this.ensureLoggedIn())) {
                     return
                 }
 
@@ -613,6 +584,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shareListId: { $set: listId },
                     },
                     listsSidebar: {
+                        showMoreMenuListId: { $set: undefined },
                         listData: {
                             [listId]: {
                                 remoteId: { $set: remoteListId ?? undefined },
@@ -632,12 +604,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setShowBetaFeatureModal: EventHandler<'setShowBetaFeatureModal'> = ({
-        event,
-    }) => {
+    setShowDisplayNameSetupModal: EventHandler<
+        'setShowDisplayNameSetupModal'
+    > = ({ event }) => {
         this.emitMutation({
             modals: {
-                showBetaFeature: { $set: event.isShown },
+                showDisplayNameSetup: { $set: event.isShown },
             },
         })
     }
@@ -664,7 +636,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setShowCloudOnboardingModal: EventHandler<
         'setShowCloudOnboardingModal'
-    > = ({ event }) => {
+    > = ({ event, previousState }) => {
+        if (previousState.currentUser == null) {
+            this.emitMutation({
+                modals: { showLogin: { $set: true } },
+            })
+            return
+        }
+
         this.emitMutation({
             modals: {
                 showCloudOnboarding: { $set: event.isShown },
@@ -771,35 +750,33 @@ export class DashboardLogic extends UILogic<State, Events> {
     private updateShareInfoForNoteIds = (params: {
         noteIds: string[]
         previousState: State
-        info: Partial<AnnotationSharingInfo>
+        info: NoteShareInfo
     }) => {
-        const {
-            searchResults: { noteSharingInfo },
-        } = params.previousState
-        const mutation: UIMutation<State['searchResults']> = {}
+        const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
         for (const noteId of params.noteIds) {
-            const prev: AnnotationSharingInfo =
-                noteSharingInfo[noteId] ?? ({} as any)
-            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
+            const prev =
+                params.previousState.searchResults.noteData.byId[noteId]
+            if (prev?.isBulkShareProtected) {
                 continue
             }
 
-            mutation.noteSharingInfo = {
-                ...mutation.noteSharingInfo,
+            mutation.byId = {
+                ...(mutation.byId ?? {}),
                 [noteId]: {
-                    $set: {
-                        ...prev,
-                        ...params.info,
-                        privacyLevel:
-                            params.info.privacyLevel ?? prev.privacyLevel,
-                        status: params.info.status ?? prev.status,
+                    isShared: {
+                        $set: params.info.isShared,
+                    },
+                    isBulkShareProtected: {
+                        $set: !!(
+                            params.info.isProtected ?? prev.isBulkShareProtected
+                        ),
                     },
                 },
             }
         }
 
-        this.emitMutation({ searchResults: mutation })
+        this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
     updateAllPageResultNotesShareInfo: EventHandler<
@@ -807,7 +784,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ event, previousState }) => {
         this.updateShareInfoForNoteIds({
             previousState,
-            info: event.info,
+            info: event,
             noteIds: previousState.searchResults.noteData.allIds,
         })
     }
@@ -819,7 +796,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.updateShareInfoForNoteIds({
             previousState,
-            info: event.info,
+            info: event,
             noteIds: noteData.allIds.filter(
                 (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
             ),
@@ -1224,14 +1201,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { newNoteCreateState: { $set: taskState } },
             }),
             async () => {
-                const newNoteId = await annotationsBG.createAnnotation(
-                    {
-                        pageUrl: event.fullPageUrl,
+                if (event.shouldShare && !(await this.ensureLoggedIn())) {
+                    return
+                }
+
+                const { savePromise } = await createAnnotation({
+                    annotationData: {
+                        fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
-                        privacyLevel: event.privacyLevel,
                     },
-                    { skipPageIndexing: true },
-                )
+                    shareOpts: {
+                        shouldShare: event.shouldShare,
+                        isBulkShareProtected: event.isProtected,
+                        shouldCopyShareLink: event.shouldShare,
+                    },
+                    annotationsBG,
+                    contentSharingBG: contentShareBG,
+                    skipPageIndexing: true,
+                })
+
+                const newNoteId = await savePromise
+
                 if (formState.tags.length) {
                     await annotationsBG.updateAnnotationTags({
                         url: newNoteId,
@@ -1252,7 +1242,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         comment: formState.inputValue,
                                         tags: formState.tags,
                                         pageUrl: event.pageId,
-                                        ...utils.getInitialNoteResultState(),
+                                        isShared: event.shouldShare,
+                                        isBulkShareProtected: !!event.isProtected,
+                                        ...utils.getInitialNoteResultState(
+                                            formState.inputValue,
+                                        ),
                                     },
                                 }),
                             },
@@ -1273,37 +1267,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 },
                             },
                         },
-                        noteSharingInfo: {
-                            [newNoteId]: {
-                                $set: {
-                                    privacyLevel: event.privacyLevel,
-                                    status:
-                                        event.privacyLevel ===
-                                        AnnotationPrivacyLevels.SHARED
-                                            ? 'shared'
-                                            : 'not-yet-shared',
-                                    taskState: 'pristine',
-                                },
-                            },
-                        },
                     },
                 })
-
-                if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-                    await contentShareBG
-                        .shareAnnotation({
-                            annotationUrl: newNoteId,
-                            queueInteraction: 'queue-and-return',
-                        })
-                        .catch(() => {})
-                    await contentShareBG
-                        .shareAnnotationsToLists({
-                            annotationUrls: [newNoteId],
-                            queueInteraction: 'queue-and-return',
-                        })
-                        .catch(() => {})
-                    await this.ensureLoggedIn()
-                }
             },
         )
     }
@@ -1382,13 +1347,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setCloudUpgradeBannerShown: EventHandler<'setCloudUpgradeBannerShown'> = ({
+    closeCloudOnboardingModal: EventHandler<'closeCloudOnboardingModal'> = ({
         event,
     }) => {
         this.emitMutation({
             searchResults: {
-                isCloudUpgradeBannerShown: { $set: event.isShown },
+                isCloudUpgradeBannerShown: { $set: !event.didFinish },
             },
+            modals: {
+                showCloudOnboarding: { $set: false },
+            },
+            isCloudEnabled: { $set: event.didFinish },
         })
     }
 
@@ -1554,23 +1523,21 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
         event,
-        previousState: {
-            searchResults: { noteSharingInfo },
-        },
+        previousState,
     }) => {
+        const prev = previousState.searchResults.noteData.byId[event.noteId]
         this.emitMutation({
             searchResults: {
-                noteSharingInfo: {
-                    $merge: {
+                noteData: {
+                    byId: {
                         [event.noteId]: {
-                            ...noteSharingInfo[event.noteId],
-                            ...event.info,
-                            privacyLevel:
-                                event.info.privacyLevel ??
-                                noteSharingInfo[event.noteId].privacyLevel,
-                            status:
-                                event.info.status ??
-                                noteSharingInfo[event.noteId].status,
+                            isShared: { $set: event.isShared },
+                            isBulkShareProtected: {
+                                $set: !!(
+                                    event.isProtected ??
+                                    prev.isBulkShareProtected
+                                ),
+                            },
                         },
                     },
                 },
@@ -1602,9 +1569,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dismissSubscriptionBanner: EventHandler<
         'dismissSubscriptionBanner'
     > = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.subBannerDismissed]: true,
-        })
+        await this.syncSettings.dashboard.set('subscribeBannerShownAfter', null)
         this.emitMutation({
             searchResults: { isSubscriptionBannerShown: { $set: false } },
         })
@@ -1620,9 +1585,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dismissOnboardingMsg: EventHandler<'dismissOnboardingMsg'> = async () => {
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.onboardingMsgSeen]: true,
-        })
+        await this.syncSettings.dashboard.set('onboardingMsgSeen', true)
         this.emitMutation({
             searchResults: { showOnboardingMsg: { $set: false } },
         })
@@ -1661,16 +1624,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async showShareOnboardingIfNeeded() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async showShareOnboardingIfNeeded(now = Date.now()) {
+        // const lastShared = await this.syncSettings.contentSharing.get(
+        //     'lastSharedAnnotationTimestamp',
+        // )
 
-        if (lastShared == null) {
-            this.emitMutation({
-                modals: { showNoteShareOnboarding: { $set: true } },
-            })
-        }
+        // if (lastShared == null) {
+        //     this.emitMutation({
+        //         modals: { showNoteShareOnboarding: { $set: true } },
+        //     })
+        // }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 
     setNoteEditCommentValue: EventHandler<'setNoteEditCommentValue'> = ({
@@ -1736,10 +1704,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: { noteUpdateState: { $set: taskState } },
             }),
             async () => {
-                await this.options.annotationsBG.editAnnotation(
-                    event.noteId,
-                    editNoteForm.inputValue,
-                )
+                if (event.shouldShare && !(await this.ensureLoggedIn())) {
+                    return
+                }
+
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: editNoteForm.inputValue,
+                    },
+                    shareOpts: {
+                        shouldShare: event.shouldShare,
+                        shouldCopyShareLink: event.shouldShare,
+                        isBulkShareProtected: event.isProtected,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                })
+
                 if (tagsHaveChanged) {
                     await this.options.annotationsBG.updateAnnotationTags({
                         url: event.noteId,
@@ -1753,8 +1735,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     isEditing: { $set: false },
-                                    comment: { $set: editNoteForm.inputValue },
                                     tags: { $set: editNoteForm.tags },
+                                    isShared: { $set: event.shouldShare },
+                                    comment: { $set: editNoteForm.inputValue },
+                                    isBulkShareProtected: {
+                                        $set: event.isProtected,
+                                    },
                                 },
                             },
                         },
@@ -2021,9 +2007,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await this.options.localStorage.set({
-            [STORAGE_KEYS.listSidebarLocked]: event.isLocked,
-        })
+        await this.syncSettings.dashboard.set(
+            'listSidebarLocked',
+            event.isLocked,
+        )
     }
 
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
@@ -2134,6 +2121,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 $set: {
                                     id: listId,
                                     name: newListName,
+                                    isOwnedList: true,
                                 },
                             },
                         },
@@ -2383,6 +2371,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 deletingListId: { $set: event.listId },
+            },
+            listsSidebar: {
+                showMoreMenuListId: { $set: undefined },
             },
         })
     }

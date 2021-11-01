@@ -128,9 +128,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
 
         document.addEventListener('click', this.handleOutsideClick, false)
-
-        const isBetaAllowed = await auth.isAuthorizedForFeature('beta')
-        this.props.setBetaFeaturesEnabled(isBetaAllowed)
+        this.props.setBetaFeaturesEnabled(true)
     }
 
     componentWillUnmount() {

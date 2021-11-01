@@ -10,6 +10,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { SyncStatusIcon } from './sync-status-icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { SyncStatusIconState } from '../types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
@@ -35,6 +36,14 @@ const Row = styled(Margin)`
     &:last-child {
         margin-bottom: 0px;
     }
+`
+
+const BottomRow = styled.div`
+    padding: 5px 10px 5px 10px;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+}
 `
 
 const RowContainer = styled.div`
@@ -73,13 +82,39 @@ const TextBlock = styled.div<{
         `}
 `
 
+const HelpTextBlock = styled.span<{
+    bold: boolean
+}>`
+    height: 18px;
+    ${textStyles}
+    font-size: 10px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: ${colors.midGrey};
+    text-decoration: none;
+`
+
+const HelpTextBlockLink = styled.a<{
+    bold: boolean
+}>`
+    height: 18px;
+    ${textStyles}
+    font-size: 10px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: ${colors.midGrey};
+    padding-left: 5px;
+`
+
 const TextBlockSmall = styled.div`
     ${textStyles}
     font-weight: ${fonts.primary.weight.normal};
     color: ${(props) => props.theme.colors.darkgrey};
     font-size: 10px;
     line-height: 12px;
-    text-align: center;
+    text-align: left;
 `
 
 const TextContainer = styled.div`
@@ -88,8 +123,6 @@ const TextContainer = styled.div`
     display: flex;
     align-items: flex-start;
 `
-
-
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
@@ -132,9 +165,13 @@ export const timeSinceNowToString = (date: Date | null): string => {
 }
 
 export interface SyncStatusMenuProps extends RootState {
+    isLoggedIn: boolean
+    isCloudEnabled: boolean
     outsideClickIgnoreClass?: string
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
+    onLoginClick: React.MouseEventHandler
+    onMigrateClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
@@ -144,24 +181,86 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     handleClickOutside = this.props.onClickOutside
 
     private renderTitleText(): string {
-        if (this.props.syncStatusIconState === 'green') {
+        const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
+        if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
             return 'Everything is synced'
         }
+
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
+            return 'Nothing to sync yet'
+        }
+
         return 'Syncing changes...'
     }
 
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
+            console.log(lastSuccessfulSyncDate)
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
+        if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
+            return 'Save your first page or annotation'
+        }
         return 'in progress'
+    }
+
+    private renderStatus() {
+        const {
+            isLoggedIn,
+            isCloudEnabled,
+            onLoginClick,
+            onMigrateClick,
+            syncStatusIconState,
+        } = this.props
+
+        if (!isLoggedIn) {
+            return (
+                <RowContainer>
+                    <Row>
+                        <TextBlock bold>
+                            You're not logged in and syncing
+                        </TextBlock>
+                        <PrimaryAction label="Login" onClick={onLoginClick} />
+                    </Row>
+                </RowContainer>
+            )
+        }
+
+        if (!isCloudEnabled) {
+            return (
+                <RowContainer>
+                    <Row>
+                        <TextBlock bold>
+                            You haven't migrated to Memex Cloud
+                        </TextBlock>
+                        <PrimaryAction
+                            label="Migrate"
+                            onClick={onMigrateClick}
+                        />
+                    </Row>
+                </RowContainer>
+            )
+        }
+
+        return (
+            <RowContainer>
+                <Row>
+                    <SyncStatusIcon color={syncStatusIconState} />
+                    <TextContainer>
+                        <TextBlock bold>{this.renderTitleText()}</TextBlock>
+                        <TextBlockSmall>
+                            {this.renderLastSyncText()}
+                        </TextBlockSmall>
+                    </TextContainer>
+                </Row>
+            </RowContainer>
+        )
     }
 
     render() {
         const {
             isDisplayed,
-            syncStatusIconState,
             pendingLocalChangeCount,
             pendingRemoteChangeCount,
         } = this.props
@@ -172,17 +271,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
         return (
             <StyledHoverBox width="min-content" right="50px" top="45px">
-                <RowContainer>
-                    <Row>
-                        <SyncStatusIcon color={syncStatusIconState} />
-                        <TextContainer>
-                            <TextBlock bold>{this.renderTitleText()}</TextBlock>
-                            <TextBlockSmall>
-                                {this.renderLastSyncText()}
-                            </TextBlockSmall>
-                        </TextContainer>
-                    </Row>
-                </RowContainer>
+                {this.renderStatus()}
                 <Separator />
                 <RowContainer>
                     <Row>
@@ -190,10 +279,32 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         <TextBlock> pending local changes</TextBlock>
                     </Row>
                     <Row>
-                        <Count>{pendingRemoteChangeCount ? pendingRemoteChangeCount : 0}</Count>
+                        <Count>
+                            {pendingRemoteChangeCount
+                                ? pendingRemoteChangeCount
+                                : 0}
+                        </Count>
                         <TextBlock> pending remote changes</TextBlock>
                     </Row>
                 </RowContainer>
+                <Separator />
+                <BottomRow>
+                    <HelpTextBlock> Report sync problems:</HelpTextBlock>
+                    <HelpTextBlockLink
+                        target="_blank"
+                        href="https://worldbrain.io/faq/new-sync"
+                    >
+                        {' '}
+                        Forum
+                    </HelpTextBlockLink>
+                    <HelpTextBlockLink
+                        target="_blank"
+                        href="mailto:support@worldbrain.io"
+                    >
+                        {' '}
+                        Email
+                    </HelpTextBlockLink>
+                </BottomRow>
             </StyledHoverBox>
         )
     }

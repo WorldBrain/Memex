@@ -13,7 +13,7 @@ import {
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
@@ -23,15 +23,14 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import {
-    generateUrl,
-    getLastSharedAnnotationTimestamp,
-    setLastSharedAnnotationTimestamp,
-} from 'src/annotations/utils'
-import { areTagsEquivalent } from 'src/tags/utils'
+import { generateUrl } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -39,6 +38,8 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
+    setLoginModalShown?: (isShown: boolean) => void
+    setDisplayNameModalShown?: (isShown: boolean) => void
 }
 
 type EventHandler<
@@ -64,8 +65,14 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
+    syncSettings: SyncSettingsStore<'contentSharing'>
+
     constructor(private options: SidebarLogicOptions) {
         super()
+
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: options.syncSettingsBG,
+        })
 
         Object.assign(
             this,
@@ -149,8 +156,7 @@ export class SidebarContainerLogic extends UILogic<
                 pageAnnotations: {},
                 searchResults: {},
             },
-            annotationSharingInfo: {},
-            annotationSharingAccess: 'feature-disabled',
+            annotationSharingAccess: 'sharing-allowed',
 
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
@@ -178,8 +184,8 @@ export class SidebarContainerLogic extends UILogic<
             searchResultSkip: 0,
 
             showLoginModal: false,
+            showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
-            showBetaFeatureNotifModal: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
@@ -201,8 +207,6 @@ export class SidebarContainerLogic extends UILogic<
             if (pageUrl) {
                 await annotationsCache.load(pageUrl)
             }
-
-            await this.loadBeta()
         })
     }
 
@@ -213,12 +217,33 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private annotationSubscription = (annotations: CachedAnnotation[]) => {
+    private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
-            annotations: { $set: annotations },
+            annotations: {
+                // TODO: This complexity is a result of the fact that we're allowing changes to the share
+                //   state outside of the annots cache (SingleNoteShareMenu). We should eventually move all
+                //   data interactions to be done via the cache
+                $apply: (previousAnnots: Annotation[]) => {
+                    const previousAnnotsByUrl = new Map<string, Annotation>()
+                    previousAnnots.forEach((annot) =>
+                        previousAnnotsByUrl.set(annot.url, annot),
+                    )
+                    return nextAnnotations.map((annot) => {
+                        const prev = previousAnnotsByUrl.get(annot.url)
+
+                        return {
+                            ...annot,
+                            isShared: prev?.isShared ?? annot.isShared,
+                            isBulkShareProtected:
+                                prev?.isBulkShareProtected ??
+                                annot.isBulkShareProtected,
+                        }
+                    })
+                },
+            },
             editForms: {
                 $apply: (editForms: EditForms) => {
-                    for (const { url } of annotations) {
+                    for (const { url } of nextAnnotations) {
                         if (editForms[url] == null) {
                             editForms[url] = { ...INIT_FORM_STATE }
                         }
@@ -228,22 +253,6 @@ export class SidebarContainerLogic extends UILogic<
             },
         }
 
-        for (const { privacyLevel, url } of annotations) {
-            mutation.annotationSharingInfo = {
-                ...(mutation.annotationSharingInfo || {}),
-                [url]: {
-                    $set: {
-                        status:
-                            privacyLevel === AnnotationPrivacyLevels.SHARED
-                                ? 'shared'
-                                : 'not-yet-shared',
-                        taskState: 'pristine',
-                        privacyLevel,
-                    },
-                },
-            }
-        }
-
         this.emitMutation(mutation)
     }
 
@@ -251,45 +260,31 @@ export class SidebarContainerLogic extends UILogic<
         event: { sortingFn },
     }) => this.options.annotationsCache.sort(sortingFn)
 
-    private async loadBeta() {
-        const isAllowed = await this.options.auth.isAuthorizedForFeature('beta')
-
-        this.emitMutation({
-            annotationSharingAccess: {
-                $set: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-            },
-        })
-    }
-
-    private async ensureLoggedIn(
-        params: {
-            ensureBetaAccess?: boolean
-        } = {},
-    ): Promise<boolean> {
-        const { auth } = this.options
+    private async ensureLoggedIn(): Promise<boolean> {
+        const {
+            auth,
+            setLoginModalShown,
+            setDisplayNameModalShown,
+        } = this.options
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const isBetaAuthd = await auth.isAuthorizedForFeature('beta')
-
-            const mutation: UIMutation<SidebarContainerState> = {
-                annotationSharingAccess: {
-                    $set: isBetaAuthd ? 'sharing-allowed' : 'feature-disabled',
-                },
-            }
-
-            if (params.ensureBetaAccess && !isBetaAuthd) {
-                this.emitMutation({
-                    ...mutation,
-                    showBetaFeatureNotifModal: { $set: true },
-                })
+            const userProfile = await auth.getUserProfile()
+            if (!userProfile?.displayName?.length) {
+                setDisplayNameModalShown?.(true)
+                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
                 return false
             }
 
-            this.emitMutation(mutation)
+            setLoginModalShown?.(false)
+            setDisplayNameModalShown?.(false)
+            this.emitMutation({
+                annotationSharingAccess: { $set: 'sharing-allowed' },
+            })
             return true
         }
 
+        setLoginModalShown?.(true)
         this.emitMutation({ showLoginModal: { $set: true } })
         return false
     }
@@ -412,11 +407,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })
@@ -424,6 +414,12 @@ export class SidebarContainerLogic extends UILogic<
 
     setLoginModalShown: EventHandler<'setLoginModalShown'> = ({ event }) => {
         this.emitMutation({ showLoginModal: { $set: event.shown } })
+    }
+
+    setDisplayNameSetupModalShown: EventHandler<
+        'setDisplayNameSetupModalShown'
+    > = ({ event }) => {
+        this.emitMutation({ showDisplayNameSetupModal: { $set: event.shown } })
     }
 
     setAllNotesCopyPasterShown: EventHandler<'setAllNotesCopyPasterShown'> = ({
@@ -552,7 +548,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState: { commentBox, pageUrl },
     }) => {
-        const { annotationsCache, contentSharing } = this.options
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -565,29 +560,23 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: { $set: false },
         })
 
-        await annotationsCache.create({
-            url: annotationUrl,
-            pageUrl,
-            comment,
-            tags: commentBox.tags,
-            privacyLevel: event.privacyLevel,
-        })
-
-        if (event.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-            await contentSharing
-                .shareAnnotation({
-                    annotationUrl,
-                    queueInteraction: 'queue-and-return',
-                })
-                .catch(() => {})
-            await contentSharing
-                .shareAnnotationsToLists({
-                    annotationUrls: [annotationUrl],
-                    queueInteraction: 'queue-and-return',
-                })
-                .catch(() => {})
-            await this.ensureLoggedIn()
+        if (event.shouldShare && !(await this.ensureLoggedIn())) {
+            return
         }
+
+        await this.options.annotationsCache.create(
+            {
+                url: annotationUrl,
+                pageUrl,
+                comment,
+                tags: commentBox.tags,
+            },
+            {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected: event.isProtected,
+            },
+        )
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -724,23 +713,27 @@ export class SidebarContainerLogic extends UILogic<
             editForms: { [event.annotationUrl]: form },
         } = previousState
 
+        if (event.shouldShare && !(await this.ensureLoggedIn())) {
+            return
+        }
+
         const comment = form.commentText.trim()
         const existing = previousState.annotations.find(
             (annot) => annot.url === event.annotationUrl,
         )
 
-        const somethingChanged = !(
-            existing.comment === comment &&
-            areTagsEquivalent(existing.tags, form.tags)
-        )
-
-        if (somethingChanged) {
-            this.options.annotationsCache.update({
+        await this.options.annotationsCache.update(
+            {
                 ...existing,
                 comment,
                 tags: form.tags,
-            })
-        }
+            },
+            {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected: event.isProtected,
+            },
+        )
 
         this.emitMutation({
             annotationModes: {
@@ -775,11 +768,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (previousState.annotationSharingAccess === 'feature-disabled') {
-            this.options.showBetaFeatureNotifModal?.()
-            return
-        }
-
         const immediateShare =
             event.mouseEvent.metaKey && event.mouseEvent.altKey
 
@@ -787,6 +775,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: { $set: event.annotationUrl },
             immediatelyShareNotes: { $set: !!immediateShare },
         })
+
         await this.setLastSharedAnnotationTimestamp()
     }
 
@@ -1041,89 +1030,55 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
     }
 
-    setBetaFeatureNotifModalShown: EventHandler<
-        'setBetaFeatureNotifModalShown'
-    > = ({ event }) => {
-        this.emitMutation({ showBetaFeatureNotifModal: { $set: event.shown } })
-    }
-
-    private async _detectSharedAnnotations(annotationUrls: string[]) {
-        const annotationSharingInfo: UIMutation<
-            SidebarContainerState['annotationSharingInfo']
-        > = {}
-        const remoteIds = await this.options.contentSharing.getRemoteAnnotationIds(
-            { annotationUrls },
-        )
-
-        const privacyLevels = await this.options.annotations.findAnnotationPrivacyLevels(
-            { annotationUrls },
-        )
-
-        for (const localId of annotationUrls) {
-            annotationSharingInfo[localId] = {
-                $set: {
-                    taskState: 'pristine',
-                    privacyLevel: privacyLevels[localId],
-                    status:
-                        remoteIds[localId] ||
-                        privacyLevels[localId] ===
-                            AnnotationPrivacyLevels.SHARED
-                            ? 'shared'
-                            : 'not-yet-shared',
-                },
-            }
-        }
-
-        this.emitMutation({ annotationSharingInfo })
-    }
-
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
-    > = ({ previousState: { annotations, annotationSharingInfo }, event }) => {
-        const sharingInfo = {}
+    > = ({ previousState, event }) => {
+        const nextAnnotations = previousState.annotations.map((annotation) =>
+            annotation.isBulkShareProtected
+                ? annotation
+                : {
+                      ...annotation,
+                      isShared: event.isShared,
+                      isBulkShareProtected: !!(
+                          event.isProtected ?? annotation.isBulkShareProtected
+                      ),
+                  },
+        )
 
-        for (const { url } of annotations) {
-            const prev = annotationSharingInfo[url]
-            if (prev?.privacyLevel === AnnotationPrivacyLevels.PROTECTED) {
-                sharingInfo[url] = prev
-                continue
-            }
-
-            sharingInfo[url] = {
-                ...event.info,
-                privacyLevel:
-                    event.info.privacyLevel ??
-                    annotationSharingInfo[url].privacyLevel,
-                status: event.info.status ?? annotationSharingInfo[url].status,
-            }
-        }
-
-        this.emitMutation({ annotationSharingInfo: { $set: sharingInfo } })
+        this.emitMutation({ annotations: { $set: nextAnnotations } })
     }
 
     updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({
-        previousState: { annotationSharingInfo },
+        previousState,
         event,
     }) => {
+        const annotationIndex = previousState.annotations.findIndex(
+            (a) => a.url === event.annotationUrl,
+        )
         this.emitMutation({
-            annotationSharingInfo: {
-                $merge: {
-                    [event.annotationUrl]: {
-                        ...annotationSharingInfo[event.annotationUrl],
-                        ...event.info,
+            annotations: {
+                [annotationIndex]: {
+                    isShared: { $set: event.isShared },
+                    isBulkShareProtected: {
+                        $apply: (prev) => !!(event.isProtected ?? prev),
                     },
                 },
             },
         })
     }
 
-    private async setLastSharedAnnotationTimestamp() {
-        const lastShared = await getLastSharedAnnotationTimestamp()
+    private async setLastSharedAnnotationTimestamp(now = Date.now()) {
+        // const lastShared = await this.syncSettings.contentSharing.get(
+        //     'lastSharedAnnotationTimestamp',
+        // )
 
-        if (lastShared == null) {
-            this.options.showAnnotationShareModal?.()
-        }
+        // if (lastShared == null) {
+        //     this.options.showAnnotationShareModal?.()
+        // }
 
-        await setLastSharedAnnotationTimestamp()
+        await this.syncSettings.contentSharing.set(
+            'lastSharedAnnotationTimestamp',
+            now,
+        )
     }
 }

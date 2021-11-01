@@ -14,6 +14,7 @@ import * as sharingTestData from 'src/content-sharing/background/index.test.data
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const setupLogicHelper = async ({
     device,
@@ -50,12 +51,13 @@ const setupLogicHelper = async ({
     }
 
     if (withAuth) {
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () => ({
-            id: 'test-user',
-            displayName: 'test',
-            email: 'test@test.com',
-            emailVerified: true,
-        })
+        await device.backgroundModules.auth.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
+        await device.backgroundModules.auth.remoteFunctions.updateUserProfile(
+            TEST_USER,
+        )
     }
 
     const analytics = new FakeAnalytics()
@@ -71,6 +73,7 @@ const setupLogicHelper = async ({
             .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
+        syncSettingsBG: backgroundModules.syncSettings,
         annotations: annotationsBG,
         events: fakeEmitter as any,
         annotationsCache,
@@ -98,9 +101,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -125,6 +131,7 @@ describe('SidebarContainerLogic', () => {
             })
             await sidebar.processEvent('editAnnotation', {
                 annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: false,
                 context,
             })
             expect(
@@ -140,9 +147,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment and tags", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
+            annotationsCache.annotations = [DATA.ANNOT_1]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -175,6 +185,7 @@ describe('SidebarContainerLogic', () => {
             })
             await sidebar.processEvent('editAnnotation', {
                 annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: false,
                 context,
             })
             expect(
@@ -188,6 +199,47 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations[0].lastEdited).not.toEqual(
                 annotation.lastEdited,
             )
+        })
+
+        it('should block annotation edit with login modal if logged out + save has share intent', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+                editForms: {
+                    $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
+                },
+            })
+
+            const annotation = sidebar.state.annotations[0]
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+
+            await sidebar.processEvent('changeEditCommentText', {
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+            })
+
+            expect(sidebar.state.showLoginModal).toBe(false)
+            expect(sidebar.state.annotations).toEqual([annotation])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: DATA.ANNOT_1.url,
+                shouldShare: true,
+                context,
+            })
+
+            expect(sidebar.state.showLoginModal).toBe(true)
+            expect(sidebar.state.annotations).toEqual([annotation])
         })
 
         it('should be able to interrupt an edit, preserving comment and tag inputs', async ({
@@ -263,29 +315,29 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations.length).toBe(0)
         })
 
-        it('should be able to change annotation sharing access', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+        // it('should be able to change annotation sharing access', async ({
+        //     device,
+        // }) => {
+        //     const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'feature-disabled',
+        //     )
 
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'sharing-allowed',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'sharing-allowed',
-            )
+        //     await sidebar.processEvent('receiveSharingAccessChange', {
+        //         sharingAccess: 'sharing-allowed',
+        //     })
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'sharing-allowed',
+        //     )
 
-            await sidebar.processEvent('receiveSharingAccessChange', {
-                sharingAccess: 'feature-disabled',
-            })
-            expect(sidebar.state.annotationSharingAccess).toEqual(
-                'feature-disabled',
-            )
-        })
+        //     await sidebar.processEvent('receiveSharingAccessChange', {
+        //         sharingAccess: 'feature-disabled',
+        //     })
+        //     expect(sidebar.state.annotationSharingAccess).toEqual(
+        //         'feature-disabled',
+        //     )
+        // })
 
         it('should be able to toggle sidebar lock', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
@@ -377,7 +429,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: 0,
+                shouldShare: false,
             })
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
@@ -414,7 +466,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
 
             await sidebar.processEvent('saveNewPageComment', {
-                privacyLevel: 0,
+                shouldShare: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
@@ -425,6 +477,24 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.commentBox.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should block save a new comment with login modal if logged out + share intent set', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+
+            await sidebar.processEvent('changeNewPageCommentText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showLoginModal).toBe(false)
+            await sidebar.processEvent('saveNewPageComment', {
+                shouldShare: true,
+            })
+            expect(sidebar.state.showLoginModal).toBe(true)
         })
 
         it('should be able to hydrate new comment box with state', async ({
@@ -571,59 +641,70 @@ describe('SidebarContainerLogic', () => {
             const id1 = 'test1'
             const id2 = 'test2'
 
-            expect(sidebar.state.annotationSharingInfo).toEqual({})
+            sidebar.processMutation({
+                annotations: { $set: [{ url: id1 }, { url: id2 }] as any },
+            })
+
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'not-yet-shared', taskState: 'pristine' },
+                isShared: false,
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'not-yet-shared', taskState: 'pristine' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'shared', taskState: 'success' },
+                isShared: true,
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'shared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: true, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                info: { status: 'unshared' },
+                isShared: false,
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2 },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                info: { status: 'shared', taskState: 'error' },
+                isShared: true,
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-                [id2]: { status: 'shared', taskState: 'error' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2, isShared: true, isBulkShareProtected: false },
+            ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                info: { taskState: 'success' },
+                isShared: true,
+                isProtected: true,
             })
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [id1]: { status: 'unshared', taskState: 'success' },
-                [id2]: { status: 'shared', taskState: 'success' },
-            })
+            expect(sidebar.state.annotations).toEqual([
+                { url: id1, isShared: false, isBulkShareProtected: false },
+                { url: id2, isShared: true, isBulkShareProtected: true },
+            ])
         })
 
         it('should share annotations, simulating sidebar share process', async ({
             device,
         }) => {
-            const { contentSharing, directLinking } = device.backgroundModules
-            await device.authService.setUser(TEST_USER)
+            const {
+                contentSharing,
+                directLinking,
+                personalCloud,
+            } = device.backgroundModules
+
+            // Make sure sync is enabled and running as sharing is handled in cloud translation layer
+            await personalCloud.enableSync()
+            await personalCloud.setup()
 
             const localListId = await sharingTestData.createContentSharingTestList(
                 device,
             )
             await contentSharing.shareList({
-                listId: localListId,
-            })
-            await contentSharing.shareListEntries({
                 listId: localListId,
             })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
@@ -645,7 +726,11 @@ describe('SidebarContainerLogic', () => {
                 { skipPageIndexing: true },
             )
 
-            const { sidebar } = await setupLogicHelper({ device, pageUrl })
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl,
+                withAuth: true,
+            })
 
             await sidebar.processEvent('receiveSharingAccessChange', {
                 sharingAccess: 'sharing-allowed',
@@ -666,13 +751,13 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
 
             // BG calls that run automatically upon share menu opening
-            await contentSharing.shareAnnotation({ annotationUrl })
-            await contentSharing.shareAnnotationsToLists({
-                annotationUrls: [annotationUrl],
-                queueInteraction: 'skip-queue',
+            await contentSharing.shareAnnotation({
+                annotationUrl,
+                shareToLists: true,
             })
 
-            await contentSharing.waitForSync()
+            await personalCloud.waitForSync()
+
             const serverStorage = await device.getServerStorage()
             expect(
                 await serverStorage.storageManager
@@ -768,9 +853,6 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareList({
                 listId: localListId,
             })
-            await contentSharing.shareListEntries({
-                listId: localListId,
-            })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
 
             // This annotation will be shared
@@ -813,6 +895,10 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
+            await directLinking.setAnnotationPrivacyLevel(undefined, {
+                annotation: annotationUrl2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             await contentSharing.waitForSync()
 
             const { sidebar, sidebarLogic } = await setupLogicHelper({
@@ -821,26 +907,17 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({ url: annotationUrl1 }),
-                expect.objectContaining({ url: annotationUrl2 }),
+                expect.objectContaining({
+                    url: annotationUrl1,
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: annotationUrl2,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                }),
             ])
-            await sidebarLogic['_detectSharedAnnotations']([
-                annotationUrl1,
-                annotationUrl2,
-            ])
-
-            expect(sidebar.state.annotationSharingInfo).toEqual({
-                [annotationUrl1]: {
-                    status: 'shared',
-                    privacyLevel: 100,
-                    taskState: 'pristine',
-                },
-                [annotationUrl2]: {
-                    status: 'not-yet-shared',
-                    privacyLevel: 100,
-                    taskState: 'pristine',
-                },
-            })
         })
     })
 

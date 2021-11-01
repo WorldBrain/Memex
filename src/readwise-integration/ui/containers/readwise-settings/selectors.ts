@@ -4,14 +4,9 @@ export function showLoadingError(state: ReadwiseSettingsState) {
     return state.loadState === 'error'
 }
 
-export function showUnauthorized(state: ReadwiseSettingsState) {
-    return state.loadState === 'success' && !state.isFeatureAuthorized
-}
-
 export function showForm(state: ReadwiseSettingsState) {
     return (
         !showLoadingError(state) &&
-        !showUnauthorized(state) &&
         (state.syncState === 'pristine' || state.syncState === 'success')
     )
 }
@@ -22,7 +17,6 @@ export function apiKeyDisabled(state: ReadwiseSettingsState) {
 
 export function showSyncScreen(state: ReadwiseSettingsState) {
     return (
-        !showUnauthorized(state) &&
         !showLoadingError(state) &&
         !showForm(state) &&
         state.loadState === 'success'

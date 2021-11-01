@@ -19,20 +19,36 @@ export const InitialComponent = ({
 }) => (
     <div className={styles.createButtons}>
         <div className={styles.button} onClick={createHighlight}>
-            <ButtonTooltip tooltipText="Highlight" position="bottom">
+            <ButtonTooltip
+                tooltipText={
+                    <p>
+                        <strong>Highlight</strong>
+                        <br />+ shift to share
+                    </p>
+                }
+                position="bottomHighlighter"
+            >
                 <img src={highlighter} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>
 
         <div className={styles.button} onClick={createAnnotation}>
-            <ButtonTooltip tooltipText="Annotate" position="bottom">
+            <ButtonTooltip
+                tooltipText={
+                    <p>
+                        <strong>Annotate</strong>
+                        <br />+ shift to share
+                    </p>
+                }
+                position="bottomHighlighter"
+            >
                 <img src={annotations} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>
         {createLink && (
             <ButtonTooltip
                 tooltipText="Create Link to Highlight"
-                position="bottom"
+                position="bottomHighlighter"
             >
                 <div className={styles.button} onClick={createLink}>
                     <img src={share} className={styles.buttonImg} />
@@ -48,8 +64,14 @@ export const InitialComponent = ({
             })}
         >
             <ButtonTooltip
-                tooltipText="Close. Disable in Toolbar"
-                position="bottom"
+                tooltipText={
+                    <p>
+                        <strong>Close Highlighter</strong>
+                        <br />
+                        Disable in Settings
+                    </p>
+                }
+                position="bottomHighlighter"
             >
                 <img src={close} className={styles.buttonImg} />
             </ButtonTooltip>

@@ -29,9 +29,13 @@ import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface RootState {
     loadState: TaskState
+    currentUser: AuthenticatedUser | null
+    isCloudEnabled: boolean
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
@@ -46,6 +50,7 @@ export type Events = UIEvent<
         ListsSidebarEvents &
         SyncModalEvents & {
             search: { paginate?: boolean }
+            closeCloudOnboardingModal: { didFinish: boolean }
         }
 >
 
@@ -63,6 +68,7 @@ export interface DashboardDependencies {
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>
     activityIndicatorBG: ActivityIndicatorInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     openFeed: () => void
@@ -103,9 +109,9 @@ export interface SelectedState {
 export interface DashboardModalsState {
     shareListId?: number
     showLogin?: boolean
-    showBetaFeature?: boolean
     showSubscription?: boolean
     showCloudOnboarding?: boolean
+    showDisplayNameSetup?: boolean
     showNoteShareOnboarding?: boolean
 
     deletingListId?: number
@@ -116,9 +122,9 @@ export interface DashboardModalsState {
 export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: number }
     setShowLoginModal: { isShown: boolean }
-    setShowBetaFeatureModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
     setShowCloudOnboardingModal: { isShown: boolean }
+    setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
     setDeletingListId: { listId: number }

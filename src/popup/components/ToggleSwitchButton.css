@@ -1,0 +1,47 @@
+.toggleDiv {
+    position: relative;
+}
+
+.switch {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.icon {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.button {
+    display: flex;
+    width: 200px;
+    text-align: left;
+    height: 100%;
+}
+
+.buttonInner {
+    display: flex;
+    flex-direction: column;
+}
+
+.switchBlocks {
+    height: 60px;
+    display: flex;
+}
+
+.option {
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex: 2;
+}
+
+.subTitle {
+    margin-top: auto;
+    font-size: 12px;
+    color: #3a2f45;
+    margin-bottom: 0px;
+    opacity: 0.7;
+}

@@ -6,17 +6,28 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import range from 'lodash/range'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { migrations, MigrationProps } from './quick-and-dirty-migrations'
+import {
+    migrations,
+    MigrationProps,
+    MIGRATION_PREFIX,
+} from './quick-and-dirty-migrations'
+import { SETTING_NAMES } from 'src/sync-settings/background/constants'
+import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
 
 const testPageUrls = ['test.com/1', 'test.com/2', 'test.com/3', 'test.com/4']
 
 async function setupTest() {
     const setup = await setupBackgroundIntegrationTest()
+
+    setup.fetch.mock(READWISE_API_URL, 200)
+
     const migrationProps: MigrationProps = {
         storex: setup.storageManager,
         db: setup.storageManager.backend['dexieInstance'],
         localStorage: setup.browserAPIs.storage.local,
-        backgroundModules: { readwise: setup.backgroundModules.readwise },
+        backgroundModules: setup.backgroundModules,
+        localExtSettingStore:
+            setup.backgroundModules.personalCloud.options.localExtSettingStore,
         normalizeUrl,
     }
 
@@ -24,6 +35,139 @@ async function setupTest() {
 }
 
 describe('quick-and-dirty migration tests', () => {
+    describe('post-cloud update readwise key migration', () => {
+        it('should do nothing if no existing key exists', async () => {
+            const { migrationProps, fetch } = await setupTest()
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
+        })
+
+        it('should store the old value from local storage in the synced settings DB table + uploads highlights after cut-off point', async () => {
+            const { migrationProps, fetch } = await setupTest()
+
+            const dummyKey = 'readwise-key'
+
+            const createdWhen = new Date('2021-10-14T10:00:00')
+
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/#123456789',
+                pageUrl: 'test.com',
+                body: 'test highlight',
+                createdWhen,
+            })
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test/#123456789',
+                pageUrl: 'test.com/test',
+                body: 'test highlight 2',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time - should NOT be synced
+            })
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test2/#123456789',
+                pageUrl: 'test.com/test2',
+                body: 'test highlight 3',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time, though edited time is after - SHOULD be synced
+                lastEdited: createdWhen,
+            })
+            await migrationProps.localStorage.set({
+                [SETTING_NAMES.readwise.apiKey]: dummyKey,
+            })
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toEqual({ key: SETTING_NAMES.readwise.apiKey, value: dummyKey })
+
+            const [apiUrl, apiCallData] = fetch.lastCall()
+            expect(apiUrl).toEqual(READWISE_API_URL)
+            expect(apiCallData).toEqual({
+                body: JSON.stringify({
+                    highlights: [
+                        {
+                            source_type: 'article',
+                            highlighted_at: createdWhen,
+                            location_type: 'order',
+                            text: 'test highlight',
+                        },
+                        {
+                            source_type: 'article',
+                            highlighted_at: new Date('2021-10-12'),
+                            location_type: 'order',
+                            text: 'test highlight 3',
+                        },
+                    ],
+                }),
+                headers: {
+                    Authorization: 'Token readwise-key',
+                    'Content-Type': 'application/json',
+                },
+                method: 'POST',
+            })
+        })
+
+        it('should store the old value from local storage in the synced settings DB table + NOT upload highlights if none exist past the cut-off point', async () => {
+            const { migrationProps, fetch } = await setupTest()
+
+            const dummyKey = 'readwise-key'
+
+            await migrationProps.db.table('annotations').add({
+                url: 'test.com/test/#123456789',
+                pageUrl: 'test.com/test',
+                body: 'test highlight 2',
+                createdWhen: new Date('2021-10-12'), // This is before the cut-off time - should NOT be synced
+            })
+
+            await migrationProps.localStorage.set({
+                [SETTING_NAMES.readwise.apiKey]: dummyKey,
+            })
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toBeUndefined()
+            expect(fetch.lastCall()).toBeUndefined()
+
+            await migrations[MIGRATION_PREFIX + 'migrate-readwise-key'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db
+                    .table('settings')
+                    .get(SETTING_NAMES.readwise.apiKey),
+            ).toEqual({ key: SETTING_NAMES.readwise.apiKey, value: dummyKey })
+            expect(fetch.lastCall()).toBeUndefined()
+        })
+    })
+
     describe('point-old-mobile-list-entries-to-new', () => {
         it('should modify all list entries pointing to a non-existent list to point to the mobile list', async () => {
             const { migrationProps } = await setupTest()

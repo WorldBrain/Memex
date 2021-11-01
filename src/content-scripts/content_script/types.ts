@@ -6,8 +6,8 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
-import { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -40,6 +40,7 @@ export interface HighlightDependencies {
 
 export interface SearchInjectionDependencies {
     requestSearcher: any
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
 export type HighlightsScriptMain = (

@@ -43,6 +43,7 @@ import type { Props as ListDetailsProps } from './search-results/components/list
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
+import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -68,6 +69,7 @@ export class DashboardContainer extends StatefulUIElement<
         activityIndicatorBG: runInBackground(),
         personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
+        syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         searchBG: runInBackground(),
         backupBG: runInBackground(),
@@ -117,7 +119,6 @@ export class DashboardContainer extends StatefulUIElement<
             remoteLink,
             listName: listData.name,
             localListId: listData.id,
-            sharingAccess: searchResults.sharingAccess,
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {
@@ -300,8 +301,14 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderHeader() {
-        const { searchFilters, listsSidebar, syncMenu } = this.state
-        const syncStatusIconState = deriveStatusIconColor(syncMenu)
+        const {
+            isCloudEnabled,
+            searchFilters,
+            listsSidebar,
+            currentUser,
+            syncMenu,
+        } = this.state
+        const syncStatusIconState = deriveStatusIconColor(this.state)
         return (
             <HeaderContainer
                 searchBarProps={{
@@ -340,9 +347,19 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
+                    isCloudEnabled,
                     syncStatusIconState,
+                    isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
+                    onLoginClick: () =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: true,
+                        }),
+                    onMigrateClick: () =>
+                        this.processEvent('setShowCloudOnboardingModal', {
+                            isShown: true,
+                        }),
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
@@ -472,9 +489,7 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 updateAllResultNotesShareInfo={(info) =>
-                    this.processEvent('updateAllPageResultNotesShareInfo', {
-                        info,
-                    })
+                    this.processEvent('updateAllPageResultNotesShareInfo', info)
                 }
                 selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}
@@ -638,7 +653,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
                             pageId,
-                            info,
+                            ...info,
                         }),
                 }}
                 pagePickerProps={{
@@ -675,11 +690,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onSave: (day, pageId) => (privacyLevel) =>
+                    onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,
                             pageId,
-                            privacyLevel,
+                            isProtected,
+                            shouldShare,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
@@ -694,9 +710,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => () =>
+                    onEditConfirm: (noteId) => (shouldShare, isProtected) =>
                         this.processEvent('saveNoteEdit', {
                             noteId,
+                            shouldShare,
+                            isProtected,
                         }),
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
@@ -742,7 +760,7 @@ export class DashboardContainer extends StatefulUIElement<
                     updateShareInfo: (noteId) => (info) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            info,
+                            ...info,
                         }),
                 }}
                 searchCopyPasterProps={{
@@ -806,11 +824,13 @@ export class DashboardContainer extends StatefulUIElement<
         }
 
         if (modalsState.showLogin) {
-            const closeLoginModal = () =>
-                this.processEvent('setShowLoginModal', { isShown: false })
             return (
                 <LoginModal
-                    onClose={closeLoginModal}
+                    onClose={() =>
+                        this.processEvent('setShowLoginModal', {
+                            isShown: false,
+                        })
+                    }
                     authBG={this.props.authBG}
                     contentSharingBG={this.props.contentShareBG}
                     onSuccess={() =>
@@ -818,6 +838,19 @@ export class DashboardContainer extends StatefulUIElement<
                             () => this.processEvent('checkSharingAccess', null),
                             1000,
                         )
+                    }
+                />
+            )
+        }
+
+        if (modalsState.showDisplayNameSetup) {
+            return (
+                <DisplayNameModal
+                    authBG={this.props.authBG}
+                    onClose={() =>
+                        this.processEvent('setShowDisplayNameSetupModal', {
+                            isShown: false,
+                        })
                     }
                 />
             )
@@ -861,41 +894,18 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showBetaFeature) {
-            return (
-                <BetaFeatureNotifModal
-                    showSubscriptionModal={() =>
-                        this.processEvent('setShowSubscriptionModal', {
-                            isShown: true,
-                        })
-                    }
-                    onClose={() =>
-                        this.processEvent('setShowBetaFeatureModal', {
-                            isShown: false,
-                        })
-                    }
-                />
-            )
-        }
-
         if (modalsState.showCloudOnboarding) {
             return (
                 <CloudOnboardingModal
                     services={this.props.services}
-                    authBG={this.props.authBG}
                     backupBG={this.props.backupBG}
+                    syncSettingsBG={this.props.syncSettingsBG}
                     personalCloudBG={this.props.personalCloudBG}
-                    onModalClose={(args) => {
-                        this.processEvent('setShowCloudOnboardingModal', {
-                            isShown: false,
+                    onModalClose={(args) =>
+                        this.processEvent('closeCloudOnboardingModal', {
+                            didFinish: !!args.didFinish,
                         })
-
-                        if (args?.didFinish) {
-                            this.processEvent('setCloudUpgradeBannerShown', {
-                                isShown: false,
-                            })
-                        }
-                    }}
+                    }
                 />
             )
         }
@@ -931,19 +941,18 @@ export class DashboardContainer extends StatefulUIElement<
                     annotations={this.props.annotationsBG}
                     annotationsCache={this.annotationsCache}
                     contentSharing={this.props.contentShareBG}
+                    syncSettingsBG={this.props.syncSettingsBG}
                     contentConversationsBG={this.props.contentConversationsBG}
-                    showLoginModal={() =>
-                        this.processEvent('setShowLoginModal', {
-                            isShown: true,
+                    setLoginModalShown={(isShown) =>
+                        this.processEvent('setShowLoginModal', { isShown })
+                    }
+                    setDisplayNameModalShown={(isShown) =>
+                        this.processEvent('setShowDisplayNameSetupModal', {
+                            isShown,
                         })
                     }
                     showAnnotationShareModal={() =>
                         this.processEvent('setShowNoteShareOnboardingModal', {
-                            isShown: true,
-                        })
-                    }
-                    showBetaFeatureNotifModal={() =>
-                        this.processEvent('setShowBetaFeatureModal', {
                             isShown: true,
                         })
                     }

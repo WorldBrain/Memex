@@ -45,9 +45,9 @@ export const UNWANTED_GOOGLE_SEARCH_TYPES = [
 ]
 
 // Storage keys
-export const HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
-export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'
-export const POSITION_KEY = 'RESULTS_POSITION_'
+export const __OLD_HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
+export const __OLD_SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'
+export const __OLD_POSITION_KEY = 'RESULTS_POSITION_'
 
 // Default Search Injection Object
 export const SEARCH_INJECTION_DEFAULT = {

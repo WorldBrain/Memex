@@ -1,7 +1,10 @@
+import createResolvable, { Resolvable } from '@josephg/resolvable'
+import { serializeError, deserializeError, ErrorObject } from 'serialize-error'
 import uuid from 'uuid/v1'
-import { Events } from 'webextension-polyfill-ts/src/generated/events'
-import { Runtime } from 'webextension-polyfill-ts'
+import type { Events } from 'webextension-polyfill-ts/src/generated/events'
+import { Runtime, browser } from 'webextension-polyfill-ts'
 import { filterTabUrl } from 'src/util/uri-utils'
+import { sleepPromise } from '../promises'
 
 interface RPCObject {
     headers: {
@@ -13,6 +16,7 @@ interface RPCObject {
     }
     payload: any
     error?: any
+    serializedError?: ErrorObject
 }
 
 interface PendingRequest {
@@ -26,23 +30,35 @@ type RuntimeConnect = (
 ) => Runtime.Port
 type RuntimeOnConnect = Events.Event<(port: Runtime.Port) => void>
 
+export type RpcRole = 'content' | 'background'
+export type RpcSideName =
+    | 'background'
+    | 'content-script-global'
+    | 'content-script-popup'
+
 export class PortBasedRPCManager {
     private ports = new Map<string, Runtime.Port>()
     private pendingRequests = new Map<string, PendingRequest>()
 
-    static createRPCResponseObject = ({
-        packet,
-        payload,
-        error = null,
-    }): RPCObject => ({
-        headers: {
-            type: 'RPC_RESPONSE',
-            id: packet.headers.id,
-            name: packet.headers.name,
+    static createRPCResponseObject = (
+        params: Omit<RPCObject, 'headers'> & {
+            packet: { headers: { id: string; name: string } }
         },
-        payload,
-        error,
-    })
+    ): RPCObject => {
+        const {
+            packet: { headers },
+        } = params
+        return {
+            headers: {
+                type: 'RPC_RESPONSE',
+                id: headers.id,
+                name: headers.name,
+            },
+            payload: params.payload,
+            error: params.error,
+            serializedError: params.serializedError,
+        }
+    }
 
     static createRPCRequestObject = ({ name, payload }): RPCObject => ({
         headers: {
@@ -69,7 +85,7 @@ export class PortBasedRPCManager {
         payload,
     })
 
-    getPortIdForExtBg = () => `${this.sideName}-background`
+    getPortIdForExtBg = () => `${this.options.sideName}-background`
     getPortIdForTab = (tabId: number) => `content-script-background|t:${tabId}`
 
     getPortId = (port: Runtime.Port) => {
@@ -91,35 +107,121 @@ export class PortBasedRPCManager {
         )
     }
 
+    _paused?: Resolvable<void>
+    _ensuredFirstConnection = false
+    _ensuringConnection?: Resolvable<void>
+
     constructor(
-        private sideName,
-        private getRegisteredRemoteFunction,
-        private connect: RuntimeConnect,
-        private onConnect: RuntimeOnConnect,
-        private debug: boolean = false,
-    ) {}
+        private options: {
+            sideName: string
+            role: 'content' | 'background'
+            getRegisteredRemoteFunction: (
+                name: string,
+            ) => (...args: any[]) => Promise<any>
+            connect: RuntimeConnect
+            onConnect: RuntimeOnConnect
+            debug?: boolean
+            paused?: boolean
+        },
+    ) {
+        if (options.paused) {
+            this._paused = createResolvable()
+        }
+    }
+
+    setup() {
+        if (this.options.role === 'content') {
+            this.registerConnectionToBackground()
+        }
+
+        if (this.options.role === 'background') {
+            this.registerListenerForIncomingConnections()
+        }
+    }
 
     log = (msg: string, obj?: any) => {
-        if (this.debug === true || window['memex-rpc-debug']) {
+        if (this.options.debug === true || window['memex-rpc-debug']) {
             console['log'](msg, obj ?? {})
         }
     }
 
-    registerConnectionToBackground() {
-        const pid = `${this.sideName}-bg`
-        this.log(`RPC::registerConnectionToBackground::from ${this.sideName}`)
-        const port = this.connect(undefined, { name: pid })
-        this.ports.set(this.getPortIdForExtBg(), port)
+    unpause() {
+        const paused = this._paused
+        delete this._paused
+        paused?.resolve()
+    }
 
-        const RPCResponder = this.messageResponder
-        port.onMessage.addListener(RPCResponder)
+    async registerConnectionToBackground() {
+        const pid = `${this.options.sideName}-bg`
+        this.log(
+            `RPC::registerConnectionToBackground::from ${this.options.sideName}`,
+        )
+        const port = this.options.connect(undefined, { name: pid })
+        const portId = this.getPortIdForExtBg()
+        this.ports.set(portId, port)
+        port.onMessage.addListener(this.messageResponder)
+    }
+
+    unregisterConnectionToBackground() {
+        const portId = this.getPortIdForExtBg()
+        const port = this.ports.get(portId)
+        if (!port) {
+            return
+        }
+
+        this.ports.delete(portId)
+        port.onMessage.removeListener(this.messageResponder)
+        try {
+            port.disconnect()
+        } catch (err) {
+            console.error(
+                `Ignored error while disconnecting from background script`,
+                err,
+            )
+        }
+    }
+
+    async ensureConnectionToBackground(options: {
+        timeout: number
+        reconnectOnTimeout?: boolean
+    }) {
+        if (this._ensuringConnection) {
+            return this._ensuringConnection
+        }
+
+        const ensuringConnection = createResolvable()
+        this._ensuringConnection = ensuringConnection
+        while (true) {
+            const sleeping = sleepPromise(options.timeout)
+            const result = await Promise.race([
+                this.postMessageRequestToExtension(
+                    'confirmBackgroundScriptLoaded',
+                    [],
+                    { skipEnsure: true },
+                ).then(() => 'success' as 'success'),
+                sleeping.then(() => 'timeout' as 'timeout'),
+            ]).catch(() => 'error' as 'error')
+
+            if (result === 'success') {
+                break
+            }
+            if (result === 'error') {
+                await sleeping
+            }
+            if (result === 'error' || options.reconnectOnTimeout) {
+                this.unregisterConnectionToBackground()
+                this.registerConnectionToBackground()
+            }
+        }
+        delete this._ensuringConnection
+        ensuringConnection.resolve()
     }
 
     registerListenerForIncomingConnections() {
         const connected = (port: Runtime.Port) => {
             this.log(
                 `RPC::onConnect::Side:${
-                    this.sideName
+                    this.options.sideName
                 } got a connection from ${this.getPortId(port)}`,
             )
             this.ports.set(this.getPortId(port), port)
@@ -129,15 +231,35 @@ export class PortBasedRPCManager {
             )
         }
 
-        this.onConnect.addListener(connected)
+        this.options.onConnect.addListener(connected)
     }
 
-    public postMessageRequestToExtension(name, payload) {
+    async postMessageRequestToExtension(
+        name: string,
+        payload: any,
+        options?: { skipEnsure?: boolean },
+    ) {
+        if (!options?.skipEnsure) {
+            if (this._ensuredFirstConnection) {
+                // await this._ensuringFirstConnection
+                await this.ensureConnectionToBackground({
+                    timeout: 1000,
+                    reconnectOnTimeout: true,
+                })
+            } else {
+                // this._ensuringFirstConnection = createResolvable()
+                await this.ensureConnectionToBackground({
+                    timeout: 300,
+                    reconnectOnTimeout: false,
+                })
+                // this._ensuringFirstConnection.resolve()
+            }
+        }
         const port = this.getExtensionPort(name)
         return this.postMessageToRPC(port, name, payload)
     }
 
-    public postMessageRequestToTab(tabId, name, payload) {
+    public postMessageRequestToTab(tabId: number, name: string, payload: any) {
         const port = this.getTabPort(tabId, name)
         return this.postMessageToRPC(port, name, payload)
     }
@@ -145,7 +267,11 @@ export class PortBasedRPCManager {
     // Since only the background script maintains a connection to all the other
     // content scripts and pages. To send a message from say the popup, to a tab,
     // the message is sent via the background script.
-    public postMessageRequestToTabViaExtension(tabId, name, payload) {
+    public postMessageRequestToTabViaExtension(
+        tabId: string,
+        name: string,
+        payload: any,
+    ) {
         const port = this.getExtensionPort(name)
         const request = PortBasedRPCManager.createRPCRequestViaBGObject({
             tabId,
@@ -210,7 +336,16 @@ export class PortBasedRPCManager {
             { request },
         )
 
-        const ret = await pendingRequest
+        let ret: any
+        try {
+            ret = await pendingRequest
+        } catch (err) {
+            if (err.fromBgScript) {
+                throw new Error('Error occured in bg script')
+            } else {
+                throw err
+            }
+        }
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Response for [${name}]`,
             { ret },
@@ -222,15 +357,17 @@ export class PortBasedRPCManager {
         this.pendingRequests.set(id, request)
     }
 
-    private messageResponder = (packet, port) => {
-        const { headers, payload, error } = packet
+    private messageResponder = async (packet, port) => {
+        await this._paused
+
+        const { headers, payload, error, serializedError } = packet
         const { id, name, type } = headers
 
         if (type === 'RPC_RESPONSE') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: RESPONSE received for [${name}]`,
             )
-            this.resolvePendingRequest(id, payload, error)
+            this.resolvePendingRequest(id, payload, error, serializedError)
         } else if (type === 'RPC_REQUEST') {
             this.log(
                 `RPC::messageResponder::PortName(${port.name}):: REQUEST received for [${name}]`,
@@ -246,10 +383,10 @@ export class PortBasedRPCManager {
                     payload,
                 )
             } else {
-                const f = this.getRegisteredRemoteFunction(name)
+                const f = this.options.getRegisteredRemoteFunction(name)
 
                 if (!f) {
-                    console.error({ side: this.sideName, packet, port })
+                    console.error({ side: this.options.sideName, packet, port })
                     throw Error(`No registered remote function called ${name}`)
                 }
                 Object.defineProperty(f, 'name', { value: name })
@@ -272,38 +409,42 @@ export class PortBasedRPCManager {
                             `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
                         )
                     })
-                    .catch((e) => {
-                        console.error(e.mesage)
+                    .catch((err) => {
+                        console.error(err.mesage)
                         port.postMessage(
                             PortBasedRPCManager.createRPCResponseObject({
                                 packet,
                                 payload: null,
-                                error: e.message,
+                                error: err.message,
+                                serializedError: serializeError(err),
                             }),
                         )
                         this.log(
                             `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
                         )
-                        throw e
+                        throw err
                     })
             }
         }
     }
 
-    private resolvePendingRequest = (id, payload, error) => {
+    private resolvePendingRequest = (id, payload, error, serializedError) => {
         const request = this.pendingRequests.get(id)
 
         if (!request) {
-            console.error({ sideName: this.sideName, id, payload })
+            console.error({ sideName: this.options.sideName, id, payload })
             throw new Error(
                 `Tried to resolve a request that does not exist (may have already been resolved) id:${id}`,
             )
         }
         if (error) {
             console.error(
-                `Calling ${request.request.headers.name} errored`,
-                error,
+                `Calling ${request.request.headers.name} errored, bg stack trace below`,
             )
+            console.error(deserializeError(serializedError))
+
+            error = new Error('From bg script')
+            error.fromBgScript = true
             request.promise.reject(error)
         } else {
             request.promise.resolve(payload)

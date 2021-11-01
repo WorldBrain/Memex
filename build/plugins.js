@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { EnvironmentPlugin } from 'webpack'
+import { EnvironmentPlugin, IgnorePlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
@@ -69,6 +69,7 @@ export default function ({
             preload: /\.(css|js)$/,
             prefetch: /\.(svg|png)$/,
         }),
+        new IgnorePlugin(/^\.\/locale$/, /moment$/),
     ]
 
     if (mode === 'development') {
@@ -80,7 +81,7 @@ export default function ({
                     files: [
                         'yarn.lock',
                         'package-lock.json',
-                        'private/.env.example',
+                        '.env.example',
                         'private/.env.production',
                         'private/.env.development',
                     ],

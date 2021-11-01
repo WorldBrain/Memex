@@ -16,7 +16,7 @@ import {
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
 import { blobToJson } from 'src/util/blob-utils'
-import { AnnotationPrivacyLevels, Annotation } from '../../annotations/types'
+import { Annotation } from '../../annotations/types'
 import {
     PersonalCloudErrorType,
     DataChangeType,
@@ -29,7 +29,6 @@ describe('Personal cloud', () => {
     }) => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 2,
-            useDownloadTranslationLayer: true,
         })
 
         const fullUrl =
@@ -93,20 +92,18 @@ describe('Personal cloud', () => {
                               ],
                 })
             }
-            if (testOptions.source === 'url') {
-                setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
-                    await pipeline({
-                        pageDoc: {
-                            url: fullUrl,
-                            content: {
-                                fullText,
-                                title: fullTitle,
-                            },
+            setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
+                await pipeline({
+                    pageDoc: {
+                        url: fullUrl,
+                        content: {
+                            fullText,
+                            title: fullTitle,
                         },
-                    }),
-                    { htmlBody },
-                )
-            }
+                    },
+                }),
+                { htmlBody },
+            )
             await setups[0].backgroundModules.pages.indexPage({
                 fullUrl,
                 tabId: 667,
@@ -224,6 +221,7 @@ describe('Personal cloud', () => {
             }
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.integrateAllUpdates()
             await expectPageContent(setups[1])
         }
         await test()
@@ -257,7 +255,7 @@ describe('Personal cloud', () => {
     }) => {
         const { setups, serverStorage } = await setupSyncBackgroundTest({
             deviceCount: 2,
-            useDownloadTranslationLayer: true,
+            enableFailsafes: true,
         })
         // setups[0].backgroundModules.personalCloud.debug = true
         // setups[1].backgroundModules.personalCloud.debug = true
@@ -280,7 +278,7 @@ describe('Personal cloud', () => {
         const annotation = {
             pageUrl: testPageUrl,
             comment: options.annotationComment,
-            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            isBulkShareProtected: true,
             createdWhen: new Date('2021-07-21'),
         }
         const annotationUrl = await setups[0].backgroundModules.directLinking.createAnnotation(
@@ -382,7 +380,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: false,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -399,13 +396,12 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: false,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
 
         await personalCloud.enableSync()
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
@@ -417,7 +413,7 @@ describe('Personal cloud', () => {
         const authChangesPromiseBefore = personalCloud.authChangesObserved
         const changesIntegratingPromiseBefore = personalCloud.changesIntegrating
 
-        personalCloud.startSync()
+        await personalCloud.startSync()
 
         expect(await personalCloud.options.settingStore.get('isSetUp')).toBe(
             true,
@@ -437,7 +433,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -463,7 +458,6 @@ describe('Personal cloud', () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
-            useDownloadTranslationLayer: true,
         })
 
         const { personalCloud } = setups[0].backgroundModules
@@ -483,5 +477,29 @@ describe('Personal cloud', () => {
         expect(personalCloud.actionQueue.isPaused).toBe(false)
         expect(personalCloud.authChangesObserved).not.toBeUndefined()
         expect(personalCloud.changesIntegrating).not.toBeUndefined()
+    })
+
+    it.skip(`should schedule showing pioneer subscription banner in 2 weeks after enabling on new install`, async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 1,
+            startWithSyncDisabled: true,
+        })
+
+        const { bgScript } = setups[0].backgroundModules
+
+        const now = Date.now()
+        const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
+
+        expect(
+            await bgScript.deps.syncSettingsStore.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
+        ).toEqual(null)
+        await bgScript.handleInstallLogic(now)
+        expect(
+            await bgScript.deps.syncSettingsStore.dashboard.get(
+                'subscribeBannerShownAfter',
+            ),
+        ).toEqual(fortnightFromNow)
     })
 })

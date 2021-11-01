@@ -12,7 +12,7 @@ import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
-import { Annotation, AnnotationPrivacyLevels } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import * as anchoring from 'src/highlighting/ui/anchoring'
 import {
@@ -92,7 +92,7 @@ export interface SaveAndRenderHighlightDeps {
     annotationsCache: AnnotationsCacheInterface
     analyticsEvent?: AnalyticsEvent
     inPageUI: SharedInPageUIInterface
-    options?: { clickToEdit?: boolean }
+    shouldShare?: boolean
 }
 
 export type HighlightRendererInterface = HighlightRenderInterface &
@@ -180,19 +180,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } as Annotation
 
         await Promise.all([
-            params.annotationsCache.create({
-                ...annotation,
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            params.annotationsCache.create(annotation, {
+                shouldShare: params.shouldShare,
+                shouldCopyShareLink: params.shouldShare,
             }),
             this.renderHighlight(
                 annotation,
                 ({ openInEdit, annotationUrl }) => {
                     params.inPageUI.showSidebar({
                         annotationUrl,
-                        action:
-                            params.options?.clickToEdit || openInEdit
-                                ? 'edit_annotation'
-                                : 'show_annotation',
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
                     })
                 },
             ),

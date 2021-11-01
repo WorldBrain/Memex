@@ -14,10 +14,11 @@ export interface State {
     syncState: UITaskState
     step: 'tutorial' | 'sync'
     shouldShowLogin: boolean
+    newSignUp: boolean
 }
 
 export type Event = UIEvent<{
     finishOnboarding: null
     goToSyncStep: null
-    onUserLogIn: null
+    onUserLogIn: { newSignUp?: boolean }
 }>

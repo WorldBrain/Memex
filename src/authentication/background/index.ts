@@ -66,10 +66,12 @@ export class AuthBackground {
         )
 
         this.remoteFunctions = {
+            refreshUserInfo: this.refreshUserInfo,
             getCurrentUser: () => this.authService.getCurrentUser(),
-            signOut: () => this.authService.signOut(),
-            refreshUserInfo: () => this.refreshUserInfo(),
-
+            signOut: () => {
+                delete this._userProfile
+                this.authService.signOut()
+            },
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -106,24 +108,7 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
-            setBetaEnabled: async (enabled) => {
-                const user = await this.authService.getCurrentUser()
-                if (!user) {
-                    throw new Error(
-                        `User wants to change beta status without being authenticated`,
-                    )
-                }
-
-                if (enabled) {
-                    await this.backendFunctions.registerBetaUser({})
-                }
-                await this.settings.set('beta', enabled)
-            },
             getUserProfile: async () => {
-                if (this._userProfile) {
-                    return this._userProfile
-                }
-
                 const user = await this.authService.getCurrentUser()
                 if (!user) {
                     return null

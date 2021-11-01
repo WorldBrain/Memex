@@ -1,19 +1,12 @@
 import { browser } from 'webextension-polyfill-ts'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { padShortTimestamp } from './utils'
-import { SearchIndex } from 'src/search'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
-
-const fetchPageDataOpts = {
-    includePageContent: true,
-    includeFavIcon: true,
-}
 
 /**
  * TransitionType strings that we care about in the context of the ext.
@@ -72,11 +65,6 @@ async function getBookmarkTime({ browserId }) {
 
 export default class ImportItemProcessor {
     /**
-     * @type {Function} Function to afford aborting current XHR. Set when import processor reaches XHR point.
-     */
-    abortXHR
-
-    /**
      * @type {boolean} Flag denoting whether or not execution has been cancelled.
      */
     cancelled = false
@@ -128,10 +116,6 @@ export default class ImportItemProcessor {
             visits,
             rejectNoContent,
         })
-        await this.options.bookmarks.storage.createBookmarkIfNeeded(
-            pageDoc.url,
-            bookmark,
-        )
     }
 
     async _storeOtherData({ url, tags, collections, annotations }) {
@@ -165,33 +149,6 @@ export default class ImportItemProcessor {
     }
 
     /**
-     * Using the `url` of the current item, performs the XHR and formatting needed on the response
-     * to form a new page doc.
-     *
-     * @param {IImportItem} importItem
-     * @returns {PageDoc}
-     */
-    async _createPageDoc({ url }) {
-        const includeFavIcon = !(await this.options.pages.domainHasFavIcon(url))
-
-        // Do the page data fetch
-        const fetch = fetchPageData({
-            url,
-            opts: {
-                ...fetchPageDataOpts,
-                includeFavIcon,
-            },
-        })
-
-        this.abortXHR = fetch.cancel
-
-        this._checkCancelled()
-        const pageContent = await fetch.run()
-
-        return { url, ...pageContent }
-    }
-
-    /**
      * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
      *
      * @param {IImportItem} importItemDoc
@@ -203,30 +160,15 @@ export default class ImportItemProcessor {
             await checkVisitItemTransitionTypes(importItem)
         }
 
-        const pageDoc = !options.indexTitle
-            ? await this._createPageDoc(importItem)
-            : {
-                  url: importItem.url,
-                  content: {
-                      title: importItem.title,
-                  },
-              }
+        await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        const visits = []
-
-        let bookmark
         if (importItem.type === IMPORT_TYPE.BOOKMARK) {
-            bookmark = await getBookmarkTime(importItem)
+            await this.options.bookmarks.storage.createBookmarkIfNeeded(
+                importItem.url,
+                await getBookmarkTime(importItem),
+            )
         }
 
-        await this._storeDocs({
-            pageDoc,
-            visits,
-            bookmark,
-            rejectNoContent: false,
-        })
-
-        this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
         return { status: DOWNLOAD_STATUS.SUCC }
     }
@@ -239,31 +181,15 @@ export default class ImportItemProcessor {
 
         const timeAdded = padShortTimestamp(importItem.timeAdded)
 
-        const pageDoc = !options.indexTitle
-            ? await this._createPageDoc({ url })
-            : {
-                  url,
-                  content: {
-                      title,
-                  },
-              }
+        await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        const visits = []
-
-        if (timeAdded) {
-            visits.push(timeAdded)
+        if (options?.bookmarkImports) {
+            await this.options.bookmarks.storage.createBookmarkIfNeeded(
+                importItem.url,
+                timeAdded ?? Date.now(),
+            )
         }
 
-        const bookmark = options.bookmarkImports
-            ? timeAdded || Date.now()
-            : undefined
-
-        await this._storeDocs({
-            pageDoc,
-            bookmark,
-            visits,
-            rejectNoContent: false,
-        })
         await this._storeOtherData({ url, tags, collections, annotations })
 
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
@@ -304,9 +230,6 @@ export default class ImportItemProcessor {
      * methods reach a `this._checkCancelled()` call.
      */
     cancel() {
-        if (typeof this.abortXHR === 'function') {
-            this.abortXHR()
-        }
         this.cancelled = true
     }
 }

@@ -1,4 +1,8 @@
-export interface DashboardResultsDependencies {}
+import type { UIServices } from 'src/services/ui/types'
+
+export interface DashboardResultsDependencies {
+    services: UIServices
+}
 
 export interface DashboardResultsState {
     readerShow: boolean

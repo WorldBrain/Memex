@@ -17,7 +17,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 const COPY_TIMEOUT = 2000
 
 export interface ShorcutHandlerDict {
-    [shortcut: string]: React.MouseEventHandler | (() => Promise<void>)
+    [shortcut: string]: () => Promise<void>
 }
 
 export interface Props {
@@ -129,7 +129,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     )}
                     <PrivacyContainer>
                         {this.props.isLoading ? (
-                            <LoadingBox><LoadingIndicator /></LoadingBox>
+                            <LoadingBox>
+                                <LoadingIndicator />
+                            </LoadingBox>
                         ) : (
                             <>
                                 <PrivacyTitle>
@@ -161,7 +163,6 @@ const Menu = styled.div`
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
-        line-height: 22px;
     }
 `
 
@@ -177,8 +178,9 @@ const TitleContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: normal;
+    opacity: 0.5;
     color: ${(props) => props.theme.colors.primary};
 `
 
@@ -222,19 +224,18 @@ const LinkCopier = styled.button`
 const PrivacyContainer = styled.div`
     width: 100%;
 
-    & * {
-        color: ${(props) => props.theme.colors.primary};
-    }
-
     &:first-child {
         padding-top: 15px;
     }
 `
 
 const PrivacyTitle = styled.div`
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: normal;
     padding: 0px 15px;
+    opacity: 0.5;
+    margin-bottom: -5px;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const PrivacyOptionContainer = styled(Margin)`

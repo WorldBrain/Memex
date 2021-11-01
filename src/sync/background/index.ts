@@ -169,29 +169,28 @@ export default class SyncBackground extends SyncService {
     }
 
     registerRemoteEmitter() {
-        const remoteEmitter = remoteEventEmitter('sync')
-
-        this.initialSync.events.on('progress', (args) => {
-            return remoteEmitter.emit('progress', args)
-        })
-        this.initialSync.events.on('roleSwitch', (args) => {
-            return remoteEmitter.emit('roleSwitch', args)
-        })
-        this.initialSync.events.on('error', (args) => {
-            captureException(`InitialSyncError - ${args.error}`)
-            return remoteEmitter.emit('error', args)
-        })
-        this.initialSync.events.on('finished', async (args) => {
-            return remoteEmitter.emit('finished', args)
-        })
-        this.initialSync.events.on('channelTimeout', () => {
-            captureException(`InitialSyncError - channelTimeout`)
-            return remoteEmitter.emit('channelTimeout')
-        })
-        this.initialSync.events.on('packageStalled', () => {
-            captureException(`InitialSyncError - packageStalled`)
-            return remoteEmitter.emit('packageStalled')
-        })
+        // const remoteEmitter = remoteEventEmitter('sync')
+        // this.initialSync.events.on('progress', (args) => {
+        //     return remoteEmitter.emit('progress', args)
+        // })
+        // this.initialSync.events.on('roleSwitch', (args) => {
+        //     return remoteEmitter.emit('roleSwitch', args)
+        // })
+        // this.initialSync.events.on('error', (args) => {
+        //     captureException(`InitialSyncError - ${args.error}`)
+        //     return remoteEmitter.emit('error', args)
+        // })
+        // this.initialSync.events.on('finished', async (args) => {
+        //     return remoteEmitter.emit('finished', args)
+        // })
+        // this.initialSync.events.on('channelTimeout', () => {
+        //     captureException(`InitialSyncError - channelTimeout`)
+        //     return remoteEmitter.emit('channelTimeout')
+        // })
+        // this.initialSync.events.on('packageStalled', () => {
+        //     captureException(`InitialSyncError - packageStalled`)
+        //     return remoteEmitter.emit('packageStalled')
+        // })
     }
 
     private setupLastSyncTimestampStoring = () => {

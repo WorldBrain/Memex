@@ -9,9 +9,9 @@ import {
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
 import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import {
-    KeyboardShortcuts,
+import type {
     Shortcut,
+    BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
@@ -20,6 +20,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const styles = require('./ribbon.css')
 
@@ -29,7 +30,7 @@ export interface Props extends RibbonSubcomponentProps {
     tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
-    shortcutsData?: ShortcutElData[]
+    shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     toggleShowExtraButtons: () => void
     handleRibbonToggle: () => void
@@ -44,9 +45,11 @@ interface State {
 }
 
 export default class Ribbon extends Component<Props, State> {
-    static defaultProps = { shortcutsData: shortcuts }
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
+        shortcutsData: shortcuts,
+    }
 
-    private keyboardShortcuts: KeyboardShortcuts
+    private keyboardShortcuts: BaseKeyboardShortcuts
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
@@ -178,117 +181,124 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <ExtraButtonsPanel
-                closePanel={() => this.props.toggleShowExtraButtons()}
+            <BlurredSidebarOverlay
+                onOutsideClick={() => this.props.toggleShowExtraButtons()}
+                skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <div
-                    onClick={() => {
-                        this.props.handleRibbonToggle()
-                        this.props.sidebar.closeSidebar()
-                    }}
-                    className={styles.extraButtonRow}
+                <ExtraButtonsPanel
+                    closePanel={() => this.props.toggleShowExtraButtons()}
                 >
                     <div
-                        className={cx(
-                            styles.button,
-                            styles.ribbonIcon,
-                            styles.extraButtons,
-                            {
-                                [styles.ribbonOn]: this.props.isRibbonEnabled,
-                                [styles.ribbonOff]: !this.props.isRibbonEnabled,
-                            },
+                        onClick={() => {
+                            this.props.handleRibbonToggle()
+                            this.props.sidebar.closeSidebar()
+                        }}
+                        className={styles.extraButtonRow}
+                    >
+                        <div
+                            className={cx(
+                                styles.button,
+                                styles.ribbonIcon,
+                                styles.extraButtons,
+                                {
+                                    [styles.ribbonOn]: this.props
+                                        .isRibbonEnabled,
+                                    [styles.ribbonOff]: !this.props
+                                        .isRibbonEnabled,
+                                },
+                            )}
+                        />
+                        {this.props.isRibbonEnabled ? (
+                            <div className={styles.extraButtonsText}>
+                                Disable Sidebar
+                            </div>
+                        ) : (
+                            <div className={styles.extraButtonsText}>
+                                Enable Ribbon
+                            </div>
                         )}
-                    />
-                    {this.props.isRibbonEnabled ? (
-                        <div className={styles.extraButtonsText}>
-                            Disable Sidebar
-                        </div>
-                    ) : (
-                        <div className={styles.extraButtonsText}>
-                            Enable Ribbon
-                        </div>
-                    )}
-                </div>
-
-                <div
-                    onClick={this.props.highlights.handleHighlightsToggle}
-                    className={styles.extraButtonRow}
-                >
-                    <div
-                        className={cx(
-                            styles.button,
-                            styles.ribbonIcon,
-                            styles.extraButtons,
-                            {
-                                [styles.highlightsOn]: this.props.highlights
-                                    .areHighlightsEnabled,
-                                [styles.highlightsOff]: !this.props.highlights
-                                    .areHighlightsEnabled,
-                            },
-                        )}
-                    />
-                    {this.props.highlights.areHighlightsEnabled ? (
-                        <div className={styles.extraButtonsText}>
-                            Hide Highlights
-                        </div>
-                    ) : (
-                        <div className={styles.extraButtonsText}>
-                            Show Highlights
-                        </div>
-                    )}
-                </div>
-
-                <div
-                    onClick={this.props.tooltip.handleTooltipToggle}
-                    className={styles.extraButtonRow}
-                >
-                    <div
-                        className={cx(
-                            styles.extraButtons,
-                            styles.button,
-                            styles.ribbonIcon,
-                            {
-                                [styles.tooltipOn]: this.props.tooltip
-                                    .isTooltipEnabled,
-                                [styles.tooltipOff]: !this.props.tooltip
-                                    .isTooltipEnabled,
-                            },
-                        )}
-                    />
-                    {this.props.tooltip.isTooltipEnabled ? (
-                        <div className={styles.extraButtonsText}>
-                            Hide Highlighter
-                        </div>
-                    ) : (
-                        <div className={styles.extraButtonsText}>
-                            Show Highlighter
-                        </div>
-                    )}
-                </div>
-                <div
-                    onClick={() => this.openOptionsTabRPC('settings')}
-                    className={styles.extraButtonRow}
-                >
-                    <div
-                        className={cx(
-                            styles.button,
-                            styles.settings,
-                            styles.extraButtons,
-                        )}
-                    />
-                    <div className={styles.extraButtonsText}>
-                        Advanced Settings
                     </div>
-                </div>
-                <div
-                    onClick={() =>
-                        window.open('https://worldbrain.io/feedback')
-                    }
-                    className={styles.feedbackRow}
-                >
-                    <div className={styles.extraButtonsText}>Feedback</div>
-                </div>
-            </ExtraButtonsPanel>
+
+                    <div
+                        onClick={this.props.highlights.handleHighlightsToggle}
+                        className={styles.extraButtonRow}
+                    >
+                        <div
+                            className={cx(
+                                styles.button,
+                                styles.ribbonIcon,
+                                styles.extraButtons,
+                                {
+                                    [styles.highlightsOn]: this.props.highlights
+                                        .areHighlightsEnabled,
+                                    [styles.highlightsOff]: !this.props
+                                        .highlights.areHighlightsEnabled,
+                                },
+                            )}
+                        />
+                        {this.props.highlights.areHighlightsEnabled ? (
+                            <div className={styles.extraButtonsText}>
+                                Hide Highlights
+                            </div>
+                        ) : (
+                            <div className={styles.extraButtonsText}>
+                                Show Highlights
+                            </div>
+                        )}
+                    </div>
+
+                    <div
+                        onClick={this.props.tooltip.handleTooltipToggle}
+                        className={styles.extraButtonRow}
+                    >
+                        <div
+                            className={cx(
+                                styles.extraButtons,
+                                styles.button,
+                                styles.ribbonIcon,
+                                {
+                                    [styles.tooltipOn]: this.props.tooltip
+                                        .isTooltipEnabled,
+                                    [styles.tooltipOff]: !this.props.tooltip
+                                        .isTooltipEnabled,
+                                },
+                            )}
+                        />
+                        {this.props.tooltip.isTooltipEnabled ? (
+                            <div className={styles.extraButtonsText}>
+                                Hide Highlighter
+                            </div>
+                        ) : (
+                            <div className={styles.extraButtonsText}>
+                                Show Highlighter
+                            </div>
+                        )}
+                    </div>
+                    <div
+                        onClick={() => this.openOptionsTabRPC('settings')}
+                        className={styles.extraButtonRow}
+                    >
+                        <div
+                            className={cx(
+                                styles.button,
+                                styles.settings,
+                                styles.extraButtons,
+                            )}
+                        />
+                        <div className={styles.extraButtonsText}>
+                            Advanced Settings
+                        </div>
+                    </div>
+                    <div
+                        onClick={() =>
+                            window.open('https://worldbrain.io/feedback')
+                        }
+                        className={styles.feedbackRow}
+                    >
+                        <div className={styles.extraButtonsText}>Feedback</div>
+                    </div>
+                </ExtraButtonsPanel>
+            </BlurredSidebarOverlay>
         )
     }
 
@@ -362,7 +372,9 @@ export default class Ribbon extends Component<Props, State> {
                                     </>
                                 )}
                                 <ButtonTooltip
-                                    tooltipText="Search Dashboard"
+                                    tooltipText={this.getTooltipText(
+                                        'openDashboard',
+                                    )}
                                     position="leftNarrow"
                                 >
                                     <div
@@ -432,24 +444,29 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
-                                            {
-                                                [styles.saveIcon]: this.props
-                                                    .commentBox.isCommentSaved,
-                                            },
+                                {!this.props.sidebar.isSidebarOpen && (
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
                                         )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                </ButtonTooltip>
+                                        position="leftNarrow"
+                                    >
+                                        <div
+                                            className={cx(
+                                                styles.button,
+                                                styles.comments,
+                                                {
+                                                    [styles.saveIcon]: this
+                                                        .props.commentBox
+                                                        .isCommentSaved,
+                                                },
+                                            )}
+                                            onClick={
+                                                this.handleCommentIconBtnClick
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                )}
                                 {this.props.commentBox.showCommentBox && (
                                     <Tooltip position="left">
                                         <AnnotationCreate

@@ -1,12 +1,11 @@
-import { Storage } from 'webextension-polyfill-ts'
-import { LimitedBrowserStorage } from './tests/browser-storage'
+import type { LimitedBrowserStorage } from './tests/browser-storage'
 
 export interface SettingStore<Settings> {
     set<Key extends keyof Settings>(
         key: Key,
         value: Settings[Key],
     ): Promise<void>
-    get<Key extends keyof Settings>(key: Key): Promise<Settings[Key]>
+    get<Key extends keyof Settings>(key: Key): Promise<Settings[Key] | null>
 }
 
 export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
@@ -25,10 +24,16 @@ export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
         await this.localBrowserStorage.set({ [storageKey]: value })
     }
 
-    async get<Key extends keyof Settings>(key: Key): Promise<Settings[Key]> {
+    async get<Key extends keyof Settings>(
+        key: Key,
+    ): Promise<Settings[Key] | null> {
         const storageKey = this._makeStorageKey(key as string)
-        const response = await this.localBrowserStorage.get(storageKey)
-        return response[storageKey as string]
+        return this.__rawGet(storageKey)
+    }
+
+    async __rawGet<ReturnType = any>(key: string): Promise<ReturnType | null> {
+        const response = await this.localBrowserStorage.get(key)
+        return (response[key] as ReturnType) ?? null
     }
 
     _makeStorageKey(key: string) {

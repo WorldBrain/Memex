@@ -7,7 +7,7 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/utils'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
-import { KeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
+import type { BaseKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
 import analytics from 'src/analytics'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
@@ -22,13 +22,13 @@ async function writeShortcutState(state: State) {
 }
 
 export interface Props {
-    shortcutsData?: ShortcutElData[]
+    shortcutsData: ShortcutElData[]
 }
 
-export interface State extends KeyboardShortcuts {}
+export interface State extends BaseKeyboardShortcuts {}
 
 class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
-    static defaultProps = {
+    static defaultProps: Pick<Props, 'shortcutsData'> = {
         shortcutsData: shortcuts,
     }
 
@@ -99,7 +99,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     renderCheckboxes() {
-        return this.props.shortcutsData.map(({ id, name, children }) => {
+        return this.props.shortcutsData.map(({ id, name, text, subText }) => {
             if (this.state[name]) {
                 return (
                     <Checkbox
@@ -110,15 +110,20 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                         isDisabled={!this.state.shortcutsEnabled}
                         name={name}
                     >
-                        {children}
-                        <input
-                            type="text"
-                            value={this.state[name].shortcut}
-                            onKeyDown={this.recordBinding}
-                            onChange={(e) => e.preventDefault()}
-                            disabled={!this.state.shortcutsEnabled}
-                            name={name}
-                        />{' '}
+                        {text}
+                        <div className={styles.rightBox}>
+                            <input
+                                type="text"
+                                value={this.state[name].shortcut}
+                                onKeyDown={this.recordBinding}
+                                onChange={(e) => e.preventDefault()}
+                                disabled={!this.state.shortcutsEnabled}
+                                name={name}
+                            />{' '}
+                            <span className={styles.kbShortcutSubText}>
+                                {subText}
+                            </span>
+                        </div>
                     </Checkbox>
                 )
             }

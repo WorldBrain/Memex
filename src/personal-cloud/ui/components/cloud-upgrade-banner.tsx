@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 const Container = styled.div<StyleProps>`
     display: flex;
@@ -54,14 +55,25 @@ const CloudUpgradeBanner = ({ onGetStartedClick, ...props }: Props) => (
     <Container {...props}>
         <ContentBox {...props}>
             <Title {...props}>
-                Memex now supports Multi-Device Sync & has a new pricing model
+                Memex now supports multi-device sync & automatic cloud backup
             </Title>
             <Description>
                 Sync between an unlimited amount of devices for free
             </Description>
         </ContentBox>
         <ButtonBox>
-            <PrimaryAction label="Get Started" onClick={onGetStartedClick} />
+            <SecondaryAction
+                label="Learn More"
+                onClick={() =>
+                    window.open(
+                        'https://worldbrain.io/announcements/back-to-beta',
+                    )
+                }
+            />
+            <PrimaryAction
+                label="Start Migration"
+                onClick={onGetStartedClick}
+            />
         </ButtonBox>
     </Container>
 )

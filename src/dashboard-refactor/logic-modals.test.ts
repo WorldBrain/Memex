@@ -9,11 +9,11 @@ describe('Dashboard Refactor modals logic', () => {
     }) => {
         const { searchResults } = await setupTest(device, {
             withAuth: true,
-            withBeta: true,
         })
         const listId = 123
         searchResults.processMutation({
             listsSidebar: {
+                showMoreMenuListId: { $set: listId },
                 listData: {
                     [listId]: {
                         $set: {
@@ -26,6 +26,9 @@ describe('Dashboard Refactor modals logic', () => {
         })
 
         expect(searchResults.state.modals.shareListId).toBeUndefined()
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
+            listId,
+        )
         expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
             'pristine',
         )
@@ -35,6 +38,9 @@ describe('Dashboard Refactor modals logic', () => {
         })
 
         expect(searchResults.state.modals.shareListId).toEqual(listId)
+        expect(
+            searchResults.state.listsSidebar.showMoreMenuListId,
+        ).toBeUndefined()
         expect(searchResults.state.listsSidebar.listShareLoadingState).toEqual(
             'success',
         )
@@ -54,7 +60,6 @@ describe('Dashboard Refactor modals logic', () => {
 
         const { searchResults } = await setupTest(device, {
             withAuth: true,
-            withBeta: true,
         })
 
         searchResults.processMutation({
@@ -107,20 +112,20 @@ describe('Dashboard Refactor modals logic', () => {
         expect(searchResults.state.modals.showLogin).toEqual(false)
     })
 
-    it('should be able to set the Beta Feature modal visibility', async ({
+    it('should be able to set the display name setup modal visibility', async ({
         device,
     }) => {
         const { searchResults } = await setupTest(device)
 
-        expect(searchResults.state.modals.showBetaFeature).toEqual(false)
-        await searchResults.processEvent('setShowBetaFeatureModal', {
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(false)
+        await searchResults.processEvent('setShowDisplayNameSetupModal', {
             isShown: true,
         })
-        expect(searchResults.state.modals.showBetaFeature).toEqual(true)
-        await searchResults.processEvent('setShowBetaFeatureModal', {
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(true)
+        await searchResults.processEvent('setShowDisplayNameSetupModal', {
             isShown: false,
         })
-        expect(searchResults.state.modals.showBetaFeature).toEqual(false)
+        expect(searchResults.state.modals.showDisplayNameSetup).toEqual(false)
     })
 
     it('should be able to set the Show Subscription modal visibility', async ({
@@ -162,10 +167,9 @@ describe('Dashboard Refactor modals logic', () => {
     it('clicking activity feed while logged out should display login modal', async ({
         device,
     }) => {
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () =>
-            null
         const { searchResults } = await setupTest(device, {
             openFeedUrl: () => {},
+            withAuth: false,
         })
         expect(searchResults.state.modals.showLogin).not.toBe(true)
         await searchResults.processEvent('clickFeedActivityIndicator', null)

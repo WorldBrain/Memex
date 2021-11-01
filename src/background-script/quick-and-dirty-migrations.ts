@@ -1,29 +1,36 @@
-import Dexie from 'dexie'
-import Storex from '@worldbrain/storex'
-import { Storage } from 'webextension-polyfill-ts'
-import textStemmer from '@worldbrain/memex-stemmer'
-import { URLNormalizer } from '@worldbrain/memex-url-utils'
+import type Dexie from 'dexie'
+import type Storex from '@worldbrain/storex'
+import type { Storage } from 'webextension-polyfill-ts'
+import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import textStemmer from '@worldbrain/memex-stemmer'
 
-import { ReadwiseBackground } from 'src/readwise-integration/background'
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
+import type { BackgroundModules } from './setup'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { SETTING_NAMES } from 'src/sync-settings/background/constants'
+import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
+import type { LocalExtensionSettings } from './types'
+import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
+import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 
 export interface MigrationProps {
     db: Dexie
     storex: Storex
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
-    backgroundModules: {
-        readwise: ReadwiseBackground
-    }
+    backgroundModules: Pick<BackgroundModules, 'readwise' | 'syncSettings'>
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
 }
 
 export interface Migrations {
     [storageKey: string]: (props: MigrationProps) => Promise<void>
 }
+
+export const MIGRATION_PREFIX = '@QnDMigration-'
 
 // __IMPORTANT NOTE__
 //     Please note that use of the Dexie `db` instance rather than the `storex` instance won't trigger
@@ -32,6 +39,65 @@ export interface Migrations {
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This is the migration to bring over old pre-cloud user data to the new cloud-based
+     * model. Previously this was done by version number in the calling BG script class, though
+     * that didn't work nicely to cover 100% of users with our frequent hotfix releases post-cloud release.
+     */
+    [MIGRATION_PREFIX + 'migrate-to-cloud']: async ({
+        localExtSettingStore,
+        storex: storageManager,
+        backgroundModules: { syncSettings },
+    }) => {
+        if ((await localExtSettingStore.get('installTimestamp')) != null) {
+            return
+        }
+
+        await this.deps.syncSettingsStore.dashboard.set(
+            'subscribeBannerShownAfter',
+            Date.now(),
+        )
+        await syncSettings.__migrateLocalStorage()
+        await migrateInstallTime({
+            storageManager,
+            getOldInstallTime: () =>
+                (localExtSettingStore as BrowserSettingsStore<any>).__rawGet(
+                    __OLD_INSTALL_TIME_KEY,
+                ),
+            setInstallTime: (time) =>
+                localExtSettingStore.set('installTimestamp', time),
+        })
+    },
+    /*
+     * Post 3.0.0 cloud release, we forgot to migrate the users' Readwise keys from local storage to
+     * the new synced settings collection. This meant that Readwise integration stopped working until
+     * the user re-entered their API key.
+     */
+    [MIGRATION_PREFIX + 'migrate-readwise-key']: async ({
+        backgroundModules,
+        localStorage,
+    }) => {
+        // Note I'm using the constant for the synced settings here because the name is the same as the old local storage key name
+        const {
+            [SETTING_NAMES.readwise.apiKey]: oldKey,
+        } = await localStorage.get(SETTING_NAMES.readwise.apiKey)
+
+        const cloudReleaseDate = new Date('2021-10-13T04:00:00.000+00:00')
+
+        if (!oldKey) {
+            return
+        }
+
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+
+        await syncSettings.readwise.set('apiKey', oldKey)
+        await backgroundModules.readwise.uploadAllAnnotations({
+            annotationFilter: ({ createdWhen, lastEdited }) =>
+                createdWhen > cloudReleaseDate || lastEdited > cloudReleaseDate,
+        })
+    },
     /*
      * We discovered further complications with our mobile list ID staticization attempts where,
      * as it was not also done on the mobile app, sync entries coming in from the mobile app would

@@ -10,3 +10,5 @@ global.DataTransfer = function () {
     this.getData = (format) => this.data
     this.setDragImage = (img) => (this.img = img)
 }
+
+global.document.execCommand = () => true

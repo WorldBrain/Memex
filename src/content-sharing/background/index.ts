@@ -1,21 +1,21 @@
 import pick from 'lodash/pick'
-import StorageManager from '@worldbrain/storex'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import CustomListStorage from 'src/custom-lists/background/storage'
-import { AuthBackground } from 'src/authentication/background'
-import { Analytics } from 'src/analytics/types'
-import AnnotationStorage from 'src/annotations/background/storage'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import type StorageManager from '@worldbrain/storex'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import type CustomListStorage from 'src/custom-lists/background/storage'
+import type { AuthBackground } from 'src/authentication/background'
+import type { Analytics } from 'src/analytics/types'
+import type AnnotationStorage from 'src/annotations/background/storage'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import ActivityStreamsBackground from 'src/activity-streams/background'
-import { Services } from 'src/services/types'
-import { ServerStorageModules } from 'src/storage/types'
-import { ContentSharingInterface, ContentSharingEvents } from './types'
+import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import type ActivityStreamsBackground from 'src/activity-streams/background'
+import type { Services } from 'src/services/types'
+import type { ServerStorageModules } from 'src/storage/types'
+import type { ContentSharingInterface } from './types'
 import { ContentSharingClientStorage } from './storage'
 import { GenerateServerID } from '../../background-script/types'
+
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
@@ -31,8 +31,8 @@ export default class ContentSharingBackground {
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
-            userMessages: UserMessageService
             services: Pick<Services, 'contentSharing'>
+            captureException?: (e: Error) => void
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
@@ -47,15 +47,16 @@ export default class ContentSharingBackground {
         this.remoteFunctions = {
             ...options.services.contentSharing,
             shareList: this.shareList,
-            shareListEntries: this.shareListEntries,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToLists: this.shareAnnotationsToLists,
             unshareAnnotationsFromLists: this.unshareAnnotationsFromLists,
-            unshareAnnotation: this.unshareAnnotation,
+            unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
+            generateRemoteAnnotationId: async () =>
+                this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
                 return this.storage.getRemoteListId({
                     localId: callOptions.localListId,
@@ -89,6 +90,9 @@ export default class ContentSharingBackground {
     async setup() {}
 
     async executePendingActions() {}
+
+    private generateRemoteAnnotationId = (): string =>
+        this.options.generateServerId('sharedAnnotation').toString()
 
     private getRemoteAnnotationLink: ContentSharingInterface['getRemoteAnnotationLink'] = async ({
         annotationUrl,
@@ -160,10 +164,6 @@ export default class ContentSharingBackground {
         }
     }
 
-    shareListEntries: ContentSharingInterface['shareListEntries'] = async (
-        options,
-    ) => {}
-
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
@@ -172,18 +172,27 @@ export default class ContentSharingBackground {
                 localIds: [options.annotationUrl],
             })
         )[options.annotationUrl]
-        if (remoteAnnotationId) {
-            return
+
+        if (!remoteAnnotationId) {
+            await this.storage.storeAnnotationMetadata([
+                {
+                    localId: options.annotationUrl,
+                    excludeFromLists: !options.shareToLists ?? true,
+                    remoteId:
+                        options.remoteAnnotationId ??
+                        this.generateRemoteAnnotationId(),
+                },
+            ])
         }
-        await this.storage.storeAnnotationMetadata([
-            {
-                localId: options.annotationUrl,
-                remoteId: this.options
-                    .generateServerId('sharedAnnotation')
-                    .toString(),
-                excludeFromLists: true,
-            },
-        ])
+
+        if (!options.skipPrivacyLevelUpdate) {
+            await this.options.annotationStorage.setAnnotationPrivacyLevel({
+                annotation: options.annotationUrl,
+                privacyLevel: options.setBulkShareProtected
+                    ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                    : AnnotationPrivacyLevels.SHARED,
+            })
+        }
 
         this.options.analytics.trackEvent({
             category: 'ContentSharing',
@@ -194,35 +203,37 @@ export default class ContentSharingBackground {
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
         options,
     ) => {
+        const { annotationStorage } = this.options
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const allAnnotations = await this.options.annotationStorage.getAnnotations(
-            options.annotationUrls,
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: options.annotationUrls },
         )
-        const annotPrivacyLevels = await this.options.annotationStorage.getPrivacyLevelsByAnnotation(
-            {
-                annotations: options.annotationUrls,
-            },
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (url) =>
+                ![
+                    AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[url]?.privacyLevel),
         )
-        const annotations = allAnnotations.filter(
-            (annotation) =>
-                !remoteIds[annotation.url] &&
-                (!annotPrivacyLevels[annotation.url] ||
-                    annotPrivacyLevels[annotation.url]?.privacyLevel >
-                        AnnotationPrivacyLevels.PROTECTED),
+
+        await this.storage.storeAnnotationMetadata(
+            nonProtectedAnnotations
+                .filter((url) => !remoteIds[url])
+                .map((localId) => ({
+                    localId,
+                    remoteId: this.generateRemoteAnnotationId(),
+                    excludeFromLists: !options.shareToLists ?? true,
+                })),
         )
-        for (const annnotation of annotations) {
-            await this.storage.storeAnnotationMetadata([
-                {
-                    localId: annnotation.url,
-                    remoteId: this.options
-                        .generateServerId('sharedAnnotation')
-                        .toString(),
-                    excludeFromLists: true, // TODO: should this be true or false?
-                },
-            ])
-        }
+
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
+            annotations: nonProtectedAnnotations,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                : AnnotationPrivacyLevels.SHARED,
+        })
     }
 
     shareAnnotationsToLists: ContentSharingInterface['shareAnnotationsToLists'] = async (
@@ -287,21 +298,26 @@ export default class ContentSharingBackground {
         })
     }
 
-    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
+    unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
         options,
     ) => {
-        const remoteAnnotationId = (
-            await this.storage.getRemoteAnnotationIds({
-                localIds: [options.annotationUrl],
-            })
-        )[options.annotationUrl]
-        if (!remoteAnnotationId) {
-            throw new Error(
-                `Tried to unshare an annotation which was not shared`,
-            )
-        }
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
+        const { annotationStorage } = this.options
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: options.annotationUrls },
+        )
+        const nonProtectedAnnotations = options.annotationUrls.filter(
+            (annotationUrl) =>
+                ![
+                    AnnotationPrivacyLevels.PROTECTED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(annotPrivacyLevels[annotationUrl]?.privacyLevel),
+        )
+
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
+            annotations: nonProtectedAnnotations,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.PROTECTED
+                : AnnotationPrivacyLevels.PRIVATE,
         })
     }
 

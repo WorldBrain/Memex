@@ -3,9 +3,10 @@ import * as domTextPosition from 'dom-anchor-text-position'
 import * as hypHTMLAnchoring from './anchoring/html'
 import { anchor as PDFAnchor, describe as PDFDescribe } from './anchoring/pdf'
 import { highlightDOMRange } from '../highlight-dom-range'
+import { isFullUrlPDF } from 'src/util/uri-utils'
 
 const isPDF = () => {
-    return window.location.href.endsWith('.pdf')
+    return isFullUrlPDF(window.location.href)
 }
 
 export async function selectionToDescriptor({ selection }) {

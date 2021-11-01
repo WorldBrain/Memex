@@ -67,10 +67,6 @@ const AccountMenu = (
                         </ButtonSideMenu>
                     }
                     menuItems={[
-                        {
-                            label: '⭐️ Upgrade',
-                            handler: props.showSubscriptionModal,
-                        },
                         { label: 'Account Info', handler: handleAccountClick },
                         { label: 'Log Out', handler: handleLogOutClick },
                     ]}

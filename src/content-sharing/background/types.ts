@@ -4,17 +4,19 @@ import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/con
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
     shareList(options: { listId: number }): Promise<{ remoteListId: string }>
-    shareListEntries(options: {
-        listId: number
-        queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
     shareAnnotation(options: {
         annotationUrl: string
+        remoteAnnotationId?: string
+        shareToLists?: boolean
         queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
+        setBulkShareProtected?: boolean
+        skipPrivacyLevelUpdate?: boolean
     }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]
+        shareToLists?: boolean
+        setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     shareAnnotationsToLists(options: {
@@ -25,14 +27,15 @@ export interface ContentSharingInterface
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
-    unshareAnnotation(options: {
-        annotationUrl: string
-        queueInteraction?: ContentSharingQueueInteraction
+    unshareAnnotations(options: {
+        annotationUrls: string[]
+        setBulkShareProtected?: boolean
     }): Promise<void>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
     }): Promise<string | null>
+    generateRemoteAnnotationId(): Promise<string>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
     getRemoteListIds(options: {
         localListIds: number[]
@@ -65,6 +68,7 @@ export interface ContentSharingEvents {
 }
 
 export type ContentSharingQueueInteraction =
+    | 'queue-only'
     | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'

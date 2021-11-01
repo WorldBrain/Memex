@@ -35,11 +35,16 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
+import { captureException } from 'src/util/raven'
 import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 
 export async function main() {
-    setupRpcConnection({ sideName: 'background', role: 'background' })
+    const rpcManager = setupRpcConnection({
+        sideName: 'background',
+        role: 'background',
+        paused: true,
+    })
 
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
@@ -85,6 +90,7 @@ export async function main() {
         localStorageChangesManager,
         fetchPageDataProcessor,
         browserAPIs: browser,
+        captureException,
         storageManager,
         persistentStorageManager,
         getIceServers: async () => {
@@ -114,7 +120,6 @@ export async function main() {
     const { setStorageLoggingEnabled } = await setStorageMiddleware(
         storageManager,
         {
-            syncService: backgroundModules.sync,
             storexHub: backgroundModules.storexHub,
             contentSharing: backgroundModules.contentSharing,
             personalCloud: backgroundModules.personalCloud,
@@ -129,6 +134,7 @@ export async function main() {
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
         auth: backgroundModules.auth.remoteFunctions,
+        analytics: backgroundModules.analytics.remoteFunctions,
         subscription: {
             getCheckoutLink:
                 backgroundModules.auth.subscriptionService.getCheckoutLink,
@@ -165,6 +171,8 @@ export async function main() {
         persistentStorageManager,
         getServerStorage,
     })
+
+    rpcManager.unpause()
 }
 
 main()

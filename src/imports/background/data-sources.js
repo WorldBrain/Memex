@@ -1,5 +1,5 @@
 import moment from 'moment'
-import browserIsChrome from '../../util/check-browser'
+import checkBrowser from '../../util/check-browser'
 import {
     IMPORT_TYPE as TYPE,
     IMPORT_SERVICES as SERVICES,
@@ -22,7 +22,7 @@ export default class ImportDataSources {
      */
     get ROOT_BM() {
         return {
-            id: browserIsChrome() ? '0' : '',
+            id: checkBrowser() === 'firefox' ? '' : '0',
         }
     }
 
@@ -36,12 +36,10 @@ export default class ImportDataSources {
         this._bookmarks = bookmarks
     }
 
-    _createHistParams = time => ({
+    _createHistParams = (time) => ({
         ...ImportDataSources.DEF_HIST_PARAMS,
         endTime: time,
-        startTime: moment(time)
-            .subtract(1, 'week')
-            .valueOf(),
+        startTime: moment(time).subtract(1, 'week').valueOf(),
     })
 
     /**

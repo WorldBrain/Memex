@@ -1,11 +1,12 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { Page } from 'src/search/models'
+import type { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
-import { AnnotPage } from './types'
-import { Annotation } from 'src/annotations/types'
-import { User, SocialPage } from 'src/social-integration/types'
+import type { AnnotPage } from './types'
+import { Annotation, AnnotationPrivacyLevel } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 import {
     buildPostUrlId,
@@ -92,6 +93,13 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .toArray()
 
         for (const { favIcon, hostname } of favIcons) {
+            if (!favIcon) {
+                console.warn(
+                    'found a favicon entry without favicon, hostname: ',
+                    hostname,
+                )
+                continue
+            }
             favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
         }
     }
@@ -219,26 +227,59 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         annotMap: Map<string, Annotation[]>,
     ) {
         const annotTagMap = new Map<string, string[]>()
+        const protectedAnnotUrlsSet = new Set<string>()
+        const sharedAnnotUrlsSet = new Set<string>()
+
         const annots = (await this.backend.dexieInstance
             .table('annotations')
             .where('pageUrl')
             .anyOf(pageUrls)
             .toArray()) as Annotation[]
 
+        const annotUrls = annots.map((annot) => annot.url)
+
         await this.backend.dexieInstance
             .table('tags')
             .where('url')
-            .anyOf(annots.map((annot) => annot.url))
+            .anyOf(annotUrls)
             .eachPrimaryKey(([name, url]: [string, string]) => {
                 const prev = annotTagMap.get(url) ?? []
                 annotTagMap.set(url, [...prev, name])
+            })
+
+        await this.backend.dexieInstance
+            .table('annotationPrivacyLevels')
+            .where('annotation')
+            .anyOf(annotUrls)
+            .each(({ annotation, privacyLevel }: AnnotationPrivacyLevel) => {
+                if (
+                    [
+                        AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
+                    protectedAnnotUrlsSet.add(annotation)
+                }
+                if (
+                    [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel)
+                ) {
+                    sharedAnnotUrlsSet.add(annotation)
+                }
             })
 
         annots.forEach((annot) => {
             const prev = annotMap.get(annot.pageUrl) ?? []
             annotMap.set(annot.pageUrl, [
                 ...prev,
-                { ...annot, tags: annotTagMap.get(annot.url) ?? [] },
+                {
+                    ...annot,
+                    tags: annotTagMap.get(annot.url) ?? [],
+                    isShared: sharedAnnotUrlsSet.has(annot.url),
+                    isBulkShareProtected: protectedAnnotUrlsSet.has(annot.url),
+                },
             ])
         })
     }

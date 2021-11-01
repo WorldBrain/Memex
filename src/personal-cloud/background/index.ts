@@ -22,7 +22,7 @@ import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authenticat
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
-    PersonalCloudSettings,
+    LocalPersonalCloudSettings,
     PersonalCloudDeviceID,
     PersonalCloudRemoteInterface,
     PersonalCloudStats,
@@ -38,19 +38,23 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
 import { prepareDataMigration } from 'src/personal-cloud/storage/migration-preparation'
-import { SettingStore } from 'src/util/settings'
+import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
 import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { LocalExtensionSettings } from 'src/background-script/types'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 export interface PersonalCloudBackgroundOptions {
+    backend: PersonalCloudBackend
     storageManager: StorageManager
+    syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
     remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
-    backend: PersonalCloudBackend
     getUserId(): Promise<string | number | null>
     userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
-    settingStore: SettingStore<PersonalCloudSettings>
+    settingStore: SettingStore<LocalPersonalCloudSettings>
+    localExtSettingStore: SettingStore<LocalExtensionSettings>
     createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
         storageType: PersonalCloudClientStorageType
@@ -64,6 +68,7 @@ export interface PersonalCloudBackgroundOptions {
 export class PersonalCloudBackground {
     currentSchemaVersion?: Date
     actionQueue: ActionQueue<PersonalCloudAction>
+    pendingActionsExecuting: Promise<void>
     authChangesObserved: Promise<void>
     changesIntegrating: Promise<void>
     pushMutex = new AsyncMutex()
@@ -94,10 +99,10 @@ export class PersonalCloudBackground {
         this.setupEventListeners()
 
         this.remoteFunctions = {
-            enableCloudSync: this.enableSync,
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
             runDataMigrationPreparation: this.prepareDataMigration,
+            enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
                 wipePassiveData({ db: this.dexie, visitLimit: 20 }),
@@ -128,8 +133,16 @@ export class PersonalCloudBackground {
     }
 
     private prepareDataMigration = async () => {
+        const db = this.dexie
+
         await prepareDataMigration({
-            db: this.dexie,
+            db,
+            chunkSize: 350,
+            resetQueue: async () => {
+                await db.table('personalCloudAction').clear()
+                await this.actionQueue.resetPendingActionCount()
+                this._modifyStats({ pendingDownloads: 0, pendingUploads: 0 })
+            },
             queueObjs: (actionData) =>
                 this.actionQueue.scheduleManyActions(
                     actionData.objs.map((object) => ({
@@ -152,14 +165,14 @@ export class PersonalCloudBackground {
         })
 
         await this.enableSync()
-        this.startSync()
+        await this.startSync()
     }
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
     private async startCloudSyncIfEnabled() {
         if (await this.isCloudSyncEnabled()) {
-            this.startSync()
+            await this.startSync()
         }
     }
 
@@ -192,13 +205,22 @@ export class PersonalCloudBackground {
         }
     }
 
-    enableSync = async () => {
+    async enableSync() {
         await this.options.settingStore.set('isSetUp', true)
     }
 
-    startSync() {
-        this.actionQueue.unpause()
+    enableSyncForNewInstall = async (now = Date.now()) => {
+        await this.enableSync()
+        await this.startSync()
+    }
 
+    async startSync() {
+        const userId = await this.options.getUserId()
+        await this.handleAuthChange(userId)
+
+        if (!this.pendingActionsExecuting) {
+            this.pendingActionsExecuting = this.actionQueue.executePendingActions()
+        }
         // These will never return, so don't await for it
         if (!this.authChangesObserved) {
             this.authChangesObserved = this.observeAuthChanges()
@@ -221,6 +243,7 @@ export class PersonalCloudBackground {
     async handleAuthChange(userId: string | number | null) {
         if (userId) {
             await this.createOrLoadDeviceId(userId)
+            this.actionQueue.unpause()
         } else {
             this.actionQueue.pause()
             delete this.deviceId
@@ -249,6 +272,11 @@ export class PersonalCloudBackground {
                 console.error('Error while emitting updated stats:', err)
             }
         }
+    }
+
+    async integrateAllUpdates(): Promise<void> {
+        const updateBatch = await this.options.backend.bulkDownloadUpdates()
+        return this.integrateUpdates(updateBatch)
     }
 
     async integrateContinuously() {
@@ -461,6 +489,9 @@ export class PersonalCloudBackground {
 
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
         if (!this.deviceId) {
+            console.warn(
+                'Tried to execute action without deviceId, so pausing the action queue',
+            )
             return { pauseAndRetry: true }
         }
         this._debugLog('Executing action', action)
@@ -620,13 +651,9 @@ export class PersonalCloudBackground {
     }
 
     private isPassiveDataRemovalNeeded: () => Promise<boolean> = async () => {
-        const { storageManager } = this.options
+        const { localExtSettingStore } = this.options
 
-        const oldVisits = await storageManager
-            .collection('visits')
-            .findAllObjects({
-                time: { $lte: PASSIVE_DATA_CUTOFF_DATE.getTime() },
-            })
-        return oldVisits.length > 0
+        const installTime = await localExtSettingStore.get('installTimestamp')
+        return installTime < PASSIVE_DATA_CUTOFF_DATE.getTime()
     }
 }

@@ -3,7 +3,7 @@ import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
 export function createSelfTests(options: {
@@ -93,7 +93,7 @@ export function createSelfTests(options: {
             console.log('Generated device ID:', personalCloud.deviceId!)
 
             if (process.env.TEST_READWISE_API_KEY?.length > 0) {
-                await backgroundModules.settings.set({
+                await backgroundModules.syncSettings.set({
                     [SYNCED_SETTING_KEYS.ReadwiseAPIKey]:
                         process.env.TEST_READWISE_API_KEY,
                 })
@@ -125,45 +125,63 @@ export function createSelfTests(options: {
                 { skipPageIndexing: true },
             )
             console.log(`Added private note to '${testPageUrl}'`)
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation2 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `Yet another test comment! This one's protected`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
                 },
                 { skipPageIndexing: true },
             )
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation2,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+            )
             console.log(`Added protected note to '${testPageUrl}'`)
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: upload error`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
                 },
                 { skipPageIndexing: true },
             )
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation3,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+            )
             console.log(
                 `Added upload error generating note to '${testPageUrl}'`,
             )
-            await backgroundModules.directLinking.createAnnotation(
+            const publicAnnotation4 = await backgroundModules.directLinking.createAnnotation(
                 {
                     tab: {} as any,
                 },
                 {
                     pageUrl: normalizedTestPageUrl,
                     comment: `*memex-debug*: download error`,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     createdWhen: new Date('2021-07-21'),
                 },
                 { skipPageIndexing: true },
+            )
+            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
+                {},
+                {
+                    annotation: publicAnnotation4,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
             )
             console.log(
                 `Added download error generating note to '${testPageUrl}'`,
@@ -218,9 +236,7 @@ export function createSelfTests(options: {
             })
             await backgroundModules.contentSharing.shareAnnotation({
                 annotationUrl: publicAnnotationUrl,
-            })
-            await backgroundModules.contentSharing.shareAnnotationsToLists({
-                annotationUrls: [publicAnnotationUrl],
+                shareToLists: true,
             })
             await backgroundModules.directLinking.editAnnotation(
                 null,

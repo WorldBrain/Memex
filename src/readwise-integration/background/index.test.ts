@@ -35,7 +35,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     {
                         execute: async ({
                             setup: {
-                                backgroundModules: { readwise, settings },
+                                backgroundModules: {
+                                    readwise,
+                                    syncSettings: settings,
+                                },
                             },
                         }) => {
                             await readwise['options'].settingsStore.set(
@@ -62,7 +65,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
                                 expect(
-                                    await setup.backgroundModules.settings.get(
+                                    await setup.backgroundModules.syncSettings.get(
                                         'readwise.apiKey',
                                     ),
                                 ).toEqual({
@@ -185,7 +188,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         validatedKey: 'my key',
                                     },
                                 )
-                                await setup.backgroundModules.readwise.uploadAllAnnotations()
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {},
+                                )
 
                                 expectFetchCalls(
                                     parseJsonFetchCalls(setup.fetch.calls()),
@@ -290,7 +295,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         validatedKey: 'my key',
                                     },
                                 )
-                                await setup.backgroundModules.readwise.uploadAllAnnotations()
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {},
+                                )
 
                                 const expectedHighlight1 = DATA.UPLOADED_HIGHLIGHT_1(
                                     firstAnnotationUrl,
@@ -386,7 +393,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: firstAnnotationUrl,
                                     },
                                 )
-                                await setup.backgroundModules.readwise.uploadAllAnnotations()
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {},
+                                )
 
                                 const expectedHighlight1 = DATA.UPLOADED_HIGHLIGHT_1(
                                     firstAnnotationUrl,
@@ -454,7 +463,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     DATA.ANNOT_3,
                                 )
 
-                                await setup.backgroundModules.readwise.uploadAllAnnotations()
+                                await setup.backgroundModules.readwise.uploadAllAnnotations(
+                                    {},
+                                )
 
                                 expectFetchCalls(
                                     parseJsonFetchCalls(setup.fetch.calls()),

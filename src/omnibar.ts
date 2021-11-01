@@ -11,7 +11,7 @@ import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
-import browserIsChrome from './util/check-browser'
+import checkBrowser from './util/check-browser'
 import { EVENT_NAMES } from './analytics/internal/constants'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import { combineSearchIndex } from './search/search-index'
@@ -56,17 +56,6 @@ export async function main() {
         getDb,
     })
 
-    // Read which browser we are running in.
-    let browserName
-    ;(async () => {
-        // XXX Firefox seems the only one currently implementing this function, but
-        // luckily that is enough for our current needs.
-        if (!browserIsChrome()) {
-            const browserInfo = await window['browser'].runtime.getBrowserInfo()
-            browserName = browserInfo.name
-        }
-    })()
-
     function formatTime(timestamp, showTime) {
         const m = moment(timestamp)
         const inLastSevenDays = moment().diff(m, 'days') <= 7
@@ -93,7 +82,7 @@ export async function main() {
         return {
             content: doc.url,
             description:
-                browserName === 'Firefox'
+                checkBrowser() === 'firefox'
                     ? `${url} ${title} - ${time}`
                     : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
         }

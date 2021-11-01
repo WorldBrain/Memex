@@ -9,11 +9,7 @@ import {
     BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
-import {
-    FakeTab,
-    injectFakeTabs,
-} from 'src/tab-management/background/index.tests'
-import { object } from '@storybook/addon-knobs'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import {
     PAGE_1_CREATION,
     PAGE_2_CREATION,
@@ -22,6 +18,7 @@ import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
@@ -39,16 +36,31 @@ function testSetupFactory() {
             tabManagement: setup.backgroundModules.tabManagement,
             tabsAPI: setup.browserAPIs.tabs,
             tabs: [DATA.TEST_TAB_1, DATA.TEST_TAB_2],
+            includeTitle: true,
         })
     }
 }
 
-const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
+const createAnnotationStep = (args?: {
+    protectAnnotation?: boolean
+    postCheck?: IntegrationTestStep<
+        BackgroundIntegrationTestContext
+    >['postCheck']
+}): IntegrationTestStep<BackgroundIntegrationTestContext> => ({
     execute: async ({ setup }) => {
         annotUrl = await directLinking(setup).createAnnotation(
             { tab: DATA.TEST_TAB_1 },
-            DATA.ANNOT_1 as any,
+            DATA.ANNOT_1,
         )
+        if (args?.protectAnnotation) {
+            await directLinking(setup).setAnnotationPrivacyLevel(
+                { tab: DATA.TEST_TAB_1 },
+                {
+                    annotation: annotUrl,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                },
+            )
+        }
         annotPrivacyLevel = await directLinking(
             setup,
         ).annotationStorage.findAnnotationPrivacyLevel({ annotation: annotUrl })
@@ -63,7 +75,7 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                     pageTitle: DATA.ANNOT_1.title,
                     comment: DATA.ANNOT_1.comment,
                     _comment_terms: ['test', 'comment'],
-                    _pageTitle_terms: ['test'],
+                    _pageTitle_terms: ['test', 'title'],
                     body: undefined,
                     selector: undefined,
                     createdWhen: expect.any(Date),
@@ -71,17 +83,20 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
                 },
             },
         }),
-        annotationPrivacyLevels: (): StorageCollectionDiff => ({
-            [annotPrivacyLevel.id]: {
-                type: 'create',
-                object: {
-                    annotation: annotUrl,
-                    createdWhen: expect.any(Date),
-                    id: annotPrivacyLevel.id,
-                    privacyLevel: 100,
-                },
-            },
-        }),
+        annotationPrivacyLevels: (): StorageCollectionDiff =>
+            args?.protectAnnotation
+                ? {
+                      [annotPrivacyLevel.id]: {
+                          type: 'create',
+                          object: {
+                              annotation: annotUrl,
+                              createdWhen: expect.any(Date),
+                              id: annotPrivacyLevel.id,
+                              privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                          },
+                      },
+                  }
+                : undefined,
         pages: (): StorageCollectionDiff => PAGE_1_CREATION,
         visits: (): StorageCollectionDiff => expect.anything(),
         customLists: (): StorageCollectionDiff => ({
@@ -110,7 +125,8 @@ const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext
             },
         }),
     },
-}
+    postCheck: args?.postCheck,
+})
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
@@ -127,11 +143,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_1 },
                                 DATA.HIGHLIGHT_1 as any,
                             )
-                            annotPrivacyLevel = await directLinking(
-                                setup,
-                            ).annotationStorage.findAnnotationPrivacyLevel({
-                                annotation: annotUrl,
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -141,24 +152,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         url: annotUrl,
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: DATA.HIGHLIGHT_1.title,
-                                        _pageTitle_terms: ['test'],
+                                        _pageTitle_terms: ['test', 'title'],
                                         body: DATA.HIGHLIGHT_1.body,
                                         _body_terms: ['test', 'body'],
                                         comment: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotPrivacyLevel.id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrl,
-                                        createdWhen: expect.any(Date),
-                                        id: annotPrivacyLevel.id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -205,15 +205,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         annotations: [
                                             {
                                                 url: annotUrl,
-                                                _body_terms: ['test', 'body'],
-                                                _pageTitle_terms: ['test'],
-                                                body: 'test body',
+                                                _body_terms: expect.any(Array),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                body: DATA.HIGHLIGHT_1.body,
                                                 comment: undefined,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle:
+                                                    DATA.HIGHLIGHT_1.title,
+                                                pageUrl:
+                                                    DATA.HIGHLIGHT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -226,7 +230,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -246,7 +250,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).editAnnotation(
@@ -278,18 +282,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         annotations: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'updated',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
                                                 comment: 'updated comment',
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -302,7 +307,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -312,6 +317,38 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             })
                         },
                     },
+                ],
+            }
+        },
+    ),
+    backgroundIntegrationTest(
+        'should create a page, create a protected annotation, and confirm the privacy level was created',
+        () => {
+            const findAllObjects = (collection, setup) =>
+                setup.storageManager.collection(collection).findObjects({})
+
+            return {
+                setup: testSetupFactory(),
+                steps: [
+                    createAnnotationStep({
+                        protectAnnotation: true,
+                        postCheck: async ({ setup }) => {
+                            expect(
+                                await findAllObjects(
+                                    'annotationPrivacyLevels',
+                                    setup,
+                                ),
+                            ).toEqual([
+                                {
+                                    annotation: annotUrl,
+                                    createdWhen: expect.any(Date),
+                                    id: annotPrivacyLevel.id,
+                                    privacyLevel:
+                                        AnnotationPrivacyLevels.PROTECTED,
+                                },
+                            ])
+                        },
+                    }),
                 ],
             }
         },
@@ -327,7 +364,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         preCheck: async ({ setup }) => {
                             const searchResults = await runFilteredTimeSearch(
@@ -380,14 +417,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                     'updated',
                                                     'comment',
                                                 ],
-                                                _pageTitle_terms: ['test'],
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
                                                 comment: 'updated comment',
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -416,7 +455,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).addTagForAnnotation(
@@ -449,18 +488,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
                                             },
@@ -478,7 +518,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
+                                        title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                     },
@@ -521,13 +561,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             }
         },
     ),
+    // Annot bookmarks are functional, but currentyl unused in Memex ext + ignored from Memex cloud
     backgroundIntegrationTest(
         'should create a page, create an annotation, bookmark it, then retrieve it via a filtered search',
+        { skipSyncTests: true },
         () => {
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).toggleAnnotBookmark(
@@ -564,18 +606,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         'lorem.com': [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: true,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -589,13 +632,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         displayTime: expect.any(Number),
                                         favIcon: undefined,
                                         hasBookmark: false,
-                                        pageId: 'lorem.com',
+                                        pageId: DATA.PAGE_1.url,
                                         screenshot: undefined,
                                         tags: [],
                                         lists: [SPECIAL_LIST_NAMES.INBOX],
-                                        title: undefined,
-                                        url: 'lorem.com',
-                                        fullUrl: 'https://www.lorem.com',
+                                        title: DATA.PAGE_1.title,
+                                        url: DATA.PAGE_1.url,
+                                        fullUrl: DATA.PAGE_1.fullUrl,
                                     },
                                 ],
                                 isAnnotsSearch: true,
@@ -609,7 +652,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         },
     ),
     backgroundIntegrationTest(
-        'should create a page, create an annotation, tag+star+add it to list, then delete it - deleting all assoc. data',
+        'should create a page, create an annotation, tag+add it to list, then delete it - deleting all assoc. data',
+        { skipSyncTests: true },
         () => {
             let listId: number
             const findAllObjects = (collection, setup) =>
@@ -618,7 +662,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             await directLinking(setup).toggleAnnotBookmark(
@@ -705,11 +749,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotPrivacyLevel.id]: {
-                                    type: 'delete',
-                                },
-                            }),
                             tags: (): StorageCollectionDiff => ({
                                 [`["${DATA.TAG_1}","${annotUrl}"]`]: {
                                     type: 'delete',
@@ -745,7 +784,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotAUrl: string
             let annotBUrl: string
-            let annotationPrivacyLevels: any
 
             const { url, ...testAnnot } = DATA.ANNOT_1
 
@@ -766,11 +804,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_1 },
                                 testAnnot,
                             )
-                            annotationPrivacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotAUrl, annotBUrl],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -781,8 +814,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: testAnnot.title,
                                         comment: testAnnot.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -796,36 +829,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: testAnnot.title,
                                         comment: testAnnot.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotAUrl].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotAUrl,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotAUrl]
-                                                .id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [annotationPrivacyLevels[annotBUrl].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotBUrl,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotBUrl]
-                                                .id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -875,11 +884,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotAUrl].id]: {
-                                    type: 'delete',
-                                },
-                            }),
                         },
                         postCheck: async ({ setup }) => {
                             expect(
@@ -892,8 +896,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     pageUrl: DATA.PAGE_1.url,
                                     pageTitle: testAnnot.title,
                                     comment: testAnnot.comment,
-                                    _comment_terms: ['test', 'comment'],
-                                    _pageTitle_terms: ['test'],
+                                    _comment_terms: expect.any(Array),
+                                    _pageTitle_terms: expect.any(Array),
                                     body: undefined,
                                     selector: undefined,
                                     createdWhen: expect.any(Date),
@@ -914,7 +918,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
             return {
                 setup: testSetupFactory(),
                 steps: [
-                    createAnnotationStep,
+                    createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
                             listId = await customLists(setup).createCustomList({
@@ -967,21 +971,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             expect(searchResults).toEqual({
                                 annotsByDay: {
                                     [firstDay]: {
-                                        'lorem.com': [
+                                        [DATA.ANNOT_1.pageUrl]: [
                                             {
                                                 url: annotUrl,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 lastEdited: expect.any(Date),
                                                 hasBookmark: false,
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -1004,7 +1009,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotUrlA: string
             let annotUrlB: string
-            let annotationPrivacyLevels: any
 
             return {
                 setup: testSetupFactory(),
@@ -1023,11 +1027,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_2 },
                                 DATA.ANNOT_2,
                             )
-                            annotationPrivacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotUrlA, annotUrlB],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -1038,8 +1037,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.ANNOT_1.pageUrl,
                                         pageTitle: DATA.ANNOT_1.title,
                                         comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1053,36 +1052,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.ANNOT_2.pageUrl,
                                         pageTitle: DATA.ANNOT_2.title,
                                         comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: ['test', 'text'],
-                                        _pageTitle_terms: ['annotation'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [annotationPrivacyLevels[annotUrlA].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlA,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotUrlA]
-                                                .id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [annotationPrivacyLevels[annotUrlB].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlB,
-                                        createdWhen: expect.any(Date),
-                                        id:
-                                            annotationPrivacyLevels[annotUrlB]
-                                                .id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -1192,18 +1167,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrlA,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
                                             },
@@ -1222,20 +1198,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['test.com']: [
                                             {
                                                 url: annotUrlB,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'text',
-                                                ],
-                                                _pageTitle_terms: [
-                                                    'annotation',
-                                                ],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'some test text',
+                                                comment: DATA.ANNOT_2.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'annotation',
-                                                pageUrl: 'test.com',
+                                                pageTitle: DATA.ANNOT_2.title,
+                                                pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_2],
                                             },
@@ -1263,7 +1238,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
         () => {
             let annotUrlA: string
             let annotUrlB: string
-            let privacyLevels: any
 
             return {
                 setup: testSetupFactory(),
@@ -1282,12 +1256,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 { tab: DATA.TEST_TAB_2 },
                                 DATA.ANNOT_2,
                             )
-
-                            privacyLevels = await directLinking(
-                                setup,
-                            ).annotationStorage.getPrivacyLevelsByAnnotation({
-                                annotations: [annotUrlA, annotUrlB],
-                            })
                         },
                         expectedStorageChanges: {
                             annotations: (): StorageCollectionDiff => ({
@@ -1298,8 +1266,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_1.url,
                                         pageTitle: DATA.ANNOT_1.title,
                                         comment: DATA.ANNOT_1.comment,
-                                        _comment_terms: ['test', 'comment'],
-                                        _pageTitle_terms: ['test'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
@@ -1313,32 +1281,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageUrl: DATA.PAGE_2.url,
                                         pageTitle: DATA.ANNOT_2.title,
                                         comment: DATA.ANNOT_2.comment,
-                                        _comment_terms: ['test', 'text'],
-                                        _pageTitle_terms: ['annotation'],
+                                        _comment_terms: expect.any(Array),
+                                        _pageTitle_terms: expect.any(Array),
                                         body: undefined,
                                         selector: undefined,
                                         createdWhen: expect.any(Date),
                                         lastEdited: expect.any(Date),
-                                    },
-                                },
-                            }),
-                            annotationPrivacyLevels: (): StorageCollectionDiff => ({
-                                [privacyLevels[annotUrlA].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlA,
-                                        createdWhen: expect.any(Date),
-                                        id: privacyLevels[annotUrlA].id,
-                                        privacyLevel: 100,
-                                    },
-                                },
-                                [privacyLevels[annotUrlB].id]: {
-                                    type: 'create',
-                                    object: {
-                                        annotation: annotUrlB,
-                                        createdWhen: expect.any(Date),
-                                        id: privacyLevels[annotUrlB].id,
-                                        privacyLevel: 100,
                                     },
                                 },
                             }),
@@ -1418,18 +1366,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['lorem.com']: [
                                             {
                                                 url: annotUrlA,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'comment',
-                                                ],
-                                                _pageTitle_terms: ['test'],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'test comment',
+                                                comment: DATA.ANNOT_1.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'test',
-                                                pageUrl: 'lorem.com',
+                                                pageTitle: DATA.ANNOT_1.title,
+                                                pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },
@@ -1448,20 +1397,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         ['test.com']: [
                                             {
                                                 url: annotUrlB,
-                                                _comment_terms: [
-                                                    'test',
-                                                    'text',
-                                                ],
-                                                _pageTitle_terms: [
-                                                    'annotation',
-                                                ],
+                                                _comment_terms: expect.any(
+                                                    Array,
+                                                ),
+                                                _pageTitle_terms: expect.any(
+                                                    Array,
+                                                ),
                                                 body: undefined,
-                                                comment: 'some test text',
+                                                comment: DATA.ANNOT_2.comment,
                                                 createdWhen: expect.any(Date),
                                                 hasBookmark: false,
                                                 lastEdited: expect.any(Date),
-                                                pageTitle: 'annotation',
-                                                pageUrl: 'test.com',
+                                                pageTitle: DATA.ANNOT_2.title,
+                                                pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
                                             },

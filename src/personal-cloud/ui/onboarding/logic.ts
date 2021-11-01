@@ -6,7 +6,10 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import { BACKUP_URL } from 'src/constants'
 import type { Event, State, Dependencies } from './types'
-import { dumpDB } from 'src/personal-cloud/storage/dump-db-contents'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -15,67 +18,43 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 >
 
 export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
+    syncSettings: SyncSettingsStore<'dashboard'>
+
     constructor(private dependencies: Dependencies) {
         super()
+
+        this.syncSettings = createSyncSettingsStore(dependencies)
     }
 
     getInitialState = (): State => ({
         loadState: 'pristine',
-        dumpState: 'pristine',
-
         migrationState: 'pristine',
         dataCleaningState: 'pristine',
 
-        currentUser: null,
         stage: 'data-dump',
 
-        dumpPercentComplete: 0,
         isMigrationPrepped: false,
+        giveControlToDumper: false,
         shouldBackupViaDump: false,
         needsToRemovePassiveData: false,
     })
 
     async init() {
-        const {
-            authBG,
-            backupBG,
-            personalCloudBG,
-            onModalClose,
-        } = this.dependencies
+        const { backupBG, personalCloudBG, onModalClose } = this.dependencies
         await loadInitial(this, async () => {
-            const user = await authBG.getCurrentUser()
-
-            if (user) {
-                this.emitMutation({ currentUser: { $set: user } })
-            } else {
-                // We can't do the migration if not logged in
-                return onModalClose()
-            }
-
             const needsToRemovePassiveData = await personalCloudBG.isPassiveDataRemovalNeeded()
             this.emitMutation({
                 needsToRemovePassiveData: { $set: needsToRemovePassiveData },
             })
 
-            const { lastBackup } = await backupBG.getBackupTimes()
-            this.emitMutation({
-                shouldBackupViaDump: { $set: lastBackup == null },
-            })
-        })
-    }
-
-    private async attemptDataDump() {
-        await executeUITask(this, 'dumpState', async () => {
-            await dumpDB({
-                progressCallback: ({ completedTables, totalTables }) => {
-                    this.emitMutation({
-                        dumpPercentComplete: {
-                            $set: completedTables / totalTables,
-                        },
-                    })
-                    return true
-                },
-            })
+            // const { lastBackup } = await backupBG.getBackupTimes()
+            // this.emitMutation({
+            //     shouldBackupViaDump: {
+            //         $set:
+            //             this.dependencies.browser === 'chrome' &&
+            //             lastBackup == null,
+            //     },
+            // })
         })
     }
 
@@ -106,6 +85,10 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         })
     }
 
+    private _goToBackupRoute = () => {
+        window.open(BACKUP_URL, '_self')
+    }
+
     migrateToOldVersion: EventHandler<'migrateToOldVersion'> = ({}) => {
         this.emitMutation({ stage: { $set: 'old-version-backup' } })
     }
@@ -116,20 +99,22 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         this.emitMutation({ stage: { $set: 'data-dump' } })
     }
 
-    goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) => {
-        window.open(BACKUP_URL, '_self')
-    }
+    goToBackupRoute: EventHandler<'goToBackupRoute'> = ({}) =>
+        this._goToBackupRoute()
 
-    startDataDump: EventHandler<'startDataDump'> = async ({}) => {
-        await this.attemptDataDump()
-    }
+    startDataDump: EventHandler<'cancelDataDump'> = async ({
+        previousState,
+    }) => {
+        if (!previousState.shouldBackupViaDump) {
+            this._goToBackupRoute()
+            return
+        }
 
-    retryDataDump: EventHandler<'retryDataDump'> = async ({}) => {
-        await this.attemptDataDump()
+        this.emitMutation({ giveControlToDumper: { $set: true } })
     }
 
     cancelDataDump: EventHandler<'cancelDataDump'> = async ({}) => {
-        this.emitMutation({ dumpState: { $set: 'pristine' } })
+        this.emitMutation({ giveControlToDumper: { $set: false } })
     }
 
     startDataClean: EventHandler<'startDataClean'> = async ({
@@ -161,9 +146,8 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     closeMigration: EventHandler<'closeMigration'> = async ({
         previousState,
     }) => {
-        this.dependencies.onModalClose({
-            didFinish: previousState.isMigrationPrepped,
-        })
+        const didFinish = previousState.isMigrationPrepped
+        this.dependencies.onModalClose({ didFinish })
     }
 
     continueToMigration: EventHandler<'continueToMigration'> = async ({
@@ -174,6 +158,17 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
         } else {
             this.emitMutation({ stage: { $set: 'data-migration' } })
             await this.attemptCloudMigration(previousState)
+        }
+    }
+
+    attemptModalClose: EventHandler<'attemptModalClose'> = async ({
+        previousState,
+    }) => {
+        if (
+            previousState.stage === 'data-dump' &&
+            !previousState.giveControlToDumper
+        ) {
+            this.dependencies.onModalClose({ didFinish: false })
         }
     }
 }

@@ -2,7 +2,6 @@ import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import expect from 'expect'
 import fetchMock from 'fetch-mock'
-const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
@@ -59,6 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
     startWithSyncDisabled?: boolean
+    useDownloadTranslationLayer?: boolean
     services?: Services
 }
 
@@ -200,7 +200,8 @@ export async function setupBackgroundIntegrationTest(
                     (await backgroundModules.auth.authService.getCurrentUser())
                         ?.id,
                 getNow,
-                useDownloadTranslationLayer: true,
+                useDownloadTranslationLayer:
+                    options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
             }),
@@ -214,7 +215,6 @@ export async function setupBackgroundIntegrationTest(
         }),
         generateServerId: () => nextServerId++,
     })
-    backgroundModules.sync.initialSync.wrtc = wrtc
     backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections({
@@ -247,7 +247,6 @@ export async function setupBackgroundIntegrationTest(
     }
 
     await setStorageMiddleware(storageManager, {
-        syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
         personalCloud: backgroundModules.personalCloud,
@@ -292,7 +291,7 @@ export function registerBackgroundIntegrationTest(
         await runBackgroundIntegrationTest(test, options)
     })
     const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
-    if (!skipSyncTests) {
+    if (!skipSyncTests && !test.skipSyncTests) {
         registerSyncBackgroundIntegrationTests(test, options)
     }
 }

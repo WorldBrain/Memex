@@ -3,11 +3,10 @@ import React from 'react'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
-import { ShareMenuCommonProps, ShareMenuCommonState } from './types'
+import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { getKeyName } from 'src/util/os-specific-key-names'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 
 interface State extends ShareMenuCommonState {
@@ -68,7 +67,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
         const { contentSharingBG, listId } = this.props
 
         const { remoteListId } = await contentSharingBG.shareList({ listId })
-        await contentSharingBG.shareListEntries({ listId })
 
         this.setState({
             link: getListShareUrl({ remoteListId }),
@@ -95,17 +93,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
 
         this.annotationUrls = [...annotationUrlsSet]
     }
-
-    private createAnnotationPrivacyLevels = (
-        privacyLevel: AnnotationPrivacyLevels,
-    ) =>
-        this.annotationUrls.reduce(
-            (acc, annotation) => ({
-                ...acc,
-                [annotation]: privacyLevel,
-            }),
-            {},
-        )
 
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
@@ -146,77 +133,46 @@ export default class ListShareMenu extends React.Component<Props, State> {
 
             await this.props.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
-                queueInteraction: 'skip-queue',
-            })
-            await this.props.contentSharingBG.shareAnnotationsToLists({
-                annotationUrls: this.annotationUrls,
-                queueInteraction: 'skip-queue',
+                shareToLists: true,
             })
             success = true
         } catch (err) {}
 
         this.props.postShareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
-            shareStateChanged: success,
+            isShared: true,
         })
     }
 
     private unshareAllAnnotations = async () => {
         let success = false
         try {
-            await Promise.all(
-                this.annotationUrls.map((annotationUrl) =>
-                    this.props.contentSharingBG
-                        .unshareAnnotation({
-                            annotationUrl,
-                            queueInteraction: 'skip-queue',
-                        })
-                        .catch((err) => {}),
-                ),
-            )
+            await this.props.contentSharingBG.unshareAnnotations({
+                annotationUrls: this.annotationUrls,
+            })
             success = true
         } catch (err) {}
 
-        this.props.postUnshareHook?.({
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-            shareStateChanged: success,
+        this.props.postShareHook?.({
+            isShared: false,
         })
     }
 
-    private handleSetShared: React.MouseEventHandler = async (e) => {
-        const { annotationsBG } = this.props
-        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
-            AnnotationPrivacyLevels.SHARED,
-        )
-
+    private handleSetShared = async () => {
         await executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.shareAllAnnotations()
-                await annotationsBG.updateAnnotationPrivacyLevels({
-                    annotationPrivacyLevels,
-                    respectProtected: true,
-                })
             },
         )
     }
 
-    private handleSetPrivate: React.MouseEventHandler = async (e) => {
-        const { annotationsBG } = this.props
-        const annotationPrivacyLevels = this.createAnnotationPrivacyLevels(
-            AnnotationPrivacyLevels.PRIVATE,
-        )
-
+    private handleSetPrivate = async () => {
         await executeReactStateUITask<State, 'shareState'>(
             this,
             'shareState',
             async () => {
                 await this.unshareAllAnnotations()
-                await annotationsBG.updateAnnotationPrivacyLevels({
-                    annotationPrivacyLevels,
-                    respectProtected: true,
-                })
             },
         )
     }
@@ -237,22 +193,22 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 }
                 privacyOptions={[
                     {
+                        title: 'Shared',
+                        shortcut: `shift+${ListShareMenu.MOD_KEY}+enter`,
+                        description: 'Shared in collections this page is in',
+                        icon: 'shared',
+                        onClick: this.handleSetShared,
+                    },
+                    {
                         title: 'Private',
                         shortcut: `${ListShareMenu.MOD_KEY}+enter`,
                         description: 'Only locally available to you',
                         icon: 'person',
                         onClick: this.handleSetPrivate,
                     },
-                    {
-                        title: 'Shared',
-                        shortcut: `shift+${ListShareMenu.ALT_KEY}+enter`,
-                        description: 'Shared in collections this page is in',
-                        icon: 'shared',
-                        onClick: this.handleSetShared,
-                    },
                 ]}
                 shortcutHandlerDict={{
-                    'alt+shift+enter': this.handleSetShared,
+                    'mod+shift+enter': this.handleSetShared,
                     'mod+enter': this.handleSetPrivate,
                 }}
             />

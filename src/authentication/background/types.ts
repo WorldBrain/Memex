@@ -25,7 +25,6 @@ export interface AuthRemoteFunctionsInterface {
     getSubscriptionStatus(): Promise<SubscriptionStatus>
     getSubscriptionExpiry(): Promise<number | null>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
-    setBetaEnabled(enabled: boolean): Promise<void>
 
     hasSubscribedBefore(): Promise<boolean>
 }

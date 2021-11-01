@@ -17,16 +17,19 @@ import {
     SharedInPageUIInterface,
     SharedInPageUIEvents,
 } from 'src/in-page-ui/shared-state/types'
-import { TooltipInPageUIInterface } from 'src/in-page-ui/tooltip/types'
+import type {
+    TooltipInPageUIInterface,
+    AnnotationFunctions,
+} from 'src/in-page-ui/tooltip/types'
+import { UserFeatureOptIn } from 'src/features/background/feature-opt-ins'
 
-interface TooltipContainerProps {
+export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
     onInit: any
     createAndCopyDirectLink: any
-    createAnnotation: any
-    createHighlight: any
     openSettings: any
     destroyTooltip: any
+    isFeatureEnabled(feature: UserFeatureOptIn): Promise<boolean>
 }
 
 interface TooltipContainerState {
@@ -37,10 +40,7 @@ interface TooltipContainerState {
     tooltipState: 'copied' | 'running' | 'pristine' | 'done'
 }
 
-class TooltipContainer extends React.Component<
-    TooltipContainerProps,
-    TooltipContainerState
-> {
+class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
         showTooltip: false,
         showCreateLink: false,
@@ -52,7 +52,7 @@ class TooltipContainer extends React.Component<
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
         this.setState({
-            showCreateLink: await features.getFeature('DirectLink'),
+            showCreateLink: await this.props.isFeatureEnabled('DirectLink'),
         })
     }
 
@@ -115,10 +115,10 @@ class TooltipContainer extends React.Component<
         })
     }
 
-    createAnnotation = async (e) => {
+    private createAnnotation: React.MouseEventHandler = async (e) => {
         e.preventDefault()
         e.stopPropagation()
-        await this.props.createAnnotation()
+        await this.props.createAnnotation(e.shiftKey)
 
         // Remove onboarding select option notification if it's present
         await conditionallyRemoveOnboardingSelectOption(
@@ -134,10 +134,10 @@ class TooltipContainer extends React.Component<
         }, 400)
     }
 
-    createHighlight = async (e) => {
+    private createHighlight: React.MouseEventHandler = async (e) => {
         this.setState({ tooltipState: 'running' })
         try {
-            await this.props.createHighlight()
+            await this.props.createHighlight(e.shiftKey)
         } catch (err) {
             // Can happen if a user accidently removes the text selection before clicking the button
         } finally {

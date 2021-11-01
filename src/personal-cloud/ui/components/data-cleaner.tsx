@@ -69,12 +69,14 @@ export default class DataCleaner extends React.PureComponent<Props> {
                     <Text>
                         You've been using Memex since when we still had the
                         history full-text search.
-                    </Text>
-                    <Text>
+                        <br />
                         Because of that, there is a lot of unecessary data in
                         your Memex that must be cleaned out.
+                        <br />
+                        <a href={readMoreLink} target="_blank">
+                            Read more &gt;
+                        </a>
                     </Text>
-                    <a href={readMoreLink}>Read more ></a>
                 </>
             )
         }

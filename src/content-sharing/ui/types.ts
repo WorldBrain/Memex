@@ -1,5 +1,5 @@
-import { TaskState } from 'ui-logic-core/lib/types'
-import { AnnotationPrivacyLevels } from 'src/annotations/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface AnnotationSharingInfo {
     status: 'not-yet-shared' | 'shared' | 'unshared'

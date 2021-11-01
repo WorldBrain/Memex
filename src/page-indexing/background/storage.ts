@@ -159,6 +159,8 @@ export default class PageStorage extends StorageModule {
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {
+        newPageData = { ...newPageData }
+
         const updates = {}
 
         for (const fieldName of Object.keys(newPageData)) {

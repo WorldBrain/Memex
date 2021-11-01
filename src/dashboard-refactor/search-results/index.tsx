@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import Waypoint from 'react-waypoint'
 
-import {
+import type {
     RootState,
     PageResult as PageResultData,
     PageData,
@@ -14,6 +14,7 @@ import {
     PageInteractionProps,
     PagePickerAugdProps,
     NoResultsType,
+    NoteShareInfo,
 } from './types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
@@ -52,7 +53,6 @@ import ListDetails, {
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
-import { AnnotationSharingInfo } from 'src/content-sharing/ui/types'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 
@@ -99,9 +99,7 @@ export type Props = RootState &
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
-        updateAllResultNotesShareInfo: (
-            info: Partial<AnnotationSharingInfo>,
-        ) => void
+        updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -130,6 +128,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 tags={noteData.tags}
                 body={noteData.highlight}
                 comment={noteData.comment}
+                isShared={noteData.isShared}
+                isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
@@ -139,8 +139,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         : undefined
                 }
                 mode={noteData.isEditing ? 'edit' : 'default'}
-                sharingInfo={this.props.noteSharingInfo[noteId]}
-                sharingAccess={this.props.sharingAccess}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
                         <HoverBox right="0" withRelativeContainer>
@@ -173,6 +171,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     noteData.shareMenuShowStatus !== 'hide' && (
                         <HoverBox width="350px" right="0" withRelativeContainer>
                             <SingleNoteShareMenu
+                                isShared={noteData.isShared}
                                 shareImmediately={
                                     noteData.shareMenuShowStatus ===
                                     'show-n-share'
@@ -182,29 +181,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={({
-                                    privacyLevel,
-                                    shareStateChanged,
-                                }) =>
-                                    interactionProps.updateShareInfo({
-                                        privacyLevel,
-                                        taskState: 'success',
-                                        status: shareStateChanged
-                                            ? 'shared'
-                                            : undefined,
-                                    })
-                                }
-                                postUnshareHook={({
-                                    privacyLevel,
-                                    shareStateChanged,
-                                }) =>
-                                    interactionProps.updateShareInfo({
-                                        privacyLevel,
-                                        taskState: 'success',
-                                        status: shareStateChanged
-                                            ? 'unshared'
-                                            : undefined,
-                                    })
+                                postShareHook={(shareInfo) =>
+                                    interactionProps.updateShareInfo(shareInfo)
                                 }
                             />
                         </HoverBox>
@@ -218,8 +196,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         } as any),
                     onEditCancel: () =>
                         interactionProps.onEditCancel(dummyEvent),
-                    onEditConfirm: () =>
-                        interactionProps.onEditConfirm(dummyEvent),
+                    onEditConfirm: interactionProps.onEditConfirm,
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -260,48 +237,46 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <NoteTopBarBox
-                    leftSide={
-                        <NotesTypeDropdownMenu
-                            notesTypeSelection={notesType}
-                            onNotesTypeSelection={this.props.onPageNotesTypeSelection(
-                                day,
-                                normalizedUrl,
-                            )}
-                        />
-                    }
-                    rightSide={
-                        <TopBarRightSideWrapper>
-                            <ButtonTooltip
-                                tooltipText="Share Page and Notes"
-                                position="bottom"
-                            >
-                                <ShareBtn onClick={onShareBtnClick}>
-                                    <IconImg
-                                        src={
-                                            isShared ? icons.shared : icons.link
-                                        }
-                                    />
-                                </ShareBtn>
-                            </ButtonTooltip>
-                            <SortingDropdownMenuBtn
-                                onMenuItemClick={({ sortingFn }) =>
-                                    this.props.onPageNotesSortSelection(
-                                        day,
-                                        normalizedUrl,
-                                    )(sortingFn)
-                                }
-                            />
-                        </TopBarRightSideWrapper>
-                    }
-                />
-                <Margin bottom="3px" />
                 <AnnotationCreate
                     autoFocus={this.props.shouldFormsAutoFocus}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
                 />
+                {noteIds[notesType].length > 0 && (
+                    <>
+                        <Margin top="3px" />
+                        <NoteTopBarBox
+                            rightSide={
+                                <TopBarRightSideWrapper>
+                                    <ButtonTooltip
+                                        tooltipText="Share Page and Notes"
+                                        position="bottom"
+                                    >
+                                        <ShareBtn onClick={onShareBtnClick}>
+                                            <IconImg
+                                                src={
+                                                    isShared
+                                                        ? icons.shared
+                                                        : icons.link
+                                                }
+                                            />
+                                        </ShareBtn>
+                                    </ButtonTooltip>
+                                    <SortingDropdownMenuBtn
+                                        onMenuItemClick={({ sortingFn }) =>
+                                            this.props.onPageNotesSortSelection(
+                                                day,
+                                                normalizedUrl,
+                                            )(sortingFn)
+                                        }
+                                    />
+                                </TopBarRightSideWrapper>
+                            }
+                        />
+                        <Separator />
+                    </>
+                )}
                 {noteIds[notesType].map(
                     this.renderNoteResult(day, normalizedUrl),
                 )}
@@ -334,25 +309,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
-                        postShareHook: ({ privacyLevel, shareStateChanged }) =>
-                            interactionProps.updatePageNotesShareInfo({
-                                status: shareStateChanged
-                                    ? 'shared'
-                                    : undefined,
-                                taskState: 'success',
-                                privacyLevel,
-                            }),
-                        postUnshareHook: ({
-                            privacyLevel,
-                            shareStateChanged,
-                        }) =>
-                            interactionProps.updatePageNotesShareInfo({
-                                status: shareStateChanged
-                                    ? 'unshared'
-                                    : undefined,
-                                taskState: 'success',
-                                privacyLevel,
-                            }),
+                        postShareHook: (shareInfo) =>
+                            interactionProps.updatePageNotesShareInfo(
+                                shareInfo,
+                            ),
                     }}
                     {...interactionProps}
                     {...pickerProps}
@@ -367,13 +327,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         if (this.props.noResultsType === 'onboarding-msg') {
             return (
                 <NoResults title="You don't have anything saved yet">
-                    <DismissibleResultsMessage
-                        onDismiss={this.props.onDismissOnboardingMsg}
-                    >
-                        <OnboardingMsg
-                            goToImportRoute={this.props.goToImportRoute}
-                        />
-                    </DismissibleResultsMessage>
+                    <OnboardingMsg
+                        goToImportRoute={this.props.goToImportRoute}
+                    />
                 </NoResults>
             )
         }
@@ -405,7 +361,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             )
         }
 
-        return <NoResults title="No Results">¯\_(ツ)_/¯</NoResults>
+        return (
+            <NoResults title="Nothing found for this query">
+                ¯\_(ツ)_/¯
+            </NoResults>
+        )
     }
 
     private renderResultsByDay() {
@@ -474,29 +434,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
-                            postShareHook={({
-                                shareStateChanged,
-                                privacyLevel,
-                            }) =>
-                                this.props.updateAllResultNotesShareInfo({
-                                    status: shareStateChanged
-                                        ? 'shared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                })
-                            }
-                            postUnshareHook={({
-                                shareStateChanged,
-                                privacyLevel,
-                            }) =>
-                                this.props.updateAllResultNotesShareInfo({
-                                    status: shareStateChanged
-                                        ? 'unshared'
-                                        : undefined,
-                                    taskState: 'success',
-                                    privacyLevel,
-                                })
+                            postShareHook={(shareInfo) =>
+                                this.props.updateAllResultNotesShareInfo(
+                                    shareInfo,
+                                )
                             }
                         />
                     </HoverBox>
@@ -550,6 +491,7 @@ const PageTopBarBox = styled(Margin)`
     width: 100%;
     border-bottom: 1px solid #e0e0e0;
     padding-bottom: 2px;
+    z-index: 3;
 `
 
 const IconBox = styled.div`
@@ -587,6 +529,12 @@ const PageNotesBox = styled(Margin)`
     padding-left: 10px;
     padding-top: 5px;
     border-left: 4px solid #e0e0e0;
+`
+
+const Separator = styled.div`
+    width: 100%;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: -2px;
 `
 
 const Loader = styled.div`

@@ -234,20 +234,21 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
     }
 
     renderAddNewDevice() {
-        return (
-            <InitialSyncSetup
-                getInitialSyncMessage={this.props.getInitialSyncMessage}
-                waitForInitialSyncConnected={
-                    this.props.waitForInitialSyncConnected
-                }
-                waitForInitialSync={this.props.waitForInitialSync}
-                abortInitialSync={this.props.abortInitialSync}
-                removeAllDevices={this.props.removeAllDevices}
-                getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
-                open={this.state.isAddingNewDevice}
-                onClose={this.handleCloseNewDevice}
-            />
-        )
+        return null
+        // return (
+        //     <InitialSyncSetup
+        //         getInitialSyncMessage={this.props.getInitialSyncMessage}
+        //         waitForInitialSyncConnected={
+        //             this.props.waitForInitialSyncConnected
+        //         }
+        //         waitForInitialSync={this.props.waitForInitialSync}
+        //         abortInitialSync={this.props.abortInitialSync}
+        //         removeAllDevices={this.props.removeAllDevices}
+        //         getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
+        //         open={this.state.isAddingNewDevice}
+        //         onClose={this.handleCloseNewDevice}
+        //     />
+        // )
     }
 
     render() {

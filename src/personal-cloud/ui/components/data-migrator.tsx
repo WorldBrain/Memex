@@ -5,7 +5,13 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { Container, BtnBox, Header, Text, TopComponent } from './shared-components'
+import {
+    Container,
+    BtnBox,
+    Header,
+    Text,
+    TopComponent,
+} from './shared-components'
 
 export interface Props {
     isPrepping: boolean
@@ -73,9 +79,11 @@ export default class DataMigrator extends React.PureComponent<Props> {
                     </TopComponent>
                     <Header>Cloud Migration in Progress</Header>
                     <Text>
-                        This process with run and continue in the background.
-                        <br/>
-                        <br/>
+                        You can close this modal, as the sync process will
+                        continue in the background.
+                        <br />
+                        Login on other devices to sync them too.
+                        <br />
                         It may take a while for all content to appear on all
                         your devices.
                     </Text>
@@ -86,7 +94,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
             return (
                 <>
                     <TopComponent>
-                    <Icon icon="alertRound" height="20px" />
+                        <Icon icon="alertRound" height="20px" />
                     </TopComponent>
                     <Header>
                         There was an error with migrating your data to the cloud
@@ -101,10 +109,18 @@ export default class DataMigrator extends React.PureComponent<Props> {
         return (
             <>
                 <TopComponent>
-                    <Icon icon="checkRound" height="20px" />
+                    <LoadingIndicator />
                 </TopComponent>
-                <Header>Cloud Migration Complete</Header>
-                <Text>Login on other devices to sync them.</Text>
+                <Header>Cloud Migration in Progress</Header>
+                <Text>
+                    You can close this modal, as the sync process will continue
+                    in the background.
+                    <br />
+                    Login on other devices to sync them too.
+                    <br />
+                    It may take a while for all content to appear on all your
+                    devices.
+                </Text>
             </>
         )
     }

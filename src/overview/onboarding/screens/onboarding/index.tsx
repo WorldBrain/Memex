@@ -47,18 +47,20 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderTutorialStep = () => (
         <div className={styles.welcomeScreen}>
             <div className={styles.titleText}>
-                Learn the basics of how to use Memex in 3 minutes
+                Learn the basics in less than 4 minutes
             </div>
             <div className={styles.videoBox}>
                 <iframe
-                    src="https://www.youtube.com/embed/G8UF8lQnAKA"
+                    src="https://www.youtube.com/embed/PBNXY1Ud_Is"
                     title="Onboarding Video"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 ></iframe>
             </div>
             <ButtonBar>
                 <PrimaryAction
-                    label="Continue"
+                    label={
+                        this.state.newSignUp ? 'Go to Dashboard' : 'Continue'
+                    }
                     onClick={() => this.processEvent('goToSyncStep', null)}
                 />
             </ButtonBar>
@@ -111,7 +113,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                 </div>
             </div>
             <SignInScreen
-                onSuccess={() => this.processEvent('onUserLogIn', null)}
+                onSuccess={(isNewUser) =>
+                    this.processEvent('onUserLogIn', { newSignUp: isNewUser })
+                }
             />
         </div>
     )

@@ -2,15 +2,15 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
-import type { SettingValue, Setting } from './types'
+import type { SyncSettingValue, SyncSetting } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { COLLECTION_NAMES } from './constants'
 
-export default class SettingsStorage extends StorageModule {
+export default class SyncSettingsStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         collections: {
             [COLLECTION_NAMES.settings]: {
-                version: STORAGE_VERSIONS[20].version,
+                version: STORAGE_VERSIONS[25].version,
                 fields: {
                     key: { type: 'string' },
                     value: { type: 'json' },
@@ -52,16 +52,18 @@ export default class SettingsStorage extends StorageModule {
         },
     })
 
-    async setSetting(setting: Setting): Promise<void> {
+    async setSetting(setting: SyncSetting): Promise<void> {
         await this.operation('createSetting', setting)
     }
 
-    async getSetting<T extends SettingValue>(key: string): Promise<T | null> {
-        const record: Setting = await this.operation('findSetting', { key })
+    async getSetting<T extends SyncSettingValue>(
+        key: string,
+    ): Promise<T | null> {
+        const record: SyncSetting = await this.operation('findSetting', { key })
         return (record?.value as T) ?? null
     }
 
-    async removeSetting<T extends SettingValue>(
+    async removeSetting<T extends SyncSettingValue>(
         key: string,
     ): Promise<T | null> {
         const setting: T = await this.operation('findSetting', { key })

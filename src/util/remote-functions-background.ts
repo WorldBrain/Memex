@@ -13,8 +13,9 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { FeaturesBetaInterface } from 'src/features/background/feature-beta'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
-import { PDFInterface } from 'src/pdf/background'
+import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import type { AnalyticsInterface } from 'src/analytics/background/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -22,6 +23,7 @@ export interface RemoteFunctionImplementations<
     notifications: NotificationCreator
     bookmarks: BookmarksInterface
     auth: AuthRemoteFunctionsInterface
+    analytics: AnalyticsInterface
     subscription: SubscriptionsService
     sync: PublicSyncInterface
     features: FeaturesInterface
@@ -32,12 +34,13 @@ export interface RemoteFunctionImplementations<
     readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
     personalCloud: PersonalCloudRemoteInterface
-    pdf: PDFInterface
+    pdf: PDFRemoteInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
 // (in setupRemoteFunctionsImplementations and elsewhere)
 export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
+    analytics: runInBackground(),
     notifications: runInBackground(),
     bookmarks: runInBackground(),
     auth: runInBackground(),

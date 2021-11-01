@@ -1,5 +1,8 @@
 import type Dexie from 'dexie'
-import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
+import {
+    makeSingleDeviceUILogicTestFactory,
+    UILogicTestDevice,
+} from 'src/tests/ui-logic-tests'
 import { prepareDataMigration } from './migration-preparation'
 
 const ACTIVE_PAGE_URLS = ['a.com', 'b.com', 'c.com', 'd.com']
@@ -64,16 +67,16 @@ async function insertTestData({ db, now }: { db: Dexie; now: number }) {
 describe('cloud migration preparation tests', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    it('should process data in specific collection order', async ({
-        device,
-    }) => {
+    async function runTest(device: UILogicTestDevice, chunkSize: number) {
         const queuedData = new Map<string, any[]>()
-        const db = device.storageManager.backend['dexie']
+        const db = device.storageManager.backend['dexie'] as Dexie
         const now = Date.now()
         await insertTestData({ db, now })
 
         await prepareDataMigration({
             db,
+            chunkSize,
+            resetQueue: async () => queuedData.clear(),
             queueObjs: async (actionData) => {
                 const prev = queuedData.get(actionData.collection) ?? []
                 queuedData.set(actionData.collection, [
@@ -97,5 +100,14 @@ describe('cloud migration preparation tests', () => {
             'settings',
             'templates',
         ])
+    }
+
+    it('should process data in specific collection order', async ({ device }) =>
+        runTest(device, 350))
+
+    it('should work with different chunk sizes', async ({ device }) => {
+        for (const chunkSize of [1, 10, 50, 100, 500, 1000]) {
+            await runTest(device, chunkSize)
+        }
     })
 })

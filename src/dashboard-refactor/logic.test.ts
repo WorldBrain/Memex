@@ -1,7 +1,7 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
-import { STORAGE_KEYS } from './constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -75,12 +75,16 @@ describe('Dashboard Refactor misc logic', () => {
         const {
             searchResults: searchResultsA,
             logic: logicA,
-        } = await setupTest(device)
+        } = await setupTest(device, { withAuth: true })
 
+        const now = Date.now()
+        await logicA.syncSettings.dashboard.set('listSidebarLocked', false)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerShownAfter',
+            now,
+        )
         await logicA['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: false,
-            [STORAGE_KEYS.listSidebarLocked]: false,
-            [STORAGE_KEYS.subBannerDismissed]: false,
         })
 
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
@@ -90,6 +94,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsA.state.isCloudEnabled).toBe(true)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
         expect(
@@ -98,16 +103,20 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(true)
+        expect(searchResultsA.state.isCloudEnabled).toBe(false)
 
         const {
             searchResults: searchResultsB,
             logic: logicB,
-        } = await setupTest(device)
+        } = await setupTest(device, { withAuth: true })
 
+        await logicA.syncSettings.dashboard.set('listSidebarLocked', true)
+        await logicA.syncSettings.dashboard.set(
+            'subscribeBannerShownAfter',
+            null,
+        )
         await logicB['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: true,
-            [STORAGE_KEYS.listSidebarLocked]: true,
-            [STORAGE_KEYS.subBannerDismissed]: true,
         })
 
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(false)
@@ -117,6 +126,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.isCloudEnabled).toBe(true)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
         expect(
@@ -125,36 +135,57 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 
-    it('should get sharing access state during init logic', async ({
+    // it('should get sharing access state during init logic', async ({
+    //     device,
+    // }) => {
+    //     const { searchResults: searchResultsA } = await setupTest(device)
+
+    //     device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
+    //         true
+
+    //     expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    //     await searchResultsA.processEvent('init', null)
+    //     expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
+    //         'sharing-allowed',
+    //     )
+
+    //     const { searchResults: searchResultsB } = await setupTest(device)
+
+    //     device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
+    //         false
+
+    //     expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    //     await searchResultsB.processEvent('init', null)
+    //     expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
+    //         'feature-disabled',
+    //     )
+    // })
+
+    it('should get current user state during init logic', async ({
         device,
     }) => {
-        const { searchResults: searchResultsA } = await setupTest(device)
+        const { searchResults: searchResultsA } = await setupTest(device, {
+            withAuth: true,
+        })
 
-        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
-            true
-
-        expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
+        expect(searchResultsA.state.currentUser).toBeNull()
         await searchResultsA.processEvent('init', null)
-        expect(searchResultsA.state.searchResults.sharingAccess).toEqual(
-            'sharing-allowed',
-        )
+        expect(searchResultsA.state.currentUser).toEqual(TEST_USER)
 
-        const { searchResults: searchResultsB } = await setupTest(device)
+        const { searchResults: searchResultsB } = await setupTest(device, {
+            withAuth: false,
+        })
 
-        device.backgroundModules.auth.remoteFunctions.isAuthorizedForFeature = async () =>
-            false
-
-        expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
+        expect(searchResultsB.state.currentUser).toBeNull()
         await searchResultsB.processEvent('init', null)
-        expect(searchResultsB.state.searchResults.sharingAccess).toEqual(
-            'feature-disabled',
-        )
+        expect(searchResultsB.state.currentUser).toEqual(TEST_USER)
     })
 
     it('should get feed activity status during init logic', async ({
@@ -194,6 +225,11 @@ describe('Dashboard Refactor misc logic', () => {
         expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicD.init()
         expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
+
+        await logicA.cleanup()
+        await logicB.cleanup()
+        await logicC.cleanup()
+        await logicD.cleanup()
     })
 
     it('should get feed activity status during init logic', async ({
@@ -204,9 +240,9 @@ describe('Dashboard Refactor misc logic', () => {
         device.backgroundModules.activityIndicator.remoteFunctions.markActivitiesAsSeen = async () => {
             activitiesMarkedAsSeen = true
         }
-        device.backgroundModules.auth.remoteFunctions.getCurrentUser = async () =>
-            ({ id: 1 } as any)
+
         const { searchResults } = await setupTest(device, {
+            withAuth: true,
             openFeedUrl: () => {
                 feedUrlOpened = true
             },
@@ -221,5 +257,48 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
         expect(feedUrlOpened).toBe(true)
         expect(activitiesMarkedAsSeen).toBe(true)
+    })
+
+    it('should hide banner and set cloud enabled flag on migration finish', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        const initState = () =>
+            searchResults.processMutation({
+                modals: { showCloudOnboarding: { $set: true } },
+                searchResults: { isCloudUpgradeBannerShown: { $set: true } },
+                isCloudEnabled: { $set: false },
+            })
+
+        initState()
+
+        expect(searchResults.state.isCloudEnabled).toBe(false)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(true)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(true)
+
+        await searchResults.processEvent('closeCloudOnboardingModal', {
+            didFinish: false,
+        })
+
+        expect(searchResults.state.isCloudEnabled).toBe(false)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(true)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
+
+        initState()
+
+        await searchResults.processEvent('closeCloudOnboardingModal', {
+            didFinish: true,
+        })
+
+        expect(searchResults.state.isCloudEnabled).toBe(true)
+        expect(
+            searchResults.state.searchResults.isCloudUpgradeBannerShown,
+        ).toBe(false)
+        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
     })
 })

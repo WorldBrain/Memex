@@ -5,43 +5,100 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from 'src/dashboard-refactor/colors'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { ButtonTooltip } from 'src/common-ui/components'
+import { getKeyName } from 'src/util/os-specific-key-names'
 
 export interface Props {
+    icon: IconKeys
     title: string
     shortcut: string
     description: string
-    icon: IconKeys
-    onClick: React.MouseEventHandler
+    isSelected?: boolean
+    hasProtectedOption?: boolean
+    onClick: (isProtected?: boolean) => void
 }
 
-const SharePrivacyOption = (props: Props) => (
-    <PrivacyOptionItem onClick={props.onClick}>
-        <Icon 
-            height="18px" 
-            icon={props.icon}
-            color="primary"
-        />
-        <PrivacyOptionBox>
-            <PrivacyOptionTitleBox>
-                <PrivacyOptionTitle>{props.title}</PrivacyOptionTitle>
-                <PrivacyOptionShortcut>{props.shortcut}</PrivacyOptionShortcut>
-            </PrivacyOptionTitleBox>
-            <PrivacyOptionSubTitle>{props.description}</PrivacyOptionSubTitle>
-        </PrivacyOptionBox>
-    </PrivacyOptionItem>
-)
+interface State {
+    isHovered: boolean
+}
+
+class SharePrivacyOption extends React.PureComponent<Props, State> {
+    state: State = { isHovered: false }
+
+    private setHoverState = (isHovered: boolean) => () =>
+        this.setState({ isHovered })
+
+    private handleProtectedClick: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
+        this.props.onClick(true)
+    }
+
+    private get protectedModeShortcut(): string {
+        const [modKey, altKey] = [
+            getKeyName({ key: 'mod' }),
+            getKeyName({ key: 'alt' }),
+        ]
+        return `(${this.props.shortcut.replace(modKey, altKey)})`
+    }
+
+    render() {
+        return (
+            <PrivacyOptionItem
+                onClick={() => this.props.onClick(false)}
+                isSelected={this.props.isSelected}
+                onMouseEnter={this.setHoverState(true)}
+                onMouseLeave={this.setHoverState(false)}
+            >
+                <Icon height="18px" icon={this.props.icon} color="primary" />
+                <PrivacyOptionBox>
+                    <PrivacyOptionTitleBox>
+                        <PrivacyOptionTitle>
+                            {this.props.title}
+                        </PrivacyOptionTitle>
+                        <PrivacyOptionShortcut>
+                            {this.props.shortcut}
+                        </PrivacyOptionShortcut>
+                    </PrivacyOptionTitleBox>
+                    <PrivacyOptionSubTitle>
+                        {this.props.description}
+                    </PrivacyOptionSubTitle>
+                </PrivacyOptionBox>
+                {this.props.hasProtectedOption && this.state.isHovered && (
+                    <ButtonTooltip
+                        tooltipText={
+                            <span>
+                                <strong>Protect Status</strong>
+                                <br />
+                                No status change in bulk action.
+                                <br />
+                                <i>{this.protectedModeShortcut}</i>
+                            </span>
+                        }
+                        position="bottomRightEdge"
+                    >
+                        <Icon
+                            onClick={this.handleProtectedClick}
+                            height="14px"
+                            icon="lock"
+                            color="black"
+                        />
+                    </ButtonTooltip>
+                )}
+            </PrivacyOptionItem>
+        )
+    }
+}
 
 export default SharePrivacyOption
 
 const PrivacyOptionItem = styled(Margin)`
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     flex-direction: row;
     cursor: pointer;
-    padding: 2px 20px;
+    padding: 10px 20px;
     width: fill-available;
-    margin-bottom: 10px;
 
     &:hover {
         background-color: ${colors.onHover};
@@ -50,14 +107,23 @@ const PrivacyOptionItem = styled(Margin)`
     &:last-child {
         margin-bottom: 0px;
     }
+
+    &:first-child {
+        margin-top: 0px;
+    }
+
+    ${(props) =>
+        props.isSelected ? `background-color: ${colors.lightGrey};` : ''}
 `
 
 const PrivacyOptionBox = styled.div`
+    flex: auto;
     display: flex;
     align-items: flex-start;
     justify-content: center;
     flex-direction: column;
     padding-left: 10px;
+    width: 200px;
 `
 
 const PrivacyOptionTitleBox = styled.div`
@@ -82,4 +148,8 @@ const PrivacyOptionShortcut = styled.div`
 const PrivacyOptionSubTitle = styled.div`
     font-size: 12px;
     font-weight: normal;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 `

@@ -211,9 +211,12 @@ async function runSyncBackgroundTest(
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
-    const { setups, sync } = await setupSyncBackgroundTest(options)
+    const testInstance = options.test.instantiate({ isSyncTest: true })
+    const { setups, sync } = await setupSyncBackgroundTest({
+        ...options,
+        testInstance,
+    })
 
-    const testInstance = await options.test.instantiate({ isSyncTest: true })
     for (const setup of setups) {
         await testInstance.setup?.({ setup })
         await setup.backgroundModules.personalCloud.setup()
@@ -263,14 +266,18 @@ export async function setupSyncBackgroundTest(
             'storageManager'
         >
         useDownloadTranslationLayer?: boolean
+        testInstance?: BackgroundIntegrationTestInstance
+        enableFailsafes?: boolean
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
     const userId = TEST_USER.id
 
-    const getServerStorage = await createLazyTestServerStorage({
-        changeWatchSettings: options.serverChangeWatchSettings,
-    })
+    const getServerStorage =
+        options.testInstance?.getSetupOptions?.().getServerStorage ??
+        createLazyTestServerStorage({
+            changeWatchSettings: options.serverChangeWatchSettings,
+        })
     const serverStorage = await getServerStorage()
     const cloudHub = new PersonalCloudHub()
 
@@ -288,9 +295,11 @@ export async function setupSyncBackgroundTest(
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
             services,
             view: cloudHub.getView(),
+            disableFailsafes: !options.enableFailsafes,
             getUserId: async () => userId,
             getNow,
-            useDownloadTranslationLayer: options.useDownloadTranslationLayer,
+            useDownloadTranslationLayer:
+                options.useDownloadTranslationLayer ?? true,
             getDeviceId: async () =>
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
@@ -311,10 +320,11 @@ export async function setupSyncBackgroundTest(
 
     for (const setup of setups) {
         await setup.backgroundModules.personalCloud.setup()
+        // setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
 
         if (!options.startWithSyncDisabled) {
             await setup.backgroundModules.personalCloud.enableSync()
-            setup.backgroundModules.personalCloud.startSync()
+            await setup.backgroundModules.personalCloud.startSync()
         }
     }
 
@@ -323,6 +333,7 @@ export async function setupSyncBackgroundTest(
         syncOptions: { debug: boolean },
     ) => {
         const setup = setups[deviceIndex]
+        await setup.backgroundModules.personalCloud.integrateAllUpdates()
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 

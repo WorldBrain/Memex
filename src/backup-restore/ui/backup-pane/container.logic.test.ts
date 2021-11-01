@@ -37,10 +37,12 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => undefined,
             }),
         })
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'overview',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
@@ -80,10 +82,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'onboarding-how',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'onboarding-how',
+            }),
+        )
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
@@ -104,10 +108,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'onboarding-size',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'onboarding-size',
+            }),
+        )
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
@@ -161,10 +167,12 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(secondSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'running-backup',
-        })
+        expect(secondSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'running-backup',
+            }),
+        )
         expect(localStorage.popChanges()).toEqual([
             { type: 'remove', key: 'backup.onboarding' },
             { type: 'remove', key: 'backup.onboarding.authenticating' },
@@ -181,10 +189,12 @@ describe('Backup settings container logic', () => {
             },
         )
 
-        expect(secondSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'overview',
-        })
+        expect(secondSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'overview',
+            }),
+        )
     })
 
     it('should be to able to backup through local server', async () => {
@@ -236,10 +246,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'onboarding-size',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'onboarding-size',
+            }),
+        )
 
         // Remove previous analytics and local storage events
         analytics.popNew()
@@ -254,10 +266,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'running-backup',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'running-backup',
+            }),
+        )
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
@@ -276,10 +290,12 @@ describe('Backup settings container logic', () => {
             },
         )
 
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'overview',
+            }),
+        )
     })
 
     it('should be able to guide the user through the restore flow when they try to restore without being logged in', async () => {
@@ -298,20 +314,24 @@ describe('Backup settings container logic', () => {
                     (backendLocation = newChoice),
             }),
         })
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'overview',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
             { type: 'onRestoreRequested' },
             { remoteFunctions: {} },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'restore-where',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'restore-where',
+            }),
+        )
 
         const choiceResult = await triggerEvent(
             firstSessionState,
@@ -347,10 +367,12 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(secondSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'restore-running',
-        })
+        expect(secondSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'restore-running',
+            }),
+        )
         expect(localStorage.popChanges()).toEqual([
             {
                 type: 'remove',
@@ -373,20 +395,24 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'overview',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
             { type: 'onRestoreRequested' },
             { remoteFunctions: {} },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'restore-where',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'restore-where',
+            }),
+        )
 
         const choiceResult = await triggerEvent(
             firstSessionState,
@@ -420,10 +446,12 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(secondSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'restore-where',
-        })
+        expect(secondSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'restore-where',
+            }),
+        )
         expect(localStorage.popChanges()).toEqual([
             {
                 type: 'remove',
@@ -446,20 +474,24 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(firstSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'overview',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
             { type: 'onRestoreRequested' },
             { remoteFunctions: {} },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'restore-where',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'restore-where',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
@@ -471,10 +503,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: true,
-            screen: 'restore-running',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: true,
+                screen: 'restore-running',
+            }),
+        )
     })
 
     it('should be able to guide the user through the restore flow when using local', async () => {
@@ -491,20 +525,24 @@ describe('Backup settings container logic', () => {
                 getBackendLocation: () => backendLocation,
             }),
         })
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'overview',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'overview',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
             { type: 'onRestoreRequested' },
             { remoteFunctions: {} },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'restore-where',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'restore-where',
+            }),
+        )
 
         await triggerEvent(
             firstSessionState,
@@ -516,10 +554,12 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        expect(firstSessionState).toEqual({
-            isAuthenticated: false,
-            screen: 'restore-running',
-        })
+        expect(firstSessionState).toEqual(
+            expect.objectContaining({
+                isAuthenticated: false,
+                screen: 'restore-running',
+            }),
+        )
     })
 })
 
@@ -575,7 +615,7 @@ describe('Backup settings container logic helpers', () => {
                         analytics: 'analytics',
                     },
                 },
-                { type: 'state', args: { screen: 'bla' } },
+                { type: 'state', args: { screen: 'bla', redirect: null } },
             ])
         })
 
@@ -612,7 +652,7 @@ describe('Backup settings container logic helpers', () => {
                         analytics: 'analytics',
                     },
                 },
-                { type: 'state', args: { screen: 'bla' } },
+                { type: 'state', args: { screen: 'bla', redirect: null } },
             ])
         })
     })

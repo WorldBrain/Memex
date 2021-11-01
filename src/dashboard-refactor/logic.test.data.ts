@@ -29,6 +29,8 @@ const noteDataToSearchRes = (
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
     lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,
+    isBulkShareProtected: note.isBulkShareProtected,
+    isShared: note.isShared,
     pageUrl: page.normalizedUrl,
     comment: note.comment,
     body: note.highlight,
@@ -74,6 +76,7 @@ export const NOTE_1: NoteData = {
     pageUrl: PAGE_1.normalizedUrl,
     displayTime: new Date('2020-11-26T01:05').getTime(),
     comment: 'Test webpage internet javascript',
+    isShared: false,
     isEdited: true,
     tags: [],
 }
@@ -84,6 +87,7 @@ export const NOTE_2: NoteData = {
     displayTime: new Date('2020-11-26T01:07').getTime(),
     comment: 'webpage internet javascript',
     highlight: 'Some test text',
+    isShared: false,
     tags: [],
 }
 
@@ -93,6 +97,7 @@ export const NOTE_3: NoteData = {
     displayTime: new Date('2020-11-27T18:05').getTime(),
     comment: 'Test webpage internet javascript deer',
     isEdited: true,
+    isShared: false,
     tags: [],
 }
 
@@ -102,6 +107,7 @@ export const NOTE_4: NoteData = {
     displayTime: new Date('2020-11-26T05:15').getTime(),
     comment: 'Memex is a web extensions',
     highlight: 'memex web extension chrome firefox browser',
+    isShared: false,
     tags: [],
 }
 
@@ -110,6 +116,7 @@ export const NOTE_5: NoteData = {
     pageUrl: PAGE_3.normalizedUrl,
     displayTime: new Date('2020-11-27T18:15').getTime(),
     highlight: 'memex deer duck garage',
+    isShared: false,
     tags: [],
 }
 

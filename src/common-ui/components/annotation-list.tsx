@@ -2,10 +2,8 @@ import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
 import analytics from 'src/analytics'
-import {
-    Annotation as AnnotationFlawed,
-    AnnotationPrivacyLevels,
-} from 'src/annotations/types'
+import { Annotation as AnnotationFlawed } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
@@ -106,7 +104,7 @@ class AnnotationList extends Component<Props, State> {
             (acc, curr) => ({ ...acc, [curr.url]: 'default' }),
             {},
         ),
-        sharingAccess: 'feature-disabled',
+        sharingAccess: 'sharing-allowed',
         annotationsSharingInfo: {},
     }
 
@@ -126,15 +124,7 @@ class AnnotationList extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        await this.detectPageSharingStatus()
         await this.detectSharedAnnotations()
-    }
-
-    private async detectPageSharingStatus() {
-        const isAllowed = await this.authBG.isAuthorizedForFeature('beta')
-        this.setState({
-            sharingAccess: isAllowed ? 'sharing-allowed' : 'feature-disabled',
-        })
     }
 
     private async detectSharedAnnotations() {
@@ -326,25 +316,13 @@ class AnnotationList extends Component<Props, State> {
                             await copyToClipboard(link)
                         }}
                         annotationUrl={annot.url}
-                        postShareHook={({ privacyLevel, shareStateChanged }) =>
+                        postShareHook={({ isShared, isProtected }) =>
                             this.updateAnnotationShareState(annot.url)({
-                                status: shareStateChanged
-                                    ? 'shared'
-                                    : undefined,
+                                status: isShared ? 'shared' : 'unshared',
                                 taskState: 'success',
-                                privacyLevel,
-                            })
-                        }
-                        postUnshareHook={({
-                            privacyLevel,
-                            shareStateChanged,
-                        }) =>
-                            this.updateAnnotationShareState(annot.url)({
-                                status: shareStateChanged
-                                    ? 'unshared'
+                                privacyLevel: isProtected
+                                    ? AnnotationPrivacyLevels.PROTECTED
                                     : undefined,
-                                taskState: 'success',
-                                privacyLevel,
                             })
                         }
                         closeShareMenu={() =>
@@ -380,9 +358,9 @@ class AnnotationList extends Component<Props, State> {
                 comment={annot.comment}
                 className={styles.annotation}
                 createdWhen={annot.createdWhen!}
+                isShared={false}
+                isBulkShareProtected={false}
                 mode={this.state.annotationModes[annot.url]}
-                sharingAccess={this.state.sharingAccess}
-                sharingInfo={this.state.annotationsSharingInfo[annot.url]}
                 onGoToAnnotation={this.handleGoToAnnotation(annot)}
                 renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
                 renderCopyPasterForAnnotation={() =>

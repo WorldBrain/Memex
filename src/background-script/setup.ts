@@ -1,4 +1,6 @@
-import { Browser } from 'webextension-polyfill-ts'
+import kebabCase from 'lodash/kebabCase'
+import { browser, Browser } from 'webextension-polyfill-ts'
+import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
@@ -67,8 +69,9 @@ import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
-import { UserSettingsBackground } from 'src/settings/background'
+import { SyncSettingsBackground } from 'src/sync-settings/background'
 import { Services } from 'src/services/types'
+import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
@@ -85,10 +88,7 @@ import {
     PersonalCloudClientStorageType,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import {
-    PersonalCloudSettings,
-    PersonalCloudBackgroundEvents,
-} from 'src/personal-cloud/background/types'
+import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
@@ -97,6 +97,9 @@ import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
+import type { LocalExtensionSettings } from './types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -115,7 +118,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
-    settings: UserSettingsBackground
+    syncSettings: SyncSettingsBackground
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -156,6 +159,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
+    captureException?: typeof captureException
     userMessageService?: UserMessageService
     disableSyncEnryption?: boolean
     getIceServers?: () => Promise<string[]>
@@ -166,6 +170,7 @@ export function createBackgroundModules(options: {
         name: ModuleName,
         options?: { broadcastToTabs?: boolean },
     ): RemoteEventEmitter<ModuleName>
+    userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
         options.createRemoteEventEmitter ?? remoteEventEmitter
@@ -181,6 +186,15 @@ export function createBackgroundModules(options: {
         (await options.getServerStorage()).storageModules
     const getServerStorageManager = async () =>
         (await options.getServerStorage()).storageManager
+
+    const syncSettings = new SyncSettingsBackground({
+        storageManager,
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
+    const syncSettingsStore = createSyncSettingsStore({
+        syncSettingsBG: syncSettings,
+    })
 
     const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
@@ -247,13 +261,10 @@ export function createBackgroundModules(options: {
     const reader = new ReaderBackground({ storageManager })
 
     const pdfBg = new PDFBackground({
-        extensionGetURL: options.browserAPIs.extension.getURL,
-        localBrowserStorage: options.browserAPIs.storage.local,
-        tabs: options.browserAPIs.tabs,
-    })
-
-    pdfBg.setupRequestInterceptors({
-        webRequest: options.browserAPIs.webRequest,
+        webRequestAPI: options.browserAPIs.webRequest,
+        runtimeAPI: options.browserAPIs.runtime,
+        tabsAPI: options.browserAPIs.tabs,
+        syncSettings: syncSettingsStore,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -363,19 +374,14 @@ export function createBackgroundModules(options: {
         annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
-        userMessages,
         getServerStorage,
         services: options.services,
+        captureException: options.captureException,
         generateServerId,
     })
 
-    const settings = new UserSettingsBackground({
-        storageManager,
-        localBrowserStorage: options.browserAPIs.storage.local,
-    })
-
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
-        settings,
+        syncSettings,
         { prefix: 'readwise.' },
     )
 
@@ -396,7 +402,7 @@ export function createBackgroundModules(options: {
                     annotationUrl,
                 )
             ).map(({ name }) => name.replace(/\s+/g, '-')),
-        streamAnnotations: async function* () {
+        async *streamAnnotations() {
             yield* await storageManager.operation(
                 'streamObjects',
                 'annotations',
@@ -410,14 +416,29 @@ export function createBackgroundModules(options: {
         search,
     })
 
+    const localExtSettingStore = new BrowserSettingsStore<
+        LocalExtensionSettings
+    >(options.browserAPIs.storage.local, {
+        prefix: 'localSettings.',
+    })
+
     const bgScript = new BackgroundScript({
         storageManager,
         tabManagement,
+        localExtSettingStore,
         storageChangesMan: options.localStorageChangesManager,
         customListsBackground: customLists,
         copyPasterBackground: copyPaster,
         notifsBackground: notifications,
-        readwiseBackground: readwise,
+        syncSettingsBG: syncSettings,
+        urlNormalizer: normalizeUrl,
+        commandsAPI: browser.commands,
+        readwiseBG: readwise,
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
+        alarmsAPI: browser.alarms,
+        tabsAPI: browser.tabs,
+        syncSettingsStore,
     })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
@@ -448,12 +469,13 @@ export function createBackgroundModules(options: {
             : undefined
 
     const personalCloudSettingStore = new BrowserSettingsStore<
-        PersonalCloudSettings
+        LocalPersonalCloudSettings
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
+        syncSettingsStore,
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??
@@ -486,13 +508,14 @@ export function createBackgroundModules(options: {
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {
+            const uaParser = new UAParser(options.userAgentString)
             const serverStorage = await options.getServerStorage()
             const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
                 {
                     device: {
                         type: PersonalDeviceType.DesktopBrowser,
-                        os: PersonalDeviceOs.Windows,
-                        browser: PersonalDeviceBrowser.Edge,
+                        os: kebabCase(uaParser.getOS().name),
+                        browser: kebabCase(uaParser.getBrowser().name),
                         product: PersonalDeviceProduct.Extension,
                     },
                     userId,
@@ -501,9 +524,10 @@ export function createBackgroundModules(options: {
             return device.id
         },
         settingStore: personalCloudSettingStore,
+        localExtSettingStore,
         getUserId: async () =>
             (await auth.authService.getCurrentUser())?.id ?? null,
-        userIdChanges: async function* () {
+        async *userIdChanges() {
             for await (const nextUser of authChanges(auth.authService)) {
                 yield nextUser
             }
@@ -518,8 +542,10 @@ export function createBackgroundModules(options: {
             await updateOrCreate({
                 ...params,
                 storageManager: incomingStorageManager,
-                executeOperation: (...args) => {
-                    return incomingStorageManager.backend.operation(...args)
+                executeOperation: (...args: any[]) => {
+                    return (incomingStorageManager.backend.operation as any)(
+                        ...args,
+                    )
                 },
             })
 
@@ -577,7 +603,7 @@ export function createBackgroundModules(options: {
         bookmarks,
         tabManagement,
         readwise,
-        settings,
+        syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -718,10 +744,12 @@ export async function setupBackgroundModules(
     backgroundModules.readwise.setupRemoteFunctions()
     backgroundModules.contentConversations.setupRemoteFunctions()
     backgroundModules.pages.setupRemoteFunctions()
+    backgroundModules.syncSettings.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
 
+    await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
@@ -738,6 +766,8 @@ export function getBackgroundStorageModules(
     return {
         pageFetchBacklog: backgroundModules.pageFetchBacklog.storage,
         annotations: backgroundModules.directLinking.annotationStorage,
+        readwiseAction:
+            backgroundModules.readwise.__deprecatedActionQueue.storage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,
         bookmarks: backgroundModules.bookmarks.storage,
@@ -752,7 +782,7 @@ export function getBackgroundStorageModules(
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
         contentSharing: backgroundModules.contentSharing.storage,
-        settings: backgroundModules.settings.storage,
+        syncSettings: backgroundModules.syncSettings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
     }

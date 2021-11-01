@@ -7,7 +7,7 @@ import { doesFileExist } from './util'
 export const envPaths = {
     development: path.resolve(__dirname, '../private/.env.development'),
     production: path.resolve(__dirname, '../private/.env.production'),
-    fallback: path.resolve(__dirname, '../private/.env.example'),
+    fallback: path.resolve(__dirname, '../.env.example'),
 }
 
 export function determineEnvPath({ mode }) {
