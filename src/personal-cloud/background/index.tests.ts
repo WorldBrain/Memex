@@ -305,12 +305,16 @@ export async function setupSyncBackgroundTest(
                     .personalCloud.deviceId,
         })
 
-        const setup = await setupBackgroundIntegrationTest({
-            ...options,
-            services,
-            getServerStorage,
-            personalCloudBackend,
-        })
+        const setup: BackgroundIntegrationTestSetup = await setupBackgroundIntegrationTest(
+            {
+                ...options,
+                services,
+                getServerStorage,
+                personalCloudBackend,
+            },
+        )
+        setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
+        setup.backgroundModules.personalCloud.strictErrorReporting = true
 
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
