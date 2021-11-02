@@ -397,7 +397,7 @@ export class PageIndexingBackground {
         await this.storage.createPage(pageData)
         await this.storeLocators(contentIdentifier)
 
-        if (opts.addInboxEntryOnCreate) {
+        if (opts.addInboxEntryOnCreate && !existingPage) {
             await this.options.createInboxEntry(pageData.fullUrl)
         }
 
