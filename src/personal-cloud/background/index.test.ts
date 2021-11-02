@@ -159,7 +159,7 @@ describe('Personal cloud', () => {
                             expect.objectContaining({
                                 type: 'overwrite',
                                 collection: 'pages',
-                                schemaVersion: STORAGE_VERSIONS[25].version,
+                                schemaVersion: STORAGE_VERSIONS[26].version,
                             }),
                         ],
                     }),

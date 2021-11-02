@@ -391,10 +391,9 @@ export class PageIndexingBackground {
         const existingPage = await this.storage.getPage(normalizedUrl)
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
-            await this.storeLocators(contentIdentifier)
+        } else {
+            await this.storage.createPage(pageData)
         }
-
-        await this.storage.createPage(pageData)
         await this.storeLocators(contentIdentifier)
 
         if (opts.addInboxEntryOnCreate && !existingPage) {
