@@ -23,12 +23,14 @@ const getContentFingerprints: GetContentFingerprints = async () => {
     const fingerprintsStrings =
         pdfDocument.fingerprints ??
         (pdfDocument.fingerprint ? [pdfDocument.fingerprint] : [])
-    const contentFingerprints = fingerprintsStrings.map(
-        (fingerprint): ContentFingerprint => ({
-            fingerprintScheme: FingerprintSchemeType.PdfV1,
-            fingerprint,
-        }),
-    )
+    const contentFingerprints = fingerprintsStrings
+        .filter((fingerprint) => fingerprint != null)
+        .map(
+            (fingerprint): ContentFingerprint => ({
+                fingerprintScheme: FingerprintSchemeType.PdfV1,
+                fingerprint,
+            }),
+        )
     return contentFingerprints
 }
 
