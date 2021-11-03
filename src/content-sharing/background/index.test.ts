@@ -1,5 +1,6 @@
 import orderBy from 'lodash/orderBy'
 import expect from 'expect'
+import type StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
@@ -80,6 +81,19 @@ async function setupTest(options: {
             {},
             { order: [['id', 'asc']] },
         )
+
+    const getFromDB = (storageManager: StorageManager) => (
+        collection: string,
+    ) =>
+        storageManager.operation(
+            'findObjects',
+            collection,
+            {},
+            { order: [['id', 'asc']] },
+        )
+
+    const getShared = getFromDB(serverStorage.storageManager)
+    const getLocal = getFromDB(setup.storageManager)
 
     return {
         directLinking,
@@ -1140,6 +1154,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
                                 await personalCloud.waitForSync()
 
+                                expect(await getLocal('annotations')).toEqual(
+                                    [],
+                                )
+                                expect(
+                                    await getLocal('sharedAnnotationMetadata'),
+                                ).toEqual([])
+                                expect(
+                                    await getLocal('annotationPrivacyLevels'),
+                                ).toEqual([])
+
                                 const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     {} as any,
                                     data.ANNOTATION_1_1_DATA,
@@ -1154,6 +1178,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(await getLocal('annotations')).toEqual([
                                     expect.objectContaining({
+                                        url: annotationUrl,
                                         body: data.ANNOTATION_1_1_DATA.body,
                                         comment:
                                             data.ANNOTATION_1_1_DATA.comment,
@@ -1198,6 +1223,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     annotationUrl,
                                 )
                                 await personalCloud.waitForSync()
+
+                                expect(await getLocal('annotations')).toEqual(
+                                    [],
+                                )
+                                expect(
+                                    await getLocal('sharedAnnotationMetadata'),
+                                ).toEqual([])
+                                expect(
+                                    await getLocal('annotationPrivacyLevels'),
+                                ).toEqual([])
 
                                 expect(
                                     await getShared('sharedAnnotation'),

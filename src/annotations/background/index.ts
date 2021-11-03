@@ -38,6 +38,7 @@ import { Analytics } from 'src/analytics/types'
 import { getUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
+import type ContentSharingBackground from 'src/content-sharing/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -58,6 +59,7 @@ export default class DirectLinkingBackground {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
             pages: PageIndexingBackground
+            contentSharingBG: ContentSharingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
@@ -535,6 +537,9 @@ export default class DirectLinkingBackground {
             await this.annotationStorage.deleteTagsByUrl({ url: pk })
         }
 
+        await this.options.contentSharingBG.deleteAnnotationShareData({
+            annotationUrl: pk,
+        })
         await this.annotationStorage.deleteAnnotation(pk)
     }
 

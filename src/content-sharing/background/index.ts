@@ -322,6 +322,15 @@ export default class ContentSharingBackground {
         })
     }
 
+    async deleteAnnotationShareData(options: { annotationUrl: string }) {
+        await this.storage.deleteAnnotationMetadata({
+            localIds: [options.annotationUrl],
+        })
+        await this.storage.deleteAnnotationPrivacyLevel({
+            annotation: options.annotationUrl,
+        })
+    }
+
     findAnnotationPrivacyLevels: ContentSharingInterface['findAnnotationPrivacyLevels'] = async (
         params,
     ) => {
