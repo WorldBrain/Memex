@@ -20,6 +20,8 @@ import {
 } from '@worldbrain/memex-storage/lib/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
+const contentSharing = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.contentSharing
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
@@ -53,17 +55,14 @@ const createAnnotationStep = (args?: {
             DATA.ANNOT_1,
         )
         if (args?.protectAnnotation) {
-            await directLinking(setup).setAnnotationPrivacyLevel(
-                { tab: DATA.TEST_TAB_1 },
-                {
-                    annotation: annotUrl,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await contentSharing(setup).setAnnotationPrivacyLevel({
+                annotation: annotUrl,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
         }
-        annotPrivacyLevel = await directLinking(
+        annotPrivacyLevel = await contentSharing(
             setup,
-        ).annotationStorage.findAnnotationPrivacyLevel({ annotation: annotUrl })
+        ).storage.findAnnotationPrivacyLevel({ annotation: annotUrl })
     },
     expectedStorageChanges: {
         annotations: (): StorageCollectionDiff => ({

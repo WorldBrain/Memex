@@ -370,7 +370,6 @@ export function createBackgroundModules(options: {
         activityStreams,
         storageManager,
         customLists: customLists.storage,
-        annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
