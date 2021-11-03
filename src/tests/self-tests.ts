@@ -136,13 +136,10 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
-                {},
-                {
-                    annotation: publicAnnotation2,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+                annotation: publicAnnotation2,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             console.log(`Added protected note to '${testPageUrl}'`)
             const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
                 {
@@ -155,13 +152,10 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
-                {},
-                {
-                    annotation: publicAnnotation3,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+                annotation: publicAnnotation3,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             console.log(
                 `Added upload error generating note to '${testPageUrl}'`,
             )
@@ -176,13 +170,10 @@ export function createSelfTests(options: {
                 },
                 { skipPageIndexing: true },
             )
-            await backgroundModules.directLinking.setAnnotationPrivacyLevel(
-                {},
-                {
-                    annotation: publicAnnotation4,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+                annotation: publicAnnotation4,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
             console.log(
                 `Added download error generating note to '${testPageUrl}'`,
             )
