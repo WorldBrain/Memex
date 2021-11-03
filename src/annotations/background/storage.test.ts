@@ -10,6 +10,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 async function insertTestData({
     storageManager,
     backgroundModules: {
+        contentSharing: { storage: contentSharingStorage },
         directLinking: { annotationStorage },
         customLists,
     },
@@ -37,7 +38,7 @@ async function insertTestData({
             url: annot.url,
         } as any)
 
-        await annotationStorage.setAnnotationPrivacyLevel({
+        await contentSharingStorage.setAnnotationPrivacyLevel({
             annotation: annot.url,
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         })
@@ -96,11 +97,11 @@ describe('Annotations storage', () => {
         })
 
         test('fetch privacy level for an annotation', async () => {
-            const { annotationStorage } = await setupTest()
+            const { contentSharingStorage } = await setupTest()
 
             const url = DATA.annotation.url
             expect(
-                await annotationStorage.findAnnotationPrivacyLevel({
+                await contentSharingStorage.findAnnotationPrivacyLevel({
                     annotation: url,
                 }),
             ).toEqual(
@@ -172,10 +173,10 @@ describe('Annotations storage', () => {
             })
 
             test('update annotation privacy level', async () => {
-                const { annotationStorage } = await setupTest()
+                const { contentSharingStorage } = await setupTest()
 
                 const url = DATA.annotation.url
-                const origPrivacyLevel = await annotationStorage.findAnnotationPrivacyLevel(
+                const origPrivacyLevel = await contentSharingStorage.findAnnotationPrivacyLevel(
                     { annotation: url },
                 )
                 expect(origPrivacyLevel).toEqual(
@@ -186,26 +187,26 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.deleteAnnotationPrivacyLevel({
+                await contentSharingStorage.deleteAnnotationPrivacyLevel({
                     annotation: url,
                 })
 
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(null)
 
                 const updatedWhen = new Date()
 
-                await annotationStorage.setAnnotationPrivacyLevel({
+                await contentSharingStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     updatedWhen,
                 })
 
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(
@@ -216,14 +217,14 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.setAnnotationPrivacyLevel({
+                await contentSharingStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
                     updatedWhen,
                 })
 
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(
@@ -234,14 +235,14 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.setAnnotationPrivacyLevel({
+                await contentSharingStorage.setAnnotationPrivacyLevel({
                     annotation: url,
                     privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                     updatedWhen,
                 })
 
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(
@@ -276,12 +277,12 @@ describe('Annotations storage', () => {
             test('delete annotation should result in delete of any privacy level', async () => {
                 const {
                     backgroundModules,
-                    annotationStorage,
+                    contentSharingStorage,
                 } = await setupTest()
 
                 const url = DATA.directLink.url
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(
@@ -297,7 +298,7 @@ describe('Annotations storage', () => {
                     url,
                 )
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(null)
@@ -388,11 +389,11 @@ describe('Annotations storage', () => {
             })
 
             test('delete annotation privacy level', async () => {
-                const { annotationStorage } = await setupTest()
+                const { contentSharingStorage } = await setupTest()
 
                 const url = DATA.directLink.url
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(
@@ -403,12 +404,12 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.deleteAnnotationPrivacyLevel({
+                await contentSharingStorage.deleteAnnotationPrivacyLevel({
                     annotation: url,
                 })
 
                 expect(
-                    await annotationStorage.findAnnotationPrivacyLevel({
+                    await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
                     }),
                 ).toEqual(null)

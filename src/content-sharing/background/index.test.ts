@@ -988,14 +988,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expect.objectContaining({}),
                                 ])
 
-                                await directLinking.setAnnotationPrivacyLevel(
-                                    {},
-                                    {
-                                        annotation: annotationUrl,
-                                        privacyLevel:
-                                            AnnotationPrivacyLevels.PRIVATE,
-                                    },
-                                )
+                                await contentSharing.setAnnotationPrivacyLevel({
+                                    annotation: annotationUrl,
+                                    privacyLevel:
+                                        AnnotationPrivacyLevels.PRIVATE,
+                                })
 
                                 await personalCloud.waitForSync()
 
@@ -1411,8 +1408,7 @@ function makeShareAnnotationTest(options: {
                     )
 
                     if (options.testProtectedBulkShare) {
-                        await setup.backgroundModules.directLinking.setAnnotationPrivacyLevel(
-                            {} as any,
+                        await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                             {
                                 annotation: secondAnnotationUrl,
                                 privacyLevel:
