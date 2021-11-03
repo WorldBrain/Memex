@@ -131,7 +131,10 @@ describe('Personal cloud', () => {
                             normalizedUrl: 'www.dude-wheres-my/test.pdf',
                             storedContentType: StoredContentType.PdfContent,
                             content: {
-                                metadata: TEST_PDF_METADATA,
+                                metadata: {
+                                    ...TEST_PDF_METADATA,
+                                    memexDocumentBytes: expect.any(Number),
+                                },
                                 pageTexts: TEST_PDF_PAGE_TEXTS,
                             },
                         },
@@ -212,7 +215,10 @@ describe('Personal cloud', () => {
                 const objectBlob = storedObjects[0].object as Blob
                 const object = await blobToJson(objectBlob)
                 expect(object).toEqual({
-                    metadata: TEST_PDF_METADATA,
+                    metadata: {
+                        ...TEST_PDF_METADATA,
+                        memexDocumentBytes: expect.any(Number),
+                    },
                     pageTexts: TEST_PDF_PAGE_TEXTS,
                 })
                 expect(objectBlob.type).toEqual(

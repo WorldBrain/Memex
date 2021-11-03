@@ -1,7 +1,8 @@
 import { browser } from 'webextension-polyfill-ts'
-import * as PDFJS from 'pdfjs-dist/build/pdf'
+import * as PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 import { PDF_RAW_TEXT_SIZE_LIMIT } from './constants'
+import type { MemexPDFMetadata } from './types'
 
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData: ArrayBuffer) {
@@ -40,15 +41,20 @@ async function extractContent(pdfData: ArrayBuffer) {
     })
 
     const metadata = await pdf.getMetadata()
-    if (truncated) {
-        metadata.memexTruncated = true
-        metadata.memexTotalPages = pdf.numPages
-        metadata.memexIncludedPages = pageIndex // not off by one, but pageIndex is the index it discarded
+    const downloadInfo = await pdf.getDownloadInfo()
+
+    const pdfMetadata: MemexPDFMetadata = {
+        memexTotalPages: pdf.numPages,
+        memexIncludedPages: pageIndex,
+        memexDocumentBytes: downloadInfo?.length ?? null,
+        memexOutline: (await pdf.getOutline()) ?? null,
+        documentInformationDict: metadata?.info ?? null,
+        metadataMap: metadata?.metadata?.getAll() ?? null,
     }
 
     return {
+        pdfMetadata,
         pdfPageTexts: pageTexts,
-        pdfMetadata: metadata,
         fullText: processedText,
         author: metadata.info.Author,
         title: metadata.info.Title,
