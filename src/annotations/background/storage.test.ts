@@ -74,6 +74,7 @@ async function setupTest() {
         annotationStorage:
             setup.backgroundModules.directLinking.annotationStorage,
         contentSharingStorage: setup.backgroundModules.contentSharing.storage,
+        backgroundModules: setup.backgroundModules,
     }
 }
 
@@ -275,6 +276,7 @@ describe('Annotations storage', () => {
 
             test('delete annotation should result in delete of any privacy level', async () => {
                 const {
+                    backgroundModules,
                     annotationStorage,
                     contentSharingStorage,
                 } = await setupTest()
@@ -292,7 +294,10 @@ describe('Annotations storage', () => {
                     }),
                 )
 
-                await annotationStorage.deleteAnnotation(url)
+                await backgroundModules.directLinking.deleteAnnotation(
+                    undefined,
+                    url,
+                )
                 expect(
                     await contentSharingStorage.findAnnotationPrivacyLevel({
                         annotation: url,
