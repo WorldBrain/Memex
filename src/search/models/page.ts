@@ -312,6 +312,11 @@ export default class Page extends AbstractModel
                 where: { pageUrl: this.url },
             },
             {
+                collection: 'locators',
+                operation: 'deleteObjects',
+                where: { normalizedUrl: this.url },
+            },
+            {
                 // page should be deleted last so we can reliably delete all dependent data first during sync
                 collection: 'pages',
                 operation: 'deleteObjects',
