@@ -16,12 +16,23 @@
     }
 }
 
+.menuIcon {
+    width: 20px;
+    height: auto;
+    margin-right: 15px;
+}
+
+.topMenuItem {
+    background: #e0e0e0;
+}
+
 .text {
     color: black;
     text-decoration: none;
     font-size: 1em;
     padding: 10px 20px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
 }
 
@@ -48,7 +59,7 @@
     border-radius: 3px;
     font-weight: 500;
     width: 230px;
-    padding: 5px 0px;
+    padding: 0px 0px 5px 0px;
 }
 
 .footerText {
