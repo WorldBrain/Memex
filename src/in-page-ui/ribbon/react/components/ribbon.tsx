@@ -275,6 +275,21 @@ export default class Ribbon extends Component<Props, State> {
                         )}
                     </div>
                     <div
+                        onClick={() =>
+                            window.open('https://worldbrain.io/tutorials')
+                        }
+                        className={styles.extraButtonRow}
+                    >
+                        <div
+                            className={cx(
+                                styles.button,
+                                styles.helpIcon,
+                                styles.extraButtons,
+                            )}
+                        />
+                        <div className={styles.extraButtonsText}>Tutorials</div>
+                    </div>
+                    <div
                         onClick={() => this.openOptionsTabRPC('settings')}
                         className={styles.extraButtonRow}
                     >
@@ -285,9 +300,7 @@ export default class Ribbon extends Component<Props, State> {
                                 styles.extraButtons,
                             )}
                         />
-                        <div className={styles.extraButtonsText}>
-                            Advanced Settings
-                        </div>
+                        <div className={styles.extraButtonsText}>Settings</div>
                     </div>
                     <div
                         onClick={() =>
@@ -295,7 +308,9 @@ export default class Ribbon extends Component<Props, State> {
                         }
                         className={styles.feedbackRow}
                     >
-                        <div className={styles.extraButtonsText}>Feedback</div>
+                        <div className={styles.extraButtonsText}>
+                            Feature Requests & Bugs
+                        </div>
                     </div>
                 </ExtraButtonsPanel>
             </BlurredSidebarOverlay>
