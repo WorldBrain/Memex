@@ -59,7 +59,6 @@ export class PDFBackground {
     headersReceivedListener = (
         details: WebRequest.OnHeadersReceivedDetailsType,
     ) => {
-        console.log('hr', details)
         if (!this.shouldOpen || !details.url) {
             return
         }

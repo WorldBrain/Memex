@@ -6,4 +6,5 @@ export interface MemexPDFMetadata {
     memexOutline?: any[]
     metadataMap?: any
     documentInformationDict?: any
+    fingerprints: string[]
 }

@@ -6,6 +6,54 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 
+type CloudSendTest =
+    | 'tag'
+    | 'bookmark'
+    | 'list'
+    | 'copy-paste'
+    | 'note'
+    | 'note.private'
+    | 'note.protected'
+    | 'errors'
+    | 'errors.upload'
+    | 'errors.download'
+    | 'share'
+    | 'share.list'
+    | 'share.note'
+    | 'share.note.edit'
+    | 'share.note.remove'
+    | 'share.incoming.note'
+    | 'lots-of-data'
+    | 'pdf'
+    | 'pdf.online'
+    | 'pdf.online.share'
+
+function matchTest<Test extends string>(
+    test: Test,
+    testOptions?: {
+        only?: Test[]
+        skip?: Test[]
+    },
+) {
+    const parts = test.split('.')
+    const paths = [...parts.entries()].map(([index]) =>
+        parts.slice(0, index + 1).join('.'),
+    )
+    let foundInOnly = false
+    for (const path of paths) {
+        if (testOptions?.skip?.includes?.(path as Test)) {
+            return false
+        }
+
+        foundInOnly = foundInOnly || testOptions?.only?.includes?.(path as Test)
+    }
+    if (testOptions?.only && !foundInOnly) {
+        return false
+    }
+
+    return true
+}
+
 export function createSelfTests(options: {
     backgroundModules: BackgroundModules
     storageManager: StorageManager
@@ -47,9 +95,13 @@ export function createSelfTests(options: {
 
     const tests = {
         cloudSend: async (testOptions?: {
-            deleteSharedAnnotation?: boolean
-            lotsOfData?: boolean
+            only?: CloudSendTest[]
+            skip?: CloudSendTest[]
         }) => {
+            const shouldTest = (test: CloudSendTest) => {
+                return matchTest(test, testOptions)
+            }
+
             await clearDb(options.storageManager)
             await clearDb(options.persistentStorageManager)
             console.log('Cleared local databases')
@@ -102,175 +154,226 @@ export function createSelfTests(options: {
 
             const testPageUrl = 'https://www.getmemex.com/'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
-            await backgroundModules.tags.addTagToPage({
-                url: testPageUrl,
-                tag: 'test-tag',
-            })
-            console.log(`Added tag 'test-tag' to '${testPageUrl}'`)
-            await backgroundModules.bookmarks.addBookmark({
-                url: normalizedTestPageUrl,
-                fullUrl: testPageUrl,
-                skipIndexing: true,
-            })
-            console.log(`Bookmarked '${testPageUrl}'`)
-            const publicAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
-                {
-                    tab: {} as any,
-                },
-                {
-                    pageUrl: normalizedTestPageUrl,
-                    comment: 'Hi, this is a test comment',
-                    createdWhen: new Date('2021-07-20'),
-                },
-                { skipPageIndexing: true },
-            )
-            console.log(`Added private note to '${testPageUrl}'`)
-            const publicAnnotation2 = await backgroundModules.directLinking.createAnnotation(
-                {
-                    tab: {} as any,
-                },
-                {
-                    pageUrl: normalizedTestPageUrl,
-                    comment: `Yet another test comment! This one's protected`,
-                    createdWhen: new Date('2021-07-21'),
-                },
-                { skipPageIndexing: true },
-            )
-            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
-                annotation: publicAnnotation2,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-            })
-            console.log(`Added protected note to '${testPageUrl}'`)
-            const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
-                {
-                    tab: {} as any,
-                },
-                {
-                    pageUrl: normalizedTestPageUrl,
-                    comment: `*memex-debug*: upload error`,
-                    createdWhen: new Date('2021-07-21'),
-                },
-                { skipPageIndexing: true },
-            )
-            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
-                annotation: publicAnnotation3,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-            })
-            console.log(
-                `Added upload error generating note to '${testPageUrl}'`,
-            )
-            const publicAnnotation4 = await backgroundModules.directLinking.createAnnotation(
-                {
-                    tab: {} as any,
-                },
-                {
-                    pageUrl: normalizedTestPageUrl,
-                    comment: `*memex-debug*: download error`,
-                    createdWhen: new Date('2021-07-21'),
-                },
-                { skipPageIndexing: true },
-            )
-            await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
-                annotation: publicAnnotation4,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-            })
-            console.log(
-                `Added download error generating note to '${testPageUrl}'`,
-            )
-            const testListId1 = await backgroundModules.customLists.createCustomList(
-                {
-                    name: 'My test list #1',
-                },
-            )
-            const testListId2 = await backgroundModules.customLists.createCustomList(
-                {
-                    name: 'My test list #2',
-                },
-            )
-            await backgroundModules.customLists.insertPageToList({
-                id: testListId1,
-                url: normalizedTestPageUrl,
-                skipPageIndexing: true,
-            })
-            await backgroundModules.customLists.insertPageToList({
-                id: testListId2,
-                url: normalizedTestPageUrl,
-                skipPageIndexing: true,
-            })
-            console.log(`Added 'https://www.getmemex.com' to 2 lists`)
-            await backgroundModules.copyPaster.createTemplate({
-                title: 'Test template',
-                code: 'Soem test code {{{PageTitle}}}',
-                isFavourite: false,
-            })
-            console.log(`Added test copy-paster template`)
-
-            const {
-                remoteListId: remoteListId1,
-            } = await backgroundModules.contentSharing.shareList({
-                listId: testListId1,
-            })
-            console.log('Shared test list #1, remote ID:', remoteListId1)
-            const {
-                remoteListId: remoteListId2,
-            } = await backgroundModules.contentSharing.shareList({
-                listId: testListId2,
-            })
-            console.log('Shared test list #2, remote ID:', remoteListId2)
-
-            await serverStorage.storageModules.contentSharing.ensurePageInfo({
-                creatorReference: { type: 'user-reference', id: user.id },
-                pageInfo: {
-                    normalizedUrl: normalizedTestPageUrl,
-                    originalUrl: testPageUrl,
-                },
-            })
-            await backgroundModules.contentSharing.shareAnnotation({
-                annotationUrl: publicAnnotationUrl,
-                shareToLists: true,
-            })
-            await backgroundModules.directLinking.editAnnotation(
-                null,
-                publicAnnotationUrl,
-                'Edited comment',
-            )
-            console.log('Shared and edited annotation')
-
-            let sharedAnnotationId: string | number
-            if (testOptions?.deleteSharedAnnotation) {
-                sharedAnnotationId = (
-                    await backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
-                        {
-                            localIds: [publicAnnotationUrl],
-                        },
-                    )
-                )[publicAnnotationUrl]
-                await backgroundModules.directLinking.annotationStorage.deleteAnnotation(
-                    publicAnnotationUrl,
+            if (shouldTest('tag')) {
+                await backgroundModules.tags.addTagToPage({
+                    url: testPageUrl,
+                    tag: 'test-tag',
+                })
+                console.log(`Added tag 'test-tag' to '${testPageUrl}'`)
+            }
+            if (shouldTest('bookmark')) {
+                await backgroundModules.bookmarks.addBookmark({
+                    url: normalizedTestPageUrl,
+                    fullUrl: testPageUrl,
+                    skipIndexing: true,
+                })
+                console.log(`Bookmarked '${testPageUrl}'`)
+            }
+            let publicAnnotationUrl: string
+            if (shouldTest('note.private') || shouldTest('share.note')) {
+                publicAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
+                    {
+                        tab: {} as any,
+                    },
+                    {
+                        pageUrl: normalizedTestPageUrl,
+                        comment: 'Hi, this is a test comment',
+                        createdWhen: new Date('2021-07-20'),
+                    },
+                    { skipPageIndexing: true },
                 )
-                console.log('Deleted shared annotation', sharedAnnotationId)
+                console.log(`Added private note to '${testPageUrl}'`)
+            }
+            if (shouldTest('note.protected')) {
+                const publicAnnotation2 = await backgroundModules.directLinking.createAnnotation(
+                    {
+                        tab: {} as any,
+                    },
+                    {
+                        pageUrl: normalizedTestPageUrl,
+                        comment: `Yet another test comment! This one's protected`,
+                        createdWhen: new Date('2021-07-21'),
+                    },
+                    { skipPageIndexing: true },
+                )
+                await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
+                    {
+                        annotation: publicAnnotation2,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    },
+                )
+                console.log(`Added protected note to '${testPageUrl}'`)
+            }
+            if (shouldTest('errors.upload')) {
+                const publicAnnotation3 = await backgroundModules.directLinking.createAnnotation(
+                    {
+                        tab: {} as any,
+                    },
+                    {
+                        pageUrl: normalizedTestPageUrl,
+                        comment: `*memex-debug*: upload error`,
+                        createdWhen: new Date('2021-07-21'),
+                    },
+                    { skipPageIndexing: true },
+                )
+                await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
+                    {
+                        annotation: publicAnnotation3,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    },
+                )
+                console.log(
+                    `Added upload error generating note to '${testPageUrl}'`,
+                )
+            }
+            if (shouldTest('errors.download')) {
+                const publicAnnotation4 = await backgroundModules.directLinking.createAnnotation(
+                    {
+                        tab: {} as any,
+                    },
+                    {
+                        pageUrl: normalizedTestPageUrl,
+                        comment: `*memex-debug*: download error`,
+                        createdWhen: new Date('2021-07-21'),
+                    },
+                    { skipPageIndexing: true },
+                )
+                await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
+                    {
+                        annotation: publicAnnotation4,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    },
+                )
+                console.log(
+                    `Added download error generating note to '${testPageUrl}'`,
+                )
             }
 
-            await serverStorage.storageModules.contentSharing.createAnnotations(
-                {
-                    annotationsByPage: {
-                        [normalizedTestPageUrl]: [
-                            {
-                                createdWhen: Date.now(),
-                                localId: 'blub',
-                                comment: 'Yes, totally!',
-                            },
-                        ],
+            let testListId1: number
+            let testListId2: number
+            if (shouldTest('list') || shouldTest('share')) {
+                testListId1 = await backgroundModules.customLists.createCustomList(
+                    {
+                        name: 'My test list #1',
                     },
-                    creator: { type: 'user-reference', id: user.id },
-                    listReferences: [],
-                },
-            )
+                )
+                testListId2 = await backgroundModules.customLists.createCustomList(
+                    {
+                        name: 'My test list #2',
+                    },
+                )
+                await backgroundModules.customLists.insertPageToList({
+                    id: testListId1,
+                    url: normalizedTestPageUrl,
+                    skipPageIndexing: true,
+                })
+                await backgroundModules.customLists.insertPageToList({
+                    id: testListId2,
+                    url: normalizedTestPageUrl,
+                    skipPageIndexing: true,
+                })
+                console.log(`Added 'https://www.getmemex.com' to 2 lists`)
+            }
+            if (shouldTest('copy-paste')) {
+                await backgroundModules.copyPaster.createTemplate({
+                    title: 'Test template',
+                    code: 'Soem test code {{{PageTitle}}}',
+                    isFavourite: false,
+                })
+                console.log(`Added test copy-paster template`)
+            }
+
+            let remoteListId1: string
+            if (shouldTest('share')) {
+                remoteListId1 = (
+                    await backgroundModules.contentSharing.shareList({
+                        listId: testListId1,
+                    })
+                ).remoteListId
+                console.log('Shared test list #1, remote ID:', remoteListId1)
+
+                const {
+                    remoteListId: remoteListId2,
+                } = await backgroundModules.contentSharing.shareList({
+                    listId: testListId2,
+                })
+                console.log('Shared test list #2, remote ID:', remoteListId2)
+
+                if (shouldTest('share.note')) {
+                    await serverStorage.storageModules.contentSharing.ensurePageInfo(
+                        {
+                            creatorReference: {
+                                type: 'user-reference',
+                                id: user.id,
+                            },
+                            pageInfo: {
+                                normalizedUrl: normalizedTestPageUrl,
+                                originalUrl: testPageUrl,
+                            },
+                        },
+                    )
+                    await backgroundModules.contentSharing.shareAnnotation({
+                        annotationUrl: publicAnnotationUrl,
+                        shareToLists: true,
+                    })
+                    if (shouldTest('share.note.edit')) {
+                        await backgroundModules.directLinking.editAnnotation(
+                            null,
+                            publicAnnotationUrl,
+                            'Edited comment',
+                        )
+                    }
+                    console.log('Shared and edited annotation')
+
+                    let sharedAnnotationId: string | number
+                    if (shouldTest('share.note.remove')) {
+                        sharedAnnotationId = (
+                            await backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
+                                {
+                                    localIds: [publicAnnotationUrl],
+                                },
+                            )
+                        )[publicAnnotationUrl]
+                        await backgroundModules.directLinking.annotationStorage.deleteAnnotation(
+                            publicAnnotationUrl,
+                        )
+                        console.log(
+                            'Deleted shared annotation',
+                            sharedAnnotationId,
+                        )
+                    }
+                }
+
+                if (shouldTest('share.incoming.note')) {
+                    await serverStorage.storageModules.contentSharing.createAnnotations(
+                        {
+                            annotationsByPage: {
+                                [normalizedTestPageUrl]: [
+                                    {
+                                        createdWhen: Date.now(),
+                                        localId: 'blub',
+                                        comment: 'Yes, totally!',
+                                    },
+                                ],
+                            },
+                            creator: { type: 'user-reference', id: user.id },
+                            listReferences: [],
+                        },
+                    )
+                }
+            }
+
+            if (shouldTest('pdf.online')) {
+                await backgroundModules.pages.indexPage({
+                    fullUrl:
+                        'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                })
+            }
 
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
 
-            if (testOptions?.deleteSharedAnnotation) {
+            if (shouldTest('share.incoming.note')) {
                 const sharedAnnotationEntries = await serverStorage.storageModules.contentSharing.getAnnotationListEntries(
                     {
                         listReference: {
@@ -282,7 +385,7 @@ export function createSelfTests(options: {
                 console.log({ sharedAnnotationEntries })
             }
 
-            if (testOptions?.lotsOfData) {
+            if (shouldTest('lots-of-data')) {
                 for (let i = 0; i < 50; ++i) {
                     const normalizedUrl = `example.com/test-${i}`
                     const fullUrl = `https://www.example.com/test-${i}`

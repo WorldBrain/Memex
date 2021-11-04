@@ -18,4 +18,5 @@ export const TEST_PDF_METADATA: MemexPDFMetadata = {
         Producer: 'Skia/PDF m93 Google Docs Renderer',
         Title: 'test',
     },
+    fingerprints: ['finger-one', 'finger-two'],
 }

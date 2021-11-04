@@ -62,12 +62,16 @@ const fetchPageData: FetchPageData = ({
     let cancel: CancelXHR
 
     // Check if pdf and run code for pdf instead
-    if (isFullUrlPDF(normalizedUrl)) {
-        run = async () => ({
-            content: opts.includePageContent
-                ? await extractPdfContent({ url })
-                : undefined,
-        })
+    if (isFullUrlPDF(url)) {
+        run = async () => {
+            if (opts.includePageContent) {
+                const content = await extractPdfContent({ url })
+                return {
+                    pdfFingerprints: content.pdfMetadata.fingerprints,
+                    content,
+                }
+            }
+        }
         cancel = () => undefined
     } else {
         const req = fetchDOMFromUrl(url, timeout, domParser)

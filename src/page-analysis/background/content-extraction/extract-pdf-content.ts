@@ -50,6 +50,7 @@ async function extractContent(pdfData: ArrayBuffer) {
         memexOutline: (await pdf.getOutline()) ?? null,
         documentInformationDict: metadata?.info ?? null,
         metadataMap: metadata?.metadata?.getAll() ?? null,
+        fingerprints: [pdf.fingerprint],
     }
 
     return {

@@ -7,6 +7,7 @@ import {
     ContentLocatorFormat,
     ContentLocatorType,
     LocationSchemeType,
+    FingerprintSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     ContentIdentifier,
@@ -122,12 +123,14 @@ export class PageIndexingBackground {
     }
 
     async initContentIdentifier(
-        params: InitContentIdentifierParams & { tabId: number },
+        params: InitContentIdentifierParams & { tabId?: number },
     ): Promise<InitContentIdentifierReturns> {
-        const resolvable = this._resolvableForIdentifierTabPage({
-            tabId: params.tabId,
-            fullUrl: params.locator.originalLocation,
-        })
+        const resolvable =
+            params.tabId &&
+            this._resolvableForIdentifierTabPage({
+                tabId: params.tabId,
+                fullUrl: params.locator.originalLocation,
+            })
 
         const regularNormalizedUrl = normalizeUrl(
             params.locator.originalLocation,
@@ -137,7 +140,7 @@ export class PageIndexingBackground {
             fullUrl: params.locator.originalLocation,
         }
         if (!params.fingerprints.length) {
-            resolvable.resolve(regularIdentifier)
+            resolvable?.resolve?.(regularIdentifier)
             return regularIdentifier
         }
         let contentInfo = this.contentInfo[regularNormalizedUrl]
@@ -233,7 +236,7 @@ export class PageIndexingBackground {
             await this.storeLocators(primaryIdentifier)
         }
 
-        resolvable.resolve(primaryIdentifier)
+        resolvable?.resolve?.(primaryIdentifier)
         return primaryIdentifier
     }
 
@@ -512,6 +515,20 @@ export class PageIndexingBackground {
             props.fullUrl,
         )
         const { content: pageData } = processed
+        if (processed.pdfFingerprints) {
+            await this.initContentIdentifier({
+                locator: {
+                    format: ContentLocatorFormat.PDF,
+                    originalLocation: props.fullUrl,
+                },
+                fingerprints: processed.pdfFingerprints.map(
+                    (fingerprint): ContentFingerprint => ({
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        fingerprint,
+                    }),
+                ),
+            })
+        }
         await this.storeDocContent(normalizeUrl(pageData.url), processed)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
@@ -530,6 +547,7 @@ export class PageIndexingBackground {
         if (!pageData) {
             return
         }
+        console.log(pageData)
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
