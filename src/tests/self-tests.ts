@@ -27,6 +27,8 @@ type CloudSendTest =
     | 'pdf'
     | 'pdf.online'
     | 'pdf.online.share'
+    | 'pdf.online.share.note'
+    | 'pdf.online.share.receive'
 
 function matchTest<Test extends string>(
     test: Test,
@@ -63,18 +65,18 @@ export function createSelfTests(options: {
     const { backgroundModules } = options
     const { personalCloud } = backgroundModules
 
-    const ensureTestUser = async () => {
+    const ensureTestUser = async (email = 'test@test.com') => {
         const authService = backgroundModules.auth
             .authService as WorldbrainAuthService
         if (!(await authService.getCurrentUser())) {
             try {
                 await authService.firebase
                     .auth()
-                    .signInWithEmailAndPassword('test@test.com', 'testing')
+                    .signInWithEmailAndPassword(email, 'testing')
             } catch (e) {
                 await authService.firebase
                     .auth()
-                    .createUserWithEmailAndPassword('test@test.com', 'testing')
+                    .createUserWithEmailAndPassword(email, 'testing')
             }
         }
         const user = await authService.getCurrentUser()
@@ -85,7 +87,7 @@ export function createSelfTests(options: {
         const serverStorage = await options.getServerStorage()
         await serverStorage.storageModules.userManagement.ensureUser(
             {
-                displayName: 'Test user',
+                displayName: `Test user (${email})`,
             },
             { type: 'user-reference', id: user.id },
         )
@@ -97,8 +99,15 @@ export function createSelfTests(options: {
         cloudSend: async (testOptions?: {
             only?: CloudSendTest[]
             skip?: CloudSendTest[]
+            enable?: CloudSendTest[]
         }) => {
-            const shouldTest = (test: CloudSendTest) => {
+            const shouldTest = (
+                test: CloudSendTest,
+                matchOptions?: { needsExplicitInclusion?: boolean },
+            ) => {
+                if (matchOptions.needsExplicitInclusion) {
+                    return testOptions?.enable?.includes?.(test)
+                }
                 return matchTest(test, testOptions)
             }
 
@@ -178,7 +187,7 @@ export function createSelfTests(options: {
                     {
                         pageUrl: normalizedTestPageUrl,
                         comment: 'Hi, this is a test comment',
-                        createdWhen: new Date('2021-07-20'),
+                        createdWhen: new Date(),
                     },
                     { skipPageIndexing: true },
                 )
@@ -251,7 +260,11 @@ export function createSelfTests(options: {
 
             let testListId1: number
             let testListId2: number
-            if (shouldTest('list') || shouldTest('share')) {
+            if (
+                shouldTest('list') ||
+                shouldTest('share') ||
+                shouldTest('pdf.online.share')
+            ) {
                 testListId1 = await backgroundModules.customLists.createCustomList(
                     {
                         name: 'My test list #1',
@@ -284,7 +297,7 @@ export function createSelfTests(options: {
             }
 
             let remoteListId1: string
-            if (shouldTest('share')) {
+            if (shouldTest('share') || shouldTest('pdf.online.share')) {
                 remoteListId1 = (
                     await backgroundModules.contentSharing.shareList({
                         listId: testListId1,
@@ -299,19 +312,19 @@ export function createSelfTests(options: {
                 })
                 console.log('Shared test list #2, remote ID:', remoteListId2)
 
-                if (shouldTest('share.note')) {
-                    await serverStorage.storageModules.contentSharing.ensurePageInfo(
-                        {
-                            creatorReference: {
-                                type: 'user-reference',
-                                id: user.id,
-                            },
-                            pageInfo: {
-                                normalizedUrl: normalizedTestPageUrl,
-                                originalUrl: testPageUrl,
-                            },
+                await serverStorage.storageModules.contentSharing.ensurePageInfo(
+                    {
+                        creatorReference: {
+                            type: 'user-reference',
+                            id: user.id,
                         },
-                    )
+                        pageInfo: {
+                            normalizedUrl: normalizedTestPageUrl,
+                            originalUrl: testPageUrl,
+                        },
+                    },
+                )
+                if (shouldTest('share.note')) {
                     await backgroundModules.contentSharing.shareAnnotation({
                         annotationUrl: publicAnnotationUrl,
                         shareToLists: true,
@@ -364,10 +377,48 @@ export function createSelfTests(options: {
             }
 
             if (shouldTest('pdf.online')) {
+                const fullPdfUrl =
+                    'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+                const normalizedPdfUrl = normalizeUrl(fullPdfUrl, {})
                 await backgroundModules.pages.indexPage({
-                    fullUrl:
-                        'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                    fullUrl: fullPdfUrl,
                 })
+                if (shouldTest('pdf.online.share')) {
+                    await backgroundModules.customLists.insertPageToList({
+                        id: testListId1,
+                        url: normalizedPdfUrl,
+                        skipPageIndexing: true,
+                    })
+                    if (shouldTest('pdf.online.share.note')) {
+                        const pdfAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
+                            {
+                                tab: {} as any,
+                            },
+                            {
+                                pageUrl: normalizedPdfUrl,
+                                comment: 'Hi, this is a test comment',
+                                createdWhen: new Date(),
+                            },
+                            { skipPageIndexing: true },
+                        )
+                        await serverStorage.storageModules.contentSharing.ensurePageInfo(
+                            {
+                                creatorReference: {
+                                    type: 'user-reference',
+                                    id: user.id,
+                                },
+                                pageInfo: {
+                                    normalizedUrl: normalizedPdfUrl,
+                                    originalUrl: fullPdfUrl,
+                                },
+                            },
+                        )
+                        await backgroundModules.contentSharing.shareAnnotation({
+                            annotationUrl: pdfAnnotationUrl,
+                            shareToLists: true,
+                        })
+                    }
+                }
             }
 
             await personalCloud.waitForSync()
@@ -385,7 +436,25 @@ export function createSelfTests(options: {
                 console.log({ sharedAnnotationEntries })
             }
 
-            if (shouldTest('lots-of-data')) {
+            if (
+                shouldTest('pdf.online.share.receive', {
+                    needsExplicitInclusion: true,
+                })
+            ) {
+                await ensureTestUser('two@test.com')
+                await serverStorage.storageModules.activityFollows.storeFollow({
+                    collection: 'sharedList',
+                    objectId: remoteListId1,
+                    userReference: {
+                        type: 'user-reference',
+                        id: (
+                            await backgroundModules.auth.authService.getCurrentUser()
+                        ).id,
+                    },
+                })
+            }
+
+            if (shouldTest('lots-of-data', { needsExplicitInclusion: true })) {
                 for (let i = 0; i < 50; ++i) {
                     const normalizedUrl = `example.com/test-${i}`
                     const fullUrl = `https://www.example.com/test-${i}`

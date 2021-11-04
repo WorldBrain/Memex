@@ -547,7 +547,6 @@ export class PageIndexingBackground {
         if (!pageData) {
             return
         }
-        console.log(pageData)
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
