@@ -3,6 +3,12 @@ import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/persona
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
+import {
+    ContentLocatorType,
+    LocationSchemeType,
+    ContentLocatorFormat,
+    FingerprintSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -46,6 +52,17 @@ const LOCAL_PAGES_V24 = {
         lang: 'en-US',
         canonicalUrl: 'https://www.notionized.com/foo',
         description: 'notionized.com/foo description',
+    },
+    third: {
+        url: 'memex.cloud/ct/test1.pdf',
+        fullUrl: 'https://memex.cloud/ct/test1.pdf',
+        domain: 'memex.cloud',
+        hostname: 'memex.cloud',
+        fullTitle: 'https://memex.cloud/ct/test1.pdf',
+        text: '',
+        lang: 'en-GB',
+        canonicalUrl: 'https://www.getmemexed.com/test.pdf',
+        description: 'getmemexed.com PDF description',
     },
 }
 
@@ -127,6 +144,24 @@ export const LOCAL_TEST_DATA_V24 = {
             excludeFromLists: true,
             localId: LOCAL_ANNOTATIONS_V24.second.url,
             remoteId: 'test-2',
+        },
+    },
+    locators: {
+        // NOTE: first and second are skipped, as the corresponding pages are not PDFs.
+        //   Only pages that are PDFs will have local extension locators.
+        third: {
+            fingerprint: 'test-fingerprint',
+            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            location: LOCAL_PAGES_V24.third.url,
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.NormalizedUrlV1,
+            normalizedUrl: LOCAL_PAGES_V24.third.url,
+            originalLocation: LOCAL_PAGES_V24.third.fullUrl,
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927733923,
+            primary: true,
+            valid: true,
+            version: 0,
         },
     },
     visits: {
@@ -252,6 +287,17 @@ const REMOTE_METADATA_V24 = {
         lang: LOCAL_TEST_DATA_V24.pages.second.lang,
         description: LOCAL_TEST_DATA_V24.pages.second.description,
     },
+    third: {
+        id: 3,
+        createdWhen: 559,
+        updatedWhen: 559,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        canonicalUrl: LOCAL_TEST_DATA_V24.pages.third.canonicalUrl,
+        title: LOCAL_TEST_DATA_V24.pages.third.fullTitle,
+        lang: LOCAL_TEST_DATA_V24.pages.third.lang,
+        description: LOCAL_TEST_DATA_V24.pages.third.description,
+    },
 }
 
 const REMOTE_LOCATORS_V24 = {
@@ -262,10 +308,10 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.first.id,
-        format: 'html',
+        format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.first.url,
-        locationScheme: 'normalized-url-v1',
-        locationType: 'remote',
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
         originalLocation: LOCAL_TEST_DATA_V24.pages.first.fullUrl,
         primary: true,
         valid: true,
@@ -281,10 +327,10 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.second.id,
-        format: 'html',
+        format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.second.url,
-        locationScheme: 'normalized-url-v1',
-        locationType: 'remote',
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
         originalLocation: LOCAL_TEST_DATA_V24.pages.second.fullUrl,
         primary: true,
         valid: true,
@@ -292,6 +338,26 @@ const REMOTE_LOCATORS_V24 = {
         lastVisited: 0,
         // contentSize: null,
         // fingerprint: null,
+    },
+    third: {
+        id: 3,
+        createdWhen: 560,
+        updatedWhen: 560,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        format: ContentLocatorFormat.PDF,
+        location: LOCAL_TEST_DATA_V24.locators.third.normalizedUrl,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
+        originalLocation: LOCAL_TEST_DATA_V24.locators.third.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.third.lastVisited,
+        // contentSize: null,
+        fingerprint: LOCAL_TEST_DATA_V24.locators.third.fingerprint,
+        fingerprintScheme: FingerprintSchemeType.PdfV1,
     },
 }
 

@@ -15,6 +15,7 @@ import {
 import {
     DataChangeType,
     DataUsageAction,
+    ContentLocatorFormat,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     PersonalCloudUpdateBatch,
@@ -523,7 +524,10 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
-                    [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id, {
+                        normalizedUrl: testLocators.first.location,
+                        format: ContentLocatorFormat.HTML,
+                    }],
                 ], { skipChanges: 4 }),
                 personalBlockStats: [blockStats({ usedBlocks: 1 })],
                 personalContentMetadata: [testMetadata.second],
@@ -533,6 +537,133 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.first.url } },
             ], { skip: 1 })
+        })
+
+        it('should create locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+
+            // Note we still want to insert the non-PDF pages here to test the different locators behavior
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.third.id],
+                ]),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
+                personalContentLocator: [testLocators.first, testLocators.second, testLocators.third],
+            })
+
+            // NOTE: Only the locator for the third page is downloaded, as that is the only PDF
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+            ])
+        })
+
+        it('should delete locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .deleteOneObject({
+                    normalizedUrl: LOCAL_TEST_DATA_V24.locators.third.location,
+                })
+            await setups[0].storageManager.collection('pages').deleteOneObject({
+                url: LOCAL_TEST_DATA_V24.pages.third.url,
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Delete, 'personalContentMetadata', testMetadata.third.id, {
+                        normalizedUrl: testLocators.third.location,
+                    }],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third.id, {
+                        normalizedUrl: testLocators.third.location,
+                        format: ContentLocatorFormat.PDF,
+                    }],
+                ], { skipChanges: 0 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.third.url } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { normalizedUrl: LOCAL_TEST_DATA_V24.locators.third.normalizedUrl } },
+            ])
         })
 
         it('should create bookmarks', async () => {
