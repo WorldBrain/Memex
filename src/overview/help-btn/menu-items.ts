@@ -17,8 +17,8 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: 'Onboarding Wizard',
-        link: '#/overview?' + ONBOARDING_QUERY_PARAMS.NEW_USER,
+        text: 'Feature Requests & Bugs',
+        link: 'https://worldbrain.io/feedback',
     },
     '-',
     {
