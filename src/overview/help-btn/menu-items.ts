@@ -32,8 +32,13 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: 'Changelog & Roadmap',
+        text: 'Changelog',
         link: 'https://worldbrain.io/changelog',
+    },
+    '-',
+    {
+        text: '💸 Get Early Bird Discount',
+        link: 'https://worldbrain.io/announcements/pioneer-plan',
     },
     '-',
     {

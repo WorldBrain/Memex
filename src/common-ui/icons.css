@@ -176,6 +176,14 @@
     mask-image: url('/img/home.svg');
 }
 
+.moneyIcon {
+    composes: standardIcon;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/dollar-sign.svg');
+    mask-size: contain;
+}
+
 .blockIcon {
     composes: standardIcon;
     mask-position: center;
