@@ -73,8 +73,9 @@ const PioneerPlanBanner = ({
                 Memex is in beta state
             </PioneerPlanTitle>
             <PioneerPlanDescription>
-                Learn about our roadmap and how to support us as a 'Venture
-                Capital'-free business.
+                Learn about our roadmap, why we operate as a 'Venture
+                Capital'-free business <br />
+                and the early bird discount on our upcoming subscription plans.
             </PioneerPlanDescription>
         </PioneerPlanContentBox>
         <PioneerPlanButtonBox>

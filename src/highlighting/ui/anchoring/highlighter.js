@@ -152,7 +152,7 @@ function drawHighlightsAbovePdfCanvas(highlightEl) {
             // opaque and then make the entire highlight layer transparent. This means
             // that there is no visual indication of whether text has one or multiple
             // highlights, but it preserves readability.
-            svgStyle.opacity = '0.3'
+            svgStyle.opacity = '0.1'
         }
     }
 
@@ -168,7 +168,7 @@ function drawHighlightsAbovePdfCanvas(highlightEl) {
 
     if (isCssBlendSupported) {
         rect.setAttribute('class', 'hypothesis-svg-highlight')
-        rect.setAttribute('style', `fill: ${colorBrandMintGreen};`)
+        rect.setAttribute('style', `fill: #d4e8ff;`)
     } else {
         rect.setAttribute('class', 'hypothesis-svg-highlight is-opaque')
     }
