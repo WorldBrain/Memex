@@ -300,6 +300,12 @@ export class AnnotationsSidebarContainer<
                             onUpdateEntrySelection={this.handleTagsUpdate(
                                 currentAnnotationId,
                             )}
+                            onEscapeKeyDown={() =>
+                                this.processEvent(
+                                    'resetTagPickerAnnotationId',
+                                    null,
+                                )
+                            }
                         />
                     </ClickAway>
                 </HoverBox>

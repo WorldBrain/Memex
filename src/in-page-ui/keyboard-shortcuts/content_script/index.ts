@@ -2,11 +2,11 @@ import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
 import { createAndCopyDirectLink } from 'src/annotations/content_script/interactions'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { KeyboardShortcuts, Shortcut } from '../types'
-import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
+import type { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
-import { InPageUIInterface } from 'src/in-page-ui/background/types'
+import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>

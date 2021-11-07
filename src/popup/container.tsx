@@ -270,7 +270,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         />
                         <div
                             onClick={() =>
-                                window.open('https://worldbrain.io/help')
+                                window.open('https://worldbrain.io/tutorials')
                             }
                             className={btnStyles.help}
                         />

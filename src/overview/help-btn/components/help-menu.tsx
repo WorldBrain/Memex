@@ -1,5 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { MenuOptions, MenuOption } from '../types'
 
@@ -20,15 +21,23 @@ export class HelpMenu extends React.PureComponent<Props> {
     }
 
     private renderMenuOption = (
-        { text, link, small }: MenuOption,
+        { text, link, small, icon, top }: MenuOption,
         i: number,
     ) => (
-        <li key={i} className={cx(styles.menuItem, { [styles.smallMenuItem]: small })}>
+        <li
+            key={i}
+            className={cx(
+                styles.menuItem,
+                { [styles.smallMenuItem]: small },
+                { [styles.topMenuItem]: top },
+            )}
+        >
             <a
                 className={cx(styles.text, { [styles.smallText]: small })}
                 target="_blank"
                 href={link}
             >
+                {icon && <img className={styles.menuIcon} src={icon} />}
                 {text}
             </a>
         </li>
@@ -42,11 +51,10 @@ export class HelpMenu extends React.PureComponent<Props> {
         return (
             <div className={styles.menuContainer}>
                 <ul className={styles.menu}>
-                    {this.props.menuOptions.map(
-                        (opt, i) =>
-                            opt === '-'
-                                ? this.renderSeparator(opt, i)
-                                : this.renderMenuOption(opt, i),
+                    {this.props.menuOptions.map((opt, i) =>
+                        opt === '-'
+                            ? this.renderSeparator(opt, i)
+                            : this.renderMenuOption(opt, i),
                     )}
                 </ul>
                 {this.renderFooter()}

@@ -5,6 +5,7 @@ import type { Events } from 'webextension-polyfill-ts/src/generated/events'
 import { Runtime, browser } from 'webextension-polyfill-ts'
 import { filterTabUrl } from 'src/util/uri-utils'
 import { sleepPromise } from '../promises'
+import { RpcError } from '../webextensionRPC'
 
 interface RPCObject {
     headers: {
@@ -156,10 +157,15 @@ export class PortBasedRPCManager {
         this.log(
             `RPC::registerConnectionToBackground::from ${this.options.sideName}`,
         )
-        const port = this.options.connect(undefined, { name: pid })
-        const portId = this.getPortIdForExtBg()
-        this.ports.set(portId, port)
-        port.onMessage.addListener(this.messageResponder)
+
+        try {
+            const port = this.options.connect(undefined, { name: pid })
+            const portId = this.getPortIdForExtBg()
+            this.ports.set(portId, port)
+            port.onMessage.addListener(this.messageResponder)
+        } catch (err) {
+            throw new RpcError(err.message)
+        }
     }
 
     unregisterConnectionToBackground() {
@@ -210,7 +216,7 @@ export class PortBasedRPCManager {
             }
             if (result === 'error' || options.reconnectOnTimeout) {
                 this.unregisterConnectionToBackground()
-                this.registerConnectionToBackground()
+                await this.registerConnectionToBackground()
             }
         }
         delete this._ensuringConnection
@@ -341,9 +347,9 @@ export class PortBasedRPCManager {
             ret = await pendingRequest
         } catch (err) {
             if (err.fromBgScript) {
-                throw new Error('Error occured in bg script')
+                throw new RpcError('Error occured in bg script')
             } else {
-                throw err
+                throw new RpcError(err.message)
             }
         }
         this.log(
@@ -422,7 +428,7 @@ export class PortBasedRPCManager {
                         this.log(
                             `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
                         )
-                        throw err
+                        throw new RpcError(err.message)
                     })
             }
         }

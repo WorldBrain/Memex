@@ -1,10 +1,10 @@
-import { Creator } from './notifications'
+import { Creator, DEF_NOTIFICATION_OPTS } from './notifications'
 
 const NOTIF_1 = {
+    ...DEF_NOTIFICATION_OPTS,
     message: 'test',
     title: 'test',
     requireInteraction: true,
-    ...Creator.DEF_OPTS,
 }
 
 const { requireInteraction, ...NOTIF_1_FF } = NOTIF_1
