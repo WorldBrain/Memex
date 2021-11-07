@@ -71,6 +71,12 @@ export default [
         icon: 'info',
     },
     {
+        name: 'Get Early Bird Discount',
+        pathname: 'https://worldbrain.io/announcements/pioneer-plan',
+        isExternal: true,
+        icon: 'money',
+    },
+    {
         name: 'User Account',
         pathname: '/account',
         icon: 'settings',

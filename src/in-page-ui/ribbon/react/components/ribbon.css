@@ -10,6 +10,10 @@
     font-size: 12px;
 }
 
+.extraButtonText {
+    font-weight: normal;
+}
+
 .horizontalLine {
     width: 18px;
     border: solid 0.5px #d8d8d8;
@@ -226,6 +230,10 @@
 
 .highlightsOff {
     background-image: url('/img/highlightOff.svg');
+}
+
+.helpIcon {
+    background-image: url('/img/help.svg');
 }
 
 .tooltipOn {

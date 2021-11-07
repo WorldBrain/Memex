@@ -29,14 +29,7 @@ import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
 
 export class RpcError extends Error {
-    constructor(message) {
-        super(message)
-        this.name = this.constructor.name
-    }
-}
-
-export class RemoteError extends Error {
-    constructor(message) {
+    constructor(message: string) {
         super(message)
         this.name = this.constructor.name
     }

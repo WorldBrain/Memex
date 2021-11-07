@@ -10,7 +10,7 @@ import {
 } from 'src/highlighting/types'
 import { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
-import { descriptorToRange, markRange } from './anchoring/index'
+import { descriptorToRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
 import { Annotation } from 'src/annotations/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
@@ -98,10 +98,12 @@ export interface SaveAndRenderHighlightDeps {
 export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
+export interface HighlightRendererDependencies {}
+
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer
 
-    constructor() {
+    constructor(private deps: HighlightRendererDependencies) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
     }
 
@@ -179,23 +181,28 @@ export class HighlightRenderer implements HighlightRendererInterface {
             pageTitle: title,
         } as Annotation
 
-        await Promise.all([
-            params.annotationsCache.create(annotation, {
-                shouldShare: params.shouldShare,
-                shouldCopyShareLink: params.shouldShare,
-            }),
-            this.renderHighlight(
-                annotation,
-                ({ openInEdit, annotationUrl }) => {
-                    params.inPageUI.showSidebar({
-                        annotationUrl,
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    })
-                },
-            ),
-        ])
+        try {
+            await Promise.all([
+                params.annotationsCache.create(annotation, {
+                    shouldShare: params.shouldShare,
+                    shouldCopyShareLink: params.shouldShare,
+                }),
+                this.renderHighlight(
+                    annotation,
+                    ({ openInEdit, annotationUrl }) => {
+                        params.inPageUI.showSidebar({
+                            annotationUrl,
+                            action: openInEdit
+                                ? 'edit_annotation'
+                                : 'show_annotation',
+                        })
+                    },
+                ),
+            ])
+        } catch (err) {
+            this.removeAnnotationHighlight(annotation.url)
+            throw err
+        }
 
         return annotation
     }
@@ -507,7 +514,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     /**
      * Removes the highlights of a given annotation.
-     * Called when the annotation is deleted.
      */
     removeAnnotationHighlight = (url: string) => {
         const baseClass = styles['memex-highlight']

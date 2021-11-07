@@ -7,6 +7,7 @@ import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { NotifDefinition } from '../types'
 import { browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
+import type { RemoteNotificationsInterface } from './types'
 
 interface OptionalNotificationDependencies {
     eventNotifs: notifications.EventNotifsDict
@@ -23,7 +24,7 @@ export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
     storage: NotificationStorage
-
+    private remoteFunctions: RemoteNotificationsInterface
     private dependencies: RequiredNotficationDependencies &
         OptionalNotificationDependencies
 
@@ -42,10 +43,7 @@ export default class NotificationBackground {
         this.storage = new NotificationStorage({
             storageManager: options.storageManager,
         })
-    }
-
-    setupRemoteFunctions() {
-        makeRemotelyCallable({
+        this.remoteFunctions = {
             storeNotification: (...params: [any]) => {
                 return this.storeNotification(...params)
             },
@@ -55,19 +53,26 @@ export default class NotificationBackground {
             fetchUnreadNotifications: () => {
                 return this.fetchUnreadNotifications()
             },
-            fetchReadNotifications: (...params: [any]) => {
-                return this.fetchReadNotifications(...params)
+            fetchReadNotifications: (args) => {
+                return this.fetchReadNotifications(args)
             },
-            readNotification: id => {
+            readNotification: (id) => {
                 return this.readNotification(id)
             },
-            fetchNotifById: id => {
+            fetchNotifById: (id) => {
                 return this.fetchNotifById(id)
             },
-            dispatchNotification: notification => {
+            dispatchNotification: (notification) => {
                 return this.dispatchNotification(notification)
             },
-        })
+            createNotification: async (notification) => {
+                await createNotif(notification)
+            },
+        }
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     async storeNotification(request) {

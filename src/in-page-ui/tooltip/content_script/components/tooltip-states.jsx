@@ -21,10 +21,10 @@ export const InitialComponent = ({
         <div className={styles.button} onClick={createHighlight}>
             <ButtonTooltip
                 tooltipText={
-                    <p>
+                    <span>
                         <strong>Highlight</strong>
                         <br />+ shift to share
-                    </p>
+                    </span>
                 }
                 position="bottomHighlighter"
             >
@@ -35,10 +35,10 @@ export const InitialComponent = ({
         <div className={styles.button} onClick={createAnnotation}>
             <ButtonTooltip
                 tooltipText={
-                    <p>
+                    <span>
                         <strong>Annotate</strong>
                         <br />+ shift to share
-                    </p>
+                    </span>
                 }
                 position="bottomHighlighter"
             >
@@ -65,11 +65,11 @@ export const InitialComponent = ({
         >
             <ButtonTooltip
                 tooltipText={
-                    <p>
+                    <span>
                         <strong>Close Highlighter</strong>
                         <br />
                         Disable in Settings
-                    </p>
+                    </span>
                 }
                 position="bottomHighlighter"
             >
