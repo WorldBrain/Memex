@@ -105,7 +105,7 @@ export function createSelfTests(options: {
                 test: CloudSendTest,
                 matchOptions?: { needsExplicitInclusion?: boolean },
             ) => {
-                if (matchOptions.needsExplicitInclusion) {
+                if (matchOptions?.needsExplicitInclusion) {
                     return testOptions?.enable?.includes?.(test)
                 }
                 return matchTest(test, testOptions)
