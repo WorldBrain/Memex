@@ -36,10 +36,19 @@ export interface Props
 
 export default class PageResultView extends PureComponent<Props> {
     get domain(): string {
-        return (
-            this.props.fullUrl.split('/')[2]?.replace('www.', '') ??
-            this.props.normalizedUrl
-        )
+        let fullUrl: URL
+        try {
+            fullUrl = new URL(this.props.fullUrl)
+        } catch (err) {
+            return ''
+        }
+
+        if (fullUrl.protocol === 'https:') {
+            return decodeURIComponent(fullUrl.hostname.replace('www.', ''))
+        } else if (fullUrl.protocol === 'file:') {
+            return decodeURIComponent(fullUrl.pathname)
+        }
+        return ''
     }
 
     private get hasTags(): boolean {
