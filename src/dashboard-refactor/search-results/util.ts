@@ -1,12 +1,12 @@
 import moment from 'moment'
 
-import {
+import type {
     StandardSearchResponse,
     AnnotationsSearchResponse,
     AnnotsByPageUrl,
     AnnotPage,
 } from 'src/search/background/types'
-import {
+import type {
     PageData,
     PageResult,
     PageResultsByDay,
@@ -18,10 +18,11 @@ import {
     NestedResults,
     NotesType,
 } from './types'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import { initNormalizedState, mergeNormalizedStates } from 'src/common-ui/utils'
+import { pageIsPdf } from 'src/page-indexing/utils'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -126,6 +127,7 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
     favIconURI: pageResult.favIcon,
     displayTime: pageResult.displayTime,
     hasNotes: pageResult.annotsCount > 0,
+    type: pageIsPdf(pageResult) ? 'pdf' : 'page',
 })
 
 const annotationToNoteData = (

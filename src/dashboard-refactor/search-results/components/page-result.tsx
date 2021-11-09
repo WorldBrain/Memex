@@ -246,6 +246,9 @@ export default class PageResultView extends PureComponent<Props> {
                                     <FavIconImg src={this.props.favIconURI} />
                                 </FavIconBox>
                             )}
+                            {this.props.type === 'pdf' && (
+                                <PDFIcon>PDF</PDFIcon>
+                            )}
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
@@ -274,6 +277,15 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const PDFIcon = styled.div`
+    border: 1px solid rgb(184, 184, 184);
+    border-radius: 5px;
+    padding: 0 8px;
+    font-weight: 500;
+    color: black;
+    margin-right: 10px;
+`
 
 const PopoutContainer = styled.div``
 
