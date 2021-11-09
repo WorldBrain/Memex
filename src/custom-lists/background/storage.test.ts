@@ -301,7 +301,7 @@ describe('Custom List Integrations', () => {
             await checkInboxEntry(url3, { shouldExist: false })
             await directLinking.createAnnotation(
                 { tab: {} },
-                { pageUrl: url3, comment: 'test' },
+                { pageUrl: url3, comment: 'test', title: 'test' },
             )
             await checkInboxEntry(url3, { shouldExist: true })
             await customLists.removePageFromList({
@@ -311,7 +311,7 @@ describe('Custom List Integrations', () => {
             await checkInboxEntry(url3, { shouldExist: false })
             await directLinking.createAnnotation(
                 { tab: {} },
-                { pageUrl: url3, comment: 'test' },
+                { pageUrl: url3, comment: 'test', title: 'test' },
             )
             await checkInboxEntry(url3, { shouldExist: false })
 

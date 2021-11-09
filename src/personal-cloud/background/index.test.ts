@@ -256,7 +256,10 @@ describe('Personal cloud', () => {
         errorData: (options: {
             setups: BackgroundIntegrationTestSetup[]
             userId: number | string
-            annotation: Pick<Annotation, 'url' | 'pageUrl' | 'comment'>
+            annotation: Pick<
+                Annotation,
+                'url' | 'pageUrl' | 'comment' | 'pageTitle'
+            >
         }) => any
     }) => {
         const { setups, serverStorage } = await setupSyncBackgroundTest({
@@ -284,6 +287,7 @@ describe('Personal cloud', () => {
         const annotation = {
             pageUrl: testPageUrl,
             comment: options.annotationComment,
+            title: 'test',
             isBulkShareProtected: true,
             createdWhen: new Date('2021-07-21'),
         }
@@ -322,7 +326,11 @@ describe('Personal cloud', () => {
                     },
                     ...options.errorData({
                         userId,
-                        annotation: { ...annotation, url: annotationUrl },
+                        annotation: {
+                            ...annotation,
+                            url: annotationUrl,
+                            pageTitle: annotation.title,
+                        },
                         setups,
                     }),
                 },
@@ -350,6 +358,7 @@ describe('Personal cloud', () => {
                         url: options.annotation.url,
                         pageUrl: options.annotation.pageUrl,
                         comment: options.annotation.comment,
+                        pageTitle: options.annotation.pageTitle,
                         createdWhen: expect.any(String),
                         lastEdited: expect.any(String),
                     },

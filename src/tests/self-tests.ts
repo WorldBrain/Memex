@@ -162,6 +162,7 @@ export function createSelfTests(options: {
             }
 
             const testPageUrl = 'https://www.getmemex.com/'
+            const testPageTitle = 'test title'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             if (shouldTest('tag')) {
                 await backgroundModules.tags.addTagToPage({
@@ -187,6 +188,7 @@ export function createSelfTests(options: {
                     {
                         pageUrl: normalizedTestPageUrl,
                         comment: 'Hi, this is a test comment',
+                        title: testPageTitle,
                         createdWhen: new Date(),
                     },
                     { skipPageIndexing: true },
@@ -201,6 +203,7 @@ export function createSelfTests(options: {
                     {
                         pageUrl: normalizedTestPageUrl,
                         comment: `Yet another test comment! This one's protected`,
+                        title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
                     },
                     { skipPageIndexing: true },
@@ -221,6 +224,7 @@ export function createSelfTests(options: {
                     {
                         pageUrl: normalizedTestPageUrl,
                         comment: `*memex-debug*: upload error`,
+                        title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
                     },
                     { skipPageIndexing: true },
@@ -243,6 +247,7 @@ export function createSelfTests(options: {
                     {
                         pageUrl: normalizedTestPageUrl,
                         comment: `*memex-debug*: download error`,
+                        title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
                     },
                     { skipPageIndexing: true },
@@ -397,6 +402,7 @@ export function createSelfTests(options: {
                             {
                                 pageUrl: normalizedPdfUrl,
                                 comment: 'Hi, this is a test comment',
+                                title: testPageTitle,
                                 createdWhen: new Date(),
                             },
                             { skipPageIndexing: true },
