@@ -12,9 +12,10 @@ export async function indexTestFingerprintedPdf(
     setup: BackgroundIntegrationTestSetup,
     options?: {
         expectedServerId?: number | string
+        fullUrl?: string
     },
 ) {
-    const fullUrl = 'file:////home/bla/test.pdf'
+    const fullUrl = options?.fullUrl ?? 'file:////home/bla/test.pdf'
     const contentSize = 456
     const fingerprints: ContentFingerprint[] = [
         {

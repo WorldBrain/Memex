@@ -212,15 +212,13 @@ export class PageIndexingBackground {
             const newLocator: ContentLocator = {
                 ...params.locator,
                 originalLocation: params.locator.originalLocation,
+                location: params.locator.originalLocation,
                 locationType: isFile
                     ? ContentLocatorType.Local
                     : ContentLocatorType.Remote,
                 locationScheme: isFile
                     ? LocationSchemeType.FilesystemPathV1
                     : LocationSchemeType.NormalizedUrlV1,
-                location: isFile
-                    ? params.locator.originalLocation
-                    : primaryIdentifier.normalizedUrl,
                 fingerprint: fingerprint.fingerprint,
                 format: params.locator.format,
                 fingerprintScheme: fingerprint.fingerprintScheme,
