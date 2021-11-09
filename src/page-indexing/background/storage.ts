@@ -361,6 +361,14 @@ export default class PageStorage extends StorageModule {
         }
     }
 
+    async findLocatorsByNormalizedUrl(
+        normalizedUrl: string,
+    ): Promise<ContentLocator[]> {
+        return this.operation('findLocatorsByNormalizedUrl', {
+            normalizedUrl,
+        })
+    }
+
     async storeLocators(params: {
         identifier: ContentIdentifier
         locators: ContentLocator[]

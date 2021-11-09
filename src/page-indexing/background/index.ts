@@ -634,6 +634,10 @@ export class PageIndexingBackground {
         delete this._resolvableForIdentifierTabPage[event.tabId]
     }
 
+    findLocatorsByNormalizedUrl(normalizedUrl: string) {
+        return this.storage.findLocatorsByNormalizedUrl(normalizedUrl)
+    }
+
     _resolvableForIdentifierTabPage(params: {
         tabId: number
         fullUrl: string
