@@ -16,8 +16,10 @@ import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type BookmarksBackground from 'src/bookmarks/background'
-import { pageIsPdf, pickBestLocator } from 'src/page-indexing/utils'
-import type { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
+import {
+    isPagePdf,
+    pickBestLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export default class SearchBackground {
@@ -157,7 +159,7 @@ export default class SearchBackground {
     ): Promise<AnnotPage[]> {
         const toReturn: AnnotPage[] = []
         for (const doc of docs) {
-            if (!pageIsPdf(doc)) {
+            if (!isPagePdf(doc)) {
                 toReturn.push(doc)
                 continue
             }
@@ -165,7 +167,9 @@ export default class SearchBackground {
             const locators = await this.options.pages.findLocatorsByNormalizedUrl(
                 doc.url,
             )
-            const mainLocator = pickBestLocator(locators)
+            const mainLocator = pickBestLocator(locators, {
+                priority: ContentLocatorType.Remote,
+            })
             doc.fullUrl = mainLocator?.originalLocation ?? null
             toReturn.push(doc)
         }
