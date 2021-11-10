@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
+import { IMPORT_TYPE as TYPE } from '../constants'
 import { Checkbox } from 'src/common-ui/components'
 import settingsStyle from 'src/options/settings/components/settings.css'
 
@@ -15,20 +15,6 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
         <div className={settingsStyle.sectionTitle}>Settings</div>
         <div className={styles.advFunctionality}>
             <ul className={styles.settingsList}>
-                {(props.allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
-                    props.allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) && (
-                    <li className={styles.settingsListItem}>
-                        <Checkbox
-                            id="star-imports"
-                            handleChange={props.onBookmarImportsToggle}
-                            isChecked={props.bookmarkImports}
-                        >
-                            <label htmlFor="star-imports">
-                                'Star' all imported urls
-                            </label>
-                        </Checkbox>
-                    </li>
-                )}
                 <li className={styles.settingsListItem}>
                     <ButtonTooltip
                         tooltipText="Fast, but not full-text searchable"

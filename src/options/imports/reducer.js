@@ -34,7 +34,7 @@ const defaultState = {
     },
     showDownloadDetails: false,
     blobUrl: null,
-    bookmarkImports: false,
+    bookmarkImports: true,
     indexTitle: false,
 }
 
