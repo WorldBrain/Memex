@@ -2,7 +2,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
-import { padShortTimestamp } from './utils'
+import { processTimestamp } from './utils'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
@@ -176,7 +176,7 @@ export default class ImportItemProcessor {
     async _processService(importItem, options: { indexTitle?: any } = {}) {
         const { url, title, tags, collections, annotations } = importItem
 
-        const timeAdded = padShortTimestamp(importItem.timeAdded)
+        const timeAdded = processTimestamp(importItem.timeAdded)
 
         await this.options.pages.indexPage({ fullUrl: importItem.url })
 
