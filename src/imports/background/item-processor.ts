@@ -183,12 +183,10 @@ export default class ImportItemProcessor {
 
         await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        if (options?.bookmarkImports) {
-            await this.options.bookmarks.storage.createBookmarkIfNeeded(
-                importItem.url,
-                timeAdded ?? Date.now(),
-            )
-        }
+        await this.options.bookmarks.storage.createBookmarkIfNeeded(
+            importItem.url,
+            timeAdded ?? Date.now(),
+        )
 
         await this._storeOtherData({ url, tags, collections, annotations })
 
