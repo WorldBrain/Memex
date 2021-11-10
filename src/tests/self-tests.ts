@@ -2,9 +2,10 @@ import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
-import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
+import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
 type CloudSendTest =
     | 'tag'
@@ -68,16 +69,14 @@ export function createSelfTests(options: {
     const ensureTestUser = async (email = 'test@test.com') => {
         const authService = backgroundModules.auth
             .authService as WorldbrainAuthService
-        if (!(await authService.getCurrentUser())) {
-            try {
-                await authService.firebase
-                    .auth()
-                    .signInWithEmailAndPassword(email, 'testing')
-            } catch (e) {
-                await authService.firebase
-                    .auth()
-                    .createUserWithEmailAndPassword(email, 'testing')
-            }
+        try {
+            await authService.firebase
+                .auth()
+                .signInWithEmailAndPassword(email, 'testing')
+        } catch (e) {
+            await authService.firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, 'testing')
         }
         const user = await authService.getCurrentUser()
         if (!user) {
@@ -282,12 +281,12 @@ export function createSelfTests(options: {
                 )
                 await backgroundModules.customLists.insertPageToList({
                     id: testListId1,
-                    url: normalizedTestPageUrl,
+                    url: testPageUrl,
                     skipPageIndexing: true,
                 })
                 await backgroundModules.customLists.insertPageToList({
                     id: testListId2,
-                    url: normalizedTestPageUrl,
+                    url: testPageUrl,
                     skipPageIndexing: true,
                 })
                 console.log(`Added 'https://www.getmemex.com' to 2 lists`)
@@ -381,26 +380,32 @@ export function createSelfTests(options: {
                 }
             }
 
+            const fullPdfUrl =
+                'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+            const normalizedPdfUrl = normalizeUrl(fullPdfUrl, {})
+            let primaryPdfIndentifier: ContentIdentifier
             if (shouldTest('pdf.online')) {
-                const fullPdfUrl =
-                    'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-                const normalizedPdfUrl = normalizeUrl(fullPdfUrl, {})
                 await backgroundModules.pages.indexPage({
                     fullUrl: fullPdfUrl,
                 })
+                primaryPdfIndentifier =
+                    backgroundModules.pages.contentInfo[normalizedPdfUrl]
+                        .primaryIdentifier
                 if (shouldTest('pdf.online.share')) {
                     await backgroundModules.customLists.insertPageToList({
                         id: testListId1,
-                        url: normalizedPdfUrl,
+                        url: primaryPdfIndentifier.fullUrl,
                         skipPageIndexing: true,
                     })
+                    console.log('Added PDF to shared list #1')
+
                     if (shouldTest('pdf.online.share.note')) {
                         const pdfAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
                             {
                                 tab: {} as any,
                             },
                             {
-                                pageUrl: normalizedPdfUrl,
+                                pageUrl: primaryPdfIndentifier.fullUrl,
                                 comment: 'Hi, this is a test comment',
                                 title: testPageTitle,
                                 createdWhen: new Date(),
@@ -423,6 +428,11 @@ export function createSelfTests(options: {
                             annotationUrl: pdfAnnotationUrl,
                             shareToLists: true,
                         })
+                        // await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+                        //     annotation: pdfAnnotationUrl,
+                        //     privacyLevel: AnnotationPrivacyLevels.SHARED,
+                        // })
+                        console.log('Shared PDF note to lists')
                     }
                 }
             }
@@ -439,7 +449,7 @@ export function createSelfTests(options: {
                         },
                     },
                 )
-                console.log({ sharedAnnotationEntries })
+                console.log('Incoming note', { sharedAnnotationEntries })
             }
 
             if (
@@ -447,6 +457,7 @@ export function createSelfTests(options: {
                     needsExplicitInclusion: true,
                 })
             ) {
+                backgroundModules.auth.authService.signOut()
                 await ensureTestUser('two@test.com')
                 await serverStorage.storageModules.activityFollows.storeFollow({
                     collection: 'sharedList',
@@ -458,6 +469,14 @@ export function createSelfTests(options: {
                         ).id,
                     },
                 })
+                console.log(
+                    await backgroundModules.customLists.fetchFollowedListsWithAnnotations(
+                        {
+                            normalizedPageUrl:
+                                primaryPdfIndentifier.normalizedUrl,
+                        },
+                    ),
+                )
             }
 
             if (shouldTest('lots-of-data', { needsExplicitInclusion: true })) {
@@ -493,6 +512,9 @@ export function createSelfTests(options: {
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.startSync()
+        },
+        ensureTestUser: async (email = 'test@test.com') => {
+            await ensureTestUser(email)
         },
     }
     return tests
