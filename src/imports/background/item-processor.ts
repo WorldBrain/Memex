@@ -173,10 +173,7 @@ export default class ImportItemProcessor {
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
-    async _processService(
-        importItem,
-        options: { indexTitle?: any; bookmarkImports?: any } = {},
-    ) {
+    async _processService(importItem, options: { indexTitle?: any } = {}) {
         const { url, title, tags, collections, annotations } = importItem
 
         const timeAdded = padShortTimestamp(importItem.timeAdded)

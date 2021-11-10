@@ -51,11 +51,9 @@ AdvSettings.propTypes = {
         [TYPE.BOOKMARK]: PropTypes.bool.isRequired,
         [TYPE.OTHERS]: PropTypes.string.isRequired,
     }).isRequired,
-    bookmarkImports: PropTypes.bool.isRequired,
     indexTitle: PropTypes.bool.isRequired,
     onPrevFailedToggle: PropTypes.func.isRequired,
     prevFailedValue: PropTypes.bool.isRequired,
-    onBookmarImportsToggle: PropTypes.func.isRequired,
     onIndexTitleToggle: PropTypes.func.isRequired,
 }
 
