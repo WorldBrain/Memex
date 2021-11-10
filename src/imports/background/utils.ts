@@ -25,14 +25,46 @@ export const padShortTimestamp = (timestamp: number) => {
 
     const difference = expectedLength - actualLength
 
-    if (difference === 0) {
-        return timestamp
-    }
-
     if (difference < 0) {
         throw new Error(`Invalid timestamp: ${timestamp}`)
     }
 
     const newTimestampStr = timestampStr + '0'.repeat(difference)
     return Number.parseInt(newTimestampStr, 10)
+}
+
+export const shaveLongTimestamp = (timestamp: number) => {
+    const timestampStr = timestamp.toString()
+    const expectedLength = Date.now().toString().length
+    const actualLength = timestampStr.length
+
+    const difference = expectedLength - actualLength
+
+    if (difference > 0) {
+        throw new Error(`Invalid timestamp: ${timestamp}`)
+    }
+
+    const newTimestampStr = timestampStr.slice(0, expectedLength)
+    return Number.parseInt(newTimestampStr, 10)
+}
+
+export const processTimestamp = (timestamp: number) => {
+    const timestampStr = timestamp.toString()
+    const expectedLength = Date.now().toString().length
+    const actualLength = timestampStr.length
+
+    const difference = expectedLength - actualLength
+
+    if (difference === 0) {
+        return timestamp
+    }
+
+    if (difference > 0) {
+        return padShortTimestamp(timestamp)
+    }
+
+    if (difference < 0) {
+        return shaveLongTimestamp(timestamp)
+    }
+    return timestamp
 }
