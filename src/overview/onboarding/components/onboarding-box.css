@@ -346,15 +346,16 @@
 
 .videoBox {
     margin-bottom: 30px;
-    height: 500px;
-    width: 50%;
+    height: 50vh;
+    width: 50vw;
+    min-width: 600px;
 }
 
-@media (max-width: 1300px) {
+/*@media (max-width: 1300px) {
     .videoBox {
         height: 400px;
     }
-}
+}*/
 
 .videoBox iframe {
     top: 0;
