@@ -67,7 +67,27 @@ const parseDescriptionList: RecursiveNetscapeParser = (
     return items
 }
 
-const parseNoFolders = (doc) => {
+const parseShallowList: ServiceParser = (doc) => {
+    // h1 are collection names, bookmarks are <a> elements, no nested collections
+    let items = []
+    const headers = doc.querySelectorAll('body > h1')
+    for (let header of headers) {
+        const collectionName =
+            header.textContent !== ''
+                ? header.textContent
+                : 'Imported Bookmarks'
+        const links = Array.from(
+            header.nextElementSibling.querySelectorAll('a'),
+        )
+        const newItems = links
+            .filter((link) => link.hasAttribute('href'))
+            .map((link) => parseNetscapeLink(link, collectionName))
+        items = items.concat(newItems)
+    }
+    return items
+}
+
+const parseNoFolders: ServiceParser = (doc) => {
     const links = Array.from(doc.getElementsByTagName('a'))
     const collectionName = 'Imported Bookmarks'
     const items: Item[] = links
@@ -76,13 +96,40 @@ const parseNoFolders = (doc) => {
     return items
 }
 
+const identifyService: (doc: Document) => string = (doc) => {
+    const title = doc.querySelector('title')
+    if (title) {
+        if (title.textContent.includes('Pocket')) {
+            return 'pocket'
+        } else if (title.textContent.includes('Raindrop.io')) {
+            return 'raindrop'
+        } else if (title.textContent.includes('Instapaper')) {
+            return 'instapaper' //same as pocket
+        } else if (title.textContent.includes('Bookmarks')) {
+            // Could be diigo or BookmarkOS, but they both work with parseDescriptionList
+            return 'bookmarks'
+        }
+    }
+    return 'netscape'
+}
 const parseNetscape: ServiceParser = (doc) => {
-    const isRaindrop = doc
-        .querySelector('title')
-        .innerText.includes('Raindrop.io')
-    return isRaindrop
-        ? parseDescriptionList(doc.querySelector('dl'), [], '')
-        : parseNoFolders(doc)
+    const serviceName = identifyService(doc)
+    switch (serviceName) {
+        case 'pocket':
+            return parseShallowList(doc)
+        case 'raindrop':
+            return parseDescriptionList(doc.querySelector('dl'), [], '')
+        case 'instapaper':
+            return parseShallowList(doc)
+        case 'diigo':
+            return parseNoFolders(doc)
+        case 'pinboard':
+            return parseNoFolders(doc)
+        case 'bookmarks':
+            return parseDescriptionList(doc.querySelector('dl'), [], '')
+        default:
+            return parseNoFolders(doc)
+    }
 }
 
 export default parseNetscape
