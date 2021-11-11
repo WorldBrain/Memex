@@ -351,11 +351,11 @@
     min-width: 600px;
 }
 
-/*@media (max-width: 1300px) {
+/* @media (max-width: 1300px) {
     .videoBox {
         height: 400px;
     }
-}*/
+} */
 
 .videoBox iframe {
     top: 0;
