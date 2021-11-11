@@ -36,10 +36,14 @@ const parseDescriptionList: RecursiveNetscapeParser = (
     if (element.tagName === 'DT') {
         if (['H3', 'H2', 'H1'].includes(element.children[0].tagName)) {
             // if dt contains a h3 element, it is a collection name, get it.
+            const subCollectionName =
+                element.children[0].textContent !== ''
+                    ? element.children[0].textContent
+                    : 'Imported Bookmarks'
             const collectionName =
                 parentCollectionName !== ''
-                    ? `${parentCollectionName} > ${element.children[0].textContent}`
-                    : element.children[0].textContent
+                    ? `${parentCollectionName} > ${subCollectionName}`
+                    : subCollectionName
             // if a dl element follows h3, it is a sub-collection, get sub-collection names
             if (element.children[1].tagName === 'DL') {
                 return parseDescriptionList(
@@ -105,6 +109,8 @@ const identifyService: (doc: Document) => string = (doc) => {
             return 'raindrop'
         } else if (title.textContent.includes('Instapaper')) {
             return 'instapaper' //same as pocket
+        } else if (title.textContent.includes('Pinboard')) {
+            return 'pinboard' //same as pocket
         } else if (title.textContent.includes('Bookmarks')) {
             // Could be diigo or BookmarkOS, but they both work with parseDescriptionList
             return 'bookmarks'
