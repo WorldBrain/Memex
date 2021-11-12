@@ -90,7 +90,7 @@
 .leftTutorial {
     &.tooltipContent {
         width: 420px;
-        height: 60vh;
+        height: 50vh;
         overflow-y: scroll;
         overflow-x: hidden;
     }
