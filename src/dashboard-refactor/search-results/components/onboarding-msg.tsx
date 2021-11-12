@@ -13,19 +13,14 @@ export default class OnboardingMsg extends React.PureComponent<Props> {
                 <Container>
                     <Description>
                         <span>
-                            <u onClick={this.props.goToImportRoute}>Import</u>{' '}
-                            your bookmarks or{' '}
-                            <u
-                                onClick={() =>
-                                    window.open(
-                                        'https://worldbrain.io/tutorials',
-                                    )
-                                }
-                            >
-                                learn
-                            </u>{' '}
-                            how to use Memex
+                            Want to{' '}
+                            <u onClick={this.props.goToImportRoute}>import</u>{' '}
+                            your bookmarks?
                         </span>
+                        <BookmarkingProviders
+                            onClick={this.props.goToImportRoute}
+                            src={'img/bookmarking-providers.svg'}
+                        />
                     </Description>
                 </Container>
             </>
@@ -43,11 +38,26 @@ const Container = styled.div`
     margin-top: -10px;
 `
 
+const BookmarkingProviders = styled.img`
+    height: 150px;
+    display: flex;
+    position: relative;
+    margin-top: 10px;
+    cursor: pointer;
+`
+
 const Description = styled.div`
     font-size: 16px;
     font-weight: normal;
-    width: 75%;
+    margin-top: 30px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    & u {
+        cursor: pointer;
+    }
 `
 
 const CTABtn = styled.button`

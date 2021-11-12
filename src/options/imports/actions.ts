@@ -39,9 +39,6 @@ export const resumeImport = createAction('imports/resumeImport')
 // Adv settings mode actions
 export const setConcurrency = createAction('imports-adv/setConcurrency')
 export const setProcessErrs = createAction('imports-adv/setProcessErrs')
-export const toggleBookmarkImports = createAction(
-    'imports-adv/toggleBookmarkImports',
-)
 export const toggleIndexTitle = createAction('imports-adv/toggleIndexTitle')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
@@ -115,7 +112,6 @@ export const recalcEsts = () => (dispatch, getState) => {
         payload: {
             allowTypes: selectors.allowTypes(state),
             options: {
-                bookmarkImports: selectors.bookmarkImports(state),
                 indexTitle: selectors.indexTitle(state),
             },
             blobUrl: selectors.blobUrl(state),
@@ -219,7 +215,6 @@ export const start = () => (dispatch, getState) => {
         payload: {
             allowTypes,
             options: {
-                bookmarkImports: selectors.bookmarkImports(state),
                 indexTitle: selectors.indexTitle(state),
             },
             blobUrl: selectors.blobUrl(state),

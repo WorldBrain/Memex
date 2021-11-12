@@ -18,7 +18,28 @@ export const loadBlob = ({
     })
 }
 
-export const padShortTimestamp = (timestamp: number) => {
+const padShortTimestamp = (timestamp: number) => {
+    // assuming input is correct (shorter than expected)
+    const timestampStr = timestamp.toString()
+    const expectedLength = Date.now().toString().length
+    const actualLength = timestampStr.length
+
+    const difference = expectedLength - actualLength
+
+    const newTimestampStr = timestampStr + '0'.repeat(difference)
+    return Number.parseInt(newTimestampStr, 10)
+}
+
+const shaveLongTimestamp = (timestamp: number) => {
+    // assuming input is correct (longer than expected)
+    const timestampStr = timestamp.toString()
+    const expectedLength = Date.now().toString().length
+
+    const newTimestampStr = timestampStr.slice(0, expectedLength)
+    return Number.parseInt(newTimestampStr, 10)
+}
+
+export const normalizeTimestamp = (timestamp: number) => {
     const timestampStr = timestamp.toString()
     const expectedLength = Date.now().toString().length
     const actualLength = timestampStr.length
@@ -29,10 +50,12 @@ export const padShortTimestamp = (timestamp: number) => {
         return timestamp
     }
 
-    if (difference < 0) {
-        throw new Error(`Invalid timestamp: ${timestamp}`)
+    if (difference > 0) {
+        return padShortTimestamp(timestamp)
     }
 
-    const newTimestampStr = timestampStr + '0'.repeat(difference)
-    return Number.parseInt(newTimestampStr, 10)
+    if (difference < 0) {
+        return shaveLongTimestamp(timestamp)
+    }
+    return timestamp
 }
