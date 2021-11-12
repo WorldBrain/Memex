@@ -13,7 +13,7 @@ const Results = (props) => {
         <>
             <UpdateNotifBanner
                 theme={{
-                    width: '405px',
+                    width: props.position === 'side' && '410px',
                     position: 'relative',
                     iconSize: '20px',
                 }}
@@ -24,6 +24,8 @@ const Results = (props) => {
                     styles[searchEngineClass],
                     {
                         [styles.MEMEX_CONTAINER_SMALL]: props.hideResults,
+                        [styles.MEMEX_CONTAINER_SIDE]:
+                            props.position === 'side',
                     },
                 )}
             >
