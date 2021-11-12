@@ -69,6 +69,85 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
+                        type="checkbox"
+                        name="pocket"
+                        id="pocket"
+                        handleChange={onAllowPocketClick}
+                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
+                    >
+                        <div className={localStyles.labelContainer}>
+                            <span className={localStyles.checkboxText}>
+                                Pocket
+                            </span>
+                        </div>
+                    </Checkbox>
+                </td>
+                {!isLoading && blobUrl === null && (
+                    <td colSpan="3">
+                        <div className={localStyles.uploaderBox}>
+                            <label
+                                className={classNames(localStyles.selectFile, {
+                                    [localStyles.hidden]:
+                                        allowTypes[TYPE.OTHERS] !==
+                                        SERVICES.POCKET,
+                                })}
+                                htmlFor="file-upload"
+                            >
+                                Select export file
+                            </label>
+                            <input
+                                type="file"
+                                name="file-upload"
+                                id="file-upload"
+                                onChange={onInputImport}
+                                disabled={
+                                    allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
+                                }
+                            />{' '}
+                            <ButtonTooltip
+                                tooltipText="How can I get that file?"
+                                position="right"
+                            >
+                                <a
+                                    href="https://worldbrain.io/tutorials/importing"
+                                    taget="_blank"
+                                >
+                                    <span
+                                        className={classNames(
+                                            localStyles.tutorial,
+                                            {
+                                                [localStyles.hidden]:
+                                                    allowTypes[TYPE.OTHERS] !==
+                                                    SERVICES.POCKET,
+                                            },
+                                        )}
+                                    />
+                                </a>
+                            </ButtonTooltip>
+                        </div>
+                    </td>
+                )}
+                {isLoading && allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
+                    <td colSpan="3">
+                        <LoadingIndicator />
+                    </td>
+                )}
+                {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
+                    estimates[TYPE.OTHERS].remaining > 0 &&
+                    blobUrl !== null && (
+                        <React.Fragment>
+                            <td>{estimates[TYPE.OTHERS].complete}</td>
+                            <td>{estimates[TYPE.OTHERS].remaining}</td>
+                            <td>
+                                {'~'}
+                                {estimates[TYPE.OTHERS].timeRemaining}
+                            </td>
+                        </React.Fragment>
+                    )}
+            </tr>
+            <tr className={localStyles.importTableRow}>
+                <td>
+                    <Checkbox
                         name="html"
                         id="html"
                         isChecked={

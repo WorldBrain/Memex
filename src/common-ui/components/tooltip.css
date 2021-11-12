@@ -87,20 +87,6 @@
     }
 }
 
-.leftTutorial {
-    &.tooltipContent {
-        width: 420px;
-        height: 50vh;
-        overflow-y: scroll;
-        overflow-x: hidden;
-    }
-
-    &.tooltipBubble {
-        right: 30px;
-        top: -20px;
-    }
-}
-
 .tooltipBottomLeft {
     right: -150px;
     z-index: 1;

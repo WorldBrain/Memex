@@ -139,7 +139,7 @@ export default class ListsSidebarGroup extends PureComponent<
                                 >
                                     <Margin horizontal="8px">
                                         <Icon
-                                            heightAndWidth="12px"
+                                            heightAndWidth="8px"
                                             path={icons.plus}
                                         />
                                     </Margin>

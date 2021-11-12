@@ -34,8 +34,6 @@ import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalExtensionSettings } from './types'
 import type { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
-import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 interface Dependencies {
     storageManager: Storex
@@ -139,11 +137,9 @@ class BackgroundScript {
             switch (details.reason) {
                 case 'install':
                     await this.handleUnifiedLogic()
-                    await setLocalStorage(READ_STORAGE_FLAG, true)
                     return this.handleInstallLogic()
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
-                    await setLocalStorage(READ_STORAGE_FLAG, false)
                     return this.handleUnifiedLogic()
                 default:
             }

@@ -37,7 +37,7 @@ export interface RibbonContainerState {
     loadState: TaskState
     isRibbonEnabled: boolean | null
     areExtraButtonsShown: boolean
-    areTutorialShown: boolean
+
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
@@ -56,7 +56,6 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
-        toggleShowTutorial: null
         hydrateStateFromDB: { url: string }
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
@@ -116,7 +115,6 @@ export class RibbonContainerLogic extends UILogic<
             pageUrl: this.dependencies.getPageUrl(),
             loadState: 'pristine',
             areExtraButtonsShown: false,
-            areTutorialShown: false,
             isRibbonEnabled: null,
             highlights: {
                 areHighlightsEnabled: false,
@@ -231,27 +229,9 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         const mutation: UIMutation<RibbonContainerState> = {
             areExtraButtonsShown: { $set: !previousState.areExtraButtonsShown },
-            areTutorialShown: { $set: false },
         }
 
         if (!previousState.areExtraButtonsShown) {
-            mutation.commentBox = { showCommentBox: { $set: false } }
-            mutation.tagging = { showTagsPicker: { $set: false } }
-            mutation.lists = { showListsPicker: { $set: false } }
-        }
-
-        this.emitMutation(mutation)
-    }
-
-    toggleShowTutorial: EventHandler<'toggleShowTutorial'> = ({
-        previousState,
-    }) => {
-        const mutation: UIMutation<RibbonContainerState> = {
-            areTutorialShown: { $set: !previousState.areTutorialShown },
-            areExtraButtonsShown: { $set: false },
-        }
-
-        if (!previousState.areTutorialShown) {
             mutation.commentBox = { showCommentBox: { $set: false } }
             mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
@@ -317,7 +297,6 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
-                      areTutorialShown: { $set: false },
                   }
                 : {}
 
@@ -408,7 +387,6 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
-                      areTutorialShown: { $set: false },
                   }
                 : {}
 
@@ -509,7 +487,6 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
-                      areTutorialShown: { $set: false },
                   }
                 : {}
 
@@ -527,7 +504,6 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       areExtraButtonsShown: { $set: false },
-                      areTutorialShown: { $set: false },
                   }
                 : {}
 

@@ -34,6 +34,7 @@ const defaultState = {
     },
     showDownloadDetails: false,
     blobUrl: null,
+    bookmarkImports: false,
     indexTitle: false,
 }
 
@@ -186,6 +187,10 @@ export default createReducer(
         [actions.setBlobUrl]: (state, blobUrl) => ({
             ...state,
             blobUrl,
+        }),
+        [actions.toggleBookmarkImports]: (state) => ({
+            ...state,
+            bookmarkImports: !state.bookmarkImports,
         }),
         [actions.toggleIndexTitle]: (state) => ({
             ...state,

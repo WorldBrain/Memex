@@ -2,7 +2,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
-import { normalizeTimestamp } from './utils'
+import { padShortTimestamp } from './utils'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
@@ -149,58 +149,46 @@ export default class ImportItemProcessor {
     }
 
     /**
-     * Handles processing of a bookmark import item. Checks for exisitng page docs that have the same URL.
+     * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
      *
      * @param {IImportItem} importItemDoc
      * @returns {any} Status string denoting the outcome of import processing as `status`
      *  + optional filled-out page doc as `pageDoc` field.
      */
-    async _processBookmark(importItem, options: { indexTitle?: any } = {}) {
-        const { url, title, tags, collections, annotations } = importItem
-
-        const timeAdded = normalizeTimestamp(importItem.timeAdded)
+    async _processHistory(importItem, options: { indexTitle?: any } = {}) {
+        if (!options.indexTitle) {
+            await checkVisitItemTransitionTypes(importItem)
+        }
 
         await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        await this.options.bookmarks.storage.createBookmarkIfNeeded(
-            importItem.url,
-            timeAdded ?? Date.now(),
-        )
+        if (importItem.type === IMPORT_TYPE.BOOKMARK) {
+            await this.options.bookmarks.storage.createBookmarkIfNeeded(
+                importItem.url,
+                await getBookmarkTime(importItem),
+            )
+        }
 
-        await this._storeOtherData({ url, tags, collections, annotations })
-
-        this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
-    async _processBookmarkWithTags(
+    async _processService(
         importItem,
-        options: { indexTitle?: any } = {},
+        options: { indexTitle?: any; bookmarkImports?: any } = {},
     ) {
-        const status = this._processBookmark(importItem, options)
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-
-        await setLocalStorage(TAG_SUGGESTIONS_KEY, [
-            ...new Set([...tagSuggestions, ...importItem.tags]),
-        ])
-
-        this._checkCancelled()
-        // If we finally got here without an error being thrown, return the success status message + pageDoc data
-        return status
-    }
-
-    async _processService(importItem, options: { indexTitle?: any } = {}) {
         const { url, title, tags, collections, annotations } = importItem
 
-        const timeAdded = normalizeTimestamp(importItem.timeAdded)
+        const timeAdded = padShortTimestamp(importItem.timeAdded)
 
         await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        await this.options.bookmarks.storage.createBookmarkIfNeeded(
-            importItem.url,
-            timeAdded ?? Date.now(),
-        )
+        if (options?.bookmarkImports) {
+            await this.options.bookmarks.storage.createBookmarkIfNeeded(
+                importItem.url,
+                timeAdded ?? Date.now(),
+            )
+        }
 
         await this._storeOtherData({ url, tags, collections, annotations })
 
@@ -228,7 +216,8 @@ export default class ImportItemProcessor {
 
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
-                return this._processBookmark(importItem, options)
+            case IMPORT_TYPE.HISTORY:
+                return this._processHistory(importItem, options)
             case IMPORT_TYPE.OTHERS:
                 return this._processService(importItem, options)
             default:

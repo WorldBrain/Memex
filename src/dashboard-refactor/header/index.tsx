@@ -142,6 +142,9 @@ export default class Header extends PureComponent<HeaderProps> {
                             hoverState={this.props.sidebarToggleHoverState}
                         />
                     </SidebarToggleBox>
+                    {selectedList && (
+                        <CollectionTitle>{selectedList}</CollectionTitle>
+                    )}
                 </SidebarHeaderContainer>
                 <SearchSection vertical="auto" horizontal="17px">
                     <SearchBar {...searchBarProps} />

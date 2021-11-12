@@ -60,6 +60,10 @@ export const processErrors = createSelector(
     imports,
     (state) => state.processErrors,
 )
+export const bookmarkImports = createSelector(
+    imports,
+    (state) => state.bookmarkImports,
+)
 export const indexTitle = createSelector(imports, (state) => state.indexTitle)
 
 const getImportStatusFlag = (status) =>

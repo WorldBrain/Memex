@@ -120,7 +120,6 @@ const BtnsContainer = styled.div`
     display: flex;
     align-items: center;
     padding-top: 5px;
-    z-index: 100;
 `
 
 const Name = styled.div`

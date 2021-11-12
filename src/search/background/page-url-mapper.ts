@@ -4,7 +4,7 @@ import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
 import type { AnnotPage } from './types'
-import type { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotationPrivacyLevel } from 'src/annotations/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { User, SocialPage } from 'src/social-integration/types'
 import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
@@ -13,7 +13,6 @@ import {
     derivePostUrlIdProps,
     buildTweetUrl,
 } from 'src/social-integration/util'
-import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
