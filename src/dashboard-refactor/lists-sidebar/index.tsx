@@ -249,34 +249,39 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             bookmark folders
                                         </NoCollectionsMessage>
                                     ) : (
-                                        this.renderLists(group.listsArray, true)
-                                    )}
-                                    {group.title === 'Followed collections' &&
-                                    group.listsArray.length === 0 ? (
-                                        <NoCollectionsMessage>
-                                            <u
-                                                onClick={() =>
-                                                    window.open(
-                                                        'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
-                                                    )
-                                                }
-                                            >
-                                                Collaborate
-                                            </u>{' '}
-                                            with friends or{' '}
-                                            <u
-                                                onClick={() =>
-                                                    window.open(
-                                                        'https://memex.social/c/oiLz5UIXw9JXermqZmXW',
-                                                    )
-                                                }
-                                            >
-                                                follow
-                                            </u>{' '}
-                                            your first collection.
-                                        </NoCollectionsMessage>
-                                    ) : (
-                                        this.renderLists(group.listsArray, true)
+                                        <>
+                                            {group.title ===
+                                                'Followed collections' &&
+                                            group.listsArray.length === 0 ? (
+                                                <NoCollectionsMessage>
+                                                    <u
+                                                        onClick={() =>
+                                                            window.open(
+                                                                'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
+                                                            )
+                                                        }
+                                                    >
+                                                        Collaborate
+                                                    </u>{' '}
+                                                    with friends or{' '}
+                                                    <u
+                                                        onClick={() =>
+                                                            window.open(
+                                                                'https://memex.social/c/oiLz5UIXw9JXermqZmXW',
+                                                            )
+                                                        }
+                                                    >
+                                                        follow
+                                                    </u>{' '}
+                                                    your first collection.
+                                                </NoCollectionsMessage>
+                                            ) : (
+                                                this.renderLists(
+                                                    group.listsArray,
+                                                    true,
+                                                )
+                                            )}
+                                        </>
                                     )}
                                 </ListsSidebarGroup>
                             </Margin>
