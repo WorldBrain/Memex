@@ -17,7 +17,6 @@
     flex-direction: column;
     border-bottom: #dedede solid 1px;
     margin-bottom: 20px;
-    margin-right: 20px;
     background: #fff;
     padding: 0px 5px 20px 5px;
 }
@@ -35,6 +34,11 @@
     & .header {
         border: none;
     }
+}
+
+.MEMEX_CONTAINER_SIDE {
+    margin-right: 0px;
+    width: 440px;
 }
 
 .resultLength {
