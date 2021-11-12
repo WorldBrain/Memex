@@ -1,6 +1,5 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
@@ -61,16 +60,6 @@ export interface ContentSharingInterface
     }): Promise<{ [listId: number]: boolean }>
     waitForSync(): Promise<void>
     executePendingActions(): Promise<void>
-    findAnnotationPrivacyLevels(params: {
-        annotationUrls: string[]
-    }): Promise<{
-        [annotationUrl: string]: AnnotationPrivacyLevels
-    }>
-    setAnnotationPrivacyLevel(params: {
-        annotation: string
-        privacyLevel: AnnotationPrivacyLevels
-    }): Promise<void>
-    deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
 }
 
 export interface ContentSharingEvents {

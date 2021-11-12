@@ -39,7 +39,7 @@ export const createAnnotationsCache = (
                 )
 
                 const annotationUrls = annotations.map((a) => a.url)
-                const privacyLevels = await bgModules.contentSharing.findAnnotationPrivacyLevels(
+                const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
                     {
                         annotationUrls,
                     },

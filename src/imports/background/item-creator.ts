@@ -11,6 +11,8 @@ const deriveImportItem = (type) => (item) => ({
     browserId: item.id,
     url: item.url,
     title: item.title,
+    collections: item.collections,
+    timeAdded: item.dateAdded,
     type,
 })
 
@@ -206,7 +208,6 @@ export default class ImportItemCreator {
             if (!data.size) {
                 continue
             }
-
             yield { data, type }
         }
     }

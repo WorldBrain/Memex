@@ -895,7 +895,7 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
-            await contentSharing.setAnnotationPrivacyLevel({
+            await directLinking.setAnnotationPrivacyLevel(undefined, {
                 annotation: annotationUrl2,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })

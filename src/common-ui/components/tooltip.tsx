@@ -37,6 +37,8 @@ class Tooltip extends React.PureComponent<Props> {
                                 this.props.position === 'bottomLeft',
                             [styles.inPageTooltip]:
                                 this.props.position === 'inpage',
+                            [styles.leftTutorial]:
+                                this.props.position === 'leftTutorial',
                         },
                     )}
                 >
@@ -46,6 +48,8 @@ class Tooltip extends React.PureComponent<Props> {
                                 this.props.position === 'tooltipDate',
                             [styles.leftSmallWidth]:
                                 this.props.position === 'leftSmallWidth',
+                            [styles.leftTutorial]:
+                                this.props.position === 'leftTutorial',
                         })}
                     >
                         {this.props.children}
