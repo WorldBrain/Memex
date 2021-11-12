@@ -76,6 +76,16 @@ const BottomGroup = styled.div`
     padding-bottom: 100px;
 `
 
+const NoCollectionsMessage = styled.div`
+    font-size: 12px;
+    color: #3a2f45;
+    padding: 5px 18px 10px 18px;
+
+    & u {
+        cursor: pointer;
+    }
+`
+
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
@@ -112,6 +122,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             ),
         )
 
+    private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
+        window.location.hash = '#/' + route
+    }
+
     render() {
         const {
             lockedState: { isSidebarLocked },
@@ -120,6 +134,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             searchBarProps,
             listsGroups,
         } = this.props
+        console.log(listsGroups)
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
@@ -217,7 +232,52 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             errorMessage={addListErrorMessage}
                                         />
                                     )}
-                                    {this.renderLists(group.listsArray, true)}
+                                    {group.title === 'My collections' &&
+                                    group.listsArray.length === 0 ? (
+                                        <NoCollectionsMessage>
+                                            <strong>
+                                                No saved collections
+                                            </strong>{' '}
+                                            <br />
+                                            <u
+                                                onClick={this.bindRouteGoTo(
+                                                    'import',
+                                                )}
+                                            >
+                                                Import
+                                            </u>{' '}
+                                            bookmark folders
+                                        </NoCollectionsMessage>
+                                    ) : (
+                                        this.renderLists(group.listsArray, true)
+                                    )}
+                                    {group.title === 'Followed collections' &&
+                                    group.listsArray.length === 0 ? (
+                                        <NoCollectionsMessage>
+                                            <u
+                                                onClick={() =>
+                                                    window.open(
+                                                        'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
+                                                    )
+                                                }
+                                            >
+                                                Collaborate
+                                            </u>{' '}
+                                            with friends or{' '}
+                                            <u
+                                                onClick={() =>
+                                                    window.open(
+                                                        'https://memex.social/c/oiLz5UIXw9JXermqZmXW',
+                                                    )
+                                                }
+                                            >
+                                                follow
+                                            </u>{' '}
+                                            your first collection.
+                                        </NoCollectionsMessage>
+                                    ) : (
+                                        this.renderLists(group.listsArray, true)
+                                    )}
                                 </ListsSidebarGroup>
                             </Margin>
                         ))}
