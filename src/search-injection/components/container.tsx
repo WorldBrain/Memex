@@ -364,17 +364,16 @@ class Container extends React.Component<Props, State> {
                     <CloudUpgradeBanner
                         onGetStartedClick={() => this.openOverviewRPC()}
                         direction="column"
-                        width="415px"
+                        width={this.state.position === 'side' && '420px'}
                     />
                 )}
-                {this.state.isSubscriptionBannerShown && (
+                {/* {this.state.isSubscriptionBannerShown && (
                     <PioneerPlanBanner
                         onHideClick={this.handleSubBannerDismiss}
                         direction="column"
                         showCloseButton={true}
-                        width="415px"
                     />
-                )}
+                )} */}
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}

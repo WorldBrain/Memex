@@ -25,3 +25,8 @@ export interface Item {
 }
 
 export type ServiceParser = (doc: Document) => Item[]
+export type RecursiveNetscapeParser = (
+    element: Element,
+    items: Item[],
+    parentCollectionName: string,
+) => Item[]

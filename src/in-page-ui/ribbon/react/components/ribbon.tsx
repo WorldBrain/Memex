@@ -14,6 +14,7 @@ import type {
     BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
+import TutorialPanel from './tutorial-panel'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -32,7 +33,9 @@ export interface Props extends RibbonSubcomponentProps {
     isRibbonEnabled: boolean
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
+    showTutorial: boolean
     toggleShowExtraButtons: () => void
+    toggleShowTutorial: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
     getUrl: () => string
@@ -120,6 +123,34 @@ export default class Ribbon extends Component<Props, State> {
             : source
     }
 
+    private shortCutEnabled(name: string): string {
+        const short: Shortcut = this.keyboardShortcuts[name]
+        console.log(short)
+
+        if (short.enabled !== true) {
+            return 'disabled'
+        }
+    }
+
+    private getOnlyShortcut(name: string): string {
+        const elData = this.shortcutsData.get(name)
+        const short: Shortcut = this.keyboardShortcuts[name]
+
+        if (!elData) {
+            return ''
+        }
+
+        let source = elData.tooltip
+
+        if (['createBookmark', 'toggleSidebar'].includes(name)) {
+            source = this.props.bookmark.isBookmarked
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+
+        return `${short.shortcut}`
+    }
+
     private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
     private hideListPicker = () => this.props.lists.setShowListsPicker(false)
 
@@ -172,6 +203,306 @@ export default class Ribbon extends Component<Props, State> {
                     />
                 </BlurredSidebarOverlay>
             </Tooltip>
+        )
+    }
+
+    private renderTutorial() {
+        if (!this.props.showTutorial) {
+            return
+        }
+
+        return (
+            <BlurredSidebarOverlay
+                onOutsideClick={() => this.props.toggleShowTutorial()}
+                skipRendering={!this.props.sidebar.isSidebarOpen}
+            >
+                <TutorialPanel
+                    closePanel={() => this.props.toggleShowTutorial()}
+                >
+                    <div className={styles.Section}>
+                        <div className={styles.SectionTitle}>
+                            Keyboard Shortcuts{' '}
+                            <span
+                                onClick={() =>
+                                    this.openOptionsTabRPC('settings')
+                                }
+                                className={styles.actionButton}
+                            >
+                                Edit Shortcuts
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Save current page
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'createBookmark',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('createBookmark')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Highlight selected text
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'createHighlight',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('createHighlight')} <br />{' '}
+                                <span className={styles.shiftShare}>
+                                    (+shift to share)
+                                </span>
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Add note to selected text
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'createAnnotation',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('createAnnotation')}{' '}
+                                <br />{' '}
+                                <span className={styles.shiftShare}>
+                                    (+shift to share)
+                                </span>
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Add note to page
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled('addComment') ===
+                                        'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('addComment')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Search pages and annotations
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'openDashboard',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('openDashboard')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Add tag(s) to page
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled('addTag') ===
+                                        'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('addTag')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Add page to collection
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'addToCollection',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('addToCollection')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Toggle sidebar
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'toggleSidebar',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('toggleSidebar')}
+                            </span>
+                        </div>
+                        <div className={styles.KeyboardShortcutsBlock}>
+                            <span className={styles.KeyboardShortcutsTitle}>
+                                Toggle highlights on page
+                            </span>
+                            <span
+                                className={cx(styles.KeyboardShortcutKeys, {
+                                    [styles.disabled]:
+                                        this.shortCutEnabled(
+                                            'toggleHighlights',
+                                        ) === 'disabled',
+                                })}
+                            >
+                                {this.getOnlyShortcut('toggleHighlights')}
+                            </span>
+                        </div>
+                    </div>
+                    <div className={styles.Section}>
+                        <div className={styles.SectionTitle}>
+                            Advanced Workflows{' '}
+                            <span
+                                onClick={() =>
+                                    window.open(
+                                        'https://memex.garden/tutorials',
+                                    )
+                                }
+                                className={styles.actionButton}
+                            >
+                                View All Tutorials
+                            </span>
+                        </div>
+                        <div
+                            className={styles.TutorialBlock}
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
+                                )
+                            }
+                        >
+                            <span className={styles.TutorialTitle}>
+                                Sharing collections, annotated pages and
+                                highlights
+                            </span>
+                        </div>
+                        <div
+                            className={styles.TutorialBlock}
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/organise-or-tag-all-open-tabs',
+                                )
+                            }
+                        >
+                            <span className={styles.TutorialTitle}>
+                                Organise or Tag all open tabs
+                            </span>
+                        </div>
+                        <div
+                            className={styles.TutorialBlock}
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/importing-to-memex-from-other-services',
+                                )
+                            }
+                        >
+                            <span className={styles.TutorialTitle}>
+                                Importing to Memex from other services
+                            </span>
+                        </div>
+                        <div
+                            className={styles.TutorialBlock}
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/export-your-data-locally-to-any-cloud-provider',
+                                )
+                            }
+                        >
+                            <span className={styles.TutorialTitle}>
+                                Export your data locally & to any cloud provider
+                            </span>
+                        </div>
+                        <div
+                            className={styles.TutorialBlock}
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/text-export-templates',
+                                )
+                            }
+                        >
+                            <span className={styles.TutorialTitle}>
+                                Text Export Templates
+                            </span>
+                        </div>
+                        <div className={styles.Section}>
+                            <div className={styles.SectionTitle}>
+                                Getting Support
+                            </div>
+                            <div
+                                className={styles.TutorialBlock}
+                                onClick={() =>
+                                    window.open(
+                                        'https://links.memex.garden/onboarding',
+                                    )
+                                }
+                            >
+                                <span className={styles.TutorialTitle}>
+                                    ☎️ Book Onboarding Call
+                                </span>
+                            </div>
+                            <div
+                                className={styles.TutorialBlock}
+                                onClick={() =>
+                                    window.open(
+                                        'https://links.memex.garden/chat',
+                                    )
+                                }
+                            >
+                                <span className={styles.TutorialTitle}>
+                                    💬 Chat with us
+                                </span>
+                            </div>
+                            <div
+                                className={styles.TutorialBlock}
+                                onClick={() =>
+                                    window.open(
+                                        'https://community.memex.garden',
+                                    )
+                                }
+                            >
+                                <span className={styles.TutorialTitle}>
+                                    ✍🏽 Visit Forum
+                                </span>
+                            </div>
+                            <div
+                                className={styles.TutorialBlock}
+                                onClick={() =>
+                                    window.open(
+                                        'https://links.memex.garden/announcements/pioneer-plan',
+                                    )
+                                }
+                            >
+                                <span className={styles.TutorialTitle}>
+                                    💸 Get an early bird discount
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </TutorialPanel>
+            </BlurredSidebarOverlay>
         )
     }
 
@@ -560,6 +891,7 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 {this.renderCollectionsPicker()}
+                                <div className={styles.horizontalLine} />
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="leftNarrow"
@@ -573,12 +905,31 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.toggleShowExtraButtons()
                                         }
                                     />
-                                    {this.props.showExtraButtons && (
-                                        <Tooltip position="leftSmallWidth">
-                                            {this.renderExtraButtons()}
-                                        </Tooltip>
-                                    )}
                                 </ButtonTooltip>
+                                {this.props.showExtraButtons && (
+                                    <Tooltip position="leftSmallWidth">
+                                        {this.renderExtraButtons()}
+                                    </Tooltip>
+                                )}
+                                <ButtonTooltip
+                                    tooltipText="Quick Tutorial & Help"
+                                    position="leftNarrow"
+                                >
+                                    <div
+                                        className={cx(
+                                            styles.button,
+                                            styles.help,
+                                        )}
+                                        onClick={() =>
+                                            this.props.toggleShowTutorial()
+                                        }
+                                    />
+                                </ButtonTooltip>
+                                {this.props.showTutorial && (
+                                    <Tooltip position="leftTutorial">
+                                        {this.renderTutorial()}
+                                    </Tooltip>
+                                )}
                             </div>
                             {/*
                             <div className={styles.settingsActions}>
