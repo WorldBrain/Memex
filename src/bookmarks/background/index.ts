@@ -1,7 +1,6 @@
 import { Tabs, Browser, Bookmarks } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
-
 import { TabManager } from 'src/tab-management/background/tab-manager'
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
@@ -10,6 +9,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { pageIsStub } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
+import checkBrowser from '../../util/check-browser'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -32,6 +32,11 @@ export default class BookmarksBackground {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
+        }
+    }
+    get ROOT_BM() {
+        return {
+            id: checkBrowser() === 'firefox' ? '' : '0',
         }
     }
 
@@ -129,6 +134,25 @@ export default class BookmarksBackground {
         }
     }
 
+    async getBookmarkCollectionName(parentId: string) {
+        // call browser.bookmark.get(id) with parent id until we get to the root which has id "0"
+        // format collection name as "dir1 > ... > dirN"
+        // Unused for now but will be useful in the future
+        let collectionName = ''
+        let currentId = parentId
+        while (currentId !== this.ROOT_BM.id) {
+            const dir = (
+                await this.options.browserAPIs.bookmarks.get(currentId)
+            )[0]
+            collectionName =
+                collectionName === ''
+                    ? dir.title
+                    : dir.title + ' > ' + collectionName
+            currentId = dir.parentId
+        }
+        return collectionName
+    }
+
     async handleBookmarkCreation(id: string, node: Bookmarks.BookmarkTreeNode) {
         // Created folders won't have `url`; ignore these
         if (!node.url) {
@@ -141,7 +165,9 @@ export default class BookmarksBackground {
         if (activeTab != null && activeTab.url === node.url) {
             tabId = activeTab.id
         }
-
-        return this.addPageBookmark({ fullUrl: node.url, tabId })
+        return this.addPageBookmark({
+            fullUrl: node.url,
+            tabId,
+        })
     }
 }
