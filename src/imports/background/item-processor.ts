@@ -149,28 +149,45 @@ export default class ImportItemProcessor {
     }
 
     /**
-     * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
+     * Handles processing of a bookmark import item. Checks for exisitng page docs that have the same URL.
      *
      * @param {IImportItem} importItemDoc
      * @returns {any} Status string denoting the outcome of import processing as `status`
      *  + optional filled-out page doc as `pageDoc` field.
      */
-    async _processHistory(importItem, options: { indexTitle?: any } = {}) {
-        if (!options.indexTitle) {
-            await checkVisitItemTransitionTypes(importItem)
-        }
+    async _processBookmark(importItem, options: { indexTitle?: any } = {}) {
+        const { url, title, tags, collections, annotations } = importItem
+
+        const timeAdded = normalizeTimestamp(importItem.timeAdded)
 
         await this.options.pages.indexPage({ fullUrl: importItem.url })
 
-        if (importItem.type === IMPORT_TYPE.BOOKMARK) {
-            await this.options.bookmarks.storage.createBookmarkIfNeeded(
-                importItem.url,
-                await getBookmarkTime(importItem),
-            )
-        }
+        await this.options.bookmarks.storage.createBookmarkIfNeeded(
+            importItem.url,
+            timeAdded ?? Date.now(),
+        )
 
+        await this._storeOtherData({ url, tags, collections, annotations })
+
+        this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
         return { status: DOWNLOAD_STATUS.SUCC }
+    }
+
+    async _processBookmarkWithTags(
+        importItem,
+        options: { indexTitle?: any } = {},
+    ) {
+        const status = this._processBookmark(importItem, options)
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+
+        await setLocalStorage(TAG_SUGGESTIONS_KEY, [
+            ...new Set([...tagSuggestions, ...importItem.tags]),
+        ])
+
+        this._checkCancelled()
+        // If we finally got here without an error being thrown, return the success status message + pageDoc data
+        return status
     }
 
     async _processService(importItem, options: { indexTitle?: any } = {}) {
@@ -211,8 +228,7 @@ export default class ImportItemProcessor {
 
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
-            case IMPORT_TYPE.HISTORY:
-                return this._processHistory(importItem, options)
+                return this._processBookmark(importItem, options)
             case IMPORT_TYPE.OTHERS:
                 return this._processService(importItem, options)
             default:

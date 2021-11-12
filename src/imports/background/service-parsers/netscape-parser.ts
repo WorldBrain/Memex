@@ -67,7 +67,6 @@ const parseDescriptionList: RecursiveNetscapeParser = (
             }
         }
     }
-    console.log('Raindrop Import', { items })
     return items
 }
 
