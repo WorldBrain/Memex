@@ -13,10 +13,13 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
 import TipTap from './editor/editor'
+import MarkdownHelp from './MarkdownHelp'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface State {
     isTagPickerShown: boolean
     contentToSave: string
+    isMarkdownHelpShown: boolean
 }
 
 var TurndownService = require('turndown')
@@ -56,9 +59,12 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
+    private editor;
+
     state: State = {
         isTagPickerShown: false,
         contentToSave: null,
+        isMarkdownHelpShown: false,
     }
 
     componentDidMount() {
@@ -80,12 +86,16 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
+    private hideMarkdownHelp = () => this.setState({ isMarkdownHelpShown: false })
     private handleCancel = () => this.props.onCancel()
     private handleSave = async (
         shouldShare: boolean,
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
+        
+        this.editor.commands.clearContent()
+
         await saveP
     }
 
@@ -135,7 +145,9 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.setState({ isTagPickerShown })
 
         const tagPicker = !this.state.isTagPickerShown ? null : (
-            <HoverBox>
+            <HoverBox
+                right='0px'
+            >
                 <ClickAway onClickAway={() => setPickerShown(false)}>
                     <TagPicker
                         {...this.props}
@@ -165,12 +177,34 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
+
+    private renderMarkdownHelpButton() {
+        const setPickerShown = (isMarkdownHelpShown: boolean) =>
+            this.setState({ isMarkdownHelpShown })
+
+        return (
+            <MarkdownButtonContainer>
+                <ButtonTooltip
+                    tooltipText="Toggle formatting help" 
+                    position="bottom"
+                >
+                <MarkdownButton
+                    src={icons.helpIcon}
+                    onClick={() =>
+                        setPickerShown(!this.state.isMarkdownHelpShown)
+                    }
+                />
+                </ButtonTooltip>
+            </MarkdownButtonContainer>
+        )
+    }
+
     private renderActionButtons() {
         return (
             <FooterStyled>
                 <Flex>
                     <SaveBtn onSave={this.handleSave} />
-                    <ButtonTooltip tooltipText="esc" position="bottomSidebar">
+                    <ButtonTooltip tooltipText="esc" position="bottom">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
                         </CancelBtnStyled>
@@ -192,13 +226,31 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <TipTap
                     updatedContent={(content) => this.printContent(content)}
                     onKeyDown={(e) => this.handleInputKeyDown(e)}
-                    placeholder={`<p>Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)</p>`}
+                    placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                    editorInstanceRef={editor => this.editor = editor}
                 />
                 {this.props.comment !== '' && (
                     <>
-                        {this.renderTagPicker()}
-                        {this.renderActionButtons()}
+                        <FooterContainer>
+                            <SaveActionBar>
+                                {this.renderActionButtons()}
+                                {this.renderMarkdownHelpButton()}
+                            </SaveActionBar>
+                            {this.renderTagPicker()}
+                        </FooterContainer>
                     </>
+                )}
+                {!this.state.isMarkdownHelpShown ? null : (
+                    <HoverBox
+                        right='0px'
+                        top='100px'
+                        width='430px'
+                        position='initial'
+                    >
+                        {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
+                            <MarkdownHelp/>
+                        {/*</ClickAway>*/}
+                    </HoverBox>
                 )}
             </TextBoxContainerStyled>
         )
@@ -206,6 +258,32 @@ export class AnnotationCreate extends React.Component<Props, State>
 }
 
 export default onClickOutside(AnnotationCreate)
+
+const FooterContainer = styled.div`
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const SaveActionBar = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+`
+
+const MarkdownButtonContainer = styled.div`
+    display: flex;
+`
+
+const MarkdownButton = styled.img`
+    display: flex;
+    height: 16px;
+    opacity: 0.8;
+    mask-position: center center;
+    margin-left: 10px;
+    cursor: pointer;
+`
 
 const TextBoxContainerStyled = styled.div`
     box-shadow: none;
@@ -215,7 +293,6 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: 100%;
-    padding: 0 10px;
     box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
     border-radius: 5px;
     background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
@@ -261,8 +338,7 @@ const FooterStyled = styled.div`
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: center;
-    margin: 0 5px 3px 5px;
-    height: 26px;
+    margin: 0 5px 0px 5px;
     animation: slideIn 0.2s ease-in-out;
     animation-fill-mode: forwards;
 `
@@ -289,6 +365,6 @@ const CancelBtnStyled = styled.div`
 
 const Flex = styled.div`
     display: flex;
-    padding: 0 5px 5px;
     justify-content: flex-end;
+    align-items: center;
 `

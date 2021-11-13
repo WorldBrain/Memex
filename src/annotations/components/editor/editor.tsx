@@ -5,8 +5,8 @@ import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
+
 import './styles.css'
-import styled from 'styled-components'
 
 interface Props {
     updatedContent: (content) => void
@@ -14,9 +14,10 @@ interface Props {
     comment?: string
     placeholder?: string
     clearField?: boolean
+    editorInstanceRef: () => void
 }
 
-export default (props) => {
+export default (props, styles) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -31,6 +32,7 @@ export default (props) => {
             }),
         ],
         content: props.comment,
+        onCreate: ({ editor }) => editor.commands.focus('end'),
         onUpdate: ({ editor }) => {
             const content = editor.getHTML()
             props.updatedContent(content)
@@ -42,19 +44,17 @@ export default (props) => {
                     return props.onKeyDown(event)
                 },
             },
-            attributes: {
-                class:
-                    'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-            },
         },
     })
+
+    props.editorInstanceRef(editor)
 
     // TODO: clear the content when the note is saved
     //editor.commands.clearContent()
 
     return (
         <>
-            <EditorContent editor={editor} />
+            <EditorContent className={'ProseMirrorContainer'} editor={editor} />
         </>
     )
 }

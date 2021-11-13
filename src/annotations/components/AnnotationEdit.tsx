@@ -40,23 +40,29 @@ class AnnotationEdit extends React.Component<Props> {
         contentToSave: '',
     }
 
+    private editor
+
+    private saveEdit(shouldShare, isProtected) {
+        this.props.onEditConfirm(shouldShare, isProtected)
+    }
+
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
         if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.props.onEditConfirm(true, false)
+            return this.saveEdit(true, false)
         }
 
         if (e.key === 'Enter' && e.shiftKey && e.altKey) {
-            return this.props.onEditConfirm(true, true)
+            return this.saveEdit(true, true)
         }
 
         if (e.key === 'Enter' && e.altKey) {
-            return this.props.onEditConfirm(false, true)
+            return this.saveEdit(false, true)
         }
 
         if (e.key === 'Enter' && e.metaKey) {
-            return this.props.onEditConfirm(false, false)
+            return this.saveEdit(false, false)
         }
 
         if (e.key === 'Escape') {
@@ -84,6 +90,7 @@ class AnnotationEdit extends React.Component<Props> {
                     updatedContent={(content) => this.printContent(content)}
                     onKeyDown={(e) => this.handleInputKeyDown(e)}
                     comment={this.parseMD2HTML()}
+                    editorInstanceRef={(editor) => (this.editor = editor)}
                 />
             </>
         )
