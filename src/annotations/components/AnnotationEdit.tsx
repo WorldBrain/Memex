@@ -5,6 +5,16 @@ import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdo
 import { FocusableComponent } from './types'
 import { uninsertTab, insertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import TipTap from './editor/editor'
+const { marked } = require('marked')
+
+interface State {
+    contentToSave: string
+}
+
+var TurndownService = require('turndown')
+
+var turndownService = new TurndownService()
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
@@ -23,23 +33,11 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props>
-    implements FocusableComponent {
+class AnnotationEdit extends React.Component<Props> {
     static MOD_KEY = getKeyName({ key: 'mod' })
-    private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
-    componentDidMount() {
-        this.focusOnInputEnd()
-    }
-
-    focus() {
-        this.textAreaRef.current.focus()
-    }
-
-    focusOnInputEnd() {
-        const inputLen = this.props.comment.length
-        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
-        this.focus()
+    state: State = {
+        contentToSave: '',
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -65,37 +63,27 @@ class AnnotationEdit extends React.Component<Props>
             this.props.onEditCancel()
             return
         }
+    }
 
-        if (e.key === 'Tab' && !e.shiftKey) {
-            e.preventDefault()
-            insertTab({ el: this.textAreaRef.current })
-        }
+    private printContent(content) {
+        var content = turndownService.turndown(content)
+        this.setState({ contentToSave: content })
+        this.props.onCommentChange(this.state.contentToSave)
+    }
 
-        if (e.key === 'Tab' && e.shiftKey) {
-            e.preventDefault()
-            uninsertTab({ el: this.textAreaRef.current })
-        }
+    private parseMD2HTML() {
+        const html = marked.parse(this.props.comment)
+        // TODO const sanitisedHTML =
+        return html
     }
 
     render() {
         return (
             <>
-                <MarkdownPreviewAnnotationInsertMenu
-                    showPreviewBtnOnEmptyInput
-                    customRef={this.textAreaRef}
-                    onKeyDown={this.handleInputKeyDown}
-                    value={this.props.comment}
-                    updateInputValue={this.props.onCommentChange}
-                    renderInput={(inputProps) => (
-                        <StyledTextArea
-                            {...inputProps}
-                            value={this.props.comment}
-                            placeholder={`Add private note. Save with ${AnnotationEdit.MOD_KEY}+enter (+shift to share)`}
-                            onChange={(e) =>
-                                this.props.onCommentChange(e.target.value)
-                            }
-                        />
-                    )}
+                <TipTap
+                    updatedContent={(content) => this.printContent(content)}
+                    onKeyDown={(e) => this.handleInputKeyDown(e)}
+                    comment={this.parseMD2HTML()}
                 />
             </>
         )

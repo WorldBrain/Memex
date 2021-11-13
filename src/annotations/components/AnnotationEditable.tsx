@@ -85,9 +85,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         hoverState: null,
     }
 
-    focus() {
-        this.annotEditRef?.current?.focusOnInputEnd()
-    }
+    focus() {}
 
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
@@ -198,6 +196,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
+                    comment={comment}
                 />
             )
         }

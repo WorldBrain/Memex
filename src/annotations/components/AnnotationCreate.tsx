@@ -12,10 +12,16 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
+import TipTap from './editor/editor'
 
 interface State {
     isTagPickerShown: boolean
+    contentToSave: string
 }
+
+var TurndownService = require('turndown')
+
+var turndownService = new TurndownService()
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
@@ -45,13 +51,14 @@ export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
     static ALT_KEY = getKeyName({ key: 'alt' })
     static MOD_KEY = getKeyName({ key: 'mod' })
-    private textAreaRef = React.createRef<HTMLTextAreaElement>()
-    private markdownPreviewRef = React.createRef<
-        MarkdownPreviewAnnotationInsertMenu
-    >()
+    //private textAreaRef = React.createRef<HTMLTextAreaElement>()
+    // private markdownPreviewRef = React.createRef<
+    //     MarkdownPreviewAnnotationInsertMenu
+    // >()
 
     state: State = {
         isTagPickerShown: false,
+        contentToSave: null,
     }
 
     componentDidMount() {
@@ -62,8 +69,8 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     focus() {
         const inputLen = this.props.comment.length
-        this.textAreaRef.current.focus()
-        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
+        // this.textAreaRef.current.focus()
+        // this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
     }
 
     handleClickOutside() {
@@ -79,14 +86,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
-
-        if (
-            this.markdownPreviewRef?.current?.markdownPreviewRef.current?.state
-                .showPreview
-        ) {
-            this.markdownPreviewRef.current.markdownPreviewRef.current.togglePreview()
-        }
-
         await saveP
     }
 
@@ -119,15 +118,15 @@ export class AnnotationCreate extends React.Component<Props, State>
             return this.handleSave(false, false)
         }
 
-        if (e.key === 'Tab' && !e.shiftKey) {
-            e.preventDefault()
-            insertTab({ el: this.textAreaRef.current })
-        }
+        // if (e.key === 'Tab' && !e.shiftKey) {
+        //     e.preventDefault()
+        //     insertTab({ el: this.textAreaRef.current })
+        // }
 
-        if (e.key === 'Tab' && e.shiftKey) {
-            e.preventDefault()
-            uninsertTab({ el: this.textAreaRef.current })
-        }
+        // if (e.key === 'Tab' && e.shiftKey) {
+        //     e.preventDefault()
+        //     uninsertTab({ el: this.textAreaRef.current })
+        // }
     }
 
     private renderTagPicker() {
@@ -181,26 +180,19 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
+    private printContent(content) {
+        var content = turndownService.turndown(content)
+        this.setState({ contentToSave: content })
+        this.props.onCommentChange(this.state.contentToSave)
+    }
+
     render() {
         return (
             <TextBoxContainerStyled>
-                <MarkdownPreviewAnnotationInsertMenu
-                    ref={this.markdownPreviewRef}
-                    customRef={this.textAreaRef}
-                    onKeyDown={this.handleInputKeyDown}
-                    value={this.props.comment}
-                    updateInputValue={this.props.onCommentChange}
-                    renderInput={(inputProps) => (
-                        <StyledTextArea
-                            {...inputProps}
-                            value={this.props.comment}
-                            onClick={this.hideTagPicker}
-                            placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                            onChange={(e) =>
-                                this.props.onCommentChange(e.target.value)
-                            }
-                        />
-                    )}
+                <TipTap
+                    updatedContent={(content) => this.printContent(content)}
+                    onKeyDown={(e) => this.handleInputKeyDown(e)}
+                    placeholder={`<p>Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)</p>`}
                 />
                 {this.props.comment !== '' && (
                     <>
@@ -223,6 +215,7 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: 100%;
+    padding: 0 10px;
     box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
     border-radius: 5px;
     background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
