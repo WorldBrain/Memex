@@ -1,11 +1,10 @@
 .tagHolder {
     position: relative;
-    display: inline-block;
-    justify-content: flex-start;
+    display: flex;
+    justify-content: center;
     align-items: center;
     box-sizing: border-box;
     cursor: pointer;
-    padding: 5px 10px 5px 15px;
 }
 
 .tag {
@@ -22,7 +21,7 @@
 
 .tagIcon {
     mask-image: url('/img/tag_empty.svg');
-    mask-size: 15px;
+    mask-size: 16px;
     width: 20px;
     height: 20px;
     mask-repeat: no-repeat;
@@ -30,11 +29,16 @@
     background-color: #3a2f45;
     opacity: 0.6;
     display: flex;
-    margin-right: 5px;
 }
 
 .tagText {
     vertical-align: center;
+}
+
+.tagHolderContainer {
+    & > div {
+        display: flex;
+    }
 }
 
 .placeholder {
@@ -45,12 +49,6 @@
     align-items: center;
     padding: 2px 5px;
     border-radius: 3px;
-    margin-left: -10px;
-
-    &:hover {
-        color: #3a2f45;
-        background-color: #e0e0e0;
-    }
 }
 
 .placeholder_alt {

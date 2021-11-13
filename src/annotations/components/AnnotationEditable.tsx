@@ -98,7 +98,8 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     focus() {}
 
-    private hideMarkdownHelp = () => this.setState({ isMarkdownHelpShown: false })
+    private hideMarkdownHelp = () =>
+        this.setState({ isMarkdownHelpShown: false })
 
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
@@ -352,15 +353,15 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
-                    tooltipText="Toggle formatting help" 
+                    tooltipText="Toggle formatting help"
                     position="bottom"
                 >
-                <MarkdownButton
-                    src={icons.helpIcon}
-                    onClick={() =>
-                        setPickerShown(!this.state.isMarkdownHelpShown)
-                    }
-                />
+                    <MarkdownButton
+                        src={icons.helpIcon}
+                        onClick={() =>
+                            setPickerShown(!this.state.isMarkdownHelpShown)
+                        }
+                    />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
         )
@@ -485,11 +486,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {!this.state.isMarkdownHelpShown ? null : (
                     <HoverBox
                         top="215px"
-                        right= "50px"
-                        width='430px'
-                        position='initial'
+                        right="50px"
+                        width="430px"
+                        position="initial"
                     >
-                        <MarkdownHelp/>
+                        <MarkdownHelp />
                     </HoverBox>
                 )}
             </ThemeProvider>
@@ -674,7 +675,7 @@ const CommentBox = styled.div`
     padding: 10px 15px 10px 15px;
     line-height: 1.4;
     text-align: left;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
     overflow: visible;
     flex-direction: row-reverse;
     display: flex;
@@ -694,7 +695,7 @@ const CommentBox = styled.div`
 
 const DefaultFooterStyled = styled.div`
     display: flex;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
 
     & div {
         border-top: none;

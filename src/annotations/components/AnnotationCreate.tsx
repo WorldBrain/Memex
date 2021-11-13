@@ -8,6 +8,7 @@ import { FocusableComponent } from './types'
 import { insertTab, uninsertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import TagHolder from 'src/tags/ui/tag-holder'
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
@@ -15,6 +16,9 @@ import SaveBtn from './save-btn'
 import TipTap from './editor/editor'
 import MarkdownHelp from './MarkdownHelp'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
+import type { NoteResultHoverState } from './types'
+import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 
 interface State {
     isTagPickerShown: boolean
@@ -31,6 +35,11 @@ export interface AnnotationCreateEventProps {
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
+    onTagsHover?: React.MouseEventHandler
+    annotationFooterDependencies?: AnnotationFooterEventProps
+    onFooterHover?: React.MouseEventHandler
+    onNoteHover?: React.MouseEventHandler
+    onUnhover?: React.MouseEventHandler
 }
 
 export interface AnnotationCreateGeneralProps {
@@ -38,6 +47,9 @@ export interface AnnotationCreateGeneralProps {
     autoFocus?: boolean
     comment: string
     tags: string[]
+    onTagClick?: (tag: string) => void
+    hoverState: NoteResultHoverState
+    mode: AnnotationMode
 }
 
 export interface Props
@@ -59,7 +71,13 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
-    private editor;
+    static defaultProps: Pick<Props, 'mode' | 'hoverState' | 'tags'> = {
+        tags: [],
+        mode: 'default',
+        hoverState: null,
+    }
+
+    private editor
 
     state: State = {
         isTagPickerShown: false,
@@ -86,14 +104,15 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
-    private hideMarkdownHelp = () => this.setState({ isMarkdownHelpShown: false })
+    private hideMarkdownHelp = () =>
+        this.setState({ isMarkdownHelpShown: false })
     private handleCancel = () => this.props.onCancel()
     private handleSave = async (
         shouldShare: boolean,
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
-        
+
         this.editor.commands.clearContent()
 
         await saveP
@@ -145,9 +164,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.setState({ isTagPickerShown })
 
         const tagPicker = !this.state.isTagPickerShown ? null : (
-            <HoverBox
-                right='0px'
-            >
+            <HoverBox right="0px">
                 <ClickAway onClickAway={() => setPickerShown(false)}>
                     <TagPicker
                         {...this.props}
@@ -177,7 +194,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
-
     private renderMarkdownHelpButton() {
         const setPickerShown = (isMarkdownHelpShown: boolean) =>
             this.setState({ isMarkdownHelpShown })
@@ -185,15 +201,15 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
-                    tooltipText="Toggle formatting help" 
+                    tooltipText="Toggle formatting help"
                     position="bottom"
                 >
-                <MarkdownButton
-                    src={icons.helpIcon}
-                    onClick={() =>
-                        setPickerShown(!this.state.isMarkdownHelpShown)
-                    }
-                />
+                    <MarkdownButton
+                        src={icons.helpIcon}
+                        onClick={() =>
+                            setPickerShown(!this.state.isMarkdownHelpShown)
+                        }
+                    />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
         )
@@ -227,10 +243,20 @@ export class AnnotationCreate extends React.Component<Props, State>
                     updatedContent={(content) => this.printContent(content)}
                     onKeyDown={(e) => this.handleInputKeyDown(e)}
                     placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                    editorInstanceRef={editor => this.editor = editor}
+                    editorInstanceRef={(editor) => (this.editor = editor)}
                 />
                 {this.props.comment !== '' && (
                     <>
+                        <TagsSegment
+                            tags={this.props.tags}
+                            onMouseEnter={this.props.onTagsHover}
+                            showEditBtn={this.props.hoverState === 'tags'}
+                            onTagClick={this.props.onTagClick}
+                            onEditBtnClick={
+                                this.props.annotationFooterDependencies
+                                    ?.onTagIconClick
+                            }
+                        />
                         <FooterContainer>
                             <SaveActionBar>
                                 {this.renderActionButtons()}
@@ -242,13 +268,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                 )}
                 {!this.state.isMarkdownHelpShown ? null : (
                     <HoverBox
-                        right='0px'
-                        top='100px'
-                        width='430px'
-                        position='initial'
+                        right="0px"
+                        top="100px"
+                        width="430px"
+                        position="initial"
                     >
                         {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
-                            <MarkdownHelp/>
+                        <MarkdownHelp />
                         {/*</ClickAway>*/}
                     </HoverBox>
                 )}
@@ -264,6 +290,7 @@ const FooterContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 5px 15px 5px 5px;
 `
 
 const SaveActionBar = styled.div`
@@ -338,7 +365,6 @@ const FooterStyled = styled.div`
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: center;
-    margin: 0 5px 0px 5px;
     animation: slideIn 0.2s ease-in-out;
     animation-fill-mode: forwards;
 `

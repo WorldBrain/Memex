@@ -5,7 +5,6 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
-    maxTags?: number
     showEditBtn: boolean
     onTagClick?: (tag: string) => void
     onEditBtnClick: React.MouseEventHandler
@@ -13,7 +12,6 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
 
 export default function TagsSegment({
     tags,
-    maxTags = 8,
     onTagClick,
     showEditBtn,
     onEditBtnClick,
@@ -26,7 +24,7 @@ export default function TagsSegment({
     return (
         <Container {...props}>
             <TagsContainer>
-                {tags.slice(0, maxTags).map((tag) => (
+                {tags.slice(0).map((tag) => (
                     <TagPill
                         key={tag}
                         onClick={onTagClick ? () => onTagClick(tag) : undefined}
@@ -41,15 +39,16 @@ export default function TagsSegment({
 }
 
 const Container = styled.div`
-    display: flex;
+    display: inline-box;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid #e0e0e0;
-    padding: 5px 15px;
+    border-top: 1px solid #f0f0f0;
+    padding: 5px 10px;
 `
 
 const TagsContainer = styled.div`
     display: flex;
+    flex-wrap: wrap;
 `
 
 const TagPill = styled.div`
@@ -81,4 +80,7 @@ const EditIcon = styled.button`
     mask-repeat: no-repeat;
     mask-size: 16px;
     cursor: pointer;
+    right: 30px;
+    position: relative;
+    z-index: 10;
 `

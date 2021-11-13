@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classNames from 'classnames'
-
+import { ButtonTooltip } from 'src/common-ui/components'
 import { maxPossibleTags } from 'src/sidebar/annotations-sidebar/utils'
 import { ClickHandler } from 'src/sidebar/annotations-sidebar/types'
 
@@ -72,17 +72,19 @@ class TagHolder extends React.Component<Props, State> {
         const { tags, clickHandler } = this.props
 
         return (
-            <div className={styles.tagHolder} onClick={clickHandler}>
-                {this._renderTags()}
-                <span
-                    className={classNames(
-                        styles.placeholder,
-                        tags.length > 0 && styles.placeholder_alt,
-                    )}
-                >
-                    {!tags.length && <span className={styles.tagIcon} />}
-                    <span className={styles.addTag}>Add tag</span>
-                </span>
+            <div className={styles.tagHolderContainer} onClick={clickHandler}>
+                <ButtonTooltip tooltipText="Add Tags" position="bottomSidebar">
+                    <div className={styles.tagHolder} onClick={clickHandler}>
+                        <span
+                            className={classNames(
+                                styles.placeholder,
+                                tags.length > 0 && styles.placeholder_alt,
+                            )}
+                        >
+                            <span className={styles.tagIcon} />
+                        </span>
+                    </div>
+                </ButtonTooltip>
             </div>
         )
     }
