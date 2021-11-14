@@ -15,7 +15,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
         return (
             <MarkdownHelpContainer>
                 <TutorialTable>
-                    <FormattingTitle>Formatting</FormattingTitle>
+                    <FormattingTitle>Editor Formatting</FormattingTitle>
                     <tr>
                         <td>
                             <b>Bold</b>
@@ -36,17 +36,6 @@ export class MarkdownHelp extends React.Component<Props, State> {
                     </tr>
                     <tr>
                         <td>
-                            <Highlight>Highlight</Highlight>
-                        </td>
-                        <td>==highlight==</td>
-                        <td>
-                            <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+h
-                            </ShortCuts>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
                             <Link
                                 href="https://memex.garden/tutorials"
                                 target="_blank"
@@ -57,51 +46,6 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>Highlight text and paste url</td>
                         <td>
                             <ShortCuts>{MarkdownHelp.MOD_KEY}+v</ShortCuts>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <code>Inline Code</code>
-                        </td>
-                        <td>`() => function(){}`</td>
-                        <td>
-                            <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+e
-                            </ShortCuts>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <CodeBlock>
-                                Multi-Line <br />
-                                Code Block
-                            </CodeBlock>
-                        </td>
-                        <td>shift+enter in Inline Code</td>
-                        <td>
-                            <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+c
-                            </ShortCuts>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <u>Underline</u>
-                        </td>
-                        <td></td>
-                        <td>
-                            <ShortCuts>{MarkdownHelp.MOD_KEY}+u</ShortCuts>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <s>Strikethrough</s>
-                        </td>
-                        <td>~~Strikethrough~~</td>
-                        <td>
-                            <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+x
-                            </ShortCuts>
                         </td>
                     </tr>
                     <tr>
@@ -127,6 +71,17 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>
                             <ShortCuts>
                                 {MarkdownHelp.MOD_KEY}+shift+8
+                            </ShortCuts>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <blockquote>Block Quote</blockquote>
+                        </td>
+                        <td> > this is the quote</td>
+                        <td>
+                            <ShortCuts>
+                                {MarkdownHelp.MOD_KEY}+shift+B
                             </ShortCuts>
                         </td>
                     </tr>
@@ -163,6 +118,42 @@ export class MarkdownHelp extends React.Component<Props, State> {
                             </ShortCuts>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <code>Inline Code</code>
+                        </td>
+                        <td>`inline Code`</td>
+                        <td>
+                            <ShortCuts>
+                                {MarkdownHelp.MOD_KEY}+shift+e
+                            </ShortCuts>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <CodeBlock>
+                                Multi-Line <br />
+                                Code Block
+                            </CodeBlock>
+                        </td>
+                        <td>```code blocks```</td>
+                        <td>
+                            <ShortCuts>
+                                {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+c
+                            </ShortCuts>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <s>Strikethrough</s>
+                        </td>
+                        <td>~~Strikethrough~~</td>
+                        <td>
+                            <ShortCuts>
+                                {MarkdownHelp.MOD_KEY}+shift+x
+                            </ShortCuts>
+                        </td>
+                    </tr>
                 </TutorialTable>
             </MarkdownHelpContainer>
         )
@@ -179,20 +170,30 @@ const TutorialTable = styled.table`
         align-items: center;
     }
 
+    td:first-child {
+        width: 50px;
+        white-space: nowrap;
+    }
+
+    td:nth-child(2) {
+        white-space: nowrap;
+        text-align: center;
+    }
+
     & td:last-child {
         display: flex;
         justify-content: flex-end;
+        width: 50px;
     }
 
     & code {
-        border: 1px solid #f29d9d;
+        padding: 2px 3px 1px;
+        border: 1px solid #1d1c1d21;
         border-radius: 3px;
-        padding: 2px 5px;
-        width: fit-content;
-        align-self: flex-end;
-        background-color: #f29d9d60;
-        color: #ff2b2b;
-        font-weight: 500;
+        background-color: #1d1c1d0a;
+        color: #e01e5a;
+        font-size: 14px;
+        font-family: Monaco, Menlo, Consolas, Courier New, monospace !important;
     }
 
     & ul {
@@ -202,17 +203,35 @@ const TutorialTable = styled.table`
     & ol {
         margin-inline-start: -30px;
     }
+
+    & h1 {
+        font-size: 18px;
+    }
+
+    & h2 {
+        font-size: 16px;
+    }
+
+    & h3 {
+        font-size: 14px;
+    }
+
+    & blockquote {
+        border-left: #5cd9a6 3px solid;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+        padding-left: 10px;
+    }
 `
 
-const CodeBlock = styled.div`
-    border: 1px solid #f29d9d;
-    border-radius: 3px;
-    padding: 2px 5px;
-    width: fit-content;
-    text-align: left;
-    background-color: #f29d9d60;
-    color: #ff2b2b;
-    font-weight: 500;
+const CodeBlock = styled.pre`
+        width: fit-content;
+        border: 1px solid #1d1c1d21;
+        border-radius: 3px;
+        background-color: #1d1c1d0a;
+        padding: 5px;
+        font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace !important;
+    }
 `
 
 const Highlight = styled.div`

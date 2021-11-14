@@ -96,6 +96,12 @@ export default class AnnotationEditable extends React.Component<Props> {
         isMarkdownHelpShown: false,
     }
 
+    public removeMarkdownHelp() {
+        this.setState({
+            isMarkdownHelpShown: false,
+        })
+    }
+
     focus() {}
 
     private hideMarkdownHelp = () =>
@@ -571,7 +577,6 @@ const HighlightActionsBox = styled.div`
 
 const NoteTextBox = styled.div`
     position: relative;
-    min-height: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -581,14 +586,6 @@ const NoteTextBox = styled.div`
     word-break: break-word;
     hyphens: auto;
     width: 100%;
-
-    & *:first-child {
-        margin-top: 0px;
-    }
-
-    & *:last-child {
-        margin-bottom: 0px;
-    }
 `
 
 const NoteText = styled(Markdown)`
@@ -672,7 +669,7 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 10px 15px 10px 15px;
+    padding: 15px 15px 15px 15px;
     line-height: 1.4;
     text-align: left;
     border-top: 1px solid #f0f0f0;

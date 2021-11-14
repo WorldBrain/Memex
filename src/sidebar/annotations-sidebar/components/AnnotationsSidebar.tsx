@@ -674,10 +674,6 @@ const AnnotationsSectionStyled = styled.section`
 const NewAnnotationBoxStyled = styled.div`
     position: relative;
     width: 100%;
-
-    &:hover {
-        background: white;
-    }
 `
 
 const TopSectionStyled = styled.div`

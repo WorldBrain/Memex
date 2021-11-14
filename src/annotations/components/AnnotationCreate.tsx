@@ -28,7 +28,11 @@ interface State {
 
 var TurndownService = require('turndown')
 
-var turndownService = new TurndownService()
+var turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+})
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
@@ -114,6 +118,9 @@ export class AnnotationCreate extends React.Component<Props, State>
         const saveP = this.props.onSave(shouldShare, isProtected)
 
         this.editor.commands.clearContent()
+        this.setState({
+            isMarkdownHelpShown: false,
+        })
 
         await saveP
     }

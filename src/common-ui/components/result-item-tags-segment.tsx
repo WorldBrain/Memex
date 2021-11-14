@@ -43,7 +43,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: space-between;
     border-top: 1px solid #f0f0f0;
-    padding: 5px 10px;
+    padding: 5px 15px;
 `
 
 const TagsContainer = styled.div`

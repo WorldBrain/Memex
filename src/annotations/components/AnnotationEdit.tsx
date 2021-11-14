@@ -7,9 +7,11 @@ import { uninsertTab, insertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import TipTap from './editor/editor'
 const { marked } = require('marked')
+import AnnotationEditable from './AnnotationEditable'
 
 interface State {
     contentToSave: string
+    isMarkdownHelpShown: boolean
 }
 
 var TurndownService = require('turndown')
@@ -38,12 +40,14 @@ class AnnotationEdit extends React.Component<Props> {
 
     state: State = {
         contentToSave: '',
+        isMarkdownHelpShown: false,
     }
 
     private editor
 
     private saveEdit(shouldShare, isProtected) {
         this.props.onEditConfirm(shouldShare, isProtected)
+        AnnotationEditable.removeMarkdownHelp()
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {

@@ -1,10 +1,10 @@
 import React from 'react'
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
+import CodeBlock from '@tiptap/extension-code-block'
 
 import './styles.css'
 
@@ -21,8 +21,12 @@ export default (props, styles) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
-            Highlight,
             Typography,
+            CodeBlock.configure({
+                HTMLAttributes: {
+                    class: 'CodeBlock',
+                },
+            }),
             Link.configure({
                 linkOnPaste: true,
             }),
