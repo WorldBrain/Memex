@@ -225,10 +225,11 @@ export class AnnotationCreate extends React.Component<Props, State>
             <TextBoxContainerStyled>
                 <MemexEditor
                     onKeyDown={this.handleInputKeyDown}
-                    updatedContent={(content) =>
+                    onContentUpdate={(content) =>
                         this.props.onCommentChange(content)
                     }
-                    editorInstanceRef={(editor) => (this.editor = editor)}
+                    markdownContent={this.props.comment}
+                    setEditorInstanceRef={(editor) => (this.editor = editor)}
                     placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                 />
                 {this.props.comment !== '' && (

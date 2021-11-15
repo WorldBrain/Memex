@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import TurndownService from 'turndown'
+import { marked } from 'marked'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
@@ -21,12 +22,11 @@ export interface MemexEditorInstance {
 }
 
 interface Props {
-    comment?: string
+    markdownContent: string
     placeholder?: string
-    clearField?: boolean
-    onKeyDown: React.KeyboardEventHandler
-    updatedContent: (content: string) => void
-    editorInstanceRef: (instance: MemexEditorInstance) => void
+    onKeyDown?: React.KeyboardEventHandler
+    onContentUpdate: (markdownContent: string) => void
+    setEditorInstanceRef?: (instance: MemexEditorInstance) => void
 }
 
 const MemexEditor = (props: Props) => {
@@ -53,22 +53,24 @@ const MemexEditor = (props: Props) => {
                 emptyEditorClass: 'is-editor-empty',
             }),
         ],
-        content: props.comment,
+        content: marked.parse(props.markdownContent),
         onCreate: ({ editor }) => editor.commands.focus('end'),
         onUpdate: ({ editor }) => {
             const htmlContent = editor.getHTML()
             const markdownContent = turndownService.turndown(htmlContent)
-            props.updatedContent(markdownContent)
+            props.onContentUpdate(markdownContent)
         },
         autofocus: true,
-        editorProps: {
-            handleDOMEvents: {
-                keydown: (view, event) => {
-                    props.onKeyDown(event as any)
-                    return true
-                },
-            },
-        },
+        editorProps: props.onKeyDown
+            ? {
+                  handleDOMEvents: {
+                      keydown: (view, event) => {
+                          props.onKeyDown(event as any)
+                          return true
+                      },
+                  },
+              }
+            : undefined,
     })
     const memexEditorRef = useRef<MemexEditorInstance>()
 
@@ -79,8 +81,8 @@ const MemexEditor = (props: Props) => {
             },
         }
 
-        props.editorInstanceRef(memexEditorRef.current)
-    })
+        props.setEditorInstanceRef?.(memexEditorRef.current)
+    }, [editor])
 
     return <EditorContent className="ProseMirrorContainer" editor={editor} />
 }
