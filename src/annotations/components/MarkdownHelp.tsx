@@ -100,7 +100,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>
                             <h2>Heading 2</h2>
                         </td>
-                        <td># Heading 2</td>
+                        <td>## Heading 2</td>
                         <td>
                             <ShortCuts>
                                 {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+2
@@ -111,7 +111,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>
                             <h3>Heading 3</h3>
                         </td>
-                        <td># Heading 3</td>
+                        <td>### Heading 3</td>
                         <td>
                             <ShortCuts>
                                 {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+3
