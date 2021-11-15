@@ -14,7 +14,6 @@ import Link from '@tiptap/extension-link'
 import CodeBlock from '@tiptap/extension-code-block'
 import Heading from '@tiptap/extension-heading'
 import Image from '@tiptap/extension-image'
-import { nodeInputRule } from '@tiptap/core'
 import { GetYoutubeTimeStamp } from './YoutubeInsert'
 
 import './styles.css'
@@ -42,13 +41,11 @@ const MemexEditor = (props: Props) => {
     const renderer = {
         image(url) {
             return `
-                <img id={'Test'} src="${url}" alt={'test'}/>
+                <img href="${url}" target="_blank" src="${url}" alt={'test'}/>
                 `
         },
     }
     marked.use({ renderer })
-
-    const inputRegex = '/YT'
 
     const InsertYoutubeLink = Link.extend({
         addKeyboardShortcuts() {
