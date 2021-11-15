@@ -65,8 +65,10 @@ const MemexEditor = (props: Props) => {
             ? {
                   handleDOMEvents: {
                       keydown: (view, event) => {
-                          props.onKeyDown(event as any)
-                          return true
+                          // NOTE: this seems to be typed incorrectly
+                          //  removing the 'as any's will throw errors at you,
+                          //  but fixing them result in editor KB shortcuts stop working
+                          return props.onKeyDown(event as any) as any
                       },
                   },
               }
