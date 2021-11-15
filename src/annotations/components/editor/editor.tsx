@@ -32,7 +32,10 @@ interface Props {
 const MemexEditor = (props: Props) => {
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                codeBlock: false,
+                heading: false,
+            }),
             Typography,
             CodeBlock.configure({
                 HTMLAttributes: {
