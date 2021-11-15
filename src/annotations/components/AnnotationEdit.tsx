@@ -47,7 +47,7 @@ class AnnotationEdit extends React.Component<Props> {
 
     private saveEdit(shouldShare, isProtected) {
         this.props.onEditConfirm(shouldShare, isProtected)
-        AnnotationEditable.removeMarkdownHelp()
+        //AnnotationEditable.removeMarkdownHelp()
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
