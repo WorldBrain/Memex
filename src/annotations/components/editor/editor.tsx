@@ -5,6 +5,7 @@ import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
 import CodeBlock from '@tiptap/extension-code-block'
+import Heading from '@tiptap/extension-heading'
 
 import './styles.css'
 
@@ -26,6 +27,9 @@ export default (props, styles) => {
                 HTMLAttributes: {
                     class: 'CodeBlock',
                 },
+            }),
+            Heading.configure({
+                levels: [1, 2, 3],
             }),
             Link.configure({
                 linkOnPaste: true,
