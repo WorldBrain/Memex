@@ -1,3 +1,5 @@
+/* stylelint-disable  declaration-no-important, selector-pseudo-class-no-unknown */
+
 :global .ProseMirror p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
