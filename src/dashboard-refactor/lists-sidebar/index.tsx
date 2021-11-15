@@ -134,7 +134,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             searchBarProps,
             listsGroups,
         } = this.props
-        console.log(listsGroups)
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}

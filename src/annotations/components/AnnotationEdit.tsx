@@ -1,10 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
-import { FocusableComponent } from './types'
-import { uninsertTab, insertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
+import MemexEditor, { MemexEditorInstance } from './editor/editor'
+
+interface State {
+    isMarkdownHelpShown: boolean
+}
 
 export interface AnnotationEditEventProps {
     onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
@@ -14,6 +16,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     comment: string
+    toggleMarkdownHelp?: () => void
 }
 
 export interface Props
@@ -23,81 +26,57 @@ export interface Props
     rows: number
 }
 
-class AnnotationEdit extends React.Component<Props>
-    implements FocusableComponent {
+class AnnotationEdit extends React.Component<Props> {
     static MOD_KEY = getKeyName({ key: 'mod' })
-    private textAreaRef = React.createRef<HTMLTextAreaElement>()
 
-    componentDidMount() {
-        this.focusOnInputEnd()
+    state: State = {
+        isMarkdownHelpShown: false,
     }
 
-    focus() {
-        this.textAreaRef.current.focus()
-    }
+    private editor: MemexEditorInstance
 
-    focusOnInputEnd() {
-        const inputLen = this.props.comment.length
-        this.textAreaRef.current.setSelectionRange(inputLen, inputLen)
-        this.focus()
+    private saveEdit(shouldShare, isProtected) {
+        this.props.onEditConfirm(shouldShare, isProtected)
+        //AnnotationEditable.removeMarkdownHelp()
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
         if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.props.onEditConfirm(true, false)
+            return this.saveEdit(true, false)
         }
 
         if (e.key === 'Enter' && e.shiftKey && e.altKey) {
-            return this.props.onEditConfirm(true, true)
+            return this.saveEdit(true, true)
         }
 
         if (e.key === 'Enter' && e.altKey) {
-            return this.props.onEditConfirm(false, true)
+            return this.saveEdit(false, true)
         }
 
         if (e.key === 'Enter' && e.metaKey) {
-            return this.props.onEditConfirm(false, false)
+            return this.saveEdit(false, false)
         }
 
         if (e.key === 'Escape') {
             this.props.onEditCancel()
             return
         }
-
-        if (e.key === 'Tab' && !e.shiftKey) {
-            e.preventDefault()
-            insertTab({ el: this.textAreaRef.current })
-        }
-
-        if (e.key === 'Tab' && e.shiftKey) {
-            e.preventDefault()
-            uninsertTab({ el: this.textAreaRef.current })
-        }
     }
 
     render() {
         return (
-            <>
-                <MarkdownPreviewAnnotationInsertMenu
-                    showPreviewBtnOnEmptyInput
-                    customRef={this.textAreaRef}
-                    onKeyDown={this.handleInputKeyDown}
-                    value={this.props.comment}
-                    updateInputValue={this.props.onCommentChange}
-                    renderInput={(inputProps) => (
-                        <StyledTextArea
-                            {...inputProps}
-                            value={this.props.comment}
-                            placeholder={`Add private note. Save with ${AnnotationEdit.MOD_KEY}+enter (+shift to share)`}
-                            onChange={(e) =>
-                                this.props.onCommentChange(e.target.value)
-                            }
-                        />
-                    )}
-                />
-            </>
+            <MemexEditor
+                onContentUpdate={(content) =>
+                    this.props.onCommentChange(content)
+                }
+                markdownContent={this.props.comment}
+                onKeyDown={this.handleInputKeyDown}
+                toggleMarkdownHelp={() => {
+                    this.props.toggleMarkdownHelp()
+                }}
+            />
         )
     }
 }
