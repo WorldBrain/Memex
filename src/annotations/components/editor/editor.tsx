@@ -1,5 +1,6 @@
 import React from 'react'
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
+import TurndownService from 'turndown'
+import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -9,16 +10,22 @@ import Heading from '@tiptap/extension-heading'
 
 import './styles.css'
 
+const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+})
+
 interface Props {
-    updatedContent: (content) => void
-    onKeyDown: (event) => void
     comment?: string
     placeholder?: string
     clearField?: boolean
-    editorInstanceRef: () => void
+    onKeyDown: React.KeyboardEventHandler
+    updatedContent: (content: string) => void
+    editorInstanceRef: (instance: Editor) => void
 }
 
-export default (props, styles) => {
+const MemexEditor = (props: Props) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -42,14 +49,16 @@ export default (props, styles) => {
         content: props.comment,
         onCreate: ({ editor }) => editor.commands.focus('end'),
         onUpdate: ({ editor }) => {
-            const content = editor.getHTML()
-            props.updatedContent(content)
+            const htmlContent = editor.getHTML()
+            const markdownContent = turndownService.turndown(htmlContent)
+            props.updatedContent(markdownContent)
         },
         autofocus: true,
         editorProps: {
             handleDOMEvents: {
                 keydown: (view, event) => {
-                    return props.onKeyDown(event)
+                    props.onKeyDown(event as any)
+                    return true
                 },
             },
         },
@@ -60,9 +69,7 @@ export default (props, styles) => {
     // TODO: clear the content when the note is saved
     //editor.commands.clearContent()
 
-    return (
-        <>
-            <EditorContent className={'ProseMirrorContainer'} editor={editor} />
-        </>
-    )
+    return <EditorContent className={'ProseMirrorContainer'} editor={editor} />
 }
+
+export default MemexEditor

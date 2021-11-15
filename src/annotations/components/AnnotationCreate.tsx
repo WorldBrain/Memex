@@ -1,19 +1,17 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
+import type { Editor } from '@tiptap/react'
 
 import { ButtonTooltip } from 'src/common-ui/components'
-import { MarkdownPreviewAnnotationInsertMenu } from 'src/markdown-preview/markdown-preview-insert-menu'
 import { FocusableComponent } from './types'
-import { insertTab, uninsertTab } from 'src/common-ui/utils'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import TagHolder from 'src/tags/ui/tag-holder'
-import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
-import TipTap from './editor/editor'
+import MemexEditor from './editor/editor'
 import MarkdownHelp from './MarkdownHelp'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
@@ -22,17 +20,8 @@ import type { AnnotationFooterEventProps } from 'src/annotations/components/Anno
 
 interface State {
     isTagPickerShown: boolean
-    contentToSave: string
     isMarkdownHelpShown: boolean
 }
-
-var TurndownService = require('turndown')
-
-var turndownService = new TurndownService({
-    headingStyle: 'atx',
-    hr: '---',
-    codeBlockStyle: 'fenced',
-})
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
@@ -53,7 +42,6 @@ export interface AnnotationCreateGeneralProps {
     tags: string[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
-    mode: AnnotationMode
 }
 
 export interface Props
@@ -75,17 +63,15 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
-    static defaultProps: Pick<Props, 'mode' | 'hoverState' | 'tags'> = {
+    static defaultProps: Pick<Props, 'hoverState' | 'tags'> = {
         tags: [],
-        mode: 'default',
         hoverState: null,
     }
 
-    private editor
+    private editor: Editor
 
     state: State = {
         isTagPickerShown: false,
-        contentToSave: null,
         isMarkdownHelpShown: false,
     }
 
@@ -117,10 +103,8 @@ export class AnnotationCreate extends React.Component<Props, State>
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
 
-        this.editor.commands.clearContent()
-        this.setState({
-            isMarkdownHelpShown: false,
-        })
+        this.editor?.commands.clearContent()
+        this.setState({ isMarkdownHelpShown: false })
 
         await saveP
     }
@@ -237,20 +221,16 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
-    private printContent(content) {
-        var content = turndownService.turndown(content)
-        this.setState({ contentToSave: content })
-        this.props.onCommentChange(this.state.contentToSave)
-    }
-
     render() {
         return (
             <TextBoxContainerStyled>
-                <TipTap
-                    updatedContent={(content) => this.printContent(content)}
-                    onKeyDown={(e) => this.handleInputKeyDown(e)}
-                    placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                <MemexEditor
+                    onKeyDown={this.handleInputKeyDown}
+                    updatedContent={(content) =>
+                        this.props.onCommentChange(content)
+                    }
                     editorInstanceRef={(editor) => (this.editor = editor)}
+                    placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                 />
                 {this.props.comment !== '' && (
                     <>

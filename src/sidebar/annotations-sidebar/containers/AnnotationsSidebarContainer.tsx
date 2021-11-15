@@ -223,6 +223,7 @@ export class AnnotationsSidebarContainer<
             loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
+            hoverState: null,
         }
     }
 
