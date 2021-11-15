@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import TurndownService from 'turndown'
-import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -16,13 +16,17 @@ const turndownService = new TurndownService({
     codeBlockStyle: 'fenced',
 })
 
+export interface MemexEditorInstance {
+    resetState: () => void
+}
+
 interface Props {
     comment?: string
     placeholder?: string
     clearField?: boolean
     onKeyDown: React.KeyboardEventHandler
     updatedContent: (content: string) => void
-    editorInstanceRef: (instance: Editor) => void
+    editorInstanceRef: (instance: MemexEditorInstance) => void
 }
 
 const MemexEditor = (props: Props) => {
@@ -63,13 +67,19 @@ const MemexEditor = (props: Props) => {
             },
         },
     })
+    const memexEditorRef = useRef<MemexEditorInstance>()
 
-    props.editorInstanceRef(editor)
+    useEffect(() => {
+        memexEditorRef.current = {
+            resetState: () => {
+                editor.commands.clearContent()
+            },
+        }
 
-    // TODO: clear the content when the note is saved
-    //editor.commands.clearContent()
+        props.editorInstanceRef(memexEditorRef.current)
+    })
 
-    return <EditorContent className={'ProseMirrorContainer'} editor={editor} />
+    return <EditorContent className="ProseMirrorContainer" editor={editor} />
 }
 
 export default MemexEditor

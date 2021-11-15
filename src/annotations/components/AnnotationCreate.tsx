@@ -1,7 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
-import type { Editor } from '@tiptap/react'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { FocusableComponent } from './types'
@@ -11,7 +10,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
-import MemexEditor from './editor/editor'
+import MemexEditor, { MemexEditorInstance } from './editor/editor'
 import MarkdownHelp from './MarkdownHelp'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
@@ -68,7 +67,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         hoverState: null,
     }
 
-    private editor: Editor
+    private editor: MemexEditorInstance
 
     state: State = {
         isTagPickerShown: false,
@@ -103,7 +102,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
 
-        this.editor?.commands.clearContent()
+        this.editor?.resetState()
         this.setState({ isMarkdownHelpShown: false })
 
         await saveP
