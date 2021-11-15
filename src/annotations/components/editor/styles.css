@@ -49,6 +49,11 @@
         margin-block-start: 0.5em;
         margin-block-end: 0.5em;
         line-height: 20px;
+
+        & img {
+            max-width: fill-available;
+            height: auto;
+        }
     }
 
     & h1 {
@@ -56,6 +61,11 @@
         margin-block-end: 0.5em;
         line-height: 22px;
         font-size: 18px;
+    }
+
+    & img {
+        max-width: fill-available;
+        height: auto;
     }
 
     & h2 {
@@ -122,76 +132,78 @@
     & > *:last-child {
         margin-block-end: 0em;
     }
+}
 
-    /* & p:first-child {
-        margin-block-start: 0em;
+:global .bubble-menu {
+    display: flex;
+    background-color: #2a2a2a;
+    padding: 0.2rem;
+    border-radius: 0.5rem;
+    font-family: sans-serif;
+    cursor: pointer;
+
+    & > * {
+        all: initial;
+        line-height: 20px;
     }
 
-    & h1:first-child {
-        margin-block-start: 0em;
+    & button {
+        border: none;
+        background: #2a2a2a;
+        color: #fff;
+        font-size: 0.85rem;
+        font-family: sans-serif;
+        font-weight: 500;
+        padding: 1px 0.2rem 0 0.2rem;
+        cursor: pointer;
+
+        &:hover,
+        &.is-active {
+            opacity: 1;
+            color: #d0d0d0;
+            text-decoration: solid 1px underline;
+        }
+    }
+}
+
+:global .floating-menu {
+    display: flex;
+    padding: 0.2rem;
+    border-radius: 0.5rem;
+    font-family: sans-serif;
+
+    & > * {
+        all: initial;
+        line-height: 20px;
     }
 
-    & h2:first-child {
-        margin-block-start: 0em;
+    & button {
+        border: none;
+        background: none;
+        font-size: 14px;
+        color: #a0a0a0;
+        font-weight: 500;
+        padding: 0 0.2rem;
+        font-family: sans-serif;
+
+        &:hover,
+        &.is-active {
+            opacity: 1;
+        }
+
+        &:focus {
+            text-decoration: underline 1px solid #a0a0a0;
+        }
+
+        &.is-active {
+            color: #545454;
+        }
     }
 
-    & h3:first-child {
-        margin-block-start: 0em;
+    & .NoNotePlaceholder {
+        font-size: 14px;
+        color: #818181;
+        margin-right: 10px;
+        margin-left: -5px;
     }
-
-    & h4:first-child {
-        margin-block-start: 0em;
-    }
-
-    & h5:first-child {
-        margin-block-start: 0em;
-    }
-
-    & blockquote:first-child {
-        margin-block-start: 0em;
-    }
-
-    & image:first-child {
-        margin-block-start: 0em;
-    }
-
-    & pre:first-child {
-        margin-block-start: 0em;
-    }
-
-    & p:last-child {
-        margin-block-end: 0em;
-    }
-
-    & h1:last-child {
-        margin-block-end: 0em;
-    }
-
-    & h2:last-child {
-        margin-block-end: 0em;
-    }
-
-    & h3:last-child {
-        margin-block-end: 0em;
-    }
-
-    & h4:last-child {
-        margin-block-end: 0em;
-    }
-
-    & h5:last-child {
-        margin-block-end: 0em;
-    }
-
-    & blockquote:last-child {
-        margin-block-end: 0em;
-    }
-
-    & image:last-child {
-        margin-block-end: 0em;
-    }
-
-    & pre:last-child {
-        margin-block-end: 0em;
-    } */
 }

@@ -66,6 +66,7 @@ export interface AnnotationProps {
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
+    toggleMarkdownHelp?: () => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -217,6 +218,9 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {...annotationEditDependencies}
                     rows={2}
                     comment={comment}
+                    toggleMarkdownHelp={() => {
+                        this.props.toggleMarkdownHelp()
+                    }}
                 />
             )
         }
@@ -452,8 +456,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }}
                     >
                         <AnnotationStyled>
-                            {this.renderHighlightBody()}
-                            {this.renderNote()}
+                            <ContentContainer>
+                                {this.renderHighlightBody()}
+                                {this.renderNote()}
+                            </ContentContainer>
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
@@ -723,6 +729,12 @@ const AnnotationStyled = styled.div`
         `
         box-shadow: 0px 0px 5px 1px #00000080;
     `};
+`
+
+const ContentContainer = styled.div`
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
 `
 
 const DeleteConfirmStyled = styled.span`

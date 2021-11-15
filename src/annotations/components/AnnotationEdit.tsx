@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { getKeyName } from 'src/util/os-specific-key-names'
-import MemexEditor from './editor/editor'
+import MemexEditor, { MemexEditorInstance } from './editor/editor'
 
 interface State {
     isMarkdownHelpShown: boolean
@@ -16,6 +16,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     comment: string
+    toggleMarkdownHelp?: () => void
 }
 
 export interface Props
@@ -31,6 +32,8 @@ class AnnotationEdit extends React.Component<Props> {
     state: State = {
         isMarkdownHelpShown: false,
     }
+
+    private editor: MemexEditorInstance
 
     private saveEdit(shouldShare, isProtected) {
         this.props.onEditConfirm(shouldShare, isProtected)
@@ -70,6 +73,9 @@ class AnnotationEdit extends React.Component<Props> {
                 }
                 markdownContent={this.props.comment}
                 onKeyDown={this.handleInputKeyDown}
+                toggleMarkdownHelp={() => {
+                    this.props.toggleMarkdownHelp()
+                }}
             />
         )
     }

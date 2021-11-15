@@ -22,6 +22,8 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import MarkdownHelp from 'src/annotations/components/MarkdownHelp'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
@@ -70,6 +72,7 @@ export interface AnnotationsSidebarProps
 
 interface AnnotationsSidebarState {
     searchText?: string
+    isMarkdownHelpShown?: boolean
 }
 
 class AnnotationsSidebar extends React.Component<
@@ -77,8 +80,12 @@ class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarState
 > {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationEditRef
 
-    state = { searchText: '' }
+    state = {
+        searchText: '',
+        isMarkdownHelpShown: false,
+    }
 
     componentDidMount() {
         document.addEventListener('keydown', this.onKeydown, false)
@@ -89,6 +96,9 @@ class AnnotationsSidebar extends React.Component<
     }
 
     focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
+
+    private toggleMarkdownHelp = () =>
+        this.setState({ isMarkdownHelpShown: !this.state.isMarkdownHelpShown })
 
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -153,13 +163,24 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <NewAnnotationSection>
-                <NewAnnotationBoxStyled>
-                    <AnnotationCreate
-                        {...this.props.annotationCreateProps}
-                        ref={(ref) => (this.annotationCreateRef = ref)}
-                        autoFocus
-                    />
-                </NewAnnotationBoxStyled>
+                <AnnotationCreate
+                    {...this.props.annotationCreateProps}
+                    ref={this.annotationCreateRef}
+                    autoFocus
+                    toggleMarkdownHelp={() => this.toggleMarkdownHelp()}
+                />
+                {!this.state.isMarkdownHelpShown ? null : (
+                    <HoverBox
+                        right="0px"
+                        top="5px"
+                        width="430px"
+                        position="relative"
+                    >
+                        {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
+                        <MarkdownHelp />
+                        {/*</ClickAway>*/}
+                    </HoverBox>
+                )}
             </NewAnnotationSection>
         )
     }
@@ -373,30 +394,46 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <AnnotationEditable
-                    key={i}
-                    {...annot}
-                    {...this.props}
-                    body={annot.body}
-                    comment={annot.comment}
-                    createdWhen={annot.createdWhen!}
-                    isShared={annot.isShared}
-                    isBulkShareProtected={annot.isBulkShareProtected}
-                    mode={this.props.annotationModes[annot.url]}
-                    isActive={this.props.activeAnnotationUrl === annot.url}
-                    onHighlightClick={this.props.setActiveAnnotationUrl(
-                        annot.url,
+                <>
+                    <AnnotationEditable
+                        key={i}
+                        {...annot}
+                        {...this.props}
+                        body={annot.body}
+                        comment={annot.comment}
+                        createdWhen={annot.createdWhen!}
+                        isShared={annot.isShared}
+                        isBulkShareProtected={annot.isBulkShareProtected}
+                        mode={this.props.annotationModes[annot.url]}
+                        isActive={this.props.activeAnnotationUrl === annot.url}
+                        onHighlightClick={this.props.setActiveAnnotationUrl(
+                            annot.url,
+                        )}
+                        onGoToAnnotation={footerDeps.onGoToAnnotation}
+                        annotationEditDependencies={this.props.bindAnnotationEditProps(
+                            annot,
+                        )}
+                        annotationFooterDependencies={footerDeps}
+                        isClickable={
+                            this.props.theme.canClickAnnotations &&
+                            annot.body?.length > 0
+                        }
+                        toggleMarkdownHelp={() => this.toggleMarkdownHelp()}
+                        ref={(ref) => (this.annotationEditRef = ref)}
+                    />
+                    {!this.state.isMarkdownHelpShown ? null : (
+                        <HoverBox
+                            right="0px"
+                            width="430px"
+                            position="relative"
+                            ref={(ref) => (this.annotationEditRef = ref)}
+                        >
+                            {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
+                            <MarkdownHelp />
+                            {/*</ClickAway>*/}
+                        </HoverBox>
                     )}
-                    onGoToAnnotation={footerDeps.onGoToAnnotation}
-                    annotationEditDependencies={this.props.bindAnnotationEditProps(
-                        annot,
-                    )}
-                    annotationFooterDependencies={footerDeps}
-                    isClickable={
-                        this.props.theme.canClickAnnotations &&
-                        annot.body?.length > 0
-                    }
-                />
+                </>
             )
         })
 

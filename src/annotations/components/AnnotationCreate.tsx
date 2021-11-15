@@ -41,6 +41,7 @@ export interface AnnotationCreateGeneralProps {
     tags: string[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
+    toggleMarkdownHelp?: () => void
 }
 
 export interface Props
@@ -61,6 +62,8 @@ export class AnnotationCreate extends React.Component<Props, State>
     // private markdownPreviewRef = React.createRef<
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
+
+    private annotCreateRef = React.createRef<AnnotationCreate>()
 
     static defaultProps: Pick<Props, 'hoverState' | 'tags'> = {
         tags: [],
@@ -93,6 +96,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
+    private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
     private hideMarkdownHelp = () =>
         this.setState({ isMarkdownHelpShown: false })
     private handleCancel = () => this.props.onCancel()
@@ -196,9 +200,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
-                        onClick={() =>
-                            setPickerShown(!this.state.isMarkdownHelpShown)
-                        }
+                        onClick={() => this.props.toggleMarkdownHelp()}
                     />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
@@ -231,6 +233,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                     markdownContent={this.props.comment}
                     setEditorInstanceRef={(editor) => (this.editor = editor)}
                     placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                    toggleMarkdownHelp={() => {
+                        this.props.toggleMarkdownHelp()
+                    }}
                 />
                 {this.props.comment !== '' && (
                     <>
@@ -252,18 +257,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                             {this.renderTagPicker()}
                         </FooterContainer>
                     </>
-                )}
-                {!this.state.isMarkdownHelpShown ? null : (
-                    <HoverBox
-                        right="0px"
-                        top="100px"
-                        width="430px"
-                        position="initial"
-                    >
-                        {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
-                        <MarkdownHelp />
-                        {/*</ClickAway>*/}
-                    </HoverBox>
                 )}
             </TextBoxContainerStyled>
         )
