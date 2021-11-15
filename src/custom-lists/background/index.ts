@@ -196,7 +196,7 @@ export default class CustomListBackground {
         const fingerprints = this.options.pages.getContentFingerprints({
             normalizedUrl: normalizedPageUrl,
         })
-        const sharedFingerprintsByList = fingerprints.length
+        const sharedFingerprintsByList = fingerprints?.length
             ? await contentSharing.getNormalizedUrlsByFingerprints({
                   fingerprints,
                   listReferences: uniqueListReferences,
@@ -215,7 +215,6 @@ export default class CustomListBackground {
         for (const listReference of uniqueListReferences) {
             let normalizedUrlInList = normalizedPageUrl
             const sharedFingerprint = sharedFingerprintsByList[listReference.id]
-            // console.log({ listReference, sharedFingerprint })
             if (sharedFingerprint) {
                 normalizedUrlInList = sharedFingerprint.normalizedUrl
             }
