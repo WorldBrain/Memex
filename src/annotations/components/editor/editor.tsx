@@ -14,6 +14,8 @@ import Link from '@tiptap/extension-link'
 import CodeBlock from '@tiptap/extension-code-block'
 import Heading from '@tiptap/extension-heading'
 import Image from '@tiptap/extension-image'
+import { nodeInputRule } from '@tiptap/core'
+import { GetYoutubeTimeStamp } from './YoutubeInsert'
 
 import './styles.css'
 
@@ -44,8 +46,26 @@ const MemexEditor = (props: Props) => {
                 `
         },
     }
-
     marked.use({ renderer })
+
+    const inputRegex = '/YT'
+
+    const InsertYoutubeLink = Link.extend({
+        addKeyboardShortcuts() {
+            return {
+                // ↓ your new keyboard shortcut
+                'Mod-y': () =>
+                    this.editor
+                        .chain()
+                        .insertContent(
+                            `<a href="${GetYoutubeTimeStamp()[0]}">${
+                                GetYoutubeTimeStamp()[1]
+                            }</a>`,
+                        )
+                        .run(),
+            }
+        },
+    })
 
     const editor = useEditor({
         extensions: [
@@ -54,6 +74,7 @@ const MemexEditor = (props: Props) => {
                 heading: false,
             }),
             Typography,
+            InsertYoutubeLink,
             CodeBlock.configure({
                 HTMLAttributes: {
                     class: 'CodeBlock',
@@ -76,6 +97,8 @@ const MemexEditor = (props: Props) => {
         content: marked.parse(props.markdownContent),
         onCreate: ({ editor }) => {
             editor.commands.focus('end')
+            console.log(getTextToInsert()[1])
+            console.log(getTextToInsert()[0])
         },
         onUpdate: ({ editor }) => {
             const htmlContent = editor.getHTML()

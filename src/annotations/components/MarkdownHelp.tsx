@@ -22,7 +22,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         </td>
                         <td>**bold**</td>
                         <td>
-                            <ShortCuts>{MarkdownHelp.MOD_KEY}+b</ShortCuts>
+                            <ShortCuts>{MarkdownHelp.MOD_KEY}+B</ShortCuts>
                         </td>
                     </tr>
                     <tr>
@@ -31,7 +31,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         </td>
                         <td>*italic*</td>
                         <td>
-                            <ShortCuts>{MarkdownHelp.MOD_KEY}+i</ShortCuts>
+                            <ShortCuts>{MarkdownHelp.MOD_KEY}+I</ShortCuts>
                         </td>
                     </tr>
                     <tr>
@@ -45,7 +45,19 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         </td>
                         <td>Highlight text and paste url</td>
                         <td>
-                            <ShortCuts>{MarkdownHelp.MOD_KEY}+v</ShortCuts>
+                            <ShortCuts>{MarkdownHelp.MOD_KEY}+V</ShortCuts>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>YouTube timestamp</td>
+                        <td>
+                            <a href="https://youtu.be/VIVIegSt81k?t=75">
+                                [1:15]
+                            </a>
+                        </td>
+                        <td>
+                            <span>In Editor:</span> <br />
+                            <ShortCuts>{MarkdownHelp.MOD_KEY}+Y</ShortCuts>
                         </td>
                     </tr>
                     <tr>
@@ -81,7 +93,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td> > this is the quote</td>
                         <td>
                             <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+B
+                                {MarkdownHelp.MOD_KEY}+shift+b
                             </ShortCuts>
                         </td>
                     </tr>
@@ -125,7 +137,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>`inline Code`</td>
                         <td>
                             <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+e
+                                {MarkdownHelp.MOD_KEY}+shift+E
                             </ShortCuts>
                         </td>
                     </tr>
@@ -139,7 +151,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>```code blocks```</td>
                         <td>
                             <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+c
+                                {MarkdownHelp.MOD_KEY}+{MarkdownHelp.ALT_KEY}+C
                             </ShortCuts>
                         </td>
                     </tr>
@@ -150,7 +162,7 @@ export class MarkdownHelp extends React.Component<Props, State> {
                         <td>~~Strikethrough~~</td>
                         <td>
                             <ShortCuts>
-                                {MarkdownHelp.MOD_KEY}+shift+x
+                                {MarkdownHelp.MOD_KEY}+shift+X
                             </ShortCuts>
                         </td>
                     </tr>
@@ -184,6 +196,14 @@ const TutorialTable = styled.table`
         display: flex;
         justify-content: flex-end;
         width: 50px;
+        font-size: 14px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+
+        & span {
+            margin-right: 5px;
+        }
     }
 
     & code {
@@ -197,11 +217,11 @@ const TutorialTable = styled.table`
     }
 
     & ul {
-        margin-inline-start: -30px;
+        margin-inline-start: -20px;
     }
 
     & ol {
-        margin-inline-start: -30px;
+        margin-inline-start: -20px;
     }
 
     & h1 {
