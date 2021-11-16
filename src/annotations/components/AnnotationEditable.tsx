@@ -24,7 +24,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
-import MarkdownHelp from 'src/editor/components/MarkdownHelp'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface HighlightProps extends AnnotationProps {
@@ -76,7 +75,6 @@ export interface AnnotationEditableEventProps {
 }
 
 interface State {
-    isMarkdownHelpShown: boolean
     editorHeight: string
 }
 
@@ -93,14 +91,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     state: State = {
-        isMarkdownHelpShown: false,
         editorHeight: null,
-    }
-
-    public removeMarkdownHelp() {
-        this.setState({
-            isMarkdownHelpShown: false,
-        })
     }
 
     focus() {}
@@ -108,9 +99,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     componentDidMount() {
         this.textAreaHeight()
     }
-
-    private hideMarkdownHelp = () =>
-        this.setState({ isMarkdownHelpShown: false })
 
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
@@ -369,8 +357,6 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderMarkdownHelpButton() {
-        const setPickerShown = (isMarkdownHelpShown: boolean) =>
-            this.setState({ isMarkdownHelpShown })
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
@@ -504,16 +490,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
-                {!this.state.isMarkdownHelpShown ? null : (
-                    <HoverBox
-                        top="215px"
-                        right="50px"
-                        width="430px"
-                        position="initial"
-                    >
-                        <MarkdownHelp />
-                    </HoverBox>
-                )}
             </ThemeProvider>
         )
     }

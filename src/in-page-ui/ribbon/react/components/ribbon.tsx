@@ -20,7 +20,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
-import QuickTutorial from 'src/editor/components/QuickTutorial'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 
 const styles = require('./ribbon.css')
 

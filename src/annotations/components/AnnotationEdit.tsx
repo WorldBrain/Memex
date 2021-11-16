@@ -2,10 +2,11 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { getKeyName } from 'src/util/os-specific-key-names'
-import MemexEditor, { MemexEditorInstance } from 'src/editor'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 
 interface State {
-    isMarkdownHelpShown: boolean
     editorHeight: string
 }
 
@@ -31,7 +32,6 @@ class AnnotationEdit extends React.Component<Props> {
     static MOD_KEY = getKeyName({ key: 'mod' })
 
     state: State = {
-        isMarkdownHelpShown: false,
         editorHeight: null,
     }
 

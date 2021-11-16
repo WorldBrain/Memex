@@ -10,16 +10,6 @@
     font-size: 12px;
 }
 
-.tutorialPanel {
-    all: initial;
-    font-family: sans-serif;
-    font-size: 12px;
-}
-
-.TutorialBox {
-    background: white;
-}
-
 .extraButtonText {
     font-weight: normal;
 }

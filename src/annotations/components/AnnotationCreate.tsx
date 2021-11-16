@@ -10,8 +10,9 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
-import MemexEditor, { MemexEditorInstance } from 'src/editor'
-import MarkdownHelp from 'src/editor/components/MarkdownHelp'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import type { NoteResultHoverState } from './types'
@@ -19,7 +20,6 @@ import type { AnnotationFooterEventProps } from 'src/annotations/components/Anno
 
 interface State {
     isTagPickerShown: boolean
-    isMarkdownHelpShown: boolean
 }
 
 export interface AnnotationCreateEventProps {
@@ -73,7 +73,6 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
-        isMarkdownHelpShown: false,
     }
 
     componentDidMount() {
@@ -96,8 +95,6 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     // private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
-    private hideMarkdownHelp = () =>
-        this.setState({ isMarkdownHelpShown: false })
     private handleCancel = () => this.props.onCancel()
     private handleSave = async (
         shouldShare: boolean,
@@ -106,7 +103,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         const saveP = this.props.onSave(shouldShare, isProtected)
 
         this.editor?.resetState()
-        this.setState({ isMarkdownHelpShown: false })
 
         await saveP
     }
@@ -188,9 +184,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private renderMarkdownHelpButton() {
-        const setPickerShown = (isMarkdownHelpShown: boolean) =>
-            this.setState({ isMarkdownHelpShown })
-
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
