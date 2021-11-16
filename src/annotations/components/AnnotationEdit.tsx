@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { getKeyName } from 'src/util/os-specific-key-names'
-import MemexEditor, { MemexEditorInstance } from './editor/editor'
+import MemexEditor, { MemexEditorInstance } from 'src/editor'
 
 interface State {
     isMarkdownHelpShown: boolean

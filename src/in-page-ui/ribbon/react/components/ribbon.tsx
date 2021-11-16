@@ -21,8 +21,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
-import { ClickAway } from 'src/util/click-away-wrapper'
-import MarkdownHelp from 'src/annotations/components/MarkdownHelp'
+import MarkdownHelp from 'src/editor/components/MarkdownHelp'
 
 const styles = require('./ribbon.css')
 

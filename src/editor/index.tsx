@@ -1,12 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import TurndownService from 'turndown'
 import { marked } from 'marked'
-import {
-    useEditor,
-    EditorContent,
-    BubbleMenu,
-    FloatingMenu,
-} from '@tiptap/react'
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -14,7 +9,7 @@ import Link from '@tiptap/extension-link'
 import CodeBlock from '@tiptap/extension-code-block'
 import Heading from '@tiptap/extension-heading'
 import Image from '@tiptap/extension-image'
-import { GetYoutubeTimeStamp } from './YoutubeInsert'
+import { getYoutubeTimestamp } from './utils'
 
 import './styles.css'
 
@@ -49,15 +44,14 @@ const MemexEditor = (props: Props) => {
 
     const InsertYoutubeLink = Link.extend({
         addKeyboardShortcuts() {
+            const [videoURL, humanTimestamp] = getYoutubeTimestamp()
             return {
                 // ↓ your new keyboard shortcut
                 'Mod-y': () =>
                     this.editor
                         .chain()
                         .insertContent(
-                            `<a href="${GetYoutubeTimeStamp()[0]}">${
-                                GetYoutubeTimeStamp()[1]
-                            }</a>`,
+                            `<a href="${videoURL}">${humanTimestamp}</a>`,
                         )
                         .run(),
             }

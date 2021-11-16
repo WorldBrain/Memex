@@ -1,6 +1,6 @@
-import { extractIdFromUrl, isUrlYTVideo } from 'src/util/youtube-url'
+import { extractIdFromUrl } from 'src/util/youtube-url'
 
-export const GetYoutubeTimeStamp = () => {
+export const getYoutubeTimestamp = () => {
     const videoEl = document.querySelector<HTMLVideoElement>('.video-stream')
 
     const timestampSecs = Math.trunc(videoEl?.currentTime ?? 0)
@@ -13,7 +13,5 @@ export const GetYoutubeTimeStamp = () => {
     const videoId = extractIdFromUrl(document.location.href)
     const videoURLwithTime = `https://youtu.be/${videoId}?t=${timestampSecs}`
 
-    const YoutubeData = [videoURLwithTime, humanTimestamp]
-
-    return YoutubeData
+    return [videoURLwithTime, humanTimestamp]
 }

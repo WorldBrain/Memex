@@ -24,7 +24,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
-import MarkdownHelp from './MarkdownHelp'
+import MarkdownHelp from 'src/editor/components/MarkdownHelp'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface HighlightProps extends AnnotationProps {
