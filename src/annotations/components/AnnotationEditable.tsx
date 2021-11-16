@@ -25,6 +25,8 @@ import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -50,6 +52,7 @@ export interface AnnotationProps {
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
+    contextLocation?: string
     lastEdited?: Date | number
     annotationFooterDependencies?: AnnotationFooterEventProps
     annotationEditDependencies?: AnnotationEditGeneralProps &
@@ -76,6 +79,7 @@ export interface AnnotationEditableEventProps {
 
 interface State {
     editorHeight: string
+    showQuickTutorial: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -92,6 +96,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     state: State = {
         editorHeight: '50px',
+        showQuickTutorial: false,
     }
 
     focus() {}
@@ -123,6 +128,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                   }
                 : undefined,
         }
+    }
+
+    private toggleShowTutorial() {
+        this.setState({ showQuickTutorial: !this.state.showQuickTutorial })
     }
 
     private get theme(): SidebarAnnotationTheme {
@@ -358,14 +367,50 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
-                    tooltipText="Toggle formatting help"
+                    tooltipText="Show formatting help"
                     position="bottom"
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
-                        // TODO make it open the ribbon via events: toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'>
+                        onClick={() =>
+                            this.setState({ showQuickTutorial: true })
+                        }
                     />
                 </ButtonTooltip>
+                {this.state.showQuickTutorial && (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.setState({ showQuickTutorial: false })
+                        }
+                    >
+                        <HoverBox
+                            top={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'unset'
+                                    : '215px'
+                            }
+                            bottom={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '60px'
+                                    : 'unset'
+                            }
+                            right={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '20px'
+                                    : '50px'
+                            }
+                            width="430px"
+                            position={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'fixed'
+                                    : 'initial'
+                            }
+                            height="430px"
+                        >
+                            <QuickTutorial markdownHelpOnTop={true} />
+                        </HoverBox>
+                    </ClickAway>
+                )}
             </MarkdownButtonContainer>
         )
     }

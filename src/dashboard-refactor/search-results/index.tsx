@@ -133,6 +133,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
+                contextLocation={'dashboard'}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -242,6 +243,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
+                    contextLocation={'dashboard'}
                 />
                 {noteIds[notesType].length > 0 && (
                     <>

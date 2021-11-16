@@ -32,7 +32,7 @@ class AnnotationEdit extends React.Component<Props> {
     static MOD_KEY = getKeyName({ key: 'mod' })
 
     state: State = {
-        editorHeight: null,
+        editorHeight: '50px',
     }
 
     private editor: MemexEditorInstance
@@ -86,7 +86,7 @@ export default AnnotationEdit
 
 const EditorContainer = styled.div`
     height: fit-content;
-    min-height: ${(props) => props.editorHeight};
+    transition: height 0.4s linear;
     border-top: 1px solid #f0f0f0;
 
     &:first-child {

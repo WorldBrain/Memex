@@ -188,7 +188,7 @@ export default class Ribbon extends Component<Props, State> {
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
                 <QuickTutorial
-                    onOutsideClick={() => this.props.toggleShowTutorial()}
+                    onClickOutside={() => this.props.toggleShowTutorial()}
                     onSettingsClick={() => this.openOptionsTabRPC('settings')}
                 />
             </BlurredSidebarOverlay>
