@@ -43,19 +43,19 @@ const MemexEditor = (props: Props) => {
     marked.use({ renderer })
 
     const InsertYoutubeLink = Link.extend({
-        addKeyboardShortcuts() {
-            const [videoURL, humanTimestamp] = getYoutubeTimestamp()
-            return {
-                // ↓ your new keyboard shortcut
-                'Mod-y': () =>
-                    this.editor
-                        .chain()
-                        .insertContent(
-                            `<a href="${videoURL}">${humanTimestamp}</a>`,
-                        )
-                        .run(),
-            }
-        },
+        addKeyboardShortcuts: () => ({
+            // ↓ your new keyboard shortcut
+            'Mod-y': () => {
+                const [videoURL, humanTimestamp] = getYoutubeTimestamp()
+
+                return this.editor
+                    .chain()
+                    .insertContent(
+                        `<a href="${videoURL}">${humanTimestamp}</a>`,
+                    )
+                    .run()
+            },
+        }),
     })
 
     const editor = useEditor({

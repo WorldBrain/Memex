@@ -8,20 +8,19 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import type {
     Shortcut,
     BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
-import TutorialPanel from './tutorial-panel'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
-import MarkdownHelp from 'src/editor/components/MarkdownHelp'
+import QuickTutorial from 'src/editor/components/QuickTutorial'
 
 const styles = require('./ribbon.css')
 
@@ -75,7 +74,7 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
+        this.keyboardShortcuts = await getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
     }
 
@@ -121,34 +120,6 @@ export default class Ribbon extends Component<Props, State> {
         return short.shortcut && short.enabled
             ? `${source} (${short.shortcut})`
             : source
-    }
-
-    private shortCutEnabled(name: string): string {
-        const short: Shortcut = this.keyboardShortcuts[name]
-        console.log(short)
-
-        if (short.enabled !== true) {
-            return 'disabled'
-        }
-    }
-
-    private getOnlyShortcut(name: string): string {
-        const elData = this.shortcutsData.get(name)
-        const short: Shortcut = this.keyboardShortcuts[name]
-
-        if (!elData) {
-            return ''
-        }
-
-        let source = elData.tooltip
-
-        if (['createBookmark', 'toggleSidebar'].includes(name)) {
-            source = this.props.bookmark.isBookmarked
-                ? elData.toggleOff
-                : elData.toggleOn
-        }
-
-        return `${short.shortcut}`
     }
 
     private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
@@ -216,293 +187,10 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowTutorial()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <TutorialPanel
-                    closePanel={() => this.props.toggleShowTutorial()}
-                >
-                    <div className={styles.Section}>
-                        <div className={styles.SectionTitle}>
-                            Keyboard Shortcuts{' '}
-                            <span
-                                onClick={() =>
-                                    this.openOptionsTabRPC('settings')
-                                }
-                                className={styles.actionButton}
-                            >
-                                Edit Shortcuts
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Save current page
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'createBookmark',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('createBookmark')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Highlight selected text
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'createHighlight',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('createHighlight')} <br />{' '}
-                                <span className={styles.shiftShare}>
-                                    (+shift to share)
-                                </span>
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Add note to selected text
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'createAnnotation',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('createAnnotation')}{' '}
-                                <br />{' '}
-                                <span className={styles.shiftShare}>
-                                    (+shift to share)
-                                </span>
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Add note to page
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled('addComment') ===
-                                        'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('addComment')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Search pages and annotations
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'openDashboard',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('openDashboard')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Add tag(s) to page
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled('addTag') ===
-                                        'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('addTag')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Add page to collection
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'addToCollection',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('addToCollection')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Toggle sidebar
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'toggleSidebar',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('toggleSidebar')}
-                            </span>
-                        </div>
-                        <div className={styles.KeyboardShortcutsBlock}>
-                            <span className={styles.KeyboardShortcutsTitle}>
-                                Toggle highlights on page
-                            </span>
-                            <span
-                                className={cx(styles.KeyboardShortcutKeys, {
-                                    [styles.disabled]:
-                                        this.shortCutEnabled(
-                                            'toggleHighlights',
-                                        ) === 'disabled',
-                                })}
-                            >
-                                {this.getOnlyShortcut('toggleHighlights')}
-                            </span>
-                        </div>
-                    </div>
-                    <MarkdownHelp />
-                    <div className={styles.Section}>
-                        <div className={styles.SectionTitle}>
-                            Advanced Workflows{' '}
-                            <span
-                                onClick={() =>
-                                    window.open(
-                                        'https://memex.garden/tutorials',
-                                    )
-                                }
-                                className={styles.actionButton}
-                            >
-                                View All Tutorials
-                            </span>
-                        </div>
-                        <div
-                            className={styles.TutorialBlock}
-                            onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
-                                )
-                            }
-                        >
-                            <span className={styles.TutorialTitle}>
-                                Sharing collections, annotated pages and
-                                highlights
-                            </span>
-                        </div>
-                        <div
-                            className={styles.TutorialBlock}
-                            onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/organise-or-tag-all-open-tabs',
-                                )
-                            }
-                        >
-                            <span className={styles.TutorialTitle}>
-                                Organise or Tag all open tabs
-                            </span>
-                        </div>
-                        <div
-                            className={styles.TutorialBlock}
-                            onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/importing-to-memex-from-other-services',
-                                )
-                            }
-                        >
-                            <span className={styles.TutorialTitle}>
-                                Importing to Memex from other services
-                            </span>
-                        </div>
-                        <div
-                            className={styles.TutorialBlock}
-                            onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/export-your-data-locally-to-any-cloud-provider',
-                                )
-                            }
-                        >
-                            <span className={styles.TutorialTitle}>
-                                Export your data locally & to any cloud provider
-                            </span>
-                        </div>
-                        <div
-                            className={styles.TutorialBlock}
-                            onClick={() =>
-                                window.open(
-                                    'https://tutorials.memex.garden/text-export-templates',
-                                )
-                            }
-                        >
-                            <span className={styles.TutorialTitle}>
-                                Text Export Templates
-                            </span>
-                        </div>
-                        <div className={styles.Section}>
-                            <div className={styles.SectionTitle}>
-                                Getting Support
-                            </div>
-                            <div
-                                className={styles.TutorialBlock}
-                                onClick={() =>
-                                    window.open(
-                                        'https://links.memex.garden/onboarding',
-                                    )
-                                }
-                            >
-                                <span className={styles.TutorialTitle}>
-                                    ☎️ Book Onboarding Call
-                                </span>
-                            </div>
-                            <div
-                                className={styles.TutorialBlock}
-                                onClick={() =>
-                                    window.open(
-                                        'https://links.memex.garden/chat',
-                                    )
-                                }
-                            >
-                                <span className={styles.TutorialTitle}>
-                                    💬 Chat with us
-                                </span>
-                            </div>
-                            <div
-                                className={styles.TutorialBlock}
-                                onClick={() =>
-                                    window.open(
-                                        'https://community.memex.garden',
-                                    )
-                                }
-                            >
-                                <span className={styles.TutorialTitle}>
-                                    ✍🏽 Visit Forum
-                                </span>
-                            </div>
-                            <div
-                                className={styles.TutorialBlock}
-                                onClick={() =>
-                                    window.open(
-                                        'https://links.memex.garden/announcements/pioneer-plan',
-                                    )
-                                }
-                            >
-                                <span className={styles.TutorialTitle}>
-                                    💸 Get an early bird discount
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </TutorialPanel>
+                <QuickTutorial
+                    onOutsideClick={() => this.props.toggleShowTutorial()}
+                    onSettingsClick={() => this.openOptionsTabRPC('settings')}
+                />
             </BlurredSidebarOverlay>
         )
     }
