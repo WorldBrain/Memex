@@ -5,6 +5,7 @@ import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content
 import type CustomListStorage from 'src/custom-lists/background/storage'
 import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
+import type AnnotationStorage from 'src/annotations/background/storage'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
@@ -13,7 +14,7 @@ import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
 import type { ContentSharingInterface } from './types'
 import { ContentSharingClientStorage } from './storage'
-import { GenerateServerID } from '../../background-script/types'
+import type { GenerateServerID } from '../../background-script/types'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -26,6 +27,7 @@ export default class ContentSharingBackground {
             storageManager: StorageManager
             backend: ContentSharingBackend
             customLists: CustomListStorage
+            annotationStorage: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
@@ -53,11 +55,6 @@ export default class ContentSharingBackground {
             unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
-            findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
-                this,
-            ),
-            setAnnotationPrivacyLevel: this.setAnnotationPrivacyLevel,
-            deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
             generateRemoteAnnotationId: async () =>
                 this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
@@ -189,7 +186,7 @@ export default class ContentSharingBackground {
         }
 
         if (!options.skipPrivacyLevelUpdate) {
-            await this.storage.setAnnotationPrivacyLevel({
+            await this.options.annotationStorage.setAnnotationPrivacyLevel({
                 annotation: options.annotationUrl,
                 privacyLevel: options.setBulkShareProtected
                     ? AnnotationPrivacyLevels.SHARED_PROTECTED
@@ -206,10 +203,11 @@ export default class ContentSharingBackground {
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
         options,
     ) => {
+        const { annotationStorage } = this.options
         const remoteIds = await this.storage.getRemoteAnnotationIds({
             localIds: options.annotationUrls,
         })
-        const annotPrivacyLevels = await this.storage.getPrivacyLevelsByAnnotation(
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
             { annotations: options.annotationUrls },
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
@@ -230,7 +228,7 @@ export default class ContentSharingBackground {
                 })),
         )
 
-        await this.storage.setAnnotationPrivacyLevelBulk({
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
             annotations: nonProtectedAnnotations,
             privacyLevel: options.setBulkShareProtected
                 ? AnnotationPrivacyLevels.SHARED_PROTECTED
@@ -303,7 +301,8 @@ export default class ContentSharingBackground {
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
         options,
     ) => {
-        const annotPrivacyLevels = await this.storage.getPrivacyLevelsByAnnotation(
+        const { annotationStorage } = this.options
+        const annotPrivacyLevels = await annotationStorage.getPrivacyLevelsByAnnotation(
             { annotations: options.annotationUrls },
         )
         const nonProtectedAnnotations = options.annotationUrls.filter(
@@ -314,49 +313,12 @@ export default class ContentSharingBackground {
                 ].includes(annotPrivacyLevels[annotationUrl]?.privacyLevel),
         )
 
-        await this.storage.setAnnotationPrivacyLevelBulk({
+        await annotationStorage.setAnnotationPrivacyLevelBulk({
             annotations: nonProtectedAnnotations,
             privacyLevel: options.setBulkShareProtected
                 ? AnnotationPrivacyLevels.PROTECTED
                 : AnnotationPrivacyLevels.PRIVATE,
         })
-    }
-
-    async deleteAnnotationShareData(options: { annotationUrl: string }) {
-        await this.storage.deleteAnnotationMetadata({
-            localIds: [options.annotationUrl],
-        })
-        await this.storage.deleteAnnotationPrivacyLevel({
-            annotation: options.annotationUrl,
-        })
-    }
-
-    findAnnotationPrivacyLevels: ContentSharingInterface['findAnnotationPrivacyLevels'] = async (
-        params,
-    ) => {
-        const storedLevels = await this.storage.getPrivacyLevelsByAnnotation({
-            annotations: params.annotationUrls,
-        })
-
-        const privacyLevels = {}
-        for (const annotationUrl of params.annotationUrls) {
-            privacyLevels[annotationUrl] =
-                storedLevels[annotationUrl]?.privacyLevel ??
-                AnnotationPrivacyLevels.PRIVATE
-        }
-        return privacyLevels
-    }
-
-    setAnnotationPrivacyLevel: ContentSharingInterface['setAnnotationPrivacyLevel'] = async (
-        params,
-    ) => {
-        await this.storage.setAnnotationPrivacyLevel(params)
-    }
-
-    deleteAnnotationPrivacyLevel: ContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
-        params,
-    ) => {
-        await this.storage.deleteAnnotationPrivacyLevel(params)
     }
 
     waitForSync: ContentSharingInterface['waitForSync'] = async () => {}

@@ -8,6 +8,7 @@ export interface Props {
     bottom?: string
     width?: string
     withRelativeContainer?: boolean
+    position?: string
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -34,7 +35,7 @@ export const HoverBoxDiv = styled.div<Props>`
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     overflow: visible;
-    position: absolute;
+    position: ${(props) => (props.position ? props.position : 'absolute')};;
     border-radius: 3px;
     width: ${(props) => (props.width ? props.width : '300px')};
     ${(props) => (props.top ? `top: ${props.top};` : '')}

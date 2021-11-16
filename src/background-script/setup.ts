@@ -298,6 +298,15 @@ export function createBackgroundModules(options: {
         services: options.services,
     })
 
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        pages,
+        analytics,
+        getServerStorage,
+    })
+
     const auth =
         options.auth ||
         new AuthBackground({
@@ -362,22 +371,13 @@ export function createBackgroundModules(options: {
         activityStreams,
         storageManager,
         customLists: customLists.storage,
+        annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
         services: options.services,
         captureException: options.captureException,
         generateServerId,
-    })
-
-    const directLinking = new DirectLinkingBackground({
-        browserAPIs: options.browserAPIs,
-        storageManager,
-        socialBg: social,
-        pages,
-        analytics,
-        getServerStorage,
-        contentSharingBG: contentSharing,
     })
 
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(

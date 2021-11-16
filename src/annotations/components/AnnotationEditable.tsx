@@ -24,6 +24,9 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
+import MarkdownHelp from './MarkdownHelp'
+import { ClickAway } from 'src/util/click-away-wrapper'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -63,6 +66,7 @@ export interface AnnotationProps {
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
+    toggleMarkdownHelp?: () => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -71,6 +75,10 @@ export interface AnnotationEditableEventProps {
     onNoteHover?: React.MouseEventHandler
     onTagsHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
+}
+
+interface State {
+    isMarkdownHelpShown: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -85,9 +93,20 @@ export default class AnnotationEditable extends React.Component<Props> {
         hoverState: null,
     }
 
-    focus() {
-        this.annotEditRef?.current?.focusOnInputEnd()
+    state: State = {
+        isMarkdownHelpShown: false,
     }
+
+    public removeMarkdownHelp() {
+        this.setState({
+            isMarkdownHelpShown: false,
+        })
+    }
+
+    focus() {}
+
+    private hideMarkdownHelp = () =>
+        this.setState({ isMarkdownHelpShown: false })
 
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
@@ -198,6 +217,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
+                    comment={comment}
+                    toggleMarkdownHelp={() => {
+                        this.props.toggleMarkdownHelp()
+                    }}
                 />
             )
         }
@@ -334,6 +357,26 @@ export default class AnnotationEditable extends React.Component<Props> {
         ]
     }
 
+    private renderMarkdownHelpButton() {
+        const setPickerShown = (isMarkdownHelpShown: boolean) =>
+            this.setState({ isMarkdownHelpShown })
+        return (
+            <MarkdownButtonContainer>
+                <ButtonTooltip
+                    tooltipText="Toggle formatting help"
+                    position="bottom"
+                >
+                    <MarkdownButton
+                        src={icons.helpIcon}
+                        onClick={() =>
+                            setPickerShown(!this.state.isMarkdownHelpShown)
+                        }
+                    />
+                </ButtonTooltip>
+            </MarkdownButtonContainer>
+        )
+    }
+
     private renderFooter() {
         const {
             mode,
@@ -382,19 +425,22 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {mode === 'delete' && (
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
-                <BtnContainerStyled>
-                    <ButtonTooltip tooltipText="esc" position="bottom">
-                        <CancelBtnStyled onClick={cancelBtnHandler}>
-                            Cancel
-                        </CancelBtnStyled>
-                    </ButtonTooltip>
-                    <ButtonTooltip
-                        tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                        position="bottom"
-                    >
-                        {confirmBtn}
-                    </ButtonTooltip>
-                </BtnContainerStyled>
+                <SaveActionBar>
+                    <BtnContainerStyled>
+                        <ButtonTooltip tooltipText="esc" position="bottom">
+                            <CancelBtnStyled onClick={cancelBtnHandler}>
+                                Cancel
+                            </CancelBtnStyled>
+                        </ButtonTooltip>
+                        <ButtonTooltip
+                            tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                            position="bottom"
+                        >
+                            {confirmBtn}
+                        </ButtonTooltip>
+                    </BtnContainerStyled>
+                    {this.renderMarkdownHelpButton()}
+                </SaveActionBar>
             </DeletionBox>
         )
     }
@@ -410,8 +456,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }}
                     >
                         <AnnotationStyled>
-                            {this.renderHighlightBody()}
-                            {this.renderNote()}
+                            <ContentContainer>
+                                {this.renderHighlightBody()}
+                                {this.renderNote()}
+                            </ContentContainer>
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
@@ -447,6 +495,16 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
+                {!this.state.isMarkdownHelpShown ? null : (
+                    <HoverBox
+                        top="215px"
+                        right="50px"
+                        width="430px"
+                        position="initial"
+                    >
+                        <MarkdownHelp />
+                    </HoverBox>
+                )}
             </ThemeProvider>
         )
     }
@@ -495,6 +553,24 @@ const EditNoteIcon = styled.div`
     mask-size: 16px;
     cursor: pointer;
 `
+const MarkdownButtonContainer = styled.div`
+    display: flex;
+`
+
+const MarkdownButton = styled.img`
+    display: flex;
+    height: 16px;
+    opacity: 0.8;
+    mask-position: center center;
+    margin-left: 10px;
+    cursor: pointer;
+`
+
+const SaveActionBar = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+`
 
 const HighlightActionsBox = styled.div`
     position: absolute;
@@ -507,7 +583,6 @@ const HighlightActionsBox = styled.div`
 
 const NoteTextBox = styled.div`
     position: relative;
-    min-height: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -517,14 +592,6 @@ const NoteTextBox = styled.div`
     word-break: break-word;
     hyphens: auto;
     width: 100%;
-
-    & *:first-child {
-        margin-top: 0px;
-    }
-
-    & *:last-child {
-        margin-bottom: 0px;
-    }
 `
 
 const NoteText = styled(Markdown)`
@@ -608,10 +675,10 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 10px 15px 10px 15px;
+    padding: 15px 15px 15px 15px;
     line-height: 1.4;
     text-align: left;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
     overflow: visible;
     flex-direction: row-reverse;
     display: flex;
@@ -631,7 +698,7 @@ const CommentBox = styled.div`
 
 const DefaultFooterStyled = styled.div`
     display: flex;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
 
     & div {
         border-top: none;
@@ -662,6 +729,12 @@ const AnnotationStyled = styled.div`
         `
         box-shadow: 0px 0px 5px 1px #00000080;
     `};
+`
+
+const ContentContainer = styled.div`
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
 `
 
 const DeleteConfirmStyled = styled.span`
@@ -697,7 +770,7 @@ const BtnContainerStyled = styled.div`
     flex-direction: row-reverse;
     width: 100%;
     justify-content: flex-end;
-    padding: 0 5px 5px;
+    align-items: center;
 `
 
 const ActionBtnStyled = styled.button`
@@ -729,5 +802,7 @@ const ActionBtnStyled = styled.button`
 const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
-    padding-left: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding: 5px;
+}
 `

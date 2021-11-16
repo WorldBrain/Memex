@@ -16,14 +16,17 @@ export interface Props {
     browser: BrowserName
 }
 
+export const DEF_NOTIFICATION_OPTS: Pick<
+    NotifOpts,
+    'type' | 'iconUrl' | 'requireInteraction'
+> = {
+    type: DEF_TYPE,
+    iconUrl: DEF_ICON_URL,
+    requireInteraction: true,
+}
+
 export class Creator implements NotificationCreator {
     private onClickListeners = new Map<string, NotificationClickListener>()
-
-    static DEF_OPTS: Partial<NotifOpts> = {
-        type: DEF_TYPE,
-        iconUrl: DEF_ICON_URL,
-        requireInteraction: true,
-    }
 
     constructor(private props: Props) {}
 
@@ -45,7 +48,7 @@ export class Creator implements NotificationCreator {
     create: CreateNotification = async (notifOptions, onClick = (f) => f) => {
         const id = await this.props.notificationsAPI.create(
             this.filterOpts({
-                ...Creator.DEF_OPTS,
+                ...DEF_NOTIFICATION_OPTS,
                 ...(notifOptions as NotifOpts),
             }),
         )

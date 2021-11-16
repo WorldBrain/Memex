@@ -25,6 +25,7 @@ import {
     AnnotationSender,
     AnnotListEntry,
 } from 'src/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
@@ -38,7 +39,6 @@ import { Analytics } from 'src/analytics/types'
 import { getUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
-import type ContentSharingBackground from 'src/content-sharing/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -59,7 +59,6 @@ export default class DirectLinkingBackground {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
             pages: PageIndexingBackground
-            contentSharingBG: ContentSharingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
@@ -94,6 +93,11 @@ export default class DirectLinkingBackground {
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
             listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
             createAnnotation: this.createAnnotation.bind(this),
+            findAnnotationPrivacyLevels: this.findAnnotationPrivacyLevels.bind(
+                this,
+            ),
+            setAnnotationPrivacyLevel: this.setAnnotationPrivacyLevel,
+            deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
             updateAnnotationTags: this.updateAnnotationTags.bind(this),
@@ -428,6 +432,34 @@ export default class DirectLinkingBackground {
         return annotationUrl
     }
 
+    async findAnnotationPrivacyLevels(_, params: { annotationUrls: string[] }) {
+        const storedLevels = await this.annotationStorage.getPrivacyLevelsByAnnotation(
+            { annotations: params.annotationUrls },
+        )
+
+        const privacyLevels = {}
+        for (const annotationUrl of params.annotationUrls) {
+            privacyLevels[annotationUrl] =
+                storedLevels[annotationUrl]?.privacyLevel ??
+                AnnotationPrivacyLevels.PRIVATE
+        }
+        return privacyLevels
+    }
+
+    setAnnotationPrivacyLevel = async (
+        _,
+        params: { annotation: string; privacyLevel: AnnotationPrivacyLevels },
+    ) => {
+        await this.annotationStorage.setAnnotationPrivacyLevel(params)
+    }
+
+    deleteAnnotationPrivacyLevel = async (
+        _,
+        params: { annotation: string },
+    ) => {
+        await this.annotationStorage.deleteAnnotationPrivacyLevel(params)
+    }
+
     async insertAnnotToList(_, params: AnnotListEntry) {
         return this.annotationStorage.insertAnnotToList(params)
     }
@@ -537,9 +569,6 @@ export default class DirectLinkingBackground {
             await this.annotationStorage.deleteTagsByUrl({ url: pk })
         }
 
-        await this.options.contentSharingBG.deleteAnnotationShareData({
-            annotationUrl: pk,
-        })
         await this.annotationStorage.deleteAnnotation(pk)
     }
 

@@ -1,3 +1,4 @@
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { Anchor } from 'src/highlighting/types'
 
 // export interface Annotation {
@@ -33,6 +34,13 @@ export interface Annotation {
     isBookmarked?: boolean
     isSocialPost?: boolean
     isBulkShareProtected?: boolean
+}
+
+export interface AnnotationPrivacyLevel {
+    annotation: string
+    privacyLevel: AnnotationPrivacyLevels
+    createdWhen: Date
+    updatedWhen?: Date
 }
 
 export interface NewAnnotationOptions {

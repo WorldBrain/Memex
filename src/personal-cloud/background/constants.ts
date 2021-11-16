@@ -3,7 +3,6 @@ import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-sto
 import { COLLECTION_NAMES as LISTS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/annotations/constants'
 import { COLLECTION_NAMES as TEMPLATE_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/copy-paster/constants'
-import { COLLECTION_NAMES as SHARING_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/content-sharing/client-storage'
 import { COLLECTION_NAMES as SETTINGS_COLLECTION_NAMES } from 'src/sync-settings/background/constants'
 
 export const PASSIVE_DATA_CUTOFF_DATE = new Date('2019-09-09')
@@ -21,7 +20,7 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     SETTINGS_COLLECTION_NAMES.settings,
     TEMPLATE_COLLECTION_NAMES.templates,
     ANNOTATIONS_COLLECTION_NAMES.annotation,
-    SHARING_COLLECTION_NAMES.annotationPrivacy,
-    SHARING_COLLECTION_NAMES.listMetadata,
-    SHARING_COLLECTION_NAMES.annotationMetadata,
+    ANNOTATIONS_COLLECTION_NAMES.annotationPrivacy,
+    'sharedListMetadata',
+    'sharedAnnotationMetadata',
 ]

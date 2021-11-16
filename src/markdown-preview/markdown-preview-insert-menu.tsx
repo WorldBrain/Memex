@@ -13,6 +13,7 @@ import { annotationMenuItems } from './insert-menu-entries'
 export interface Props extends MarkdownPreviewProps {
     menuItems?: MenuItemProps[]
     updateInputValue: (value: string) => void
+    onKeyDown: () => void
 }
 
 export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<

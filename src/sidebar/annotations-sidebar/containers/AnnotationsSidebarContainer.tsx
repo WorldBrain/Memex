@@ -39,6 +39,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -222,6 +223,7 @@ export class AnnotationsSidebarContainer<
             loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
+            hoverState: null,
         }
     }
 
@@ -300,6 +302,12 @@ export class AnnotationsSidebarContainer<
                             onUpdateEntrySelection={this.handleTagsUpdate(
                                 currentAnnotationId,
                             )}
+                            onEscapeKeyDown={() =>
+                                this.processEvent(
+                                    'resetTagPickerAnnotationId',
+                                    null,
+                                )
+                            }
                         />
                     </ClickAway>
                 </HoverBox>
