@@ -18227,9 +18227,9 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-pdfjs-dist@WorldBrain/pdfjs-dist#fix/unsafe-eval:
+pdfjs-dist@WorldBrain/pdfjs-dist#fix/annot-shifts:
   version "2.8.19"
-  resolved "https://codeload.github.com/WorldBrain/pdfjs-dist/tar.gz/ea1c0f12b163c109049a2063138a4978317c5731"
+  resolved "https://codeload.github.com/WorldBrain/pdfjs-dist/tar.gz/8a030e1161af1aeccdc2636012b095ea7e64b40f"
 
 pend@~1.2.0:
   version "1.2.0"
