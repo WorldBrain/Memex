@@ -128,49 +128,46 @@ const MemexEditor = (props: Props) => {
 
     return (
         <>
-            <EditorContent className="ProseMirrorContainer" editor={editor}>
-                {editor && (
-                    <BubbleMenu
-                        className="bubble-menu"
-                        tippyOptions={{ duration: 100 }}
-                        editor={editor}
+            <EditorContent className="ProseMirrorContainer" editor={editor} />
+            {editor && (
+                <BubbleMenu
+                    className="bubble-menu"
+                    tippyOptions={{ duration: 100 }}
+                    editor={editor}
+                >
+                    <button
+                        onClick={() =>
+                            editor.chain().focus().toggleBold().run()
+                        }
+                        className={editor.isActive('bold') ? 'is-active' : ''}
                     >
-                        <button
-                            onClick={() =>
-                                editor.chain().focus().toggleBold().run()
-                            }
-                            className={
-                                editor.isActive('bold') ? 'is-active' : ''
-                            }
-                        >
-                            Bold
-                        </button>
-                        <button
-                            onClick={() =>
-                                editor.chain().focus().toggleItalic().run()
-                            }
-                            className={
-                                editor.isActive('italic') ? 'is-active' : ''
-                            }
-                        >
-                            Italic
-                        </button>
-                        <button
-                            onClick={() =>
-                                editor.chain().focus().toggleBulletList().run()
-                            }
-                            className={
-                                editor.isActive('bulletList') ? 'is-active' : ''
-                            }
-                        >
-                            Bullet
-                        </button>
-                        <button onClick={() => props.toggleMarkdownHelp()}>
-                            More
-                        </button>
-                    </BubbleMenu>
-                )}
-            </EditorContent>
+                        Bold
+                    </button>
+                    <button
+                        onClick={() =>
+                            editor.chain().focus().toggleItalic().run()
+                        }
+                        className={editor.isActive('italic') ? 'is-active' : ''}
+                    >
+                        Italic
+                    </button>
+                    <button
+                        onClick={() =>
+                            editor.chain().focus().toggleBulletList().run()
+                        }
+                        className={
+                            editor.isActive('bulletList') ? 'is-active' : ''
+                        }
+                    >
+                        Bullet
+                    </button>
+                    <button
+                    // TODO make it open the ribbon via events: toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'>
+                    >
+                        More
+                    </button>
+                </BubbleMenu>
+            )}
         </>
     )
 }

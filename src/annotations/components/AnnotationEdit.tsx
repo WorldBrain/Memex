@@ -6,6 +6,7 @@ import MemexEditor, { MemexEditorInstance } from './editor/editor'
 
 interface State {
     isMarkdownHelpShown: boolean
+    editorHeight: string
 }
 
 export interface AnnotationEditEventProps {
@@ -16,7 +17,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     comment: string
-    toggleMarkdownHelp?: () => void
+    editorHeight?: string
 }
 
 export interface Props
@@ -31,6 +32,7 @@ class AnnotationEdit extends React.Component<Props> {
 
     state: State = {
         isMarkdownHelpShown: false,
+        editorHeight: null,
     }
 
     private editor: MemexEditorInstance
@@ -67,21 +69,25 @@ class AnnotationEdit extends React.Component<Props> {
 
     render() {
         return (
-            <MemexEditor
-                onContentUpdate={(content) =>
-                    this.props.onCommentChange(content)
-                }
-                markdownContent={this.props.comment}
-                onKeyDown={this.handleInputKeyDown}
-                toggleMarkdownHelp={() => {
-                    this.props.toggleMarkdownHelp()
-                }}
-            />
+            <EditorContainer editorHeight={this.props.editorHeight}>
+                <MemexEditor
+                    onContentUpdate={(content) =>
+                        this.props.onCommentChange(content)
+                    }
+                    markdownContent={this.props.comment}
+                    onKeyDown={this.handleInputKeyDown}
+                />
+            </EditorContainer>
         )
     }
 }
 
 export default AnnotationEdit
+
+const EditorContainer = styled.div`
+    height: ${(props) => props.editorHeight};
+    min-height: 50px;
+`
 
 const StyledTextArea = styled.textarea`
     background-color: #fff;

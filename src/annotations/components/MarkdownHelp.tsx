@@ -174,6 +174,8 @@ export class MarkdownHelp extends React.Component<Props, State> {
 
 const TutorialTable = styled.table`
     width: 100%;
+    all: initial;
+    font-size: 14px;
 
     & tr {
         height: 40px;

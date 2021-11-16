@@ -66,7 +66,6 @@ export interface AnnotationProps {
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
-    toggleMarkdownHelp?: () => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -79,6 +78,7 @@ export interface AnnotationEditableEventProps {
 
 interface State {
     isMarkdownHelpShown: boolean
+    editorHeight: string
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -95,6 +95,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     state: State = {
         isMarkdownHelpShown: false,
+        editorHeight: null,
     }
 
     public removeMarkdownHelp() {
@@ -104,6 +105,10 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     focus() {}
+
+    componentDidMount() {
+        this.textAreaHeight()
+    }
 
     private hideMarkdownHelp = () =>
         this.setState({ isMarkdownHelpShown: false })
@@ -201,6 +206,15 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private textAreaHeight() {
+        const lines = this.props.comment.split(/\r\n|\r|\n/).length
+        const height = lines * 20
+        const heightinPX = (height + 'px').toString()
+        console.log(heightinPX)
+        this.setState({ editorHeight: heightinPX })
+        console.log(this.state.editorHeight)
+    }
+
     private renderNote() {
         const {
             url,
@@ -221,6 +235,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     toggleMarkdownHelp={() => {
                         this.props.toggleMarkdownHelp()
                     }}
+                    editorHeight={this.state.editorHeight}
                 />
             )
         }
@@ -368,9 +383,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
-                        onClick={() =>
-                            setPickerShown(!this.state.isMarkdownHelpShown)
-                        }
+                        // TODO make it open the ribbon via events: toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'>
                     />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
@@ -587,7 +600,7 @@ const NoteTextBox = styled.div`
     justify-content: space-between;
     align-items: center;
     overflow-x: hidden;
-    line-height: 22px;
+    line-height: 20px;
     line-break: normal;
     word-break: break-word;
     hyphens: auto;

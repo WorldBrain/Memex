@@ -13,10 +13,6 @@
     resize: vertical;
     border-top: 1px solid #f0f0f0;
 
-    &:first-child {
-        border-top: none;
-    }
-
     & > div {
         background-color: white;
         border: none;

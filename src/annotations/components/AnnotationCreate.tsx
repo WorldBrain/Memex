@@ -41,7 +41,6 @@ export interface AnnotationCreateGeneralProps {
     tags: string[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
-    toggleMarkdownHelp?: () => void
 }
 
 export interface Props
@@ -200,7 +199,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
-                        onClick={() => this.props.toggleMarkdownHelp()}
+                        // TODO make it open the ribbon via events: toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'>
                     />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
@@ -233,9 +232,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                     markdownContent={this.props.comment}
                     setEditorInstanceRef={(editor) => (this.editor = editor)}
                     placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                    toggleMarkdownHelp={() => {
-                        this.props.toggleMarkdownHelp()
-                    }}
                 />
                 {this.props.comment !== '' && (
                     <>
