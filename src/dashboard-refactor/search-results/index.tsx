@@ -249,20 +249,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <NoteTopBarBox
                             rightSide={
                                 <TopBarRightSideWrapper>
-                                    <ButtonTooltip
-                                        tooltipText="Share Page and Notes"
-                                        position="bottom"
-                                    >
-                                        <ShareBtn onClick={onShareBtnClick}>
-                                            <IconImg
-                                                src={
-                                                    isShared
-                                                        ? icons.shared
-                                                        : icons.link
-                                                }
-                                            />
-                                        </ShareBtn>
-                                    </ButtonTooltip>
                                     <SortingDropdownMenuBtn
                                         onMenuItemClick={({ sortingFn }) =>
                                             this.props.onPageNotesSortSelection(

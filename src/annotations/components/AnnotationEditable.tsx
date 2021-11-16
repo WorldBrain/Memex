@@ -91,7 +91,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     state: State = {
-        editorHeight: null,
+        editorHeight: '50px',
     }
 
     focus() {}
@@ -197,9 +197,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         const lines = this.props.comment.split(/\r\n|\r|\n/).length
         const height = lines * 20
         const heightinPX = (height + 'px').toString()
-        console.log(heightinPX)
         this.setState({ editorHeight: heightinPX })
-        console.log(this.state.editorHeight)
     }
 
     private renderNote() {

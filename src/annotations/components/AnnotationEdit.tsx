@@ -85,8 +85,13 @@ class AnnotationEdit extends React.Component<Props> {
 export default AnnotationEdit
 
 const EditorContainer = styled.div`
-    height: ${(props) => props.editorHeight};
-    min-height: 50px;
+    height: fit-content;
+    min-height: ${(props) => props.editorHeight};
+    border-top: 1px solid #f0f0f0;
+
+    &:first-child {
+        border-top: none;
+    }
 `
 
 const StyledTextArea = styled.textarea`

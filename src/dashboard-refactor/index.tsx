@@ -477,7 +477,10 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
-                goToImportRoute={this.bindRouteGoTo('import')}
+                goToImportRoute={() => {
+                    this.bindRouteGoTo('import')()
+                    this.processEvent('dismissOnboardingMsg', null)
+                }}
                 toggleListShareMenu={() =>
                     this.processEvent('setListShareMenuShown', {
                         isShown: !searchResults.isListShareMenuShown,

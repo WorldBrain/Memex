@@ -436,30 +436,27 @@ export class AnnotationsSidebarContainer<
                                 <ActionIcon src={icons.close} />
                             </CloseBtn>
                         </ButtonTooltip>
-                        {this.props.isLockable &&
-                            (this.state.isLocked ? (
-                                <ButtonTooltip
-                                    tooltipText="Unlock sidebar"
-                                    position="rightCentered"
-                                >
-                                    <CloseBtn onClick={this.toggleSidebarLock}>
-                                        <SidebarLockIconReverse
-                                            src={icons.doubleArrow}
-                                        />
-                                    </CloseBtn>
-                                </ButtonTooltip>
-                            ) : (
-                                <ButtonTooltip
-                                    tooltipText="Lock sidebar open"
-                                    position="rightCentered"
-                                >
-                                    <CloseBtn onClick={this.toggleSidebarLock}>
-                                        <SidebarLockIcon
-                                            src={icons.doubleArrow}
-                                        />
-                                    </CloseBtn>
-                                </ButtonTooltip>
-                            ))}
+                        {this.state.isLocked ? (
+                            <ButtonTooltip
+                                tooltipText="Unlock sidebar"
+                                position="rightCentered"
+                            >
+                                <CloseBtn onClick={this.toggleSidebarLock}>
+                                    <SidebarLockIconReverse
+                                        src={icons.doubleArrow}
+                                    />
+                                </CloseBtn>
+                            </ButtonTooltip>
+                        ) : (
+                            <ButtonTooltip
+                                tooltipText="Lock sidebar open"
+                                position="rightCentered"
+                            >
+                                <CloseBtn onClick={this.toggleSidebarLock}>
+                                    <SidebarLockIcon src={icons.doubleArrow} />
+                                </CloseBtn>
+                            </ButtonTooltip>
+                        )}
                         <DropdownMenuBtn
                             onMenuItemClick={(item) =>
                                 this.processEvent('setDisplayMode', {
