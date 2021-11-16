@@ -67,20 +67,6 @@ async function setupTest(options: {
         testData.remoteListId = listShareResult.remoteListId
         return listShareResult.remoteListId
     }
-    const getShared = (collection: string) =>
-        serverStorage.storageManager.operation(
-            'findObjects',
-            collection,
-            {},
-            { order: [['id', 'asc']] },
-        )
-    const getLocal = (collection: string) =>
-        setup.storageManager.operation(
-            'findObjects',
-            collection,
-            {},
-            { order: [['id', 'asc']] },
-        )
 
     const getFromDB = (storageManager: StorageManager) => (
         collection: string,
