@@ -95,7 +95,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
-    private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
+    // private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
     private hideMarkdownHelp = () =>
         this.setState({ isMarkdownHelpShown: false })
     private handleCancel = () => this.props.onCancel()

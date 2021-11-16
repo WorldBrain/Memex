@@ -25,7 +25,6 @@ import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
 import MarkdownHelp from './MarkdownHelp'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface HighlightProps extends AnnotationProps {
@@ -232,9 +231,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {...annotationEditDependencies}
                     rows={2}
                     comment={comment}
-                    toggleMarkdownHelp={() => {
-                        this.props.toggleMarkdownHelp()
-                    }}
                     editorHeight={this.state.editorHeight}
                 />
             )

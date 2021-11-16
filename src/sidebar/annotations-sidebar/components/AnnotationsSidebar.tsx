@@ -22,8 +22,6 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import MarkdownHelp from 'src/annotations/components/MarkdownHelp'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
@@ -164,7 +162,6 @@ class AnnotationsSidebar extends React.Component<
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
                     autoFocus
-                    toggleMarkdownHelp={() => this.toggleMarkdownHelp()}
                 />
             </NewAnnotationSection>
         )
