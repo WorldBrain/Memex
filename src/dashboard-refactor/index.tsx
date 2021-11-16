@@ -15,7 +15,6 @@ import { shareListAndAllEntries } from './lists-sidebar/util'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import { isDuringInstall } from 'src/overview/onboarding/utils'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
@@ -34,7 +33,6 @@ import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
-import BetaFeatureNotifModal from 'src/overview/sharing/components/BetaFeatureNotifModal'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
@@ -44,6 +42,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
+import PdfLocator from './components/PdfLocator'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -468,6 +467,16 @@ export class DashboardContainer extends StatefulUIElement<
                     wasPageDropped:
                         listsSidebar.listData[listId]?.wasPageDropped,
                 })}
+            />
+        )
+    }
+
+    private renderPdfLocator() {
+        return (
+            <PdfLocator
+                title="Test title"
+                url="https://testsite.com/test.pdf"
+                onFileReceive={async (file) => console.log(file)}
             />
         )
     }
@@ -914,8 +923,8 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     render() {
-        const { listsSidebar } = this.state
-        if (isDuringInstall(this.props.location)) {
+        const { listsSidebar, mode } = this.state
+        if (mode === 'onboarding') {
             return (
                 <Onboarding
                     authBG={this.props.authBG}
@@ -931,7 +940,9 @@ export class DashboardContainer extends StatefulUIElement<
                 {this.props.renderDashboardSwitcherLink()}
                 <Margin bottom="5px" />
                 {this.renderListsSidebar()}
-                {this.renderSearchResults()}
+                {mode === 'locate-pdf'
+                    ? this.renderPdfLocator()
+                    : this.renderSearchResults()}
                 {this.renderModals()}
                 <NotesSidebar
                     tags={this.props.tagsBG}

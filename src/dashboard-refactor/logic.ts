@@ -31,6 +31,7 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -99,6 +100,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             loadState: 'pristine',
             isCloudEnabled: true,
             currentUser: null,
+            mode: 'locate-pdf',
+            // mode: isDuringInstall(this.options.location)
+            //     ? 'onboarding'
+            //     : 'search',
             modals: {
                 showLogin: false,
                 showSubscription: false,

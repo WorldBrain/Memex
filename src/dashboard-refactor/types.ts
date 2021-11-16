@@ -36,6 +36,7 @@ export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
     isCloudEnabled: boolean
+    mode: 'search' | 'locate-pdf' | 'onboarding'
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
