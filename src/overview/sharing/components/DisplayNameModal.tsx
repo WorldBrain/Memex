@@ -22,7 +22,10 @@ export default class DisplayNameModal extends React.PureComponent<Props> {
     render() {
         return (
             <Modal {...this.props}>
-                <TitleText>Please set a display name before sharing</TitleText>
+                <TitleText>Who is sharing?</TitleText>
+                <SubTitleText>
+                    Set a display name so people know who the content is from
+                </SubTitleText>
                 <Margin />
                 <DisplayNameSetup
                     authBG={this.props.authBG}
@@ -38,6 +41,14 @@ const TitleText = styled.div`
     color: ${(props) => props.theme.colors.primary};
     font-size: 18px;
     font-weight: 600;
+    margin-bottom: 10px;
+`
+
+const SubTitleText = styled.div`
+    font-family: ${(props) => props.theme.fonts.primary};
+    color: ${(props) => props.theme.colors.darkgrey};
+    font-size: 16px;
+    font-weight: 400;
 
     padding-bottom: ${(props) => (props.routeToLoginBtn ? '20px' : '0px')};
 `
