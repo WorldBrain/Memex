@@ -61,9 +61,9 @@ const Sidebar = styled.div<{
 const Container = styled.div``
 
 const PeekTrigger = styled.div`
-    height: 100%;
+    height: 100vh;
     width: 10px;
-    position: absolute;
+    position: fixed;
     background: transparent;
 `
 
