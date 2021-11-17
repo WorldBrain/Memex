@@ -4,7 +4,6 @@
         "target": "ES6",
         "module": "commonjs",
         "sourceMap": false,
-        "inlineSourceMap": true,
-        "jsx": "react-jsx"
+        "inlineSourceMap": true
     }
 }
