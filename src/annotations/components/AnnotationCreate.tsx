@@ -44,6 +44,7 @@ export interface AnnotationCreateGeneralProps {
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
     contextLocation?: string
+    isRibbonCommentBox?: boolean
 }
 
 export interface Props
@@ -237,6 +238,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             (this.editor = editor)
                         }
                         placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                        isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />
                     {this.props.comment !== '' && (
                         <>
