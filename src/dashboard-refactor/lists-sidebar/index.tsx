@@ -74,6 +74,14 @@ const BottomGroup = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
     padding-bottom: 100px;
+    height: fill-available;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
+}
 `
 
 const NoCollectionsMessage = styled.div`

@@ -120,7 +120,6 @@ export const InnerDiv = styled.div`
     background: white;
     overflow: hidden;
     overflow-y: scroll;
-
     background: #fff;
     min-width: 500px;
     min-height: 200px;
@@ -128,6 +127,12 @@ export const InnerDiv = styled.div`
     position: relative;
     transition: all 0.2s ease-in-out;
     cursor: auto;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 
     ${(props) =>
         props.large &&

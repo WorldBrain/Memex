@@ -79,6 +79,7 @@ export type Props = RootState &
         onDismissOnboardingMsg: React.MouseEventHandler
         showCloudOnboardingModal: React.MouseEventHandler
         onDismissSubscriptionBanner: React.MouseEventHandler
+        isDisplayed: boolean
         filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
         newNoteInteractionProps: {
@@ -435,6 +436,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 
     render() {
+        console.log(this.props.isDisplayed)
+
         return (
             <ResultsContainer bottom="100px">
                 {this.props.isCloudUpgradeBannerShown && (
@@ -452,7 +455,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 {this.props.selectedListId != null && (
                     <ListDetails {...this.props.listDetailsProps} />
                 )}
-                <PageTopBarBox bottom="5px">
+                <PageTopBarBox
+                    isDisplayed={this.props.isDisplayed}
+                    bottom="5px"
+                >
                     <TopBar
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
@@ -475,11 +481,15 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
-const PageTopBarBox = styled(Margin)`
+const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
     border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 2px;
+    padding: 2px 15px;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 3;
+    position: fixed;
+    top: ${(props) => (props.isDisplayed === true ? '75px' : '45px')};
+    background: #f6f8fb;
 `
 
 const IconBox = styled.div`
@@ -539,6 +549,7 @@ const ResultsContainer = styled(Margin)`
     max-width: ${sizeConstants.searchResults.widthPx}px;
     margin-bottom: 100px;
     width: fill-available;
+    margin-top: 35px;
 `
 
 const TopBarRightSideWrapper = styled.div`

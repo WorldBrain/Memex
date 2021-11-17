@@ -30,8 +30,6 @@ export class HoverBox extends React.Component<Props> {
 
 export const HoverBoxContainer = styled.div`
     position: relative;
-    width: ${(props) => (props.width ? props.width : '300px')};
-    height: ${(props) => (props.height ? props.height : 'fit-content')};
 `
 
 export const HoverBoxDiv = styled.div<Props>`
@@ -48,7 +46,13 @@ export const HoverBoxDiv = styled.div<Props>`
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
     background-color: #fff;
     border-radius: 3px;
-    z-index: 3;
+    z-index: 1001;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 export const HoverBoxDashboard = styled.div`
@@ -62,4 +66,10 @@ export const HoverBoxDashboard = styled.div`
     border-radius: 3px;
     right: 20px;
     top: 40px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `

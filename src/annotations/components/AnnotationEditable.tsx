@@ -377,40 +377,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }
                     />
                 </ButtonTooltip>
-                {this.state.showQuickTutorial && (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.setState({ showQuickTutorial: false })
-                        }
-                    >
-                        <HoverBox
-                            top={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'unset'
-                                    : '215px'
-                            }
-                            bottom={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '60px'
-                                    : 'unset'
-                            }
-                            right={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '20px'
-                                    : '50px'
-                            }
-                            width="430px"
-                            position={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'fixed'
-                                    : 'initial'
-                            }
-                            height="430px"
-                        >
-                            <QuickTutorial markdownHelpOnTop={true} />
-                        </HoverBox>
-                    </ClickAway>
-                )}
             </MarkdownButtonContainer>
         )
     }
@@ -533,6 +499,40 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
+                {this.state.showQuickTutorial && (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.setState({ showQuickTutorial: false })
+                        }
+                    >
+                        <HoverBox
+                            top={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'unset'
+                                    : '215px'
+                            }
+                            bottom={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '60px'
+                                    : 'unset'
+                            }
+                            right={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '20px'
+                                    : '50px'
+                            }
+                            width="430px"
+                            position={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'fixed'
+                                    : 'initial'
+                            }
+                            height="430px"
+                        >
+                            <QuickTutorial markdownHelpOnTop={true} />
+                        </HoverBox>
+                    </ClickAway>
+                )}
             </ThemeProvider>
         )
     }

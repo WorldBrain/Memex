@@ -281,6 +281,11 @@ const StyledPageResult = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
+    border-radius: 5px;
+
+    &:hover {
+        box-shadow: 0px 0px 4px 2px #d6d6d6;
+    }
 `
 
 const RemoveFromListBtn = styled.div`
@@ -322,6 +327,7 @@ const PageContentBox = styled.a`
     cursor: pointer;
     padding: 15px 15px 5px 15px;
     text-decoration: none;
+    border-radius: 5px;
 
     &:hover {
         background-color: #fafafa;

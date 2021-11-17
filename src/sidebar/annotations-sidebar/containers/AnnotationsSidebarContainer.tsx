@@ -688,6 +688,12 @@ const ContainerStyled = styled.div`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
 
     font-family: sans-serif;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarContainerStyled = styled.div`
