@@ -94,8 +94,8 @@ const MemexEditor = (props: Props) => {
         content: marked.parse(props.markdownContent),
         onCreate: ({ editor }) => {
             editor.commands.focus('end')
-            console.log(getTextToInsert()[1])
-            console.log(getTextToInsert()[0])
+            // console.log(getTextToInsert()[1])
+            // console.log(getTextToInsert()[0])
         },
         onUpdate: ({ editor }) => {
             const htmlContent = editor.getHTML()
