@@ -586,16 +586,16 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
-                    [DataChangeType.Modify, 'personalContentLocator', testLocators.third.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.fourth.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
-                    [DataChangeType.Modify, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
                 ]),
                 personalBlockStats: [blockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
-                personalContentLocator: [testLocators.first, testLocators.second, testLocators.third, testLocators.fourth_a, testLocators.fourth_b],
+                personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
             })
 
             // NOTE: Only the locators for the third+fourth pages are downloaded, as they are the only PDFs
@@ -605,12 +605,9 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
-
             ])
         })
 

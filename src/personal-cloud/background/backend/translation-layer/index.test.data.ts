@@ -30,6 +30,13 @@ export async function insertReadwiseAPIKey(
     })
 }
 
+const REMOTE_DEVICES_V24 = {
+    first: {
+        id: 1,
+        user: TEST_USER.id,
+    },
+}
+
 const LOCAL_PAGES_V24 = {
     first: {
         url: 'getmemexed.com/test',
@@ -174,6 +181,7 @@ export const LOCAL_TEST_DATA_V24 = {
             primary: true,
             valid: true,
             version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
         },
         // NOTE: fourth_a and fourth_b point to the same page
         fourth_a: {
@@ -190,6 +198,7 @@ export const LOCAL_TEST_DATA_V24 = {
             primary: true,
             valid: true,
             version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
         },
         fourth_b: {
             id: 3,
@@ -205,6 +214,7 @@ export const LOCAL_TEST_DATA_V24 = {
             primary: true,
             valid: true,
             version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
         },
     },
     visits: {
@@ -300,13 +310,6 @@ export const LOCAL_TEST_DATA_V24 = {
     },
 }
 
-const REMOTE_DEVICES_V24 = {
-    first: {
-        id: 1,
-        user: TEST_USER.id,
-    },
-}
-
 const REMOTE_METADATA_V24 = {
     first: {
         id: 1,
@@ -362,7 +365,6 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.first.id,
-        localNormalizedUrl: LOCAL_TEST_DATA_V24.pages.first.url,
         format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.first.url,
         locationScheme: LocationSchemeType.NormalizedUrlV1,
@@ -372,6 +374,7 @@ const REMOTE_LOCATORS_V24 = {
         valid: true,
         version: 0,
         lastVisited: 0,
+        localId: null,
         // contentSize: null,
         // fingerprint: null,
     },
@@ -382,7 +385,6 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.second.id,
-        localNormalizedUrl: LOCAL_TEST_DATA_V24.pages.second.url,
         format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.second.url,
         locationScheme: LocationSchemeType.NormalizedUrlV1,
@@ -392,18 +394,41 @@ const REMOTE_LOCATORS_V24 = {
         valid: true,
         version: 0,
         lastVisited: 0,
+        localId: null,
         // contentSize: null,
         // fingerprint: null,
     },
-    third: {
+    // As the third page is a PDF, an extra dummy locator exists to point to the dummy
+    //  memex.cloud/ct/ page that gets created locally for the PDF
+    third_dummy: {
         id: 3,
         createdWhen: 560,
         updatedWhen: 560,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: null,
+        format: ContentLocatorFormat.PDF,
+        location: LOCAL_TEST_DATA_V24.pages.third.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.third.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        fingerprintScheme: null,
+        contentSize: null,
+        fingerprint: null,
+        lastVisited: 0,
+    },
+    third: {
+        id: 4,
+        createdWhen: 562,
+        updatedWhen: 562,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
         localId: LOCAL_TEST_DATA_V24.locators.third.id,
-        localNormalizedUrl: LOCAL_TEST_DATA_V24.locators.third.normalizedUrl,
         format: LOCAL_TEST_DATA_V24.locators.third.format,
         location: LOCAL_TEST_DATA_V24.locators.third.location,
         locationScheme: LOCAL_TEST_DATA_V24.locators.third.locationScheme,
@@ -417,15 +442,35 @@ const REMOTE_LOCATORS_V24 = {
         fingerprint: LOCAL_TEST_DATA_V24.locators.third.fingerprint,
         fingerprintScheme: LOCAL_TEST_DATA_V24.locators.third.fingerprintScheme,
     },
+    fourth_dummy: {
+        id: 5,
+        createdWhen: 564,
+        updatedWhen: 564,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: null,
+        format: ContentLocatorFormat.PDF,
+        location: LOCAL_TEST_DATA_V24.pages.fourth.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.fourth.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        fingerprintScheme: null,
+        contentSize: null,
+        fingerprint: null,
+        lastVisited: 0,
+    },
     fourth_a: {
-        id: 4,
-        createdWhen: 562,
-        updatedWhen: 562,
+        id: 6,
+        createdWhen: 566,
+        updatedWhen: 566,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
         localId: LOCAL_TEST_DATA_V24.locators.fourth_a.id,
-        localNormalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_a.normalizedUrl,
         format: LOCAL_TEST_DATA_V24.locators.fourth_a.format,
         location: LOCAL_TEST_DATA_V24.locators.fourth_a.location,
         locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_a.locationScheme,
@@ -442,14 +487,13 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_a.fingerprintScheme,
     },
     fourth_b: {
-        id: 5,
-        createdWhen: 564,
-        updatedWhen: 564,
+        id: 7,
+        createdWhen: 566,
+        updatedWhen: 566,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
         localId: LOCAL_TEST_DATA_V24.locators.fourth_b.id,
-        localNormalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_b.normalizedUrl,
         format: LOCAL_TEST_DATA_V24.locators.fourth_b.format,
         location: LOCAL_TEST_DATA_V24.locators.fourth_b.location,
         locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_b.locationScheme,
