@@ -59,3 +59,9 @@ export const normalizeTimestamp = (timestamp: number) => {
     }
     return timestamp
 }
+
+const f = (a, b) => [].concat(...a.map((d) => b.map((e) => [].concat(d, e))))
+export const cartesian = (a?, b?, ...c) => {
+    // returns the cartesian product between an arbitrary number of lists
+    return b ? cartesian(f(a, b), ...c) : a
+}
