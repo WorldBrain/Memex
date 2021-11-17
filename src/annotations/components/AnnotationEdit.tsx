@@ -2,10 +2,12 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { getKeyName } from 'src/util/os-specific-key-names'
-import MemexEditor, { MemexEditorInstance } from './editor/editor'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 
 interface State {
-    isMarkdownHelpShown: boolean
+    editorHeight: string
 }
 
 export interface AnnotationEditEventProps {
@@ -16,7 +18,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     comment: string
-    toggleMarkdownHelp?: () => void
+    editorHeight?: string
 }
 
 export interface Props
@@ -30,7 +32,7 @@ class AnnotationEdit extends React.Component<Props> {
     static MOD_KEY = getKeyName({ key: 'mod' })
 
     state: State = {
-        isMarkdownHelpShown: false,
+        editorHeight: '50px',
     }
 
     private editor: MemexEditorInstance
@@ -67,21 +69,30 @@ class AnnotationEdit extends React.Component<Props> {
 
     render() {
         return (
-            <MemexEditor
-                onContentUpdate={(content) =>
-                    this.props.onCommentChange(content)
-                }
-                markdownContent={this.props.comment}
-                onKeyDown={this.handleInputKeyDown}
-                toggleMarkdownHelp={() => {
-                    this.props.toggleMarkdownHelp()
-                }}
-            />
+            <EditorContainer editorHeight={this.props.editorHeight}>
+                <MemexEditor
+                    onContentUpdate={(content) =>
+                        this.props.onCommentChange(content)
+                    }
+                    markdownContent={this.props.comment}
+                    onKeyDown={this.handleInputKeyDown}
+                />
+            </EditorContainer>
         )
     }
 }
 
 export default AnnotationEdit
+
+const EditorContainer = styled.div`
+    height: fit-content;
+    transition: height 0.4s linear;
+    border-top: 1px solid #f0f0f0;
+
+    &:first-child {
+        border-top: none;
+    }
+`
 
 const StyledTextArea = styled.textarea`
     background-color: #fff;

@@ -10,16 +10,18 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
-import MemexEditor, { MemexEditorInstance } from './editor/editor'
-import MarkdownHelp from './MarkdownHelp'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import type { NoteResultHoverState } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 
 interface State {
     isTagPickerShown: boolean
-    isMarkdownHelpShown: boolean
+    toggleShowTutorial: boolean
 }
 
 export interface AnnotationCreateEventProps {
@@ -41,7 +43,7 @@ export interface AnnotationCreateGeneralProps {
     tags: string[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
-    toggleMarkdownHelp?: () => void
+    contextLocation?: string
 }
 
 export interface Props
@@ -74,7 +76,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
-        isMarkdownHelpShown: false,
+        toggleShowTutorial: false,
     }
 
     componentDidMount() {
@@ -95,19 +97,21 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
 
+    private toggleShowTutorial = () => {
+        this.setState({ toggleShowTutorial: !this.state.toggleShowTutorial })
+    }
+
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
-    private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
-    private hideMarkdownHelp = () =>
-        this.setState({ isMarkdownHelpShown: false })
+    // private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
     private handleCancel = () => this.props.onCancel()
     private handleSave = async (
         shouldShare: boolean,
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
+        this.setState({ toggleShowTutorial: false })
 
         this.editor?.resetState()
-        this.setState({ isMarkdownHelpShown: false })
 
         await saveP
     }
@@ -189,18 +193,15 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private renderMarkdownHelpButton() {
-        const setPickerShown = (isMarkdownHelpShown: boolean) =>
-            this.setState({ isMarkdownHelpShown })
-
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
-                    tooltipText="Toggle formatting help"
+                    tooltipText="Show formatting help"
                     position="bottom"
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
-                        onClick={() => this.props.toggleMarkdownHelp()}
+                        onClick={() => this.toggleShowTutorial()}
                     />
                 </ButtonTooltip>
             </MarkdownButtonContainer>
@@ -224,41 +225,76 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     render() {
         return (
-            <TextBoxContainerStyled>
-                <MemexEditor
-                    onKeyDown={this.handleInputKeyDown}
-                    onContentUpdate={(content) =>
-                        this.props.onCommentChange(content)
-                    }
-                    markdownContent={this.props.comment}
-                    setEditorInstanceRef={(editor) => (this.editor = editor)}
-                    placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                    toggleMarkdownHelp={() => {
-                        this.props.toggleMarkdownHelp()
-                    }}
-                />
-                {this.props.comment !== '' && (
-                    <>
-                        <TagsSegment
-                            tags={this.props.tags}
-                            onMouseEnter={this.props.onTagsHover}
-                            showEditBtn={this.props.hoverState === 'tags'}
-                            onTagClick={this.props.onTagClick}
-                            onEditBtnClick={
-                                this.props.annotationFooterDependencies
-                                    ?.onTagIconClick
+            <>
+                <TextBoxContainerStyled>
+                    <MemexEditor
+                        onKeyDown={this.handleInputKeyDown}
+                        onContentUpdate={(content) =>
+                            this.props.onCommentChange(content)
+                        }
+                        markdownContent={this.props.comment}
+                        setEditorInstanceRef={(editor) =>
+                            (this.editor = editor)
+                        }
+                        placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                    />
+                    {this.props.comment !== '' && (
+                        <>
+                            <TagsSegment
+                                tags={this.props.tags}
+                                onMouseEnter={this.props.onTagsHover}
+                                showEditBtn={this.props.hoverState === 'tags'}
+                                onTagClick={this.props.onTagClick}
+                                onEditBtnClick={
+                                    this.props.annotationFooterDependencies
+                                        ?.onTagIconClick
+                                }
+                            />
+                            <FooterContainer>
+                                <SaveActionBar>
+                                    {this.renderActionButtons()}
+                                    {this.renderMarkdownHelpButton()}
+                                </SaveActionBar>
+                                {this.renderTagPicker()}
+                            </FooterContainer>
+                        </>
+                    )}
+                </TextBoxContainerStyled>
+                {this.state.toggleShowTutorial && (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.setState({ toggleShowTutorial: false })
+                        }
+                    >
+                        <HoverBox
+                            top={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'unset'
+                                    : '215px'
                             }
-                        />
-                        <FooterContainer>
-                            <SaveActionBar>
-                                {this.renderActionButtons()}
-                                {this.renderMarkdownHelpButton()}
-                            </SaveActionBar>
-                            {this.renderTagPicker()}
-                        </FooterContainer>
-                    </>
+                            bottom={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '60px'
+                                    : 'unset'
+                            }
+                            right={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '20px'
+                                    : '50px'
+                            }
+                            width="430px"
+                            position={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'fixed'
+                                    : 'initial'
+                            }
+                            height="430px"
+                        >
+                            <QuickTutorial markdownHelpOnTop={true} />
+                        </HoverBox>
+                    </ClickAway>
                 )}
-            </TextBoxContainerStyled>
+            </>
         )
     }
 }

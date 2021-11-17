@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.0.7",
+    "version": "3.0.8",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -101,7 +101,7 @@
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
         "page-metadata-parser": "^1.1.4",
-        "pdfjs-dist": "WorldBrain/pdfjs-dist#fix/unsafe-eval",
+        "pdfjs-dist": "WorldBrain/pdfjs-dist#fix/annot-shifts",
         "polished": "^4.0.3",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",

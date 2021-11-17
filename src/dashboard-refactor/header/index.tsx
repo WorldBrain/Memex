@@ -25,7 +25,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: space-between;
     background: #fff;
-    z-index: 5;
+    z-index: 3001;
 `
 
 const SearchSection = styled(Margin)`

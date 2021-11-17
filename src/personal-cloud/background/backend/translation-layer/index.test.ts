@@ -253,7 +253,7 @@ function dataChangesAndUsage(
     },
 ) {
     return {
-        dataUsageEntry: dataUsage(remoteData, changes, options),
+        // dataUsageEntry: dataUsage(remoteData, changes, options),
         personalDataChange: dataChanges(remoteData, changes, options),
     }
 }
@@ -262,6 +262,7 @@ function blockStats(params: { usedBlocks: number }) {
     return {
         id: expect.anything(),
         usedBlocks: params.usedBlocks,
+        lastChange: expect.any(Number),
         user: TEST_USER.id,
     }
 }
@@ -413,7 +414,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -460,7 +461,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -512,7 +513,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -556,7 +557,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -604,7 +605,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -647,7 +648,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -705,7 +706,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -768,7 +769,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -842,7 +843,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -900,7 +901,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -964,7 +965,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1037,7 +1038,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1125,7 +1126,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1206,7 +1207,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1296,7 +1297,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1379,7 +1380,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1427,7 +1428,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
@@ -1478,7 +1479,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
@@ -1533,7 +1534,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
@@ -1581,7 +1582,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1641,7 +1642,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1686,7 +1687,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalListShare',
@@ -1736,7 +1737,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalListShare',
@@ -1794,7 +1795,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1875,7 +1876,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -1958,7 +1959,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2009,7 +2010,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2062,7 +2063,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2130,7 +2131,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2183,7 +2184,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2238,7 +2239,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2311,7 +2312,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2392,7 +2393,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2453,7 +2454,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalContentMetadata',
@@ -2503,7 +2504,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
@@ -2559,7 +2560,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
@@ -2627,7 +2628,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
@@ -2671,7 +2672,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
@@ -2728,7 +2729,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
@@ -2788,7 +2789,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents(serverStorage.storageManager, [
-                    'dataUsageEntry',
+                    // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
@@ -2846,7 +2847,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
-                        'dataUsageEntry',
+                        // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -2911,7 +2912,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
-                        'dataUsageEntry',
+                        // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -2983,7 +2984,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
-                        'dataUsageEntry',
+                        // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -3069,7 +3070,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
-                        'dataUsageEntry',
+                        // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
                         'personalContentLocator',

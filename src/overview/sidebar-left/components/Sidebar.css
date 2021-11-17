@@ -92,10 +92,10 @@
 }
 
 .triggerDiv {
-    height: 100%;
+    height: 100vh;
     display: flex;
     width: 10px;
-    position: absolute;
+    position: fixed;
     background: transparent;
     z-index: 3000;
 }
