@@ -8,6 +8,8 @@ export interface Props {
     bottom?: string
     width?: string
     withRelativeContainer?: boolean
+    position?: string
+    height?: string
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -33,23 +35,30 @@ export const HoverBoxContainer = styled.div`
 export const HoverBoxDiv = styled.div<Props>`
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
-    overflow: visible;
-    position: absolute;
+    overflow: scroll;
+    position: ${(props) => (props.position ? props.position : 'absolute')};;
     border-radius: 3px;
     width: ${(props) => (props.width ? props.width : '300px')};
+    height: ${(props) => (props.height ? props.height : 'fit-content')};
     ${(props) => (props.top ? `top: ${props.top};` : '')}
     ${(props) => (props.left ? `left: ${props.left};` : '')}
     ${(props) => (props.right ? `right: ${props.right};` : '')}
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
     background-color: #fff;
     border-radius: 3px;
-    z-index: 3;
+    z-index: 1001;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 export const HoverBoxDashboard = styled.div`
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
-    overflow: visible;
+    overflow: scroll;
     position: absolute;
     width: 300px;
     z-index: 1;
@@ -57,4 +66,10 @@ export const HoverBoxDashboard = styled.div`
     border-radius: 3px;
     right: 20px;
     top: 40px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `

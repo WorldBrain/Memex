@@ -24,6 +24,9 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -49,6 +52,7 @@ export interface AnnotationProps {
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
+    contextLocation?: string
     lastEdited?: Date | number
     annotationFooterDependencies?: AnnotationFooterEventProps
     annotationEditDependencies?: AnnotationEditGeneralProps &
@@ -73,6 +77,11 @@ export interface AnnotationEditableEventProps {
     onUnhover?: React.MouseEventHandler
 }
 
+interface State {
+    editorHeight: string
+    showQuickTutorial: boolean
+}
+
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
@@ -85,8 +94,15 @@ export default class AnnotationEditable extends React.Component<Props> {
         hoverState: null,
     }
 
-    focus() {
-        this.annotEditRef?.current?.focusOnInputEnd()
+    state: State = {
+        editorHeight: '50px',
+        showQuickTutorial: false,
+    }
+
+    focus() {}
+
+    componentDidMount() {
+        this.textAreaHeight()
     }
 
     private get creationInfo() {
@@ -112,6 +128,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                   }
                 : undefined,
         }
+    }
+
+    private toggleShowTutorial() {
+        this.setState({ showQuickTutorial: !this.state.showQuickTutorial })
     }
 
     private get theme(): SidebarAnnotationTheme {
@@ -182,6 +202,13 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private textAreaHeight() {
+        const lines = this.props.comment.split(/\r\n|\r|\n/).length
+        const height = lines * 20
+        const heightinPX = (height + 'px').toString()
+        this.setState({ editorHeight: heightinPX })
+    }
+
     private renderNote() {
         const {
             url,
@@ -198,6 +225,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
+                    comment={comment}
+                    editorHeight={this.state.editorHeight}
                 />
             )
         }
@@ -334,6 +363,24 @@ export default class AnnotationEditable extends React.Component<Props> {
         ]
     }
 
+    private renderMarkdownHelpButton() {
+        return (
+            <MarkdownButtonContainer>
+                <ButtonTooltip
+                    tooltipText="Show formatting help"
+                    position="bottom"
+                >
+                    <MarkdownButton
+                        src={icons.helpIcon}
+                        onClick={() =>
+                            this.setState({ showQuickTutorial: true })
+                        }
+                    />
+                </ButtonTooltip>
+            </MarkdownButtonContainer>
+        )
+    }
+
     private renderFooter() {
         const {
             mode,
@@ -382,19 +429,22 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {mode === 'delete' && (
                     <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                 )}
-                <BtnContainerStyled>
-                    <ButtonTooltip tooltipText="esc" position="bottom">
-                        <CancelBtnStyled onClick={cancelBtnHandler}>
-                            Cancel
-                        </CancelBtnStyled>
-                    </ButtonTooltip>
-                    <ButtonTooltip
-                        tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                        position="bottom"
-                    >
-                        {confirmBtn}
-                    </ButtonTooltip>
-                </BtnContainerStyled>
+                <SaveActionBar>
+                    <BtnContainerStyled>
+                        <ButtonTooltip tooltipText="esc" position="bottom">
+                            <CancelBtnStyled onClick={cancelBtnHandler}>
+                                Cancel
+                            </CancelBtnStyled>
+                        </ButtonTooltip>
+                        <ButtonTooltip
+                            tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                            position="bottom"
+                        >
+                            {confirmBtn}
+                        </ButtonTooltip>
+                    </BtnContainerStyled>
+                    {this.renderMarkdownHelpButton()}
+                </SaveActionBar>
             </DeletionBox>
         )
     }
@@ -410,8 +460,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }}
                     >
                         <AnnotationStyled>
-                            {this.renderHighlightBody()}
-                            {this.renderNote()}
+                            <ContentContainer>
+                                {this.renderHighlightBody()}
+                                {this.renderNote()}
+                            </ContentContainer>
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
@@ -447,6 +499,40 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
+                {this.state.showQuickTutorial && (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.setState({ showQuickTutorial: false })
+                        }
+                    >
+                        <HoverBox
+                            top={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'unset'
+                                    : '215px'
+                            }
+                            bottom={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '60px'
+                                    : 'unset'
+                            }
+                            right={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '20px'
+                                    : '50px'
+                            }
+                            width="430px"
+                            position={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'fixed'
+                                    : 'initial'
+                            }
+                            height="430px"
+                        >
+                            <QuickTutorial markdownHelpOnTop={true} />
+                        </HoverBox>
+                    </ClickAway>
+                )}
             </ThemeProvider>
         )
     }
@@ -495,6 +581,24 @@ const EditNoteIcon = styled.div`
     mask-size: 16px;
     cursor: pointer;
 `
+const MarkdownButtonContainer = styled.div`
+    display: flex;
+`
+
+const MarkdownButton = styled.img`
+    display: flex;
+    height: 16px;
+    opacity: 0.8;
+    mask-position: center center;
+    margin-left: 10px;
+    cursor: pointer;
+`
+
+const SaveActionBar = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+`
 
 const HighlightActionsBox = styled.div`
     position: absolute;
@@ -507,24 +611,15 @@ const HighlightActionsBox = styled.div`
 
 const NoteTextBox = styled.div`
     position: relative;
-    min-height: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     overflow-x: hidden;
-    line-height: 22px;
+    line-height: 20px;
     line-break: normal;
     word-break: break-word;
     hyphens: auto;
     width: 100%;
-
-    & *:first-child {
-        margin-top: 0px;
-    }
-
-    & *:last-child {
-        margin-bottom: 0px;
-    }
 `
 
 const NoteText = styled(Markdown)`
@@ -608,10 +703,10 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 10px 15px 10px 15px;
+    padding: 15px 15px 15px 15px;
     line-height: 1.4;
     text-align: left;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
     overflow: visible;
     flex-direction: row-reverse;
     display: flex;
@@ -631,7 +726,7 @@ const CommentBox = styled.div`
 
 const DefaultFooterStyled = styled.div`
     display: flex;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #f0f0f0;
 
     & div {
         border-top: none;
@@ -662,6 +757,12 @@ const AnnotationStyled = styled.div`
         `
         box-shadow: 0px 0px 5px 1px #00000080;
     `};
+`
+
+const ContentContainer = styled.div`
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
 `
 
 const DeleteConfirmStyled = styled.span`
@@ -697,7 +798,7 @@ const BtnContainerStyled = styled.div`
     flex-direction: row-reverse;
     width: 100%;
     justify-content: flex-end;
-    padding: 0 5px 5px;
+    align-items: center;
 `
 
 const ActionBtnStyled = styled.button`
@@ -729,5 +830,7 @@ const ActionBtnStyled = styled.button`
 const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
-    padding-left: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding: 5px;
+}
 `

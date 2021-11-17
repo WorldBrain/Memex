@@ -70,6 +70,7 @@ export interface AnnotationsSidebarProps
 
 interface AnnotationsSidebarState {
     searchText?: string
+    isMarkdownHelpShown?: boolean
 }
 
 class AnnotationsSidebar extends React.Component<
@@ -77,8 +78,12 @@ class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarState
 > {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationEditRef
 
-    state = { searchText: '' }
+    state = {
+        searchText: '',
+        isMarkdownHelpShown: false,
+    }
 
     componentDidMount() {
         document.addEventListener('keydown', this.onKeydown, false)
@@ -153,13 +158,11 @@ class AnnotationsSidebar extends React.Component<
 
         return (
             <NewAnnotationSection>
-                <NewAnnotationBoxStyled>
-                    <AnnotationCreate
-                        {...this.props.annotationCreateProps}
-                        ref={(ref) => (this.annotationCreateRef = ref)}
-                        autoFocus
-                    />
-                </NewAnnotationBoxStyled>
+                <AnnotationCreate
+                    {...this.props.annotationCreateProps}
+                    ref={this.annotationCreateRef}
+                    autoFocus
+                />
             </NewAnnotationSection>
         )
     }
@@ -373,30 +376,33 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <AnnotationEditable
-                    key={i}
-                    {...annot}
-                    {...this.props}
-                    body={annot.body}
-                    comment={annot.comment}
-                    createdWhen={annot.createdWhen!}
-                    isShared={annot.isShared}
-                    isBulkShareProtected={annot.isBulkShareProtected}
-                    mode={this.props.annotationModes[annot.url]}
-                    isActive={this.props.activeAnnotationUrl === annot.url}
-                    onHighlightClick={this.props.setActiveAnnotationUrl(
-                        annot.url,
-                    )}
-                    onGoToAnnotation={footerDeps.onGoToAnnotation}
-                    annotationEditDependencies={this.props.bindAnnotationEditProps(
-                        annot,
-                    )}
-                    annotationFooterDependencies={footerDeps}
-                    isClickable={
-                        this.props.theme.canClickAnnotations &&
-                        annot.body?.length > 0
-                    }
-                />
+                <>
+                    <AnnotationEditable
+                        key={i}
+                        {...annot}
+                        {...this.props}
+                        body={annot.body}
+                        comment={annot.comment}
+                        createdWhen={annot.createdWhen!}
+                        isShared={annot.isShared}
+                        isBulkShareProtected={annot.isBulkShareProtected}
+                        mode={this.props.annotationModes[annot.url]}
+                        isActive={this.props.activeAnnotationUrl === annot.url}
+                        onHighlightClick={this.props.setActiveAnnotationUrl(
+                            annot.url,
+                        )}
+                        onGoToAnnotation={footerDeps.onGoToAnnotation}
+                        annotationEditDependencies={this.props.bindAnnotationEditProps(
+                            annot,
+                        )}
+                        annotationFooterDependencies={footerDeps}
+                        isClickable={
+                            this.props.theme.canClickAnnotations &&
+                            annot.body?.length > 0
+                        }
+                        ref={(ref) => (this.annotationEditRef = ref)}
+                    />
+                </>
             )
         })
 
@@ -674,10 +680,6 @@ const AnnotationsSectionStyled = styled.section`
 const NewAnnotationBoxStyled = styled.div`
     position: relative;
     width: 100%;
-
-    &:hover {
-        background: white;
-    }
 `
 
 const TopSectionStyled = styled.div`

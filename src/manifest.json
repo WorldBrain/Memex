@@ -1,5 +1,5 @@
 {
-    "name": "WorldBrain's Memex",
+    "name": "Memex",
     "short_name": "Memex",
     "version": "0.3.3",
     "description": "Search, annotate and organize what you've read online.",
@@ -15,7 +15,7 @@
         }
     ],
     "browser_action": {
-        "default_title": "WorldBrain's Memex",
+        "default_title": "Memex",
         "default_popup": "./popup.html"
     },
     "commands": {

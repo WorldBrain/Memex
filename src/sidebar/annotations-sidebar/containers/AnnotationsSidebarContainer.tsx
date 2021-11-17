@@ -39,6 +39,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -222,6 +223,7 @@ export class AnnotationsSidebarContainer<
             loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
+            hoverState: null,
         }
     }
 
@@ -434,30 +436,27 @@ export class AnnotationsSidebarContainer<
                                 <ActionIcon src={icons.close} />
                             </CloseBtn>
                         </ButtonTooltip>
-                        {this.props.isLockable &&
-                            (this.state.isLocked ? (
-                                <ButtonTooltip
-                                    tooltipText="Unlock sidebar"
-                                    position="rightCentered"
-                                >
-                                    <CloseBtn onClick={this.toggleSidebarLock}>
-                                        <SidebarLockIconReverse
-                                            src={icons.doubleArrow}
-                                        />
-                                    </CloseBtn>
-                                </ButtonTooltip>
-                            ) : (
-                                <ButtonTooltip
-                                    tooltipText="Lock sidebar open"
-                                    position="rightCentered"
-                                >
-                                    <CloseBtn onClick={this.toggleSidebarLock}>
-                                        <SidebarLockIcon
-                                            src={icons.doubleArrow}
-                                        />
-                                    </CloseBtn>
-                                </ButtonTooltip>
-                            ))}
+                        {this.state.isLocked ? (
+                            <ButtonTooltip
+                                tooltipText="Unlock sidebar"
+                                position="rightCentered"
+                            >
+                                <CloseBtn onClick={this.toggleSidebarLock}>
+                                    <SidebarLockIconReverse
+                                        src={icons.doubleArrow}
+                                    />
+                                </CloseBtn>
+                            </ButtonTooltip>
+                        ) : (
+                            <ButtonTooltip
+                                tooltipText="Lock sidebar open"
+                                position="rightCentered"
+                            >
+                                <CloseBtn onClick={this.toggleSidebarLock}>
+                                    <SidebarLockIcon src={icons.doubleArrow} />
+                                </CloseBtn>
+                            </ButtonTooltip>
+                        )}
                         <DropdownMenuBtn
                             onMenuItemClick={(item) =>
                                 this.processEvent('setDisplayMode', {
@@ -689,6 +688,12 @@ const ContainerStyled = styled.div`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
 
     font-family: sans-serif;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarContainerStyled = styled.div`

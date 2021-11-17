@@ -18,6 +18,7 @@ const StyledHoverBox = styled(HoverBox)`
     background-color: ${colors.white};
     flex-direction: column;
     box-shadow: ${styles.boxShadow.overlayElement};
+    overflow: hidden;
 `
 
 const Separator = styled.div`
