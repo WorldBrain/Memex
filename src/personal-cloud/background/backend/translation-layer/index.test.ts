@@ -524,10 +524,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
-                    [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id, {
-                        normalizedUrl: testLocators.first.location,
-                        id: testLocators.first.id,
-                    }],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
                 ], { skipChanges: 4 }),
                 personalBlockStats: [blockStats({ usedBlocks: 1 })],
                 personalContentMetadata: [testMetadata.second],
@@ -647,8 +644,8 @@ describe('Personal cloud translation layer', () => {
                     'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
-                    // 'personalContentMetadata',
-                    // 'personalContentLocator',
+                    'personalContentMetadata',
+                    'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
@@ -657,19 +654,20 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
-                    [DataChangeType.Modify, 'personalContentLocator', testLocators.third.id],
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.third.id, {
-                        normalizedUrl: testLocators.third.location,
+                        normalizedUrl: testLocators.third_dummy.location,
                     }],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third_dummy.id],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.third.id, {
-                        normalizedUrl: testLocators.third.localNormalizedUrl,
                         id: testLocators.third.localId,
                     }],
+
                 ], { skipChanges: 0 }),
                 personalBlockStats: [blockStats({ usedBlocks: 2 })],
-                // personalContentMetadata: [testMetadata.first, testMetadata.second],
-                // personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
             })
 
             // prettier-ignore
@@ -677,7 +675,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.third.url } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { normalizedUrl: LOCAL_TEST_DATA_V24.locators.third.normalizedUrl } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { id: LOCAL_TEST_DATA_V24.locators.third.id } },
             ])
         })
 
