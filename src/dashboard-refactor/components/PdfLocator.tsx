@@ -17,6 +17,7 @@ export interface Props {
 
 export default class PdfLocator extends React.PureComponent<Props, State> {
     private static allowedFileTypes = ['application/pdf']
+    private static dropId = 'pdf-dropzone'
 
     state: State = { errorMessage: null, isBeingDraggedOver: false }
 
@@ -38,8 +39,13 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
 
         await this.handleFileReceived(file)
     }
-    private setDragOver = (isBeingDraggedOver: boolean) => () =>
-        this.setState({ isBeingDraggedOver })
+    private setDragOver = (
+        isBeingDraggedOver: boolean,
+    ): React.DragEventHandler => (e) => {
+        if ((e.target as Element).id === PdfLocator.dropId) {
+            this.setState({ isBeingDraggedOver })
+        }
+    }
 
     private handleFileDrop: React.DragEventHandler = async (e) => {
         e.preventDefault()
@@ -47,7 +53,8 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
         await this.handleFileReceived(file)
     }
 
-    private handleDragEnter: React.DragEventHandler = async (e) => {}
+    private handleDragOver: React.DragEventHandler = async (e) =>
+        e.preventDefault()
 
     render() {
         return (
@@ -65,11 +72,16 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
                         one too in order to view it with annotations.
                     </LocatorText>
                     <LocatorDropContainer
+                        id={PdfLocator.dropId}
+                        onDrop={this.handleFileDrop}
                         onClick={this.handleFileSelect}
+                        onDragOver={this.handleDragOver}
                         onDragEnter={this.setDragOver(true)}
                         onDragLeave={this.setDragOver(false)}
-                        onDrop={this.handleFileDrop}
                     >
+                        {this.state.isBeingDraggedOver && (
+                            <strong>DRAGGED!!!!</strong>
+                        )}
                         {this.state.errorMessage != null ? (
                             <>
                                 <div>
