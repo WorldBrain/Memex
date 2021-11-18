@@ -185,7 +185,7 @@ export function createSelfTests(options: {
                         tab: {} as any,
                     },
                     {
-                        pageUrl: normalizedTestPageUrl,
+                        pageUrl: testPageUrl,
                         comment: 'Hi, this is a test comment',
                         title: testPageTitle,
                         createdWhen: new Date(),
@@ -200,7 +200,7 @@ export function createSelfTests(options: {
                         tab: {} as any,
                     },
                     {
-                        pageUrl: normalizedTestPageUrl,
+                        pageUrl: testPageUrl,
                         comment: `Yet another test comment! This one's protected`,
                         title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
@@ -221,7 +221,7 @@ export function createSelfTests(options: {
                         tab: {} as any,
                     },
                     {
-                        pageUrl: normalizedTestPageUrl,
+                        pageUrl: testPageUrl,
                         comment: `*memex-debug*: upload error`,
                         title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
@@ -244,7 +244,7 @@ export function createSelfTests(options: {
                         tab: {} as any,
                     },
                     {
-                        pageUrl: normalizedTestPageUrl,
+                        pageUrl: testPageUrl,
                         comment: `*memex-debug*: download error`,
                         title: testPageTitle,
                         createdWhen: new Date('2021-07-21'),
