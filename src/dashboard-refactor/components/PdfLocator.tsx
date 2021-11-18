@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { fileOpen } from 'browser-fs-access'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { sizeConstants } from '../constants'
+import { dropImage } from 'src/common-ui/components/design-library/icons'
 
 interface State {
     errorMessage: string | null
@@ -58,97 +59,110 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <Container>
-                <DetailsContainer>
-                    <Title>{this.props.title}</Title>
-                    <Url>{this.props.url}</Url>
-                </DetailsContainer>
-                <LocatorContainer>
-                    <LocatorHeader>
-                        Open this PDF from your local file system
-                    </LocatorHeader>
-                    <LocatorText>
-                        The person who annoted this PDF owned a copy. You need
-                        one too in order to view it with annotations.
-                    </LocatorText>
-                    <LocatorDropContainer
-                        id={PdfLocator.dropId}
-                        onDrop={this.handleFileDrop}
-                        onClick={this.handleFileSelect}
-                        onDragOver={this.handleDragOver}
-                        onDragEnter={this.setDragOver(true)}
-                        onDragLeave={this.setDragOver(false)}
-                    >
-                        {this.state.isBeingDraggedOver && (
-                            <strong>DRAGGED!!!!</strong>
-                        )}
-                        {this.state.errorMessage != null ? (
-                            <>
-                                <div>
-                                    <LocatorDropText>
-                                        An error occurred on processing your
-                                        file:
-                                    </LocatorDropText>
-                                </div>
-                                <div>
-                                    <LocatorDropErrorText>
-                                        {this.state.errorMessage}
-                                    </LocatorDropErrorText>
-                                </div>
-                            </>
-                        ) : (
-                            <LocatorDropText>
-                                <strong>Click here</strong> or drag & drop file
-                                here
-                            </LocatorDropText>
-                        )}
-                    </LocatorDropContainer>
-                </LocatorContainer>
-            </Container>
+            <LocatorContainer
+                id={PdfLocator.dropId}
+                onDragOver={this.handleDragOver}
+                onDragEnter={this.setDragOver(true)}
+                onDragLeave={this.setDragOver(false)}
+                onDrop={this.setDragOver(false)}
+                isBeingDraggedOver={this.state.isBeingDraggedOver}
+            >
+                <LocatorHeader>
+                    The PDF could not be found in the expected location
+                </LocatorHeader>
+                <LocatorText>
+                    If you have a copy somewhere else, open it with this brower
+                    or drop it here
+                </LocatorText>
+                <LocatorDropContainerInner
+                    id={PdfLocator.dropId}
+                    onDragEnter={this.setDragOver(true)}
+                    onDragLeave={this.setDragOver(false)}
+                    onDrop={this.setDragOver(false)}
+                    isBeingDraggedOver={this.state.isBeingDraggedOver}
+                >
+                    <DropImage src={dropImage} />
+                    {this.state.isBeingDraggedOver ? (
+                        <LocatorDropText>...aaaand, drop!</LocatorDropText>
+                    ) : (
+                        <LocatorDropText>Drop PDF file here</LocatorDropText>
+                    )}
+                </LocatorDropContainerInner>
+            </LocatorContainer>
         )
     }
 }
 
-const Container = styled(Margin)`
-    display: flex;
-    flex-direction: column;
-    align-self: center;
-    max-width: ${sizeConstants.searchResults.widthPx}px;
-    margin-bottom: 100px;
-    width: fill-available;
-`
-
-const Title = styled.h1``
-
-const Url = styled.span``
-
-const DetailsContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-self: flex-start;
-`
-
 const LocatorContainer = styled.div`
-    padding: 20px 25px;
-    border: 1px solid black;
-    border-radius: 5px;
-    background-color: white;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
 `
 
-const LocatorHeader = styled.h1``
+const LocatorHeader = styled.h1`
+    text-align: center;
+    color: ${(props) => props.theme.colors.primary};
+    font-size: 1.5rem;
+    pointer-events: none;
+    margin-top: 10vh;
+`
 
-const LocatorText = styled.span``
+const LocatorText = styled.div`
+    font-size: 1rem;
+    color: ${(props) => props.theme.colors.darkgrey};
+    margin-bottom: 50px;
+    pointer-events: none;
+`
 
 const LocatorDropContainer = styled.div`
     padding: 30px 20px;
     margin: 20px 50px;
     border-radius: 5px;
-    background-color: grey;
+    border: 10px solid white;
+    background-color: white;
     cursor: pointer;
+    width: 400px
+    min-height: 200px;
+    height: 30vh;
 `
 
-const LocatorDropText = styled.span``
+const LocatorDropContainerInner = styled.div`
+    border-radius: 5px;
+    border: 2px dashed ${(props) => props.theme.colors.purple};
+    box-sizing: border-box;
+    height: fill-available;
+    width: fill-available;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 800px;
+    max-width: 1200px;
+    width: 50vw;
+    height: 50vh;
+    pointer-events: none;
+`
+
+const DropImage = styled.img`
+    display: flex;
+    background-size: 25px;
+    background-position: center center;
+    border-radius: 100px;
+    padding: 20px;
+    margin-bottom: 40px;
+    border: 3px solid ${(props) => props.theme.colors.purple};
+`
+
+const LocatorDropText = styled.div`
+    color: ${(props) => props.theme.colors.purple};
+    text-align: center;
+    pointer-events: none;
+    font-size: 1.5rem;
+    font-weight: 400;
+`
 
 const LocatorDropErrorText = styled.span`
     color: red;

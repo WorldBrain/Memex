@@ -14,6 +14,7 @@ export const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 export const heartEmptyGrey = browser.extension.getURL(
     '/img/star_empty_grey.svg',
 )
+export const dropImage = browser.extension.getURL('/img/dropImage.svg')
 export const helpIcon = browser.extension.getURL('/img/help.svg')
 export const searchIcon = browser.extension.getURL('/img/search.svg')
 export const commentAdd = browser.extension.getURL('/img/comment_add.svg')
