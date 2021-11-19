@@ -78,6 +78,7 @@ describe('Personal cloud', () => {
                         testOptions.type === 'html'
                             ? [
                                   {
+                                      id: 667,
                                       url: fullUrl,
                                       htmlBody,
                                       title: fullTitle,
@@ -86,6 +87,7 @@ describe('Personal cloud', () => {
                               ]
                             : [
                                   {
+                                      id: 667,
                                       type: 'pdf',
                                       url: fullUrl,
                                   },

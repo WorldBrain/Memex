@@ -12,11 +12,10 @@ export const TEST_PDF_METADATA: MemexPDFMetadata = {
         IsAcroFormPresent: false,
         IsCollectionPresent: false,
         IsLinearized: false,
-        IsSignaturesPresent: false,
         IsXFAPresent: false,
         PDFFormatVersion: '1.4',
         Producer: 'Skia/PDF m93 Google Docs Renderer',
         Title: 'test',
     },
-    fingerprints: ['finger-one', 'finger-two'],
+    fingerprints: ['fa217cb8b2488a93120c4c9618b8fe3e'],
 }

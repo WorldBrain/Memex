@@ -76,11 +76,13 @@ export default async function extractPdfContent(
     let blob = 'blob' in input ? input.blob : undefined
 
     if (!('blob' in input)) {
-        blob = await loadBlob<Blob>({
-            url: input.url,
-            timeout: 5000,
-            responseType: 'blob',
-        })
+        blob = options.fetch
+            ? await (await options.fetch(input.url)).blob()
+            : await loadBlob<Blob>({
+                  url: input.url,
+                  timeout: 5000,
+                  responseType: 'blob',
+              })
     }
 
     const pdfData = await new Promise<ArrayBuffer>(function (resolve, reject) {
