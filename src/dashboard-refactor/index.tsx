@@ -476,7 +476,6 @@ export class DashboardContainer extends StatefulUIElement<
             <PdfLocator
                 title="Test title"
                 url="https://testsite.com/test.pdf"
-                onFileReceive={async (file) => console.log(file)}
             />
         )
     }
