@@ -1,4 +1,4 @@
-export const loadBlob = ({
+export const loadBlob = <T extends Blob | Document>({
     url,
     timeout,
     responseType,
@@ -6,7 +6,7 @@ export const loadBlob = ({
     url: string
     timeout: number
     responseType?: any
-}) => {
+}): Promise<T> => {
     return new Promise((resolve, reject) => {
         const req = new XMLHttpRequest()
         req.timeout = timeout

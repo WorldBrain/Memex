@@ -160,7 +160,7 @@ export function createSelfTests(options: {
                 console.log('Set test Readwise API Key')
             }
 
-            const testPageUrl = 'https://www.getmemex.com/'
+            const testPageUrl = 'https://getmemex.com/'
             const testPageTitle = 'test title'
             const normalizedTestPageUrl = normalizeUrl(testPageUrl, {})
             if (shouldTest('tag')) {
@@ -289,7 +289,7 @@ export function createSelfTests(options: {
                     url: testPageUrl,
                     skipPageIndexing: true,
                 })
-                console.log(`Added 'https://www.getmemex.com' to 2 lists`)
+                console.log(`Added 'https://getmemex.com' to 2 lists`)
             }
             if (shouldTest('copy-paste')) {
                 await backgroundModules.copyPaster.createTemplate({

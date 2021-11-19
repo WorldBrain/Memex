@@ -48,6 +48,8 @@ import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
+import { setupPdfViewerListeners } from './pdf-detection'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -60,6 +62,16 @@ export async function main(
     } = {},
 ) {
     params.loadRemotely = params.loadRemotely ?? true
+
+    if (params.getContentFingerprints != null) {
+        setupPdfViewerListeners({
+            onLoadError: () =>
+                bgScriptBG.openOverviewTab({
+                    openInSameTab: true,
+                    missingPdf: true,
+                }),
+        })
+    }
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
     setupPageContentRPC()
@@ -78,6 +90,7 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
+    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()

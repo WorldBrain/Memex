@@ -1,10 +1,9 @@
 import * as Global from './global'
 import {
     FingerprintSchemeType,
-    ContentLocatorFormat,
     ContentFingerprint,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { GetContentFingerprints } from './types'
+import type { GetContentFingerprints } from './types'
 
 const waitForDocument = async () => {
     while (true) {

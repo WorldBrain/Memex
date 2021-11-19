@@ -3,6 +3,7 @@ import * as PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 import { PDF_RAW_TEXT_SIZE_LIMIT } from './constants'
 import type { MemexPDFMetadata } from './types'
+import { loadBlob } from 'src/imports/background/utils'
 
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData: ArrayBuffer) {
@@ -75,16 +76,11 @@ export default async function extractPdfContent(
     let blob = 'blob' in input ? input.blob : undefined
 
     if (!('blob' in input)) {
-        const doFetch = options?.fetch ?? fetch
-        const response = await doFetch(input.url)
-
-        if (response.status >= 400 && response.status < 600) {
-            return Promise.reject(
-                new Error(`Bad response from server: ${response.status}`),
-            )
-        }
-
-        blob = await response.blob()
+        blob = await loadBlob<Blob>({
+            url: input.url,
+            timeout: 5000,
+            responseType: 'blob',
+        })
     }
 
     const pdfData = await new Promise<ArrayBuffer>(function (resolve, reject) {
