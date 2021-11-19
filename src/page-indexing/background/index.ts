@@ -212,7 +212,7 @@ export class PageIndexingBackground {
             const newLocator: ContentLocator = {
                 ...params.locator,
                 originalLocation: params.locator.originalLocation,
-                location: params.locator.originalLocation,
+                location: normalizeUrl(params.locator.originalLocation),
                 locationType: isFile
                     ? ContentLocatorType.Local
                     : ContentLocatorType.Remote,
