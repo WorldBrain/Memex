@@ -27,7 +27,7 @@ const Sidebar = styled.div<{
     justify-content: start;
     width: ${sizeConstants.listsSidebar.widthPx}px;
     position: fixed;
-    z-index: 10;
+    z-index: 3000;
 
     ${(props) =>
         props.locked &&
@@ -61,9 +61,9 @@ const Sidebar = styled.div<{
 const Container = styled.div``
 
 const PeekTrigger = styled.div`
-    height: 100%;
+    height: 100vh;
     width: 10px;
-    position: absolute;
+    position: fixed;
     background: transparent;
 `
 
