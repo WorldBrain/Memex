@@ -24,9 +24,9 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
-import MarkdownHelp from './MarkdownHelp'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -52,6 +52,7 @@ export interface AnnotationProps {
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
     isClickable?: boolean
+    contextLocation?: string
     lastEdited?: Date | number
     annotationFooterDependencies?: AnnotationFooterEventProps
     annotationEditDependencies?: AnnotationEditGeneralProps &
@@ -66,7 +67,6 @@ export interface AnnotationProps {
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
-    toggleMarkdownHelp?: () => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -78,7 +78,8 @@ export interface AnnotationEditableEventProps {
 }
 
 interface State {
-    isMarkdownHelpShown: boolean
+    editorHeight: string
+    showQuickTutorial: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -94,19 +95,15 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     state: State = {
-        isMarkdownHelpShown: false,
-    }
-
-    public removeMarkdownHelp() {
-        this.setState({
-            isMarkdownHelpShown: false,
-        })
+        editorHeight: '50px',
+        showQuickTutorial: false,
     }
 
     focus() {}
 
-    private hideMarkdownHelp = () =>
-        this.setState({ isMarkdownHelpShown: false })
+    componentDidMount() {
+        this.textAreaHeight()
+    }
 
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
@@ -131,6 +128,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                   }
                 : undefined,
         }
+    }
+
+    private toggleShowTutorial() {
+        this.setState({ showQuickTutorial: !this.state.showQuickTutorial })
     }
 
     private get theme(): SidebarAnnotationTheme {
@@ -201,6 +202,13 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private textAreaHeight() {
+        const lines = this.props.comment.split(/\r\n|\r|\n/).length
+        const height = lines * 20
+        const heightinPX = (height + 'px').toString()
+        this.setState({ editorHeight: heightinPX })
+    }
+
     private renderNote() {
         const {
             url,
@@ -218,9 +226,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {...annotationEditDependencies}
                     rows={2}
                     comment={comment}
-                    toggleMarkdownHelp={() => {
-                        this.props.toggleMarkdownHelp()
-                    }}
+                    editorHeight={this.state.editorHeight}
                 />
             )
         }
@@ -358,18 +364,16 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private renderMarkdownHelpButton() {
-        const setPickerShown = (isMarkdownHelpShown: boolean) =>
-            this.setState({ isMarkdownHelpShown })
         return (
             <MarkdownButtonContainer>
                 <ButtonTooltip
-                    tooltipText="Toggle formatting help"
+                    tooltipText="Show formatting help"
                     position="bottom"
                 >
                     <MarkdownButton
                         src={icons.helpIcon}
                         onClick={() =>
-                            setPickerShown(!this.state.isMarkdownHelpShown)
+                            this.setState({ showQuickTutorial: true })
                         }
                     />
                 </ButtonTooltip>
@@ -495,15 +499,39 @@ export default class AnnotationEditable extends React.Component<Props> {
                         </AnnotationStyled>
                     </ItemBox>
                 </Margin>
-                {!this.state.isMarkdownHelpShown ? null : (
-                    <HoverBox
-                        top="215px"
-                        right="50px"
-                        width="430px"
-                        position="initial"
+                {this.state.showQuickTutorial && (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.setState({ showQuickTutorial: false })
+                        }
                     >
-                        <MarkdownHelp />
-                    </HoverBox>
+                        <HoverBox
+                            top={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'unset'
+                                    : '215px'
+                            }
+                            bottom={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '60px'
+                                    : 'unset'
+                            }
+                            right={
+                                this.props.contextLocation === 'dashboard'
+                                    ? '20px'
+                                    : '50px'
+                            }
+                            width="430px"
+                            position={
+                                this.props.contextLocation === 'dashboard'
+                                    ? 'fixed'
+                                    : 'initial'
+                            }
+                            height="430px"
+                        >
+                            <QuickTutorial markdownHelpOnTop={true} />
+                        </HoverBox>
+                    </ClickAway>
                 )}
             </ThemeProvider>
         )
@@ -587,7 +615,7 @@ const NoteTextBox = styled.div`
     justify-content: space-between;
     align-items: center;
     overflow-x: hidden;
-    line-height: 22px;
+    line-height: 20px;
     line-break: normal;
     word-break: break-word;
     hyphens: auto;

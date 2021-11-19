@@ -11,6 +11,7 @@ export const PageResultList = styled.ol`
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 35px;
 `
 
 export const NoteResultList = styled.ol`

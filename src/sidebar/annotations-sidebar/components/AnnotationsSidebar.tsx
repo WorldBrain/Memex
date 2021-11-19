@@ -22,8 +22,6 @@ import {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import MarkdownHelp from 'src/annotations/components/MarkdownHelp'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { SidebarContainerState } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
@@ -97,9 +95,6 @@ class AnnotationsSidebar extends React.Component<
 
     focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
 
-    private toggleMarkdownHelp = () =>
-        this.setState({ isMarkdownHelpShown: !this.state.isMarkdownHelpShown })
-
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
             this.props.onClickOutside(e as any)
@@ -167,20 +162,7 @@ class AnnotationsSidebar extends React.Component<
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
                     autoFocus
-                    toggleMarkdownHelp={() => this.toggleMarkdownHelp()}
                 />
-                {!this.state.isMarkdownHelpShown ? null : (
-                    <HoverBox
-                        right="0px"
-                        top="5px"
-                        width="430px"
-                        position="relative"
-                    >
-                        {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
-                        <MarkdownHelp />
-                        {/*</ClickAway>*/}
-                    </HoverBox>
-                )}
             </NewAnnotationSection>
         )
     }
@@ -418,21 +400,8 @@ class AnnotationsSidebar extends React.Component<
                             this.props.theme.canClickAnnotations &&
                             annot.body?.length > 0
                         }
-                        toggleMarkdownHelp={() => this.toggleMarkdownHelp()}
                         ref={(ref) => (this.annotationEditRef = ref)}
                     />
-                    {!this.state.isMarkdownHelpShown ? null : (
-                        <HoverBox
-                            right="0px"
-                            width="430px"
-                            position="relative"
-                            ref={(ref) => (this.annotationEditRef = ref)}
-                        >
-                            {/*<ClickAway onClickAway={() => setPickerShown(false)}>*/}
-                            <MarkdownHelp />
-                            {/*</ClickAway>*/}
-                        </HoverBox>
-                    )}
                 </>
             )
         })
