@@ -32,6 +32,7 @@ export function makeSingleDeviceUILogicTestFactory(
     return (description, test) => {
         it(description, async () => {
             const setup = await setupBackgroundIntegrationTest(options)
+            setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
             await test({
                 device: {
                     ...setup,

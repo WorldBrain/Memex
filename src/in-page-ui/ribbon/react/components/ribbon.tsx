@@ -535,6 +535,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     .commentText
                                             }
                                             tags={this.props.commentBox.tags}
+                                            isRibbonCommentBox={true}
                                         />
                                     </Tooltip>
                                 )}
