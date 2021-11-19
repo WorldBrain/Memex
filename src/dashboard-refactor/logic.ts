@@ -10,6 +10,7 @@ import {
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
+    MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
@@ -96,14 +97,20 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
+        let mode: State['mode'] = 'search'
+        if (isDuringInstall(this.options.location)) {
+            mode = 'onboarding'
+        } else if (
+            this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
+        ) {
+            mode = 'locate-pdf'
+        }
+
         return {
+            mode,
             loadState: 'pristine',
             isCloudEnabled: true,
             currentUser: null,
-            mode: 'locate-pdf',
-            // mode: isDuringInstall(this.options.location)
-            //     ? 'onboarding'
-            //     : 'search',
             modals: {
                 showLogin: false,
                 showSubscription: false,

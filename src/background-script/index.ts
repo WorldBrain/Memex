@@ -45,6 +45,7 @@ import type { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { setLocalStorage } from 'src/util/storage'
+import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 
 interface Dependencies {
     storageManager: Storex
@@ -275,7 +276,9 @@ class BackgroundScript {
         params,
     ) => {
         await this.chooseTabOpenFn(params)({
-            url: OVERVIEW_URL + (params.missingPdf ? '?missing-pdf' : ''),
+            url:
+                OVERVIEW_URL +
+                (params.missingPdf ? `?${MISSING_PDF_QUERY_PARAM}` : ''),
         })
     }
 

@@ -58,9 +58,7 @@ export const conditionallySkipToTimeFilter = async () => {
  * Check if the URL has the parameter install set to true
  */
 export const isDuringInstall = (loc = window.location): boolean =>
-    Object.values(ONBOARDING_QUERY_PARAMS)
-        .map((queryParam) => loc.href.includes(queryParam))
-        .reduce((prev, curr) => prev || curr)
+    loc.href.includes(ONBOARDING_QUERY_PARAMS.NEW_USER)
 
 /**
  * Find the page center of the current page.
