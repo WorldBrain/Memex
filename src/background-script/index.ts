@@ -18,7 +18,12 @@ import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
-import { OVERVIEW_URL, __OLD_INSTALL_TIME_KEY } from 'src/constants'
+import {
+    OVERVIEW_URL,
+    __OLD_INSTALL_TIME_KEY,
+    OPTIONS_URL,
+    LEARN_MORE_URL,
+} from 'src/constants'
 import type { ReadwiseBackground } from 'src/readwise-integration/background'
 
 // TODO: pass these deps down via constructor
@@ -31,11 +36,15 @@ import type TabManagementBackground from 'src/tab-management/background'
 import type CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
-import type { LocalExtensionSettings } from './types'
+import type {
+    LocalExtensionSettings,
+    RemoteBGScriptInterface,
+    OpenTabParams,
+} from './types'
 import type { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { setLocalStorage } from 'src/util/storage'
 
 interface Dependencies {
     storageManager: Storex
@@ -58,8 +67,15 @@ interface Dependencies {
 
 class BackgroundScript {
     private alarmsListener: (alarm: Alarms.Alarm) => void
+    private remoteFunctions: RemoteBGScriptInterface
 
-    constructor(public deps: Dependencies) {}
+    constructor(public deps: Dependencies) {
+        this.remoteFunctions = {
+            openOptionsTab: this.openOptionsPage,
+            openOverviewTab: this.openDashboardPage,
+            openLearnMoreTab: this.openLearnMorePage,
+        }
+    }
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
@@ -215,11 +231,7 @@ class BackgroundScript {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable({
-            openOptionsTab: utils.openOptionsURL,
-            openOverviewTab: utils.openOverviewURL,
-            openLearnMoreTab: utils.openLearnMoreURL,
-        })
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     setupWebExtAPIHandlers() {
@@ -252,6 +264,36 @@ class BackgroundScript {
     clearAlarms() {
         this.deps.alarmsAPI.clearAll()
         this.deps.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
+    }
+
+    private chooseTabOpenFn = (params?: OpenTabParams) =>
+        params?.openInSameTab
+            ? this.deps.tabsAPI.update
+            : this.deps.tabsAPI.create
+
+    private openDashboardPage: RemoteBGScriptInterface['openOverviewTab'] = async (
+        params,
+    ) => {
+        await this.chooseTabOpenFn(params)({
+            url: OVERVIEW_URL + (params.missingPdf ? '?missing-pdf' : ''),
+        })
+    }
+
+    private openOptionsPage: RemoteBGScriptInterface['openOptionsTab'] = async (
+        query,
+        params,
+    ) => {
+        await this.chooseTabOpenFn(params)({
+            url: `${OPTIONS_URL}#${query}`,
+        })
+    }
+
+    private openLearnMorePage: RemoteBGScriptInterface['openLearnMoreTab'] = async (
+        params,
+    ) => {
+        await this.chooseTabOpenFn(params)({
+            url: LEARN_MORE_URL,
+        })
     }
 }
 
