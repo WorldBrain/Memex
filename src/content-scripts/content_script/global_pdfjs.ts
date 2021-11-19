@@ -7,7 +7,8 @@ import type { GetContentFingerprints } from './types'
 
 const waitForDocument = async () => {
     while (true) {
-        const pdfViewer = (window as any)['PDFViewerApplication'].pdfViewer
+        const pdfApplication = (window as any)['PDFViewerApplication']
+        const pdfViewer = pdfApplication?.pdfViewer
         const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
             pdfViewer?.pdfDocument
         if (pdfDocument) {

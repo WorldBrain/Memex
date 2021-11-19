@@ -79,10 +79,6 @@ export async function createContentSharingTestList(
             },
         ],
     })
-    // if (!options?.dontIndexPages) {
-    //     await setup.backgroundModules.pages.addPage(PAGE_1_DATA)
-    //     await setup.backgroundModules.pages.addPage(PAGE_2_DATA)
-    // }
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
         ...ENTRY_1_DATA,

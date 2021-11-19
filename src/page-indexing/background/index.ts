@@ -580,14 +580,12 @@ export class PageIndexingBackground {
     }
 
     private async _getPageData(props: PageCreationProps) {
-        // TODO: This tab manager abstraction seems obselete -
-        //  - it breaks page content extraction via tab for PDFs here. Needs more investigation
-        // const foundTabId = await this._findTabId(props.fullUrl)
-        // if (foundTabId) {
-        //     props.tabId = foundTabId
-        // } else {
-        //     delete props.tabId
-        // }
+        const foundTabId = await this._findTabId(props.fullUrl)
+        if (foundTabId) {
+            props.tabId = foundTabId
+        } else {
+            delete props.tabId
+        }
 
         return props.tabId
             ? this.processPageDataFromTab(props)
