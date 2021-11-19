@@ -255,7 +255,9 @@ export default class PageResultView extends PureComponent<Props> {
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
                             {hasTitle
-                                ? this.props.fullTitle
+                                ? this.props.fullTitle === this.props.fullUrl
+                                    ? this.props.fullTitle.split('/').slice(-1)
+                                    : this.props.fullTitle
                                 : this.props.fullUrl}
                         </PageTitle>
                     </PageContentBox>
@@ -356,4 +358,8 @@ const PageTitle = styled(Margin)`
 const PageUrl = styled.span`
     font-size: 12px;
     color: #545454;
+    display: flex;
+    height: 20px;
+    align-items: center;
+    padding-top: 2px;
 `

@@ -27,7 +27,7 @@ const Sidebar = styled.div<{
     justify-content: start;
     width: ${sizeConstants.listsSidebar.widthPx}px;
     position: fixed;
-    z-index: 10;
+    z-index: 3000;
 
     ${(props) =>
         props.locked &&
