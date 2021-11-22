@@ -16,17 +16,14 @@ import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
 
 export interface Props {
     content: TutorialCardContent[]
+    destroyTutorial: () => void
+    finishTutorial: () => void
 }
 export interface State {
     cardIndex: number
 }
 
 export default class TutorialContainer extends React.Component<Props, State> {
-    static propTypes = {
-        // onConfirm: PropTypes.func.isRequired,
-        // onClose: PropTypes.func.isRequired,
-    }
-
     state: State = { cardIndex: 0 }
     handleEvent = null
 
@@ -34,8 +31,6 @@ export default class TutorialContainer extends React.Component<Props, State> {
         this.handleEvent = reactEventHandler(this, logic.processEvent)
     }
 
-    closeTutorial = () => window.close()
-    finishTutorial = () => window.close()
     prevCard = (_) => {
         this.setState({
             cardIndex: this.state.cardIndex > 0 ? this.state.cardIndex - 1 : 0,
@@ -56,7 +51,7 @@ export default class TutorialContainer extends React.Component<Props, State> {
                 <CardHeader>
                     <ExitButton>
                         <button
-                            onClick={this.closeTutorial}
+                            onClick={this.props.destroyTutorial}
                             // onClick={this.handleEvent({ type: 'onClose' })}
                         >
                             X
@@ -79,7 +74,9 @@ export default class TutorialContainer extends React.Component<Props, State> {
                     {this.state.cardIndex < this.props.content.length - 1 ? (
                         <button onClick={this.nextCard}>Next Step</button>
                     ) : (
-                        <button onClick={this.finishTutorial}>Finish</button>
+                        <button onClick={this.props.finishTutorial}>
+                            Finish
+                        </button>
                     )}
                 </CardFooter>
             </TutorialCardContainer>

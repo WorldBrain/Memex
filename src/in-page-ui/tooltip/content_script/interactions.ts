@@ -65,7 +65,7 @@ let manualOverride = false
  * Sets up Container <---> webpage Remote functions.
  */
 export const insertTooltip = async (params: TooltipDependencies) => {
-    // If target is set, Tooltip has already been injected.
+    // temporary hack to inject guided tutorial
     if (
         !tutorialTarget &&
         getUrl(window.location.href).includes(GUIDED_ONBOARDING_URL)
@@ -74,9 +74,45 @@ export const insertTooltip = async (params: TooltipDependencies) => {
         tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
         document.body.appendChild(tutorialTarget)
 
-        showTutorial = await setupTutorialUIContainer(tutorialTarget)
+        showTutorial = await setupTutorialUIContainer(tutorialTarget, {
+            destroyTutorial: async () => {
+                // analytics.trackEvent({
+                //     category: 'InPageTooltip',
+                //     action: 'closeTooltip',
+                // })
+                // manualOverride = true
+                removeTutorial()
+
+                // const closeMessageShown = await _getCloseMessageShown()
+                // if (!closeMessageShown) {
+                //     params.toolbarNotifications.showToolbarNotification(
+                //         'tooltip-first-close',
+                //         {},
+                //     )
+                //     _setCloseMessageShown()
+                // }
+            },
+            finishTutorial: async () => {
+                // analytics.trackEvent({
+                //     category: 'InPageTooltip',
+                //     action: 'closeTooltip',
+                // })
+                // manualOverride = true
+                removeTutorial()
+
+                // const closeMessageShown = await _getCloseMessageShown()
+                // if (!closeMessageShown) {
+                //     params.toolbarNotifications.showToolbarNotification(
+                //         'tooltip-first-close',
+                //         {},
+                //     )
+                //     _setCloseMessageShown()
+                // }
+            },
+        })
     }
 
+    // If target is set, Tooltip has already been injected.
     if (target) {
         return
     }
@@ -121,6 +157,19 @@ export const insertTooltip = async (params: TooltipDependencies) => {
         callback: () => params.inPageUI.showTooltip(),
         toolbarNotifications: params.toolbarNotifications,
     })
+}
+
+export const removeTutorial = (options?: { override?: boolean }) => {
+    manualOverride = !!options?.override
+
+    if (!tutorialTarget) {
+        return
+    }
+    destroyUIContainer(tutorialTarget)
+    tutorialTarget.remove()
+
+    tutorialTarget = null
+    showTooltip = null
 }
 
 export const removeTooltip = (options?: { override?: boolean }) => {
