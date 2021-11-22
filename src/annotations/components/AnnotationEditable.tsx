@@ -203,7 +203,14 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private textAreaHeight() {
-        const lines = this.props.comment.split(/\r\n|\r|\n/).length
+        let lines = 0
+
+        try {
+            lines = this.props.comment.split(/\r\n|\r|\n/).length
+        } catch {
+            lines = 1
+        }
+
         const height = lines * 20
         const heightinPX = (height + 'px').toString()
         this.setState({ editorHeight: heightinPX })
