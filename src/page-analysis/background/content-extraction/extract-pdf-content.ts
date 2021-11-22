@@ -8,7 +8,7 @@ import { loadBlob } from 'src/imports/background/utils'
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData: ArrayBuffer) {
     // Point PDF.js to its worker code, a static file in the extension.
-    PDFJS.GlobalWorkerOptions.workerSrc = browser.extension.getURL(
+    PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
         '/build/pdf.worker.min.js',
     )
 

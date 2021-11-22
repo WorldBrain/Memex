@@ -22,7 +22,7 @@ export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
-        const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
+        const targetUrl = `${browser.runtime.getURL('/options.html')}#/backup`
 
         // to get around the blocked state of the request, we update the original tab with the backup screen.
         // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.

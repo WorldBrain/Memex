@@ -116,7 +116,7 @@ export const handleRender = async (
         )
     }
 
-    const cssFile = browser.extension.getURL(
+    const cssFile = browser.runtime.getURL(
         '/content_script_search_injection.css',
     )
     await injectCSS(cssFile)

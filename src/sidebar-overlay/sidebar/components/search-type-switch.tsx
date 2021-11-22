@@ -11,7 +11,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { browser } from 'webextension-polyfill-ts'
 
-const commentAdd = browser.extension.getURL('/img/comment_add.svg')
+const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 
 const styles = require('./search-type-switch.css')
 
