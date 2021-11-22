@@ -278,7 +278,7 @@ class BackgroundScript {
         await this.chooseTabOpenFn(params)({
             url:
                 OVERVIEW_URL +
-                (params.missingPdf ? `?${MISSING_PDF_QUERY_PARAM}` : ''),
+                (params?.missingPdf ? `?${MISSING_PDF_QUERY_PARAM}` : ''),
         })
     }
 
