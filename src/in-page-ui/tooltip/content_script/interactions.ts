@@ -9,6 +9,9 @@ import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
 import { TooltipPosition } from '../types'
 import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
+import { setupTutorialUIContainer } from 'src/in-page-ui/guided-tutorial/content-script/components'
+import { getUrl } from 'src/util/uri-utils'
+import { GUIDED_ONBOARDING_URL } from 'src/overview/onboarding/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -49,6 +52,9 @@ async function _getCloseMessageShown() {
 let target = null
 let showTooltip = null
 
+let tutorialTarget = null
+let showTutorial = null
+
 /* Denotes whether the user inserted/removed tooltip themselves. */
 let manualOverride = false
 
@@ -60,6 +66,17 @@ let manualOverride = false
  */
 export const insertTooltip = async (params: TooltipDependencies) => {
     // If target is set, Tooltip has already been injected.
+    if (
+        !tutorialTarget &&
+        getUrl(window.location.href).includes(GUIDED_ONBOARDING_URL)
+    ) {
+        tutorialTarget = document.createElement('div')
+        tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
+        document.body.appendChild(tutorialTarget)
+
+        showTutorial = await setupTutorialUIContainer(tutorialTarget)
+    }
+
     if (target) {
         return
     }
