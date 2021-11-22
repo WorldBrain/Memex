@@ -203,7 +203,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     private textAreaHeight() {
-        let lines = 0
+        let lines = 1
 
         try {
             lines = this.props.comment.split(/\r\n|\r|\n/).length
