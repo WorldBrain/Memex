@@ -58,7 +58,28 @@ export class DashboardContainer extends StatefulUIElement<
             ? 'https://memex.social'
             : 'https://staging.memex.social'
 
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<
+        Props,
+        | 'analytics'
+        | 'copyToClipboard'
+        | 'document'
+        | 'location'
+        | 'localStorage'
+        | 'contentConversationsBG'
+        | 'activityIndicatorBG'
+        | 'personalCloudBG'
+        | 'contentShareBG'
+        | 'syncSettingsBG'
+        | 'annotationsBG'
+        | 'pdfViewerBG'
+        | 'searchBG'
+        | 'backupBG'
+        | 'listsBG'
+        | 'tagsBG'
+        | 'authBG'
+        | 'openFeed'
+        | 'openCollectionPage'
+    > = {
         analytics,
         copyToClipboard,
         document: window.document,
@@ -70,6 +91,7 @@ export class DashboardContainer extends StatefulUIElement<
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
+        pdfViewerBG: runInBackground(),
         searchBG: runInBackground(),
         backupBG: runInBackground(),
         listsBG: runInBackground(),

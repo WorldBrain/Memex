@@ -5,7 +5,8 @@ import { PDF_VIEWER_HTML } from '../constants'
 
 export class PDFBackground {
     private routeViewer: string
-    private shouldOpen: boolean
+    private _shouldOpen: boolean
+    private _shouldOpenOneTime: boolean
     remoteFunctions: PDFRemoteInterface
 
     constructor(
@@ -22,17 +23,28 @@ export class PDFBackground {
         this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
         this.remoteFunctions = {
             refreshSetting: this.refreshSetting,
+            openPdfViewerForNextPdf: async () => {
+                this._shouldOpenOneTime = true
+            },
         }
     }
 
-    refreshSetting = async () => {
-        this.shouldOpen =
+    private get shouldOpen(): boolean {
+        if (this._shouldOpenOneTime) {
+            this._shouldOpenOneTime = false
+            return true
+        }
+        return this._shouldOpen
+    }
+
+    private refreshSetting = async () => {
+        this._shouldOpen =
             (await this.deps.syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
             )) ?? true
     }
 
-    doRedirect(requestUrl: string, tabId: number) {
+    private doRedirect(requestUrl: string, tabId: number) {
         const url = this.routeViewer + '?file=' + encodeURIComponent(requestUrl)
         // console.log('Redirecting ' + details.url + ' to ' + url)
 
@@ -45,7 +57,7 @@ export class PDFBackground {
         return { redirectUrl: url }
     }
 
-    beforeRequestListener = (
+    private beforeRequestListener = (
         details: WebRequest.OnBeforeRequestDetailsType,
     ) => {
         // only called for local files matching *.pdf
@@ -56,7 +68,7 @@ export class PDFBackground {
         return this.doRedirect(details.url, details.tabId)
     }
 
-    headersReceivedListener = (
+    private headersReceivedListener = (
         details: WebRequest.OnHeadersReceivedDetailsType,
     ) => {
         if (!this.shouldOpen || !details.url) {
@@ -65,10 +77,13 @@ export class PDFBackground {
         if (!this.isPdfRequestForViewer(details)) {
             return
         }
+
         return this.doRedirect(details.url, details.tabId)
     }
 
-    isPdfRequestForViewer(details: WebRequest.OnHeadersReceivedDetailsType) {
+    private isPdfRequestForViewer(
+        details: WebRequest.OnHeadersReceivedDetailsType,
+    ) {
         if (details.url.endsWith('.pdf')) {
             return true
         }

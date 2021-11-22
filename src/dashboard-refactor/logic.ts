@@ -104,6 +104,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
         ) {
             mode = 'locate-pdf'
+            this.options.pdfViewerBG.openPdfViewerForNextPdf()
         }
 
         return {
