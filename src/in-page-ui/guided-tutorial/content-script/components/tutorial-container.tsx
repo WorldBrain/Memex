@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { reactEventHandler } from 'src/util/ui-logic'
 
-import * as logic from './tutorial-card.logic'
-
 import { ThemeProvider } from 'styled-components'
 import styled from 'styled-components'
 import { theme } from 'src/common-ui/components/design-library/theme'
@@ -25,11 +23,6 @@ export interface State {
 
 export default class TutorialContainer extends React.Component<Props, State> {
     state: State = { cardIndex: 0 }
-    handleEvent = null
-
-    componentWillMount() {
-        this.handleEvent = reactEventHandler(this, logic.processEvent)
-    }
 
     prevCard = (_) => {
         this.setState({

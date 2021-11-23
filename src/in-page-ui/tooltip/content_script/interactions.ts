@@ -9,9 +9,6 @@ import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
 import { TooltipPosition } from '../types'
 import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
-import { setupTutorialUIContainer } from 'src/in-page-ui/guided-tutorial/content-script/components'
-import { getUrl } from 'src/util/uri-utils'
-import { GUIDED_ONBOARDING_URL } from 'src/overview/onboarding/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -52,9 +49,6 @@ async function _getCloseMessageShown() {
 let target = null
 let showTooltip = null
 
-let tutorialTarget = null
-let showTutorial = null
-
 /* Denotes whether the user inserted/removed tooltip themselves. */
 let manualOverride = false
 
@@ -65,53 +59,6 @@ let manualOverride = false
  * Sets up Container <---> webpage Remote functions.
  */
 export const insertTooltip = async (params: TooltipDependencies) => {
-    // temporary hack to inject guided tutorial
-    if (
-        !tutorialTarget &&
-        getUrl(window.location.href).includes(GUIDED_ONBOARDING_URL)
-    ) {
-        tutorialTarget = document.createElement('div')
-        tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
-        document.body.appendChild(tutorialTarget)
-
-        showTutorial = await setupTutorialUIContainer(tutorialTarget, {
-            destroyTutorial: async () => {
-                // analytics.trackEvent({
-                //     category: 'InPageTooltip',
-                //     action: 'closeTooltip',
-                // })
-                // manualOverride = true
-                removeTutorial()
-
-                // const closeMessageShown = await _getCloseMessageShown()
-                // if (!closeMessageShown) {
-                //     params.toolbarNotifications.showToolbarNotification(
-                //         'tooltip-first-close',
-                //         {},
-                //     )
-                //     _setCloseMessageShown()
-                // }
-            },
-            finishTutorial: async () => {
-                // analytics.trackEvent({
-                //     category: 'InPageTooltip',
-                //     action: 'closeTooltip',
-                // })
-                // manualOverride = true
-                removeTutorial()
-
-                // const closeMessageShown = await _getCloseMessageShown()
-                // if (!closeMessageShown) {
-                //     params.toolbarNotifications.showToolbarNotification(
-                //         'tooltip-first-close',
-                //         {},
-                //     )
-                //     _setCloseMessageShown()
-                // }
-            },
-        })
-    }
-
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -157,19 +104,6 @@ export const insertTooltip = async (params: TooltipDependencies) => {
         callback: () => params.inPageUI.showTooltip(),
         toolbarNotifications: params.toolbarNotifications,
     })
-}
-
-export const removeTutorial = (options?: { override?: boolean }) => {
-    manualOverride = !!options?.override
-
-    if (!tutorialTarget) {
-        return
-    }
-    destroyUIContainer(tutorialTarget)
-    tutorialTarget.remove()
-
-    tutorialTarget = null
-    showTooltip = null
 }
 
 export const removeTooltip = (options?: { override?: boolean }) => {

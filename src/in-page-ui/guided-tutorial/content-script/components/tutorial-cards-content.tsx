@@ -1,6 +1,5 @@
 import React from 'react'
 import { reactEventHandler } from 'src/util/ui-logic'
-import * as logic from './tutorial-card.logic'
 import styled from 'styled-components'
 import TutorialStep from './tutorial-step'
 

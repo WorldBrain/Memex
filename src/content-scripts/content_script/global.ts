@@ -42,6 +42,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
+// import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -137,7 +138,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
-    // component, that when run, initialise the respective component with it's
+    // component, that when run, initialise the respective component with its
     // dependencies
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
@@ -280,6 +281,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
             action: 'createFromShortcut',
         }),
     })
+
     const loadContentScript = createContentScriptLoader({ loadRemotely })
     if (shouldIncludeSearchInjection(window.location.hostname)) {
         await contentScriptRegistry.registerSearchInjectionScript(

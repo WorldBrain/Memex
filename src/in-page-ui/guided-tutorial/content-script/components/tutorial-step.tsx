@@ -1,8 +1,6 @@
 import React from 'react'
 import { reactEventHandler } from 'src/util/ui-logic'
 
-import * as logic from './tutorial-card.logic'
-
 import styled from 'styled-components'
 import { TutorialStepContent } from './tutorial-cards-content'
 
@@ -11,12 +9,6 @@ interface Props extends TutorialStepContent {
 }
 
 export default class TutorialStep extends React.Component<Props> {
-    handleEvent = null
-
-    componentWillMount() {
-        this.handleEvent = reactEventHandler(this, logic.processEvent)
-    }
-
     closeTutorial = () => window.close()
 
     render() {
