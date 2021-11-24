@@ -106,6 +106,22 @@ const LOCAL_ANNOTATIONS_V24 = {
         createdWhen: new Date('2020-10-11'),
         lastEdited: new Date('2020-10-20'),
     },
+    third: {
+        url: LOCAL_PAGES_V24.third.url + '/#111111113',
+        pageUrl: LOCAL_PAGES_V24.third.url,
+        pageTitle: LOCAL_PAGES_V24.third.fullTitle,
+        comment: 'This is a test comment on a PDF page!',
+        createdWhen: new Date('2020-10-12'),
+        lastEdited: new Date('2020-10-12'),
+    },
+    fourth: {
+        url: LOCAL_PAGES_V24.third.url + '/#111111114',
+        pageUrl: LOCAL_PAGES_V24.third.url,
+        pageTitle: LOCAL_PAGES_V24.third.fullTitle,
+        comment: 'This is another test comment on a PDF page',
+        createdWhen: new Date('2020-10-13'),
+        lastEdited: new Date('2020-10-13'),
+    },
 }
 
 const LOCAL_LISTS_V24 = {
@@ -151,6 +167,13 @@ export const LOCAL_TEST_DATA_V24 = {
             createdWhen: new Date(1625190554984),
             updatedWhen: new Date(1625190554984),
         },
+        third: {
+            id: 3,
+            annotation: LOCAL_ANNOTATIONS_V24.third.url,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            createdWhen: new Date(1625190554985),
+            updatedWhen: new Date(1625190554985),
+        },
     },
     sharedAnnotationMetadata: {
         first: {
@@ -162,6 +185,11 @@ export const LOCAL_TEST_DATA_V24 = {
             excludeFromLists: true,
             localId: LOCAL_ANNOTATIONS_V24.second.url,
             remoteId: 'test-2',
+        },
+        third: {
+            excludeFromLists: false,
+            localId: LOCAL_ANNOTATIONS_V24.third.url,
+            remoteId: 'test-3',
         },
     },
     locators: {
@@ -277,6 +305,12 @@ export const LOCAL_TEST_DATA_V24 = {
             createdAt: new Date(1625190554986),
             fullUrl: LOCAL_PAGES_V24.second.fullUrl,
             pageUrl: LOCAL_PAGES_V24.second.url,
+            listId: LOCAL_LISTS_V24.first.id,
+        },
+        third: {
+            createdAt: new Date(1625190554990),
+            fullUrl: LOCAL_PAGES_V24.third.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.third.url,
             listId: LOCAL_LISTS_V24.first.id,
         },
     },
@@ -537,6 +571,18 @@ const REMOTE_ANNOTATIONS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
+    third: {
+        id: 1,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: extractIdFromAnnotationUrl(
+            LOCAL_TEST_DATA_V24.annotations.third.url,
+        ),
+        comment: LOCAL_TEST_DATA_V24.annotations.third.comment,
+        createdWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        updatedWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+    },
 }
 
 const REMOTE_ANNOTATION_SELECTORS_V24 = {
@@ -724,6 +770,17 @@ export const REMOTE_TEST_DATA_V24 = {
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
             updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
+        third: {
+            id: 1,
+            localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.id,
+            privacyLevel:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.privacyLevel,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.third.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+        },
     },
     personalAnnotationShare: {
         first: {
@@ -751,6 +808,19 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 565,
             updatedWhen: 565,
+        },
+        third: {
+            id: 1,
+            remoteId:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third.remoteId,
+            excludeFromLists:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third
+                    .excludeFromLists,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.third.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 567,
+            updatedWhen: 567,
         },
     },
     personalList: REMOTE_LISTS_V24,
@@ -792,6 +862,15 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 563,
             updatedWhen: 563,
+        },
+        third: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.third.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 565,
+            updatedWhen: 565,
         },
     },
     personalTextTemplate: {
