@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.0.9",
+    "version": "3.0.11",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -15,7 +15,7 @@
         "watch:notif": "webpack --watch --env.notifs",
         "watch:clean": "npm run cache:clean && npm run watch:notif",
         "cache:clean": "rimraf ./node_modules/.cache",
-        "stats": "webpack --profile --json > stats.json",
+        "stats": "webpack --profile -1json > stats.json",
         "publish-chrome": "node publish --chrome",
         "publish-ff": "node publish --ff",
         "mocha": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register",
@@ -101,7 +101,7 @@
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
         "page-metadata-parser": "^1.1.4",
-        "pdfjs-dist": "WorldBrain/pdfjs-dist#8a030e1161af1aeccdc2636012b095ea7e64b40f",
+        "pdfjs-dist": "WorldBrain/pdfjs-dist#fix/annot-shifts",
         "polished": "^4.0.3",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",

@@ -1,5 +1,11 @@
 import { browser } from 'webextension-polyfill-ts'
 
+export const logoSmall = browser.extension.getURL(
+    '/img/worldbrain-logo-narrow-bw-48.png',
+)
+export const logoHorizontal = browser.extension.getURL(
+    '/img/memexLogoHorizontal.png',
+)
 export const settings = browser.extension.getURL('/img/settings.svg')
 
 export const check = browser.extension.getURL('/img/check.svg')
