@@ -213,8 +213,40 @@ export function createBackgroundModules(options: {
         return call<Returns>(name, ...args)
     }
 
-    const analytics = new AnalyticsBackground(options.analyticsManager, {
+    const notifications = new NotificationBackground({ storageManager })
+
+    const jobScheduler = new JobSchedulerBackground({
+        storagePrefix: JobScheduler.STORAGE_PREFIX,
+        storageAPI: options.browserAPIs.storage,
+        alarmsAPI: options.browserAPIs.alarms,
+        notifications,
+        jobs,
+    })
+
+    const auth =
+        options.auth ||
+        new AuthBackground({
+            authService: options.services.auth,
+            remoteEmitter: createRemoteEventEmitter('auth'),
+            subscriptionService: options.services.subscriptions,
+            localStorageArea: options.browserAPIs.storage.local,
+            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
+                jobScheduler.scheduler,
+            ),
+            backendFunctions: {
+                registerBetaUser: async (params) =>
+                    callFirebaseFunction('registerBetaUser', params),
+            },
+            getUserManagement: async () =>
+                (await options.getServerStorage()).storageModules
+                    .userManagement,
+        })
+
+    const analytics = new AnalyticsBackground({
         localBrowserStorage: options.browserAPIs.storage.local,
+        getAnalyticsStorage: async () =>
+            (await options.getServerStorage()).storageModules.analytics,
+        getUserId: async () => (await auth.authService.getCurrentUser()).id,
     })
 
     const pages = new PageIndexingBackground({
@@ -267,16 +299,6 @@ export function createBackgroundModules(options: {
         syncSettings: syncSettingsStore,
     })
 
-    const notifications = new NotificationBackground({ storageManager })
-
-    const jobScheduler = new JobSchedulerBackground({
-        storagePrefix: JobScheduler.STORAGE_PREFIX,
-        storageAPI: options.browserAPIs.storage,
-        alarmsAPI: options.browserAPIs.alarms,
-        notifications,
-        jobs,
-    })
-
     const social = new SocialBackground({ storageManager })
 
     const activityIndicator = new ActivityIndicatorBackground({
@@ -297,25 +319,6 @@ export function createBackgroundModules(options: {
         getServerStorage,
         services: options.services,
     })
-
-    const auth =
-        options.auth ||
-        new AuthBackground({
-            authService: options.services.auth,
-            remoteEmitter: createRemoteEventEmitter('auth'),
-            subscriptionService: options.services.subscriptions,
-            localStorageArea: options.browserAPIs.storage.local,
-            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
-                jobScheduler.scheduler,
-            ),
-            backendFunctions: {
-                registerBetaUser: async (params) =>
-                    callFirebaseFunction('registerBetaUser', params),
-            },
-            getUserManagement: async () =>
-                (await options.getServerStorage()).storageModules
-                    .userManagement,
-        })
 
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
@@ -758,6 +761,10 @@ export async function setupBackgroundModules(
     await backgroundModules.auth.authService.refreshUserInfo()
     await backgroundModules.contentSharing.setup()
     await backgroundModules.personalCloud.setup()
+
+    backgroundModules.auth.authService.events.on('changed', ({ user }) => {
+        backgroundModules.analytics.maybeTrackInstall(user?.id ?? null)
+    })
 }
 
 export function getBackgroundStorageModules(

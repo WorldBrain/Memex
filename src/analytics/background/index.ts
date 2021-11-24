@@ -1,46 +1,90 @@
 import { Storage } from 'webextension-polyfill-ts'
 import { updateLastActive } from '../utils'
 import { AnalyticsInterface } from './types'
-import { bindMethod } from 'src/util/functions'
-import ActivityPings from './activity-pings'
-import { BrowserSettingsStore } from 'src/util/settings'
-import { ActivityPingSettings } from './activity-pings/types'
-import { AnalyticsEvent, AnalyticsEvents, Analytics } from '../types'
+import { AnalyticsEvent, AnalyticsEvents } from '../types'
+import PersonalAnalyticsStorage from '@worldbrain/memex-common/lib/analytics/storage'
+import type * as commonAnalyticsTypes from '@worldbrain/memex-common/lib/analytics/types'
 
 export class AnalyticsBackground {
     remoteFunctions: AnalyticsInterface
-    activityPings: ActivityPings
 
     constructor(
-        private analyticsManager: Analytics,
-        options: {
+        public options: {
+            getAnalyticsStorage(): Promise<PersonalAnalyticsStorage>
+            getUserId(): Promise<number | string | null>
             localBrowserStorage: Storage.LocalStorageArea
         },
     ) {
         this.remoteFunctions = {
-            trackEvent: bindMethod(this, 'trackEvent'),
+            trackEvent: this.trackEvent,
+            rawTrackEvent: this.rawTrackEvent,
             updateLastActive,
         }
-        this.activityPings = new ActivityPings({
-            analytics: analyticsManager,
-            settings: new BrowserSettingsStore<ActivityPingSettings>(
-                options.localBrowserStorage,
-                { prefix: 'analyticsPings' },
-            ),
+    }
+
+    async setup() {}
+
+    async maybeTrackInstall(userId: number | string | null) {
+        if (!userId) {
+            return
+        }
+        const settingsKey = 'analytics.trackedInstall'
+        const settings = await this.options.localBrowserStorage.get([
+            settingsKey,
+        ])
+        const alreadyTrackedInstall = settings[settingsKey]
+        if (alreadyTrackedInstall) {
+            return
+        }
+        const installTime = await this._getInstallTime()
+        if (!installTime) {
+            return // should never happen
+        }
+
+        const storage = await this.options.getAnalyticsStorage()
+        await storage.trackInstall({
+            user: { type: 'user-reference', id: userId },
+            time: installTime,
+        })
+
+        // writing this to the local storage, not the synced storage, because the install time
+        // will not get overwritten if already existing. It's just to save some read costs.
+        await this.options.localBrowserStorage.set({
+            [settingsKey]: true,
         })
     }
 
-    async setup() {
-        await this.activityPings.setup()
+    async _getInstallTime() {
+        const key = 'installTimestamp'
+        const settings = await this.options.localBrowserStorage.get([key])
+        return settings[key]
     }
 
-    async trackEvent<Category extends keyof AnalyticsEvents>(
+    trackEvent = async <Category extends keyof AnalyticsEvents>(
         event: AnalyticsEvent<Category>,
-    ) {
-        if (this.activityPings.isActivityPing(event)) {
-            this.activityPings.storeActivity(event)
-        } else {
-            this.analyticsManager.trackEvent(event)
+    ) => {
+        await this.rawTrackEvent({
+            type: `${event.category}::${event.action}`,
+        })
+    }
+
+    rawTrackEvent = async (
+        event: Omit<commonAnalyticsTypes.AnalyticsEvent, 'createdWhen'>,
+    ) => {
+        const userId = await this.options.getUserId()
+        if (!userId) {
+            return
         }
+
+        const analyticsStorage = await this.options.getAnalyticsStorage()
+
+        // don't await, we don't care if it fails
+        analyticsStorage.trackEvent({
+            user: { type: 'user-reference', id: userId },
+            event: {
+                createdWhen: Date.now(),
+                ...event,
+            },
+        })
     }
 }

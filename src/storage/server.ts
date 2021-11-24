@@ -21,6 +21,7 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import PersonalAnalyticsStorage from '@worldbrain/memex-common/lib/analytics/storage'
 import {
     ChangeWatchMiddleware,
     ChangeWatchMiddlewareSettings,
@@ -82,6 +83,9 @@ export function createLazyServerStorage(
                     storageManager,
                     autoPkType: 'string',
                 })
+            const analytics = new PersonalAnalyticsStorage({
+                storageManager,
+            })
             const contentSharing = new ContentSharingStorage({
                 storageManager,
                 operationExecuter: operationExecuter('contentSharing'),
@@ -111,6 +115,7 @@ export function createLazyServerStorage(
             const serverStorage: ServerStorage = {
                 storageManager,
                 storageModules: {
+                    analytics,
                     sharedSyncLog,
                     userManagement,
                     contentSharing,
@@ -122,7 +127,7 @@ export function createLazyServerStorage(
             }
             registerModuleMapCollections(
                 storageManager.registry,
-                serverStorage.storageModules,
+                serverStorage.storageModules as any,
             )
             await storageManager.finishInitialization()
 
