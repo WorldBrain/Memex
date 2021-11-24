@@ -6,6 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
+import { GUIDED_ONBOARDING_URL } from '../../constants'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -67,6 +68,10 @@ export default class Logic extends UILogic<State, Event> {
                 : this.syncPromise)
         }
         this.dependencies.navToDashboard()
+    }
+
+    goToGuidedTutorial: EventHandler<'goToGuidedTutorial'> = ({}) => {
+        this.dependencies.navToGuidedTutorial()
     }
 
     finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
