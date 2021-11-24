@@ -187,6 +187,12 @@ export function createBackgroundModules(options: {
     const getServerStorageManager = async () =>
         (await options.getServerStorage()).storageManager
 
+    const localExtSettingStore = new BrowserSettingsStore<
+        LocalExtensionSettings
+    >(options.browserAPIs.storage.local, {
+        prefix: 'localSettings.',
+    })
+
     const syncSettings = new SyncSettingsBackground({
         storageManager,
         localBrowserStorage: options.browserAPIs.storage.local,
@@ -243,10 +249,10 @@ export function createBackgroundModules(options: {
         })
 
     const analytics = new AnalyticsBackground({
-        localBrowserStorage: options.browserAPIs.storage.local,
+        localExtSettingStore,
         getAnalyticsStorage: async () =>
             (await options.getServerStorage()).storageModules.analytics,
-        getUserId: async () => (await auth.authService.getCurrentUser()).id,
+        getUserId: async () => (await auth.authService.getCurrentUser())?.id,
     })
 
     const pages = new PageIndexingBackground({
@@ -417,12 +423,6 @@ export function createBackgroundModules(options: {
         storageManager,
         contentSharing,
         search,
-    })
-
-    const localExtSettingStore = new BrowserSettingsStore<
-        LocalExtensionSettings
-    >(options.browserAPIs.storage.local, {
-        prefix: 'localSettings.',
     })
 
     const bgScript = new BackgroundScript({
@@ -763,7 +763,7 @@ export async function setupBackgroundModules(
     await backgroundModules.personalCloud.setup()
 
     backgroundModules.auth.authService.events.on('changed', ({ user }) => {
-        backgroundModules.analytics.maybeTrackInstall(user?.id ?? null)
+        backgroundModules.analytics.maybeTrackInstall()
     })
 }
 

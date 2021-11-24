@@ -80,8 +80,8 @@ class BackgroundScript {
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
-            ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/uninstall'
-            : 'https://us-central1-worldbrain-staging.cloudfunctions.net/uninstall'
+            ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/analytics-trackUninstall'
+            : 'https://us-central1-worldbrain-staging.cloudfunctions.net/analytics-trackUninstall'
     }
 
     /**

@@ -1,6 +1,7 @@
 export type GenerateServerID = (collectionName: string) => number | string
 export interface LocalExtensionSettings {
     installTimestamp: number
+    trackedInstall: boolean
 }
 
 export interface OpenTabParams {

@@ -1,10 +1,10 @@
-import { Storage } from 'webextension-polyfill-ts'
-import { updateLastActive } from '../utils'
-import { AnalyticsInterface } from './types'
-import { AnalyticsEvent, AnalyticsEvents } from '../types'
 import PersonalAnalyticsStorage from '@worldbrain/memex-common/lib/analytics/storage'
 import type * as commonAnalyticsTypes from '@worldbrain/memex-common/lib/analytics/types'
-
+import { LocalExtensionSettings } from 'src/background-script/types'
+import { BrowserSettingsStore } from 'src/util/settings'
+import { updateLastActive } from '../utils'
+import { AnalyticsEvent, AnalyticsEvents } from '../types'
+import { AnalyticsInterface } from './types'
 export class AnalyticsBackground {
     remoteFunctions: AnalyticsInterface
 
@@ -12,7 +12,7 @@ export class AnalyticsBackground {
         public options: {
             getAnalyticsStorage(): Promise<PersonalAnalyticsStorage>
             getUserId(): Promise<number | string | null>
-            localBrowserStorage: Storage.LocalStorageArea
+            localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
         },
     ) {
         this.remoteFunctions = {
@@ -22,21 +22,25 @@ export class AnalyticsBackground {
         }
     }
 
-    async setup() {}
+    async setup() {
+        // don't await, because it shouldn't block the extension setup
+        this.maybeTrackInstall()
+    }
 
-    async maybeTrackInstall(userId: number | string | null) {
+    async maybeTrackInstall() {
+        const userId = await this.options.getUserId()
         if (!userId) {
             return
         }
-        const settingsKey = 'analytics.trackedInstall'
-        const settings = await this.options.localBrowserStorage.get([
-            settingsKey,
-        ])
-        const alreadyTrackedInstall = settings[settingsKey]
+        const alreadyTrackedInstall = await this.options.localExtSettingStore.get(
+            'trackedInstall',
+        )
         if (alreadyTrackedInstall) {
             return
         }
-        const installTime = await this._getInstallTime()
+        const installTime = await this.options.localExtSettingStore.get(
+            'installTimestamp',
+        )
         if (!installTime) {
             return // should never happen
         }
@@ -49,15 +53,7 @@ export class AnalyticsBackground {
 
         // writing this to the local storage, not the synced storage, because the install time
         // will not get overwritten if already existing. It's just to save some read costs.
-        await this.options.localBrowserStorage.set({
-            [settingsKey]: true,
-        })
-    }
-
-    async _getInstallTime() {
-        const key = 'installTimestamp'
-        const settings = await this.options.localBrowserStorage.get([key])
-        return settings[key]
+        await this.options.localExtSettingStore.set('trackedInstall', true)
     }
 
     trackEvent = async <Category extends keyof AnalyticsEvents>(
