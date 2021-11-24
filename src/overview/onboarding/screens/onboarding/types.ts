@@ -7,6 +7,7 @@ export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
+    navToGuidedTutorial: () => void
 }
 
 export interface State {
@@ -20,5 +21,6 @@ export interface State {
 export type Event = UIEvent<{
     finishOnboarding: null
     goToSyncStep: null
+    goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
 }>
