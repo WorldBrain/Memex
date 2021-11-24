@@ -65,7 +65,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                     }}
                 />
             </ButtonBar>
-            <div className={styles.text}>or go to search dashboard</div>
+            <div
+                className={styles.text}
+                onClick={() => {
+                    this.processEvent('finishOnboarding', null)
+                }}
+            >
+                or go to search dashboard
+            </div>
         </div>
     )
 
