@@ -16,6 +16,7 @@ import {
 import {
     fingerprintInArray,
     fingerprintsEqual,
+    isPagePdf,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
@@ -580,11 +581,16 @@ export class PageIndexingBackground {
     }
 
     private async _getPageData(props: PageCreationProps) {
-        const foundTabId = await this._findTabId(props.fullUrl)
-        if (foundTabId) {
-            props.tabId = foundTabId
-        } else {
-            delete props.tabId
+        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
+        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
+        //     so we don't have to do this dance
+        if (!isPagePdf({ url: props.fullUrl })) {
+            const foundTabId = await this._findTabId(props.fullUrl)
+            if (foundTabId) {
+                props.tabId = foundTabId
+            } else {
+                delete props.tabId
+            }
         }
 
         return props.tabId

@@ -6,26 +6,29 @@ import {
     FingerprintSchemeType,
     ContentLocatorFormat,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 describe('Page indexing background', () => {
     it('should generate and remember normalized URLs for local PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'file:///home/bla/test.pdf'
+        const tabId = 1
         const {
             identifier,
             contentSize,
-        } = await indexTestFingerprintedPdf(setup, { fullUrl: url })
+        } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         await setup.backgroundModules.bookmarks.addBookmark({
             url: identifier.normalizedUrl,
             fullUrl: identifier.fullUrl,
+            tabId,
         })
         const common = {
             contentSize,
             fingerprintScheme: FingerprintSchemeType.PdfV1,
             format: ContentLocatorFormat.PDF,
             lastVisited: expect.any(Number),
-            location: url,
+            location: normalizeUrl(url),
             locationScheme: LocationSchemeType.FilesystemPathV1,
             locationType: ContentLocatorType.Local,
             normalizedUrl: 'memex.cloud/ct/1337.pdf',
@@ -80,21 +83,23 @@ describe('Page indexing background', () => {
     it('should generate and remember normalized URLs for remote PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'https://home.com/bla/test.pdf'
+        const tabId = 1
         const {
             identifier,
             contentSize,
-        } = await indexTestFingerprintedPdf(setup, { fullUrl: url })
+        } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         await setup.backgroundModules.bookmarks.addBookmark({
             url: identifier.normalizedUrl,
             fullUrl: identifier.fullUrl,
+            tabId,
         })
         const common = {
             contentSize,
             fingerprintScheme: FingerprintSchemeType.PdfV1,
             format: ContentLocatorFormat.PDF,
             lastVisited: expect.any(Number),
-            location: url,
+            location: normalizeUrl(url),
             locationScheme: LocationSchemeType.NormalizedUrlV1,
             locationType: ContentLocatorType.Remote,
             normalizedUrl: 'memex.cloud/ct/1337.pdf',

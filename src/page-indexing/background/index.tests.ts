@@ -13,6 +13,7 @@ export async function indexTestFingerprintedPdf(
     options?: {
         expectedServerId?: number | string
         fullUrl?: string
+        tabId?: number
     },
 ) {
     const fullUrl = options?.fullUrl ?? 'file:////home/bla/test.pdf'
@@ -37,7 +38,7 @@ export async function indexTestFingerprintedPdf(
     }
     const identifier = await setup.backgroundModules.pages.initContentIdentifier(
         {
-            tabId: 1,
+            tabId: options?.tabId ?? 1,
             locator,
             fingerprints,
         },

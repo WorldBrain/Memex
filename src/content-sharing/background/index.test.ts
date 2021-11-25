@@ -1255,16 +1255,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     createTestList: true,
                                 })
                                 await shareTestList()
+                                const tabId = 1
                                 const {
                                     identifier,
                                     fingerprints,
                                 } = await indexTestFingerprintedPdf(setup, {
                                     expectedServerId: 1338,
+                                    tabId,
                                 })
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
                                         id: testData.localListId,
                                         contentIdentifier: identifier,
+                                        tabId,
                                     },
                                 )
                                 await personalCloud.waitForSync()
