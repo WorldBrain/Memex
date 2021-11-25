@@ -436,8 +436,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 
     render() {
-        console.log(this.props.isDisplayed)
-
         return (
             <ResultsContainer bottom="100px">
                 {this.props.isCloudUpgradeBannerShown && (

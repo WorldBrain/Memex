@@ -43,7 +43,7 @@ export default class PageResultView extends PureComponent<Props> {
             return ''
         }
 
-        if (fullUrl.protocol === 'https:') {
+        if (fullUrl.protocol.startsWith('http')) {
             return decodeURIComponent(fullUrl.hostname.replace('www.', ''))
         } else if (fullUrl.protocol === 'file:') {
             return decodeURIComponent(fullUrl.pathname)
