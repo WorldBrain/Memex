@@ -140,6 +140,7 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationConversationInitialState(),
             displayMode: 'private-notes',
 
+            isExpanded: true,
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -206,6 +207,11 @@ export class SidebarContainerLogic extends UILogic<
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
+            }
+
+            // load followed lists
+            if (previousState.followedListLoadState === 'pristine') {
+                await this.doLoadFollowedLists({ previousState })
             }
         })
     }
@@ -299,15 +305,16 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation(mutation)
 
-        if (
-            event.mode === 'shared-notes' &&
-            previousState.followedListLoadState === 'pristine'
-        ) {
-            await this.processUIEvent('loadFollowedLists', {
-                previousState: this.withMutation(previousState, mutation),
-                event: null,
-            })
-        }
+        // Might want to remove after we unify views
+        // if (
+        //     event.mode === 'shared-notes' &&
+        //     previousState.followedListLoadState === 'pristine'
+        // ) {
+        //     await this.processUIEvent('loadFollowedLists', {
+        //         previousState: this.withMutation(previousState, mutation),
+        //         event: null,
+        //     })
+        // }
     }
 
     show: EventHandler<'show'> = async () => {
@@ -836,40 +843,80 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {}
 
-    loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
-        previousState,
-    }) => {
+    private doLoadFollowedLists = async ({ previousState }) => {
         const { customLists, pageUrl } = this.options
+        const followedLists = await customLists.fetchFollowedListsWithAnnotations(
+            {
+                normalizedPageUrl: normalizeUrl(
+                    previousState.pageUrl ?? pageUrl,
+                ),
+            },
+        )
 
-        await executeUITask(this, 'followedListLoadState', async () => {
-            const followedLists = await customLists.fetchFollowedListsWithAnnotations(
-                {
-                    normalizedPageUrl: normalizeUrl(
-                        previousState.pageUrl ?? pageUrl,
+        this.emitMutation({
+            followedLists: {
+                allIds: {
+                    $set: followedLists.map((list) => list.id),
+                },
+                byId: {
+                    $set: fromPairs(
+                        followedLists.map((list) => [
+                            list.id,
+                            {
+                                ...list,
+                                isExpanded: false,
+                                annotationsLoadState: 'pristine',
+                                conversationsLoadState: 'pristine',
+                            },
+                        ]),
                     ),
                 },
-            )
+            },
+        })
+    }
 
-            this.emitMutation({
-                followedLists: {
-                    allIds: {
-                        $set: followedLists.map((list) => list.id),
-                    },
-                    byId: {
-                        $set: fromPairs(
-                            followedLists.map((list) => [
-                                list.id,
-                                {
-                                    ...list,
-                                    isExpanded: false,
-                                    annotationsLoadState: 'pristine',
-                                    conversationsLoadState: 'pristine',
-                                },
-                            ]),
-                        ),
-                    },
-                },
+    expandMyNotes: EventHandler<'expandMyNotes'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            isExpanded: wasExpanded,
+            loadState,
+            annotations,
+        } = previousState
+
+        const annotIds = annotations.map((annot) => annot.url as string)
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isExpanded: { $set: !wasExpanded },
+        }
+        this.emitMutation(mutation)
+
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: annotIds,
             })
+            return
+        }
+
+        // // If annot data yet to be loaded, load it
+        // if (loadState === 'pristine') {
+        //     await this.processUIEvent('loadFollowedListNotes', {
+        //         event,
+        //         previousState: this.withMutation(previousState, mutation),
+        //     })
+        //     return
+        // }
+
+        this.options.events?.emit('renderHighlights', {
+            displayMode: 'shared-notes',
+            highlights: annotations
+                .filter((annotation) => annotation?.selector != null)
+                .map((annotation) => ({
+                    url: annotation.url,
+                    selector: annotation.selector,
+                })),
         })
     }
 

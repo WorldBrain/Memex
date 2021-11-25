@@ -47,6 +47,7 @@ export interface AnnotationsSidebarProps
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
+    expandMyNotes: () => void
     expandFollowedListNotes: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
@@ -152,10 +153,6 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation() {
-        if (this.props.displayMode === 'shared-notes') {
-            return null
-        }
-
         return (
             <NewAnnotationSection>
                 <AnnotationCreate
@@ -352,19 +349,15 @@ class AnnotationsSidebar extends React.Component<
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-
-        if (this.props.displayMode === 'shared-notes') {
-            return (
+        return (
+            <React.Fragment>
+                <AnnotationsSectionStyled>
+                    {this.renderAnnotationsEditable()}
+                </AnnotationsSectionStyled>
                 <FollowedListsContainer>
                     {this.renderSharedNotesByList()}
                 </FollowedListsContainer>
-            )
-        }
-
-        return (
-            <AnnotationsSectionStyled>
-                {this.renderAnnotationsEditable()}
-            </AnnotationsSectionStyled>
+            </React.Fragment>
         )
     }
 
@@ -423,7 +416,26 @@ class AnnotationsSidebar extends React.Component<
             annots.push(<CongratsMessage key="sidebar-congrats-msg" />)
         }
 
-        return annots
+        return (
+            <>
+                <FollowedListTitleContainer
+                    onClick={() => this.props.expandMyNotes()}
+                >
+                    <FollowedListTitle title={'My Notes'}>
+                        {'My Notes'}
+                    </FollowedListTitle>
+                    <FollowedListNoteCount left="10px" right="5px">
+                        {this.props.annotations.length}
+                    </FollowedListNoteCount>
+                    <FollowedListDropdownIcon
+                        icon="triangle"
+                        height="8px"
+                        isExpanded={this.props.isExpanded}
+                    />
+                </FollowedListTitleContainer>
+                {this.props.isExpanded && annots}
+            </>
+        )
     }
 
     render() {
@@ -674,7 +686,7 @@ const AnnotationsSectionStyled = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     margin-bottom: 30px;
-    padding: 15px 10px 100px;
+    padding: 15px 10px;
 `
 
 const NewAnnotationBoxStyled = styled.div`
