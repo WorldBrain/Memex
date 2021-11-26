@@ -138,7 +138,6 @@ export class SidebarContainerLogic extends UILogic<
     getInitialState(): SidebarContainerState {
         return {
             ...annotationConversationInitialState(),
-            displayMode: 'private-notes',
 
             isExpanded: true,
             loadState: 'pristine',
@@ -370,7 +369,6 @@ export class SidebarContainerLogic extends UILogic<
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
-            displayMode: { $set: 'private-notes' },
             users: { $set: {} },
         })
 
@@ -898,7 +896,6 @@ export class SidebarContainerLogic extends UILogic<
         // }
 
         this.options.events?.emit('renderHighlights', {
-            displayMode: 'shared-notes',
             highlights: annotations
                 .filter((annotation) => annotation?.selector != null)
                 .map((annotation) => ({
@@ -951,7 +948,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.options.events?.emit('renderHighlights', {
-            displayMode: 'shared-notes',
             highlights: followedAnnotIds
                 .filter(
                     (id) =>
@@ -993,7 +989,6 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 this.options.events?.emit('renderHighlights', {
-                    displayMode: 'shared-notes',
                     highlights: sharedAnnotations
                         .filter((annot) => annot.selector != null)
                         .map((annot) => ({

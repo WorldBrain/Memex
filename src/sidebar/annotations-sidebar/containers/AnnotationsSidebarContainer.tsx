@@ -14,7 +14,6 @@ import type {
     SidebarContainerState,
     SidebarContainerEvents,
     AnnotationEventContext,
-    SidebarDisplayMode,
 } from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -36,7 +35,6 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
