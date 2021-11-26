@@ -301,10 +301,7 @@ class AnnotationsSidebar extends React.Component<
             return (
                 <React.Fragment key={listId}>
                     <FollowedListNotesContainer bottom="10px">
-                        <FollowedListTitleContainer
-                            title={listData.name}
-                            bottom="10px"
-                        >
+                        <FollowedListTitleContainer bottom="10px">
                             <FollowedListDropdownIcon
                                 icon="triangle"
                                 height="12px"
@@ -320,6 +317,7 @@ class AnnotationsSidebar extends React.Component<
                                 this.props.expandFollowedListNotes(listId)
                             }
                             bottom="5px"
+                            title={listData.name}
                         >
                             <FollowedListTitleContainer>
                                 <FollowedListDropdownIcon
