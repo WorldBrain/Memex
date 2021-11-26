@@ -301,7 +301,10 @@ class AnnotationsSidebar extends React.Component<
             return (
                 <React.Fragment key={listId}>
                     <FollowedListNotesContainer bottom="10px">
-                        <FollowedListTitleContainer bottom="10px">
+                        <FollowedListTitleContainer
+                            title={listData.name}
+                            bottom="10px"
+                        >
                             <FollowedListDropdownIcon
                                 icon="triangle"
                                 height="12px"
@@ -328,7 +331,7 @@ class AnnotationsSidebar extends React.Component<
                                 <FollowedListNoteCount left="5px" right="15px">
                                     {listData.sharedAnnotationReferences.length}
                                 </FollowedListNoteCount>
-                                <FollowedListTitle title={listData.name}>
+                                <FollowedListTitle>
                                     {listData.name}
                                 </FollowedListTitle>
                             </FollowedListTitleContainer>
@@ -594,8 +597,8 @@ const FollowedListTitleContainer = styled(Margin)`
 const FollowedListTitle = styled.span`
     font-weight: bold;
     font-size: 14px;
-    white-space: break-spaces;
-    max-width: 310px;
+    white-space: pre;
+    max-width: 295px;
     text-overflow: ellipsis;
     overflow-x: hidden;
 `
