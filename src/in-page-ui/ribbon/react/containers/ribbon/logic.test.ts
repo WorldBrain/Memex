@@ -573,6 +573,7 @@ describe('Ribbon logic', () => {
         const { ribbon, analytics } = await setupTest(device, {
             dependencies: {
                 tags: {
+                    ...device.backgroundModules.tags.remoteFunctions,
                     updateTagForPage: ({ added }) => {
                         addedTag = added
                     },

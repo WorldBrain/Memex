@@ -698,6 +698,7 @@ describe('SidebarContainerLogic', () => {
             } = device.backgroundModules
 
             // Make sure sync is enabled and running as sharing is handled in cloud translation layer
+            await device.authService.setUser(TEST_USER)
             await personalCloud.enableSync()
             await personalCloud.setup()
 
