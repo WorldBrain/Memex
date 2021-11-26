@@ -113,6 +113,8 @@ export type PageData = Pick<
     hasNotes: boolean
     type: 'pdf' | 'page'
     isShared?: boolean
+    pdfUrl?: string
+    fullPdfUrl?: string
 }
 
 export type NoResultsType =

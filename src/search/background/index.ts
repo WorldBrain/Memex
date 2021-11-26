@@ -170,7 +170,8 @@ export default class SearchBackground {
             const mainLocator = pickBestLocator(locators, {
                 priority: ContentLocatorType.Remote,
             })
-            doc.fullUrl = mainLocator?.originalLocation ?? null
+            doc.pdfUrl = mainLocator?.location ?? undefined
+            doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
             toReturn.push(doc)
         }
         return toReturn

@@ -2204,6 +2204,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.options.listsBG.insertPageToList({
             id: event.listId,
             url: fullPageUrl,
+            skipPageIndexing: true,
         })
 
         this.emitMutation({

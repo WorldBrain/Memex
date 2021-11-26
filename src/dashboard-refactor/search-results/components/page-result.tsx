@@ -35,10 +35,16 @@ export interface Props
 }
 
 export default class PageResultView extends PureComponent<Props> {
-    get domain(): string {
+    private get fullUrl(): string {
+        return this.props.type === 'pdf'
+            ? this.props.fullPdfUrl!
+            : this.props.fullUrl
+    }
+
+    private get domain(): string {
         let fullUrl: URL
         try {
-            fullUrl = new URL(this.props.fullUrl)
+            fullUrl = new URL(this.fullUrl)
         } catch (err) {
             return ''
         }
@@ -246,7 +252,7 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
-                        href={this.props.fullUrl}
+                        href={this.fullUrl}
                         target="_blank"
                     >
                         <ResultContent>
@@ -261,9 +267,7 @@ export default class PageResultView extends PureComponent<Props> {
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
-                            {hasTitle
-                                ? this.props.fullTitle
-                                : this.props.fullUrl}
+                            {hasTitle ? this.props.fullTitle : this.fullUrl}
                         </PageTitle>
                     </PageContentBox>
                     <TagsSegment

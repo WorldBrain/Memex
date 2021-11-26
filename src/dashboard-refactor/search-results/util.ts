@@ -118,17 +118,22 @@ export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     editNoteForm: getInitialFormState(inputValue),
 })
 
-const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
-    tags: pageResult.tags,
-    lists: pageResult.lists,
-    fullUrl: pageResult.fullUrl,
-    fullTitle: pageResult.title,
-    normalizedUrl: pageResult.url,
-    favIconURI: pageResult.favIcon,
-    displayTime: pageResult.displayTime,
-    hasNotes: pageResult.annotsCount > 0,
-    type: isPagePdf(pageResult) ? 'pdf' : 'page',
-})
+const pageResultToPageData = (pageResult: AnnotPage): PageData => {
+    const isPdf = isPagePdf(pageResult)
+    return {
+        tags: pageResult.tags,
+        lists: pageResult.lists,
+        fullUrl: pageResult.fullUrl,
+        fullTitle: pageResult.title,
+        normalizedUrl: pageResult.url,
+        favIconURI: pageResult.favIcon,
+        displayTime: pageResult.displayTime,
+        hasNotes: pageResult.annotsCount > 0,
+        type: isPdf ? 'pdf' : 'page',
+        fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
+        pdfUrl: isPdf ? pageResult.pdfUrl! : undefined,
+    }
+}
 
 const annotationToNoteData = (
     annotation: Annotation,
