@@ -293,18 +293,7 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (!followedLists.allIds.length) {
-            return (
-                <FollowedListsMsgContainer>
-                    <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
-                    <FollowedListsMsgHead>
-                        No annotations by other people on this page
-                    </FollowedListsMsgHead>
-                    <FollowedListsMsg>
-                        Follow or share collections containing <br />
-                        annotations for this page
-                    </FollowedListsMsg>
-                </FollowedListsMsgContainer>
-            )
+            return null
         }
 
         return followedLists.allIds.map((listId) => {

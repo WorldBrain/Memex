@@ -208,12 +208,17 @@ export class SidebarContainerLogic extends UILogic<
             if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
             }
-
-            // load followed lists
-            if (previousState.followedListLoadState === 'pristine') {
-                await this.doLoadFollowedLists({ previousState })
-            }
         })
+        // load followed lists
+        if (previousState.followedListLoadState === 'pristine') {
+            // not awaiting, should I?
+            // await this.loadFollowedLists({ previousState })
+            // this.loadFollowedLists({ previousState })
+            await this.processUIEvent('loadFollowedLists', {
+                previousState: previousState,
+                event: null,
+            })
+        }
     }
 
     cleanup = () => {
@@ -293,28 +298,6 @@ export class SidebarContainerLogic extends UILogic<
         setLoginModalShown?.(true)
         this.emitMutation({ showLoginModal: { $set: true } })
         return false
-    }
-
-    setDisplayMode: EventHandler<'setDisplayMode'> = async ({
-        event,
-        previousState,
-    }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            displayMode: { $set: event.mode },
-        }
-
-        this.emitMutation(mutation)
-
-        // Might want to remove after we unify views
-        // if (
-        //     event.mode === 'shared-notes' &&
-        //     previousState.followedListLoadState === 'pristine'
-        // ) {
-        //     await this.processUIEvent('loadFollowedLists', {
-        //         previousState: this.withMutation(previousState, mutation),
-        //         event: null,
-        //     })
-        // }
     }
 
     show: EventHandler<'show'> = async () => {
@@ -843,35 +826,40 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {}
 
-    private doLoadFollowedLists = async ({ previousState }) => {
+    loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
+        previousState,
+    }) => {
         const { customLists, pageUrl } = this.options
-        const followedLists = await customLists.fetchFollowedListsWithAnnotations(
-            {
-                normalizedPageUrl: normalizeUrl(
-                    previousState.pageUrl ?? pageUrl,
-                ),
-            },
-        )
 
-        this.emitMutation({
-            followedLists: {
-                allIds: {
-                    $set: followedLists.map((list) => list.id),
-                },
-                byId: {
-                    $set: fromPairs(
-                        followedLists.map((list) => [
-                            list.id,
-                            {
-                                ...list,
-                                isExpanded: false,
-                                annotationsLoadState: 'pristine',
-                                conversationsLoadState: 'pristine',
-                            },
-                        ]),
+        await executeUITask(this, 'followedListLoadState', async () => {
+            const followedLists = await customLists.fetchFollowedListsWithAnnotations(
+                {
+                    normalizedPageUrl: normalizeUrl(
+                        previousState.pageUrl ?? pageUrl,
                     ),
                 },
-            },
+            )
+
+            this.emitMutation({
+                followedLists: {
+                    allIds: {
+                        $set: followedLists.map((list) => list.id),
+                    },
+                    byId: {
+                        $set: fromPairs(
+                            followedLists.map((list) => [
+                                list.id,
+                                {
+                                    ...list,
+                                    isExpanded: false,
+                                    annotationsLoadState: 'pristine',
+                                    conversationsLoadState: 'pristine',
+                                },
+                            ]),
+                        ),
+                    },
+                },
+            })
         })
     }
 
