@@ -4,7 +4,7 @@ import {
     KEYBOARDSHORTCUTS_STORAGE_NAME,
 } from './constants'
 import { setLocalStorage } from 'src/util/storage'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
     const defaults = KEYBOARDSHORTCUTS_DEFAULT_STATE

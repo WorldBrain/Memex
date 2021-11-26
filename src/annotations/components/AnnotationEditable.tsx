@@ -22,11 +22,12 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -536,7 +537,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                             }
                             height="430px"
                         >
-                            <QuickTutorial markdownHelpOnTop={true} />
+                            <QuickTutorial
+                                markdownHelpOnTop={true}
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                            />
                         </HoverBox>
                     </ClickAway>
                 )}

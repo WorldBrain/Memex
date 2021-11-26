@@ -5,7 +5,7 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
 

@@ -188,6 +188,7 @@ export default class Ribbon extends Component<Props, State> {
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
                 <QuickTutorial
+                    getKeyboardShortcutsState={getKeyboardShortcutsState}
                     onClickOutside={() => this.props.toggleShowTutorial()}
                     onSettingsClick={() => this.openOptionsTabRPC('settings')}
                 />
