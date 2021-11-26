@@ -316,6 +316,7 @@ class AnnotationsSidebar extends React.Component<
                             onClick={() =>
                                 this.props.expandFollowedListNotes(listId)
                             }
+                            bottom="5px"
                         >
                             <FollowedListTitleContainer>
                                 <FollowedListDropdownIcon
