@@ -887,15 +887,6 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        // // If annot data yet to be loaded, load it
-        // if (loadState === 'pristine') {
-        //     await this.processUIEvent('loadFollowedListNotes', {
-        //         event,
-        //         previousState: this.withMutation(previousState, mutation),
-        //     })
-        //     return
-        // }
-
         this.options.events?.emit('renderHighlights', {
             highlights: annotations
                 .filter((annotation) => annotation?.selector != null)

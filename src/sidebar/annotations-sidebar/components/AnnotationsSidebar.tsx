@@ -300,7 +300,8 @@ class AnnotationsSidebar extends React.Component<
         const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
-                <React.Fragment key={listId}>
+                <FollowedListNotesContainer bottom="10px" key={listId}>
+                    {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         onClick={() =>
                             this.props.expandFollowedListNotes(listId)
@@ -336,7 +337,7 @@ class AnnotationsSidebar extends React.Component<
                         </ButtonTooltip>
                     </FollowedListRow>
                     {this.renderFollowedListNotes(listId)}
-                </React.Fragment>
+                </FollowedListNotesContainer>
             )
         })
         return (
@@ -374,9 +375,6 @@ class AnnotationsSidebar extends React.Component<
                 <AnnotationsSectionStyled>
                     {this.renderSharedNotesByList()}
                 </AnnotationsSectionStyled>
-                {/* <FollowedListsContainer>
-                    {this.renderSharedNotesByList()}
-                </FollowedListsContainer> */}
             </React.Fragment>
         )
     }
