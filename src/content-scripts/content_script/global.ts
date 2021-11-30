@@ -277,7 +277,7 @@ export async function main(
                 pageAnnotations,
                 annotationsBG.toggleSidebarOverlay,
             )
-            await highlightRenderer.highlightAndScroll(annotation)
+            highlightRenderer.highlightAndScroll(annotation)
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',

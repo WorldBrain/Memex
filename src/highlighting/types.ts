@@ -20,8 +20,8 @@ export interface HighlightInteractionsInterface {
         openSidebar: AnnotationClickHandler,
         temporary?: boolean,
     ) => Promise<Highlight>
-    scrollToHighlight: ({ url }: Highlight) => number
-    highlightAndScroll: (annotation: Annotation) => number
+    scrollToHighlight: ({ url }: Highlight) => void
+    highlightAndScroll: (annotation: Annotation) => void
     attachEventListenersToNewHighlights: (
         highlight: Highlight,
         openSidebar: AnnotationClickHandler,

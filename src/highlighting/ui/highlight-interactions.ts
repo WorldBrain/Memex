@@ -312,11 +312,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
-            const top = getOffsetTop($highlight) - window.innerHeight / 2
-            window.scrollTo({ top, behavior: 'smooth' })
-            // The pixels scrolled need to be returned in order to restrict
-            // scrolling when mouse is over the sidebar.
-            return top
+            $highlight.scrollIntoView({ behavior: 'smooth' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
         }
@@ -329,7 +325,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     highlightAndScroll = (annotation: Annotation) => {
         this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
-        return this.scrollToHighlight(annotation)
+        this.scrollToHighlight(annotation)
     }
 
     /**
