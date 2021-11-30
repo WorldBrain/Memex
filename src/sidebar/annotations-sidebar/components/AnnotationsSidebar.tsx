@@ -48,6 +48,7 @@ export interface AnnotationsSidebarProps
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
     expandMyNotes: () => void
+    expandSharedSpaces: (listIds: string[]) => void
     expandFollowedListNotes: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
@@ -296,61 +297,69 @@ class AnnotationsSidebar extends React.Component<
             return null
         }
 
-        return followedLists.allIds.map((listId) => {
+        const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
                 <React.Fragment key={listId}>
-                    <FollowedListNotesContainer bottom="10px">
-                        <FollowedListTitleContainer bottom="10px">
+                    <FollowedListRow
+                        onClick={() =>
+                            this.props.expandFollowedListNotes(listId)
+                        }
+                        bottom="5px"
+                        title={listData.name}
+                    >
+                        <FollowedListTitleContainer>
                             <FollowedListDropdownIcon
                                 icon="triangle"
                                 height="12px"
-                                isExpanded={this.props.isExpanded}
+                                isExpanded={listData.isExpanded}
                                 marginLeft="5px"
                             />
-                            <FollowedListSectionTitle>
-                                Notes from Shared Spaces
-                            </FollowedListSectionTitle>
+                            <FollowedListNoteCount left="5px" right="15px">
+                                {listData.sharedAnnotationReferences.length}
+                            </FollowedListNoteCount>
+                            <FollowedListTitle>
+                                {listData.name}
+                            </FollowedListTitle>
                         </FollowedListTitleContainer>
-                        <FollowedListRow
-                            onClick={() =>
-                                this.props.expandFollowedListNotes(listId)
-                            }
-                            bottom="5px"
-                            title={listData.name}
+                        <ButtonTooltip
+                            tooltipText="Go to collection"
+                            position="left"
                         >
-                            <FollowedListTitleContainer>
-                                <FollowedListDropdownIcon
-                                    icon="triangle"
-                                    height="12px"
-                                    isExpanded={listData.isExpanded}
-                                    marginLeft="5px"
-                                />
-                                <FollowedListNoteCount left="5px" right="15px">
-                                    {listData.sharedAnnotationReferences.length}
-                                </FollowedListNoteCount>
-                                <FollowedListTitle>
-                                    {listData.name}
-                                </FollowedListTitle>
-                            </FollowedListTitleContainer>
-                            <ButtonTooltip
-                                tooltipText="Go to collection"
-                                position="left"
-                            >
-                                <Icon
-                                    icon="goTo"
-                                    height="16px"
-                                    onClick={() =>
-                                        this.props.openCollectionPage(listId)
-                                    }
-                                />
-                            </ButtonTooltip>
-                        </FollowedListRow>
-                        {this.renderFollowedListNotes(listId)}
-                    </FollowedListNotesContainer>
+                            <Icon
+                                icon="goTo"
+                                height="16px"
+                                onClick={() =>
+                                    this.props.openCollectionPage(listId)
+                                }
+                            />
+                        </ButtonTooltip>
+                    </FollowedListRow>
+                    {this.renderFollowedListNotes(listId)}
                 </React.Fragment>
             )
         })
+        return (
+            <FollowedListNotesContainer bottom="10px">
+                <FollowedListTitleContainer
+                    bottom="10px"
+                    onClick={() =>
+                        this.props.expandSharedSpaces(followedLists.allIds)
+                    }
+                >
+                    <FollowedListDropdownIcon
+                        icon="triangle"
+                        height="12px"
+                        isExpanded={this.props.isExpandedSharedSpaces}
+                        marginLeft="5px"
+                    />
+                    <FollowedListSectionTitle>
+                        Notes from Shared Spaces
+                    </FollowedListSectionTitle>
+                </FollowedListTitleContainer>
+                {this.props.isExpandedSharedSpaces && sharedNotesByList}
+            </FollowedListNotesContainer>
+        )
     }
 
     private renderResultsBody() {
@@ -362,9 +371,12 @@ class AnnotationsSidebar extends React.Component<
                 <AnnotationsSectionStyled>
                     {this.renderAnnotationsEditable()}
                 </AnnotationsSectionStyled>
-                <FollowedListsContainer>
+                <AnnotationsSectionStyled>
                     {this.renderSharedNotesByList()}
-                </FollowedListsContainer>
+                </AnnotationsSectionStyled>
+                {/* <FollowedListsContainer>
+                    {this.renderSharedNotesByList()}
+                </FollowedListsContainer> */}
             </React.Fragment>
         )
     }

@@ -140,6 +140,7 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationConversationInitialState(),
 
             isExpanded: true,
+            isExpandedSharedSpaces: true,
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -901,6 +902,47 @@ export class SidebarContainerLogic extends UILogic<
                 .map((annotation) => ({
                     url: annotation.url,
                     selector: annotation.selector,
+                })),
+        })
+    }
+
+    expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
+        event,
+        previousState,
+    }) => {
+        const wasExpanded = previousState.isExpandedSharedSpaces
+        const expandedSharedAnnotationReferences = event.listIds
+            .filter((id) => previousState.followedLists.byId[id].isExpanded)
+            .map(
+                (id) =>
+                    previousState.followedLists.byId[id]
+                        .sharedAnnotationReferences,
+            )
+        const sharedAnnotIds = expandedSharedAnnotationReferences
+            .flat()
+            .map((ref) => ref.id as string)
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isExpandedSharedSpaces: { $set: !wasExpanded },
+        }
+        this.emitMutation(mutation)
+
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: sharedAnnotIds,
+            })
+            return
+        }
+        this.options.events?.emit('renderHighlights', {
+            highlights: sharedAnnotIds
+                .filter(
+                    (id) =>
+                        previousState.followedAnnotations[id]?.selector != null,
+                )
+                .map((id) => ({
+                    url: id,
+                    selector: previousState.followedAnnotations[id].selector,
                 })),
         })
     }

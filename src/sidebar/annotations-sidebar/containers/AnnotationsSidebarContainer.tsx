@@ -549,6 +549,11 @@ export class AnnotationsSidebarContainer<
                         expandMyNotes={() =>
                             this.processEvent('expandMyNotes', null)
                         }
+                        expandSharedSpaces={(listIds) =>
+                            this.processEvent('expandSharedSpaces', {
+                                listIds,
+                            })
+                        }
                         expandFollowedListNotes={(listId) =>
                             this.processEvent('expandFollowedListNotes', {
                                 listId,

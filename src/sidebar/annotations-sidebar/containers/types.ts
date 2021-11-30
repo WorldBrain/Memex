@@ -119,6 +119,7 @@ export interface SidebarContainerState
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isExpanded: boolean
+    isExpandedSharedSpaces: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -178,6 +179,7 @@ export type SidebarContainerEvents = UIEvent<
         sortAnnotations: { sortingFn: AnnotationsSorter }
 
         expandMyNotes: null
+        expandSharedSpaces: { listIds: string[] }
 
         // Adding a new page comment
         addNewPageComment: { comment?: string; tags?: string[] }
