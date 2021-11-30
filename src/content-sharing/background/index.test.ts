@@ -19,6 +19,7 @@ import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.te
 import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
 import { setupSyncBackgroundTest } from 'src/personal-cloud/background/index.tests'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { LocationSchemeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -1257,6 +1258,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await shareTestList()
                                 const tabId = 1
                                 const {
+                                    locator,
                                     identifier,
                                     fingerprints,
                                 } = await indexTestFingerprintedPdf(setup, {
@@ -1301,7 +1303,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 expect(
                                     await getShared('sharedContentLocator'),
-                                ).toEqual([])
+                                ).toEqual([
+                                    {
+                                        creator: TEST_USER.email,
+                                        id: expect.anything(),
+                                        locationScheme:
+                                            LocationSchemeType.FilesystemPathV1,
+                                        normalizedUrl: identifier.normalizedUrl,
+                                        originalUrl: locator.originalLocation,
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
+                                    },
+                                ])
                             },
                         },
                     ],

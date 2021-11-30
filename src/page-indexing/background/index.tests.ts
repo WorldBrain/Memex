@@ -61,5 +61,5 @@ export async function indexTestFingerprintedPdf(
         await setup.storageManager.collection('locators').findObjects({}),
     ).toEqual([])
 
-    return { identifier, fingerprints, contentSize }
+    return { identifier, fingerprints, contentSize, locator }
 }
