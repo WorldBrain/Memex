@@ -17,7 +17,7 @@ import {
 import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const contentSharing = (setup: BackgroundIntegrationTestSetup) =>

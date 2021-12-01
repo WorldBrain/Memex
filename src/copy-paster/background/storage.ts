@@ -5,7 +5,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/copy-paster/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/copy-paster/constants'
 import { Template } from '../types'
 
 export default class CopyPasterStorage extends StorageModule {

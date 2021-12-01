@@ -5,7 +5,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/tags/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 

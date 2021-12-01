@@ -6,7 +6,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/social-posts/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/social-posts/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { Tweet, User } from '../types'

@@ -7,7 +7,7 @@ import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean

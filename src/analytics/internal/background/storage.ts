@@ -5,7 +5,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/event-log/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/event-log/constants'
 
 import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 

@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 import * as selectors from '../search-filters/selectors'
 
