@@ -1258,7 +1258,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await shareTestList()
                                 const tabId = 1
                                 const {
-                                    locator,
                                     identifier,
                                     fingerprints,
                                 } = await indexTestFingerprintedPdf(setup, {
@@ -1303,19 +1302,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 expect(
                                     await getShared('sharedContentLocator'),
-                                ).toEqual([
-                                    {
-                                        creator: TEST_USER.email,
-                                        id: expect.anything(),
-                                        locationScheme:
-                                            LocationSchemeType.FilesystemPathV1,
-                                        normalizedUrl: identifier.normalizedUrl,
-                                        originalUrl: locator.originalLocation,
-                                        sharedList: maybeInt(
-                                            testData.remoteListId,
-                                        ),
-                                    },
-                                ])
+                                ).toEqual([])
                             },
                         },
                     ],
