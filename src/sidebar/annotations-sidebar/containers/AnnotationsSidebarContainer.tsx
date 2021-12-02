@@ -14,7 +14,6 @@ import type {
     SidebarContainerState,
     SidebarContainerEvents,
     AnnotationEventContext,
-    SidebarDisplayMode,
 } from './types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -36,7 +35,6 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { sidebarNotesTypeToString } from '../utils'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
@@ -457,72 +455,33 @@ export class AnnotationsSidebarContainer<
                                 </CloseBtn>
                             </ButtonTooltip>
                         )}
-                        <DropdownMenuBtn
-                            onMenuItemClick={(item) =>
-                                this.processEvent('setDisplayMode', {
-                                    mode: item.id as SidebarDisplayMode,
+                    </TopBarActionBtns>
+
+                    <TopBarActionBtns>
+                        <SortingDropdownMenuBtn
+                            onMenuItemClick={({ sortingFn }) =>
+                                this.processEvent('sortAnnotations', {
+                                    sortingFn,
                                 })
                             }
-                            btnChildren={
-                                <NoteTypesWrapper>
-                                    <NotesTypeName>
-                                        {sidebarNotesTypeToString(
-                                            this.state.displayMode,
-                                        )}{' '}
-                                    </NotesTypeName>
-                                    <Icon icon="triangle" height="8px" />
-                                </NoteTypesWrapper>
-                            }
-                            menuItems={[
-                                {
-                                    id: 'private-notes',
-                                    name: sidebarNotesTypeToString(
-                                        'private-notes',
-                                    ),
-                                    info: 'The notes you made on this page',
-                                },
-                                {
-                                    id: 'shared-notes',
-                                    name: sidebarNotesTypeToString(
-                                        'shared-notes',
-                                    ),
-                                    info:
-                                        'Notes from collections you follow or shared',
-                                },
-                            ]}
                         />
+                        <ButtonTooltip
+                            tooltipText="Copy All Notes"
+                            position="bottomSidebar"
+                        >
+                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
+                                <ActionIcon src={icons.copy} />
+                            </ActionBtn>
+                        </ButtonTooltip>
+                        <ButtonTooltip
+                            tooltipText="Share All Notes"
+                            position="bottomRightEdge"
+                        >
+                            <ActionBtn onClick={this.handleShareAllNotesClick}>
+                                <ActionIcon src={icons.shareEmpty} />
+                            </ActionBtn>
+                        </ButtonTooltip>
                     </TopBarActionBtns>
-                    {this.state.displayMode === 'private-notes' && (
-                        <TopBarActionBtns>
-                            <SortingDropdownMenuBtn
-                                onMenuItemClick={({ sortingFn }) =>
-                                    this.processEvent('sortAnnotations', {
-                                        sortingFn,
-                                    })
-                                }
-                            />
-                            <ButtonTooltip
-                                tooltipText="Copy All Notes"
-                                position="bottomSidebar"
-                            >
-                                <ActionBtn
-                                    onClick={this.handleCopyAllNotesClick}
-                                >
-                                    <ActionIcon src={icons.copy} />
-                                </ActionBtn>
-                            </ButtonTooltip>
-                            <ButtonTooltip
-                                tooltipText="Share All Notes"
-                                position="bottomRightEdge"
-                            >
-                                <ActionBtn
-                                    onClick={this.handleShareAllNotesClick}
-                                >
-                                    <ActionIcon src={icons.shareEmpty} />
-                                </ActionBtn>
-                            </ButtonTooltip>
-                        </TopBarActionBtns>
-                    )}
                 </TopBarContainerStyled>
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
@@ -586,6 +545,14 @@ export class AnnotationsSidebarContainer<
                         }
                         renderTagsPickerForAnnotation={
                             this.renderTagPickerForAnnotation
+                        }
+                        expandMyNotes={() =>
+                            this.processEvent('expandMyNotes', null)
+                        }
+                        expandSharedSpaces={(listIds) =>
+                            this.processEvent('expandSharedSpaces', {
+                                listIds,
+                            })
                         }
                         expandFollowedListNotes={(listId) =>
                             this.processEvent('expandFollowedListNotes', {

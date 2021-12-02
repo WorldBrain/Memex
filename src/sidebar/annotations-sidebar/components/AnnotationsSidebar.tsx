@@ -6,7 +6,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
-
+import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
@@ -47,6 +47,8 @@ export interface AnnotationsSidebarProps
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
 
+    expandMyNotes: () => void
+    expandSharedSpaces: (listIds: string[]) => void
     expandFollowedListNotes: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
@@ -152,10 +154,6 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation() {
-        if (this.props.displayMode === 'shared-notes') {
-            return null
-        }
-
         return (
             <NewAnnotationSection>
                 <AnnotationCreate
@@ -296,43 +294,39 @@ class AnnotationsSidebar extends React.Component<
         }
 
         if (!followedLists.allIds.length) {
-            return (
-                <FollowedListsMsgContainer>
-                    <FollowedListsMsg>¯\_(ツ)_/¯</FollowedListsMsg>
-                    <FollowedListsMsgHead>
-                        No annotations by other people on this page
-                    </FollowedListsMsgHead>
-                    <FollowedListsMsg>
-                        Follow or share collections containing <br />
-                        annotations for this page
-                    </FollowedListsMsg>
-                </FollowedListsMsgContainer>
-            )
+            return null
         }
 
-        return followedLists.allIds.map((listId) => {
+        const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
-                <React.Fragment key={listId}>
-                    <FollowedListNotesContainer bottom="10px">
-                        <FollowedListRow>
-                            <FollowedListTitleContainer
-                                onClick={() =>
-                                    this.props.expandFollowedListNotes(listId)
-                                }
-                            >
-                                <FollowedListTitle title={listData.name}>
-                                    {listData.name}
-                                </FollowedListTitle>
-                                <FollowedListNoteCount left="10px" right="5px">
-                                    {listData.sharedAnnotationReferences.length}
-                                </FollowedListNoteCount>
-                                <FollowedListDropdownIcon
-                                    icon="triangle"
-                                    height="8px"
-                                    isExpanded={listData.isExpanded}
-                                />
-                            </FollowedListTitleContainer>
+                <FollowedListNotesContainer bottom="10px" key={listId}>
+                    {/* <React.Fragment key={listId}> */}
+                    <FollowedListRow
+                        onClick={() =>
+                            this.props.expandFollowedListNotes(listId)
+                        }
+                        bottom="5px"
+                        title={listData.name}
+                    >
+                        <FollowedListTitleContainer>
+                            <FollowedListDropdownIcon
+                                icon="triangle"
+                                height="12px"
+                                isExpanded={listData.isExpanded}
+                                marginLeft="5px"
+                            />
+                            <FollowedListNoteCount left="5px" right="15px">
+                                {listData.sharedAnnotationReferences.length}
+                            </FollowedListNoteCount>
+                            <FollowedListTitle>
+                                {listData.name}
+                            </FollowedListTitle>
+                        </FollowedListTitleContainer>
+                        <ButtonTooltip
+                            tooltipText="Go to collection"
+                            position="left"
+                        >
                             <Icon
                                 icon="goTo"
                                 height="16px"
@@ -340,31 +334,48 @@ class AnnotationsSidebar extends React.Component<
                                     this.props.openCollectionPage(listId)
                                 }
                             />
-                        </FollowedListRow>
-                        {this.renderFollowedListNotes(listId)}
-                    </FollowedListNotesContainer>
-                </React.Fragment>
+                        </ButtonTooltip>
+                    </FollowedListRow>
+                    {this.renderFollowedListNotes(listId)}
+                </FollowedListNotesContainer>
             )
         })
+        return (
+            <FollowedListNotesContainer bottom="10px">
+                <FollowedListTitleContainer
+                    bottom="10px"
+                    onClick={() =>
+                        this.props.expandSharedSpaces(followedLists.allIds)
+                    }
+                >
+                    <FollowedListDropdownIcon
+                        icon="triangle"
+                        height="12px"
+                        isExpanded={this.props.isExpandedSharedSpaces}
+                        marginLeft="5px"
+                    />
+                    <FollowedListSectionTitle>
+                        Notes from Shared Spaces
+                    </FollowedListSectionTitle>
+                </FollowedListTitleContainer>
+                {this.props.isExpandedSharedSpaces && sharedNotesByList}
+            </FollowedListNotesContainer>
+        )
     }
 
     private renderResultsBody() {
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-
-        if (this.props.displayMode === 'shared-notes') {
-            return (
-                <FollowedListsContainer>
-                    {this.renderSharedNotesByList()}
-                </FollowedListsContainer>
-            )
-        }
-
         return (
-            <AnnotationsSectionStyled>
-                {this.renderAnnotationsEditable()}
-            </AnnotationsSectionStyled>
+            <React.Fragment>
+                <AnnotationsSectionStyled>
+                    {this.renderAnnotationsEditable()}
+                </AnnotationsSectionStyled>
+                <AnnotationsSectionStyled>
+                    {this.renderSharedNotesByList()}
+                </AnnotationsSectionStyled>
+            </React.Fragment>
         )
     }
 
@@ -423,7 +434,26 @@ class AnnotationsSidebar extends React.Component<
             annots.push(<CongratsMessage key="sidebar-congrats-msg" />)
         }
 
-        return annots
+        return (
+            <FollowedListNotesContainer
+                bottom={this.props.isExpanded ? '20px' : '0px'}
+            >
+                <FollowedListTitleContainer
+                    onClick={() => this.props.expandMyNotes()}
+                >
+                    <FollowedListDropdownIcon
+                        icon="triangle"
+                        height="12px"
+                        isExpanded={this.props.isExpanded}
+                        marginLeft="5px"
+                    />
+                    <FollowedListSectionTitle title={'My Notes'}>
+                        {'My Notes'}
+                    </FollowedListSectionTitle>
+                </FollowedListTitleContainer>
+                {this.props.isExpanded && annots}
+            </FollowedListNotesContainer>
+        )
     }
 
     render() {
@@ -549,21 +579,34 @@ const FollowedListRow = styled(Margin)`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 15px;
+    background: white;
+    border-radius: 3px;
+    border: 1px solid #e0e0e0;
+    width: 400px;
+    cursor: pointer;
 `
 
-const FollowedListTitleContainer = styled.div`
+const FollowedListSectionTitle = styled(Margin)`
+    font-size: 16px;
+    color: #c0c0c0;
+    justify-content: flex-start;
+    width: max-content;
+`
+
+const FollowedListTitleContainer = styled(Margin)`
     display: flex;
     flex-direction: row;
     align-items: center;
     cursor: pointer;
-    width: 90%;
+    justify-content: flex-start;
 `
 
 const FollowedListTitle = styled.span`
     font-weight: bold;
     font-size: 14px;
-    white-space: nowrap;
-    max-width: 85%;
+    white-space: pre;
+    max-width: 295px;
     text-overflow: ellipsis;
     overflow-x: hidden;
 `
@@ -576,8 +619,13 @@ const FollowedListNoteCount = styled(Margin)`
     font-size: 12px;
 `
 
-const FollowedListDropdownIcon = styled(Icon)<{ isExpanded: boolean }>`
+const FollowedListDropdownIcon = styled(Icon)<{
+    isExpanded: boolean
+    marginLeft: string
+}>`
     transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
+    margin-left: ${(props) => (props.marginLeft ? props.marginLeft : 'none')};
+    margin-right: 5px;
 `
 
 const CloseIconStyled = styled.div`
@@ -673,8 +721,7 @@ const AnnotationsSectionStyled = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    margin-bottom: 30px;
-    padding: 15px 10px 100px;
+    padding: 15px 10px;
 `
 
 const NewAnnotationBoxStyled = styled.div`
