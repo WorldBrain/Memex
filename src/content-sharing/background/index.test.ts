@@ -15,6 +15,7 @@ import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { SharingTestHelper } from './index.tests'
 
 function convertRemoteId(id: string) {
     return parseInt(id, 10)
@@ -31,7 +32,7 @@ interface TestData {
 
 async function setupTest(options: {
     setup: BackgroundIntegrationTestContext['setup']
-    testData: TestData
+    testData?: TestData
     createTestList?: boolean
 }) {
     const { setup, testData } = options
@@ -78,99 +79,36 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share a new list with its entries',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    shareTestList,
-                                    personalCloud,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-
-                                const localListEntries = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'pageListEntries',
-                                    {
-                                        sort: [['createdAt', 'desc']],
-                                    },
-                                )
-
-                                await shareTestList()
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: 'My shared list',
-                                        description: null,
-                                    },
-                                ])
-                                expect(
-                                    orderBy(
-                                        await serverStorage.storageManager.operation(
-                                            'findObjects',
-                                            'sharedListEntry',
-                                            {},
-                                        ),
-                                        ['createdWhen'],
-                                        ['desc'],
-                                    ),
-                                ).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        sharedList: convertRemoteId(
-                                            testData.remoteListId,
-                                        ),
-                                        createdWhen: localListEntries[1].createdAt.getTime(),
-                                        updatedWhen: expect.any(Number),
-                                        originalUrl: 'https://www.eggs.com/foo',
-                                        normalizedUrl: 'eggs.com/foo',
-                                        entryTitle: 'Eggs.com title',
-                                    },
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        sharedList: convertRemoteId(
-                                            testData.remoteListId,
-                                        ),
-                                        createdWhen: localListEntries[2].createdAt.getTime(),
-                                        updatedWhen: expect.any(Number),
-                                        originalUrl: 'https://www.spam.com/foo',
-                                        normalizedUrl: 'spam.com/foo',
-                                        entryTitle: 'Spam.com title',
-                                    },
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 1,
+                                })
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                    { listId: 1, pageId: 2 },
                                 ])
                             },
                             postCheck: async ({ setup }) => {
-                                const listMetadata = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'sharedListMetadata',
-                                    {},
-                                )
-                                expect(listMetadata).toEqual([
-                                    {
-                                        localId: testData.localListId,
-                                        remoteId: testData.remoteListId,
-                                    },
-                                ])
+                                await helper.assertSharedListMetadata(setup, {
+                                    ids: [1],
+                                })
                             },
                         },
                     ],
@@ -181,66 +119,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share new entries to an already shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                // Add new entry
-                                await setup.backgroundModules.pages.addPage({
-                                    pageDoc: {
-                                        url: 'https://www.fish.com/cheese',
-                                        content: {
-                                            title: 'Fish.com title',
-                                        },
-                                    },
-                                    visits: [],
-                                    rejectNoContent: false,
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 1,
                                 })
-                                await setup.backgroundModules.customLists.insertPageToList(
-                                    {
-                                        id: testData.localListId,
-                                        url: 'https://www.fish.com/cheese',
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    orderBy(
-                                        await serverStorage.storageManager.operation(
-                                            'findObjects',
-                                            'sharedListEntry',
-                                            {},
-                                        ),
-                                        ['createdWhen'],
-                                        ['asc'],
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        normalizedUrl: 'spam.com/foo',
-                                        entryTitle: 'Spam.com title',
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedUrl: 'eggs.com/foo',
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedUrl: 'fish.com/cheese',
-                                        entryTitle: 'Fish.com title',
-                                    }),
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                    { listId: 1, pageId: 2 },
                                 ])
                             },
                         },
@@ -252,77 +154,36 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should sync the title when changing the title of an already shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                const updatedTitle =
-                                    'My shared list (updated title)'
-                                await setup.backgroundModules.customLists.updateList(
-                                    {
-                                        id: testData.localListId,
-                                        oldName: data.LIST_DATA.name,
-                                        newName: updatedTitle,
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: updatedTitle,
-                                        description: null,
-                                    },
-                                ])
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.editListTitle(setup, {
+                                    id: 1,
+                                    title: 'updated title',
+                                })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
 
                                 // It should not fail when trying to update other fields than the title of the list
-                                await setup.storageManager.operation(
-                                    'updateObject',
-                                    'customLists',
-                                    { id: testData.localListId },
-                                    { searchableName: 'something' },
-                                )
-                                await personalCloud.waitForSync()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: updatedTitle,
-                                        description: null,
-                                    },
-                                ])
+                                await helper.updateListData(setup, {
+                                    id: 1,
+                                    updates: { searchableName: 'something' },
+                                })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
                             },
                         },
                     ],
@@ -333,6 +194,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should delete list entries of an already shared list',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
 
                 return {
@@ -340,37 +202,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                await setup.backgroundModules.customLists.removePageFromList(
-                                    {
-                                        id: testData.localListId,
-                                        url: 'https://www.spam.com/foo',
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                ])
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.removePageFromList(setup, {
+                                    pageId: 1,
+                                    listId: 1,
+                                })
+                                await helper.assertSharedListEntries(setup, [])
                             },
                         },
                     ],
@@ -427,6 +272,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotations from lists',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
 
                 return {
@@ -527,6 +373,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share already shared annotations adding a page to another shared list',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
                 let firstLocalListId: number
                 let secondLocalListId: number
@@ -686,6 +533,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should update the body of a shared annotation',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
 
                 return {
@@ -747,6 +595,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share already shared annotations when sharing a list containing already shared pages',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
                 let firstLocalListId: number
                 let secondLocalListId: number
@@ -901,6 +750,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare an annotation',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
                 let localListIds: number[]
 
@@ -1019,6 +869,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotations when removing a page from a shared list',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
                 let localListIds: number[]
 
@@ -1121,6 +972,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotation and remove list entries when removed locally',
             { skipConflictTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
                 let localListIds: number[]
 
@@ -1210,6 +1062,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should add a list to local lists and store its metadata when the user joined a new list',
             { skipConflictTests: true, skipSyncTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
 
                 return {
@@ -1299,7 +1152,7 @@ function makeShareAnnotationTest(options: {
     testDuplicateSharing: boolean
     testProtectedBulkShare?: boolean
 }): BackgroundIntegrationTestInstance {
-    let localListId: number
+    const helper = new SharingTestHelper()
 
     return {
         setup: async ({ setup }) => {},
@@ -1314,202 +1167,75 @@ function makeShareAnnotationTest(options: {
                     personalCloud.actionQueue.forceQueueSkip = true
                     await personalCloud.setup()
 
-                    localListId = await data.createContentSharingTestList(setup)
-                    await contentSharing.shareList({
-                        listId: localListId,
-                    })
-                    const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                        {} as any,
-                        data.ANNOTATION_1_1_DATA,
-                        { skipPageIndexing: true },
-                    )
-                    const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                        {} as any,
-                        data.ANNOTATION_1_2_DATA,
-                        { skipPageIndexing: true },
-                    )
+                    await helper.createList(setup, { id: 1 })
+                    await helper.createPage(setup, { id: 1, listId: 1 })
+                    await helper.createPage(setup, { id: 2, listId: 1 })
+                    await helper.shareList(setup, { id: 1 })
+                    await helper.createAnnotation(setup, { id: 1, pageId: 1 })
+                    await helper.createAnnotation(setup, { id: 2, pageId: 1 })
 
                     if (options.testProtectedBulkShare) {
-                        await setup.backgroundModules.directLinking.setAnnotationPrivacyLevel(
-                            {} as any,
-                            {
-                                annotation: secondAnnotationUrl,
-                                privacyLevel:
-                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
-                            },
-                        )
+                        await helper.setAnnotationPrivacyLevel(setup, {
+                            id: 2,
+                            level: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        })
                     }
 
                     if (options.annotationSharingMethod === 'shareAnnotation') {
-                        await contentSharing.shareAnnotation({
-                            annotationUrl: firstAnnotationUrl,
-                        })
-                        await contentSharing.shareAnnotation({
-                            annotationUrl: secondAnnotationUrl,
-                        })
+                        await helper.shareAnnotation(setup, { id: 1 })
+                        await helper.shareAnnotation(setup, { id: 2 })
 
                         if (options.testDuplicateSharing) {
-                            await contentSharing.shareAnnotation({
-                                annotationUrl: secondAnnotationUrl,
-                            })
+                            await helper.shareAnnotation(setup, { id: 2 })
                         }
                     } else if (
                         options.annotationSharingMethod === 'shareAnnotations'
                     ) {
-                        await contentSharing.shareAnnotations({
-                            annotationUrls: [
-                                firstAnnotationUrl,
-                                secondAnnotationUrl,
-                            ],
-                        })
+                        await helper.shareAnnotations(setup, { ids: [1, 2] })
                         if (options.testDuplicateSharing) {
-                            await contentSharing.shareAnnotations({
-                                annotationUrls: [
-                                    firstAnnotationUrl,
-                                    secondAnnotationUrl,
-                                ],
+                            await helper.shareAnnotations(setup, {
+                                ids: [1, 2],
                             })
                         }
                     }
-                    await personalCloud.waitForSync()
-
-                    const sharedAnnotationMetadataPre = await setup.storageManager.operation(
-                        'findObjects',
-                        'sharedAnnotationMetadata',
-                        {},
-                    )
-                    expect(sharedAnnotationMetadataPre[0]).toEqual({
-                        localId: firstAnnotationUrl,
-                        remoteId: expect.anything(),
-                        excludeFromLists: true,
+                    await helper.assertSharedAnnotationMetadata(setup, {
+                        metadata: [
+                            { annotationId: 1, excludeFromLists: true },
+                            ...(!options.testProtectedBulkShare
+                                ? [{ annotationId: 2, excludeFromLists: true }]
+                                : []),
+                        ],
                     })
-                    expect(sharedAnnotationMetadataPre[1]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : {
-                                  localId: secondAnnotationUrl,
-                                  remoteId: expect.anything(),
-                                  excludeFromLists: true,
-                              },
-                    )
-                    const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
-                        {
-                            localIds: [firstAnnotationUrl, secondAnnotationUrl],
-                        },
-                    )
-                    expect(remoteAnnotationIds[firstAnnotationUrl]).toEqual(
-                        sharedAnnotationMetadataPre[0].remoteId,
-                    )
-                    expect(remoteAnnotationIds[secondAnnotationUrl]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : sharedAnnotationMetadataPre[1].remoteId,
-                    )
-
-                    const serverStorage = await setup.getServerStorage()
-                    const getShared = (collection: string) =>
-                        serverStorage.storageManager.operation(
-                            'findObjects',
-                            collection,
-                            {},
-                        )
-                    const sharedAnnotations = await getShared(
-                        'sharedAnnotation',
-                    )
-                    expect(sharedAnnotations[0]).toEqual({
-                        id:
-                            convertRemoteId(
-                                remoteAnnotationIds[
-                                    firstAnnotationUrl
-                                ] as string,
-                            ) || remoteAnnotationIds[firstAnnotationUrl],
-                        creator: TEST_USER.id,
-                        normalizedPageUrl: normalizeUrl(
-                            data.ANNOTATION_1_1_DATA.pageUrl,
-                        ),
-                        createdWhen: expect.any(Number),
-                        uploadedWhen: expect.any(Number),
-                        updatedWhen: expect.any(Number),
-                        comment: data.ANNOTATION_1_1_DATA.comment,
-                        body: data.ANNOTATION_1_1_DATA.body,
-                        selector: JSON.stringify(
-                            data.ANNOTATION_1_1_DATA.selector,
-                        ),
+                    await helper.assertSharedAnnotations(setup, {
+                        ids: [
+                            1,
+                            ...(!options.testProtectedBulkShare ? [2] : []),
+                        ],
                     })
-                    expect(sharedAnnotations[1]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : expect.objectContaining({
-                                  body: data.ANNOTATION_1_2_DATA.body,
-                              }),
-                    )
-                    expect(
-                        await getShared('sharedAnnotationListEntry'),
-                    ).toEqual([])
 
-                    await contentSharing.shareAnnotationsToLists({
-                        annotationUrls: [firstAnnotationUrl],
+                    await helper.assertSharedAnnotationEntries(setup, {
+                        entries: [],
                     })
+
+                    await helper.shareAnnotationsToLists(setup, { ids: [1] })
                     if (options.testDuplicateSharing) {
-                        await contentSharing.shareAnnotationsToLists({
-                            annotationUrls: [firstAnnotationUrl],
+                        await helper.shareAnnotationsToLists(setup, {
+                            ids: [1],
                         })
                     }
-                    await personalCloud.waitForSync()
 
-                    expect(
-                        await getShared('sharedAnnotationListEntry'),
-                    ).toEqual([
-                        {
-                            id: expect.anything(),
-                            creator: TEST_USER.id,
-                            normalizedPageUrl: normalizeUrl(
-                                data.ANNOTATION_1_1_DATA.pageUrl,
-                            ),
-                            createdWhen: expect.any(Number),
-                            uploadedWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                            sharedList: expect.any(Number),
-                            sharedAnnotation:
-                                convertRemoteId(
-                                    remoteAnnotationIds[
-                                        firstAnnotationUrl
-                                    ] as string,
-                                ) || remoteAnnotationIds[firstAnnotationUrl],
-                        },
-                    ])
-                    expect(await getShared('sharedPageInfo')).toEqual([
-                        {
-                            id: expect.anything(),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                            creator: TEST_USER.id,
-                            fullTitle: data.PAGE_1_DATA.pageDoc.content.title,
-                            normalizedUrl: normalizeUrl(
-                                data.ANNOTATION_1_1_DATA.pageUrl,
-                            ),
-                            originalUrl: data.ENTRY_1_DATA.url,
-                        },
-                    ])
-                    const sharedAnnotationMetadataPost = await setup.storageManager.operation(
-                        'findObjects',
-                        'sharedAnnotationMetadata',
-                        {},
-                    )
-                    expect(sharedAnnotationMetadataPost[0]).toEqual({
-                        localId: firstAnnotationUrl,
-                        remoteId: expect.anything(),
-                        excludeFromLists: false,
+                    await helper.assertSharedAnnotationEntries(setup, {
+                        entries: [{ annotationId: 1, listId: 1 }],
                     })
-                    expect(sharedAnnotationMetadataPost[1]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : {
-                                  localId: secondAnnotationUrl,
-                                  remoteId: expect.anything(),
-                                  excludeFromLists: true,
-                              },
-                    )
+                    await helper.assertSharedPageInfo(setup, { pageIds: [1] })
+                    await helper.assertSharedAnnotationMetadata(setup, {
+                        metadata: [
+                            { annotationId: 1, excludeFromLists: false },
+                            ...(!options.testProtectedBulkShare
+                                ? [{ annotationId: 2, excludeFromLists: true }]
+                                : []),
+                        ],
+                    })
                 },
             },
         ],
@@ -1519,6 +1245,7 @@ function makeShareAnnotationTest(options: {
 function makeAnnotationFromWebUiTest(options: {
     ownPage: boolean
 }): BackgroundIntegrationTestInstance {
+    const helper = new SharingTestHelper()
     const testData: TestData = {}
     let storageHooksChangeWatcher: StorageHooksChangeWatcher
 
