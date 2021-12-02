@@ -457,7 +457,7 @@ export class AnnotationsSidebarContainer<
                         )}
                     </TopBarActionBtns>
 
-                    <TopBarActionBtns>
+                    {/* <TopBarActionBtns>
                         <SortingDropdownMenuBtn
                             onMenuItemClick={({ sortingFn }) =>
                                 this.processEvent('sortAnnotations', {
@@ -481,7 +481,7 @@ export class AnnotationsSidebarContainer<
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>
                         </ButtonTooltip>
-                    </TopBarActionBtns>
+                    </TopBarActionBtns> */}
                 </TopBarContainerStyled>
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
@@ -507,6 +507,38 @@ export class AnnotationsSidebarContainer<
                                 getListShareUrl({ remoteListId }),
                                 '_blank',
                             )
+                        }
+                        onMenuItemClick={({ sortingFn }) =>
+                            this.processEvent('sortAnnotations', {
+                                sortingFn,
+                            })
+                        }
+                        annotationUrls={() =>
+                            this.state.annotations.map((a) => a.url)
+                        }
+                        normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
+                        normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                        onClickOutsideCopyPaster={() =>
+                            this.processEvent(
+                                'resetCopyPasterAnnotationId',
+                                null,
+                            )
+                        }
+                        copyPaster={this.props.copyPaster}
+                        contentSharing={this.props.contentSharing}
+                        annotationsShareAll={this.props.annotations}
+                        copyPageLink={({ link }) =>
+                            this.processEvent('copyNoteLink', { link })
+                        }
+                        postShareHook={(shareInfo) =>
+                            this.processEvent(
+                                'updateAllAnnotationsShareInfo',
+                                shareInfo,
+                            )
+                        }
+                        onCopyBtnClick={() => this.handleCopyAllNotesClick}
+                        onShareAllNotesClick={() =>
+                            this.handleCopyAllNotesClick
                         }
                         sharingAccess={this.state.annotationSharingAccess}
                         needsWaypoint={!this.state.noResults}
