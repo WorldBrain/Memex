@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'

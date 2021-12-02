@@ -127,7 +127,10 @@ export function createSelfTests(options: {
                     if (
                         collectionName === 'personalBlockStats' ||
                         collectionName === 'personalCloudError' ||
-                        collectionName === 'personalReadwiseAction'
+                        collectionName === 'personalReadwiseAction' ||
+                        collectionName === 'personalUsageEntry' ||
+                        collectionName === 'personalAnalyticEvent' ||
+                        collectionName === 'personalAnalyticsStats'
                     ) {
                         return null
                     }

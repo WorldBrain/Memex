@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
