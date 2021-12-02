@@ -3920,10 +3920,11 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentLocator: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
-                            originalUrl: testLocators.fourth_a.originalLocation,
-                        }),
+                        // NOTE: This shouldn't get shared as it's a local filesystem locator
+                        // expect.objectContaining({
+                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        //     originalUrl: testLocators.fourth_a.originalLocation,
+                        // }),
                     ],
                 })
 
@@ -4053,10 +4054,6 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentLocator: [
-                        expect.objectContaining({
-                            normalizedUrl: testLocators.fourth_dummy.location,
-                            originalUrl: testLocators.fourth_dummy.originalLocation,
-                        }),
                         // NOTE: This shouldn't get shared as it's a local filesystem locator
                         // expect.objectContaining({
                         //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
