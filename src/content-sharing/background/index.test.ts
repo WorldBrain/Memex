@@ -774,7 +774,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     personalCloud,
                                     getShared,
                                 } = await setupTest({ setup, testData })
-
                                 firstLocalListId = await data.createContentSharingTestList(
                                     setup,
                                 )

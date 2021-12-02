@@ -23,6 +23,7 @@ async function setupTest(
         authBG: backgroundModules.auth.remoteFunctions,
         personalCloudBG: backgroundModules.personalCloud.remoteFunctions,
         navToDashboard: args?.onDashboardNav ?? (() => undefined),
+        navToGuidedTutorial: () => undefined,
     })
 
     const logic = createElement(_logic)

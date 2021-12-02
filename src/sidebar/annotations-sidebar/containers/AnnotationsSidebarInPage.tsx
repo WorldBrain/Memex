@@ -16,7 +16,6 @@ import { Annotation } from 'src/annotations/types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
-import { SidebarDisplayMode } from './types'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 
 export interface Props extends ContainerProps {
@@ -95,21 +94,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 })
             }),
         )
-        sidebarEvents.on(
-            'renderHighlights',
-            async ({ highlights, displayMode }) => {
-                await highlighter.renderHighlights(
-                    highlights,
-                    ({ annotationUrl }) => {
-                        inPageUI.showSidebar({
-                            displayMode,
-                            annotationUrl,
-                            action: 'show_annotation',
-                        })
-                    },
-                )
-            },
-        )
+        sidebarEvents.on('renderHighlights', async ({ highlights }) => {
+            await highlighter.renderHighlights(
+                highlights,
+                ({ annotationUrl }) => {
+                    inPageUI.showSidebar({
+                        annotationUrl,
+                        action: 'show_annotation',
+                    })
+                },
+            )
+        })
     }
 
     cleanupEventForwarding = () => {
@@ -128,13 +123,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return containerNode?.getRootNode() as Document
     }
 
-    private activateAnnotation(
-        url: string,
-        annotationMode: 'edit' | 'show',
-        displayMode: SidebarDisplayMode = 'private-notes',
-    ) {
-        this.processEvent('setDisplayMode', { mode: displayMode })
-
+    private activateAnnotation(url: string, annotationMode: 'edit' | 'show') {
         if (annotationMode === 'show') {
             this.processEvent('switchAnnotationMode', {
                 annotationUrl: url,
@@ -168,17 +157,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tags: event.annotationData?.tags,
             })
         } else if (event.action === 'show_annotation') {
-            this.activateAnnotation(
-                event.annotationUrl,
-                'show',
-                event.displayMode,
-            )
+            this.activateAnnotation(event.annotationUrl, 'show')
         } else if (event.action === 'edit_annotation') {
-            this.activateAnnotation(
-                event.annotationUrl,
-                'edit',
-                'private-notes',
-            )
+            this.activateAnnotation(event.annotationUrl, 'edit')
         } else if (event.action === 'set_sharing_access') {
             this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,

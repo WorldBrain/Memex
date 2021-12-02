@@ -50,6 +50,7 @@ import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+// import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -162,7 +163,7 @@ export async function main(
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
-    // component, that when run, initialise the respective component with it's
+    // component, that when run, initialise the respective component with its
     // dependencies
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {

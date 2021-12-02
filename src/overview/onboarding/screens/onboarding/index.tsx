@@ -12,7 +12,7 @@ import { SignInScreen } from 'src/authentication/components/SignIn'
 
 import { runInBackground } from 'src/util/webextensionRPC'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-
+import { GUIDED_ONBOARDING_URL } from '../../constants'
 const ButtonBar = styled.div`
     display: flex;
     justify-content: center;
@@ -30,13 +30,16 @@ export default class OnboardingScreen extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG'
+        'navToDashboard' | 'authBG' | 'personalCloudBG' | 'navToGuidedTutorial'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
+        },
+        navToGuidedTutorial: () => {
+            window.open(GUIDED_ONBOARDING_URL)
         },
     }
 
@@ -56,12 +59,20 @@ export default class OnboardingScreen extends StatefulUIElement<
             </div>
             <ButtonBar>
                 <PrimaryAction
-                    label={
-                        this.state.newSignUp ? 'Go to Dashboard' : 'Continue'
-                    }
-                    onClick={() => this.processEvent('goToSyncStep', null)}
+                    label={'Try saving and annotating a website'}
+                    onClick={() => {
+                        this.processEvent('goToGuidedTutorial', null)
+                    }}
                 />
             </ButtonBar>
+            <div
+                className={styles.text}
+                onClick={() => {
+                    this.processEvent('finishOnboarding', null)
+                }}
+            >
+                or go to search dashboard
+            </div>
         </div>
     )
 

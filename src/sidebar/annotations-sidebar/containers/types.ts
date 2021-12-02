@@ -74,7 +74,6 @@ export interface EditForms {
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 export type SearchType = 'notes' | 'page' | 'social'
 export type PageType = 'page' | 'all'
-export type SidebarDisplayMode = 'private-notes' | 'shared-notes'
 export interface SearchTypeChange {
     searchType?: 'notes' | 'page' | 'social'
     resultsSearchType?: 'notes' | 'page' | 'social'
@@ -119,8 +118,9 @@ export interface SidebarContainerState
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
-    displayMode: SidebarDisplayMode
     isLocked: boolean
+    isExpanded: boolean
+    isExpandedSharedSpaces: boolean
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -179,7 +179,8 @@ export type SidebarContainerEvents = UIEvent<
 
         sortAnnotations: { sortingFn: AnnotationsSorter }
 
-        setDisplayMode: { mode: SidebarDisplayMode }
+        expandMyNotes: null
+        expandSharedSpaces: { listIds: string[] }
 
         // Adding a new page comment
         addNewPageComment: { comment?: string; tags?: string[] }

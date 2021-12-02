@@ -1,4 +1,5 @@
 import { Item, ServiceParser, RecursiveNetscapeParser } from '../types'
+import { cartesian } from '../utils'
 
 const parseNetscapeLink: (link: Element, collectionName: string) => Item = (
     link,
@@ -73,8 +74,13 @@ const parseDescriptionList: RecursiveNetscapeParser = (
 const parseShallowList: ServiceParser = (doc) => {
     // h1 are collection names, bookmarks are <a> elements, no nested collections
     let items = []
-    const headers = doc.querySelectorAll('body > h1')
+    const headers = [].concat(
+        ...['h1', 'h2', 'h3'].map((h) =>
+            Array.from(doc.querySelectorAll(`body > ${h}`)),
+        ),
+    )
     for (let header of headers) {
+        console.log(header)
         const collectionName =
             header.textContent !== ''
                 ? header.textContent
@@ -83,8 +89,8 @@ const parseShallowList: ServiceParser = (doc) => {
             header.nextElementSibling.querySelectorAll('a'),
         )
         const newItems = links
-            .filter((link) => link.hasAttribute('href'))
-            .map((link) => parseNetscapeLink(link, collectionName))
+            .filter((link: Element) => link.hasAttribute('href'))
+            .map((link: Element) => parseNetscapeLink(link, collectionName))
         items = items.concat(newItems)
     }
     return items
@@ -99,41 +105,35 @@ const parseNoFolders: ServiceParser = (doc) => {
     return items
 }
 
-const identifyService: (doc: Document) => string = (doc) => {
-    const title = doc.querySelector('title')
-    if (title) {
-        if (title.textContent.includes('Pocket')) {
-            return 'pocket'
-        } else if (title.textContent.includes('Raindrop.io')) {
-            return 'raindrop'
-        } else if (title.textContent.includes('Instapaper')) {
-            return 'instapaper' //same as pocket
-        } else if (title.textContent.includes('Pinboard')) {
-            return 'pinboard' //same as pocket
-        } else if (title.textContent.includes('Bookmarks')) {
-            // Could be diigo or BookmarkOS, but they both work with parseDescriptionList
-            return 'bookmarks'
-        }
-    }
-    return 'netscape'
+const detectDescriptionListWithCollections: (doc: Document) => boolean = (
+    doc,
+) => {
+    // detect nested collections in description lists
+    return ['h1', 'h2', 'h3']
+        .map(
+            (header) =>
+                doc.querySelectorAll(`dl dt ${header} ~ dl dt a`).length,
+        )
+        .some((x) => x > 0)
 }
+
+const detectShallowList: (doc: Document) => boolean = (doc) => {
+    // detect single level of collections followed by ordered or unordered list
+    return cartesian(['h1', 'h2', 'h3'], ['ul', 'ol'])
+        .map(
+            (hAndL) =>
+                doc.querySelectorAll(`${hAndL[0]}~${hAndL[1]} li a`).length,
+        )
+        .some((x) => x > 0)
+}
+
 const parseNetscape: ServiceParser = (doc) => {
-    const serviceName = identifyService(doc)
-    switch (serviceName) {
-        case 'pocket':
-            return parseShallowList(doc)
-        case 'raindrop':
-            return parseDescriptionList(doc.querySelector('dl'), [], '')
-        case 'instapaper':
-            return parseShallowList(doc)
-        case 'diigo':
-            return parseNoFolders(doc)
-        case 'pinboard':
-            return parseNoFolders(doc)
-        case 'bookmarks':
-            return parseDescriptionList(doc.querySelector('dl'), [], '')
-        default:
-            return parseNoFolders(doc)
+    if (detectDescriptionListWithCollections(doc)) {
+        return parseDescriptionList(doc.querySelector('dl'), [], '')
+    } else if (detectShallowList(doc)) {
+        return parseShallowList(doc)
+    } else {
+        return parseNoFolders(doc)
     }
 }
 

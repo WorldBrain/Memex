@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.0.8",
+    "version": "3.0.11",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -15,7 +15,7 @@
         "watch:notif": "webpack --watch --env.notifs",
         "watch:clean": "npm run cache:clean && npm run watch:notif",
         "cache:clean": "rimraf ./node_modules/.cache",
-        "stats": "webpack --profile --json > stats.json",
+        "stats": "webpack --profile -1json > stats.json",
         "publish-chrome": "node publish --chrome",
         "publish-ff": "node publish --ff",
         "mocha": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register",

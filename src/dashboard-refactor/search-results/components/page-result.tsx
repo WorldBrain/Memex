@@ -31,6 +31,7 @@ export interface Props
         PagePickerProps {
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
+    filteredbyListID: number
     shareMenuProps: Omit<ShareMenuProps, 'annotationsBG' | 'contentSharingBG'>
 }
 
@@ -130,7 +131,11 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
                 <ButtonTooltip
-                    tooltipText={'Remove from \nCollection'}
+                    tooltipText={
+                        this.props.filteredbyListID === 20201014
+                            ? 'Remove from Inbox'
+                            : 'Remove from \nCollection'
+                    }
                     position="left"
                 >
                     <Icon heightAndWidth="12px" path={icons.close} />
@@ -267,7 +272,11 @@ export default class PageResultView extends PureComponent<Props> {
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
                         <PageTitle top="10px" bottom="5px">
-                            {hasTitle ? this.props.fullTitle : this.fullUrl}
+                            {hasTitle
+                                ? this.props.fullTitle === this.props.fullUrl
+                                    ? this.props.fullTitle.split('/').slice(-1)
+                                    : this.props.fullTitle
+                                : this.props.fullUrl}
                         </PageTitle>
                     </PageContentBox>
                     <TagsSegment
@@ -376,4 +385,8 @@ const PageTitle = styled(Margin)`
 const PageUrl = styled.span`
     font-size: 12px;
     color: #545454;
+    display: flex;
+    height: 20px;
+    align-items: center;
+    padding-top: 2px;
 `
