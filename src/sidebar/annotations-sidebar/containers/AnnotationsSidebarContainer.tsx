@@ -424,67 +424,37 @@ export class AnnotationsSidebarContainer<
 
         return (
             <>
-                <TopBarContainerStyled>
-                    <TopBarActionBtns>
+                <TopBarActionBtns>
+                    <ButtonTooltip
+                        tooltipText="Close (ESC)"
+                        position="rightCentered"
+                    >
+                        <CloseBtn onClick={() => this.hideSidebar()}>
+                            <ActionIcon src={icons.close} />
+                        </CloseBtn>
+                    </ButtonTooltip>
+                    {this.state.isLocked ? (
                         <ButtonTooltip
-                            tooltipText="Close (ESC)"
+                            tooltipText="Unlock sidebar"
                             position="rightCentered"
                         >
-                            <CloseBtn onClick={() => this.hideSidebar()}>
-                                <ActionIcon src={icons.close} />
+                            <CloseBtn onClick={this.toggleSidebarLock}>
+                                <SidebarLockIconReverse
+                                    src={icons.doubleArrow}
+                                />
                             </CloseBtn>
                         </ButtonTooltip>
-                        {this.state.isLocked ? (
-                            <ButtonTooltip
-                                tooltipText="Unlock sidebar"
-                                position="rightCentered"
-                            >
-                                <CloseBtn onClick={this.toggleSidebarLock}>
-                                    <SidebarLockIconReverse
-                                        src={icons.doubleArrow}
-                                    />
-                                </CloseBtn>
-                            </ButtonTooltip>
-                        ) : (
-                            <ButtonTooltip
-                                tooltipText="Lock sidebar open"
-                                position="rightCentered"
-                            >
-                                <CloseBtn onClick={this.toggleSidebarLock}>
-                                    <SidebarLockIcon src={icons.doubleArrow} />
-                                </CloseBtn>
-                            </ButtonTooltip>
-                        )}
-                    </TopBarActionBtns>
-
-                    {/* <TopBarActionBtns>
-                        <SortingDropdownMenuBtn
-                            onMenuItemClick={({ sortingFn }) =>
-                                this.processEvent('sortAnnotations', {
-                                    sortingFn,
-                                })
-                            }
-                        />
+                    ) : (
                         <ButtonTooltip
-                            tooltipText="Copy All Notes"
-                            position="bottomSidebar"
+                            tooltipText="Lock sidebar open"
+                            position="rightCentered"
                         >
-                            <ActionBtn onClick={this.handleCopyAllNotesClick}>
-                                <ActionIcon src={icons.copy} />
-                            </ActionBtn>
+                            <CloseBtn onClick={this.toggleSidebarLock}>
+                                <SidebarLockIcon src={icons.doubleArrow} />
+                            </CloseBtn>
                         </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText="Share All Notes"
-                            position="bottomRightEdge"
-                        >
-                            <ActionBtn onClick={this.handleShareAllNotesClick}>
-                                <ActionIcon src={icons.shareEmpty} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                    </TopBarActionBtns> */}
-                </TopBarContainerStyled>
-                {this.renderAllNotesCopyPaster()}
-                {this.renderAllNotesShareMenu()}
+                    )}
+                </TopBarActionBtns>
             </>
         )
     }
@@ -671,7 +641,7 @@ const NotesTypeName = styled.span`
 
 const ContainerStyled = styled.div`
     height: 100%;
-    overflow: hidden scroll;
+    overflow-x: visible;
     width: 450px;
     position: fixed;
     padding: 0px 0px 10px 0px;
@@ -713,11 +683,15 @@ const TopBarContainerStyled = styled.div`
 
 const TopBarActionBtns = styled.div`
     display: grid;
-    justify-content: space-between;
+    justify-content: flex-start;
+    position: absolute;
     align-items: center;
-    display: flex;
     gap: 8px;
-    height: 24px;
+    right: 490px;
+    background-color: #f5f8fb;
+    border-radius: 0 0 0 5px;
+    box-shadow: -3px 2px 4px -1px #d0d0d0;
+    padding: 5px 1px 5px 3px;
 `
 
 const CloseBtn = styled.button`

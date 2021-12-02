@@ -253,7 +253,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         >
                             <EditNoteIcon
                                 onClick={
-                                    annotationFooterDependencies.onEditIconClick
+                                    annotationFooterDependencies?.onEditIconClick
                                 }
                             />
                         </ButtonTooltip>
@@ -472,7 +472,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         <AnnotationStyled>
                             <ContentContainer
                                 onDoubleClick={
-                                    annotationFooterDependencies.onEditIconClick
+                                    annotationFooterDependencies?.onEditIconClick
                                 }
                             >
                                 {this.renderHighlightBody()}
@@ -570,15 +570,15 @@ const CopyPasterWrapper = styled.div`
 
 const EditNoteIconBox = styled.div`
     display: none;
-    position: absolute;
+    position: relative;
     justify-content: center;
     align-items: center;
     z-index: 100;
     border: none;
     outline: none;
     background: white;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 

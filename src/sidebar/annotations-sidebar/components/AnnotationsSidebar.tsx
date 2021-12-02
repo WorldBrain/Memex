@@ -539,6 +539,8 @@ class AnnotationsSidebar extends React.Component<
                         )}
                     </MyNotesClickableArea>
                     <TopBarActionBtns>
+                        {this.renderAllNotesShareMenu()}
+                        {this.renderAllNotesCopyPaster()}
                         <SortingDropdownMenuBtn
                             onMenuItemClick={(sortingFn) =>
                                 this.props.onMenuItemClick(sortingFn)
@@ -554,6 +556,7 @@ class AnnotationsSidebar extends React.Component<
                                         showAllNotesCopyPaster: true,
                                     })
                                 }
+                                isActive={this.state.showAllNotesCopyPaster}
                             >
                                 <ActionIcon src={icons.copy} />
                             </ActionBtn>
@@ -568,13 +571,12 @@ class AnnotationsSidebar extends React.Component<
                                         showAllNotesShareMenu: true,
                                     })
                                 }
+                                isActive={this.state.showAllNotesShareMenu}
                             >
                                 <ActionIcon src={icons.shareEmpty} />
                             </ActionBtn>
                         </ButtonTooltip>
                     </TopBarActionBtns>
-                    {this.renderAllNotesCopyPaster()}
-                    {this.renderAllNotesShareMenu()}
                 </FollowedListTitleContainerMyNotes>
                 {!this.props.annotations.length ? (
                     <EmptyMessage />
@@ -589,8 +591,10 @@ class AnnotationsSidebar extends React.Component<
         return (
             <>
                 {/* {this.renderSearchSection()} */}
-                {this.renderNewAnnotation()}
-                {this.renderResultsBody()}
+                <ResultBodyContainer>
+                    {this.renderNewAnnotation()}
+                    {this.renderResultsBody()}
+                </ResultBodyContainer>
             </>
         )
     }
@@ -741,6 +745,7 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     cursor: pointer;
     justify-content: space-between;
     width: 420px;
+    z-index: 20;
 `
 
 const FollowedListTitle = styled.span`
@@ -846,7 +851,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 10px 15px 10px;
 `
 
 const NewAnnotationSeparator = styled.div`
@@ -901,7 +906,7 @@ const EmptyMessageTextStyled = styled.div`
     color: #a2a2a2;
 `
 
-const ActionBtn = styled.button`
+const ActionBtn = styled.button<{ isActive: boolean }>`
     border-radius: 3px;
     padding: 2px;
     width: 24px;
@@ -911,7 +916,8 @@ const ActionBtn = styled.button`
     background-repeat: no-repeat;
     background-position: center;
     border: none;
-    background-color: transparent;
+    background-color: ${(props) =>
+        props.isActive ? '#e0e0e0' : 'transparent'};
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -954,13 +960,26 @@ const MyNotesClickableArea = styled.div`
 `
 
 const CopyPasterWrapperTopBar = styled.div`
-    position: fixed;
-    right: 375px;
-    z-index: 3;
+    position: relative;
+    right: 225px;
+    z-index: 10;
+    top: 20px;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
-    position: fixed;
-    right: 345px;
-    z-index: 3;
+    position: relative;
+    right: 190px;
+    z-index: 10;
+    top: 20px;
+`
+
+const ResultBodyContainer = styled.div`
+    height: fill-available;
+    overflow-y: scroll;
+    padding-bottom: 150px;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
