@@ -102,7 +102,7 @@
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
         "page-metadata-parser": "^1.1.4",
-        "pdfjs-dist": "WorldBrain/pdfjs-dist#8a030e1161af1aeccdc2636012b095ea7e64b40f",
+        "pdfjs-dist": "WorldBrain/pdfjs-dist#fix/annot-shifts",
         "polished": "^4.0.3",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",
