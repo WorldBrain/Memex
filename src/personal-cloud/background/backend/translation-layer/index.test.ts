@@ -3939,6 +3939,144 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                 ], { skip: 2 })
             })
+
+            it('should index a PDF page, create a shared annotation, create a new list, add that page to the list, then share the list', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create PDF page
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                // Create shared annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.fifth)
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth,
+                    )
+                // Create list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.fourth)
+                // Share list
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    { anyId: true },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                testLocators.fourth_dummy.personalContentMetadata =
+                    testMetadata.fourth.id
+                testLocators.fourth_a.personalContentMetadata =
+                    testMetadata.fourth.id
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.third],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.fifth],
+                    personalAnnotationShare: [testAnnotationShares.fifth],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.fifth],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.fifth.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                            fingerprint: testLocators.fourth_a.fingerprint,
+                        }),
+                    ],
+                    sharedContentLocator: [
+                        expect.objectContaining({
+                            normalizedUrl: testLocators.fourth_dummy.location,
+                            originalUrl: testLocators.fourth_dummy.originalLocation,
+                        }),
+                        // NOTE: This shouldn't get shared as it's a local filesystem locator
+                        // expect.objectContaining({
+                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        //     originalUrl: testLocators.fourth_a.originalLocation,
+                        // }),
+                    ],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                ], { skip: 2 })
+            })
         })
     })
 })
