@@ -457,6 +457,8 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     render() {
+        const { annotationFooterDependencies } = this.props
+
         return (
             <ThemeProvider theme={this.theme}>
                 <Margin bottom="10px">
@@ -467,7 +469,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }}
                     >
                         <AnnotationStyled>
-                            <ContentContainer>
+                            <ContentContainer
+                                onDoubleClick={
+                                    annotationFooterDependencies.onEditIconClick
+                                }
+                            >
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
@@ -762,7 +768,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        box-shadow: 0px 0px 5px 1px #00000080;
+        outline: 2px solid #5671cfb8;
     `};
 `
 
