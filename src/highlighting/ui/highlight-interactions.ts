@@ -312,7 +312,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
-            $highlight.scrollIntoView({ behavior: 'smooth' })
+            $highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
         }
