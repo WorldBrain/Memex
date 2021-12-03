@@ -450,7 +450,7 @@ class AnnotationsSidebar extends React.Component<
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotationsShareAll}
                             normalizedPageUrl={this.props.normalizedPageUrl}
-                            copyLink={(link: string) => {
+                            copyLink={async (link) => {
                                 this.props.copyPageLink(link)
                             }}
                             postShareHook={(shareInfo) =>
