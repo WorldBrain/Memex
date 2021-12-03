@@ -46,6 +46,7 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
 export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
+    sidebarContext?: string
 }
 
 export class AnnotationsSidebarContainer<
@@ -424,7 +425,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <>
-                <TopBarActionBtns>
+                <TopBarActionBtns sidebarContext={this.props.sidebarContext}>
                     <ButtonTooltip
                         tooltipText="Close (ESC)"
                         position="rightCentered"
@@ -471,6 +472,7 @@ export class AnnotationsSidebarContainer<
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        sidebarContext={this.props.sidebarContext}
                         ref={(ref) => (this.sidebarRef = ref)}
                         openCollectionPage={(remoteListId) =>
                             window.open(
@@ -609,7 +611,7 @@ const NoteTypesWrapper = styled.div`
 const ShareMenuWrapper = styled.div`
     position: relative;
     left: 105px;
-    z-index: 3;
+    z-index: 10;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
@@ -682,13 +684,14 @@ const TopBarContainerStyled = styled.div`
     box-shadow: 0px 3px 5px -3px #c9c9c9;
 `
 
-const TopBarActionBtns = styled.div`
+const TopBarActionBtns = styled.div<{ sidebarContext: string }>`
     display: grid;
     justify-content: flex-start;
     position: absolute;
     align-items: center;
     gap: 8px;
-    right: 490px;
+    right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '450px' : '490px'};
     background-color: #f5f8fb;
     border-radius: 0 0 0 5px;
     box-shadow: -3px 2px 4px -1px #d0d0d0;

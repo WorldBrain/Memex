@@ -42,6 +42,7 @@ export interface SidebarContainerDependencies {
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
     showAnnotationShareModal?: () => void
+    sidebarContext?: string
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>

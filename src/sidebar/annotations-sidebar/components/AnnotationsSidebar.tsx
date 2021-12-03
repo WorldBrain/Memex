@@ -87,6 +87,7 @@ export interface AnnotationsSidebarProps
     annotationsShareAll: any
     copyPageLink: any
     postShareHook: (shareInfo) => void
+    sidebarContext?: string
 }
 
 interface AnnotationsSidebarState {
@@ -514,6 +515,8 @@ class AnnotationsSidebar extends React.Component<
             annots.push(<CongratsMessage key="sidebar-congrats-msg" />)
         }
 
+        console.log(this.props.sidebarContext)
+
         return (
             <FollowedListNotesContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
@@ -591,7 +594,7 @@ class AnnotationsSidebar extends React.Component<
         return (
             <>
                 {/* {this.renderSearchSection()} */}
-                <ResultBodyContainer>
+                <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                     {this.renderNewAnnotation()}
                     {this.renderResultsBody()}
                 </ResultBodyContainer>
@@ -973,10 +976,16 @@ const ShareMenuWrapperTopBar = styled.div`
     top: 20px;
 `
 
-const ResultBodyContainer = styled.div`
+const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: fill-available;
     overflow-y: scroll;
     padding-bottom: 150px;
+    width: 450px;
+    padding-right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '0' : '20px'};
+    position: absolute;
+    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '20px')};
+
     &::-webkit-scrollbar {
         display: none;
     }

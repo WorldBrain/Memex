@@ -73,6 +73,6 @@ const DropdownMenuContainer = styled.div`
 `
 
 const IconImg = styled.img`
-    width: 60%;
-    padding: 4px;
+    width: fill-available;
+    padding: 5px;
 `
