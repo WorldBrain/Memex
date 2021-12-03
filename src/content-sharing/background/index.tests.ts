@@ -92,7 +92,7 @@ export class SharingTestHelper {
 
     async createPage(
         setup: BackgroundIntegrationTestSetup,
-        options: { id: number; listId?: number },
+        options: { id: number; listId?: number; listIds?: number[] },
     ) {
         const count = ++this.counts.pages
         const normalizedUrl = `memex.garden/test/page-${count}`
@@ -111,11 +111,13 @@ export class SharingTestHelper {
             fullUrl,
             title,
         }
-        if (options.listId) {
-            await this.addPageToList(setup, {
-                pageId: options.id,
-                listId: options.listId,
-            })
+        if (options.listId || options.listIds) {
+            for (const listId of options.listIds ?? [options.listId]) {
+                await this.addPageToList(setup, {
+                    pageId: options.id,
+                    listId,
+                })
+            }
         }
     }
 
@@ -188,10 +190,28 @@ export class SharingTestHelper {
         }
     }
 
-    async editAnnotation(
+    async editAnnotationComment(
+        setup: BackgroundIntegrationTestSetup,
+        options: { id: number; comment: string },
+    ) {
+        await setup.backgroundModules.directLinking.editAnnotation(
+            null,
+            this.annotations[options.id].localId,
+            options.comment,
+        )
+        this.annotations[options.id].comment = options.comment
+    }
+
+    async deleteAnnotation(
         setup: BackgroundIntegrationTestSetup,
         options: { id: number },
-    ) {}
+    ) {
+        await setup.backgroundModules.directLinking.deleteAnnotation(
+            null,
+            this.annotations[options.id].localId,
+        )
+        delete this.annotations[options.id]
+    }
 
     async setAnnotationPrivacyLevel(
         setup: BackgroundIntegrationTestSetup,
@@ -208,11 +228,12 @@ export class SharingTestHelper {
 
     async shareAnnotation(
         setup: BackgroundIntegrationTestSetup,
-        options: { id: number },
+        options: { id: number; shareToLists?: boolean },
     ) {
         const localId = this.annotations[options.id].localId
         await setup.backgroundModules.contentSharing.shareAnnotation({
             annotationUrl: localId,
+            shareToLists: options.shareToLists,
         })
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
             {
@@ -224,22 +245,25 @@ export class SharingTestHelper {
 
     async shareAnnotations(
         setup: BackgroundIntegrationTestSetup,
-        options: { ids: number[] },
+        options: {
+            annotations: Array<{ id: number; expectNotShared?: boolean }>
+        },
     ) {
         await setup.backgroundModules.contentSharing.shareAnnotations({
-            annotationUrls: options.ids.map(
-                (id) => this.annotations[id].localId,
+            annotationUrls: options.annotations.map(
+                (annot) => this.annotations[annot.id].localId,
             ),
         })
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
             {
-                localIds: options.ids.map((id) => this.annotations[id].localId),
+                localIds: options.annotations.map(
+                    ({ id }) => this.annotations[id].localId,
+                ),
             },
         )
-        for (const id of options.ids) {
-            const remoteId = remoteIds[this.annotations[id].localId]
-            expect(remoteId).toBeDefined()
-            this.annotations[id].remoteId = remoteId
+        for (const annotation of options.annotations) {
+            const remoteId = remoteIds[this.annotations[annotation.id].localId]
+            this.annotations[annotation.id].remoteId = remoteId
         }
     }
 
@@ -252,6 +276,19 @@ export class SharingTestHelper {
                 (id) => this.annotations[id].localId,
             ),
         })
+    }
+
+    async unshareAnnotationsFromLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { ids: number[] },
+    ) {
+        await setup.backgroundModules.contentSharing.unshareAnnotationsFromLists(
+            {
+                annotationUrls: options.ids.map(
+                    (id) => this.annotations[id].localId,
+                ),
+            },
+        )
     }
 
     async assertSharedLists(
