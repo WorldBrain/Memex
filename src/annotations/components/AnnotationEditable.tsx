@@ -570,7 +570,7 @@ const CopyPasterWrapper = styled.div`
 
 const EditNoteIconBox = styled.div`
     display: none;
-    position: relative;
+    position: absolute;
     justify-content: center;
     align-items: center;
     z-index: 100;
