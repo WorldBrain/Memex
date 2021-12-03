@@ -27,7 +27,6 @@ const styles = require('./ribbon.css')
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     setRef?: (el: HTMLElement) => void
-    tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
     shortcutsData: ShortcutElData[]
@@ -37,7 +36,6 @@ export interface Props extends RibbonSubcomponentProps {
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
-    getUrl: () => string
     highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
 }
