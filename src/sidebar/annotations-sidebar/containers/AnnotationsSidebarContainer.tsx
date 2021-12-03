@@ -497,9 +497,10 @@ export class AnnotationsSidebarContainer<
                         copyPaster={this.props.copyPaster}
                         contentSharing={this.props.contentSharing}
                         annotationsShareAll={this.props.annotations}
-                        copyPageLink={({ link }) =>
+                        copyPageLink={(link) => {
                             this.processEvent('copyNoteLink', { link })
-                        }
+                            console.log(link)
+                        }}
                         postShareHook={(shareInfo) =>
                             this.processEvent(
                                 'updateAllAnnotationsShareInfo',
