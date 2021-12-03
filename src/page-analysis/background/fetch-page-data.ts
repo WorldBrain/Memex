@@ -65,7 +65,7 @@ const fetchPageData: FetchPageData = ({
     if (isFullUrlPDF(url)) {
         run = async () => {
             if (opts.includePageContent) {
-                const content = await extractPdfContent({ url })
+                const content = await extractPdfContent({ url, type: 'pdf' })
                 return {
                     pdfFingerprints: content.pdfMetadata.fingerprints,
                     content,

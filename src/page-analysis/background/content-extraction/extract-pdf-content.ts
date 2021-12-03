@@ -4,9 +4,13 @@ import transformPageText from 'src/util/transform-page-text'
 import { PDF_RAW_TEXT_SIZE_LIMIT } from './constants'
 import type { MemexPDFMetadata } from './types'
 import { loadBlob } from 'src/imports/background/utils'
+import type { RawPdfPageContent } from 'src/page-analysis/types'
 
 // Run PDF.js to extract text from each page and read document metadata.
-async function extractContent(pdfData: ArrayBuffer) {
+async function extractContent(
+    pdfData: ArrayBuffer,
+    rawContent: RawPdfPageContent,
+) {
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
         '/build/pdf.worker.min.js',
@@ -59,30 +63,28 @@ async function extractContent(pdfData: ArrayBuffer) {
         pdfPageTexts: pageTexts,
         fullText: processedText,
         author: metadata.info.Author,
-        title: metadata.info.Title,
+        title: metadata.info.Title || rawContent.title,
         keywords: metadata.info.Keywords,
     }
 }
 
 // Given a PDF as blob or URL, return a promise of its text and metadata.
 export default async function extractPdfContent(
-    input: { url: string } | { blob: Blob },
+    rawContent: RawPdfPageContent,
     options?: { fetch?: typeof fetch },
 ) {
     // TODO: If the PDF is open in a Memex PDF Reader, we should be able to save the content from that tab
     // instead of re-fetching it.
+    const blob = await (options.fetch
+        ? (await options.fetch(rawContent.url)).blob()
+        : loadBlob<Blob>({
+              url: rawContent.url,
+              timeout: 5000,
+              responseType: 'blob',
+          }))
 
-    // Fetch document if only a URL is given.
-    let blob = 'blob' in input ? input.blob : undefined
-
-    if (!('blob' in input)) {
-        blob = options.fetch
-            ? await (await options.fetch(input.url)).blob()
-            : await loadBlob<Blob>({
-                  url: input.url,
-                  timeout: 5000,
-                  responseType: 'blob',
-              })
+    if (!blob) {
+        throw new Error(`Could not load PDF from: ${rawContent.url}`)
     }
 
     const pdfData = await new Promise<ArrayBuffer>(function (resolve, reject) {
@@ -94,5 +96,5 @@ export default async function extractPdfContent(
         fileReader.readAsArrayBuffer(blob)
     })
 
-    return extractContent(pdfData)
+    return extractContent(pdfData, rawContent)
 }

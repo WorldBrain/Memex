@@ -24,6 +24,7 @@ const extractRawPageContent: ExtractRawPageContent = async (
     if (isFullUrlPDF(url)) {
         const rawContent: RawPageContent = {
             type: 'pdf',
+            title: document.title || undefined,
             url,
         }
         return rawContent
