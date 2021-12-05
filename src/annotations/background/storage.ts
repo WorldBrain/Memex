@@ -475,7 +475,7 @@ export default class AnnotationStorage extends StorageModule {
         comment,
         selector,
         createdWhen = new Date(),
-    }: Omit<Annotation, 'tags'>) {
+    }: Omit<Annotation, 'tags' | 'lists'>) {
         if (!body?.length && !comment?.length) {
             throw new Error(
                 'Failed create annotation attempt - no highlight or comment supplied',

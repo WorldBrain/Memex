@@ -24,6 +24,7 @@ export const ANNOT_1: Annotation = {
     createdWhen: new Date('2020-01-01'),
     selector: {} as any,
     tags: [],
+    lists: [],
 }
 
 export const CREATOR_1: UserPublicDetails = {

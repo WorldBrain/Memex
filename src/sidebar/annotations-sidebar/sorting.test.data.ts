@@ -21,6 +21,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605585963681',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -32,6 +33,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605581863240',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
 
@@ -55,6 +57,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605585970016',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -67,6 +70,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605577879786',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -79,6 +83,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=206/#1605576462134',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -92,6 +97,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=176/#1605576451441',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
 
@@ -115,6 +121,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605585966900',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -128,6 +135,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605577855754',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -154,6 +162,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605588109153',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -180,6 +189,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605588114635',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -206,6 +216,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605588127811',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
     {
@@ -218,6 +229,7 @@ export const TEST_DATA: Annotation[] = [
         url:
             'https://www.youtube.com/watch?v=lOIP_Z_-0Hs&feature=youtu.be&t=160/#1605576416084',
         tags: [],
+        lists: [],
         isBookmarked: false,
     },
 ]

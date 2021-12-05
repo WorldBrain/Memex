@@ -243,6 +243,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     autoFocus={this.props.shouldFormsAutoFocus}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
+                    lists={newNoteForm.lists}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />

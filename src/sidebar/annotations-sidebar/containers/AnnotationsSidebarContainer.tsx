@@ -210,17 +210,27 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('changeNewPageCommentText', { comment }),
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
+            // TODO: make into lists
+            onListsUpdate: (lists) =>
+                this.processEvent('updateNewPageCommentLists', { lists }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
             onSave: (shouldShare, isProtected) =>
                 this.processEvent('saveNewPageComment', {
                     shouldShare,
                     isProtected,
                 }),
-            queryEntries: (query) =>
+            tagQueryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
-            loadDefaultSuggestions: this.props.tags.fetchInitialTagSuggestions,
+            listQueryEntries: (query) =>
+                this.props.customLists.searchForListSuggestions({ query }),
+            loadDefaultTagSuggestions: this.props.tags
+                .fetchInitialTagSuggestions,
+            loadDefaultListSuggestions: this.props.customLists
+                .fetchInitialListSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
+            // TODO: make into lists
+            lists: this.state.commentBox.lists,
             hoverState: null,
         }
     }
@@ -312,6 +322,32 @@ export class AnnotationsSidebarContainer<
             </TagPickerWrapper>
         )
     }
+
+    // private renderCollectionsPicker() {
+    //     if (!this.props.lists.showListsPicker) {
+    //         return null
+    //     }
+
+    //     return (
+    //         <Tooltip position="left">
+    //             <BlurredSidebarOverlay
+    //                 onOutsideClick={this.hideListPicker}
+    //                 skipRendering={!this.props.sidebar.isSidebarOpen}
+    //             >
+    //                 <CollectionPicker
+    //                     {...this.props.lists}
+    //                     onUpdateEntrySelection={this.props.lists.updateLists}
+    //                     actOnAllTabs={this.props.lists.listAllTabs}
+    //                     initialSelectedEntries={
+    //                         this.props.lists.fetchInitialListSelections
+    //                     }
+    //                     onEscapeKeyDown={this.hideListPicker}
+    //                     handleClickOutside={this.hideListPicker}
+    //                 />
+    //             </BlurredSidebarOverlay>
+    //         </Tooltip>
+    //     )
+    // }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
         if (this.state.activeShareMenuNoteId !== currentAnnotationId) {

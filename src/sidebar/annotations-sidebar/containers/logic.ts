@@ -51,6 +51,7 @@ export const INIT_FORM_STATE: EditForm = {
     isTagInputActive: false,
     commentText: '',
     tags: [],
+    lists: [],
 }
 
 export const createEditFormsForAnnotations = (annots: Annotation[]) => {
@@ -559,6 +560,7 @@ export class SidebarContainerLogic extends UILogic<
                 pageUrl,
                 comment,
                 tags: commentBox.tags,
+                lists: commentBox.lists,
             },
             {
                 shouldShare: event.shouldShare,
@@ -635,6 +637,13 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             commentBox: { tags: { $set: event.tags } },
+        })
+    }
+    updateNewPageCommentLists: EventHandler<'updateNewPageCommentLists'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            commentBox: { lists: { $set: event.lists } },
         })
     }
 

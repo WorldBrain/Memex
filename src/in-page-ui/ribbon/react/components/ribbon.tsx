@@ -526,6 +526,10 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.props.commentBox
                                                     .updateCommentBoxTags
                                             }
+                                            onListsUpdate={
+                                                this.props.commentBox
+                                                    .updateCommentBoxLists
+                                            }
                                             onCommentChange={
                                                 this.props.commentBox
                                                     .changeComment
@@ -535,6 +539,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     .commentText
                                             }
                                             tags={this.props.commentBox.tags}
+                                            lists={this.props.commentBox.lists}
                                             isRibbonCommentBox={true}
                                         />
                                     </Tooltip>

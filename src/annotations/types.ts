@@ -30,6 +30,7 @@ export interface Annotation {
     _body_terms?: string[]
     _comment_terms?: string[]
     tags: string[]
+    lists: string[]
     isShared?: boolean
     isBookmarked?: boolean
     isSocialPost?: boolean
@@ -58,6 +59,7 @@ export interface AnnotationsManagerInterface {
         comment: string
         anchor: Anchor
         tags: string[]
+        lists: string[]
         bookmarked?: boolean
         isSocialPost?: boolean
     }): Promise<Annotation>

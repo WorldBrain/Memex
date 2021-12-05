@@ -1143,6 +1143,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageNewNoteLists: EventHandler<'setPageNewNoteLists'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: {
+                                        lists: { $set: event.lists },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNewNoteCommentValue: EventHandler<'setPageNewNoteCommentValue'> = ({
         event,
     }) => {

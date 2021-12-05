@@ -695,6 +695,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
+                    onListsUpdate: (day, pageId) => (lists) =>
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists,
+                        }),
                     onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,

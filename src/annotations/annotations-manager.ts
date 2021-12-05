@@ -46,6 +46,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         comment,
         anchor,
         tags,
+        lists,
         bookmarked,
         isSocialPost,
     }: {
@@ -55,6 +56,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         comment: string
         anchor: Anchor
         tags: string[]
+        lists: string[]
         bookmarked?: boolean
         isSocialPost?: boolean
     }) => {
@@ -85,6 +87,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
             createdWhen: new Date(),
             lastEdited: new Date(),
             tags,
+            lists,
         } as Annotation
 
         // Write annotation to database.

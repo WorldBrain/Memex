@@ -26,6 +26,7 @@ const noteDataToSearchRes = (
     note: NoteData,
     page: PageData,
     tags: string[] = [],
+    lists: string[] = [],
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
     lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,
@@ -36,6 +37,7 @@ const noteDataToSearchRes = (
     body: note.highlight,
     url: note.url,
     tags,
+    lists,
 })
 
 export const DAY_1 = new Date('2020-11-26').getTime()
@@ -79,6 +81,7 @@ export const NOTE_1: NoteData = {
     isShared: false,
     isEdited: true,
     tags: [],
+    lists: [],
 }
 
 export const NOTE_2: NoteData = {
@@ -89,6 +92,7 @@ export const NOTE_2: NoteData = {
     highlight: 'Some test text',
     isShared: false,
     tags: [],
+    lists: [],
 }
 
 export const NOTE_3: NoteData = {
@@ -99,6 +103,7 @@ export const NOTE_3: NoteData = {
     isEdited: true,
     isShared: false,
     tags: [],
+    lists: [],
 }
 
 export const NOTE_4: NoteData = {
@@ -109,6 +114,7 @@ export const NOTE_4: NoteData = {
     highlight: 'memex web extension chrome firefox browser',
     isShared: false,
     tags: [],
+    lists: [],
 }
 
 export const NOTE_5: NoteData = {
@@ -118,6 +124,7 @@ export const NOTE_5: NoteData = {
     highlight: 'memex deer duck garage',
     isShared: false,
     tags: [],
+    lists: [],
 }
 
 export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {

@@ -139,6 +139,8 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('changeComment', { value }),
                     updateCommentBoxTags: (value) =>
                         this.processEvent('updateCommentBoxTags', { value }),
+                    updateCommentBoxLists: (value) =>
+                        this.processEvent('updateCommentBoxLists', { value }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,

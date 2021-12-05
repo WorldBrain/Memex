@@ -46,6 +46,7 @@ export interface AnnotationsSidebarProps
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
+    renderCollectionPickerForAnnotation: (id: string) => JSX.Element
 
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void

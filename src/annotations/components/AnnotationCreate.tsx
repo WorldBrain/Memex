@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
-import { ButtonTooltip } from 'src/common-ui/components'
+import { ButtonTooltip, Tooltip } from 'src/common-ui/components'
 import { FocusableComponent } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import TagHolder from 'src/tags/ui/tag-holder'
@@ -18,9 +18,13 @@ import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import type { NoteResultHoverState } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import ListHolder from 'src/custom-lists/ui/list-holder'
+import { ListPickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 interface State {
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     toggleShowTutorial: boolean
 }
 
@@ -28,8 +32,10 @@ export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
+    onListsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
     onTagsHover?: React.MouseEventHandler
+    onListsHover?: React.MouseEventHandler
     annotationFooterDependencies?: AnnotationFooterEventProps
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
@@ -41,6 +47,7 @@ export interface AnnotationCreateGeneralProps {
     autoFocus?: boolean
     comment: string
     tags: string[]
+    lists: string[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
     contextLocation?: string
@@ -49,13 +56,12 @@ export interface AnnotationCreateGeneralProps {
 
 export interface Props
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps,
-        Partial<
-            Pick<
-                TagPickerDependencies,
-                'queryEntries' | 'loadDefaultSuggestions'
-            >
-        > {}
+        AnnotationCreateEventProps {
+    loadDefaultTagSuggestions?: () => string[] | Promise<string[]>
+    tagQueryEntries?: (query: string) => Promise<string[]>
+    loadDefaultListSuggestions?: () => string[] | Promise<string[]>
+    listQueryEntries?: (query: string) => Promise<string[]>
+}
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
@@ -77,6 +83,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
+        isListPickerShown: false,
         toggleShowTutorial: false,
     }
 
@@ -167,6 +174,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <ClickAway onClickAway={() => setPickerShown(false)}>
                     <TagPicker
                         {...this.props}
+                        loadDefaultSuggestions={
+                            this.props.loadDefaultTagSuggestions
+                        }
+                        queryEntries={this.props.tagQueryEntries}
                         onUpdateEntrySelection={async ({ selected }) =>
                             onTagsUpdate(selected)
                         }
@@ -189,6 +200,42 @@ export class AnnotationCreate extends React.Component<Props, State>
                     }
                 />
                 {tagPicker}
+            </div>
+        )
+    }
+
+    private renderCollectionsPicker() {
+        const { lists, onListsUpdate } = this.props
+        const setPickerShown = (isListPickerShown: boolean) =>
+            this.setState({ isListPickerShown })
+
+        const listPicker = !this.state.isListPickerShown ? null : (
+            <HoverBox right="0px">
+                <ClickAway onClickAway={() => setPickerShown(false)}>
+                    <CollectionPicker
+                        loadDefaultSuggestions={
+                            this.props.loadDefaultListSuggestions
+                        }
+                        queryEntries={this.props.listQueryEntries}
+                        onUpdateEntrySelection={async ({ selected }) =>
+                            onListsUpdate(selected)
+                        }
+                        initialSelectedEntries={() => lists}
+                        onEscapeKeyDown={() => setPickerShown(false)}
+                    />
+                </ClickAway>
+            </HoverBox>
+        )
+
+        return (
+            <div>
+                <ListHolder
+                    lists={lists}
+                    clickHandler={() =>
+                        setPickerShown(!this.state.isListPickerShown)
+                    }
+                />
+                {listPicker}
             </div>
         )
     }
@@ -257,7 +304,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     {this.renderActionButtons()}
                                     {this.renderMarkdownHelpButton()}
                                 </SaveActionBar>
-                                {this.renderTagPicker()}
+                                <TagsActionBar>
+                                    {this.renderTagPicker()}
+                                    {this.renderCollectionsPicker()}
+                                </TagsActionBar>
                             </FooterContainer>
                         </>
                     )}
@@ -314,6 +364,12 @@ const FooterContainer = styled.div`
 const SaveActionBar = styled.div`
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+`
+
+const TagsActionBar = styled.div`
+    display: flex;
+    justify-content: end-start;
     align-items: center;
 `
 

@@ -31,6 +31,7 @@ export interface RibbonSidebarProps {
 
 export interface RibbonCommentBoxProps {
     tags: string[]
+    lists: string[]
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
@@ -38,6 +39,7 @@ export interface RibbonCommentBoxProps {
     cancelComment: () => void
     setShowCommentBox: (value: boolean) => void
     updateCommentBoxTags: (tags: string[]) => void
+    updateCommentBoxLists: (tags: string[]) => void
     changeComment: (text: string) => void
 }
 

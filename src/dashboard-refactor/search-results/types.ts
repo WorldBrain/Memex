@@ -85,14 +85,17 @@ export type NotesType = 'search' | 'user' | 'followed'
 
 export interface NoteFormState {
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     inputValue: string
     tags: string[]
+    lists: string[]
 }
 
 export interface NoteData {
     url: string
     pageUrl: string
     tags: string[]
+    lists: string[]
     comment?: string
     highlight?: string
     isEdited?: boolean
@@ -121,7 +124,12 @@ export type NoResultsType =
     | 'stop-words'
     | 'no-results'
     | null
-export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
+export type ResultHoverState =
+    | 'main-content'
+    | 'footer'
+    | 'tags'
+    | 'lists'
+    | null
 export interface NoteShareInfo {
     isShared: boolean
     isProtected?: boolean
@@ -260,6 +268,7 @@ export type Events = UIEvent<{
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
+    setPageNewNoteLists: PageEventArgs & { lists: string[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string

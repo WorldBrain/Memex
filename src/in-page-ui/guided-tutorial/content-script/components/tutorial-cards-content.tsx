@@ -9,7 +9,7 @@ import { getKeyName } from 'src/util/os-specific-key-names'
 export type TutorialStepContent = {
     subtitle: string
     keyboardShortcut: string
-    text: JSX.Element | string | React.Component
+    text: string | React.Component | JSX.Element
 }
 
 const SmallImages = styled.img`

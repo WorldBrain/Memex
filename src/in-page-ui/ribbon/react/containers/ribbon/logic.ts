@@ -92,6 +92,7 @@ export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     showCommentBox: false,
     isCommentSaved: false,
     tags: [],
+    lists: [],
 }
 
 export class RibbonContainerLogic extends UILogic<
@@ -359,6 +360,7 @@ export class RibbonContainerLogic extends UILogic<
                 comment,
                 url: annotationUrl,
                 tags: commentBox.tags,
+                lists: commentBox.lists,
             },
             {
                 shouldShare,
@@ -391,6 +393,12 @@ export class RibbonContainerLogic extends UILogic<
         event,
     }) => {
         this.emitMutation({ commentBox: { tags: { $set: event.value } } })
+    }
+
+    updateCommentBoxLists: EventHandler<'updateCommentBoxLists'> = ({
+        event,
+    }) => {
+        this.emitMutation({ commentBox: { lists: { $set: event.value } } })
     }
 
     //

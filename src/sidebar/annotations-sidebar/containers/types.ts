@@ -64,6 +64,7 @@ export interface EditForm {
     isTagInputActive: boolean
     commentText: string
     tags: string[]
+    lists: string[]
 }
 
 export interface EditForms {
@@ -189,6 +190,7 @@ export type SidebarContainerEvents = UIEvent<
         saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
         cancelNewPageComment: null
         updateNewPageCommentTags: { tags: string[] }
+        updateNewPageCommentLists: { lists: string[] }
 
         setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
