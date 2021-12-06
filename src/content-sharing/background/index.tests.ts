@@ -403,7 +403,7 @@ export class SharingTestHelper {
 
     async assertSharedAnnotationEntries(
         setup: BackgroundIntegrationTestSetup,
-        options: { entries: Array<{ annotationId: number; listId: number }> },
+        entries: Array<{ annotationId: number; listId: number }>,
     ) {
         const ordered = await this._getStorage(
             setup,
@@ -412,7 +412,7 @@ export class SharingTestHelper {
             'createdWhen',
         )
         expect(ordered).toEqual(
-            options.entries.map((entry) => ({
+            entries.map((entry) => ({
                 id: expect.anything(),
                 creator: TEST_USER.id,
                 normalizedPageUrl: this.pages[
@@ -425,6 +425,31 @@ export class SharingTestHelper {
                 sharedAnnotation: convertRemoteId(
                     this.annotations[entry.annotationId].remoteId,
                 ),
+            })),
+        )
+    }
+
+    async assertAnnotationPrivacyLevels(
+        setup: BackgroundIntegrationTestSetup,
+        levels: Array<{
+            annotationId: number
+            level: AnnotationPrivacyLevels
+            updated?: true
+        }>,
+    ) {
+        const ordered = await this._getStorage(
+            setup,
+            'local',
+            'annotationPrivacyLevels',
+            'createdWhen',
+        )
+        expect(ordered).toEqual(
+            levels.map((level) => ({
+                id: expect.anything(),
+                createdWhen: expect.any(Date),
+                updatedWhen: level.updated && expect.any(Date),
+                annotation: this.annotations[level.annotationId].localId,
+                privacyLevel: level.level,
             })),
         )
     }

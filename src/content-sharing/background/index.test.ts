@@ -314,11 +314,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                        ],
-                                    },
+                                    [{ annotationId: 1, listId: 1 }],
                                 )
 
                                 await helper.unshareAnnotationsFromLists(
@@ -328,9 +324,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [],
-                                    },
+                                    [],
                                 )
                             },
                         },
@@ -382,11 +376,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.shareAnnotation(setup, { id: 2 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                        ],
-                                    },
+                                    [{ annotationId: 1, listId: 1 }],
                                 )
 
                                 await helper.addPageToList(setup, {
@@ -398,12 +388,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
                             },
                         },
@@ -489,11 +477,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                        ],
-                                    },
+                                    [{ annotationId: 1, listId: 1 }],
                                 )
 
                                 await helper.addPageToList(setup, {
@@ -506,12 +490,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
                                 await helper.assertSharedLists(setup, {
                                     ids: [1, 2],
@@ -574,12 +556,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
 
                                 await helper.setAnnotationPrivacyLevel(setup, {
@@ -591,7 +571,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    { entries: [] },
+                                    [],
                                 )
                             },
                         },
@@ -636,12 +616,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
 
                                 await helper.removePageFromList(setup, {
@@ -650,11 +628,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [{ annotationId: 1, listId: 2 }],
                                 )
 
                                 await helper.removePageFromList(setup, {
@@ -663,9 +637,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [],
-                                    },
+                                    [],
                                 )
                             },
                         },
@@ -710,12 +682,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [
-                                            { annotationId: 1, listId: 1 },
-                                            { annotationId: 1, listId: 2 },
-                                        ],
-                                    },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
 
                                 await helper.deleteAnnotation(setup, { id: 1 })
@@ -724,9 +694,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    {
-                                        entries: [],
-                                    },
+                                    [],
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [],
                                 )
                             },
                         },
@@ -968,6 +940,31 @@ function makeShareAnnotationTest(options: {
                                 : []),
                         ],
                     })
+                    await helper.assertAnnotationPrivacyLevels(
+                        setup,
+                        options.testProtectedBulkShare
+                            ? [
+                                  {
+                                      annotationId: 2,
+                                      level:
+                                          AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                  },
+                                  {
+                                      annotationId: 1,
+                                      level: AnnotationPrivacyLevels.SHARED,
+                                  },
+                              ]
+                            : [
+                                  {
+                                      annotationId: 1,
+                                      level: AnnotationPrivacyLevels.SHARED,
+                                  },
+                                  {
+                                      annotationId: 2,
+                                      level: AnnotationPrivacyLevels.SHARED,
+                                  },
+                              ],
+                    )
                     await helper.assertSharedAnnotations(setup, {
                         ids: [
                             1,
@@ -975,9 +972,7 @@ function makeShareAnnotationTest(options: {
                         ],
                     })
 
-                    await helper.assertSharedAnnotationEntries(setup, {
-                        entries: [],
-                    })
+                    await helper.assertSharedAnnotationEntries(setup, [])
 
                     await helper.shareAnnotationsToLists(setup, { ids: [1] })
                     if (options.testDuplicateSharing) {
@@ -986,9 +981,9 @@ function makeShareAnnotationTest(options: {
                         })
                     }
 
-                    await helper.assertSharedAnnotationEntries(setup, {
-                        entries: [{ annotationId: 1, listId: 1 }],
-                    })
+                    await helper.assertSharedAnnotationEntries(setup, [
+                        { annotationId: 1, listId: 1 },
+                    ])
                     await helper.assertSharedPageInfo(setup, { pageIds: [1] })
                     await helper.assertSharedAnnotationMetadata(setup, {
                         metadata: [
