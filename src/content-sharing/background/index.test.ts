@@ -282,7 +282,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            'should unshare annotations from lists',
+            'should unshare public annotations from lists',
             { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
@@ -326,6 +326,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                     [],
                                 )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
                             },
                         },
                     ],
@@ -333,7 +344,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share already shared annotations adding a page to another shared list',
+            'should share already public annotations adding a page to another shared list',
             { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
@@ -393,6 +404,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         { annotationId: 1, listId: 2 },
                                     ],
                                 )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
                             },
                         },
                     ],
@@ -441,7 +467,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share already shared annotations when sharing a list containing already shared pages',
+            'should share already public annotations when sharing a list containing already shared pages',
             { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
@@ -498,6 +524,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedLists(setup, {
                                     ids: [1, 2],
                                 })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
                             },
                         },
                     ],
@@ -562,10 +598,31 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ],
                                 )
 
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                 })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [],
                                 })
@@ -638,6 +695,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
                                     [],
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
                                 )
                             },
                         },

@@ -298,6 +298,10 @@ export default class ContentSharingBackground {
             ),
             excludeFromLists: true,
         })
+        await this.storage.setAnnotationPrivacyLevelBulk({
+            annotations: options.annotationUrls,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+        })
     }
 
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
