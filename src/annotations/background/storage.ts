@@ -6,33 +6,25 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/annotations/constants'
-import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
-import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
-import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/annotations/constants'
+import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
+import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
+import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 import { Tag } from 'src/search'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import {
-    Annotation,
-    AnnotListEntry,
-    AnnotationPrivacyLevel,
-} from 'src/annotations/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
     static ANNOTS_COLL = COLLECTION_NAMES.annotation
-    static ANNOTS_PRIVACY_COLL = COLLECTION_NAMES.annotationPrivacy
     static TAGS_COLL = TAG_COLLECTION_NAMES.tag
     static BMS_COLL = COLLECTION_NAMES.bookmark
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
-
-    static generateAnnotationPrivacyLevelId = () => Date.now()
 
     constructor(private options: { storageManager: Storex }) {
         super({ storageManager: options.storageManager })
@@ -176,135 +168,8 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: { $in: '$annotationUrls:string[]' } },
             },
-            createAnnotationPrivacyLevel: {
-                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
-                operation: 'createObject',
-            },
-            findAnnotationPrivacyLevel: {
-                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
-                operation: 'findObject',
-                args: { annotation: '$annotation:string' },
-            },
-            findAnnotationPrivacyLevels: {
-                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
-                operation: 'findObjects',
-                args: { annotation: { $in: '$annotations:string' } },
-            },
-            deleteAnnotationPrivacyLevel: {
-                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
-                operation: 'deleteObjects',
-                args: { annotation: '$annotation:string' },
-            },
-            updateAnnotationPrivacyLevel: {
-                collection: AnnotationStorage.ANNOTS_PRIVACY_COLL,
-                operation: 'updateObjects',
-                args: [
-                    {
-                        annotation: '$annotation:string',
-                    },
-                    {
-                        privacyLevel: '$privacyLevel:int',
-                        updatedWhen: '$updatedWhen:timestamp',
-                    },
-                ],
-            },
         },
     })
-
-    async findAnnotationPrivacyLevel(params: {
-        annotation: string
-    }): Promise<AnnotationPrivacyLevel | null> {
-        return this.operation('findAnnotationPrivacyLevel', {
-            annotation: params.annotation,
-        })
-    }
-
-    async getPrivacyLevelsByAnnotation(params: {
-        annotations: string[]
-    }): Promise<{ [annotationId: string]: AnnotationPrivacyLevel }> {
-        const privacyLevels: AnnotationPrivacyLevel[] = await this.operation(
-            'findAnnotationPrivacyLevels',
-            {
-                annotations: params.annotations,
-            },
-        )
-
-        return privacyLevels.reduce(
-            (acc, privacyLevel) => ({
-                ...acc,
-                [privacyLevel.annotation]: privacyLevel,
-            }),
-            {},
-        )
-    }
-
-    async deleteAnnotationPrivacyLevel(params: {
-        annotation: string
-    }): Promise<void> {
-        await this.operation('deleteAnnotationPrivacyLevel', {
-            annotation: params.annotation,
-        })
-    }
-
-    async setAnnotationPrivacyLevelBulk(params: {
-        annotations: string[]
-        privacyLevel: AnnotationPrivacyLevels
-        updatedWhen?: Date
-    }): Promise<void> {
-        const privacyLevels = await this.getPrivacyLevelsByAnnotation(params)
-
-        for (const annotation of params.annotations) {
-            if (privacyLevels[annotation] == null) {
-                await this.operation('createAnnotationPrivacyLevel', {
-                    id: AnnotationStorage.generateAnnotationPrivacyLevelId(),
-                    annotation,
-                    privacyLevel: params.privacyLevel,
-                    createdWhen: params.updatedWhen ?? new Date(),
-                })
-                continue
-            }
-
-            if (
-                privacyLevels[annotation].privacyLevel === params.privacyLevel
-            ) {
-                continue
-            }
-
-            await this.operation('updateAnnotationPrivacyLevel', {
-                annotation,
-                privacyLevel: params.privacyLevel,
-                updatedWhen: params.updatedWhen ?? new Date(),
-            })
-        }
-    }
-
-    async setAnnotationPrivacyLevel(params: {
-        annotation: string
-        privacyLevel: AnnotationPrivacyLevels
-        updatedWhen?: Date
-    }): Promise<void> {
-        const existing = await this.findAnnotationPrivacyLevel(params)
-
-        if (existing == null) {
-            await this.operation('createAnnotationPrivacyLevel', {
-                id: AnnotationStorage.generateAnnotationPrivacyLevelId(),
-                annotation: params.annotation,
-                privacyLevel: params.privacyLevel,
-                createdWhen: params.updatedWhen ?? new Date(),
-            })
-            return
-        }
-
-        if (existing.privacyLevel === params.privacyLevel) {
-            return
-        }
-
-        await this.operation('updateAnnotationPrivacyLevel', {
-            annotation: params.annotation,
-            privacyLevel: params.privacyLevel,
-            updatedWhen: params.updatedWhen ?? new Date(),
-        })
-    }
 
     async getAnnotations(urls: string[]): Promise<Annotation[]> {
         return this.operation('findAnnotationsByUrls', { urls })
@@ -507,7 +372,6 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async deleteAnnotation(url: string) {
-        await this.deleteAnnotationPrivacyLevel({ annotation: url })
         return this.operation('deleteAnnotation', { url })
     }
 

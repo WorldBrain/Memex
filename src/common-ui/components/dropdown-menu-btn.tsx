@@ -113,7 +113,11 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 
     private renderMenuBtn = () => {
         const btn = (
-            <MenuBtn id={this.props.btnId} onClick={this.toggleMenu}>
+            <MenuBtn
+                isOpen={this.state.isOpen}
+                id={this.props.btnId}
+                onClick={this.toggleMenu}
+            >
                 {this.props.btnChildren}
             </MenuBtn>
         )
@@ -220,13 +224,13 @@ const MenuItemInfo = styled.div`
     padding-top: 5px;
 `
 
-const MenuBtn = styled.div`
+const MenuBtn = styled.div<{ isOpen: boolean }>`
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
     border: none;
     outline: none;
-    background: transparent;
+    background: ${(props) => (props.isOpen ? '#e0e0e0' : 'transparent')};
     border-radius: 3px;
     display: flex;
     align-items: center;
@@ -263,7 +267,7 @@ const Menu = styled.ul`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
-    z-index: 1200000;
+    z-index: 10;
     margin-top: 5px;
     flex-direction: column;
     top: 25px;

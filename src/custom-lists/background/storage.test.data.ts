@@ -1,4 +1,4 @@
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export const LIST_1 = {
     name: 'SoMe ipsum',

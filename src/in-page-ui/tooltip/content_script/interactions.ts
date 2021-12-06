@@ -68,7 +68,7 @@ export const insertTooltip = async (params: TooltipDependencies) => {
     target.setAttribute('id', 'memex-direct-linking-tooltip')
     document.body.appendChild(target)
 
-    const cssFile = browser.extension.getURL('/content_script.css')
+    const cssFile = browser.runtime.getURL('/content_script.css')
     injectCSS(cssFile)
 
     showTooltip = await setupUIContainer(target, {

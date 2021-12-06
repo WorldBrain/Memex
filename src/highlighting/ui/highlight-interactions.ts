@@ -87,7 +87,7 @@ export const renderAnnotationCacheChanges = ({
 }
 
 export interface SaveAndRenderHighlightDeps {
-    getUrlAndTitle: () => { pageUrl: string; title: string }
+    getUrlAndTitle: () => Promise<{ pageUrl: string; title: string }>
     getSelection: () => Selection
     annotationsCache: AnnotationsCacheInterface
     analyticsEvent?: AnalyticsEvent
@@ -167,7 +167,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const { pageUrl, title } = params.getUrlAndTitle()
+        const { pageUrl, title } = await params.getUrlAndTitle()
         const anchor = await extractAnchorFromSelection(selection)
         const body = anchor ? anchor.quote : ''
 
@@ -312,11 +312,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
-            const top = getOffsetTop($highlight) - window.innerHeight / 2
-            window.scrollTo({ top, behavior: 'smooth' })
-            // The pixels scrolled need to be returned in order to restrict
-            // scrolling when mouse is over the sidebar.
-            return top
+            $highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
         }
@@ -329,7 +325,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     highlightAndScroll = (annotation: Annotation) => {
         this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
-        return this.scrollToHighlight(annotation)
+        this.scrollToHighlight(annotation)
     }
 
     /**

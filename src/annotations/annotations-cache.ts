@@ -39,7 +39,7 @@ export const createAnnotationsCache = (
                 )
 
                 const annotationUrls = annotations.map((a) => a.url)
-                const privacyLevels = await bgModules.annotations.findAnnotationPrivacyLevels(
+                const privacyLevels = await bgModules.contentSharing.findAnnotationPrivacyLevels(
                     {
                         annotationUrls,
                     },
@@ -186,7 +186,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     getAnnotationById = (id: string): CachedAnnotation =>
         this.annotations.find((annot) => annot.url === id)
 
-    load = async (url, args = {}) => {
+    load = async (url: string, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(
             url,
             args,

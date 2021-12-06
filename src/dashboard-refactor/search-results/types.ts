@@ -111,7 +111,10 @@ export type PageData = Pick<
     lists: string[]
     displayTime: number
     hasNotes: boolean
+    type: 'pdf' | 'page'
     isShared?: boolean
+    pdfUrl?: string
+    fullPdfUrl?: string
 }
 
 export type NoResultsType =

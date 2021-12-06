@@ -1,16 +1,25 @@
+import flatten from 'lodash/flatten'
 import {
     StorageModule,
     StorageModuleConfig,
     StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
-import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-storage/lib/pages/constants'
+import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
-import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import {
+    mergeTermFields,
+    fingerprintsEqual,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
+import {
+    ContentIdentifier,
+    ContentLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
+import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -99,6 +108,24 @@ export default class PageStorage extends StorageModule {
                     url: '$url:string',
                 },
             },
+            findLocatorsByNormalizedUrl: {
+                operation: 'findObjects',
+                collection: 'locators',
+                args: {
+                    normalizedUrl: '$normalizedUrl:string',
+                },
+            },
+            findLocatorsByFingerprint: {
+                operation: 'findObjects',
+                collection: 'locators',
+                args: {
+                    fingerprint: '$fingerprint:string',
+                },
+            },
+            createLocator: {
+                operation: 'createObject',
+                collection: 'locators',
+            },
         },
     })
 
@@ -132,6 +159,8 @@ export default class PageStorage extends StorageModule {
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {
+        newPageData = { ...newPageData }
+
         const updates = {}
 
         for (const fieldName of Object.keys(newPageData)) {
@@ -286,6 +315,78 @@ export default class PageStorage extends StorageModule {
             url: normalizedUrl,
         })
         return result.length ? result[0] : null
+    }
+
+    async getContentIdentifier(params: {
+        regularNormalizedUrl: string
+        fingerprints: Array<ContentFingerprint>
+    }): Promise<{
+        identifier: ContentIdentifier
+        locators: ContentLocator[]
+    } | null> {
+        const locators: Array<ContentLocator> = flatten(
+            await Promise.all(
+                params.fingerprints.map((fingerprint) =>
+                    this.operation('findLocatorsByFingerprint', {
+                        fingerprint,
+                    }),
+                ),
+            ),
+        )
+        const locator = locators.find(
+            (existingLocator) =>
+                !!params.fingerprints.find((fingerprint) =>
+                    fingerprintsEqual(
+                        {
+                            fingerprintScheme: fingerprint.fingerprintScheme,
+                            fingerprint: fingerprint.fingerprint,
+                        },
+                        existingLocator,
+                    ),
+                ),
+        )
+        if (!locator) {
+            return null
+        }
+        const page = await this.getPage(locator.normalizedUrl)
+        if (!page) {
+            return null
+        }
+        return {
+            locators,
+            identifier: {
+                normalizedUrl: page.url,
+                fullUrl: page.fullUrl,
+            },
+        }
+    }
+
+    async findLocatorsByNormalizedUrl(
+        normalizedUrl: string,
+    ): Promise<ContentLocator[]> {
+        return this.operation('findLocatorsByNormalizedUrl', {
+            normalizedUrl,
+        })
+    }
+
+    async storeLocators(params: {
+        identifier: ContentIdentifier
+        locators: ContentLocator[]
+    }) {
+        const existingLocators: Array<ContentLocator> = await this.operation(
+            'findLocatorsByNormalizedUrl',
+            params.identifier,
+        )
+        const toStore = params.locators.filter((locator) => {
+            return !existingLocators.find(
+                (existing) =>
+                    fingerprintsEqual(existing, locator) &&
+                    existing.originalLocation === locator.originalLocation,
+            )
+        })
+        await Promise.all(
+            toStore.map((locator) => this.operation('createLocator', locator)),
+        )
     }
 
     async _maybeDecodeBlob(

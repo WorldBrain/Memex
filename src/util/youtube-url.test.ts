@@ -1,4 +1,8 @@
-import { extractIdFromUrl, isUrlYTVideo } from './youtube-url'
+import expect from 'expect'
+import {
+    extractIdFromUrl,
+    isUrlYTVideo,
+} from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 interface TestCase {
     id?: string

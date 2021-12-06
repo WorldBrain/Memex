@@ -62,8 +62,18 @@ const CloudUpgradeBanner = ({ onGetStartedClick, ...props }: Props) => (
             </Description>
         </ContentBox>
         <ButtonBox>
-            <SecondaryAction label="Learn More" onClick={()=>window.open('https://worldbrain.io/announcements/back-to-beta')} />
-            <PrimaryAction label="Start Migration" onClick={onGetStartedClick} />
+            <SecondaryAction
+                label="Learn More"
+                onClick={() =>
+                    window.open(
+                        'https://worldbrain.io/announcements/back-to-beta',
+                    )
+                }
+            />
+            <PrimaryAction
+                label="Start Migration"
+                onClick={onGetStartedClick}
+            />
         </ButtonBox>
     </Container>
 )

@@ -6,7 +6,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { browser } from 'webextension-polyfill-ts'
 const styles = require('./IndexDropdown.css')
 
-const searchImg = browser.extension.getURL('/img/search.svg')
+const searchImg = browser.runtime.getURL('/img/search.svg')
 
 export interface Props {
     children?: any[]

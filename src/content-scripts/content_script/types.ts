@@ -6,6 +6,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
+import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface ContentScriptRegistry {
@@ -53,3 +54,5 @@ export type TooltipScriptMain = (
 export type SearchInjectionMain = (
     dependencies: SearchInjectionDependencies,
 ) => Promise<void>
+
+export type GetContentFingerprints = () => Promise<ContentFingerprint[]>

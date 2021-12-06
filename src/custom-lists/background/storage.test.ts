@@ -7,7 +7,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 async function insertTestData({
@@ -301,7 +301,7 @@ describe('Custom List Integrations', () => {
             await checkInboxEntry(url3, { shouldExist: false })
             await directLinking.createAnnotation(
                 { tab: {} },
-                { pageUrl: url3, comment: 'test' },
+                { pageUrl: url3, comment: 'test', title: 'test' },
             )
             await checkInboxEntry(url3, { shouldExist: true })
             await customLists.removePageFromList({
@@ -311,7 +311,7 @@ describe('Custom List Integrations', () => {
             await checkInboxEntry(url3, { shouldExist: false })
             await directLinking.createAnnotation(
                 { tab: {} },
-                { pageUrl: url3, comment: 'test' },
+                { pageUrl: url3, comment: 'test', title: 'test' },
             )
             await checkInboxEntry(url3, { shouldExist: false })
 

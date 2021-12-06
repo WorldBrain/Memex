@@ -142,6 +142,7 @@ export async function setupTest(
             device.backgroundModules.backupModule.remoteFunctions,
         ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
+        pdfViewerBG: device.backgroundModules.pdfBg.remoteFunctions,
         contentConversationsBG:
             device.backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:

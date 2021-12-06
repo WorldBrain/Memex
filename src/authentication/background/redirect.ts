@@ -18,7 +18,7 @@ export function makeChargebeeCallbackHandler() {
             return {}
         }
 
-        const targetUrl = `${browser.extension.getURL(
+        const targetUrl = `${browser.runtime.getURL(
             '/options.html',
         )}#/account-subscriptions`
 

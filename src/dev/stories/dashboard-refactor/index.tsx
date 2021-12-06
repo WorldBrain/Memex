@@ -49,6 +49,7 @@ async function createDependencies(): Promise<DashboardProps> {
         activityIndicatorBG:
             backgroundModules.activityIndicator.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings.remoteFunctions,
+        pdfViewerBG: backgroundModules.pdfBg.remoteFunctions,
         openFeed: () => undefined,
         openCollectionPage: () => undefined,
         renderDashboardSwitcherLink: () => null,
@@ -157,7 +158,10 @@ class DashboardWrapper extends React.PureComponent<WrapperProps> {
     render() {
         return (
             <ThemeProvider theme={theme}>
-                <DashboardContainer ref={this.dashboardRef} {...this.props} />
+                <DashboardContainer
+                    ref={this.dashboardRef}
+                    {...(this.props as any)}
+                />
             </ThemeProvider>
         )
     }

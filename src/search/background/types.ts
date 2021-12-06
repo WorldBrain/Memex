@@ -6,7 +6,9 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface AnnotPage {
     url: string
-    fullUrl: string
+    fullUrl: string | null
+    pdfUrl?: string
+    fullPdfUrl?: string
     title?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. screenshot. */

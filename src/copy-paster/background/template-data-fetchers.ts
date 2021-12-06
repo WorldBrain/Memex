@@ -1,7 +1,7 @@
 import Storex from '@worldbrain/storex'
-import { Page } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/types'
-import { Tag } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/types'
-import { Note } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/types'
+import { Page } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
+import { Tag } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
+import { Note } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/types'
 
 import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
 import ContentSharingBackground from 'src/content-sharing/background'

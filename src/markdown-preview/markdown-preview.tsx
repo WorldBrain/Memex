@@ -3,7 +3,7 @@ import styled, { ThemeProvider } from 'styled-components'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 import { ButtonTooltip } from 'src/common-ui/components'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
     onKeyDown: React.KeyboardEventHandler
