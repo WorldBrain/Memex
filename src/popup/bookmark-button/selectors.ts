@@ -8,7 +8,7 @@ const bookmarkBtn = (state: RootState) => state.bookmarkBtn
 
 export const isBookmarked = createSelector(
     bookmarkBtn,
-    state => state.isBookmarked,
+    (state) => state.isBookmarked,
 )
 
 export const isDisabled = createSelector(

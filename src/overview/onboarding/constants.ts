@@ -4,7 +4,6 @@ export const GUIDED_ONBOARDING_URL =
 export const BACKUP_URL = '/options.html#/backup'
 
 export const ONBOARDING_QUERY_PARAMS = {
-    EXISTING_USER: 'existing',
     NEW_USER: 'install',
 }
 

@@ -4,7 +4,7 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
 import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 
 interface State extends ShareMenuCommonState {
@@ -63,14 +63,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private shareAnnotation = async (isBulkShareProtected?: boolean) => {
-        const { annotationUrl, annotationsBG, contentSharingBG } = this.props
+        const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({
             annotationUrl,
             shareToLists: true,
             skipPrivacyLevelUpdate: true,
         })
 
-        await annotationsBG.setAnnotationPrivacyLevel({
+        await contentSharingBG.setAnnotationPrivacyLevel({
             annotation: annotationUrl,
             privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare: true,
@@ -89,10 +89,10 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private unshareAnnotation = async (isBulkShareProtected?: boolean) => {
-        const { annotationUrl, annotationsBG } = this.props
+        const { annotationUrl, contentSharingBG } = this.props
         this.setState({ showLink: false })
 
-        await annotationsBG.setAnnotationPrivacyLevel({
+        await contentSharingBG.setAnnotationPrivacyLevel({
             annotation: annotationUrl,
             privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare: false,

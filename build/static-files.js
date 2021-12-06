@@ -76,6 +76,10 @@ export const copyPatterns = [
 
     { from: 'node_modules/pdfjs-dist/build/pdf.js', to: 'build/' },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.js', to: 'build/' },
+    {
+        from: 'node_modules/pdfjs-dist/build/pdf.worker.js',
+        to: 'build/pdf.worker.min.js',
+    },
 
     {
         from: 'fonts/*/*',

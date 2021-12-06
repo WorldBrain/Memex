@@ -217,13 +217,10 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; level: AnnotationPrivacyLevels },
     ) {
-        await setup.backgroundModules.directLinking.setAnnotationPrivacyLevel(
-            {} as any,
-            {
-                annotation: this.annotations[options.id].localId,
-                privacyLevel: options.level,
-            },
-        )
+        await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+            annotation: this.annotations[options.id].localId,
+            privacyLevel: options.level,
+        })
     }
 
     async shareAnnotation(

@@ -15,7 +15,7 @@ import { selectors as sidebar } from 'src/overview/sidebar-left'
 import { auth, contentSharing } from 'src/util/remote-functions-background'
 import { StaticListItem } from './static-list-item'
 import { show } from 'src/overview/modals/actions'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import FeedActivityIndicator from 'src/activity-indicator/ui'
 
 const styles = require('./Index.css')

@@ -41,6 +41,7 @@ const styles = require('./components/Popup.css')
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export interface OwnProps {}
 
@@ -201,6 +202,20 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <React.Fragment>
+                {this.isCurrentPagePDF &&
+                    !this.state.currentPageUrl.startsWith(
+                        'chrome-extension',
+                    ) && (
+                        <BlurredNotice>
+                            <NoticeTitle>Save & annotate this PDF</NoticeTitle>
+                            <PrimaryAction
+                                label={'Open PDF Reader'}
+                                onClick={() =>
+                                    this.processEvent('openPDFReader', null)
+                                }
+                            />
+                        </BlurredNotice>
+                    )}
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
@@ -285,6 +300,27 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return <div className={styles.popup}>{this.renderChildren()}</div>
     }
 }
+
+const NoticeTitle = styled.div`
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.primary};
+    font-weight: bold;
+    padding-bottom: 10px;
+`
+
+const BlurredNotice = styled.div`
+    position absolute;
+    height: 67%;
+    border-bottom: 1px solid #e0e0e0;
+    width: 100%;
+    z-index: 20;
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 50px;
+    align-items: center;
+    flex-direction: column;
+`
 
 const DashboardButtonBox = styled.div`
     height: 45px;

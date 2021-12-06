@@ -31,11 +31,13 @@ import type { ContentConversationsInterface } from 'src/content-conversations/ba
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type { PDFRemoteInterface } from 'src/pdf/background/types'
 
 export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
     isCloudEnabled: boolean
+    mode: 'search' | 'locate-pdf' | 'onboarding'
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
@@ -69,6 +71,7 @@ export interface DashboardDependencies {
     annotationsBG: AnnotationInterface<'caller'>
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
+    pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
     openFeed: () => void

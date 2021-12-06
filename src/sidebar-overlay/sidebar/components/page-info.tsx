@@ -29,7 +29,7 @@ class PageInfo extends React.Component<Props> {
 
     render() {
         const { url, title } = this.props.page
-        const backImg = browser.extension.getURL('/img/back.svg')
+        const backImg = browser.runtime.getURL('/img/back.svg')
         return (
             <React.Fragment>
                 {this.showPageInfo && (

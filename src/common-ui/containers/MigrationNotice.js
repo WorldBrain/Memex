@@ -22,7 +22,7 @@ export default class extends React.PureComponent {
 
     async componentDidMount() {
         const started = await this.isMigrating()
-        this.setState(state => ({ ...state, started }))
+        this.setState((state) => ({ ...state, started }))
     }
 
     getBtnText() {
@@ -37,14 +37,14 @@ export default class extends React.PureComponent {
 
     getBanner() {
         return this.props.showBanner
-            ? browser.extension.getURL('img/memex-logo.png')
+            ? browser.runtime.getURL('img/memex-logo.png')
             : undefined
     }
 
-    handleBtnClick = event => {
+    handleBtnClick = (event) => {
         event.preventDefault()
 
-        this.setState(state => ({ ...state, started: true }))
+        this.setState((state) => ({ ...state, started: true }))
         this.startMigration()
     }
 

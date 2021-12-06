@@ -5,58 +5,127 @@ import { PDF_VIEWER_HTML } from '../constants'
 
 export class PDFBackground {
     private routeViewer: string
-    private shouldOpen: boolean
+    private _shouldOpen: boolean
+    private _shouldOpenOneTime: boolean
     remoteFunctions: PDFRemoteInterface
 
     constructor(
         private deps: {
             tabsAPI: Pick<Tabs.Static, 'update'>
             runtimeAPI: Pick<Runtime.Static, 'getURL'>
-            webRequestAPI: Pick<WebRequest.Static, 'onBeforeRequest'>
+            webRequestAPI: Pick<
+                WebRequest.Static,
+                'onBeforeRequest' | 'onHeadersReceived'
+            >
             syncSettings: SyncSettingsStore<'pdfIntegration'>
         },
     ) {
         this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
         this.remoteFunctions = {
             refreshSetting: this.refreshSetting,
+            openPdfViewerForNextPdf: async () => {
+                this._shouldOpenOneTime = true
+            },
         }
     }
 
+    private get shouldOpen(): boolean {
+        if (this._shouldOpenOneTime) {
+            this._shouldOpenOneTime = false
+            return true
+        }
+        return this._shouldOpen
+    }
+
     private refreshSetting = async () => {
-        this.shouldOpen =
+        this._shouldOpen =
             (await this.deps.syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
             )) ?? true
     }
 
-    private listener = (details: WebRequest.OnBeforeRequestDetailsType) => {
-        if (this.shouldOpen && details.url) {
-            let url = this.routeViewer + '?file=' + details.url
-            const i = details.url.indexOf('#')
-            if (i > 0) {
-                url += details.url.slice(i)
-            }
+    private doRedirect(requestUrl: string, tabId: number) {
+        const url = this.routeViewer + '?file=' + encodeURIComponent(requestUrl)
+        // console.log('Redirecting ' + details.url + ' to ' + url)
 
-            // to get around the blocked state of the request, we update the original tab with the account screen.
-            // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.
-            setTimeout(() => {
-                this.deps.tabsAPI.update(details.tabId, { active: true, url })
-            }, 1)
+        // to get around the blocked state of the request, we update the original tab with the account screen.
+        // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.
+        setTimeout(() => {
+            this.deps.tabsAPI.update(tabId, { active: true, url })
+        }, 1)
 
-            return { redirectUrl: url }
+        return { redirectUrl: url }
+    }
+
+    private beforeRequestListener = (
+        details: WebRequest.OnBeforeRequestDetailsType,
+    ) => {
+        // only called for local files matching *.pdf
+        if (!this.shouldOpen || !details.url) {
+            return
         }
-        return undefined
+
+        return this.doRedirect(details.url, details.tabId)
+    }
+
+    private headersReceivedListener = (
+        details: WebRequest.OnHeadersReceivedDetailsType,
+    ) => {
+        if (!this.shouldOpen || !details.url) {
+            return
+        }
+        if (!this.isPdfRequestForViewer(details)) {
+            return
+        }
+
+        return this.doRedirect(details.url, details.tabId)
+    }
+
+    private isPdfRequestForViewer(
+        details: WebRequest.OnHeadersReceivedDetailsType,
+    ) {
+        if (details.url.endsWith('.pdf')) {
+            return true
+        }
+        const contentTypeHeader = details.responseHeaders?.find?.(
+            (header) => header.name.toLowerCase() === 'content-type',
+        )
+        if (
+            contentTypeHeader?.value?.toLowerCase?.().split?.(';')?.[0] !==
+            'application/pdf'
+        ) {
+            return false
+        }
+        const contentDispositionHeader = details.responseHeaders?.find?.(
+            (header) => header.name.toLowerCase() === 'content-disposition',
+        )
+        if (
+            contentDispositionHeader?.value
+                ?.toLowerCase?.()
+                .split?.(';')?.[0] === 'attachement'
+        ) {
+            return false
+        }
+        return true
     }
 
     setupRequestInterceptors = async () => {
         await this.refreshSetting()
         this.deps.webRequestAPI.onBeforeRequest.addListener(
-            this.listener,
+            this.beforeRequestListener,
             {
                 types: ['main_frame', 'sub_frame'],
-                urls: ['http://*/*.pdf', 'https://*/*.pdf'],
+                urls: ['file://*/*.pdf'],
             },
             ['blocking'],
+        )
+        this.deps.webRequestAPI.onHeadersReceived.addListener(
+            this.headersReceivedListener,
+            {
+                urls: ['<all_urls>'],
+                types: ['main_frame', 'sub_frame'],
+            },
+            ['responseHeaders', 'blocking'],
         )
     }
 }

@@ -1,5 +1,5 @@
-import orderBy from 'lodash/orderBy'
 import expect from 'expect'
+import type StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
@@ -14,12 +14,10 @@ import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integra
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
+import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
+import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharingTestHelper } from './index.tests'
-
-function convertRemoteId(id: string) {
-    return parseInt(id, 10)
-}
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -44,6 +42,7 @@ async function setupTest(options: {
     setup.authService.setUser(TEST_USER)
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
+    await personalCloud.startSync()
 
     const serverStorage = await setup.getServerStorage()
     await serverStorage.storageManager.operation(
@@ -64,11 +63,26 @@ async function setupTest(options: {
         return listShareResult.remoteListId
     }
 
+    const getFromDB = (storageManager: StorageManager) => (
+        collection: string,
+    ) =>
+        storageManager.operation(
+            'findObjects',
+            collection,
+            {},
+            { order: [['id', 'asc']] },
+        )
+
+    const getShared = getFromDB(serverStorage.storageManager)
+    const getLocal = getFromDB(setup.storageManager)
+
     return {
         directLinking,
         contentSharing,
         personalCloud,
         shareTestList,
+        getShared,
+        getLocal,
     }
 }
 
@@ -714,6 +728,80 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         entries: [],
                                     },
                                 )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should share PDF fingerprints and locators',
+            { skipConflictTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    personalCloud,
+                                    shareTestList,
+                                    getShared,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                    createTestList: true,
+                                })
+                                await shareTestList()
+                                const tabId = 1
+                                const {
+                                    identifier,
+                                    fingerprints,
+                                } = await indexTestFingerprintedPdf(setup, {
+                                    expectedServerId: 1338,
+                                    tabId,
+                                })
+                                await setup.backgroundModules.customLists.insertPageToList(
+                                    {
+                                        id: testData.localListId,
+                                        contentIdentifier: identifier,
+                                        tabId,
+                                    },
+                                )
+                                await personalCloud.waitForSync()
+                                expect(
+                                    await getShared('sharedContentFingerprint'),
+                                ).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
+                                        normalizedUrl: identifier.normalizedUrl,
+                                        fingerprintScheme:
+                                            fingerprints[0].fingerprintScheme,
+                                        fingerprint:
+                                            fingerprints[0].fingerprint,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
+                                        normalizedUrl: identifier.normalizedUrl,
+                                        fingerprintScheme:
+                                            fingerprints[1].fingerprintScheme,
+                                        fingerprint:
+                                            fingerprints[1].fingerprint,
+                                    },
+                                ])
+                                expect(
+                                    await getShared('sharedContentLocator'),
+                                ).toEqual([])
                             },
                         },
                     ],

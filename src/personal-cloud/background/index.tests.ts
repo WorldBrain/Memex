@@ -314,6 +314,7 @@ export async function setupSyncBackgroundTest(
             },
         )
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
+        setup.backgroundModules.personalCloud.strictErrorReporting = true
 
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService

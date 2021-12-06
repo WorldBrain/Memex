@@ -15,6 +15,7 @@ import {
 import {
     DataChangeType,
     DataUsageAction,
+    ContentLocatorFormat,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     PersonalCloudUpdateBatch,
@@ -69,7 +70,7 @@ class IdCapturer {
 
     mergeIds<TestData>(
         testData: TestData,
-        opts?: { skipTagType: 'annotation' | 'page' },
+        opts?: { skipTagType?: 'annotation' | 'page'; anyId?: boolean },
     ) {
         const source = testData as any
         const merged = {} as any
@@ -93,7 +94,9 @@ class IdCapturer {
                 }
 
                 // pick IDs by looking at the IDs that were generated during object creation
-                const id = this.ids[collection]?.[idsPicked++]
+                const id = opts?.anyId
+                    ? expect.anything()
+                    : this.ids[collection]?.[idsPicked++]
 
                 const mergedObject = {
                     ...deleteNullFields(object),
@@ -534,6 +537,149 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.first.url } },
             ], { skip: 1 })
+        })
+
+        it('should create locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+
+            // Note we still want to insert the non-PDF pages here to test the different locators behavior
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_b)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.fourth.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
+                ]),
+                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
+                personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
+            })
+
+            // NOTE: Only the locators for the third+fourth pages are downloaded, as they are the only PDFs
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
+            ])
+        })
+
+        it('should delete locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .deleteOneObject({
+                    id: LOCAL_TEST_DATA_V24.locators.third.id,
+                })
+            await setups[0].storageManager.collection('pages').deleteOneObject({
+                url: LOCAL_TEST_DATA_V24.pages.third.url,
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Delete, 'personalContentMetadata', testMetadata.third.id, {
+                        normalizedUrl: testLocators.third_dummy.location,
+                    }],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third.id, {
+                        id: testLocators.third.localId,
+                    }],
+
+                ], { skipChanges: 0 }),
+                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.third.url } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { id: LOCAL_TEST_DATA_V24.locators.third.id } },
+            ])
         })
 
         it('should create bookmarks', async () => {
@@ -3406,6 +3552,652 @@ describe('Personal cloud translation layer', () => {
                         .collection('personalReadwiseAction')
                         .findAllObjects({}),
                 ).toEqual([])
+            })
+        })
+
+        describe('specific scenarios (may have regressed in past)', () => {
+            it('should create a list, PDF page, add that page to a list, then create a shared annotation', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create + share list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                // Create PDF page
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.third)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.third)
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.third)
+                // Create shared annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.third)
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.third],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.third],
+                    personalAnnotationShare: [testAnnotationShares.third],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.third],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.third.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                            fingerprint: testLocators.third.fingerprint,
+                        }),
+                    ],
+                    sharedContentLocator: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                            originalUrl: testLocators.third.originalLocation,
+                        }),
+                    ],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third },
+                ], { skip: 2 })
+            })
+
+            it('should index a remote PDF page, create a shared annotation, create and share a new list, then add that page to the list', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create PDF page
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.third)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.third)
+                // Create shared annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.third)
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third,
+                    )
+                // Create + share list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.third)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.third],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.third],
+                    personalAnnotationShare: [testAnnotationShares.third],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.third],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.third.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                            fingerprint: testLocators.third.fingerprint,
+                        }),
+                    ],
+                    sharedContentLocator: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                            originalUrl: testLocators.third.originalLocation,
+                        }),
+                    ],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.third },
+                ], { skip: 2 })
+            })
+
+            it('should index a local PDF page, create a shared annotation, create and share a new list, then add that page to the list', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create PDF page
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                // Create shared annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.fifth)
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth,
+                    )
+                // Create + share list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.fourth)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    { anyId: true },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                testLocators.fourth_dummy.personalContentMetadata =
+                    testMetadata.fourth.id
+                testLocators.fourth_a.personalContentMetadata =
+                    testMetadata.fourth.id
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.third],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.fifth],
+                    personalAnnotationShare: [testAnnotationShares.fifth],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.fifth],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.fifth.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                            fingerprint: testLocators.fourth_a.fingerprint,
+                        }),
+                    ],
+                    sharedContentLocator: [
+                        // NOTE: This shouldn't get shared as it's a local filesystem locator
+                        // expect.objectContaining({
+                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        //     originalUrl: testLocators.fourth_a.originalLocation,
+                        // }),
+                    ],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
+                ], { skip: 2 })
+            })
+
+            it('should index a PDF page, create a shared annotation, create a new list, add that page to the list, then share the list', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create PDF page
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                // Create shared annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.fifth)
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth,
+                    )
+                // Create list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.fourth)
+                // Share list
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    { anyId: true },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                testLocators.fourth_dummy.personalContentMetadata =
+                    testMetadata.fourth.id
+                testLocators.fourth_a.personalContentMetadata =
+                    testMetadata.fourth.id
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.third],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.fifth],
+                    personalAnnotationShare: [testAnnotationShares.fifth],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.fifth],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.fifth.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [
+                        expect.objectContaining({
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                            fingerprint: testLocators.fourth_a.fingerprint,
+                        }),
+                    ],
+                    sharedContentLocator: [
+                        // NOTE: This shouldn't get shared as it's a local filesystem locator
+                        // expect.objectContaining({
+                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        //     originalUrl: testLocators.fourth_a.originalLocation,
+                        // }),
+                    ],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                ], { skip: 2 })
+            })
+
+            it('should index a page, create a shared list, create a private annotation, add page to list, then share the annotation', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                // Create + share list
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                // Create private annotation
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationPrivacyLevels
+                            .first_private,
+                    )
+                // Add page to list
+                await setups[0].storageManager
+                    .collection('pageListEntries')
+                    .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
+                // Share annotation
+                await setups[0].storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                    )
+                await setups[0].storageManager
+                    .collection('annotationPrivacyLevels')
+                    .updateOneObject(
+                        {
+                            id:
+                                LOCAL_TEST_DATA_V24.annotationPrivacyLevels
+                                    .first_private.id,
+                        },
+                        {
+                            privacyLevel: AnnotationPrivacyLevels.SHARED,
+                        },
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                    { anyId: true },
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testListEntries = remoteData.personalListEntry
+                const testListShares = remoteData.personalListShare
+                const testAnnotations = remoteData.personalAnnotation
+                const testAnnotationShares = remoteData.personalAnnotationShare
+                const testPrivacyLevels =
+                    remoteData.personalAnnotationPrivacyLevel
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        'personalBlockStats',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalList',
+                        'personalListEntry',
+                        'personalListShare',
+                        'personalAnnotation',
+                        'personalAnnotationShare',
+                        'personalAnnotationPrivacyLevel',
+                        'sharedList',
+                        'sharedAnnotation',
+                        'sharedAnnotationListEntry',
+                        'sharedContentFingerprint',
+                        'sharedContentLocator',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalList: [testLists.first],
+                    personalListEntry: [testListEntries.first],
+                    personalListShare: [testListShares.first],
+                    personalAnnotation: [testAnnotations.first],
+                    personalAnnotationShare: [testAnnotationShares.first],
+                    personalAnnotationPrivacyLevel: [testPrivacyLevels.first],
+                    sharedList: [
+                        expect.objectContaining({
+                            title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        }),
+                    ],
+                    sharedAnnotation: [
+                        expect.objectContaining({
+                            comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
+                        }),
+                    ],
+                    sharedAnnotationListEntry: [
+                        expect.objectContaining({
+                            normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
+                        }),
+                    ],
+                    sharedContentFingerprint: [],
+                    sharedContentLocator: [],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
+                ], { skip: 0 })
             })
         })
     })

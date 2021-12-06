@@ -6,7 +6,7 @@ import colors from 'src/dashboard-refactor/colors'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 export interface Props {
     icon: IconKeys

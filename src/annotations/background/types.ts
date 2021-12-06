@@ -12,7 +12,6 @@ import {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     createDirectLink: RemotePositionalFunction<Role, any[], any>
@@ -36,23 +35,6 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         Role,
         [{ url: string; isBookmarked: boolean }],
         string
-    >
-    findAnnotationPrivacyLevels: RemotePositionalFunction<
-        Role,
-        [{ annotationUrls: string[] }],
-        {
-            [annotationUrl: string]: AnnotationPrivacyLevels
-        }
-    >
-    setAnnotationPrivacyLevel: RemotePositionalFunction<
-        Role,
-        [{ annotation: string; privacyLevel: AnnotationPrivacyLevels }],
-        void
-    >
-    deleteAnnotationPrivacyLevel: RemotePositionalFunction<
-        Role,
-        [{ annotation: string }],
-        void
     >
     editAnnotation: RemotePositionalFunction<
         Role,
@@ -117,7 +99,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
 export interface CreateAnnotationParams {
     url?: string
     pageUrl: string
-    title?: string
+    title: string
     comment?: string
     body?: string
     selector?: Anchor

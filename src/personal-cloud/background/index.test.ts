@@ -78,6 +78,7 @@ describe('Personal cloud', () => {
                         testOptions.type === 'html'
                             ? [
                                   {
+                                      id: 667,
                                       url: fullUrl,
                                       htmlBody,
                                       title: fullTitle,
@@ -86,6 +87,7 @@ describe('Personal cloud', () => {
                               ]
                             : [
                                   {
+                                      id: 667,
                                       type: 'pdf',
                                       url: fullUrl,
                                   },
@@ -131,7 +133,10 @@ describe('Personal cloud', () => {
                             normalizedUrl: 'www.dude-wheres-my/test.pdf',
                             storedContentType: StoredContentType.PdfContent,
                             content: {
-                                metadata: TEST_PDF_METADATA,
+                                metadata: {
+                                    ...TEST_PDF_METADATA,
+                                    memexDocumentBytes: expect.any(Number),
+                                },
                                 pageTexts: TEST_PDF_PAGE_TEXTS,
                             },
                         },
@@ -159,7 +164,7 @@ describe('Personal cloud', () => {
                             expect.objectContaining({
                                 type: 'overwrite',
                                 collection: 'pages',
-                                schemaVersion: STORAGE_VERSIONS[25].version,
+                                schemaVersion: STORAGE_VERSIONS[26].version,
                             }),
                         ],
                     }),
@@ -212,7 +217,10 @@ describe('Personal cloud', () => {
                 const objectBlob = storedObjects[0].object as Blob
                 const object = await blobToJson(objectBlob)
                 expect(object).toEqual({
-                    metadata: TEST_PDF_METADATA,
+                    metadata: {
+                        ...TEST_PDF_METADATA,
+                        memexDocumentBytes: expect.any(Number),
+                    },
                     pageTexts: TEST_PDF_PAGE_TEXTS,
                 })
                 expect(objectBlob.type).toEqual(

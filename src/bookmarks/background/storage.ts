@@ -6,9 +6,9 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/pages/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { Bookmark } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/types'
+import { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
 
 export default class BookmarksStorage extends StorageModule {
     static BMS_COLL = COLLECTION_NAMES.bookmark

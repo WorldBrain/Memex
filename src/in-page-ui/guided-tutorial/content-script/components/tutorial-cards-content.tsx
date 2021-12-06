@@ -3,7 +3,7 @@ import { reactEventHandler } from 'src/util/ui-logic'
 import styled from 'styled-components'
 import TutorialStep from './tutorial-step'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {

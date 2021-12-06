@@ -5,7 +5,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/notifications/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/notifications/constants'
 
 import { Notification } from '../types'
 

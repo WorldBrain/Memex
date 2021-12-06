@@ -35,9 +35,10 @@ const analysePage: PageAnalyzer = async (options) => {
 
     const extracted = await extractPageContent(options)
     const { content, rawContent } = extracted
-    const favIconURI = options.includeFavIcon
-        ? await options.tabManagement.getFavIcon({ tabId })
-        : undefined
+    const favIconURI =
+        options.includeFavIcon && extracted.rawContent.type !== 'pdf'
+            ? await options.tabManagement.getFavIcon({ tabId })
+            : undefined
     const htmlBody = rawContent.type === 'html' ? rawContent.body : undefined
 
     return {

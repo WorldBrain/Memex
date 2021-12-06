@@ -16,6 +16,7 @@ interface IconProps {
     rotation: string
     faded: boolean
     paddingHorizontal?: string
+    color?: string
 }
 
 export const Icon = styled.div<IconProps>`
@@ -27,10 +28,12 @@ export const Icon = styled.div<IconProps>`
     ${(props) =>
         css`
             ${props.path &&
-            `background-image: url(${props.path});
-            background-repeat: no-repeat;
-            background-size: contain;
-            background-position: center;`}
+            `mask-image: url(${props.path});
+            mask-repeat: no-repeat;
+            mask-size: contain;
+            mask-position: center;
+            background-color: ${props.color ? props.color : '#3a2f45'};
+            `}
         `}
     ${(props) =>
         props.rotation &&

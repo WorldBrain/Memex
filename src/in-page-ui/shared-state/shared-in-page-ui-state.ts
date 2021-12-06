@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import TypedEventEmitter from 'typed-emitter'
 
+import { MaybePromise } from 'src/util/types'
 import {
     SharedInPageUIInterface,
     SharedInPageUIEvents,
@@ -17,7 +18,7 @@ import {
 import { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 export interface SharedInPageUIDependencies {
-    getNormalizedPageUrl: () => string
+    getNormalizedPageUrl: () => MaybePromise<string>
     loadComponent: (component: InPageUIComponent) => void
     unloadComponent: (component: InPageUIComponent) => void
 }
@@ -54,10 +55,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         )
     }
 
-    private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = ({
+    private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = async ({
         pageUrl,
     }) => {
-        if (pageUrl !== this.options.getNormalizedPageUrl()) {
+        if (pageUrl !== (await this.options.getNormalizedPageUrl())) {
             return
         }
 

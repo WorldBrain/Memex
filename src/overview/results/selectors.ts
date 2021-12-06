@@ -10,7 +10,7 @@ import { query, isEmptyQuery } from '../search-bar/selectors'
 import { listFilterActive, listIdFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
-import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.

@@ -1,5 +1,5 @@
 import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
-import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
+import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { SharedSyncLogEntry } from '@worldbrain/storex-sync/lib/shared-sync-log/types'

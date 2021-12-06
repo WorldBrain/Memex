@@ -17,4 +17,5 @@ export interface RawHtmlPageContent {
 export interface RawPdfPageContent {
     type: 'pdf'
     url: string
+    title?: string
 }
