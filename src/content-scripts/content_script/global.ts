@@ -63,8 +63,9 @@ export async function main(
     } = {},
 ) {
     params.loadRemotely = params.loadRemotely ?? true
+    const isPdfViewerRunning = params.getContentFingerprints != null
 
-    if (params.getContentFingerprints != null) {
+    if (isPdfViewerRunning) {
         setupPdfViewerListeners({
             onLoadError: () =>
                 bgScriptBG.openOverviewTab({
@@ -330,7 +331,7 @@ export async function main(
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
-    if (isSidebarEnabled) {
+    if (isSidebarEnabled && (pageInfo.isPdf ? isPdfViewerRunning : true)) {
         await inPageUI.loadComponent('ribbon')
     }
 
@@ -371,6 +372,7 @@ export function loadRibbonOnMouseOver(loadRibbon: () => void) {
 }
 
 class PageInfo {
+    isPdf: boolean
     _href?: string
     _identifier?: ContentIdentifier
 
@@ -383,12 +385,12 @@ class PageInfo {
             return
         }
         const fullUrl = getUrl(window.location.href)
-        const isPdf = isFullUrlPDF(fullUrl)
+        this.isPdf = isFullUrlPDF(fullUrl)
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
         >().initContentIdentifier({
             locator: {
-                format: isPdf
+                format: this.isPdf
                     ? ContentLocatorFormat.PDF
                     : ContentLocatorFormat.HTML,
                 originalLocation: fullUrl,
