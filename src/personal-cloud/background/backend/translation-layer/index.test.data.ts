@@ -168,6 +168,13 @@ export const LOCAL_TEST_DATA_V24 = {
             createdWhen: new Date(1625190554983),
             updatedWhen: new Date(1625190554983),
         },
+        first_private: {
+            id: 1,
+            annotation: LOCAL_ANNOTATIONS_V24.first.url,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            createdWhen: new Date(1625190554983),
+            updatedWhen: new Date(1625190554983),
+        },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
