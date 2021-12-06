@@ -341,11 +341,11 @@ class AnnotationsSidebar extends React.Component<
         return (
             <FollowedListNotesContainer bottom="10px">
                 <FollowedListTitleContainer
-                    bottom="10px"
                     onClick={() =>
                         this.props.expandSharedSpaces(followedLists.allIds)
                     }
                     left="5px"
+                    bottom="5px"
                 >
                     <FollowedListSectionTitle>
                         From Shared Spaces
@@ -515,13 +515,11 @@ class AnnotationsSidebar extends React.Component<
             annots.push(<CongratsMessage key="sidebar-congrats-msg" />)
         }
 
-        console.log(this.props.sidebarContext)
-
         return (
             <FollowedListNotesContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
             >
-                <FollowedListTitleContainerMyNotes bottom="10px" left="5px">
+                <FollowedListTitleContainerMyNotes left="5px">
                     <MyNotesClickableArea
                         onClick={
                             !this.props.annotations.length

@@ -462,7 +462,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin bottom="10px">
+                <Margin top="10px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
