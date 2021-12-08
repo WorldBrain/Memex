@@ -151,7 +151,11 @@ export class SharingTestHelper {
 
     async createAnnotation(
         setup: BackgroundIntegrationTestSetup,
-        options: { id: number; pageId: number },
+        options: {
+            id: number
+            pageId: number
+            level?: AnnotationPrivacyLevels
+        },
     ) {
         const count = ++this.counts.annotations
         const body = `Annot body ${count}`
@@ -173,7 +177,7 @@ export class SharingTestHelper {
                 title: this.pages[options.pageId].title,
                 body,
                 comment,
-                selector: selector,
+                selector,
             },
             { skipPageIndexing: true },
         )
@@ -187,6 +191,12 @@ export class SharingTestHelper {
             descriptorStrategy,
             selectorQuote,
             selector,
+        }
+        if (options.level) {
+            await this.setAnnotationPrivacyLevel(setup, {
+                id: options.id,
+                level: options.level,
+            })
         }
     }
 
@@ -242,29 +252,27 @@ export class SharingTestHelper {
 
     async shareAnnotations(
         setup: BackgroundIntegrationTestSetup,
-        options: {
-            annotations: Array<{ id: number; expectNotShared?: boolean }>
-        },
+        annotations: Array<{ id: number; expectNotShared?: boolean }>,
     ) {
         await setup.backgroundModules.contentSharing.shareAnnotations({
-            annotationUrls: options.annotations.map(
+            annotationUrls: annotations.map(
                 (annot) => this.annotations[annot.id].localId,
             ),
         })
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
             {
-                localIds: options.annotations.map(
+                localIds: annotations.map(
                     ({ id }) => this.annotations[id].localId,
                 ),
             },
         )
-        for (const annotation of options.annotations) {
+        for (const annotation of annotations) {
             const remoteId = remoteIds[this.annotations[annotation.id].localId]
             this.annotations[annotation.id].remoteId = remoteId
         }
     }
 
-    async shareAnnotationsToLists(
+    async shareAnnotationsToAllLists(
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
     ) {
@@ -275,7 +283,12 @@ export class SharingTestHelper {
         })
     }
 
-    async unshareAnnotationsFromLists(
+    async shareAnnotationsToSomeLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { annotationsIds: number[]; listIds: number[] },
+    ) {}
+
+    async unshareAnnotationsFromAllLists(
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
     ) {
@@ -287,6 +300,16 @@ export class SharingTestHelper {
             },
         )
     }
+
+    async unshareAnnotationsFromSomeLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { annotationsIds: number[]; listIds: number[] },
+    ) {}
+
+    async unshareAnnotations(
+        setup: BackgroundIntegrationTestSetup,
+        options: { ids: number[] },
+    ) {}
 
     async assertSharedLists(
         setup: BackgroundIntegrationTestSetup,
