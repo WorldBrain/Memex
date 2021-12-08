@@ -170,20 +170,20 @@ export default class ContentSharingBackground {
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
-        const remoteAnnotationId = (
+        let remoteId = (
             await this.storage.getRemoteAnnotationIds({
                 localIds: [options.annotationUrl],
             })
         )[options.annotationUrl]
 
-        if (!remoteAnnotationId) {
+        if (!remoteId) {
+            remoteId =
+                options.remoteAnnotationId ?? this.generateRemoteAnnotationId()
             await this.storage.storeAnnotationMetadata([
                 {
                     localId: options.annotationUrl,
                     excludeFromLists: !options.shareToLists ?? true,
-                    remoteId:
-                        options.remoteAnnotationId ??
-                        this.generateRemoteAnnotationId(),
+                    remoteId,
                 },
             ])
         }
@@ -201,6 +201,8 @@ export default class ContentSharingBackground {
             category: 'ContentSharing',
             action: 'shareAnnotation',
         })
+
+        return { remoteId }
     }
 
     shareAnnotations: ContentSharingInterface['shareAnnotations'] = async (
@@ -300,7 +302,9 @@ export default class ContentSharingBackground {
         })
         await this.storage.setAnnotationPrivacyLevelBulk({
             annotations: options.annotationUrls,
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            privacyLevel: options.setBulkShareProtected
+                ? AnnotationPrivacyLevels.PROTECTED
+                : AnnotationPrivacyLevels.PRIVATE,
         })
     }
 
@@ -354,7 +358,25 @@ export default class ContentSharingBackground {
     setAnnotationPrivacyLevel: ContentSharingInterface['setAnnotationPrivacyLevel'] = async (
         params,
     ) => {
-        await this.storage.setAnnotationPrivacyLevel(params)
+        if (
+            params.privacyLevel === AnnotationPrivacyLevels.SHARED ||
+            params.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+        ) {
+            return this.shareAnnotation({
+                annotationUrl: params.annotation,
+                setBulkShareProtected:
+                    params.privacyLevel ===
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                shareToLists: true,
+            })
+        } else {
+            await this.unshareAnnotationsFromLists({
+                annotationUrls: [params.annotation],
+                setBulkShareProtected:
+                    params.privacyLevel === AnnotationPrivacyLevels.PROTECTED,
+            })
+            return {}
+        }
     }
 
     deleteAnnotationPrivacyLevel: ContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (

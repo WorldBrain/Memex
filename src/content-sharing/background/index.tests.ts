@@ -192,7 +192,7 @@ export class SharingTestHelper {
             selectorQuote,
             selector,
         }
-        if (options.level) {
+        if ('level' in options) {
             await this.setAnnotationPrivacyLevel(setup, {
                 id: options.id,
                 level: options.level,
@@ -227,10 +227,17 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; level: AnnotationPrivacyLevels },
     ) {
-        await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel({
-            annotation: this.annotations[options.id].localId,
-            privacyLevel: options.level,
-        })
+        const {
+            remoteId,
+        } = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
+            {
+                annotation: this.annotations[options.id].localId,
+                privacyLevel: options.level,
+            },
+        )
+        if (remoteId) {
+            this.annotations[options.id].remoteId = remoteId
+        }
     }
 
     async shareAnnotation(
@@ -309,7 +316,13 @@ export class SharingTestHelper {
     async unshareAnnotations(
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
-    ) {}
+    ) {
+        await setup.backgroundModules.contentSharing.unshareAnnotations({
+            annotationUrls: options.ids.map(
+                (id) => this.annotations[id].localId,
+            ),
+        })
+    }
 
     async assertSharedLists(
         setup: BackgroundIntegrationTestSetup,

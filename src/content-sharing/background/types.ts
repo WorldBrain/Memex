@@ -13,7 +13,7 @@ export interface ContentSharingInterface
         withoutPageInfo?: boolean
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
-    }): Promise<void>
+    }): Promise<{ remoteId: number | string }>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
@@ -26,6 +26,7 @@ export interface ContentSharingInterface
     }): Promise<void>
     unshareAnnotationsFromLists(options: {
         annotationUrls: string[]
+        setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
     }): Promise<void>
     unshareAnnotations(options: {
@@ -69,7 +70,7 @@ export interface ContentSharingInterface
     setAnnotationPrivacyLevel(params: {
         annotation: string
         privacyLevel: AnnotationPrivacyLevels
-    }): Promise<void>
+    }): Promise<{ remoteId?: number | string }>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
 }
 

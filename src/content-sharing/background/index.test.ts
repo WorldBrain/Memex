@@ -491,6 +491,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.PROTECTED,
                                 })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    ],
+                                )
                                 await helper.shareAnnotations(setup, [
                                     { id: 1, expectNotShared: true },
                                 ])
@@ -605,6 +615,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationId: 1,
                                             level:
                                                 AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
                                         },
                                     ],
                                 )
@@ -1681,7 +1692,7 @@ function makeShareAnnotationTest(options: {
                     if (options.testProtectedBulkShare) {
                         await helper.setAnnotationPrivacyLevel(setup, {
                             id: 2,
-                            level: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                            level: AnnotationPrivacyLevels.PROTECTED,
                         })
                     }
 
@@ -1727,8 +1738,7 @@ function makeShareAnnotationTest(options: {
                             ? [
                                   {
                                       annotationId: 2,
-                                      level:
-                                          AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                      level: AnnotationPrivacyLevels.PROTECTED,
                                   },
                                   {
                                       annotationId: 1,
