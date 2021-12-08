@@ -189,6 +189,7 @@ class ListPicker extends StatefulUIElement<
                     }
                 />
                 <EntryResultsList
+                    query={this.state.query}
                     entries={this.state.displayEntries}
                     renderEntryRow={this.renderListRow}
                     emptyView={this.renderEmptyList()}

@@ -239,12 +239,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             errorMessage={addListErrorMessage}
                                         />
                                     )}
-                                    {group.title === 'My collections' &&
+                                    {group.title === 'My Spaces' &&
                                     group.listsArray.length === 0 ? (
                                         <NoCollectionsMessage>
-                                            <strong>
-                                                No saved collections
-                                            </strong>{' '}
+                                            <strong>No saved spaces</strong>{' '}
                                             <br />
                                             <u
                                                 onClick={this.bindRouteGoTo(
@@ -258,7 +256,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     ) : (
                                         <>
                                             {group.title ===
-                                                'Followed collections' &&
+                                                'Followed Spaces' &&
                                             group.listsArray.length === 0 ? (
                                                 <NoCollectionsMessage>
                                                     <u
@@ -280,7 +278,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     >
                                                         follow
                                                     </u>{' '}
-                                                    your first collection.
+                                                    your first space.
                                                 </NoCollectionsMessage>
                                             ) : (
                                                 this.renderLists(
