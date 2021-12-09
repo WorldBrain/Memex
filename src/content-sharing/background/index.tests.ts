@@ -283,11 +283,13 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
     ) {
-        await setup.backgroundModules.contentSharing.shareAnnotationsToLists({
-            annotationUrls: options.ids.map(
-                (id) => this.annotations[id].localId,
-            ),
-        })
+        await setup.backgroundModules.contentSharing.shareAnnotationsToAllLists(
+            {
+                annotationUrls: options.ids.map(
+                    (id) => this.annotations[id].localId,
+                ),
+            },
+        )
     }
 
     async shareAnnotationsToSomeLists(
@@ -299,7 +301,7 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
     ) {
-        await setup.backgroundModules.contentSharing.unshareAnnotationsFromLists(
+        await setup.backgroundModules.contentSharing.unshareAnnotationsFromAllLists(
             {
                 annotationUrls: options.ids.map(
                     (id) => this.annotations[id].localId,

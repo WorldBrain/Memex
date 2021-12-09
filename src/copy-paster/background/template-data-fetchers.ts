@@ -17,7 +17,7 @@ export function getTemplateDataFetchers({
     contentSharing: Pick<
         ContentSharingBackground,
         | 'shareAnnotations'
-        | 'shareAnnotationsToLists'
+        | 'shareAnnotationsToSomeLists'
         | 'storage'
         | 'ensureRemotePageId'
     >

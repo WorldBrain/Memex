@@ -19,20 +19,28 @@ export interface ContentSharingInterface
         shareToLists?: boolean
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    shareAnnotationsToLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationsToAllLists(options: {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    unshareAnnotationsFromLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationsToSomeLists(options: {
+        annotationUrls: string[]
+        localListIds: number[]
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotationsFromSomeLists(options: {
+        annotationUrls: string[]
+        localListIds: number[]
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
@@ -70,7 +78,10 @@ export interface ContentSharingInterface
     setAnnotationPrivacyLevel(params: {
         annotation: string
         privacyLevel: AnnotationPrivacyLevels
-    }): Promise<{ remoteId?: number | string }>
+    }): Promise<{
+        remoteId?: number | string
+        sharingState: AnnotationSharingState
+    }>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
 }
 
@@ -84,3 +95,13 @@ export type ContentSharingQueueInteraction =
     | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'
+
+export interface AnnotationSharingState {
+    hasLink: boolean
+    privacyLevel: AnnotationPrivacyLevels
+    localListIds: number[]
+}
+
+export interface AnnotationSharingStates {
+    [annotationUrl: string]: AnnotationSharingState
+}
