@@ -171,6 +171,7 @@ export default class ListsSidebar extends PureComponent<
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
+                onMouseEnter={this.props.peekState.setSidebarPeekState(true)}
             >
                 <PeekTrigger
                     onMouseEnter={this.props.peekState.setSidebarPeekState(
@@ -191,8 +192,7 @@ export default class ListsSidebar extends PureComponent<
                     locked={isSidebarLocked}
                     onMouseEnter={
                         isSidebarPeeking &&
-                        (this.props.peekState.setSidebarPeekState(true),
-                        console.log('test'))
+                        this.props.peekState.setSidebarPeekState(true)
                     }
                     default={{ width: 200 }}
                     resizeGrid={[1, 0]}
