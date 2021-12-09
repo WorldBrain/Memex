@@ -39,6 +39,7 @@ const setupLogicHelper = async ({
         {
             contentSharing:
                 device.backgroundModules.contentSharing.remoteFunctions,
+            customLists: device.backgroundModules.customLists.remoteFunctions,
             tags: device.backgroundModules.tags.remoteFunctions,
             annotations: annotationsBG,
         },

@@ -6,7 +6,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from 'src/util/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
-
 interface State extends ShareMenuCommonState {
     showLink: boolean
 }
@@ -15,6 +14,7 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
+    // listProps: ListPickerDependencies
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
@@ -23,9 +23,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 > {
     static MOD_KEY = getKeyName({ key: 'mod' })
     static ALT_KEY = getKeyName({ key: 'alt' })
-    static defaultProps: Pick<Props, 'contentSharingBG' | 'annotationsBG'> = {
+    static defaultProps: Pick<
+        Props,
+        'contentSharingBG' | 'annotationsBG' | 'customListsBG'
+    > = {
         contentSharingBG: runInBackground(),
         annotationsBG: runInBackground(),
+        customListsBG: runInBackground(),
     }
 
     state: State = {

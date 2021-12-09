@@ -33,11 +33,9 @@ import analytics from 'src/analytics'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
-import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -172,6 +170,10 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setTagPickerAnnotationId', {
                     id: annotation.url,
                 }),
+            onListIconClick: () =>
+                this.processEvent('setListPickerAnnotationId', {
+                    id: annotation.url,
+                }),
         }
     }
 
@@ -210,7 +212,6 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('changeNewPageCommentText', { comment }),
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
-            // TODO: make into lists
             onListsUpdate: (lists) =>
                 this.processEvent('updateNewPageCommentLists', { lists }),
             onCancel: () => this.processEvent('cancelNewPageComment', null),
@@ -227,6 +228,10 @@ export class AnnotationsSidebarContainer<
                 .fetchInitialTagSuggestions,
             loadDefaultListSuggestions: this.props.customLists
                 .fetchInitialListSuggestions,
+            loadRemoteListNames: async () => {
+                const remoteLists = await this.props.contentSharing.getAllRemoteLists()
+                return remoteLists.map((list) => list.name)
+            },
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             // TODO: make into lists
@@ -245,6 +250,37 @@ export class AnnotationsSidebarContainer<
             : annot.tags.filter((tag) => tag !== deleted)
 
         await this.props.annotationsCache.update({ ...annot, tags: newTags })
+    }
+
+    private handleListsUpdate = (url: string): PickerUpdateHandler => async ({
+        added,
+        deleted,
+    }) => {
+        const annot = this.props.annotationsCache.getAnnotationById(url)
+        const annotLists = annot.lists ?? [] // TODO remove this once lists are implemented
+        const newLists = added
+            ? [...annotLists, added]
+            : annotLists.filter((list) => list !== deleted)
+
+        await this.props.annotationsCache.update({ ...annot, lists: newLists })
+
+        // we're calling annoationCache update above
+        // but updating list state outside of it,
+        // TODO: this is duplicated from annotations-list
+        const name = added ?? deleted
+        const list = await this.props.customLists.fetchListByName({ name })
+        const id = list.id
+        if (added != null) {
+            this.props.contentSharing.addAnnotationToLists({
+                annotationUrl: annot.url,
+                listIds: [id],
+            })
+        } else if (deleted != null) {
+            this.props.contentSharing.removeAnnotationsFromLists({
+                annotationUrl: annot.url,
+                listIds: [id],
+            })
+        }
     }
 
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
@@ -287,7 +323,7 @@ export class AnnotationsSidebarContainer<
         )
 
         return (
-            <TagPickerWrapper>
+            <PickerWrapper>
                 <HoverBox>
                     <ClickAway
                         onClickAway={() =>
@@ -319,35 +355,72 @@ export class AnnotationsSidebarContainer<
                         />
                     </ClickAway>
                 </HoverBox>
-            </TagPickerWrapper>
+            </PickerWrapper>
         )
     }
 
-    // private renderCollectionsPicker() {
-    //     if (!this.props.lists.showListsPicker) {
-    //         return null
-    //     }
+    private renderListPickerContentForAnnotation = (
+        currentAnnotationId: string,
+    ) => {
+        const annot = this.props.annotationsCache.getAnnotationById(
+            currentAnnotationId,
+        )
+        return (
+            <CollectionPicker
+                initialSelectedEntries={() => annot.lists ?? []}
+                // initialSelectedEntries={() => annot.lists ?? []}
+                queryEntries={(query) =>
+                    this.props.customLists.searchForListSuggestions({
+                        query,
+                    })
+                }
+                loadDefaultSuggestions={
+                    this.props.customLists.fetchInitialListSuggestions
+                }
+                onUpdateEntrySelection={this.handleListsUpdate(
+                    currentAnnotationId,
+                )}
+                onEscapeKeyDown={() =>
+                    this.processEvent('resetListPickerAnnotationId', null)
+                }
+                loadRemoteListNames={
+                    async () =>
+                        this.props.contentSharing.getListsForAnnotation(
+                            currentAnnotationId,
+                        )
+                    //     async () => {
+                    //     const remoteLists = await this.props.contentSharing.getAllRemoteLists()
+                    //     return remoteLists.map((list) => list.name)
+                    // }
+                }
+            />
+        )
+    }
 
-    //     return (
-    //         <Tooltip position="left">
-    //             <BlurredSidebarOverlay
-    //                 onOutsideClick={this.hideListPicker}
-    //                 skipRendering={!this.props.sidebar.isSidebarOpen}
-    //             >
-    //                 <CollectionPicker
-    //                     {...this.props.lists}
-    //                     onUpdateEntrySelection={this.props.lists.updateLists}
-    //                     actOnAllTabs={this.props.lists.listAllTabs}
-    //                     initialSelectedEntries={
-    //                         this.props.lists.fetchInitialListSelections
-    //                     }
-    //                     onEscapeKeyDown={this.hideListPicker}
-    //                     handleClickOutside={this.hideListPicker}
-    //                 />
-    //             </BlurredSidebarOverlay>
-    //         </Tooltip>
-    //     )
-    // }
+    private renderListPickerForAnnotation = (currentAnnotationId: string) => {
+        // Not used yet but will be used for the "Add to collection" button
+        if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
+            return null
+        }
+        return (
+            <PickerWrapper>
+                <HoverBox>
+                    <ClickAway
+                        onClickAway={() =>
+                            this.processEvent(
+                                'resetListPickerAnnotationId',
+                                null,
+                            )
+                        }
+                    >
+                        {this.renderListPickerContentForAnnotation(
+                            currentAnnotationId,
+                        )}
+                    </ClickAway>
+                </HoverBox>
+            </PickerWrapper>
+        )
+    }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
         if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
@@ -361,25 +434,36 @@ export class AnnotationsSidebarContainer<
         return (
             <ShareMenuWrapper>
                 <HoverBox width="320px">
-                    <SingleNoteShareMenu
-                        isShared={currentAnnotation?.isShared}
-                        shareImmediately={this.state.immediatelyShareNotes}
-                        contentSharingBG={this.props.contentSharing}
-                        annotationsBG={this.props.annotations}
-                        copyLink={(link) =>
-                            this.processEvent('copyNoteLink', { link })
-                        }
-                        annotationUrl={currentAnnotationId}
-                        postShareHook={(shareInfo) =>
-                            this.processEvent('updateAnnotationShareInfo', {
-                                annotationUrl: currentAnnotationId,
-                                ...shareInfo,
-                            })
-                        }
-                        closeShareMenu={() =>
+                    <ClickAway
+                        onClickAway={() =>
                             this.processEvent('resetShareMenuNoteId', null)
                         }
-                    />
+                    >
+                        <SingleNoteShareMenu
+                            isShared={currentAnnotation?.isShared}
+                            shareImmediately={this.state.immediatelyShareNotes}
+                            contentSharingBG={this.props.contentSharing}
+                            annotationsBG={this.props.annotations}
+                            copyLink={(link) =>
+                                this.processEvent('copyNoteLink', { link })
+                            }
+                            annotationUrl={currentAnnotationId}
+                            postShareHook={(shareInfo) =>
+                                this.processEvent('updateAnnotationShareInfo', {
+                                    annotationUrl: currentAnnotationId,
+                                    ...shareInfo,
+                                })
+                            }
+                            closeShareMenu={() =>
+                                this.processEvent('resetShareMenuNoteId', null)
+                            }
+                        />
+                        <CollectionContainer>
+                            {this.renderListPickerContentForAnnotation(
+                                currentAnnotationId,
+                            )}
+                        </CollectionContainer>
+                    </ClickAway>
                 </HoverBox>
             </ShareMenuWrapper>
         )
@@ -582,6 +666,10 @@ export class AnnotationsSidebarContainer<
                         renderTagsPickerForAnnotation={
                             this.renderTagPickerForAnnotation
                         }
+                        // Not used yet but will be used for the "Add to collection" button
+                        // renderListsPickerForAnnotation={
+                        //     this.renderListPickerForAnnotation
+                        // }
                         expandMyNotes={() =>
                             this.processEvent('expandMyNotes', null)
                         }
@@ -633,10 +721,12 @@ export class AnnotationsSidebarContainer<
     }
 }
 
-const NoteTypesWrapper = styled.div`
-    display: flex;
-    align-items: center;
-    font-weight: bold;
+const CollectionContainer = styled.div`
+    width: 100%;
+
+    &:first-child {
+        padding-top: 15px;
+    }
 `
 
 const ShareMenuWrapper = styled.div`
@@ -663,14 +753,10 @@ const CopyPasterWrapper = styled.div`
     z-index: 5;
 `
 
-const TagPickerWrapper = styled.div`
+const PickerWrapper = styled.div`
     position: sticky;
     margin-left: 100px;
     z-index: 5;
-`
-
-const NotesTypeName = styled.span`
-    font-weight: bold;
 `
 
 const ContainerStyled = styled.div`

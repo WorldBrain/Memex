@@ -87,6 +87,7 @@ describe('Ribbon logic', () => {
                     ...backgroundModules,
                     contentSharing:
                         backgroundModules.contentSharing.remoteFunctions,
+                    customLists: backgroundModules.customLists.remoteFunctions,
                     annotations,
                 },
                 { skipPageIndexing: true },

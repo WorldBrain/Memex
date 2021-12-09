@@ -32,7 +32,10 @@ export interface Props
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     filteredbyListID: number
-    shareMenuProps: Omit<ShareMenuProps, 'annotationsBG' | 'contentSharingBG'>
+    shareMenuProps: Omit<
+        ShareMenuProps,
+        'annotationsBG' | 'contentSharingBG' | 'customListsBG'
+    >
 }
 
 export default class PageResultView extends PureComponent<Props> {

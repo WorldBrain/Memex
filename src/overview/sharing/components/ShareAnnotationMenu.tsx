@@ -10,7 +10,6 @@ import SharePrivacyOption, {
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
@@ -31,6 +30,7 @@ export interface Props {
     isLoading: boolean
     showLink: boolean
     link: string
+    // customLists: Remote
 }
 
 interface State {
@@ -100,58 +100,51 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ClickAway onClickAway={this.props.onClickOutside}>
-                <Menu>
-                    {this.props.showLink && (
-                        <TopArea>
-                            <TitleContainer>
-                                <SectionTitle>
-                                    {this.props.linkTitleCopy}
-                                </SectionTitle>
-                                {this.props.onPlusBtnClick && (
-                                    <Icon
-                                        icon="plus"
-                                        height="18px"
-                                        color="primary"
-                                        onClick={this.props.onPlusBtnClick}
-                                    />
-                                )}
-                            </TitleContainer>
-                            <LinkCopierBox>
-                                <LinkCopier
-                                    state={this.state.copyState}
-                                    onClick={this.handleLinkCopy}
-                                >
-                                    {this.renderLinkContent()}
-                                </LinkCopier>
-                            </LinkCopierBox>
-                        </TopArea>
+            <Menu>
+                {this.props.showLink && (
+                    <TopArea>
+                        <TitleContainer>
+                            <SectionTitle>
+                                {this.props.linkTitleCopy}
+                            </SectionTitle>
+                            {this.props.onPlusBtnClick && (
+                                <Icon
+                                    icon="plus"
+                                    height="18px"
+                                    color="primary"
+                                    onClick={this.props.onPlusBtnClick}
+                                />
+                            )}
+                        </TitleContainer>
+                        <LinkCopierBox>
+                            <LinkCopier
+                                state={this.state.copyState}
+                                onClick={this.handleLinkCopy}
+                            >
+                                {this.renderLinkContent()}
+                            </LinkCopier>
+                        </LinkCopierBox>
+                    </TopArea>
+                )}
+                <PrivacyContainer>
+                    {this.props.isLoading ? (
+                        <LoadingBox>
+                            <LoadingIndicator />
+                        </LoadingBox>
+                    ) : (
+                        <>
+                            <PrivacyTitle>
+                                {this.props.privacyOptionsTitleCopy}
+                            </PrivacyTitle>
+                            <PrivacyOptionContainer top="5px">
+                                {this.props.privacyOptions.map((props, i) => (
+                                    <SharePrivacyOption key={i} {...props} />
+                                ))}
+                            </PrivacyOptionContainer>
+                        </>
                     )}
-                    <PrivacyContainer>
-                        {this.props.isLoading ? (
-                            <LoadingBox>
-                                <LoadingIndicator />
-                            </LoadingBox>
-                        ) : (
-                            <>
-                                <PrivacyTitle>
-                                    {this.props.privacyOptionsTitleCopy}
-                                </PrivacyTitle>
-                                <PrivacyOptionContainer top="5px">
-                                    {this.props.privacyOptions.map(
-                                        (props, i) => (
-                                            <SharePrivacyOption
-                                                key={i}
-                                                {...props}
-                                            />
-                                        ),
-                                    )}
-                                </PrivacyOptionContainer>
-                            </>
-                        )}
-                    </PrivacyContainer>
-                </Menu>
-            </ClickAway>
+                </PrivacyContainer>
+            </Menu>
         )
     }
 }

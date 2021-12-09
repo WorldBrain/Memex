@@ -39,6 +39,7 @@ export interface NoteProps extends AnnotationProps {
 
 export interface AnnotationProps {
     tags: string[]
+    lists: string[]
     createdWhen: Date | number
     mode: AnnotationMode
     hoverState: NoteResultHoverState
@@ -65,6 +66,7 @@ export interface AnnotationProps {
     onGoToAnnotation?: React.MouseEventHandler
     onTagClick?: (tag: string) => void
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
+    renderListsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
 }
@@ -74,6 +76,7 @@ export interface AnnotationEditableEventProps {
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onTagsHover?: React.MouseEventHandler
+    onListsHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
 }
 
@@ -88,8 +91,12 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
-    static defaultProps: Pick<Props, 'mode' | 'hoverState' | 'tags'> = {
+    static defaultProps: Pick<
+        Props,
+        'mode' | 'hoverState' | 'tags' | 'lists'
+    > = {
         tags: [],
+        lists: [],
         mode: 'default',
         hoverState: null,
     }
@@ -334,6 +341,16 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onTagIconClick,
                     tooltipText: 'Tag Note',
                 },
+                // Collections button for annotations. To be added later.
+                // {
+                //     key: 'list-note-btn',
+                //     image:
+                //         this.props.lists?.length > 0
+                //             ? icons.collectionsFull
+                //             : icons.collectionsEmpty,
+                //     onClick: footerDeps.onListIconClick,
+                //     tooltipText: 'Add Collections',
+                // },
                 {
                     key: 'share-note-btn',
                     image: shareIconData.icon,
@@ -362,6 +379,15 @@ export default class AnnotationEditable extends React.Component<Props> {
                         ? icons.tagFull
                         : icons.tagEmpty,
             },
+            // Collections button for annotations. To be added later.
+            // {
+            //     key: 'list-note-btn',
+            //     isDisabled: true,
+            //     image:
+            //         this.props.lists?.length > 0
+            //             ? icons.collectionsFull
+            //             : icons.collectionsEmpty,
+            // },
             {
                 key: 'share-note-btn',
                 isDisabled: true,
@@ -471,6 +497,20 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
+                            {/* lists */}
+                            {/* Collections button for annotations. To be added later. */}
+
+                            {/* <TagsSegment
+                                tags={this.props.lists}
+                                onMouseEnter={this.props.onListsHover}
+                                showEditBtn={this.props.hoverState === 'lists'}
+                                onTagClick={undefined}
+                                onEditBtnClick={
+                                    this.props.annotationFooterDependencies
+                                        ?.onListIconClick
+                                }
+                            /> */}
+                            {/* tags */}
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
@@ -489,6 +529,14 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     )}
                                 </TagPickerWrapper>
                             )}
+                            {/* Collections button for annotations. To be added later. */}
+                            {/* {this.props.renderListsPickerForAnnotation && (
+                                <TagPickerWrapper>
+                                    {this.props.renderListsPickerForAnnotation(
+                                        this.props.url,
+                                    )}
+                                </TagPickerWrapper>
+                            )} */}
                             {this.props.renderCopyPasterForAnnotation && (
                                 <CopyPasterWrapper>
                                     {this.props.renderCopyPasterForAnnotation(

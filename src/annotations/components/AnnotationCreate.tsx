@@ -8,7 +8,7 @@ import { getKeyName } from 'src/util/os-specific-key-names'
 import TagHolder from 'src/tags/ui/tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
+import TagPicker from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
 import MemexEditor, {
     MemexEditorInstance,
@@ -20,7 +20,6 @@ import type { AnnotationFooterEventProps } from 'src/annotations/components/Anno
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import ListHolder from 'src/custom-lists/ui/list-holder'
-import { ListPickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 interface State {
     isTagPickerShown: boolean
@@ -61,6 +60,7 @@ export interface Props
     tagQueryEntries?: (query: string) => Promise<string[]>
     loadDefaultListSuggestions?: () => string[] | Promise<string[]>
     listQueryEntries?: (query: string) => Promise<string[]>
+    loadRemoteListNames?: () => Promise<string[]>
 }
 
 export class AnnotationCreate extends React.Component<Props, State>
@@ -203,30 +203,38 @@ export class AnnotationCreate extends React.Component<Props, State>
             </div>
         )
     }
-
     private renderCollectionsPicker() {
         const { lists, onListsUpdate } = this.props
+
+        const setPickerShown = (isListPickerShown: boolean) =>
+            this.setState({ isListPickerShown })
+
+        return (
+            <CollectionPicker
+                loadDefaultSuggestions={this.props.loadDefaultListSuggestions}
+                queryEntries={this.props.listQueryEntries}
+                onUpdateEntrySelection={async ({ selected }) =>
+                    onListsUpdate(selected)
+                }
+                initialSelectedEntries={() => lists}
+                onEscapeKeyDown={() => setPickerShown(false)}
+                loadRemoteListNames={this.props.loadRemoteListNames}
+            />
+        )
+    }
+    private renderCollectionsPickerAndButton() {
+        // Not used yet but will be used for the "Add to collection" button
+        const { lists } = this.props
         const setPickerShown = (isListPickerShown: boolean) =>
             this.setState({ isListPickerShown })
 
         const listPicker = !this.state.isListPickerShown ? null : (
             <HoverBox right="0px">
                 <ClickAway onClickAway={() => setPickerShown(false)}>
-                    <CollectionPicker
-                        loadDefaultSuggestions={
-                            this.props.loadDefaultListSuggestions
-                        }
-                        queryEntries={this.props.listQueryEntries}
-                        onUpdateEntrySelection={async ({ selected }) =>
-                            onListsUpdate(selected)
-                        }
-                        initialSelectedEntries={() => lists}
-                        onEscapeKeyDown={() => setPickerShown(false)}
-                    />
+                    {this.renderCollectionsPicker()}
                 </ClickAway>
             </HoverBox>
         )
-
         return (
             <div>
                 <ListHolder
@@ -260,7 +268,12 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <FooterStyled>
                 <Flex>
-                    <SaveBtn onSave={this.handleSave} />
+                    <SaveBtn
+                        onSave={this.handleSave}
+                        renderCollectionsPicker={() =>
+                            this.renderCollectionsPicker()
+                        }
+                    />
                     <ButtonTooltip tooltipText="esc" position="bottom">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
@@ -306,7 +319,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 </SaveActionBar>
                                 <TagsActionBar>
                                     {this.renderTagPicker()}
-                                    {this.renderCollectionsPicker()}
+                                    {/* {this.renderCollectionsPickerAndButton()} */}
                                 </TagsActionBar>
                             </FooterContainer>
                         </>

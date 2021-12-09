@@ -93,6 +93,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         this.annotationsCache = createAnnotationsCache({
             contentSharing: props.contentShareBG,
+            customLists: props.listsBG,
             annotations: props.annotationsBG,
             tags: props.tagsBG,
         })
@@ -735,6 +736,12 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
                         }),
+                    onListPickerBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            isShown: !searchResults.noteData.byId[noteId]
+                                .isListPickerShown,
+                        }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
                             noteId,
@@ -749,6 +756,8 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     updateTags: (noteId) => (args) =>
                         this.processEvent('setNoteTags', { ...args, noteId }),
+                    updateLists: (noteId) => (args) =>
+                        this.processEvent('setNoteLists', { ...args, noteId }),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

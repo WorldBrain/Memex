@@ -114,6 +114,7 @@ export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     isEditing: false,
     areRepliesShown: false,
     isTagPickerShown: false,
+    isListPickerShown: false,
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(inputValue),

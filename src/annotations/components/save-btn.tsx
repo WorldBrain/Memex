@@ -16,6 +16,7 @@ export interface Props {
         shouldShare: boolean,
         isProtected?: boolean,
     ) => void | Promise<void>
+    renderCollectionsPicker?: () => React.ReactNode
 }
 
 interface State {
@@ -96,6 +97,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             onClick={this.saveWithShareIntent(false)}
                             isSelected={!this.props.isShared}
                         />
+                        {this.props.renderCollectionsPicker &&
+                            this.props.renderCollectionsPicker()}
                     </DropdownMenuBtn>
                 </SaveBtnArrow>
             </SaveBtn>

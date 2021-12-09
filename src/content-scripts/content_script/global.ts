@@ -42,6 +42,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUrl } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -70,6 +71,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
     // 2. Initialise dependencies required by content scripts
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
+    const collectionsBG = runInBackground<RemoteCollectionsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
@@ -81,6 +83,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
 
     const annotationsCache = createAnnotationsCache({
         tags: tagsBG,
+        customLists: collectionsBG,
         annotations: annotationsBG,
         contentSharing: runInBackground(),
     })
@@ -150,7 +153,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 annotations: annotationsBG,
                 annotationsCache,
                 tags: tagsBG,
-                customLists: runInBackground(),
+                customLists: collectionsBG,
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
                 tooltip: {
@@ -187,7 +190,7 @@ export async function main({ loadRemotely } = { loadRemotely: true }) {
                 annotations: annotationsBG,
                 tags: tagsBG,
                 auth: runInBackground(),
-                customLists: runInBackground(),
+                customLists: collectionsBG,
                 contentSharing: runInBackground(),
                 syncSettingsBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

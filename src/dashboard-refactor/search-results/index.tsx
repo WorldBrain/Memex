@@ -55,6 +55,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -127,6 +128,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
+                lists={noteData.lists}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
@@ -169,6 +171,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
+                renderListsPickerForAnnotation={() =>
+                    noteData.isListPickerShown && (
+                        <HoverBox right="0" withRelativeContainer>
+                            <CollectionPicker
+                                initialSelectedEntries={
+                                    () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
+                                }
+                                onClickOutside={
+                                    interactionProps.onListPickerBtnClick
+                                }
+                                onUpdateEntrySelection={
+                                    interactionProps.updateLists
+                                }
+                            />
+                        </HoverBox>
+                    )
+                }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
                         <HoverBox width="350px" right="0" withRelativeContainer>
@@ -185,6 +204,17 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 }
                                 postShareHook={(shareInfo) =>
                                     interactionProps.updateShareInfo(shareInfo)
+                                }
+                            />
+                            <CollectionPicker
+                                initialSelectedEntries={
+                                    () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
+                                }
+                                onClickOutside={
+                                    interactionProps.onShareBtnClick
+                                }
+                                onUpdateEntrySelection={
+                                    interactionProps.updateLists
                                 }
                             />
                         </HoverBox>
@@ -204,6 +234,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
+                    onListIconClick: interactionProps.onListPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditCancel: interactionProps.onEditCancel,

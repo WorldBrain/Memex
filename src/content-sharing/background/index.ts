@@ -83,6 +83,10 @@ export default class ContentSharingBackground {
             },
             getAllRemoteLists: this.getAllRemoteLists,
             waitForSync: this.waitForSync,
+            getListsForAnnotations: this.getListsForAnnotations,
+            getListsForAnnotation: this.getListsForAnnotation,
+            addAnnotationToLists: this.addAnnotationToLists,
+            removeAnnotationsFromLists: this.removeAnnotationsFromLists,
         }
     }
 
@@ -328,4 +332,33 @@ export default class ContentSharingBackground {
             source: 'sync' | 'local'
         },
     ) {}
+
+    getListsForAnnotations = async ({
+        annotationUrls,
+    }: {
+        annotationUrls: string[]
+    }): Promise<{ [annotationUrl: string]: string[] }> => {
+        console.log('getListsForAnnotations')
+        return annotationUrls.reduce((a, v) => ({ ...a, [v]: [v] }), {})
+    }
+    getListsForAnnotation = async (
+        annotationUrl: string,
+    ): Promise<string[]> => {
+        console.log('getListsForAnnotation')
+        return [annotationUrl]
+    }
+    addAnnotationToLists = async (args: {
+        annotationUrl: string
+        listIds: number[]
+    }): Promise<void> => {
+        console.log('addAnnotationToLists')
+        return
+    }
+    removeAnnotationsFromLists = async (args: {
+        annotationUrl: string
+        listIds: number[]
+    }): Promise<void> => {
+        console.log('removeAnnotationsFromLists')
+        return
+    }
 }

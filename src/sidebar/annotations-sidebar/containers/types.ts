@@ -127,6 +127,7 @@ export interface SidebarContainerState
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
     activeTagPickerAnnotationId: string | undefined
+    activeListPickerAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -270,9 +271,10 @@ export type SidebarContainerEvents = UIEvent<
         setAllNotesCopyPasterShown: { shown: boolean }
         setCopyPasterAnnotationId: { id: string }
         setTagPickerAnnotationId: { id: string }
+        setListPickerAnnotationId: { id: string }
         resetTagPickerAnnotationId: null
         resetCopyPasterAnnotationId: null
-
+        resetListPickerAnnotationId: null
         setAllNotesShareMenuShown: { shown: boolean }
         resetShareMenuNoteId: null
     }

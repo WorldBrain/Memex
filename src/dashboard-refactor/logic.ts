@@ -1490,6 +1490,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isListPickerShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
 
     setNoteCopyPasterShown: EventHandler<'setNoteCopyPasterShown'> = ({
         event,
@@ -1539,6 +1554,26 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsToBeAdded: event.added ? [event.added] : [],
             tagsToBeDeleted: event.deleted ? [event.deleted] : [],
         })
+    }
+    setNoteLists: EventHandler<'setNoteLists'> = async ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            lists: { $apply: updatePickerValues(event) },
+                        },
+                    },
+                },
+            },
+        })
+
+        // TODO: insert proper function call
+        // await this.options.annotationsBG.insertAnnotToList({
+        //     url: event.noteId,
+        //     listsToBeAdded: event.added ? [event.added] : [],
+        //     listsToBeDeleted: event.deleted ? [event.deleted] : [],
+        // })
     }
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({

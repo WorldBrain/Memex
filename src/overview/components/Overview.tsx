@@ -98,6 +98,7 @@ class Overview extends PureComponent<Props, State> {
 
         this.annotationsCache = createAnnotationsCache({
             contentSharing: this.contentSharingBG,
+            customLists: this.customListsBG,
             annotations: this.annotationsBG,
             tags: this.tagsBG,
         })

@@ -15,6 +15,7 @@ import type { NormalizedState } from 'src/common-ui/types'
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick: React.MouseEventHandler
+    onListPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
 }
@@ -25,7 +26,6 @@ export type PageInteractionProps = Omit<
 > & {
     updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
@@ -45,10 +45,11 @@ export type PageInteractionAugdProps = {
 
 export type NoteInteractionProps = Omit<
     CommonInteractionProps,
-    'onNotesBtnClick' | 'onListPickerBtnClick'
+    'onNotesBtnClick'
 > & {
     updateShareInfo: (info: NoteShareInfo) => void
     updateTags: PickerUpdateHandler
+    updateLists: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
     onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
     onEditBtnClick: React.MouseEventHandler
@@ -139,6 +140,7 @@ export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
@@ -279,6 +281,7 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteListPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteShareMenuShown: NoteEventArgs & {
         shouldShow: boolean
         mouseEvent: React.MouseEvent
@@ -286,6 +289,7 @@ export type Events = UIEvent<{
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
+    setNoteLists: NoteEventArgs & { added?: string; deleted?: string }
     updateNoteShareInfo: NoteEventArgs & NoteShareInfo
     /** NOTE: Does not mutate state */
     goToHighlightInNewTab: NoteEventArgs

@@ -163,6 +163,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
             activeTagPickerAnnotationId: undefined,
+            activeListPickerAnnotationId: undefined,
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -454,6 +455,25 @@ export class SidebarContainerLogic extends UILogic<
         'resetTagPickerAnnotationId'
     > = () => {
         this.emitMutation({ activeTagPickerAnnotationId: { $set: undefined } })
+    }
+
+    setListPickerAnnotationId: EventHandler<'setListPickerAnnotationId'> = ({
+        event,
+        previousState,
+    }) => {
+        const newId =
+            previousState.activeListPickerAnnotationId === event.id
+                ? undefined
+                : event.id
+        this.emitMutation({
+            activeListPickerAnnotationId: { $set: newId },
+        })
+    }
+
+    resetListPickerAnnotationId: EventHandler<
+        'resetListPickerAnnotationId'
+    > = () => {
+        this.emitMutation({ activeListPickerAnnotationId: { $set: undefined } })
     }
 
     resetCopyPasterAnnotationId: EventHandler<

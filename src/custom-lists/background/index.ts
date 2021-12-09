@@ -70,6 +70,7 @@ export default class CustomListBackground {
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
             fetchListById: this.fetchListById,
+            fetchListByName: this.fetchListByName,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
             fetchListPagesByUrl: this.fetchListPagesByUrl,

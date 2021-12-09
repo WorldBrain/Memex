@@ -16,12 +16,14 @@ import {
     updateAnnotation,
     AnnotationShareOpts,
 } from './annotation-save-logic'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 export type CachedAnnotation = Annotation
 
 export const createAnnotationsCache = (
     bgModules: {
         tags: RemoteTagsInterface
+        customLists: RemoteCollectionsInterface
         annotations: AnnotationInterface<'caller'>
         contentSharing: ContentSharingInterface
     },
@@ -96,6 +98,43 @@ export const createAnnotationsCache = (
                     url: annotationUrl,
                     tags,
                 }),
+
+            updateLists: async (annotationUrl, listNames) => {
+                const existingLists = await bgModules.contentSharing.getListsForAnnotation(
+                    annotationUrl,
+                )
+                const existingListsSet = new Set(existingLists)
+                const newListsSet = new Set(listNames)
+
+                const toAdd = listNames.filter(
+                    (list) => !existingListsSet.has(list),
+                )
+                const toDelete = existingLists.filter(
+                    (list) => !newListsSet.has(list),
+                )
+                if (toAdd.length) {
+                    const toAddLists = await Promise.all(
+                        toAdd.map((name) =>
+                            bgModules.customLists.fetchListByName({ name }),
+                        ),
+                    )
+                    bgModules.contentSharing.addAnnotationToLists({
+                        annotationUrl,
+                        listIds: toAddLists.map((list) => list.id),
+                    })
+                }
+                if (toDelete.length) {
+                    const toDeleteLists = await Promise.all(
+                        toDelete.map((name) =>
+                            bgModules.customLists.fetchListByName({ name }),
+                        ),
+                    )
+                    bgModules.contentSharing.removeAnnotationsFromLists({
+                        annotationUrl,
+                        listIds: toDeleteLists.map((list) => list.id),
+                    })
+                }
+            },
         },
     })
 
@@ -131,6 +170,10 @@ export interface AnnotationsCacheDependencies {
         updateTags: (
             annotationUrl: CachedAnnotation['url'],
             tags: CachedAnnotation['tags'],
+        ) => Promise<void>
+        updateLists: (
+            annotationUrl: CachedAnnotation['url'],
+            lists: CachedAnnotation['lists'],
         ) => Promise<void>
         delete: (annotation: CachedAnnotation) => Promise<void>
     }
@@ -235,6 +278,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             if (annotation.tags.length) {
                 await backendOperations.updateTags(annotUrl, annotation.tags)
             }
+            if (annotation.lists.length) {
+                await backendOperations.updateLists(annotUrl, annotation.lists)
+            }
         } catch (e) {
             this._annotations = stateBeforeModifications
             this.annotationChanges.emit('rollback', stateBeforeModifications)
@@ -286,12 +332,25 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 )
             }
 
+            // Tags
             if (
                 haveTagsChanged(previousAnnotation.tags ?? [], annotation.tags)
             ) {
                 await this.dependencies.backendOperations.updateTags(
                     annotation.url,
                     annotation.tags,
+                )
+            }
+            // Lists
+            if (
+                haveTagsChanged(
+                    previousAnnotation.lists ?? [],
+                    annotation.lists,
+                )
+            ) {
+                await this.dependencies.backendOperations.updateLists(
+                    annotation.url,
+                    annotation.lists,
                 )
             }
         } catch (e) {
