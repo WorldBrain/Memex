@@ -171,7 +171,10 @@ export default class ListsSidebar extends PureComponent<
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
-                onMouseEnter={this.props.peekState.setSidebarPeekState(true)}
+                onMouseEnter={
+                    !isSidebarLocked &&
+                    this.props.peekState.setSidebarPeekState(true)
+                }
             >
                 <PeekTrigger
                     onMouseEnter={this.props.peekState.setSidebarPeekState(
