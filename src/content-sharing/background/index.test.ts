@@ -1354,11 +1354,110 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.integrateAllUpdates()
                                 await personalCloud.waitForSync()
 
+                                const personalLists = await serverStorage.storageManager.operation(
+                                    'findObjects',
+                                    'personalList',
+                                    {},
+                                )
                                 const customLists = await setup.storageManager.operation(
                                     'findObjects',
                                     'customLists',
                                     {},
                                 )
+                                expect(personalLists).toEqual([
+                                    expect.objectContaining({
+                                        name: 'Test list',
+                                    }),
+                                ])
+                                expect(customLists).toEqual([
+                                    expect.objectContaining({
+                                        name: 'Test list',
+                                    }),
+                                ])
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'sharedListMetadata',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        localId: customLists[0].id,
+                                        remoteId: listReference.id.toString(),
+                                    },
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should NOT add dupe lists to local lists when the user joins a list they already joined before',
+            { skipConflictTests: true, skipSyncTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const { personalCloud } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const serverStorage = await setup.getServerStorage()
+                                const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
+                                    {
+                                        listData: {
+                                            title: 'Test list',
+                                        },
+                                        userReference: {
+                                            type: 'user-reference',
+                                            id: 'someone-else',
+                                        },
+                                    },
+                                )
+                                const {
+                                    keyString,
+                                } = await serverStorage.storageModules.contentSharing.createListKey(
+                                    {
+                                        key: { roleID: SharedListRoleID.Admin },
+                                        listReference,
+                                    },
+                                )
+                                const joinList = () =>
+                                    setup.backgroundModules.contentSharing.options.backend.processListKey(
+                                        {
+                                            keyString,
+                                            listId: listReference.id,
+                                        },
+                                    )
+
+                                await joinList()
+                                await joinList()
+                                await joinList()
+
+                                await personalCloud.integrateAllUpdates()
+                                await personalCloud.waitForSync()
+
+                                const personalLists = await serverStorage.storageManager.operation(
+                                    'findObjects',
+                                    'personalList',
+                                    {},
+                                )
+                                const customLists = await setup.storageManager.operation(
+                                    'findObjects',
+                                    'customLists',
+                                    {},
+                                )
+                                expect(personalLists).toEqual([
+                                    expect.objectContaining({
+                                        name: 'Test list',
+                                    }),
+                                ])
                                 expect(customLists).toEqual([
                                     expect.objectContaining({
                                         name: 'Test list',
