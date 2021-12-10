@@ -207,7 +207,7 @@ export class SidebarContainerLogic extends UILogic<
 
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (pageUrl != null) {
+            if (pageUrl) {
                 await annotationsCache.load(pageUrl)
             }
         })

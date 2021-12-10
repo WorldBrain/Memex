@@ -1,10 +1,9 @@
-import { PipelineRes, SearchIndex } from 'src/search'
-import PageStorage from './background/storage'
+import type { PipelineRes } from 'src/search'
 import * as Raven from 'src/util/raven'
-import { PageIndexingBackground } from './background'
+import type { PageIndexingBackground } from './background'
 import { getUrl } from 'src/util/uri-utils'
 
-export function pageIsStub(page: PipelineRes): boolean {
+export function pageIsStub(page: Pick<PipelineRes, 'text' | 'terms'>): boolean {
     return (
         (page.text == null || !page.text.length) &&
         (page.terms == null || !page.terms.length)

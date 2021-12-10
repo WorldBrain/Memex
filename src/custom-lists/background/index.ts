@@ -22,6 +22,7 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -193,6 +194,16 @@ export default class CustomListBackground {
             return true
         })
 
+        const fingerprints = this.options.pages.getContentFingerprints({
+            normalizedUrl: normalizedPageUrl,
+        })
+        const sharedFingerprintsByList = fingerprints?.length
+            ? await contentSharing.getNormalizedUrlsByFingerprints({
+                  fingerprints,
+                  listReferences: uniqueListReferences,
+              })
+            : {}
+
         const annotListEntriesByList = new Map<
             string | number,
             GetAnnotationListEntriesElement[]
@@ -203,15 +214,22 @@ export default class CustomListBackground {
         )
 
         for (const listReference of uniqueListReferences) {
+            let normalizedUrlInList = normalizedPageUrl
+            const sharedFingerprint = sharedFingerprintsByList[listReference.id]
+            if (sharedFingerprint) {
+                normalizedUrlInList = sharedFingerprint.normalizedUrl
+            }
+
             if (
-                !listEntriesByPageByList[listReference.id]?.[normalizedPageUrl]
-                    ?.length
+                !listEntriesByPageByList[listReference.id]?.[
+                    normalizedUrlInList
+                ]?.length
             ) {
                 continue
             }
             annotListEntriesByList.set(
                 listReference.id,
-                listEntriesByPageByList[listReference.id][normalizedPageUrl],
+                listEntriesByPageByList[listReference.id][normalizedUrlInList],
             )
         }
 
@@ -407,19 +425,21 @@ export default class CustomListBackground {
         })
     }
 
-    insertPageToList = async ({
-        id,
-        url,
-        tabId,
-        skipPageIndexing,
-        suppressVisitCreation,
-    }: {
-        id: number
-        url: string
-        tabId?: number
-        skipPageIndexing?: boolean
-        suppressVisitCreation?: boolean
-    }): Promise<{ object: PageListEntry }> => {
+    insertPageToList = async (
+        params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
+            id: number
+            tabId?: number
+            skipPageIndexing?: boolean
+            suppressVisitCreation?: boolean
+            suppressInboxEntry?: boolean
+        },
+    ): Promise<{ object: PageListEntry }> => {
+        const { id } = params
+        const url =
+            'contentIdentifier' in params
+                ? params.contentIdentifier?.fullUrl
+                : params.url
+
         if (!isFullUrl(url)) {
             throw new Error(
                 'Tried to insert page to list with a normalized, instead of a full URL',
@@ -430,14 +450,16 @@ export default class CustomListBackground {
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        if (!skipPageIndexing) {
+        if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
-                    tabId,
+                    tabId: params.tabId,
                     fullUrl: url,
-                    visitTime: !suppressVisitCreation ? '$now' : undefined,
+                    visitTime: !params.suppressVisitCreation
+                        ? '$now'
+                        : undefined,
                 },
-                { addInboxEntryOnCreate: true },
+                { addInboxEntryOnCreate: !params.suppressInboxEntry },
             )
         }
 

@@ -59,7 +59,7 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
 
         return this.backend.dexieInstance
             .table(collection)
-            .filter(doc => re.test(doc[fieldName]))
+            .filter((doc) => re.test(doc[fieldName]))
     }
 
     getPks = ({
@@ -100,11 +100,6 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
 
         await this.backend.executeBatch([
             {
-                collection: 'pages',
-                operation: 'deleteObjects',
-                where: { url: { $in: pageUrls } },
-            },
-            {
                 collection: 'visits',
                 operation: 'deleteObjects',
                 where: { url: { $in: pageUrls } },
@@ -125,9 +120,19 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
                 where: { pageUrl: { $in: pageUrls } },
             },
             {
+                collection: 'locators',
+                operation: 'deleteObjects',
+                where: { normalizedUrl: { $in: pageUrls } },
+            },
+            {
                 collection: 'annotations',
                 operation: 'deleteObjects',
                 where: { pageUrl: { $in: pageUrls } },
+            },
+            {
+                collection: 'pages',
+                operation: 'deleteObjects',
+                where: { url: { $in: pageUrls } },
             },
         ])
     }

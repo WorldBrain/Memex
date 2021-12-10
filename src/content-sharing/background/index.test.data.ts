@@ -1,4 +1,5 @@
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 export const LIST_DATA = {
     name: 'My shared list',
@@ -63,18 +64,45 @@ export async function createContentSharingTestList(
     const localListId = await setup.backgroundModules.customLists.createCustomList(
         LIST_DATA,
     )
-    if (!options?.dontIndexPages) {
-        await setup.backgroundModules.pages.addPage(PAGE_1_DATA)
-        await setup.backgroundModules.pages.addPage(PAGE_2_DATA)
-    }
+    injectFakeTabs({
+        tabManagement: setup.backgroundModules.tabManagement,
+        tabsAPI: setup.browserAPIs.tabs,
+        includeTitle: true,
+        tabs: [
+            {
+                url: PAGE_1_DATA.pageDoc.url,
+                title: PAGE_1_DATA.pageDoc.content.title,
+            },
+            {
+                url: PAGE_2_DATA.pageDoc.url,
+                title: PAGE_2_DATA.pageDoc.content.title,
+            },
+        ],
+    })
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
         ...ENTRY_1_DATA,
+        skipPageIndexing: options?.dontIndexPages,
+        suppressInboxEntry: true,
     })
     await setup.backgroundModules.customLists.insertPageToList({
         id: localListId,
         ...ENTRY_2_DATA,
+        skipPageIndexing: options?.dontIndexPages,
+        suppressInboxEntry: true,
     })
 
     return localListId
+}
+
+export async function shareContentSharingTestList(
+    setup: BackgroundIntegrationTestSetup,
+    localListId: number,
+) {
+    const listShareResult = await setup.backgroundModules.contentSharing.shareList(
+        {
+            listId: localListId,
+        },
+    )
+    return listShareResult.remoteListId
 }

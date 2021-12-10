@@ -1,7 +1,7 @@
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import range from 'lodash/range'
 

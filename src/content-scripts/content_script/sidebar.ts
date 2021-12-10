@@ -10,7 +10,7 @@ import {
 import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
-    const cssFile = browser.extension.getURL(`/content_script_sidebar.css`)
+    const cssFile = browser.runtime.getURL(`/content_script_sidebar.css`)
     let mount: InPageUIRootMount | null = null
     const createMount = () => {
         if (!mount) {
@@ -42,7 +42,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,
-            pageUrl: dependencies.getPageUrl(),
+            pageUrl: await dependencies.getPageUrl(),
             initialState: options.showOnLoad ? 'visible' : 'hidden',
         })
     }

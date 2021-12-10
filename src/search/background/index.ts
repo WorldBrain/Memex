@@ -1,11 +1,11 @@
-import Storex from '@worldbrain/storex'
-import { Browser } from 'webextension-polyfill-ts'
+import type Storex from '@worldbrain/storex'
+import type { Browser } from 'webextension-polyfill-ts'
 
 // import * as index from '..'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import {
+import type {
     SearchInterface,
     StandardSearchResponse,
     AnnotationsSearchResponse,
@@ -13,12 +13,14 @@ import {
     AnnotPage,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { SearchIndex } from '../types'
-import { PageIndexingBackground } from 'src/page-indexing/background'
-import * as Raven from 'src/util/raven'
-import BookmarksBackground from 'src/bookmarks/background'
-import { TabManager } from 'src/tab-management/background/tab-manager'
+import type { SearchIndex } from '../types'
+import type { PageIndexingBackground } from 'src/page-indexing/background'
+import type BookmarksBackground from 'src/bookmarks/background'
+import {
+    isPagePdf,
+    pickBestLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -152,6 +154,29 @@ export default class SearchBackground {
         }
     }
 
+    private async resolvePdfPageFullUrls(
+        docs: AnnotPage[],
+    ): Promise<AnnotPage[]> {
+        const toReturn: AnnotPage[] = []
+        for (const doc of docs) {
+            if (!isPagePdf(doc)) {
+                toReturn.push(doc)
+                continue
+            }
+
+            const locators = await this.options.pages.findLocatorsByNormalizedUrl(
+                doc.url,
+            )
+            const mainLocator = pickBestLocator(locators, {
+                priority: ContentLocatorType.Remote,
+            })
+            doc.pdfUrl = mainLocator?.location ?? undefined
+            doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
+            toReturn.push(doc)
+        }
+        return toReturn
+    }
+
     async searchAnnotations(
         params: BackgroundSearchParams,
     ): Promise<StandardSearchResponse | AnnotationsSearchResponse> {
@@ -163,9 +188,11 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const { docs, annotsByDay } = await this.storage.searchAnnots(
+        let { docs, annotsByDay } = await this.storage.searchAnnots(
             searchParams,
         )
+
+        docs = await this.resolvePdfPageFullUrls(docs)
 
         const extra = annotsByDay
             ? {
@@ -190,7 +217,9 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const docs = await this.storage.searchPages(searchParams)
+        let docs = await this.storage.searchPages(searchParams)
+
+        docs = await this.resolvePdfPageFullUrls(docs)
 
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }

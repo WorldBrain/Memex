@@ -1,4 +1,7 @@
-import { extractIdFromUrl, isUrlYTVideo } from 'src/util/youtube-url'
+import {
+    extractIdFromUrl,
+    isUrlYTVideo,
+} from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { MenuItemProps } from './types'
 
 export const annotationMenuItems: MenuItemProps[] = [

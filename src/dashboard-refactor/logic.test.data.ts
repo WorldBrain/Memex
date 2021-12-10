@@ -51,6 +51,7 @@ export const PAGE_1: PageData = {
     hasNotes: true,
     lists: [],
     tags: [],
+    type: 'page',
 }
 
 export const PAGE_2: PageData = {
@@ -61,6 +62,7 @@ export const PAGE_2: PageData = {
     hasNotes: false,
     lists: [],
     tags: [],
+    type: 'page',
 }
 
 export const PAGE_3: PageData = {
@@ -71,6 +73,7 @@ export const PAGE_3: PageData = {
     hasNotes: true,
     lists: [],
     tags: [],
+    type: 'page',
 }
 
 export const NOTE_1: NoteData = {

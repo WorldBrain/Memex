@@ -9,6 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -33,6 +34,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.ribbonRef?.current?.focusCreateForm(),
             }),
         )
+    }
+
+    private get normalizedPageUrl(): string | null {
+        return this.state.pageUrl ? normalizeUrl(this.state.pageUrl) : null
     }
 
     componentDidMount() {
@@ -102,8 +107,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 highlighter={this.props.highlighter}
                 isRibbonEnabled={this.state.isRibbonEnabled}
                 handleRemoveRibbon={() => this.props.inPageUI.removeRibbon()}
-                getUrl={() => this.props.currentTab.url}
-                tabId={this.props.currentTab.id}
                 handleRibbonToggle={() =>
                     this.processEvent('toggleRibbon', null)
                 }
@@ -157,7 +160,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('updateTags', { value }),
                     fetchInitialTagSelections: () =>
                         this.props.tags.fetchPageTags({
-                            url: this.props.currentTab.url,
+                            url: this.normalizedPageUrl,
                         }),
                     queryEntries: (query) =>
                         this.props.tags.searchForTagSuggestions({ query }),
@@ -176,7 +179,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     fetchInitialListSelections: () =>
                         this.props.customLists.fetchPageLists({
-                            url: this.props.currentTab.url,
+                            url: this.normalizedPageUrl,
                         }),
                     queryEntries: (query) =>
                         this.props.customLists.searchForListSuggestions({

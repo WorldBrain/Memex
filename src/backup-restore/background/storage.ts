@@ -6,7 +6,7 @@ import {
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
-} from '@worldbrain/memex-storage/lib/backup-changes/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/backup-changes/constants'
 
 import { ObjectChangeBatch } from './backend/types'
 import { isExcludedFromBackup } from './utils'

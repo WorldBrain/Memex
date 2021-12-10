@@ -10,11 +10,12 @@ import {
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
+    MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType, NoteShareInfo } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
@@ -31,6 +32,7 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -95,7 +97,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
+        let mode: State['mode'] = 'search'
+        if (isDuringInstall(this.options.location)) {
+            mode = 'onboarding'
+        } else if (
+            this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
+        ) {
+            mode = 'locate-pdf'
+            this.options.pdfViewerBG.openPdfViewerForNextPdf()
+        }
+
         return {
+            mode,
             loadState: 'pristine',
             isCloudEnabled: true,
             currentUser: null,
@@ -397,7 +410,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
-        this.emitMutation(mutation)
+        this.emitMutation({ ...mutation, mode: { $set: 'search' } })
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -2246,6 +2259,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.options.listsBG.insertPageToList({
             id: event.listId,
             url: fullPageUrl,
+            skipPageIndexing: true,
         })
 
         this.emitMutation({

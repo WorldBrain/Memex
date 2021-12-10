@@ -1,5 +1,6 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
@@ -12,25 +13,34 @@ export interface ContentSharingInterface
         withoutPageInfo?: boolean
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
-    }): Promise<void>
+    }): Promise<{ remoteId: number | string }>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    shareAnnotationsToLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationsToAllLists(options: {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    unshareAnnotationsFromLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
+        setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationsToSomeLists(options: {
+        annotationUrls: string[]
+        localListIds: number[]
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotationsFromSomeLists(options: {
+        annotationUrls: string[]
+        localListIds: number[]
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
@@ -72,6 +82,19 @@ export interface ContentSharingInterface
         annotationUrl: string
         listIds: number[]
     }): Promise<void>
+    findAnnotationPrivacyLevels(params: {
+        annotationUrls: string[]
+    }): Promise<{
+        [annotationUrl: string]: AnnotationPrivacyLevels
+    }>
+    setAnnotationPrivacyLevel(params: {
+        annotation: string
+        privacyLevel: AnnotationPrivacyLevels
+    }): Promise<{
+        remoteId?: number | string
+        sharingState: AnnotationSharingState
+    }>
+    deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
 }
 
 export interface ContentSharingEvents {
@@ -84,3 +107,13 @@ export type ContentSharingQueueInteraction =
     | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'
+
+export interface AnnotationSharingState {
+    hasLink: boolean
+    privacyLevel: AnnotationPrivacyLevels
+    localListIds: number[]
+}
+
+export interface AnnotationSharingStates {
+    [annotationUrl: string]: AnnotationSharingState
+}

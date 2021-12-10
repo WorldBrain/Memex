@@ -151,7 +151,11 @@ export class SharingTestHelper {
 
     async createAnnotation(
         setup: BackgroundIntegrationTestSetup,
-        options: { id: number; pageId: number },
+        options: {
+            id: number
+            pageId: number
+            level?: AnnotationPrivacyLevels
+        },
     ) {
         const count = ++this.counts.annotations
         const body = `Annot body ${count}`
@@ -173,7 +177,7 @@ export class SharingTestHelper {
                 title: this.pages[options.pageId].title,
                 body,
                 comment,
-                selector: selector,
+                selector,
             },
             { skipPageIndexing: true },
         )
@@ -187,6 +191,12 @@ export class SharingTestHelper {
             descriptorStrategy,
             selectorQuote,
             selector,
+        }
+        if ('level' in options) {
+            await this.setAnnotationPrivacyLevel(setup, {
+                id: options.id,
+                level: options.level,
+            })
         }
     }
 
@@ -217,13 +227,17 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; level: AnnotationPrivacyLevels },
     ) {
-        await setup.backgroundModules.directLinking.setAnnotationPrivacyLevel(
-            {} as any,
+        const {
+            remoteId,
+        } = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
             {
                 annotation: this.annotations[options.id].localId,
                 privacyLevel: options.level,
             },
         )
+        if (remoteId) {
+            this.annotations[options.id].remoteId = remoteId
+        }
     }
 
     async shareAnnotation(
@@ -245,50 +259,71 @@ export class SharingTestHelper {
 
     async shareAnnotations(
         setup: BackgroundIntegrationTestSetup,
-        options: {
-            annotations: Array<{ id: number; expectNotShared?: boolean }>
-        },
+        annotations: Array<{ id: number; expectNotShared?: boolean }>,
     ) {
         await setup.backgroundModules.contentSharing.shareAnnotations({
-            annotationUrls: options.annotations.map(
+            annotationUrls: annotations.map(
                 (annot) => this.annotations[annot.id].localId,
             ),
         })
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
             {
-                localIds: options.annotations.map(
+                localIds: annotations.map(
                     ({ id }) => this.annotations[id].localId,
                 ),
             },
         )
-        for (const annotation of options.annotations) {
+        for (const annotation of annotations) {
             const remoteId = remoteIds[this.annotations[annotation.id].localId]
             this.annotations[annotation.id].remoteId = remoteId
         }
     }
 
-    async shareAnnotationsToLists(
+    async shareAnnotationsToAllLists(
         setup: BackgroundIntegrationTestSetup,
         options: { ids: number[] },
     ) {
-        await setup.backgroundModules.contentSharing.shareAnnotationsToLists({
-            annotationUrls: options.ids.map(
-                (id) => this.annotations[id].localId,
-            ),
-        })
-    }
-
-    async unshareAnnotationsFromLists(
-        setup: BackgroundIntegrationTestSetup,
-        options: { ids: number[] },
-    ) {
-        await setup.backgroundModules.contentSharing.unshareAnnotationsFromLists(
+        await setup.backgroundModules.contentSharing.shareAnnotationsToAllLists(
             {
                 annotationUrls: options.ids.map(
                     (id) => this.annotations[id].localId,
                 ),
             },
         )
+    }
+
+    async shareAnnotationsToSomeLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { annotationsIds: number[]; listIds: number[] },
+    ) {}
+
+    async unshareAnnotationsFromAllLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { ids: number[] },
+    ) {
+        await setup.backgroundModules.contentSharing.unshareAnnotationsFromAllLists(
+            {
+                annotationUrls: options.ids.map(
+                    (id) => this.annotations[id].localId,
+                ),
+            },
+        )
+    }
+
+    async unshareAnnotationsFromSomeLists(
+        setup: BackgroundIntegrationTestSetup,
+        options: { annotationsIds: number[]; listIds: number[] },
+    ) {}
+
+    async unshareAnnotations(
+        setup: BackgroundIntegrationTestSetup,
+        options: { ids: number[] },
+    ) {
+        await setup.backgroundModules.contentSharing.unshareAnnotations({
+            annotationUrls: options.ids.map(
+                (id) => this.annotations[id].localId,
+            ),
+        })
     }
 
     async assertSharedLists(
@@ -406,7 +441,7 @@ export class SharingTestHelper {
 
     async assertSharedAnnotationEntries(
         setup: BackgroundIntegrationTestSetup,
-        options: { entries: Array<{ annotationId: number; listId: number }> },
+        entries: Array<{ annotationId: number; listId: number }>,
     ) {
         const ordered = await this._getStorage(
             setup,
@@ -415,7 +450,7 @@ export class SharingTestHelper {
             'createdWhen',
         )
         expect(ordered).toEqual(
-            options.entries.map((entry) => ({
+            entries.map((entry) => ({
                 id: expect.anything(),
                 creator: TEST_USER.id,
                 normalizedPageUrl: this.pages[
@@ -428,6 +463,31 @@ export class SharingTestHelper {
                 sharedAnnotation: convertRemoteId(
                     this.annotations[entry.annotationId].remoteId,
                 ),
+            })),
+        )
+    }
+
+    async assertAnnotationPrivacyLevels(
+        setup: BackgroundIntegrationTestSetup,
+        levels: Array<{
+            annotationId: number
+            level: AnnotationPrivacyLevels
+            updated?: true
+        }>,
+    ) {
+        const ordered = await this._getStorage(
+            setup,
+            'local',
+            'annotationPrivacyLevels',
+            'createdWhen',
+        )
+        expect(ordered).toEqual(
+            levels.map((level) => ({
+                id: expect.anything(),
+                createdWhen: expect.any(Date),
+                updatedWhen: level.updated && expect.any(Date),
+                annotation: this.annotations[level.annotationId].localId,
+                privacyLevel: level.level,
             })),
         )
     }

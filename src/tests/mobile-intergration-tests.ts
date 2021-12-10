@@ -1,13 +1,13 @@
 import StorageManager from '@worldbrain/storex'
 import { TypeORMStorageBackend } from '@worldbrain/storex-backend-typeorm'
 import { extractUrlParts, normalizeUrl } from '@worldbrain/memex-url-utils'
-import { MetaPickerStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/storage'
-import { OverviewStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/storage'
-import { PageEditorStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/storage'
+import { MetaPickerStorage } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/storage'
+import { OverviewStorage } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/storage'
+import { PageEditorStorage } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
-import { COLLECTION_DEFINITIONS as READER_COLLECTION_DEFINITIONS } from '@worldbrain/memex-storage/lib/reader/constants'
+import { COLLECTION_DEFINITIONS as READER_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/reader/constants'
 import SyncService, {
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'

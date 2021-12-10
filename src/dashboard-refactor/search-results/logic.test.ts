@@ -1858,6 +1858,52 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
             })
+            it('should be able to set note list state', async ({ device }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .editNoteForm.lists,
+                ).toEqual([])
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[0].name,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .lists,
+                ).toEqual([DATA.LISTS_1[0].name])
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[1].name,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .lists,
+                ).toEqual([DATA.LISTS_1[0].name, DATA.LISTS_1[1].name])
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    deleted: DATA.LISTS_1[0].name,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .lists,
+                ).toEqual([DATA.LISTS_1[1].name])
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    deleted: DATA.LISTS_1[1].name,
+                })
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .lists,
+                ).toEqual([])
+            })
 
             it('should be able to set note edit comment value state', async ({
                 device,

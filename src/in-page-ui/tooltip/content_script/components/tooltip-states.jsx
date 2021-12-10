@@ -5,10 +5,10 @@ import styles from './tooltip.css'
 import classNames from 'classnames'
 import { browser } from 'webextension-polyfill-ts'
 
-const highlighter = browser.extension.getURL('/img/highlightOn.svg')
-const annotations = browser.extension.getURL('/img/comment_add.svg')
-const share = browser.extension.getURL('/img/share.svg')
-const close = browser.extension.getURL('/img/close.svg')
+const highlighter = browser.runtime.getURL('/img/highlightOn.svg')
+const annotations = browser.runtime.getURL('/img/comment_add.svg')
+const share = browser.runtime.getURL('/img/share.svg')
+const close = browser.runtime.getURL('/img/close.svg')
 
 export const InitialComponent = ({
     createLink,

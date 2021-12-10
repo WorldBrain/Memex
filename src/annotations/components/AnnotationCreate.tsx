@@ -2,24 +2,24 @@ import * as React from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
-import { ButtonTooltip, Tooltip } from 'src/common-ui/components'
-import { FocusableComponent } from './types'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { ButtonTooltip } from 'src/common-ui/components'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 import TagHolder from 'src/tags/ui/tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
-import MemexEditor, {
-    MemexEditorInstance,
-} from '@worldbrain/memex-common/lib/editor'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
-import type { NoteResultHoverState } from './types'
+import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import ListHolder from 'src/custom-lists/ui/list-holder'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 interface State {
     isTagPickerShown: boolean
@@ -355,7 +355,12 @@ export class AnnotationCreate extends React.Component<Props, State>
                             }
                             height="430px"
                         >
-                            <QuickTutorial markdownHelpOnTop={true} />
+                            <QuickTutorial
+                                markdownHelpOnTop={true}
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                            />
                         </HoverBox>
                     </ClickAway>
                 )}
