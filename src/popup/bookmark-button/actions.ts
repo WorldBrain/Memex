@@ -19,11 +19,7 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         // N.B. bookmark state set before and after save to prevent race conditions
         // where the bookmark is loaded and set elsewhere (initial sidebar injection store setup)
         // hints at a bigger refactoring of state needed.
-        if (hasBookmark) {
-            dispatch(setIsBookmarked(false))
-            await bookmarks.delPageBookmark({ url })
-            dispatch(setIsBookmarked(false))
-        } else {
+        if (!hasBookmark) {
             dispatch(setIsBookmarked(true))
             await bookmarks.addPageBookmark({ fullUrl: url, tabId })
             dispatch(setIsBookmarked(true))
