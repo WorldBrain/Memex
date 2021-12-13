@@ -13,30 +13,36 @@ export interface ContentSharingInterface
         withoutPageInfo?: boolean
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
+        existingSharingState?: AnnotationSharingState
     }): Promise<{ remoteId: number | string }>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
+        existingSharingStates?: AnnotationSharingStates
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     shareAnnotationsToAllLists(options: {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
+        existingSharingStates?: AnnotationSharingStates
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
+        existingSharingStates?: AnnotationSharingStates
     }): Promise<{ sharingStates: AnnotationSharingStates }>
-    shareAnnotationsToSomeLists(options: {
-        annotationUrls: string[]
+    shareAnnotationToSomeLists(options: {
+        annotationUrl: string
         localListIds: number[]
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
-    unshareAnnotationsFromSomeLists(options: {
-        annotationUrls: string[]
+        existingSharingState?: AnnotationSharingState
+    }): Promise<{ sharingState: AnnotationSharingState }>
+    unshareAnnotationFromSomeLists(options: {
+        annotationUrl: string
         localListIds: number[]
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
+        existingSharingState?: AnnotationSharingState
+    }): Promise<{ sharingState: AnnotationSharingState }>
     unshareAnnotations(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
@@ -65,6 +71,9 @@ export interface ContentSharingInterface
             excludeFromLists?: boolean
         }
     }>
+    getAnnotationSharingStates(params: {
+        annotationUrls: string[]
+    }): Promise<AnnotationSharingStates>
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
@@ -109,7 +118,7 @@ export type ContentSharingQueueInteraction =
     | 'skip-queue'
 
 export interface AnnotationSharingState {
-    hasLink: boolean
+    remoteId?: string
     privacyLevel: AnnotationPrivacyLevels
     localListIds: number[]
 }

@@ -96,13 +96,13 @@ export async function insertIntegrationTestData(
         includeCollection &&
         includeAnnotations
     ) {
-        await backgroundModules.directLinking.insertAnnotToList(
-            { tab: null },
-            {
-                listId,
-                url: annotUrl,
-            },
-        )
+        // await backgroundModules.directLinking.insertAnnotToList(
+        //     { tab: null },
+        //     {
+        //         listId,
+        //         url: annotUrl,
+        //     },
+        // )
     }
 
     return { pages }

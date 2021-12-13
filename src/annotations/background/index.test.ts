@@ -677,13 +677,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
                             })
-                            await directLinking(setup).insertAnnotToList(
-                                {},
-                                {
-                                    listId,
-                                    url: annotUrl,
-                                },
-                            )
+                            // await directLinking(setup).insertAnnotToList(
+                            //     {},
+                            //     {
+                            //         listId,
+                            //         url: annotUrl,
+                            //     },
+                            // )
                         },
                         expectedStorageChanges: {
                             annotBookmarks: (): StorageCollectionDiff => ({
@@ -704,16 +704,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
-                            annotListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${annotUrl}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        listId,
-                                        url: annotUrl,
-                                        createdAt: expect.any(Date),
-                                    },
-                                },
-                            }),
+                            // annotListEntries: (): StorageCollectionDiff => ({
+                            //     [`[${listId},"${annotUrl}"]`]: {
+                            //         type: 'create',
+                            //         object: {
+                            //             listId,
+                            //             url: annotUrl,
+                            //             createdAt: expect.any(Date),
+                            //         },
+                            //     },
+                            // }),
                             customLists: (): StorageCollectionDiff => ({
                                 [listId]: {
                                     type: 'create',
@@ -753,11 +753,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${annotUrl}"]`]: {
-                                    type: 'delete',
-                                },
-                            }),
+                            // annotListEntries: (): StorageCollectionDiff => ({
+                            //     [`[${listId},"${annotUrl}"]`]: {
+                            //         type: 'delete',
+                            //     },
+                            // }),
                         },
                         postCheck: async ({ setup }) => {
                             expect(
@@ -766,9 +766,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             expect(
                                 await findAllObjects('annotBookmarks', setup),
                             ).toEqual([])
-                            expect(
-                                await findAllObjects('annotListEntries', setup),
-                            ).toEqual([])
+                            // expect(
+                            //     await findAllObjects('annotListEntries', setup),
+                            // ).toEqual([])
                             expect(await findAllObjects('tags', setup)).toEqual(
                                 [],
                             )

@@ -59,13 +59,15 @@ export default class DirectLinkingBackground {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
             pages: PageIndexingBackground
-            contentSharingBG: ContentSharingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing' | 'userManagement'>
             >
+            preAnnotationDelete(params: {
+                annotationUrl: string
+            }): Promise<void>
         },
     ) {
         this.socialBg = options.socialBg
@@ -106,8 +108,6 @@ export default class DirectLinkingBackground {
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
-            insertAnnotToList: this.insertAnnotToList.bind(this),
-            removeAnnotFromList: this.removeAnnotFromList.bind(this),
             goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
                 this,
             ),
@@ -428,16 +428,8 @@ export default class DirectLinkingBackground {
         return annotationUrl
     }
 
-    async insertAnnotToList(_, params: AnnotListEntry) {
-        return this.annotationStorage.insertAnnotToList(params)
-    }
-
     async getAnnotationByPk(pk) {
         return this.annotationStorage.getAnnotationByPk(pk)
-    }
-
-    async removeAnnotFromList(_, params: AnnotListEntry) {
-        return this.annotationStorage.removeAnnotFromList(params)
     }
 
     async toggleAnnotBookmark(_, { url }: { url: string }) {
@@ -537,7 +529,7 @@ export default class DirectLinkingBackground {
             await this.annotationStorage.deleteTagsByUrl({ url: pk })
         }
 
-        await this.options.contentSharingBG.deleteAnnotationShareData({
+        await this.options.preAnnotationDelete({
             annotationUrl: pk,
         })
         await this.annotationStorage.deleteAnnotation(pk)

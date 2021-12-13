@@ -84,8 +84,6 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             }
         >
     >
-    insertAnnotToList: RemotePositionalFunction<Role, any[], any>
-    removeAnnotFromList: RemotePositionalFunction<Role, any[], any>
     goToAnnotationFromSidebar: RemoteFunction<
         Role,
         {

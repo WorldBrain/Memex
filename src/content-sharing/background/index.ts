@@ -14,6 +14,7 @@ import type { ServerStorageModules } from 'src/storage/types'
 import type { ContentSharingInterface, AnnotationSharingState } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
+import AnnotationStorage from 'src/annotations/background/storage'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -26,6 +27,7 @@ export default class ContentSharingBackground {
             storageManager: StorageManager
             backend: ContentSharingBackend
             customLists: CustomListStorage
+            annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
             activityStreams: Pick<ActivityStreamsBackground, 'backend'>
@@ -50,9 +52,8 @@ export default class ContentSharingBackground {
             executePendingActions: this.executePendingActions.bind(this),
             shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
             unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
-            shareAnnotationsToSomeLists: this.shareAnnotationsToSomeLists,
-            unshareAnnotationsFromSomeLists: this
-                .unshareAnnotationsFromSomeLists,
+            shareAnnotationToSomeLists: this.shareAnnotationToSomeLists,
+            unshareAnnotationFromSomeLists: this.unshareAnnotationFromSomeLists,
             unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
@@ -88,6 +89,7 @@ export default class ContentSharingBackground {
                     localIds: callOptions.localListIds,
                 })
             },
+            getAnnotationSharingStates: this.getAnnotationSharingStates,
             getAllRemoteLists: this.getAllRemoteLists,
             waitForSync: this.waitForSync,
             getListsForAnnotations: this.getListsForAnnotations,
@@ -321,16 +323,28 @@ export default class ContentSharingBackground {
         return { sharingStates: {} }
     }
 
-    shareAnnotationsToSomeLists: ContentSharingInterface['shareAnnotationsToSomeLists'] = async (
+    shareAnnotationToSomeLists: ContentSharingInterface['shareAnnotationToSomeLists'] = async (
         options,
     ) => {
-        return { sharingStates: {} }
+        for (const listId of options.localListIds) {
+            await this.options.annotations.insertAnnotToList({
+                listId,
+                url: options.annotationUrl,
+            })
+        }
+        return { sharingState: dummyAnnotationSharingState() }
     }
 
-    unshareAnnotationsFromSomeLists: ContentSharingInterface['unshareAnnotationsFromSomeLists'] = async (
+    unshareAnnotationFromSomeLists: ContentSharingInterface['unshareAnnotationFromSomeLists'] = async (
         options,
     ) => {
-        return { sharingStates: {} }
+        for (const listId of options.localListIds) {
+            await this.options.annotations.removeAnnotFromList({
+                listId,
+                url: options.annotationUrl,
+            })
+        }
+        return { sharingState: dummyAnnotationSharingState() }
     }
 
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
@@ -415,6 +429,12 @@ export default class ContentSharingBackground {
 
     waitForSync: ContentSharingInterface['waitForSync'] = async () => {}
 
+    getAnnotationSharingStates: ContentSharingInterface['getAnnotationSharingStates'] = async (
+        params,
+    ) => {
+        return {}
+    }
+
     async handlePostStorageChange(
         event: StorageOperationEvent<'post'>,
         options: {
@@ -455,7 +475,6 @@ export default class ContentSharingBackground {
 function dummyAnnotationSharingState(): AnnotationSharingState {
     return {
         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-        hasLink: false,
         localListIds: [],
     }
 }
