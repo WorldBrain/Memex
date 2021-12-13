@@ -357,7 +357,7 @@ export default class CustomListBackground {
         return lists.map(({ name }) => name)
     }
 
-    _updateListSuggestionsCache = async (args: {
+    updateListSuggestionsCache = async (args: {
         added?: string
         removed?: string
         updated?: [string, string]
@@ -413,7 +413,7 @@ export default class CustomListBackground {
             name,
         })
 
-        await this._updateListSuggestionsCache({ added: name })
+        await this.updateListSuggestionsCache({ added: name })
 
         return inserted
     }
@@ -427,7 +427,7 @@ export default class CustomListBackground {
         oldName: string
         newName: string
     }) => {
-        await this._updateListSuggestionsCache({ updated: [oldName, newName] })
+        await this.updateListSuggestionsCache({ updated: [oldName, newName] })
 
         return this.storage.updateListName({
             id,
@@ -485,7 +485,7 @@ export default class CustomListBackground {
         })
 
         const list = await this.fetchListById({ id })
-        await this._updateListSuggestionsCache({ added: list.name })
+        await this.updateListSuggestionsCache({ added: list.name })
 
         return retVal
     }
@@ -580,7 +580,7 @@ export default class CustomListBackground {
             }),
         )
 
-        await this._updateListSuggestionsCache({ added: args.name })
+        await this.updateListSuggestionsCache({ added: args.name })
     }
 
     removeOpenTabsFromList = async ({ listId }: { listId: number }) => {
