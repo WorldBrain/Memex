@@ -96,6 +96,7 @@ export default class ContentSharingBackground {
             getListsForAnnotation: this.getListsForAnnotation,
             addAnnotationToLists: this.addAnnotationToLists,
             removeAnnotationsFromLists: this.removeAnnotationsFromLists,
+            suggestSharedLists: this.suggestSharedLists,
         }
     }
 
