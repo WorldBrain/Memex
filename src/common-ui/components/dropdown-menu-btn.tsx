@@ -271,4 +271,6 @@ const Menu = styled.ul`
     margin-top: 5px;
     flex-direction: column;
     top: 25px;
+    left: -67px;
+    z-index: 1000;
 `
