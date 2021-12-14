@@ -104,6 +104,9 @@ export interface ContentSharingInterface
         sharingState: AnnotationSharingState
     }>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
+    suggestSharedLists(params: {
+        prefix: string
+    }): Promise<Array<{ localId: number; name: string }>>
 }
 
 export interface ContentSharingEvents {

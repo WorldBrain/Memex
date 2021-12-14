@@ -435,13 +435,6 @@ export default class ContentSharingBackground {
         return {}
     }
 
-    async handlePostStorageChange(
-        event: StorageOperationEvent<'post'>,
-        options: {
-            source: 'sync' | 'local'
-        },
-    ) {}
-
     getListsForAnnotations = async ({
         annotationUrls,
     }: {
@@ -470,6 +463,34 @@ export default class ContentSharingBackground {
         console.log('removeAnnotationsFromLists')
         return
     }
+
+    suggestSharedLists: ContentSharingInterface['suggestSharedLists'] = async (
+        params,
+    ) => {
+        const loweredPrefix = params.prefix.toLowerCase()
+        const lists = await this.options.customLists.fetchAllLists({
+            limit: 10000,
+            skip: 0,
+        })
+        const remoteIds = await this.storage.getAllRemoteListIds()
+        const suggestions: Array<{ localId: number; name: string }> = []
+        for (const list of lists) {
+            if (
+                remoteIds[list.id] &&
+                list.name.toLowerCase().startsWith(loweredPrefix)
+            ) {
+                suggestions.push({ localId: list.id, name: list.name })
+            }
+        }
+        return suggestions
+    }
+
+    async handlePostStorageChange(
+        event: StorageOperationEvent<'post'>,
+        options: {
+            source: 'sync' | 'local'
+        },
+    ) {}
 }
 
 function dummyAnnotationSharingState(): AnnotationSharingState {
