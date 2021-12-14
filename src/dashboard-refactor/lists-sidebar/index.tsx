@@ -18,6 +18,7 @@ import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
 import { Rnd } from 'react-rnd'
+import { createGlobalStyle } from 'styled-components'
 
 const Sidebar = styled(Rnd)<{
     locked: boolean
@@ -98,6 +99,19 @@ const NoCollectionsMessage = styled.div`
     }
 `
 
+const GlobalStyle = createGlobalStyle`
+    .sidebarResizeHandleSidebar {
+        width: 4px !important;
+        height: 100% !important;
+
+        &:hover {
+            background: #5671cf30;
+        }
+    }
+
+
+`
+
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
@@ -176,6 +190,7 @@ export default class ListsSidebar extends PureComponent<
                     this.props.peekState.setSidebarPeekState(true)
                 }
             >
+                <GlobalStyle />
                 <PeekTrigger
                     onMouseEnter={this.props.peekState.setSidebarPeekState(
                         true,
@@ -198,6 +213,9 @@ export default class ListsSidebar extends PureComponent<
                         this.props.peekState.setSidebarPeekState(true)
                     }
                     default={{ width: 200 }}
+                    resizeHandleClasses={{
+                        right: 'sidebarResizeHandleSidebar',
+                    }}
                     resizeGrid={[1, 0]}
                     dragAxis={'none'}
                     minWidth={'200px'}

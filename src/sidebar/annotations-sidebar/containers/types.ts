@@ -122,6 +122,7 @@ export interface SidebarContainerState
     isLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
+    sidebarWidth: string
 
     annotationSharingAccess: AnnotationSharingAccess
 

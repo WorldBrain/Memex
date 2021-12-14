@@ -787,9 +787,11 @@ const ContentContainer = styled.div`
 const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
     font-weight: 800;
-    font-size: 15px;
+    font-size: 14px;
     color: #000;
-    margin-right: 5px;
+    margin-right: 10px;
+    width: 100%;
+    text-align: right;
 `
 
 const CancelBtnStyled = styled.button`
@@ -849,6 +851,7 @@ const ActionBtnStyled = styled.button`
 const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-top: 1px solid #f0f0f0;
     padding: 5px;
 }

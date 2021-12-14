@@ -257,7 +257,6 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
 
 const Menu = styled.ul`
     position: absolute;
-    ${({ theme }) => `left: ${theme.leftMenuOffset ?? 0};`}
     width: max-content;
     list-style: none;
     padding: 5px 0;
@@ -271,6 +270,6 @@ const Menu = styled.ul`
     margin-top: 5px;
     flex-direction: column;
     top: 25px;
-    left: -67px;
+    left: -65px;
     z-index: 1000;
 `

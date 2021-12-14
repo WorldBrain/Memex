@@ -745,8 +745,8 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     align-items: center;
     cursor: pointer;
     justify-content: space-between;
-    width: 420px;
-    z-index: 20;
+    width: fill-available;
+    z-index: 1000;
 `
 
 const FollowedListTitle = styled.span`
@@ -952,6 +952,7 @@ const TopBarActionBtns = styled.div`
     display: flex;
     gap: 8px;
     height: 24px;
+    z-index: 10000;
 `
 
 const MyNotesClickableArea = styled.div`
@@ -962,14 +963,14 @@ const MyNotesClickableArea = styled.div`
 
 const CopyPasterWrapperTopBar = styled.div`
     position: relative;
-    right: 225px;
+    right: 200px;
     z-index: 10;
     top: 20px;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
     position: relative;
-    right: 190px;
+    right: 200px;
     z-index: 10;
     top: 20px;
 `
@@ -978,11 +979,11 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: fill-available;
     overflow-y: scroll;
     padding-bottom: 150px;
-    width: 450px;
+    width: fill-available;
     padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '20px'};
+        props.sidebarContext === 'dashboard' ? '0' : '0'};
     position: absolute;
-    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '20px')};
+    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '0')};
 
     &::-webkit-scrollbar {
         display: none;
