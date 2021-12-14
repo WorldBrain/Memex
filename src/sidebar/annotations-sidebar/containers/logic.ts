@@ -8,6 +8,7 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
@@ -31,6 +32,7 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1125,14 +1127,20 @@ export class SidebarContainerLogic extends UILogic<
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
     > = ({ previousState, event }) => {
+        const isShared = (shareState: AnnotationSharingState) =>
+            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED ||
+            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED_PROTECTED
+        const isBulkShareProtected = (shareState: AnnotationSharingState) =>
+            shareState.privacyLevel == AnnotationPrivacyLevels.PROTECTED ||
+            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED_PROTECTED
         const nextAnnotations = previousState.annotations.map((annotation) =>
-            annotation.isBulkShareProtected
+            event[annotation.url] == null
                 ? annotation
                 : {
                       ...annotation,
-                      isShared: event.isShared,
-                      isBulkShareProtected: !!(
-                          event.isProtected ?? annotation.isBulkShareProtected
+                      isShared: isShared(event[annotation.url]),
+                      isBulkShareProtected: isBulkShareProtected(
+                          event[annotation.url],
                       ),
                   },
         )

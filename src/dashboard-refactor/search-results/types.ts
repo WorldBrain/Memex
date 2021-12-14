@@ -11,10 +11,7 @@ import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
-import {
-    AnnotationSharingState,
-    AnnotationSharingStates,
-} from 'src/content-sharing/background/types'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -29,6 +26,7 @@ export type PageInteractionProps = Omit<
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
     updatePageNotesShareInfo: (shareStates: AnnotationSharingStates) => void
+    // TODO: Remove before merging to develop. Commented just in case we need to go back
     // updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
