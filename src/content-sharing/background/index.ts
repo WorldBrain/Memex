@@ -448,13 +448,13 @@ export default class ContentSharingBackground {
         annotationUrls: string[]
     }): Promise<{ [annotationUrl: string]: string[] }> => {
         console.log('getListsForAnnotations')
-        return annotationUrls.reduce((a, v) => ({ ...a, [v]: [v] }), {})
+        return annotationUrls.reduce((a, v) => ({ ...a, [v]: [] }), {})
     }
     getListsForAnnotation = async (
         annotationUrl: string,
     ): Promise<string[]> => {
         console.log('getListsForAnnotation')
-        return [annotationUrl]
+        return []
     }
     addAnnotationToLists = async (args: {
         annotationUrl: string

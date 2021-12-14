@@ -3,11 +3,18 @@ import {
     setupTest,
     setPageSearchResult,
     setNoteSearchResult,
+    makeNewShareStates,
+    objectFilter,
 } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
 import { ResultHoverState } from './types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
+import {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
@@ -501,7 +508,7 @@ describe('Dashboard search results logic', () => {
             )
         })
 
-        it('should be update note share info for all notes of a page', async ({
+        it('should be able to update note share info for all notes of a page', async ({
             device,
         }) => {
             const { searchResults } = await setupTest(device, {
@@ -515,11 +522,17 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .pageUrl === pageId,
             )
+            const notesById = objectFilter(
+                searchResults.state.searchResults.noteData.byId,
+                (v) => v.pageUrl === pageId,
+            )
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                isShared: false,
+                shareStates: makeNewShareStates(notesById, {
+                    isShared: false,
+                }),
             })
             for (const noteId of noteIds) {
                 expect(
@@ -535,7 +548,9 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                isShared: true,
+                shareStates: makeNewShareStates(notesById, {
+                    isShared: true,
+                }),
             })
 
             for (const noteId of noteIds) {
@@ -552,8 +567,10 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                isShared: false,
-                isProtected: true,
+                shareStates: makeNewShareStates(notesById, {
+                    isShared: false,
+                    isBulkShareProtected: true,
+                }),
             })
 
             for (const noteId of noteIds) {
@@ -571,8 +588,10 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
                 pageId,
-                isShared: false,
-                isProtected: false,
+                shareStates: makeNewShareStates(notesById, {
+                    isShared: false,
+                    isBulkShareProtected: false,
+                }),
             })
 
             for (const noteId of noteIds) {
@@ -587,7 +606,7 @@ describe('Dashboard search results logic', () => {
             }
         })
 
-        it('should be update note share info for all result notes', async ({
+        it('should be able to update note share info for all result notes', async ({
             device,
         }) => {
             const { searchResults } = await setupTest(device, {
@@ -595,17 +614,16 @@ describe('Dashboard search results logic', () => {
             })
 
             const noteIds = searchResults.state.searchResults.noteData.allIds
+            const notesById = searchResults.state.searchResults.noteData.byId
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                {
+                makeNewShareStates(notesById, {
                     isShared: false,
-                },
+                }),
             )
             for (const noteId of noteIds) {
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId],
-                ).toEqual(
+                expect(notesById[noteId]).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
@@ -615,15 +633,13 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                {
+                makeNewShareStates(notesById, {
                     isShared: true,
-                },
+                }),
             )
 
             for (const noteId of noteIds) {
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId],
-                ).toEqual(
+                expect(notesById[noteId]).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
@@ -633,16 +649,14 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                {
-                    isProtected: true,
+                makeNewShareStates(notesById, {
                     isShared: false,
-                },
+                    isBulkShareProtected: true,
+                }),
             )
 
             for (const noteId of noteIds) {
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId],
-                ).toEqual(
+                expect(notesById[noteId]).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
@@ -653,16 +667,14 @@ describe('Dashboard search results logic', () => {
             // NOTE: Now that they're all protected, the next call shouldn't change anything
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                {
-                    isProtected: false,
+                makeNewShareStates(notesById, {
                     isShared: false,
-                },
+                    isBulkShareProtected: false,
+                }),
             )
 
             for (const noteId of noteIds) {
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId],
-                ).toEqual(
+                expect(notesById[noteId]).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,

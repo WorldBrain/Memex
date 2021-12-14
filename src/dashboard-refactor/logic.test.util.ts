@@ -14,6 +14,8 @@ import {
 import { FakeAnalytics } from 'src/analytics/mock'
 import { createUIServices } from 'src/services/ui'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -172,4 +174,85 @@ export async function setupTest(
     }
 
     return { searchResults, logic, analytics }
+}
+
+const getPrivacyLevel = (isShared, isBulkShareProtected) => {
+    if (isShared && isBulkShareProtected) {
+        return AnnotationPrivacyLevels.SHARED_PROTECTED
+    } else if (isShared) {
+        return AnnotationPrivacyLevels.SHARED
+    } else if (isBulkShareProtected) {
+        return AnnotationPrivacyLevels.PROTECTED
+    } else {
+        return AnnotationPrivacyLevels.PRIVATE
+    }
+}
+
+const makeAnnotSharingState = (noteData): AnnotationSharingState => {
+    return {
+        remoteId: noteData.isShared ? '1' : null,
+        privacyLevel: getPrivacyLevel(
+            noteData.isShared,
+            noteData.isBulkShareProtected,
+        ),
+        localListIds: noteData.lists ?? [],
+    }
+}
+
+const newPrivacyLevel = (
+    oldPrivacyLevel: AnnotationPrivacyLevels,
+    {
+        isShared,
+        isBulkShareProtected,
+    }: { isShared: boolean; isBulkShareProtected: boolean },
+) => {
+    if (
+        oldPrivacyLevel === AnnotationPrivacyLevels.PROTECTED ||
+        oldPrivacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+    ) {
+        return oldPrivacyLevel
+    } else {
+        return getPrivacyLevel(isShared, isBulkShareProtected)
+    }
+}
+export const objectMap = (obj, fn) =>
+    Object.fromEntries(Object.entries(obj).map(([k, v], i) => [k, fn(v, k, i)]))
+
+export const objectFilter = (obj, fn) =>
+    Object.fromEntries(
+        Object.entries(obj).filter(([k, v], i) => [k, fn(v, k, i)]),
+    )
+
+const makeNewShareState = (
+    note,
+    {
+        isShared,
+        isBulkShareProtected,
+    }: { isShared: boolean; isBulkShareProtected?: boolean },
+): AnnotationSharingState => {
+    const shareState = makeAnnotSharingState(note)
+    const newShareState = {
+        ...shareState,
+        privacyLevel: newPrivacyLevel(shareState.privacyLevel, {
+            isShared,
+            isBulkShareProtected,
+        }),
+    }
+    return newShareState
+}
+
+export const makeNewShareStates = (
+    notesById,
+    {
+        isShared,
+        isBulkShareProtected,
+    }: { isShared: boolean; isBulkShareProtected?: boolean },
+) => {
+    return objectMap(notesById, (v) => {
+        v.privacyLevel = makeNewShareState(v, {
+            isShared,
+            isBulkShareProtected,
+        })
+        return v
+    })
 }

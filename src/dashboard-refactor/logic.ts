@@ -1,5 +1,6 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
@@ -33,6 +34,10 @@ import {
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
+import {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -792,28 +797,63 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
+    private updateShareInfoForNoteIdsFromShareState = (params: {
+        noteIds: string[]
+        previousState: State
+        shareStates: AnnotationSharingStates
+    }) => {
+        const isShared = (shareState: AnnotationSharingState) =>
+            shareState.privacyLevel == 200 || shareState.privacyLevel == 300
+        const isBulkShareProtected = (shareState: AnnotationSharingState) =>
+            shareState.privacyLevel == 0 || shareState.privacyLevel == 300
+
+        const mutation: UIMutation<State['searchResults']['noteData']> = {}
+
+        for (const noteId of params.noteIds) {
+            mutation.byId = {
+                ...(mutation.byId ?? {}),
+                [noteId]: {
+                    isShared: {
+                        $set: isShared(params.shareStates[noteId]),
+                    },
+                    isBulkShareProtected: {
+                        $set: isBulkShareProtected(params.shareStates[noteId]),
+                    },
+                },
+            }
+        }
+
+        this.emitMutation({ searchResults: { noteData: mutation } })
+    }
+
     updateAllPageResultNotesShareInfo: EventHandler<
         'updateAllPageResultNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateShareInfoForNoteIds({
+        this.updateShareInfoForNoteIdsFromShareState({
             previousState,
-            info: event,
-            noteIds: previousState.searchResults.noteData.allIds,
+            shareStates: event,
+            noteIds: Object.keys(event),
+            // TODO: Remove before merging to develop. Commented just in case we need to go back
+            // noteIds: previousState.searchResults.noteData.allIds,
         })
     }
 
     updatePageNotesShareInfo: EventHandler<
         'updatePageNotesShareInfo'
     > = async ({ event, previousState }) => {
-        const { noteData } = previousState.searchResults
-
-        this.updateShareInfoForNoteIds({
+        this.updateAllPageResultNotesShareInfo({
+            event: event.shareStates,
             previousState,
-            info: event,
-            noteIds: noteData.allIds.filter(
-                (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
-            ),
         })
+        // const { noteData } = previousState.searchResults
+
+        // this.updateShareInfoForNoteIdsFromShareState({
+        //     previousState,
+        //     shareStates: event,
+        //     noteIds: noteData.allIds.filter(
+        //         (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
+        //     ),
+        // })
     }
 
     removePageFromList: EventHandler<'removePageFromList'> = async ({
@@ -1593,19 +1633,34 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const prev = previousState.searchResults.noteData.byId[event.noteId]
+        // const prev = previousState.searchResults.noteData.byId[event.noteId]
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShared: { $set: event.isShared },
-                            isBulkShareProtected: {
-                                $set: !!(
-                                    event.isProtected ??
-                                    prev.isBulkShareProtected
-                                ),
+                            isShared: {
+                                $set:
+                                    event[event.noteId].privacyLevel ==
+                                        AnnotationPrivacyLevels.SHARED ||
+                                    event[event.noteId].privacyLevel ==
+                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
                             },
+                            isBulkShareProtected: {
+                                $set:
+                                    event[event.noteId].privacyLevel ==
+                                        AnnotationPrivacyLevels.PROTECTED ||
+                                    event[event.noteId].privacyLevel ==
+                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                            },
+                            // TODO: Remove before merging to develop. Commented just in case we need to go back
+                            // isShared: { $set: event.isShared },
+                            // isBulkShareProtected: {
+                            //     $set: !!(
+                            //         event.isProtected ??
+                            //         prev.isBulkShareProtected
+                            //     ),
+                            // },
                         },
                     },
                 },

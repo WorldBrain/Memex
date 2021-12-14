@@ -685,11 +685,11 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onPageDrop: (day, pageId) => () =>
                         this.processEvent('dropPage', { day, pageId }),
-                    updatePageNotesShareInfo: (day, pageId) => (info) =>
+                    updatePageNotesShareInfo: (day, pageId) => (shareStates) =>
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
                             pageId,
-                            ...info,
+                            shareStates,
                         }),
                 }}
                 pagePickerProps={{

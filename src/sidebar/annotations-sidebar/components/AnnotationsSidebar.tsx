@@ -87,7 +87,7 @@ export interface AnnotationsSidebarProps
     contentSharing: any
     annotationsShareAll: any
     copyPageLink: any
-    postShareHook: (shareInfo) => void
+    postBulkShareHook: (shareState) => void
     sidebarContext?: string
 }
 
@@ -455,8 +455,8 @@ class AnnotationsSidebar extends React.Component<
                             copyLink={async (link) => {
                                 this.props.copyPageLink(link)
                             }}
-                            postShareHook={(shareInfo) =>
-                                this.props.postShareHook(shareInfo)
+                            postBulkShareHook={(shareInfo) =>
+                                this.props.postBulkShareHook(shareInfo)
                             }
                         />
                     </HoverBox>

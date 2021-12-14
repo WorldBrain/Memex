@@ -292,14 +292,6 @@ export class AnnotationsSidebarContainer<
         })
     }
 
-    private handleShareAllNotesClick: React.MouseEventHandler = (e) => {
-        e.preventDefault()
-
-        this.processEvent('setAllNotesShareMenuShown', {
-            shown: !this.state.showAllNotesShareMenu,
-        })
-    }
-
     private renderCopyPasterManagerForAnnotation = (
         currentAnnotationId: string,
     ) => {
@@ -470,38 +462,6 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAllNotesShareMenu() {
-        if (!this.state.showAllNotesShareMenu) {
-            return null
-        }
-
-        return (
-            <ShareMenuWrapperTopBar>
-                <HoverBox>
-                    <AllNotesShareMenu
-                        contentSharingBG={this.props.contentSharing}
-                        annotationsBG={this.props.annotations}
-                        copyLink={(link) =>
-                            this.processEvent('copyPageLink', { link })
-                        }
-                        normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        postShareHook={(shareInfo) =>
-                            this.processEvent(
-                                'updateAllAnnotationsShareInfo',
-                                shareInfo,
-                            )
-                        }
-                        closeShareMenu={() =>
-                            this.processEvent('setAllNotesShareMenuShown', {
-                                shown: false,
-                            })
-                        }
-                    />
-                </HoverBox>
-            </ShareMenuWrapperTopBar>
-        )
-    }
-
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
             <HoverBox>
@@ -514,19 +474,6 @@ export class AnnotationsSidebarContainer<
                     }
                 />
             </HoverBox>
-        )
-    }
-
-    private renderAllNotesCopyPaster() {
-        if (!this.state.showAllNotesCopyPaster) {
-            return null
-        }
-
-        const annotUrls = this.state.annotations.map((a) => a.url)
-        return (
-            <CopyPasterWrapperTopBar>
-                {this.renderCopyPasterManager(annotUrls)}
-            </CopyPasterWrapperTopBar>
         )
     }
 
@@ -623,10 +570,10 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyNoteLink', { link })
                             console.log(link)
                         }}
-                        postShareHook={(shareInfo) =>
+                        postBulkShareHook={(shareState) =>
                             this.processEvent(
                                 'updateAllAnnotationsShareInfo',
-                                shareInfo,
+                                shareState,
                             )
                         }
                         onCopyBtnClick={() => this.handleCopyAllNotesClick}

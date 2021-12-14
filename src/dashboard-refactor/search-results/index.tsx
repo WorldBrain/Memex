@@ -56,6 +56,10 @@ import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -101,7 +105,8 @@ export type Props = RootState &
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
-        updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
+        // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
+        updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -331,7 +336,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
-                        postShareHook: (shareInfo) =>
+                        postBulkShareHook: (shareInfo) =>
                             interactionProps.updatePageNotesShareInfo(
                                 shareInfo,
                             ),
@@ -456,9 +461,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
-                            postShareHook={(shareInfo) =>
+                            postBulkShareHook={(shareState) =>
                                 this.props.updateAllResultNotesShareInfo(
-                                    shareInfo,
+                                    shareState,
                                 )
                             }
                         />
