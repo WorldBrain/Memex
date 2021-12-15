@@ -357,7 +357,7 @@ export function createBackgroundModules(options: {
         analytics,
         getServerStorage,
         preAnnotationDelete: async (params) => {
-            await contentSharing.deleteAnnotationShareData(params)
+            await contentSharing.deleteAnnotationShare(params)
         },
     })
     const contentSharing = new ContentSharingBackground({
