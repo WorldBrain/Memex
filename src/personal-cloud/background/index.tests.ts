@@ -9,7 +9,7 @@ import {
     setupBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import type { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyTestServerStorage } from 'src/storage/server'
 import {
@@ -19,6 +19,7 @@ import {
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -258,20 +259,28 @@ async function runSyncBackgroundTest(
 export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
-        debugStorageOperations?: boolean
-        withTestUser?: boolean
         superuser?: boolean
+        withTestUser?: boolean
+        enableFailsafes?: boolean
+        debugStorageOperations?: boolean
+        useDownloadTranslationLayer?: boolean
+        usersForDevices?: AuthenticatedUser[]
         serverChangeWatchSettings?: Omit<
             ChangeWatchMiddlewareSettings,
             'storageManager'
         >
-        useDownloadTranslationLayer?: boolean
         testInstance?: BackgroundIntegrationTestInstance
-        enableFailsafes?: boolean
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
-    const userId = TEST_USER.id
+    if (
+        options.usersForDevices != null &&
+        options.usersForDevices.length !== options.deviceCount
+    ) {
+        throw new Error(
+            `Expected ${options.deviceCount} entries for usersForDevices (one per deviceCount), got ${options.usersForDevices.length}`,
+        )
+    }
 
     const getServerStorage =
         options.testInstance?.getSetupOptions?.().getServerStorage ??
@@ -285,6 +294,7 @@ export async function setupSyncBackgroundTest(
     const getNow = () => now++
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
+        const user = options.usersForDevices?.[i] ?? TEST_USER
         const services = await createServices({
             backend: 'memory',
             getServerStorage,
@@ -296,7 +306,7 @@ export async function setupSyncBackgroundTest(
             services,
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
-            getUserId: async () => userId,
+            getUserId: async () => user.id,
             getNow,
             useDownloadTranslationLayer:
                 options.useDownloadTranslationLayer ?? true,
@@ -318,7 +328,7 @@ export async function setupSyncBackgroundTest(
 
         const memoryAuth = setup.backgroundModules.auth
             .authService as MemoryAuthService
-        await memoryAuth.setUser({ ...TEST_USER })
+        await memoryAuth.setUser(user)
         setups.push(setup)
     }
 
@@ -341,7 +351,7 @@ export async function setupSyncBackgroundTest(
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync, serverStorage, getNow }
+    return { setups, sync, serverStorage, getNow }
 }
 
 const getReadablePattern = (pattern: number[]) =>
