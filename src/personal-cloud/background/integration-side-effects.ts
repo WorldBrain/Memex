@@ -15,7 +15,7 @@ export const runCloudIntegrationSideEffects = (
 ): IntegrationSideEffectRunner => async (update) => {
     if (update.collection === 'customLists') {
         await bgModules.customLists.updateListSuggestionsCache({
-            added: update.type === 'create' ? update.where!.name : undefined,
+            added: update.type === 'create' ? update.object!.name : undefined,
             removed: update.type === 'delete' ? update.where!.name : undefined,
             updated:
                 update.type === 'update'
