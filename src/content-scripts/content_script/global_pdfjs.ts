@@ -4,7 +4,7 @@ import {
     ContentFingerprint,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { GetContentFingerprints } from './types'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { Browser, browser } from 'webextension-polyfill-ts'
 
 const waitForDocument = async () => {
@@ -40,10 +40,10 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
     (inPageUI) => {
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
-            let SidebarInitialAsInteger = null
 
             if (sidebarState === true) {
                 document.body.classList.add('memexSidebarOpen')
+                setLocalStorage('SidebarWidth', '450px')
 
                 let SidebarInitialWidth = getLocalStorage('SidebarWidth').then(
                     (width) => {

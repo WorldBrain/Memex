@@ -475,7 +475,7 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
-        setLocalStorage('SidebarWidth', this.state.sidebarWidth)
+        //setLocalStorage('SidebarWidth', this.state.sidebarWidth)
 
         const style = {
             height: '100%',
@@ -516,6 +516,7 @@ export class AnnotationsSidebarContainer<
                         }}
                         onResize={(e, direction, ref, delta, position) => {
                             this.setState({ sidebarWidth: ref.style.width })
+                            setLocalStorage('SidebarWidth', ref.style.width)
                         }}
                     >
                         <SidebarContainerWithTopBar>
