@@ -29,7 +29,7 @@ import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-in
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import type {
+import {
     SharedList,
     SharedListRoleID,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
