@@ -42,6 +42,7 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { Rnd } from 'react-rnd'
 
 import { createGlobalStyle } from 'styled-components'
+import { setLocalStorage } from 'src/util/storage'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -474,6 +475,8 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
+        setLocalStorage('SidebarWidth', this.state.sidebarWidth)
+
         const style = {
             height: '100%',
             position: 'relative',
@@ -481,7 +484,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ThemeProvider theme={this.props.theme}>
-                <GlobalStyle />
+                <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
                 <ContainerStyled
                     className={classNames('ignore-react-onclickoutside')}
                 >
@@ -552,7 +555,6 @@ export class AnnotationsSidebarContainer<
                                 annotationsShareAll={this.props.annotations}
                                 copyPageLink={(link) => {
                                     this.processEvent('copyNoteLink', { link })
-                                    console.log(link)
                                 }}
                                 postShareHook={(shareInfo) =>
                                     this.processEvent(
@@ -681,7 +683,9 @@ const SidebarContainerWithTopBar = styled.div`
     height: 100%;
 `
 
-const GlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle<{
+    sidebarWidth: string
+}>`
     .sidebar-draggable {
         height: 100% !important;
     }
@@ -695,6 +699,10 @@ const GlobalStyle = createGlobalStyle`
         &:hover {
             background: #5671cf30;
         }
+    }
+
+    #outerContainer {
+        width: ${(props) => props.sidebarWidth};
     }
 
 

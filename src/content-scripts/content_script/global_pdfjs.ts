@@ -4,6 +4,8 @@ import {
     ContentFingerprint,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { GetContentFingerprints } from './types'
+import { getLocalStorage } from 'src/util/storage'
+import { Browser, browser } from 'webextension-polyfill-ts'
 
 const waitForDocument = async () => {
     while (true) {
@@ -38,11 +40,38 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
     (inPageUI) => {
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
+            let SidebarInitialAsInteger = null
 
             if (sidebarState === true) {
                 document.body.classList.add('memexSidebarOpen')
+
+                let SidebarInitialWidth = getLocalStorage('SidebarWidth').then(
+                    (width) => {
+                        let SidebarInitialAsInteger = parseFloat(
+                            width.toString().replace('px', ''),
+                        )
+                        let WindowInitialWidth =
+                            (
+                                window.innerWidth - SidebarInitialAsInteger
+                            ).toString() + 'px'
+                        document.body.style.width = WindowInitialWidth
+                    },
+                )
+
+                browser.storage.onChanged.addListener((changes) => {
+                    let SidebarWidth = changes['SidebarWidth'].newValue.replace(
+                        'px',
+                        '',
+                    )
+                    SidebarWidth = parseFloat(SidebarWidth)
+                    let windowWidth = window.innerWidth
+                    let width = (windowWidth - SidebarWidth).toString()
+                    width = width + 'px'
+                    document.body.style.width = width
+                })
             } else if (sidebarState === false) {
                 document.body.classList.remove('memexSidebarOpen')
+                document.body.style.width = window.innerWidth.toString() + 'px'
             }
         })
     },
