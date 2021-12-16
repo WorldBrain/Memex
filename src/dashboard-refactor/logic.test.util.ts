@@ -190,6 +190,7 @@ const getPrivacyLevel = (isShared, isBulkShareProtected) => {
 
 const makeAnnotSharingState = (noteData): AnnotationSharingState => {
     return {
+        hasLink: noteData.isShared ? true : false,
         remoteId: noteData.isShared ? '1' : null,
         privacyLevel: getPrivacyLevel(
             noteData.isShared,

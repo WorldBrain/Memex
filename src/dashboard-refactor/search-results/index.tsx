@@ -176,23 +176,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
-                renderListsPickerForAnnotation={() =>
-                    noteData.isListPickerShown && (
-                        <HoverBox right="0" withRelativeContainer>
-                            <CollectionPicker
-                                initialSelectedEntries={
-                                    () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
-                                }
-                                onClickOutside={
-                                    interactionProps.onListPickerBtnClick
-                                }
-                                onUpdateEntrySelection={
-                                    interactionProps.updateLists
-                                }
-                            />
-                        </HoverBox>
-                    )
-                }
+                // renderListsPickerForAnnotation={() =>
+                //     noteData.isListPickerShown && (
+                //         <HoverBox right="0" withRelativeContainer>
+                //             <CollectionPicker
+                //                 initialSelectedEntries={
+                //                     () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
+                //                 }
+                //                 onClickOutside={
+                //                     interactionProps.onListPickerBtnClick
+                //                 }
+                //                 onUpdateEntrySelection={
+                //                     interactionProps.updateLists
+                //                 }
+                //             />
+                //         </HoverBox>
+                //     )
+                // }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
                         <HoverBox width="350px" right="0" withRelativeContainer>
@@ -220,6 +220,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 }
                                 onUpdateEntrySelection={
                                     interactionProps.updateLists
+                                }
+                                queryEntries={interactionProps.listQueryEntries}
+                                loadDefaultSuggestions={
+                                    interactionProps.loadDefaultListSuggestions
+                                }
+                                loadRemoteListNames={
+                                    interactionProps.loadRemoteListNames
                                 }
                             />
                         </HoverBox>

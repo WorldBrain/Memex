@@ -39,6 +39,9 @@ export interface AnnotationCreateEventProps {
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
+    loadDefaultListSuggestions?: () => string[] | Promise<string[]>
+    listQueryEntries?: (query: string) => Promise<string[]>
+    loadRemoteListNames?: () => Promise<string[]>
 }
 
 export interface AnnotationCreateGeneralProps {
@@ -203,7 +206,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             </div>
         )
     }
-    private renderCollectionsPicker() {
+    private renderSharedCollectionsPicker() {
         const { lists, onListsUpdate } = this.props
 
         const setPickerShown = (isListPickerShown: boolean) =>
@@ -212,6 +215,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <CollectionPicker
                 loadDefaultSuggestions={this.props.loadDefaultListSuggestions}
+                // queryEntries={this.props.listQueryEntries}
                 queryEntries={this.props.listQueryEntries}
                 onUpdateEntrySelection={async ({ selected }) =>
                     onListsUpdate(selected)
@@ -231,7 +235,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         const listPicker = !this.state.isListPickerShown ? null : (
             <HoverBox right="0px">
                 <ClickAway onClickAway={() => setPickerShown(false)}>
-                    {this.renderCollectionsPicker()}
+                    {this.renderSharedCollectionsPicker()}
                 </ClickAway>
             </HoverBox>
         )
@@ -271,7 +275,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     <SaveBtn
                         onSave={this.handleSave}
                         renderCollectionsPicker={() =>
-                            this.renderCollectionsPicker()
+                            this.renderSharedCollectionsPicker()
                         }
                     />
                     <ButtonTooltip tooltipText="esc" position="bottom">

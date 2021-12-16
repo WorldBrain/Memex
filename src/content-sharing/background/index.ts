@@ -498,17 +498,18 @@ export default class ContentSharingBackground {
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
     ) => {
-        const [entries, privacyLevel, remoteId] = await Promise.all([
+        const [entries, privacyLevel, remoteIds] = await Promise.all([
             this.options.annotations.findListEntriesByUrl({
                 url: params.annotationUrl,
             }),
             this.storage.findAnnotationPrivacyLevel({
                 annotation: params.annotationUrl,
             }),
-            this.storage.getRemoteAnnotationId({
-                localId: params.annotationUrl,
+            this.storage.getRemoteAnnotationIds({
+                localIds: [params.annotationUrl],
             }),
         ])
+        const remoteId = remoteIds[params.annotationUrl]
         return {
             hasLink: !!remoteId,
             remoteId,

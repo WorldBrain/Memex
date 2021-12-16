@@ -503,9 +503,36 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
+    protected getShareCollectionPickerProps() {
+        const loadRemoteListNames = async () => {
+            const remoteLists = await this.props.contentShareBG.getAllRemoteLists()
+            return remoteLists.map((list) => list.name)
+        }
+        return {
+            listQueryEntries: (prefix: string) =>
+                // this.props.customLists.searchForListSuggestions({ query }),
+                this.props.contentShareBG
+                    .suggestSharedLists({ prefix })
+                    .then((objArray) => objArray.map((obj) => obj.name)),
+            loadDefaultListSuggestions: async (args?: { limit? }) => {
+                const defaultNames = await this.props.listsBG.fetchInitialListSuggestions(
+                    { limit: args?.limit },
+                )
+                const remoteNames = await loadRemoteListNames()
+                const sharedDefaultNames = defaultNames.filter((defaultName) =>
+                    remoteNames.includes(defaultName),
+                )
+                return sharedDefaultNames
+            },
+            loadRemoteListNames,
+        }
+    }
+
     private renderSearchResults() {
         const { searchResults, listsSidebar } = this.state
         const { searchFilters } = this.state
+
+        const shareCollectionPickerProps = this.getShareCollectionPickerProps()
 
         return (
             <SearchResultsContainer
@@ -741,6 +768,12 @@ export class DashboardContainer extends StatefulUIElement<
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
+                    listQueryEntries: (day, pageId) =>
+                        shareCollectionPickerProps.listQueryEntries,
+                    loadDefaultListSuggestions: (day, pageId) =>
+                        shareCollectionPickerProps.loadDefaultListSuggestions,
+                    loadRemoteListNames: (day, pageId) =>
+                        shareCollectionPickerProps.loadRemoteListNames,
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -788,6 +821,12 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
                         this.processEvent('setNoteLists', { ...args, noteId }),
+                    listQueryEntries: (day, pageId) =>
+                        shareCollectionPickerProps.listQueryEntries,
+                    loadDefaultListSuggestions: (day, pageId) =>
+                        shareCollectionPickerProps.loadDefaultListSuggestions,
+                    loadRemoteListNames: (day, pageId) =>
+                        shareCollectionPickerProps.loadRemoteListNames,
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

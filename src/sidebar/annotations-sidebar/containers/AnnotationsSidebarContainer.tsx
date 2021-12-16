@@ -207,14 +207,41 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    protected getShareCollectionPickerProps() {
+        const loadRemoteListNames = async () => {
+            const remoteLists = await this.props.contentSharing.getAllRemoteLists()
+            return remoteLists.map((list) => list.name)
+        }
+        return {
+            onListsUpdate: (lists) =>
+                this.processEvent('updateNewPageCommentLists', { lists }),
+            listQueryEntries: (prefix) =>
+                // this.props.customLists.searchForListSuggestions({ query }),
+                this.props.contentSharing
+                    .suggestSharedLists({ prefix })
+                    .then((objArray) => objArray.map((obj) => obj.name)),
+            loadDefaultListSuggestions: async (args?: { limit? }) => {
+                const defaultNames = await this.props.customLists.fetchInitialListSuggestions(
+                    { limit: args?.limit },
+                )
+                const remoteNames = await loadRemoteListNames()
+                const sharedDefaultNames = defaultNames.filter((defaultName) =>
+                    remoteNames.includes(defaultName),
+                )
+                return sharedDefaultNames
+            },
+            loadRemoteListNames,
+        }
+    }
+
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
+        const collectionPickerProps = this.getShareCollectionPickerProps()
         return {
             onCommentChange: (comment) =>
                 this.processEvent('changeNewPageCommentText', { comment }),
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
-            onListsUpdate: (lists) =>
-                this.processEvent('updateNewPageCommentLists', { lists }),
+            onListsUpdate: collectionPickerProps.onListsUpdate,
             onCancel: () => this.processEvent('cancelNewPageComment', null),
             onSave: (shouldShare, isProtected) =>
                 this.processEvent('saveNewPageComment', {
@@ -223,16 +250,12 @@ export class AnnotationsSidebarContainer<
                 }),
             tagQueryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
-            listQueryEntries: (query) =>
-                this.props.customLists.searchForListSuggestions({ query }),
             loadDefaultTagSuggestions: this.props.tags
                 .fetchInitialTagSuggestions,
-            loadDefaultListSuggestions: this.props.customLists
-                .fetchInitialListSuggestions,
-            loadRemoteListNames: async () => {
-                const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-                return remoteLists.map((list) => list.name)
-            },
+            listQueryEntries: collectionPickerProps.listQueryEntries,
+            loadDefaultListSuggestions:
+                collectionPickerProps.loadDefaultListSuggestions,
+            loadRemoteListNames: collectionPickerProps.loadRemoteListNames,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             // TODO: make into lists
@@ -358,17 +381,14 @@ export class AnnotationsSidebarContainer<
         const annot = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
+        const collectionPickerProps = this.getShareCollectionPickerProps()
         return (
             <CollectionPicker
                 initialSelectedEntries={() => annot.lists ?? []}
                 // initialSelectedEntries={() => annot.lists ?? []}
-                queryEntries={(query) =>
-                    this.props.customLists.searchForListSuggestions({
-                        query,
-                    })
-                }
+                queryEntries={collectionPickerProps.listQueryEntries}
                 loadDefaultSuggestions={
-                    this.props.customLists.fetchInitialListSuggestions
+                    collectionPickerProps.loadDefaultListSuggestions
                 }
                 onUpdateEntrySelection={this.handleListsUpdate(
                     currentAnnotationId,
@@ -376,16 +396,7 @@ export class AnnotationsSidebarContainer<
                 onEscapeKeyDown={() =>
                     this.processEvent('resetListPickerAnnotationId', null)
                 }
-                loadRemoteListNames={
-                    async () =>
-                        this.props.contentSharing.getListsForAnnotation(
-                            currentAnnotationId,
-                        )
-                    //     async () => {
-                    //     const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-                    //     return remoteLists.map((list) => list.name)
-                    // }
-                }
+                loadRemoteListNames={collectionPickerProps.loadRemoteListNames}
             />
         )
     }

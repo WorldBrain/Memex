@@ -59,6 +59,9 @@ export type NoteInteractionProps = Omit<
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
+    loadDefaultListSuggestions?: () => string[] | Promise<string[]>
+    listQueryEntries?: (query: string) => Promise<string[]>
+    loadRemoteListNames?: () => Promise<string[]>
 }
 
 // NOTE: Derived type - edit the original
