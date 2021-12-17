@@ -845,7 +845,7 @@ const annotationCardStyle = css`
 `
 
 const NewAnnotationSection = styled.section`
-    font-family: sans-serif;
+    font-family: 'Poppins', sans-serif;
     height: auto;
     background: #f6f8fb;
     display: flex;
@@ -863,7 +863,7 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: #f6f8fb;
     display: flex;
     flex-direction: column;
@@ -982,9 +982,10 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     padding-bottom: 150px;
     width: fill-available;
     padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '0'};
+        props.sidebarContext === 'dashboard' ? '0' : '40px'};
     position: absolute;
-    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '0')};
+    margin-right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '0' : '-40px'};
 
     &::-webkit-scrollbar {
         display: none;
