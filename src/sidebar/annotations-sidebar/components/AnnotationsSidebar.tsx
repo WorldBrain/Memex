@@ -714,8 +714,8 @@ const FollowedListRow = styled(Margin)`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 10px 10px 5px;
-    width: 415px;
+    padding: 10px 5px 10px 5px;
+    width: 98%;
     cursor: pointer;
     border-radius: 3px;
 
