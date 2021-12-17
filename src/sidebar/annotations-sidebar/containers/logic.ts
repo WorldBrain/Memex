@@ -210,11 +210,7 @@ export class SidebarContainerLogic extends UILogic<
                 await annotationsCache.load(pageUrl)
             }
         })
-        // load followed lists
         if (previousState.followedListLoadState === 'pristine') {
-            // not awaiting, should I?
-            // await this.loadFollowedLists({ previousState })
-            // this.loadFollowedLists({ previousState })
             await this.processUIEvent('loadFollowedLists', {
                 previousState: previousState,
                 event: null,
@@ -366,13 +362,16 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        this.emitMutation({
+        const mutation: UIMutation<SidebarContainerState> = {
             followedLists: { $set: initNormalizedState() },
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
             users: { $set: {} },
-        })
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
 
         await annotationsCache.load(event.pageUrl)
 
@@ -381,6 +380,10 @@ export class SidebarContainerLogic extends UILogic<
                 highlights: annotationsCache.highlights,
             })
         }
+        await this.processUIEvent('loadFollowedLists', {
+            previousState: nextState,
+            event: null,
+        })
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
