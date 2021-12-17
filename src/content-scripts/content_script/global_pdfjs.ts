@@ -6,6 +6,7 @@ import {
 import type { GetContentFingerprints } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { Browser, browser } from 'webextension-polyfill-ts'
+import { SIDEBAR_WIDTH_STORAGE_KEY } from 'src/sidebar/annotations-sidebar/constants'
 
 const waitForDocument = async () => {
     while (true) {
@@ -43,26 +44,25 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
 
             if (sidebarState === true) {
                 document.body.classList.add('memexSidebarOpen')
-                setLocalStorage('SidebarWidth', '450px')
+                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
 
-                let SidebarInitialWidth = getLocalStorage('SidebarWidth').then(
-                    (width) => {
-                        let SidebarInitialAsInteger = parseFloat(
-                            width.toString().replace('px', ''),
-                        )
-                        let WindowInitialWidth =
-                            (
-                                window.innerWidth - SidebarInitialAsInteger
-                            ).toString() + 'px'
-                        document.body.style.width = WindowInitialWidth
-                    },
-                )
+                let SidebarInitialWidth = getLocalStorage(
+                    SIDEBAR_WIDTH_STORAGE_KEY,
+                ).then((width) => {
+                    let SidebarInitialAsInteger = parseFloat(
+                        width.toString().replace('px', ''),
+                    )
+                    let WindowInitialWidth =
+                        (
+                            window.innerWidth - SidebarInitialAsInteger
+                        ).toString() + 'px'
+                    document.body.style.width = WindowInitialWidth
+                })
 
                 browser.storage.onChanged.addListener((changes) => {
-                    let SidebarWidth = changes['SidebarWidth'].newValue.replace(
-                        'px',
-                        '',
-                    )
+                    let SidebarWidth = changes[
+                        SIDEBAR_WIDTH_STORAGE_KEY
+                    ].newValue.replace('px', '')
                     SidebarWidth = parseFloat(SidebarWidth)
                     let windowWidth = window.innerWidth
                     let width = (windowWidth - SidebarWidth).toString()
