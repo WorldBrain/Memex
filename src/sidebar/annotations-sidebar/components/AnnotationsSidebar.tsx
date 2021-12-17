@@ -527,8 +527,8 @@ class AnnotationsSidebar extends React.Component<
                                 : () => this.props.expandMyNotes()
                         }
                     >
-                        <FollowedListSectionTitle title={'My Notes'}>
-                            {'My Notes'}
+                        <FollowedListSectionTitle>
+                            My Notes
                         </FollowedListSectionTitle>
                         {this.props.annotations.length > 0 && (
                             <FollowedListDropdownIcon
@@ -959,6 +959,7 @@ const MyNotesClickableArea = styled.div`
     cursor: pointer;
     display: flex;
     align-items: center;
+    width: inherit;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
