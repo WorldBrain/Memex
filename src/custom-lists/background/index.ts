@@ -560,15 +560,13 @@ export default class CustomListBackground {
             time: args.time ?? '$now',
         })
 
-        await Promise.all(
-            indexed.map(({ fullUrl }) => {
-                this.storage.insertPageToList({
-                    listId: args.listId,
-                    fullUrl,
-                    pageUrl: normalizeUrl(fullUrl),
-                })
-            }),
-        )
+        for (const { fullUrl } of indexed) {
+            await this.storage.insertPageToList({
+                listId: args.listId,
+                fullUrl,
+                pageUrl: normalizeUrl(fullUrl),
+            })
+        }
 
         await this.updateListSuggestionsCache({ added: args.name })
     }
