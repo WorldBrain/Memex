@@ -23,6 +23,8 @@ export const helpIcon = browser.runtime.getURL('/img/help.svg')
 export const searchIcon = browser.runtime.getURL('/img/search.svg')
 export const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 export const commentEdit = browser.runtime.getURL('/img/comment_edit.svg')
+export const compress = browser.runtime.getURL('/img/compress-alt.svg')
+export const expand = browser.runtime.getURL('/img/expand-alt.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )

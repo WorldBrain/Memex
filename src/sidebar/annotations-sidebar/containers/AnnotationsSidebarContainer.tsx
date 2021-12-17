@@ -42,8 +42,9 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { Rnd } from 'react-rnd'
 
 import { createGlobalStyle } from 'styled-components'
-import { setLocalStorage } from 'src/util/storage'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { Browser, browser } from 'webextension-polyfill-ts'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -87,15 +88,26 @@ export class AnnotationsSidebarContainer<
     }
 
     showSidebar() {
+        setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
         this.processEvent('show', null)
     }
 
     hideSidebar() {
+        if (this.state.isWidthLocked) {
+            setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
+        }
         this.processEvent('hide', null)
     }
 
     toggleSidebarLock = () =>
         this.processEvent(this.state.isLocked ? 'unlock' : 'lock', null)
+
+    toggleSidebarWidthLock = () => {
+        this.processEvent(
+            this.state.isWidthLocked ? 'unlockWidth' : 'lockWidth',
+            null,
+        )
+    }
 
     setPageUrl = (pageUrl: string) => {
         this.processEvent('setPageUrl', { pageUrl })
@@ -442,7 +454,7 @@ export class AnnotationsSidebarContainer<
                         position="rightCentered"
                     >
                         <CloseBtn onClick={() => this.hideSidebar()}>
-                            <ActionIcon src={icons.close} />
+                            <ActionIcon source={icons.close} />
                         </CloseBtn>
                     </ButtonTooltip>
                     {this.state.isLocked ? (
@@ -451,8 +463,9 @@ export class AnnotationsSidebarContainer<
                             position="rightCentered"
                         >
                             <CloseBtn onClick={this.toggleSidebarLock}>
-                                <SidebarLockIconReverse
-                                    src={icons.doubleArrow}
+                                <ActionIcon
+                                    source={icons.doubleArrow}
+                                    rotation={'180deg'}
                                 />
                             </CloseBtn>
                         </ButtonTooltip>
@@ -462,7 +475,30 @@ export class AnnotationsSidebarContainer<
                             position="rightCentered"
                         >
                             <CloseBtn onClick={this.toggleSidebarLock}>
-                                <SidebarLockIcon src={icons.doubleArrow} />
+                                <ActionIcon source={icons.doubleArrow} />
+                            </CloseBtn>
+                        </ButtonTooltip>
+                    )}
+                    {!this.state.isWidthLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Adjusted Page Width"
+                            position="rightCentered"
+                        >
+                            <CloseBtn
+                                onClick={() => this.toggleSidebarWidthLock()}
+                            >
+                                <ActionIcon source={icons.compress} />
+                            </CloseBtn>
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Full page width"
+                            position="rightCentered"
+                        >
+                            <CloseBtn
+                                onClick={() => this.toggleSidebarWidthLock()}
+                            >
+                                <ActionIcon source={icons.expand} />
                             </CloseBtn>
                         </ButtonTooltip>
                     )}
@@ -802,6 +838,7 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     border-radius: 0 0 0 5px;
     box-shadow: -3px 2px 4px -1px #d0d0d0;
     padding: 5px 1px 5px 3px;
+    z-index: 10000;
 `
 
 const CloseBtn = styled.button`
@@ -824,9 +861,15 @@ const CloseBtn = styled.button`
     }
 `
 
-const ActionIcon = styled.img`
-    height: 90%;
-    width: auto;
+const ActionIcon = styled.div<{ source: string; rotation: string }>`
+    height: 100%;
+    width: 100%;
+    transform: rotate(${(props) => props.rotation});
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    background: ${(props) => props.theme.colors.primary};
+    mask-image: url(${(props) => props.source});
 `
 
 const SidebarLockIcon = styled.img`

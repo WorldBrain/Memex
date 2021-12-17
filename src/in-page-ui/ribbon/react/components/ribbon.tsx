@@ -233,7 +233,7 @@ export default class Ribbon extends Component<Props, State> {
                             </div>
                         ) : (
                             <div className={styles.extraButtonsText}>
-                                Enable Ribbon
+                                Enable Sidebar
                             </div>
                         )}
                     </div>
