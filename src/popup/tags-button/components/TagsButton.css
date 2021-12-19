@@ -9,14 +9,21 @@
     float: left;
 }
 
+.hasTag {
+    background-image: url('/img/tag_full.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    opacity: 0.8;
+    float: left;
+}
+
 .button {
     flex: 7;
     text-align: left;
-    display: inline-block;
     padding: 10px 20px;
     height: 100%;
     display: flex;
-    align-items: center
+    align-items: center;
 }
 
 .buttonBulk {

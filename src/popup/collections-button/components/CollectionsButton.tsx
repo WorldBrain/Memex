@@ -10,7 +10,9 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 const styles = require('./CollectionsButton.css')
 const buttonStyles = require('../../components/Button.css')
 
-export interface OwnProps {}
+export interface OwnProps {
+    fetchCollections?: () => Promise<string[]>
+}
 
 interface StateProps {
     isDisabled: boolean
@@ -26,10 +28,18 @@ export type Props = OwnProps & StateProps & DispatchProps
 class CollectionsButton extends PureComponent<Props> {
     async componentDidMount() {
         await this.getKeyboardShortcutText()
+        const hasCollections = await this.props.fetchCollections()
+
+        if (hasCollections.length > 0) {
+            this.setState({
+                hasCollections: true,
+            })
+        }
     }
 
     state = {
         highlightInfo: undefined,
+        hasCollections: false,
     }
 
     private async getKeyboardShortcutText() {
@@ -54,7 +64,11 @@ class CollectionsButton extends PureComponent<Props> {
                 <Button
                     onClick={this.props.toggleCollectionsPopup}
                     disabled={this.props.isDisabled}
-                    btnClass={styles.addToList}
+                    btnClass={
+                        this.state.hasCollections
+                            ? styles.hasLists
+                            : styles.addToList
+                    }
                     itemClass={styles.button}
                 >
                     <div className={styles.buttonInnerContent}>

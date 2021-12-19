@@ -89,9 +89,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             action: 'openPopup',
         })
         await this.props.initState()
-        // this.setState({
-        //     documentStateLoaded: this.props.url.length > 0,
-        // })
     }
 
     processAnalyticsEvent = remoteFunction('processEvent')
@@ -252,11 +249,13 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
                 <div className={styles.item}>
-                    <TagsButton />
+                    <TagsButton fetchTags={() => this.fetchTagsForPage()} />
                 </div>
 
                 <div className={styles.item}>
-                    <CollectionsButton />
+                    <CollectionsButton
+                        fetchCollections={() => this.fetchListsForPage()}
+                    />
                 </div>
                 <hr />
 
