@@ -57,7 +57,6 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 
 async function init() {
     const currentTab = await getCurrentTab()
-
     const tabUrl = currentTab?.url
 
     // If we can't get the tab data, then can't init action button states
@@ -66,12 +65,17 @@ async function init() {
         return { currentTab: null, fullUrl: null }
     }
 
+    const fullUrl = tabUrl
+
     const pages = runInBackground<PageIndexingInterface<'caller'>>()
-    const identifier = await pages.waitForContentIdentifier({
-        tabId: currentTab.id,
-        fullUrl: tabUrl,
-    })
-    const fullUrl = identifier.fullUrl
+
+    // const identifier = await pages.waitForContentIdentifier({
+    //     tabId: currentTab.id,
+    //     fullUrl: tabUrl,
+    // })
+
+    // console.log(identifier)
+
     return { currentTab, fullUrl }
 }
 

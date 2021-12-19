@@ -57,10 +57,12 @@ class CollectionsButton extends PureComponent<Props> {
                     btnClass={styles.addToList}
                     itemClass={styles.button}
                 >
-                    Add To Collection(s)
-                    <p className={buttonStyles.subTitle}>
-                        {this.state.highlightInfo}
-                    </p>
+                    <div className={styles.buttonInnerContent}>
+                        Add To Collection(s)
+                        <p className={buttonStyles.subTitle}>
+                            {this.state.highlightInfo}
+                        </p>
+                    </div>
                 </Button>
             </div>
         )

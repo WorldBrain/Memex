@@ -76,8 +76,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 ) => ({
     openSidebar: async (e) => {
         e.preventDefault()
+        props.closePopup()
         await dispatch(acts.openSideBar())
-        setTimeout(props.closePopup, 200)
     },
     handleChange: async (e) => {
         e.stopPropagation()

@@ -54,10 +54,12 @@ class TagsButton extends PureComponent<Props> {
                     btnClass={styles.tag}
                     itemClass={styles.button}
                 >
-                    Add Tag(s)
-                    <p className={buttonStyles.subTitle}>
-                        {this.state.highlightInfo}
-                    </p>
+                    <div className={styles.buttonInnerContent}>
+                        Add Tag(s)
+                        <p className={buttonStyles.subTitle}>
+                            {this.state.highlightInfo}
+                        </p>
+                    </div>
                 </Button>
             </div>
         )
