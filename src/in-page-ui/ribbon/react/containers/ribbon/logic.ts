@@ -134,6 +134,7 @@ export class RibbonContainerLogic extends UILogic<
                 pageHasTags: false,
             },
             lists: {
+                lists: [],
                 showListsPicker: false,
                 pageBelongsToList: false,
             },
@@ -195,10 +196,16 @@ export class RibbonContainerLogic extends UILogic<
                 pageHasTags: {
                     $set: tags.length > 0,
                 },
+                tags: {
+                    $set: tags,
+                },
             },
             lists: {
                 pageBelongsToList: {
                     $set: lists.length > 0,
+                },
+                lists: {
+                    $set: lists,
                 },
             },
         })
@@ -443,22 +450,33 @@ export class RibbonContainerLogic extends UILogic<
         if (event.value.added) {
             tagsStateUpdater = (tags) => {
                 const tag = event.value.added
+
                 return tags.includes(tag) ? tags : [...tags, tag]
             }
         }
 
         if (event.value.deleted) {
+            console.log(event)
             tagsStateUpdater = (tags) => {
                 const index = tags.indexOf(event.value.deleted)
                 if (index === -1) {
                     return tags
                 }
 
-                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+                const newTags = [
+                    ...tags.slice(0, index),
+                    ...tags.slice(index + 1),
+                ]
+
+                return newTags
             }
         }
+
         this.emitMutation({
-            [context]: { tags: { $apply: tagsStateUpdater } },
+            [context]: {
+                tags: { $apply: tagsStateUpdater },
+                pageHasTags: { $set: event.value.selected.length > 0 },
+            },
         })
 
         return backendResult
@@ -480,6 +498,38 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        let listsStateUpdater: (lists: string[]) => string[]
+
+        if (event.value.added) {
+            listsStateUpdater = (lists) => {
+                const list = event.value.added
+                return lists.includes(list) ? lists : [...lists, list]
+            }
+        }
+
+        if (event.value.deleted) {
+            listsStateUpdater = (lists) => {
+                const index = lists.indexOf(event.value.deleted)
+                if (index === -1) {
+                    return lists
+                }
+
+                const NewLists = [
+                    ...lists.slice(0, index),
+                    ...lists.slice(index + 1),
+                ]
+
+                return NewLists
+            }
+        }
+
+        this.emitMutation({
+            ['lists']: {
+                lists: { $apply: listsStateUpdater },
+                pageBelongsToList: { $set: event.value.selected.length > 0 },
+            },
+        })
+
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
