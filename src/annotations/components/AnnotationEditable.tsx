@@ -542,6 +542,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     : 'initial'
                             }
                             height="430px"
+                            overflow="scroll"
                         >
                             <QuickTutorial
                                 markdownHelpOnTop={true}
