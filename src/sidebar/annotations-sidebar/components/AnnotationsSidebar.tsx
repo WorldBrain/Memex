@@ -33,7 +33,11 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
+const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
@@ -83,7 +87,7 @@ export interface AnnotationsSidebarProps
     normalizedPageUrls: string[]
     normalizedPageUrl?: string
     annotationUrls: () => void
-    contentSharing: any
+    contentSharing: ContentSharingInterface
     annotationsShareAll: any
     copyPageLink: any
     postShareHook: (shareInfo) => void
@@ -92,6 +96,8 @@ export interface AnnotationsSidebarProps
 
 interface AnnotationsSidebarState {
     searchText?: string
+    isolatedView?: string | null // if null show default view
+    showIsolatedViewNotif?: boolean // if null show default view
     isMarkdownHelpShown?: boolean
     showAllNotesCopyPaster?: boolean
     showAllNotesShareMenu?: boolean
@@ -106,6 +112,8 @@ class AnnotationsSidebar extends React.Component<
 
     state = {
         searchText: '',
+        isolatedView: null,
+        showIsolatedViewNotif: true,
         isMarkdownHelpShown: false,
         showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
@@ -294,6 +302,113 @@ class AnnotationsSidebar extends React.Component<
 
     private renderSharedNotesSection() {}
 
+    private renderSharedListNotes(listId) {
+        const { followedListLoadState, followedLists } = this.props
+
+        const listData = followedLists.byId[listId]
+        return (
+            <FollowedListNotesContainer bottom="10px" key={listId}>
+                {/* <React.Fragment key={listId}> */}
+
+                <FollowedListRow
+                    onClick={() => this.props.expandFollowedListNotes(listId)}
+                    bottom="5px"
+                    title={listData.name}
+                >
+                    <FollowedListTitleContainer>
+                        <FollowedListTitle
+                            onClick={() =>
+                                this.setState({ isolatedView: listId })
+                            }
+                        >
+                            {listData.name}
+                        </FollowedListTitle>
+                        <FollowedListNoteCount left="5px" right="15px">
+                            {listData.sharedAnnotationReferences.length}
+                        </FollowedListNoteCount>
+                    </FollowedListTitleContainer>
+                    <ButtonTooltip
+                        tooltipText="Go to collection"
+                        position="left"
+                    >
+                        <Icon
+                            icon="goTo"
+                            height="16px"
+                            onClick={() =>
+                                this.props.openCollectionPage(listId)
+                            }
+                        />
+                    </ButtonTooltip>
+                </FollowedListRow>
+                {this.renderFollowedListNotes(listId)}
+            </FollowedListNotesContainer>
+        )
+    }
+
+    async componentDidUpdate() {
+        this.setState({
+            showIsolatedViewNotif: await getLocalStorage(
+                SHOW_ISOLATED_VIEW_KEY,
+                true,
+            ),
+        })
+    }
+
+    private renderIsolatedView(listId) {
+        return (
+            <FollowedListNotesContainer bottom="10px">
+                <div>
+                    <a onClick={() => this.setState({ isolatedView: null })}>
+                        {'< Go Back'}
+                    </a>
+                    {this.props.followedLists[listId]?.isContributable ? (
+                        <p>{'@ Contributor'}</p>
+                    ) : (
+                        <p>{'@ Commentor'}</p>
+                    )}
+                </div>
+                {this.state.showIsolatedViewNotif && (
+                    <div>
+                        <p>
+                            {
+                                'While you are in this view, al notes you make are added to this collection.'
+                            }
+                        </p>
+                        <p
+                            onClick={() => {
+                                this.setState({ showIsolatedViewNotif: false })
+                                setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
+                            }}
+                        >
+                            z{'X'}
+                        </p>
+                    </div>
+                )}
+                {this.props.isExpandedSharedSpaces &&
+                    (this.props.followedListLoadState === 'running' ? (
+                        this.renderLoader()
+                    ) : this.props.followedListLoadState === 'error' ? (
+                        <FollowedListsMsgContainer>
+                            <FollowedListsMsgHead>
+                                Something went wrong
+                            </FollowedListsMsgHead>
+                            <FollowedListsMsg>
+                                Reload the page and if the problem persists{' '}
+                                <ExternalLink
+                                    label="contact
+                                    support"
+                                    href="mailto:support@worldbrain.io"
+                                />
+                                .
+                            </FollowedListsMsg>
+                        </FollowedListsMsgContainer>
+                    ) : (
+                        this.renderSharedListNotes(listId)
+                    ))}
+            </FollowedListNotesContainer>
+        )
+    }
+
     private renderSharedNotesByList() {
         const { followedListLoadState, followedLists } = this.props
 
@@ -301,43 +416,9 @@ class AnnotationsSidebar extends React.Component<
         //     return null
         // }
 
-        const sharedNotesByList = followedLists.allIds.map((listId) => {
-            const listData = followedLists.byId[listId]
-            return (
-                <FollowedListNotesContainer bottom="10px" key={listId}>
-                    {/* <React.Fragment key={listId}> */}
-                    <FollowedListRow
-                        onClick={() =>
-                            this.props.expandFollowedListNotes(listId)
-                        }
-                        bottom="5px"
-                        title={listData.name}
-                    >
-                        <FollowedListTitleContainer>
-                            <FollowedListTitle>
-                                {listData.name}
-                            </FollowedListTitle>
-                            <FollowedListNoteCount left="5px" right="15px">
-                                {listData.sharedAnnotationReferences.length}
-                            </FollowedListNoteCount>
-                        </FollowedListTitleContainer>
-                        <ButtonTooltip
-                            tooltipText="Go to collection"
-                            position="left"
-                        >
-                            <Icon
-                                icon="goTo"
-                                height="16px"
-                                onClick={() =>
-                                    this.props.openCollectionPage(listId)
-                                }
-                            />
-                        </ButtonTooltip>
-                    </FollowedListRow>
-                    {this.renderFollowedListNotes(listId)}
-                </FollowedListNotesContainer>
-            )
-        })
+        const sharedNotesByList = followedLists.allIds.map((listId) =>
+            this.renderSharedListNotes(listId),
+        )
         return (
             <FollowedListNotesContainer bottom="10px">
                 <FollowedListTitleContainer
@@ -394,7 +475,11 @@ class AnnotationsSidebar extends React.Component<
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-        return (
+        return this.state.isolatedView ? (
+            <AnnotationsSectionStyled>
+                {this.renderIsolatedView(this.state.isolatedView)}
+            </AnnotationsSectionStyled>
+        ) : (
             <React.Fragment>
                 <AnnotationsSectionStyled>
                     {this.renderAnnotationsEditable()}

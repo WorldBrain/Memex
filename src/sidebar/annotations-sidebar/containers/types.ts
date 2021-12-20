@@ -98,6 +98,7 @@ interface SidebarFollowedListsState {
             isExpanded: boolean
             annotationsLoadState: TaskState
             conversationsLoadState: TaskState
+            isContributable: boolean
         }
     >
 
