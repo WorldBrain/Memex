@@ -808,6 +808,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                 hasLink: true,
                                             },
                                         },
+                                        createdListEntries: [
+                                            { pageId: 1, listId: 2 },
+                                        ],
                                     },
                                 )
                                 await helper.assertAnnotationPrivacyLevels(
@@ -1001,7 +1004,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.createPage(setup, {
                                     id: 1,
-                                    listIds: [1],
+                                    listIds: [1, 2],
                                 })
                                 await helper.createAnnotation(setup, {
                                     id: 1,

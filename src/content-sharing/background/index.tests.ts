@@ -311,6 +311,7 @@ export class SharingTestHelper {
             annotationsIds: number[]
             listIds: number[]
             expectSharingStates: AnnotationSharingStates
+            createdListEntries?: Array<{ pageId: number; listId: number }>
         },
     ) {
         const sharingStates: AnnotationSharingStates = {}
@@ -327,6 +328,27 @@ export class SharingTestHelper {
             )
             sharingStates[annotationId] = sharingState
             this.annotations[annotationId].remoteId = sharingState.remoteId
+        }
+        for (const entry of options.createdListEntries ?? []) {
+            const pageUrl = this.pages[entry.pageId].normalizedUrl
+            const listEntries = await setup.backgroundModules.customLists.storage.fetchListPagesById(
+                {
+                    listId: this.lists[entry.listId].localId,
+                },
+            )
+            const listEntry = listEntries.find(
+                (entryInList) => entryInList.pageUrl === pageUrl,
+            )
+            if (!listEntry) {
+                throw new Error(
+                    `Expected list entry to be created, but found none: ${JSON.stringify(
+                        entry,
+                    )}`,
+                )
+            }
+            this.entries[entry.listId][entry.pageId] = {
+                createdWhen: listEntry.createdAt.getTime(),
+            }
         }
 
         this._expectSharingStates(sharingStates, options.expectSharingStates)
