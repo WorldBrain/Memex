@@ -112,9 +112,9 @@ export default class ContentSharingBackground {
         }
     }
 
-    async setup() {}
+    async setup() { }
 
-    async executePendingActions() {}
+    async executePendingActions() { }
 
     private generateRemoteAnnotationId = (): string =>
         this.options.generateServerId('sharedAnnotation').toString()
@@ -370,13 +370,37 @@ export default class ContentSharingBackground {
     unshareAnnotationFromSomeLists: ContentSharingInterface['unshareAnnotationFromSomeLists'] = async (
         options,
     ) => {
-        for (const listId of options.localListIds) {
-            await this.options.annotations.removeAnnotFromList({
-                listId,
-                url: options.annotationUrl,
-            })
+        const sharingState = await this.getAnnotationSharingState({
+            annotationUrl: options.annotationUrl,
+        })
+        sharingState.localListIds = sharingState.localListIds.filter(
+            (id) => !options.localListIds.includes(id),
+        )
+
+        const privacyState = getAnnotationPrivacyState(
+            sharingState.privacyLevel,
+        )
+        if (privacyState.public) {
+            for (const listId of sharingState.localListIds) {
+                await this.options.annotations.insertAnnotToList({
+                    listId,
+                    url: options.annotationUrl,
+                })
+            }
+        } else {
+            for (const listId of options.localListIds) {
+                await this.options.annotations.removeAnnotFromList({
+                    listId,
+                    url: options.annotationUrl,
+                })
+            }
         }
-        return { sharingState: dummyAnnotationSharingState() }
+        await this.storage.setAnnotationPrivacyLevel({
+            annotation: options.annotationUrl,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+        })
+        sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+        return { sharingState }
     }
 
     unshareAnnotations: ContentSharingInterface['unshareAnnotations'] = async (
@@ -493,27 +517,40 @@ export default class ContentSharingBackground {
         await this.storage.deleteAnnotationPrivacyLevel(params)
     }
 
-    waitForSync: ContentSharingInterface['waitForSync'] = async () => {}
+    waitForSync: ContentSharingInterface['waitForSync'] = async () => { }
 
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
     ) => {
-        const [entries, privacyLevel, remoteIds] = await Promise.all([
+        const [
+            annotation,
+            annotationEntries,
+            privacyLevel,
+            remoteId,
+        ] = await Promise.all([
+            this.options.annotations.getAnnotationByPk(params.annotationUrl),
             this.options.annotations.findListEntriesByUrl({
                 url: params.annotationUrl,
             }),
             this.storage.findAnnotationPrivacyLevel({
                 annotation: params.annotationUrl,
             }),
-            this.storage.getRemoteAnnotationIds({
-                localIds: [params.annotationUrl],
+            this.storage.getRemoteAnnotationId({
+                localId: params.annotationUrl,
             }),
         ])
-        const remoteId = remoteIds[params.annotationUrl]
+        const privacyState = maybeGetAnnotationPrivacyState(
+            privacyLevel?.privacyLevel,
+        )
+        const localListIds = privacyState.public
+            ? await this.options.customLists.fetchListIdsByUrl(
+                annotation.pageUrl,
+            )
+            : annotationEntries.map((entry) => entry.listId)
         return {
             hasLink: !!remoteId,
             remoteId,
-            localListIds: entries.map((entry) => entry.listId),
+            localListIds,
             privacyLevel:
                 privacyLevel?.privacyLevel ?? AnnotationPrivacyLevels.PRIVATE,
         }
@@ -589,7 +626,7 @@ export default class ContentSharingBackground {
         options: {
             source: 'sync' | 'local'
         },
-    ) {}
+    ) { }
 }
 
 function dummyAnnotationSharingState(): AnnotationSharingState {

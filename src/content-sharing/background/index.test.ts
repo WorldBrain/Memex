@@ -415,7 +415,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            `should share a note across the lists it's not yet in when making public, ignoring lists it's already added to and removing protected state`,
+            `should share a note across the lists it's not yet in when making it public, ignoring lists it's already added to and removing protected state`,
             { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
@@ -474,6 +474,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationId: 1,
                                             level:
                                                 AnnotationPrivacyLevels.SHARED,
+                                            updated: true,
                                         },
                                     ],
                                 )
@@ -588,6 +589,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
                                 })
+                                await helper.assertSharedAnnotationEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
                                 await helper.unshareAnnotationsFromSomeLists(
                                     setup,
                                     {
@@ -610,6 +618,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationId: 1,
                                             level:
                                                 AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
                                         },
                                     ],
                                 )
@@ -949,6 +958,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationId: 1,
                                             level:
                                                 AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
                                         },
                                     ],
                                 )
@@ -1030,6 +1040,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationId: 1,
                                             level:
                                                 AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
                                         },
                                     ],
                                 )
