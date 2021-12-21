@@ -3593,6 +3593,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.third)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.third)
                 // Add page to list
                 await setups[0].storageManager
                     .collection('pageListEntries')
@@ -3618,6 +3621,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -3626,12 +3630,17 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                testVisits.third.personalContentMetadata = testMetadata.third.id
+                testVisits.third.personalContentLocator =
+                    testLocators.third_dummy.id
+
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -3647,7 +3656,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.third_dummy, lastVisited: testVisits.third.readWhen }, testLocators.third],
+                    personalContentRead: [testVisits.third],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -3690,6 +3700,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
@@ -3712,6 +3723,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.third)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.third)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -3744,6 +3758,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -3752,12 +3767,17 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                testVisits.third.personalContentMetadata = testMetadata.third.id
+                testVisits.third.personalContentLocator =
+                    testLocators.third_dummy.id
+
                 // prettier-ignore
                 expect(
                     await getDatabaseContents(serverStorage.storageManager, [
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -3773,7 +3793,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.third_dummy, lastVisited: testVisits.third.readWhen }, testLocators.third],
+                    personalContentRead: [testVisits.third],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -3814,6 +3835,7 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third },
@@ -3838,6 +3860,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.fourth)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -3871,6 +3896,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -3879,6 +3905,11 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                testVisits.fourth.personalContentMetadata =
+                    testMetadata.fourth.id
+                testVisits.fourth.personalContentLocator =
+                    testLocators.fourth_dummy.id // expect.anything()
+                // testLocators.third_dummy.id
                 testLocators.fourth_dummy.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
@@ -3890,6 +3921,7 @@ describe('Personal cloud translation layer', () => {
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -3905,7 +3937,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.fourth_dummy, lastVisited: testVisits.fourth.readWhen }, testLocators.fourth_a],
+                    personalContentRead: [testVisits.fourth],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -3947,6 +3980,7 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
@@ -3971,6 +4005,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.fourth)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -4005,6 +4042,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -4013,6 +4051,10 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                testVisits.fourth.personalContentMetadata =
+                    testMetadata.third.id
+                testVisits.fourth.personalContentLocator =
+                    testLocators.third_dummy.id
                 testLocators.fourth_dummy.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
@@ -4024,6 +4066,7 @@ describe('Personal cloud translation layer', () => {
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -4039,7 +4082,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.fourth_dummy, lastVisited: testVisits.fourth.readWhen }, testLocators.fourth_a],
+                    personalContentRead: [testVisits.fourth],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -4081,6 +4125,7 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
@@ -4112,6 +4157,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.fourth)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -4139,6 +4187,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -4147,6 +4196,10 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                testVisits.fourth.personalContentMetadata =
+                    testMetadata.third.id
+                testVisits.fourth.personalContentLocator =
+                    testLocators.third_dummy.id
                 testLocators.fourth_dummy.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
@@ -4158,6 +4211,7 @@ describe('Personal cloud translation layer', () => {
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -4173,7 +4227,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.fourth_dummy, lastVisited: testVisits.fourth.readWhen }, testLocators.fourth_a],
+                    personalContentRead: [testVisits.fourth],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -4217,6 +4272,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
@@ -4246,6 +4302,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.fourth)
                 // Add page to list
                 await setups[0].storageManager
                     .collection('pageListEntries')
@@ -4259,10 +4318,15 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
 
+                testVisits.fourth.personalContentMetadata =
+                    testMetadata.third.id
+                testVisits.fourth.personalContentLocator =
+                    testLocators.third_dummy.id
                 testLocators.fourth_dummy.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
@@ -4274,6 +4338,7 @@ describe('Personal cloud translation layer', () => {
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -4286,7 +4351,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, { ...testLocators.fourth_dummy, lastVisited: testVisits.fourth.readWhen }, testLocators.fourth_a],
+                    personalContentRead: [testVisits.fourth],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -4318,6 +4384,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                 ], { skip: 2 })
             })
@@ -4330,6 +4397,9 @@ describe('Personal cloud translation layer', () => {
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
+                await setups[0].storageManager
+                    .collection('visits')
+                    .createObject(LOCAL_TEST_DATA_V24.visits.first)
                 // Create + share list
                 await setups[0].storageManager
                     .collection('customLists')
@@ -4377,6 +4447,7 @@ describe('Personal cloud translation layer', () => {
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
+                const testVisits = remoteData.personalContentRead
                 const testLists = remoteData.personalList
                 const testListEntries = remoteData.personalListEntry
                 const testListShares = remoteData.personalListShare
@@ -4391,6 +4462,7 @@ describe('Personal cloud translation layer', () => {
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
+                        'personalContentRead',
                         'personalList',
                         'personalListEntry',
                         'personalListShare',
@@ -4406,7 +4478,8 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
-                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalContentLocator: [{ ...testLocators.first, lastVisited: testVisits.first.readWhen }, testLocators.second],
+                    personalContentRead: [testVisits.first],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.first],
                     personalListShare: [testListShares.first],
@@ -4437,6 +4510,7 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
