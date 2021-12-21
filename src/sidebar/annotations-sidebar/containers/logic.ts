@@ -860,7 +860,7 @@ export class SidebarContainerLogic extends UILogic<
     loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
         previousState,
     }) => {
-        const { customLists, pageUrl } = this.options
+        const { customLists, pageUrl, contentSharing } = this.options
 
         await executeUITask(this, 'followedListLoadState', async () => {
             const followedLists = await customLists.fetchFollowedListsWithAnnotations(
@@ -870,6 +870,21 @@ export class SidebarContainerLogic extends UILogic<
                     ),
                 },
             )
+            console.log('followedLists', { followedLists })
+            const areListsContributable = fromPairs(
+                await Promise.all(
+                    followedLists.map(async (list) => {
+                        const canWrite = await contentSharing.canWriteToSharedListRemoteId(
+                            {
+                                remoteId: list.id,
+                            },
+                        )
+                        console.log('canWrite', { canWrite })
+                        return [list.id, canWrite]
+                    }),
+                ),
+            )
+            console.log('areListsContributable', { areListsContributable })
 
             this.emitMutation({
                 followedLists: {
@@ -885,6 +900,8 @@ export class SidebarContainerLogic extends UILogic<
                                     isExpanded: false,
                                     annotationsLoadState: 'pristine',
                                     conversationsLoadState: 'pristine',
+                                    isContributable:
+                                        areListsContributable[list.id],
                                 },
                             ]),
                         ),

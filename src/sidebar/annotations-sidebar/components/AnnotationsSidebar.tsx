@@ -363,7 +363,7 @@ class AnnotationsSidebar extends React.Component<
                     <a onClick={() => this.setState({ isolatedView: null })}>
                         {'< Go Back'}
                     </a>
-                    {this.props.followedLists[listId]?.isContributable ? (
+                    {this.props.followedLists.byId[listId]?.isContributable ? (
                         <p>{'@ Contributor'}</p>
                     ) : (
                         <p>{'@ Commentor'}</p>
