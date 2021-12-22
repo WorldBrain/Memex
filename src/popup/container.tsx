@@ -51,6 +51,7 @@ interface StateProps {
     showCollectionsPicker: boolean
     tabId: number
     url: string
+    initLogicRun: boolean
     searchValue: string
 }
 
@@ -194,6 +195,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     renderChildren() {
+        if (!this.props.initLogicRun) {
+            return false
+        }
+
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
@@ -249,12 +254,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
                 <div className={styles.item}>
-                    <TagsButton fetchTags={() => this.fetchTagsForPage()} />
+                    <TagsButton fetchTags={this.fetchTagsForPage} />
                 </div>
 
                 <div className={styles.item}>
                     <CollectionsButton
-                        fetchCollections={() => this.fetchListsForPage()}
+                        fetchCollections={this.fetchListsForPage}
                     />
                 </div>
                 <hr />
@@ -399,6 +404,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     searchValue: selectors.searchValue(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
     showTagsPicker: tagsSelectors.showTagsPicker(state),
+    initLogicRun: selectors.initLogicRun(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({

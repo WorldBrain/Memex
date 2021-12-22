@@ -9,9 +9,11 @@ export interface State {
     url: string
     /** Holds the current state of the search input. */
     searchValue: string
+    initLogicRun: boolean
 }
 
 export const defState: State = {
+    initLogicRun: false,
     tabId: null,
     url: '',
     searchValue: '',
@@ -32,6 +34,11 @@ reducer.on(acts.setUrl, (state, payload) => ({
 reducer.on(acts.setSearchVal, (state, payload) => ({
     ...state,
     searchValue: payload,
+}))
+
+reducer.on(acts.setInitState, (state, payload) => ({
+    ...state,
+    initLogicRun: payload,
 }))
 
 export default reducer

@@ -23,6 +23,7 @@ const bookmarks = runInBackground<BookmarksInterface>()
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
+export const setInitState = createAction<boolean>('popup/setInitState')
 
 const getCurrentTab = async () => {
     let currentTab
@@ -116,6 +117,7 @@ export const initState: () => Thunk = () => async (dispatch) => {
         })
         dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
         dispatch(tagActs.setTags(pageTags))
+        dispatch(setInitState(true))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)
