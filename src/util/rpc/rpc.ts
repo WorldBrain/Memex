@@ -416,7 +416,7 @@ export class PortBasedRPCManager {
                         )
                     })
                     .catch((err) => {
-                        console.error(err.mesage)
+                        console.error(err.message)
                         port.postMessage(
                             PortBasedRPCManager.createRPCResponseObject({
                                 packet,

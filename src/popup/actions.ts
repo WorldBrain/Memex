@@ -57,26 +57,21 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 
 async function init() {
     const currentTab = await getCurrentTab()
-    const tabUrl = currentTab?.url
 
     // If we can't get the tab data, then can't init action button states
-    if (!tabUrl) {
+    if (!currentTab?.url) {
         console.warn("initState - Couldn't get a currentTab url")
         return { currentTab: null, fullUrl: null }
     }
 
-    const fullUrl = tabUrl
+    const identifier = await runInBackground<
+        PageIndexingInterface<'caller'>
+    >().waitForContentIdentifier({
+        tabId: currentTab.id,
+        fullUrl: currentTab.url,
+    })
 
-    const pages = runInBackground<PageIndexingInterface<'caller'>>()
-
-    // const identifier = await pages.waitForContentIdentifier({
-    //     tabId: currentTab.id,
-    //     fullUrl: tabUrl,
-    // })
-
-    // console.log(identifier)
-
-    return { currentTab, fullUrl }
+    return { currentTab, fullUrl: identifier.fullUrl }
 }
 
 // N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.

@@ -108,7 +108,7 @@ export class PageIndexingBackground {
     >['initContentIdentifier']['function'] = async (info, params) => {
         return this.initContentIdentifier({
             ...params,
-            tabId: params.tabId ?? info.tab.id,
+            tabId: params.tabId ?? info.tab?.id,
         })
     }
 
