@@ -22,7 +22,6 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 1000
@@ -426,7 +425,7 @@ export default class CustomListBackground {
     }
 
     insertPageToList = async (
-        params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
+        params: { url: string } & {
             id: number
             tabId?: number
             skipPageIndexing?: boolean
@@ -435,10 +434,7 @@ export default class CustomListBackground {
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
-        const url =
-            'contentIdentifier' in params
-                ? params.contentIdentifier?.fullUrl
-                : params.url
+        const url = params.url
 
         if (!isFullUrl(url)) {
             throw new Error(

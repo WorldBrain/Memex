@@ -1265,7 +1265,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
                                         id: testData.localListId,
-                                        contentIdentifier: identifier,
+                                        url: identifier.fullUrl,
                                         tabId,
                                     },
                                 )
