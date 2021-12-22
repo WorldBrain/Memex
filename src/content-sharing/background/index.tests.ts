@@ -6,6 +6,7 @@ import orderBy from 'lodash/orderBy'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { CreateAnnotationParams } from 'src/annotations/background/types'
 import { AnnotationSharingStates, AnnotationSharingState } from './types'
+import fromPairs from 'lodash/fromPairs'
 
 export class SharingTestHelper {
     counts = { lists: 0, annotations: 0, pages: 0 }
@@ -155,8 +156,13 @@ export class SharingTestHelper {
         options: {
             id: number
             pageId: number
-            level?: AnnotationPrivacyLevels
-        },
+        } & (
+            | {
+                  level: AnnotationPrivacyLevels
+                  expectedSharingState: AnnotationSharingState
+              }
+            | {}
+        ),
     ) {
         const count = ++this.counts.annotations
         const body = `Annot body ${count}`
@@ -197,6 +203,7 @@ export class SharingTestHelper {
             await this.setAnnotationPrivacyLevel(setup, {
                 id: options.id,
                 level: options.level,
+                expectedSharingState: options.expectedSharingState!,
             })
         }
     }
@@ -229,11 +236,12 @@ export class SharingTestHelper {
         options: {
             id: number
             level: AnnotationPrivacyLevels
-            expectSharingState?: AnnotationSharingState
+            expectedSharingState: AnnotationSharingState
         },
     ) {
         const {
             remoteId,
+            sharingState,
         } = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
             {
                 annotation: this.annotations[options.id].localId,
@@ -243,6 +251,10 @@ export class SharingTestHelper {
         if (remoteId) {
             this.annotations[options.id].remoteId = remoteId
         }
+        this._expectAnnotationSharingState(
+            sharingState,
+            options.expectedSharingState,
+        )
     }
 
     async shareAnnotation(
@@ -254,7 +266,9 @@ export class SharingTestHelper {
         },
     ) {
         const localId = this.annotations[options.id].localId
-        await setup.backgroundModules.contentSharing.shareAnnotation({
+        const {
+            sharingState,
+        } = await setup.backgroundModules.contentSharing.shareAnnotation({
             annotationUrl: localId,
             shareToLists: options.shareToLists,
         })
@@ -264,6 +278,10 @@ export class SharingTestHelper {
             },
         )
         this.annotations[options.id].remoteId = remoteIds[localId]
+        this._expectAnnotationSharingState(
+            sharingState,
+            options.expectedSharingState,
+        )
     }
 
     async shareAnnotations(
@@ -271,7 +289,9 @@ export class SharingTestHelper {
         annotations: Array<{ id: number; expectNotShared?: boolean }>,
         options: { expectedSharingStates: AnnotationSharingStates },
     ) {
-        await setup.backgroundModules.contentSharing.shareAnnotations({
+        const {
+            sharingStates,
+        } = await setup.backgroundModules.contentSharing.shareAnnotations({
             annotationUrls: annotations.map(
                 (annot) => this.annotations[annot.id].localId,
             ),
@@ -287,6 +307,10 @@ export class SharingTestHelper {
             const remoteId = remoteIds[this.annotations[annotation.id].localId]
             this.annotations[annotation.id].remoteId = remoteId
         }
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectedSharingStates,
+        )
     }
 
     async shareAnnotationsToAllLists(
@@ -296,12 +320,18 @@ export class SharingTestHelper {
             expectedSharingStates: AnnotationSharingStates
         },
     ) {
-        await setup.backgroundModules.contentSharing.shareAnnotationsToAllLists(
+        const {
+            sharingStates,
+        } = await setup.backgroundModules.contentSharing.shareAnnotationsToAllLists(
             {
                 annotationUrls: options.ids.map(
                     (id) => this.annotations[id].localId,
                 ),
             },
+        )
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectedSharingStates,
         )
     }
 
@@ -326,7 +356,7 @@ export class SharingTestHelper {
                     ),
                 },
             )
-            sharingStates[annotationId] = sharingState
+            sharingStates[this.annotations[annotationId].localId] = sharingState
             this.annotations[annotationId].remoteId = sharingState.remoteId
         }
         for (const entry of options.createdListEntries ?? []) {
@@ -351,22 +381,10 @@ export class SharingTestHelper {
             }
         }
 
-        this._expectSharingStates(sharingStates, options.expectSharingStates)
-    }
-
-    _expectSharingStates(
-        actual: AnnotationSharingStates,
-        expected: AnnotationSharingStates,
-    ) {
-        for (const expectedSharingState of Object.values(expected)) {
-            expectedSharingState.localListIds = expectedSharingState.localListIds.map(
-                (id) => this.lists[id].localId as any,
-            )
-            if (expectedSharingState.hasLink) {
-                expectedSharingState.remoteId = expect.any(String) as any
-            }
-        }
-        expect(actual).toEqual(expected)
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectSharingStates,
+        )
     }
 
     async unshareAnnotationsFromAllLists(
@@ -376,12 +394,18 @@ export class SharingTestHelper {
             expectedSharingStates: AnnotationSharingStates
         },
     ) {
-        await setup.backgroundModules.contentSharing.unshareAnnotationsFromAllLists(
+        const {
+            sharingStates,
+        } = await setup.backgroundModules.contentSharing.unshareAnnotationsFromAllLists(
             {
                 annotationUrls: options.ids.map(
                     (id) => this.annotations[id].localId,
                 ),
             },
+        )
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectedSharingStates,
         )
     }
 
@@ -390,11 +414,14 @@ export class SharingTestHelper {
         options: {
             annotationsIds: number[]
             listIds: number[]
-            expectSharingStates: AnnotationSharingStates
+            expectedSharingStates: AnnotationSharingStates
         },
     ) {
+        const sharingStates: AnnotationSharingStates = {}
         for (const annotationId of options.annotationsIds) {
-            await setup.backgroundModules.contentSharing.unshareAnnotationFromSomeLists(
+            const {
+                sharingState,
+            } = await setup.backgroundModules.contentSharing.unshareAnnotationFromSomeLists(
                 {
                     annotationUrl: this.annotations[annotationId].localId,
                     localListIds: options.listIds.map(
@@ -402,7 +429,12 @@ export class SharingTestHelper {
                     ),
                 },
             )
+            sharingStates[this.annotations[annotationId].localId] = sharingState
         }
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectedSharingStates,
+        )
     }
 
     async unshareAnnotations(
@@ -412,29 +444,32 @@ export class SharingTestHelper {
             expectedSharingStates: AnnotationSharingStates
         },
     ) {
-        await setup.backgroundModules.contentSharing.unshareAnnotations({
+        const {
+            sharingStates,
+        } = await setup.backgroundModules.contentSharing.unshareAnnotations({
             annotationUrls: options.ids.map(
                 (id) => this.annotations[id].localId,
             ),
         })
+        this._expectAnnotationSharingStates(
+            sharingStates,
+            options.expectedSharingStates,
+        )
     }
 
     async unshareAnnotation(
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; expectedSharingState: AnnotationSharingState },
     ) {
-        await setup.backgroundModules.contentSharing.unshareAnnotation({
+        const {
+            sharingState,
+        } = await setup.backgroundModules.contentSharing.unshareAnnotation({
             annotationUrl: this.annotations[options.id].localId,
         })
-    }
-
-    async deleteAnnotationShare(
-        setup: BackgroundIntegrationTestSetup,
-        options: { id: number },
-    ) {
-        await setup.backgroundModules.contentSharing.deleteAnnotationShare({
-            annotationUrl: this.annotations[options.id].localId,
-        })
+        this._expectAnnotationSharingState(
+            sharingState,
+            options.expectedSharingState,
+        )
     }
 
     async assertSharedLists(
@@ -642,6 +677,38 @@ export class SharingTestHelper {
         )
         const ordered = orderBy(objects, [sortField], ['asc'])
         return ordered
+    }
+
+    _prepareAnnotationStateForExpect(state: AnnotationSharingState) {
+        state.localListIds = state.localListIds.map(
+            (id) => this.lists[id].localId as any,
+        )
+        if (state.hasLink) {
+            state.remoteId = expect.any(String) as any
+        }
+        return state
+    }
+
+    _expectAnnotationSharingState(
+        actual: AnnotationSharingState,
+        expected: AnnotationSharingState,
+    ) {
+        this._prepareAnnotationStateForExpect(expected)
+        expect(actual).toEqual(expected)
+    }
+
+    _expectAnnotationSharingStates(
+        actual: AnnotationSharingStates,
+        expected: AnnotationSharingStates,
+    ) {
+        expect(actual).toEqual(
+            fromPairs(
+                Object.entries(expected).map(([annotationId, state]) => [
+                    this.annotations[annotationId].localId,
+                    this._prepareAnnotationStateForExpect(state),
+                ]),
+            ),
+        )
     }
 }
 

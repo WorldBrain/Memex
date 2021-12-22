@@ -312,6 +312,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [1],
@@ -361,6 +367,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 2,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        localListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
                                 })
                                 await helper.shareAnnotationsToSomeLists(
                                     setup,
@@ -460,7 +472,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
-                                    expectSharingState: {
+                                    expectedSharingState: {
                                         localListIds: [1, 2],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
@@ -522,6 +534,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        localListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
                                 })
                                 await helper.assertAnnotationPrivacyLevels(
                                     setup,
@@ -588,6 +606,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
@@ -601,7 +625,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         annotationsIds: [1],
                                         listIds: [2],
-                                        expectSharingStates: {
+                                        expectedSharingStates: {
                                             1: {
                                                 localListIds: [1],
                                                 privacyLevel:
@@ -663,6 +687,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.unshareAnnotations(setup, {
                                     ids: [1],
@@ -671,7 +701,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             localListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.PRIVATE,
-                                            hasLink: false,
+                                            hasLink: true,
                                         },
                                     },
                                 })
@@ -728,6 +758,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     pageId: 1,
                                     level:
                                         AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                    },
                                 })
                                 await helper.unshareAnnotations(setup, {
                                     ids: [1],
@@ -794,6 +830,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.shareAnnotationsToSomeLists(
                                     setup,
@@ -871,6 +913,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.addPageToList(setup, {
                                     pageId: 1,
@@ -934,6 +982,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        localListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
                                 })
                                 await helper.shareAnnotationsToSomeLists(
                                     setup,
@@ -1010,6 +1064,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        localListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
                                 })
                                 await helper.shareAnnotationsToSomeLists(
                                     setup,
@@ -1029,7 +1089,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     level: AnnotationPrivacyLevels.PRIVATE,
-                                    expectSharingState: {
+                                    expectedSharingState: {
                                         localListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
@@ -1092,10 +1152,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     pageId: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
                                 })
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
                                 })
                                 await helper.assertAnnotationPrivacyLevels(
                                     setup,
@@ -1173,7 +1245,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ids: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                localListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PRIVATE,
                                                 hasLink: true,
@@ -1256,9 +1328,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.shareAnnotation(setup, {
                                     id: 2,
                                     expectedSharingState: {
-                                        localListIds: [2],
+                                        localListIds: [],
                                         privacyLevel:
-                                            AnnotationPrivacyLevels.SHARED,
+                                            AnnotationPrivacyLevels.PRIVATE,
                                         hasLink: true,
                                     },
                                 })
@@ -1467,7 +1539,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1],
+                                        localListIds: [1, 2],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1877,6 +1949,11 @@ function makeShareAnnotationTest(options: {
                         await helper.setAnnotationPrivacyLevel(setup, {
                             id: 2,
                             level: AnnotationPrivacyLevels.PROTECTED,
+                            expectedSharingState: {
+                                hasLink: false,
+                                localListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                            },
                         })
                     }
 
@@ -1884,16 +1961,16 @@ function makeShareAnnotationTest(options: {
                         await helper.shareAnnotation(setup, {
                             id: 1,
                             expectedSharingState: {
-                                localListIds: [1],
-                                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                                localListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
                         })
                         await helper.shareAnnotation(setup, {
                             id: 2,
                             expectedSharingState: {
-                                localListIds: [1],
-                                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                                localListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
                         })
@@ -1902,9 +1979,9 @@ function makeShareAnnotationTest(options: {
                             await helper.shareAnnotation(setup, {
                                 id: 2,
                                 expectedSharingState: {
-                                    localListIds: [1],
+                                    localListIds: [],
                                     privacyLevel:
-                                        AnnotationPrivacyLevels.SHARED,
+                                        AnnotationPrivacyLevels.PRIVATE,
                                     hasLink: true,
                                 },
                             })
@@ -1914,15 +1991,15 @@ function makeShareAnnotationTest(options: {
                     ) {
                         const expectedSharingStates = {
                             1: {
-                                localListIds: [1],
-                                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                                localListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
                             2: !options.testProtectedBulkShare
                                 ? {
-                                      localListIds: [1],
+                                      localListIds: [],
                                       privacyLevel:
-                                          AnnotationPrivacyLevels.SHARED,
+                                          AnnotationPrivacyLevels.PRIVATE,
                                       hasLink: true,
                                   }
                                 : {
@@ -2002,21 +2079,21 @@ function makeShareAnnotationTest(options: {
 
                     await helper.assertSharedAnnotationEntries(setup, [])
 
-                    const expectedSharingStatesPostAllLists = {
+                    const expectedSharingStatesPostAllLists = () => ({
                         1: {
                             localListIds: [1],
                             privacyLevel: AnnotationPrivacyLevels.SHARED,
                             hasLink: true,
                         },
-                    }
+                    })
                     await helper.shareAnnotationsToAllLists(setup, {
                         ids: [1],
-                        expectedSharingStates: expectedSharingStatesPostAllLists,
+                        expectedSharingStates: expectedSharingStatesPostAllLists(),
                     })
                     if (options.testDuplicateSharing) {
                         await helper.shareAnnotationsToAllLists(setup, {
                             ids: [1],
-                            expectedSharingStates: expectedSharingStatesPostAllLists,
+                            expectedSharingStates: expectedSharingStatesPostAllLists(),
                         })
                     }
 

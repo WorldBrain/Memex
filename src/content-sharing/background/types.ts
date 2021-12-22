@@ -13,7 +13,10 @@ export interface ContentSharingInterface
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<{ remoteId: number | string }>
+    }): Promise<{
+        remoteId: number | string
+        sharingState: AnnotationSharingState
+    }>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
