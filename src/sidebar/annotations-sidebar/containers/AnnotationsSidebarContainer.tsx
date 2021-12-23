@@ -567,7 +567,6 @@ export class AnnotationsSidebarContainer<
                         annotationsShareAll={this.props.annotations}
                         copyPageLink={(link) => {
                             this.processEvent('copyNoteLink', { link })
-                            console.log(link)
                         }}
                         postBulkShareHook={(shareStates) =>
                             this.processEvent(
@@ -631,6 +630,11 @@ export class AnnotationsSidebarContainer<
                         }
                         expandFollowedListNotes={(listId) =>
                             this.processEvent('expandFollowedListNotes', {
+                                listId,
+                            })
+                        }
+                        toggleIsolatedListView={(listId) =>
+                            this.processEvent('toggleIsolatedListView', {
                                 listId,
                             })
                         }

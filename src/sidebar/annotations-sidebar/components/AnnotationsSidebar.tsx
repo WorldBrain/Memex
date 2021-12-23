@@ -63,6 +63,7 @@ export interface AnnotationsSidebarProps
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void
     expandFollowedListNotes: (listId: string) => void
+    toggleIsolatedListView: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
@@ -98,7 +99,6 @@ export interface AnnotationsSidebarProps
 
 interface AnnotationsSidebarState {
     searchText?: string
-    isolatedView?: string | null // if null show default view
     showIsolatedViewNotif?: boolean // if null show default view
     isMarkdownHelpShown?: boolean
     showAllNotesCopyPaster?: boolean
@@ -114,7 +114,6 @@ class AnnotationsSidebar extends React.Component<
 
     state = {
         searchText: '',
-        isolatedView: null,
         showIsolatedViewNotif: false,
         isMarkdownHelpShown: false,
         showAllNotesCopyPaster: false,
@@ -310,54 +309,34 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharedNotesSection() {}
-
-    private renderSharedListNotes(listId) {
+    private renderSharedListNotes(
+        listId,
+        dropdownIcon,
+        sharedListStyleContext,
+        onClickTitle,
+        buttonOpenIsolated,
+        renderNotes,
+    ) {
         const { followedListLoadState, followedLists } = this.props
 
         const listData = followedLists.byId[listId]
-
-        const isIsolatedView = this.state.isolatedView
 
         return (
             <FollowedListNotesContainer bottom="10px" key={listId}>
                 {/* <React.Fragment key={listId}> */}
                 <FollowedListRow
-                    onClick={
-                        !isIsolatedView &&
-                        (() => this.setState({ isolatedView: listId }))
-                    }
+                    onClick={onClickTitle}
                     bottom="5px"
                     title={listData.name}
-                    context={isIsolatedView && 'isolatedView'}
+                    context={sharedListStyleContext}
                 >
-                    {!isIsolatedView && (
-                        <FollowedListIconContainer
-                            onClick={
-                                !isIsolatedView &&
-                                ((event) => {
-                                    event.stopPropagation()
-                                    this.props.expandFollowedListNotes(listId)
-                                })
-                            }
-                        >
-                            <FollowedListDropdownIcon
-                                icon="triangle"
-                                height="12px"
-                                isExpanded={listData.isExpanded}
-                                marginLeft="0px"
-                            />
-                        </FollowedListIconContainer>
-                    )}
+                    {dropdownIcon}
                     <FollowedListTitleContainer
-                        context={isIsolatedView && 'isolatedView'}
+                        context={sharedListStyleContext}
                     >
                         <FollowedListTitle
-                            context={isIsolatedView && 'isolatedView'}
-                            onClick={
-                                !isIsolatedView &&
-                                (() => this.setState({ isolatedView: listId }))
-                            }
+                            context={sharedListStyleContext}
+                            onClick={onClickTitle}
                         >
                             {listData.name}
                         </FollowedListTitle>
@@ -366,22 +345,7 @@ class AnnotationsSidebar extends React.Component<
                         </FollowedListNoteCount>
                     </FollowedListTitleContainer>
                     <FollowedListActionItems>
-                        {!isIsolatedView && (
-                            <ButtonTooltip
-                                tooltipText="Add Highlights and Notes"
-                                position="bottom"
-                            >
-                                <FollowedListIconContainer
-                                    onClick={() =>
-                                        this.setState({ isolatedView: listId })
-                                    }
-                                >
-                                    <FollowedListActionIcon
-                                        src={icons.commentAdd}
-                                    />
-                                </FollowedListIconContainer>
-                            </ButtonTooltip>
-                        )}
+                        {buttonOpenIsolated}
                         <ButtonTooltip
                             tooltipText="Go to collection"
                             position="bottomLeft"
@@ -397,21 +361,84 @@ class AnnotationsSidebar extends React.Component<
                         </ButtonTooltip>
                     </FollowedListActionItems>
                 </FollowedListRow>
-                {listData.isExpanded &&
-                    this.renderNewAnnotation('isolatedView')}
-                {this.renderFollowedListNotes(listId)}
+                {renderNotes}
             </FollowedListNotesContainer>
         )
     }
 
-    // async componentDidMount() {
-    //     this.setState({
-    //         showIsolatedViewNotif: await getLocalStorage(
-    //             SHOW_ISOLATED_VIEW_KEY,
-    //             true,
-    //         ),
-    //     })
-    // }
+    private renderSharedListNotesNotIsolated(listId) {
+        const { followedLists } = this.props
+
+        const listData = followedLists.byId[listId]
+
+        const dropdownIcon = (
+            <FollowedListIconContainer
+                onClick={(event) => {
+                    event.stopPropagation()
+                    this.props.expandFollowedListNotes(listId)
+                }}
+            >
+                <FollowedListDropdownIcon
+                    icon="triangle"
+                    height="12px"
+                    isExpanded={listData.isExpanded}
+                    marginLeft="0px"
+                />
+            </FollowedListIconContainer>
+        )
+        const sharedListStyleContext = null
+
+        const onClickTitle = (event) => {
+            event.stopPropagation()
+            this.props.toggleIsolatedListView(listId)
+        }
+
+        const buttonOpenIsolated = (
+            <ButtonTooltip
+                tooltipText="Add Highlights and Notes"
+                position="bottom"
+            >
+                <FollowedListIconContainer onClick={onClickTitle}>
+                    <FollowedListActionIcon src={icons.commentAdd} />
+                </FollowedListIconContainer>
+            </ButtonTooltip>
+        )
+        const renderNotes = (
+            <>
+                {listData.isExpanded &&
+                    this.renderNewAnnotation('isolatedView')}
+                {this.renderFollowedListNotes(listId)}
+            </>
+        )
+
+        return this.renderSharedListNotes(
+            listId,
+            dropdownIcon,
+            sharedListStyleContext,
+            onClickTitle,
+            buttonOpenIsolated,
+            renderNotes,
+        )
+    }
+
+    private renderSharedListNotesIsolated(listId) {
+        const sharedListStyleContext = 'isolatedView'
+
+        const renderNotes = (
+            <>
+                {this.renderNewAnnotation('isolatedView')}
+                {this.renderFollowedListNotes(listId)}
+            </>
+        )
+        return this.renderSharedListNotes(
+            listId,
+            null,
+            sharedListStyleContext,
+            null,
+            null,
+            renderNotes,
+        )
+    }
 
     private renderIsolatedView(listId) {
         const ContributorTooltip = (
@@ -422,12 +449,14 @@ class AnnotationsSidebar extends React.Component<
             <FollowedListNotesContainer bottom="10px">
                 <IsolatedViewTopBar>
                     <BackButton
-                        onClick={() => this.setState({ isolatedView: null })}
+                        onClick={(event) => {
+                            this.props.toggleIsolatedListView(listId)
+                        }}
                     >
                         <BackButtonArrow icon="triangle" height="12px" />{' '}
                         {'Back'}
                     </BackButton>
-                    {!this.props.followedLists[listId]?.isContributable ? (
+                    {this.props.followedLists.byId[listId]?.isContributable ? (
                         <ButtonTooltip
                             tooltipText={ContributorTooltip}
                             position="bottomLeft"
@@ -479,7 +508,7 @@ class AnnotationsSidebar extends React.Component<
                             </FollowedListsMsg>
                         </FollowedListsMsgContainer>
                     ) : (
-                        <>{this.renderSharedListNotes(listId)}</>
+                        <>{this.renderSharedListNotesIsolated(listId)}</>
                     ))}
             </FollowedListNotesContainer>
         )
@@ -493,7 +522,7 @@ class AnnotationsSidebar extends React.Component<
         // }
 
         const sharedNotesByList = followedLists.allIds.map((listId) =>
-            this.renderSharedListNotes(listId),
+            this.renderSharedListNotesNotIsolated(listId),
         )
         return (
             <FollowedListNotesContainer bottom="10px">
@@ -552,9 +581,9 @@ class AnnotationsSidebar extends React.Component<
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-        return this.state.isolatedView ? (
+        return this.props.isolatedView ? (
             <AnnotationsSectionStyled>
-                {this.renderIsolatedView(this.state.isolatedView)}
+                {this.renderIsolatedView(this.props.isolatedView)}
             </AnnotationsSectionStyled>
         ) : (
             <React.Fragment>
@@ -756,7 +785,7 @@ class AnnotationsSidebar extends React.Component<
             <>
                 {/* {this.renderSearchSection()} */}
                 <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
-                    {!this.state.isolatedView && this.renderNewAnnotation()}
+                    {!this.props.isolatedView && this.renderNewAnnotation()}
                     {this.renderResultsBody()}
                 </ResultBodyContainer>
             </>

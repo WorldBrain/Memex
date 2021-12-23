@@ -128,6 +128,7 @@ export interface SidebarContainerState
     isLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
+    isolatedView?: string | null // if null show default view
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -264,6 +265,7 @@ export type SidebarContainerEvents = UIEvent<
         loadFollowedLists: null
         loadFollowedListNotes: { listId: string }
         expandFollowedListNotes: { listId: string }
+        toggleIsolatedListView: { listId: string }
 
         updateAnnotationShareInfo: {
             annotationUrl: string

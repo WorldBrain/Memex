@@ -870,7 +870,6 @@ export class SidebarContainerLogic extends UILogic<
                     ),
                 },
             )
-            console.log('followedLists', { followedLists })
             const areListsContributable = fromPairs(
                 await Promise.all(
                     followedLists.map(async (list) => {
@@ -879,7 +878,6 @@ export class SidebarContainerLogic extends UILogic<
                                 remoteId: list.id,
                             },
                         )
-                        console.log('canWrite', { canWrite })
                         return [list.id, canWrite]
                     }),
                 ),
@@ -987,33 +985,16 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
-        event,
+    private afterToggleListView = async (
         previousState,
-    }) => {
-        const {
-            sharedAnnotationReferences,
-            isExpanded: wasExpanded,
-            annotationsLoadState,
-        } = previousState.followedLists.byId[event.listId]
-
-        const followedAnnotIds = sharedAnnotationReferences.map(
-            (ref) => ref.id as string,
-        )
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            followedLists: {
-                byId: {
-                    [event.listId]: {
-                        isExpanded: { $set: !wasExpanded },
-                    },
-                },
-            },
-        }
-        this.emitMutation(mutation)
-
+        mutation,
+        annotationsLoadState,
+        event,
+        followedAnnotIds,
+        shouldRemoveAnnotationHighlights,
+    ) => {
         // If collapsing, signal to de-render highlights
-        if (wasExpanded) {
+        if (shouldRemoveAnnotationHighlights) {
             this.options.events?.emit('removeAnnotationHighlights', {
                 urls: followedAnnotIds,
             })
@@ -1040,6 +1021,81 @@ export class SidebarContainerLogic extends UILogic<
                     selector: previousState.followedAnnotations[id].selector,
                 })),
         })
+    }
+    expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            sharedAnnotationReferences,
+            isExpanded: wasExpanded,
+            annotationsLoadState,
+        } = previousState.followedLists.byId[event.listId]
+
+        const followedAnnotIds = sharedAnnotationReferences.map(
+            (ref) => ref.id as string,
+        )
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            followedLists: {
+                byId: {
+                    [event.listId]: {
+                        isExpanded: { $set: !wasExpanded },
+                    },
+                },
+            },
+        }
+        this.emitMutation(mutation)
+
+        const shouldRemoveAnnotationHighlights = wasExpanded
+
+        this.afterToggleListView(
+            previousState,
+            mutation,
+            annotationsLoadState,
+            event,
+            followedAnnotIds,
+            shouldRemoveAnnotationHighlights,
+        )
+    }
+
+    toggleIsolatedListView: EventHandler<'toggleIsolatedListView'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            sharedAnnotationReferences,
+            isExpanded: wasExpanded,
+            annotationsLoadState,
+        } = previousState.followedLists.byId[event.listId]
+        const isolatedView = previousState.isolatedView
+
+        const followedAnnotIds = sharedAnnotationReferences.map(
+            (ref) => ref.id as string,
+        )
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isolatedView: { $set: isolatedView ? null : event.listId },
+            followedLists: {
+                byId: {
+                    [event.listId]: {
+                        isExpanded: { $set: isolatedView ? false : true },
+                    },
+                },
+            },
+        }
+        this.emitMutation(mutation)
+
+        const shouldRemoveAnnotationHighlights = isolatedView
+
+        this.afterToggleListView(
+            previousState,
+            mutation,
+            annotationsLoadState,
+            event,
+            followedAnnotIds,
+            shouldRemoveAnnotationHighlights,
+        )
     }
 
     loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({
