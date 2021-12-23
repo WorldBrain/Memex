@@ -94,8 +94,8 @@ const LOCAL_ANNOTATIONS_V24 = {
         createdWhen: new Date('2020-10-10'),
         lastEdited: new Date('2020-10-10'),
         selector: {
+            descriptor: { content: [], strategy: 'hyp-anchoring' },
             quote: 'This is a test highlight',
-            descriptor: { strategy: 'hyp-anchoring', content: [] },
         },
     },
     second: {

@@ -148,7 +148,10 @@ class IdCapturer {
 async function getDatabaseContents(
     storageManager: StorageManager,
     collections: string[],
-    options?: { getWhere?(collection: string): any },
+    options?: {
+        getWhere?(collection: string): any
+        getOrder?(collection: string): any
+    },
 ) {
     const contents: { [collection: string]: any[] } = {}
     await Promise.all(
@@ -157,7 +160,7 @@ async function getDatabaseContents(
                 await storageManager
                     .collection(collection)
                     .findObjects(options?.getWhere?.(collection) ?? {}, {
-                        order: [['createdWhen', 'asc']],
+                        order: options?.getOrder?.(collection) ?? [],
                     })
             ).map(deleteNullFields)
         }),
@@ -168,6 +171,16 @@ async function getDatabaseContents(
 function getPersonalWhere(collection: string) {
     if (collection.startsWith('personal')) {
         return { user: TEST_USER.id }
+    }
+}
+
+function getPersonalOrder(collection: string) {
+    if (
+        (collection.startsWith('personal') &&
+            !['personalBlockStats'].includes(collection)) ||
+        ['sharedAnnotationListEntry', 'sharedPageInfo'].includes(collection)
+    ) {
+        return [['createdWhen', 'asc']]
     }
 }
 
@@ -375,6 +388,17 @@ async function setup(options?: {
                     object: update.object,
                 })
             }
+
+            // N.B. this is here as the device IDs get messed up when running these tests on the FB emu
+            for (const entry of expected) {
+                if ('object' in entry && 'deviceId' in entry.object) {
+                    entry.object.deviceId =
+                        setups[
+                            downloadOptions?.deviceIndex ?? 0
+                        ].backgroundModules.personalCloud.deviceId
+                }
+            }
+
             expect(batch.slice(downloadOptions?.skip ?? 0)).toEqual(expected)
         },
         testFetches: (highlights: ReadwiseHighlight[]) =>
@@ -439,7 +463,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
@@ -486,7 +510,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
@@ -538,7 +562,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
@@ -595,7 +619,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
@@ -666,7 +690,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
@@ -726,7 +750,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalBookmark',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
@@ -774,7 +798,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalBookmark',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
@@ -817,7 +841,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
@@ -875,7 +899,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
@@ -938,7 +962,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalContentRead',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
@@ -1013,7 +1037,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalAnnotation',
                     'personalAnnotationSelector',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
@@ -1071,7 +1095,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalAnnotation',
                     'personalAnnotationSelector',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
@@ -1135,7 +1159,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalAnnotation',
                     'personalAnnotationSelector',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.first.id, { url: LOCAL_TEST_DATA_V24.annotations.first.url }],
@@ -1210,7 +1234,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalAnnotationPrivacyLevel',
                     'sharedAnnotation',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
@@ -1298,7 +1322,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalAnnotationPrivacyLevel',
                     'sharedAnnotation',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
@@ -1380,7 +1404,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalAnnotationPrivacyLevel',
                     'sharedAnnotation',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
@@ -1468,7 +1492,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalAnnotationPrivacyLevel',
                     'sharedAnnotation',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
@@ -1549,7 +1573,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotation',
                     'personalAnnotationSelector',
                     'personalAnnotationPrivacyLevel'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id, changeInfo],
@@ -1593,7 +1617,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
@@ -1644,7 +1668,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalList', testLists.first.id],
@@ -1699,7 +1723,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalList', testLists.first.id, { id: testLists.first.localId }],
@@ -1749,7 +1773,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalListEntry'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalListEntry', testListEntries.first.id],
@@ -1809,7 +1833,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'personalListEntry'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalListEntry', testListEntries.first.id, changeInfo],
@@ -1853,7 +1877,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalListShare',
                     'personalList',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalListShare', testListShares.first.id],
@@ -1903,7 +1927,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalListShare',
                     'personalList',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalListShare', testListShares.first.id, changeInfo],
@@ -1964,7 +1988,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotation',
                     'personalAnnotationSelector',
                     'personalAnnotationShare'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
@@ -2045,7 +2069,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotation',
                     'personalAnnotationSelector',
                     'personalAnnotationShare'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationShare', testAnnotationShares.second.id],
@@ -2128,7 +2152,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotation',
                     'personalAnnotationSelector',
                     'personalAnnotationShare'
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationShare', testAnnotationShares.second.id, changeInfo],
@@ -2178,7 +2202,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
@@ -2231,7 +2255,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
@@ -2299,7 +2323,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
@@ -2352,7 +2376,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
@@ -2409,7 +2433,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
@@ -2482,7 +2506,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
@@ -2563,7 +2587,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
@@ -2624,7 +2648,7 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                     'personalTag',
                     'personalTagConnection',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
@@ -2669,7 +2693,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.first.id],
@@ -2725,7 +2749,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.first.id],
@@ -2793,7 +2817,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id, { id: LOCAL_TEST_DATA_V24.templates.first.id }],
@@ -2837,7 +2861,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
@@ -2894,7 +2918,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
@@ -2954,7 +2978,7 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
-                ], { getWhere: getPersonalWhere }),
+                ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
@@ -3015,7 +3039,7 @@ describe('Personal cloud translation layer', () => {
                         'personalAnnotation',
                         'personalAnnotationSelector',
                         'personalReadwiseAction',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     ...dataChangesAndUsage(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
@@ -3080,7 +3104,7 @@ describe('Personal cloud translation layer', () => {
                         'personalAnnotation',
                         'personalAnnotationSelector',
                         'personalReadwiseAction',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     ...dataChangesAndUsage(remoteData, [
                         [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
@@ -3154,7 +3178,7 @@ describe('Personal cloud translation layer', () => {
                         'personalTag',
                         'personalTagConnection',
                         'personalReadwiseAction',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     ...dataChangesAndUsage(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
@@ -3240,7 +3264,7 @@ describe('Personal cloud translation layer', () => {
                         'personalTag',
                         'personalTagConnection',
                         'personalReadwiseAction',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     ...dataChangesAndUsage(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
@@ -3618,6 +3642,7 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
+                    { anyId: true },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -3652,7 +3677,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
@@ -3699,7 +3724,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.third, deviceId: testLocators.third.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
@@ -3755,6 +3780,7 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
+                    { anyId: true },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -3767,7 +3793,8 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
-                testVisits.third.personalContentMetadata = testMetadata.third.id
+                testAnnotations.third.id = testVisits.third.personalContentMetadata =
+                    testMetadata.third.id
                 testVisits.third.personalContentLocator =
                     testLocators.third_dummy.id
 
@@ -3789,7 +3816,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
@@ -3834,7 +3861,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.third, deviceId: testLocators.third.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
@@ -3933,7 +3960,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
@@ -3979,7 +4006,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.fourth_a, deviceId: testLocators.fourth_a.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
@@ -4078,7 +4105,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
@@ -4124,7 +4151,7 @@ describe('Personal cloud translation layer', () => {
                 // prettier-ignore
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.fourth_a, deviceId: testLocators.fourth_a.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
@@ -4223,7 +4250,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
@@ -4271,7 +4298,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.fourth_a, deviceId: testLocators.fourth_a.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
@@ -4347,7 +4374,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
@@ -4383,7 +4410,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
-                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.fourth_a, deviceId: testLocators.fourth_a.createdByDevice } },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                 ], { skip: 2 })
@@ -4474,7 +4501,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedAnnotationListEntry',
                         'sharedContentFingerprint',
                         'sharedContentLocator',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     personalBlockStats: [blockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
@@ -4522,7 +4549,7 @@ describe('Personal cloud translation layer', () => {
             })
 
             it('should setup 2 accounts on different devices, create+share a list and add a PDF on device A, join list on device B, then share an annotation on device B', async () => {
-                const { setups, serverStorage } = await setup({
+                const { setups, serverStorage, testDownload } = await setup({
                     differDeviceUsers: true,
                 })
 
@@ -4635,6 +4662,7 @@ describe('Personal cloud translation layer', () => {
                         pageUrl: LOCAL_TEST_DATA_V24.pages.fourth.url,
                         listId: testJoinedListId,
                     })
+
                 await setups[1].backgroundModules.personalCloud.waitForSync()
 
                 // prettier-ignore
@@ -4647,7 +4675,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentFingerprint',
                         'sharedContentLocator',
                         'sharedPageInfo',
-                    ], { getWhere: getPersonalWhere }),
+                    ], { getWhere: getPersonalWhere, getOrder: getPersonalOrder }),
                 ).toEqual({
                     sharedList: [
                         expect.objectContaining({
