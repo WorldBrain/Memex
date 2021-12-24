@@ -53,7 +53,7 @@ class BookmarkButton extends PureComponent<Props> {
 
     render() {
         const text = this.props.isBookmarked
-            ? 'Page Boomarked!'
+            ? 'Page Bookmarked!'
             : 'Bookmark this Page'
 
         return (
