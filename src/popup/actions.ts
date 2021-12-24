@@ -60,8 +60,11 @@ async function init() {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
-    if (!currentTab?.url) {
-        console.warn("initState - Couldn't get a currentTab url")
+    if (
+        !currentTab?.url ||
+        currentTab.url.startsWith('chrome-extension://') ||
+        currentTab.url.startsWith('moz-extension://')
+    ) {
         return { currentTab: null, fullUrl: null }
     }
 
@@ -89,6 +92,7 @@ export const initBasicStore: () => Thunk = () => async (dispatch) => {
 export const initState: () => Thunk = () => async (dispatch) => {
     const { currentTab, fullUrl } = await init()
     if (!currentTab) {
+        dispatch(setInitState(true))
         return
     }
 
@@ -117,9 +121,10 @@ export const initState: () => Thunk = () => async (dispatch) => {
         })
         dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
         dispatch(tagActs.setTags(pageTags))
-        dispatch(setInitState(true))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)
+    } finally {
+        dispatch(setInitState(true))
     }
 }
