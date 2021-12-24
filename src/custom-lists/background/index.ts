@@ -56,11 +56,7 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             insertPageToList: async (params) => {
-                const currentTab = await this.options.queryTabs?.({
-                    active: true,
-                    currentWindow: true,
-                })
-                params.tabId = currentTab?.[0]?.id
+                await this.setTabIdParamToCurrentTab(params)
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
@@ -82,6 +78,12 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            updateListForPageInCurrentTab: async (params) => {
+                if (params.tabId == null) {
+                    await this.setTabIdParamToCurrentTab(params)
+                }
+                return this.updateListForPage(params)
+            },
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
 
@@ -93,6 +95,16 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
+    }
+
+    private async setTabIdParamToCurrentTab<T extends { tabId?: number }>(
+        params: T,
+    ): Promise<void> {
+        const currentTab = await this.options.queryTabs?.({
+            active: true,
+            currentWindow: true,
+        })
+        params.tabId = currentTab?.[0]?.id
     }
 
     private fetchOwnListReferences = async (): Promise<

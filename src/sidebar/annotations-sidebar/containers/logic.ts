@@ -662,7 +662,7 @@ export class SidebarContainerLogic extends UILogic<
     updateListsForPageResult: EventHandler<
         'updateListsForPageResult'
     > = async ({ event }) => {
-        return this.options.customLists.updateListForPage({
+        return this.options.customLists.updateListForPageInCurrentTab({
             added: event.added,
             deleted: event.deleted,
             url: event.url,

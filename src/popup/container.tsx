@@ -131,7 +131,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     handleTagUpdate = async ({ added, deleted }) => {
-        const backendResult = tags.updateTagForPage({
+        const backendResult = tags.updateTagForPageInCurrentTab({
             added,
             deleted,
             url: this.props.url,
@@ -151,7 +151,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
     handleListUpdate = async ({ added, deleted }) => {
-        const backendResult = collections.updateListForPage({
+        const backendResult = collections.updateListForPageInCurrentTab({
             added,
             deleted,
             url: this.props.url,

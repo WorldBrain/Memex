@@ -438,7 +438,7 @@ export class RibbonContainerLogic extends UILogic<
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()
-                : this.dependencies.tags.updateTagForPage({
+                : this.dependencies.tags.updateTagForPageInCurrentTab({
                       added: event.value.added,
                       deleted: event.value.deleted,
                       url: previousState.pageUrl,
@@ -530,7 +530,7 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
 
-        return this.dependencies.customLists.updateListForPage({
+        return this.dependencies.customLists.updateListForPageInCurrentTab({
             added: event.value.added,
             deleted: event.value.deleted,
             url: previousState.pageUrl,
