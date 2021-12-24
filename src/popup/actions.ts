@@ -10,6 +10,7 @@ import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { getUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { isUrlSupported } from 'src/page-indexing/utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -60,11 +61,7 @@ async function init() {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
-    if (
-        !currentTab?.url ||
-        currentTab.url.startsWith('chrome-extension://') ||
-        currentTab.url.startsWith('moz-extension://')
-    ) {
+    if (!currentTab?.url || !isUrlSupported(currentTab)) {
         return { currentTab: null, fullUrl: null }
     }
 
