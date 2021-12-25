@@ -32,12 +32,38 @@ const FinishHeader = styled.div`
     text-align: left;
     margin-bottom: 17px;
 `
+
+const OptionsList = styled.div`
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 20px;
+    padding: 0 60px 30px;
+`
+
 const OptionItem = styled.div`
-    font-size: 16px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-weight: 400;
-    text-align: left;
-    padding: 10px 0;
+    flex-direction: column;
+    text-align: center;
+    padding: 10px 10px;
     cursor: pointer;
+    font-size: bold;
+    height: 140px;
+    width: 140px;
+    color: ${(props) => props.theme.colors.primary};
+    box-shadow: 0px 1px 5px 1px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background-color: #f0f0f0;
+    }
+`
+
+const OptionItemIcon = styled.div`
+    font-size: 30px;
+    margin-bottom: 10px;
 `
 
 const FinishContainer = styled.div`
@@ -81,15 +107,25 @@ const FinishTitleBox = styled.div`
     justify-content: center;
     align-items: center;
     width: 100%;
+    flex-direction: column;
+    margin-bottom: 30px;
 `
 
 const AnnotationTitleText = styled.div`
     font-size: 1.1em;
+    display: flex;
+    align-items: center;
+`
+
+const AnnotationSubTitleText = styled.div`
+    font-size: 1em;
+    font-weight: normal;
+    color: ${(props) => props.theme.colors.subText};
 `
 
 const AnnotationTitleImage = styled.div`
     font-size: 30px;
-    padding: 0 15px 0 0;
+    padding: 0 5px 0 0;
 `
 
 const MouseOverArea = styled.div`
@@ -155,10 +191,6 @@ const PinTutorialArrow = styled.span`
             transform: translateY(20px);
         }
     }
-`
-
-const OptionsList = styled.div`
-    padding-left: 40px;
 `
 
 const AnnotationTutorialArrow = styled.span`
@@ -322,10 +354,13 @@ export const tutorialSteps: TutorialStepContent[] = [
             <>
                 <FinishContainer>
                     <FinishTitleBox>
-                        <AnnotationTitleImage>✌🏽</AnnotationTitleImage>
                         <AnnotationTitleText>
-                            Done! Here are some next steps you can do.{' '}
+                            <AnnotationTitleImage>✌🏽</AnnotationTitleImage>{' '}
+                            Done!
                         </AnnotationTitleText>
+                        <AnnotationSubTitleText>
+                            Here are some next steps you can do.
+                        </AnnotationSubTitleText>
                     </FinishTitleBox>
                     <OptionsList>
                         {/* <OptionItem
@@ -340,7 +375,10 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 window.open('https://tutorials.memex.garden')
                             }
                         >
-                            🎓 Visit our tutorials
+                            <OptionItemIcon>🎓</OptionItemIcon>
+                            Visit
+                            <br />
+                            tutorials
                         </OptionItem>
                         <OptionItem
                             onClick={() =>
@@ -349,8 +387,20 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 )
                             }
                         >
-                            ☎️ Book an onboarding call
+                            <OptionItemIcon>☎️</OptionItemIcon>
+                            Personalised <br />
+                            onboarding
                         </OptionItem>
+                        {/* <OptionItem
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/onboarding',
+                                )
+                            }
+                        >
+                            <OptionItemIcon>🔖</OptionItemIcon>
+                            Import <br />Bookmarks
+                        </OptionItem> */}
                     </OptionsList>
                 </FinishContainer>
             </>
@@ -358,10 +408,9 @@ export const tutorialSteps: TutorialStepContent[] = [
         text: <></>,
         top: '25%',
         bottom: null,
-        left: '30%',
-        right: '30%',
-        width: '40%px',
-        height: '250px',
+        left: '0px',
+        width: '700px',
+        height: 'fit-content',
     },
 
     // {
