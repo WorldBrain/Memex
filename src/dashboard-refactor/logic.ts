@@ -1620,13 +1620,37 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+        const addedId = event.added
+            ? await this.options.listsBG
+                  .fetchListByName({ name: event.added })
+                  .then((list) => list.id)
+            : null
+        const deletedId = event.deleted
+            ? await this.options.listsBG
+                  .fetchListByName({ name: event.deleted })
+                  .then((list) => list.id)
+            : null
 
-        // TODO: insert proper function call
-        // await this.options.annotationsBG.insertAnnotToList({
-        //     url: event.noteId,
-        //     listsToBeAdded: event.added ? [event.added] : [],
-        //     listsToBeDeleted: event.deleted ? [event.deleted] : [],
-        // })
+        if (addedId) {
+            const {
+                sharingState,
+            } = await this.options.contentShareBG.shareAnnotationToSomeLists({
+                annotationUrl: event.noteId,
+                localListIds: [addedId],
+            })
+            // return sharingState
+        }
+        if (deletedId) {
+            const {
+                sharingState,
+            } = await this.options.contentShareBG.unshareAnnotationFromSomeLists(
+                {
+                    annotationUrl: event.noteId,
+                    localListIds: [deletedId],
+                },
+            )
+            // return sharingState
+        }
     }
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({

@@ -29,6 +29,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { linkStreams } from 'openpgp'
 
 const styles = require('./annotation-list.css')
 
@@ -299,15 +300,17 @@ class AnnotationList extends Component<Props, State> {
                             )
                             const id = list.id
                             if (args.added != null) {
-                                this.contentShareBG.addAnnotationToLists({
+                                this.contentShareBG.shareAnnotationToSomeLists({
                                     annotationUrl: annot.url,
-                                    listIds: [id],
+                                    localListIds: [id],
                                 })
                             } else if (args.deleted != null) {
-                                this.contentShareBG.removeAnnotationsFromLists({
-                                    annotationUrl: annot.url,
-                                    listIds: [id],
-                                })
+                                this.contentShareBG.unshareAnnotationFromSomeLists(
+                                    {
+                                        annotationUrl: annot.url,
+                                        localListIds: [id],
+                                    },
+                                )
                             }
                         }}
                         initialSelectedEntries={() => annot.lists}

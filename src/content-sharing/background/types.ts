@@ -82,18 +82,6 @@ export interface ContentSharingInterface
     }): Promise<{ [listId: number]: boolean }>
     waitForSync(): Promise<void>
     executePendingActions(): Promise<void>
-    getListsForAnnotations(args: {
-        annotationUrls: string[]
-    }): Promise<{ [annotationUrl: string]: string[] }>
-    getListsForAnnotation(annotationUrl: string): Promise<string[]>
-    addAnnotationToLists(args: {
-        annotationUrl: string
-        listIds: number[]
-    }): Promise<void>
-    removeAnnotationsFromLists(args: {
-        annotationUrl: string
-        listIds: number[]
-    }): Promise<void>
     findAnnotationPrivacyLevels(params: {
         annotationUrls: string[]
     }): Promise<{

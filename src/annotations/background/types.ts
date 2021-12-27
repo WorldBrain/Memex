@@ -22,7 +22,12 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     >
     listAnnotationsByPageUrl: RemoteFunction<
         Role,
-        { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
+        {
+            pageUrl: string
+            withTags?: boolean
+            withLists?: boolean
+            withBookmarks?: boolean
+        },
         Annotation[]
     >
     createAnnotation: RemotePositionalFunction<

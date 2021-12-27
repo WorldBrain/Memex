@@ -17,6 +17,10 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import {
+    List,
+    ListEntry,
+} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -163,10 +167,20 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: { $in: '$annotationUrls:string[]' } },
             },
+            listAnnotationListsForAnnotations: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$annotationUrls:string[]' } },
+            },
             listAnnotationBookmarksForAnnotations: {
                 collection: AnnotationStorage.BMS_COLL,
                 operation: 'findObjects',
                 args: { url: { $in: '$annotationUrls:string[]' } },
+            },
+            findListById: {
+                collection: AnnotationStorage.LISTS_COLL,
+                operation: 'findObject',
+                args: { id: '$id:pk' },
             },
         },
     })
@@ -178,10 +192,12 @@ export default class AnnotationStorage extends StorageModule {
     async listAnnotationsByPageUrl({
         pageUrl,
         withTags,
+        withLists,
         withBookmarks,
     }: {
         pageUrl: string
         withTags?: boolean
+        withLists?: boolean
         withBookmarks?: boolean
     }) {
         pageUrl = normalizeUrl(pageUrl)
@@ -195,6 +211,7 @@ export default class AnnotationStorage extends StorageModule {
         const annotationUrls = annotations.map((annotation) => annotation.url)
         let annotationsBookmarkMap = new Map<string, boolean>()
         let annotationsTagMap = new Map<string, string[]>()
+        let annotationsListMap = new Map<string, string[]>() // Lists should be identified by names since tags are too, but annotListEntries only save listIds
 
         if (withBookmarks !== false) {
             annotationsBookmarkMap = new Map(
@@ -222,11 +239,34 @@ export default class AnnotationStorage extends StorageModule {
             }
         }
 
-        if (annotationsTagMap.size > 0 || annotationsBookmarkMap.size > 0) {
+        if (withLists !== false) {
+            const annotationLists: AnnotListEntry[] = await this.operation(
+                'listAnnotationListsForAnnotations',
+                {
+                    annotationUrls,
+                },
+            )
+
+            annotationsListMap = new Map()
+            for (const list of annotationLists) {
+                const prev = annotationsListMap.get(list.url) ?? []
+                const customList: List = await this.operation('findListById', {
+                    id: list.listId,
+                })
+                annotationsListMap.set(list.url, [...prev, customList.name])
+            }
+        }
+
+        if (
+            annotationsTagMap.size > 0 ||
+            annotationsBookmarkMap.size > 0 ||
+            annotationsListMap.size > 0
+        ) {
             annotations.forEach((annotation) => {
                 annotation.tags = annotationsTagMap.get(annotation.url) ?? []
                 annotation.isBookmarked =
                     annotationsBookmarkMap.get(annotation.url) ?? false
+                annotation.lists = annotationsListMap.get(annotation.url) ?? []
             })
         }
 

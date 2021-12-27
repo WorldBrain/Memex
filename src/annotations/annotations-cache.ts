@@ -10,7 +10,10 @@ import {
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
 import { haveTagsChanged } from 'src/util/have-tags-changed'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingState,
+    ContentSharingInterface,
+} from 'src/content-sharing/background/types'
 import {
     createAnnotation,
     updateAnnotation,
@@ -37,6 +40,7 @@ export const createAnnotationsCache = (
                     {
                         pageUrl,
                         withTags: true,
+                        withLists: true,
                     },
                 )
 
@@ -100,9 +104,18 @@ export const createAnnotationsCache = (
                 }),
 
             updateLists: async (annotationUrl, listNames) => {
-                const existingLists = await bgModules.contentSharing.getListsForAnnotation(
-                    annotationUrl,
+                const prevSharingState = await bgModules.contentSharing.getAnnotationSharingState(
+                    { annotationUrl },
                 )
+                const existingListIds = prevSharingState.localListIds ?? []
+                const existingLists = await Promise.all(
+                    existingListIds.map((id) =>
+                        bgModules.customLists
+                            .fetchListById({ id })
+                            .then((list) => list.name),
+                    ),
+                )
+
                 const existingListsSet = new Set(existingLists)
                 const newListsSet = new Set(listNames)
 
@@ -118,10 +131,15 @@ export const createAnnotationsCache = (
                             bgModules.customLists.fetchListByName({ name }),
                         ),
                     )
-                    bgModules.contentSharing.addAnnotationToLists({
-                        annotationUrl,
-                        listIds: toAddLists.map((list) => list.id),
-                    })
+                    const {
+                        sharingState,
+                    } = await bgModules.contentSharing.shareAnnotationToSomeLists(
+                        {
+                            annotationUrl,
+                            localListIds: toAddLists.map((list) => list.id),
+                        },
+                    )
+                    return sharingState
                 }
                 if (toDelete.length) {
                     const toDeleteLists = await Promise.all(
@@ -129,10 +147,15 @@ export const createAnnotationsCache = (
                             bgModules.customLists.fetchListByName({ name }),
                         ),
                     )
-                    bgModules.contentSharing.removeAnnotationsFromLists({
-                        annotationUrl,
-                        listIds: toDeleteLists.map((list) => list.id),
-                    })
+                    const {
+                        sharingState,
+                    } = await bgModules.contentSharing.unshareAnnotationFromSomeLists(
+                        {
+                            annotationUrl,
+                            localListIds: toDeleteLists.map((list) => list.id),
+                        },
+                    )
+                    return sharingState
                 }
             },
         },
@@ -174,7 +197,7 @@ export interface AnnotationsCacheDependencies {
         updateLists: (
             annotationUrl: CachedAnnotation['url'],
             lists: CachedAnnotation['lists'],
-        ) => Promise<void>
+        ) => Promise<AnnotationSharingState>
         delete: (annotation: CachedAnnotation) => Promise<void>
     }
 }
@@ -279,7 +302,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 await backendOperations.updateTags(annotUrl, annotation.tags)
             }
             if (annotation.lists.length) {
-                await backendOperations.updateLists(annotUrl, annotation.lists)
+                const sharingState = await backendOperations.updateLists(
+                    annotUrl,
+                    annotation.lists,
+                )
             }
         } catch (e) {
             this._annotations = stateBeforeModifications
@@ -348,7 +374,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                     annotation.lists,
                 )
             ) {
-                await this.dependencies.backendOperations.updateLists(
+                const sharingState = await this.dependencies.backendOperations.updateLists(
                     annotation.url,
                     annotation.lists,
                 )
