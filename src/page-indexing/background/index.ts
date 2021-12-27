@@ -235,12 +235,11 @@ export class PageIndexingBackground {
         return primaryIdentifier
     }
 
-    async waitForContentIdentifier(params: {
+    waitForContentIdentifier = (params: {
         tabId: number
         fullUrl: string
-    }): Promise<WaitForContentIdentifierReturns> {
-        return this._resolvableForIdentifierTabPage(params)
-    }
+    }): Promise<WaitForContentIdentifierReturns> =>
+        this._resolvableForIdentifierTabPage(params)
 
     getContentFingerprints(
         contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,

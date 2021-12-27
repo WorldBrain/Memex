@@ -30,35 +30,39 @@ export async function maybeIndexTabs(
     tabs: Array<{ url: string; id: number }>,
     options: {
         createPage: PageIndexingBackground['indexPage']
+        waitForContentIdentifier: PageIndexingBackground['waitForContentIdentifier']
         time: number | '$now'
     },
 ) {
     const indexed: { fullUrl: string }[] = []
-    await Promise.all(
-        tabs.filter(isUrlSupported).map(async (tab) => {
-            let error = false
-            const fullUrl = getUrl(tab.url)
-            await options
-                .createPage(
-                    {
-                        fullUrl,
-                        tabId: tab.id,
-                        allowScreenshot: false,
-                        visitTime: options.time,
-                    },
-                    { addInboxEntryOnCreate: true },
-                )
-                .catch((err) => {
-                    Raven.captureException(err)
-                    error = true
-                    console.error(err)
-                })
 
-            if (!error) {
-                indexed.push({ fullUrl })
-            }
-        }),
-    )
+    for (const tab of tabs.filter(isUrlSupported)) {
+        const { fullUrl } = await options.waitForContentIdentifier({
+            tabId: tab.id,
+            fullUrl: getUrl(tab.url),
+        })
+        let error = false
+
+        try {
+            await options.createPage(
+                {
+                    fullUrl,
+                    tabId: tab.id,
+                    allowScreenshot: false,
+                    visitTime: options.time,
+                },
+                { addInboxEntryOnCreate: true },
+            )
+        } catch (err) {
+            error = true
+            Raven.captureException(err)
+            console.error(err)
+        }
+
+        if (!error) {
+            indexed.push({ fullUrl })
+        }
+    }
 
     return indexed
 }

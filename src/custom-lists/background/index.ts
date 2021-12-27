@@ -564,6 +564,8 @@ export default class CustomListBackground {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
+            waitForContentIdentifier: this.options.pages
+                .waitForContentIdentifier,
             createPage: this.options.pages.indexPage,
             time: args.time ?? '$now',
         })
