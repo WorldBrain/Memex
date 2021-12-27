@@ -281,6 +281,35 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this.annotations)
     }
 
+    private maybeCreateLists = async (annotation, annotUrl, shareOpts) => {
+        // this is a function so we can get a return value while using only const
+        if (annotation.lists.length) {
+            const sharingState = await this.dependencies.backendOperations.updateLists(
+                annotUrl,
+                annotation.lists,
+            )
+            const newLists = await Promise.all(
+                sharingState.localListIds.map((id) =>
+                    this.dependencies.getListNameFromId(id),
+                ),
+            )
+            const parsedPrivacyLevel = getAnnotationPrivacyState(
+                sharingState.privacyLevel,
+            )
+            const annotAfterListUpdate = {
+                ...annotation,
+                lastEdited: new Date(),
+                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
+                isBulkShareProtected:
+                    shareOpts?.isBulkShareProtected ??
+                    parsedPrivacyLevel.protected,
+                lists: newLists,
+            }
+            return annotAfterListUpdate
+        }
+        return null
+    }
+
     create: AnnotationsCacheInterface['create'] = async (
         annotation,
         shareOpts,
@@ -288,7 +317,18 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 
-        const nextAnnotation = {
+        const annotUrl = await backendOperations.create(annotation, shareOpts)
+
+        if (annotation.tags.length) {
+            await backendOperations.updateTags(annotUrl, annotation.tags)
+        }
+
+        const annotAfterListUpdate = await this.maybeCreateLists(
+            annotation,
+            annotUrl,
+            shareOpts,
+        )
+        const nextAnnotation = annotAfterListUpdate ?? {
             ...annotation,
             createdWhen: new Date(),
             isShared: shareOpts?.shouldShare,
@@ -300,27 +340,45 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('created', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
-        try {
-            const annotUrl = await backendOperations.create(
-                annotation,
-                shareOpts,
-            )
+        // try {
+        // } catch (e) {
+        //     this._annotations = stateBeforeModifications
+        //     this.annotationChanges.emit('rollback', stateBeforeModifications)
+        //     throw e
+        // }
+    }
 
-            if (annotation.tags.length) {
-                await backendOperations.updateTags(annotUrl, annotation.tags)
+    private maybeUpdateLists = async (
+        annotation,
+        previousAnnotation,
+        shareOpts,
+    ) => {
+        // this is a function so we can get a return value while using only const
+        if (haveTagsChanged(previousAnnotation.lists ?? [], annotation.lists)) {
+            const sharingState = await this.dependencies.backendOperations.updateLists(
+                annotation.url,
+                annotation.lists,
+            )
+            const newLists = await Promise.all(
+                sharingState.localListIds.map((id) =>
+                    this.dependencies.getListNameFromId(id),
+                ),
+            )
+            const parsedPrivacyLevel = getAnnotationPrivacyState(
+                sharingState.privacyLevel,
+            )
+            const annotAfterListUpdate = {
+                ...annotation,
+                lastEdited: new Date(),
+                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
+                isBulkShareProtected:
+                    shareOpts?.isBulkShareProtected ??
+                    parsedPrivacyLevel.protected,
+                lists: newLists,
             }
-            if (annotation.lists.length) {
-                const sharingState = await backendOperations.updateLists(
-                    annotUrl,
-                    annotation.lists,
-                )
-                console.log('annotations-cache create', { sharingState })
-            }
-        } catch (e) {
-            this._annotations = stateBeforeModifications
-            this.annotationChanges.emit('rollback', stateBeforeModifications)
-            throw e
+            return annotAfterListUpdate
         }
+        return null
     }
 
     update: AnnotationsCacheInterface['update'] = async (
@@ -343,44 +401,12 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             )
         }
         // Lists
-        const maybeUpdateLists = async () => {
-            if (
-                haveTagsChanged(
-                    previousAnnotation.lists ?? [],
-                    annotation.lists,
-                )
-            ) {
-                const sharingState = await this.dependencies.backendOperations.updateLists(
-                    annotation.url,
-                    annotation.lists,
-                )
-                // TODO: Convert privacy level
-                const newLists = await Promise.all(
-                    sharingState.localListIds.map((id) =>
-                        this.dependencies.getListNameFromId(id),
-                    ),
-                )
-                const parsedPrivacyLevel = getAnnotationPrivacyState(
-                    sharingState.privacyLevel,
-                )
-                const annotAfterListUpdate = {
-                    ...annotation,
-                    lastEdited: new Date(),
-                    isShared:
-                        shareOpts?.shouldShare ??
-                        parsedPrivacyLevel.public ??
-                        previousAnnotation.isShared,
-                    isBulkShareProtected:
-                        shareOpts?.isBulkShareProtected ??
-                        parsedPrivacyLevel.protected ??
-                        previousAnnotation.isBulkShareProtected,
-                    lists: newLists,
-                }
-                return annotAfterListUpdate
-            }
-            return null
-        }
-        const annotAfterListUpdate = await maybeUpdateLists()
+
+        const annotAfterListUpdate = await this.maybeUpdateLists(
+            annotation,
+            previousAnnotation,
+            shareOpts,
+        )
         const nextAnnotation = annotAfterListUpdate ?? {
             ...annotation,
             lastEdited: new Date(),
