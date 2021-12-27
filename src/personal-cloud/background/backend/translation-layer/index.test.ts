@@ -1311,81 +1311,6 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 3 })
         })
 
-        it('should update annotation privacy levels, unsharing on update to non-shared level', async () => {
-            const {
-                setups,
-                serverIdCapturer,
-                serverStorage,
-                testDownload,
-            } = await setup()
-            await insertTestPages(setups[0].storageManager)
-            await setups[0].storageManager
-                .collection('annotations')
-                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
-            await setups[0].storageManager
-                .collection('annotationPrivacyLevels')
-                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
-            await setups[0].storageManager
-                .collection('sharedAnnotationMetadata')
-                .createObject(
-                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
-                )
-            await setups[0].storageManager
-                .collection('annotationPrivacyLevels')
-                .updateOneObject(
-                    {
-                        id:
-                            LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first
-                                .id,
-                    },
-                    { privacyLevel: AnnotationPrivacyLevels.PRIVATE },
-                )
-            await setups[0].backgroundModules.personalCloud.waitForSync()
-
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
-            const testMetadata = remoteData.personalContentMetadata
-            const testLocators = remoteData.personalContentLocator
-            const testAnnotations = remoteData.personalAnnotation
-            const testAnnotationShares = remoteData.personalAnnotationShare
-            const testSelectors = remoteData.personalAnnotationSelector
-            const testPrivacyLevels = remoteData.personalAnnotationPrivacyLevel
-
-            // prettier-ignore
-            expect(
-                await getDatabaseContents(serverStorage.storageManager, [
-                    // 'dataUsageEntry',
-                    'personalDataChange',
-                    'personalBlockStats',
-                    'personalContentMetadata',
-                    'personalContentLocator',
-                    'personalAnnotation',
-                    'personalAnnotationShare',
-                    'personalAnnotationSelector',
-                    'personalAnnotationPrivacyLevel',
-                    'sharedAnnotation',
-                ], { getWhere: getPersonalWhere }),
-            ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
-                    [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
-                ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
-                personalContentMetadata: [testMetadata.first, testMetadata.second],
-                personalContentLocator: [testLocators.first, testLocators.second],
-                personalAnnotation: [testAnnotations.first],
-                personalAnnotationShare: [testAnnotationShares.first],
-                personalAnnotationSelector: [testSelectors.first],
-                personalAnnotationPrivacyLevel: [{ ...testPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE }],
-                sharedAnnotation: [],
-            })
-
-            // prettier-ignore
-            await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.PRIVATE } },
-            ], { skip: 3 })
-        })
-
         it('should update annotation privacy levels, re-sharing on update to shared privacy level', async () => {
             const {
                 setups,
@@ -1902,6 +1827,104 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: changeInfo },
             ], { skip: 1 })
+        })
+
+        it('should create annotation list entries', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('annotListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testAnnotationListEntries =
+                remoteData.personalAnnotationListEntry
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalAnnotationListEntry',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotationListEntries.first.id],
+                ], { skipChanges: 7 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalAnnotationListEntry: [testAnnotationListEntries.first],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'annotListEntries', object: LOCAL_TEST_DATA_V24.annotationListEntries.first },
+            ], { skip: 4 })
+        })
+
+        it('should delete annotation list entries', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('annotListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const changeInfo = {
+                listId: LOCAL_TEST_DATA_V24.annotationListEntries.first.listId,
+                url: LOCAL_TEST_DATA_V24.annotationListEntries.first.url,
+            }
+            await setups[0].storageManager
+                .collection('annotListEntries')
+                .deleteOneObject(changeInfo)
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testAnnotationListEntries =
+                remoteData.personalAnnotationListEntry
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalAnnotationListEntry',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Delete, 'personalAnnotationListEntry', testAnnotationListEntries.first.id, changeInfo],
+                ], { skipChanges: 8 }),
+                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalAnnotationListEntry: [],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: changeInfo },
+            ], { skip: 4 })
         })
 
         it('should create shared annotation metadata', async () => {
