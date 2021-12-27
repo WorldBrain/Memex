@@ -213,6 +213,9 @@ export class AnnotationsSidebarContainer<
             return remoteLists.map((list) => list.name)
         }
         return {
+            // initialSelectedEntriesForNoteId: (id)=>()=>{
+
+            // },
             onListsUpdate: (lists) =>
                 this.processEvent('updateNewPageCommentLists', { lists }),
             listQueryEntries: (prefix) =>
@@ -286,25 +289,29 @@ export class AnnotationsSidebarContainer<
             ? [...annotLists, added]
             : annotLists.filter((list) => list !== deleted)
 
-        await this.props.annotationsCache.update({ ...annot, lists: newLists })
+        console.log('handleListsUpdate', { added, deleted, newLists, annot })
+        const sharingState = await this.props.annotationsCache.update({
+            ...annot,
+            lists: newLists,
+        })
 
         // we're calling annoationCache update above
         // but updating list state outside of it,
         // TODO: this is duplicated from annotations-list
-        const name = added ?? deleted
-        const list = await this.props.customLists.fetchListByName({ name })
-        const id = list.id
-        if (added != null) {
-            this.props.contentSharing.addAnnotationToLists({
-                annotationUrl: annot.url,
-                listIds: [id],
-            })
-        } else if (deleted != null) {
-            this.props.contentSharing.removeAnnotationsFromLists({
-                annotationUrl: annot.url,
-                listIds: [id],
-            })
-        }
+        // const name = added ?? deleted
+        // const list = await this.props.customLists.fetchListByName({ name })
+        // const id = list.id
+        // if (added != null) {
+        //     this.props.contentSharing.shareAnnotationToSomeLists({
+        //         annotationUrl: annot.url,
+        //         localListIds: [id],
+        //     })
+        // } else if (deleted != null) {
+        //     this.props.contentSharing.unshareAnnotationFromSomeLists({
+        //         annotationUrl: annot.url,
+        //         localListIds: [id],
+        //     })
+        // }
     }
 
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
@@ -385,7 +392,6 @@ export class AnnotationsSidebarContainer<
         return (
             <CollectionPicker
                 initialSelectedEntries={() => annot.lists ?? []}
-                // initialSelectedEntries={() => annot.lists ?? []}
                 queryEntries={collectionPickerProps.listQueryEntries}
                 loadDefaultSuggestions={
                     collectionPickerProps.loadDefaultListSuggestions
@@ -401,30 +407,31 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderListPickerForAnnotation = (currentAnnotationId: string) => {
-        // Not used yet but will be used for the "Add to collection" button
-        if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
-            return null
-        }
-        return (
-            <PickerWrapper>
-                <HoverBox>
-                    <ClickAway
-                        onClickAway={() =>
-                            this.processEvent(
-                                'resetListPickerAnnotationId',
-                                null,
-                            )
-                        }
-                    >
-                        {this.renderListPickerContentForAnnotation(
-                            currentAnnotationId,
-                        )}
-                    </ClickAway>
-                </HoverBox>
-            </PickerWrapper>
-        )
-    }
+    // TODO: may be used once tags and lists are unified
+    // private renderListPickerForAnnotation = (currentAnnotationId: string) => {
+    //     // Not used yet but will be used for the "Add to collection" button
+    //     if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
+    //         return null
+    //     }
+    //     return (
+    //         <PickerWrapper>
+    //             <HoverBox>
+    //                 <ClickAway
+    //                     onClickAway={() =>
+    //                         this.processEvent(
+    //                             'resetListPickerAnnotationId',
+    //                             null,
+    //                         )
+    //                     }
+    //                 >
+    //                     {this.renderListPickerContentForAnnotation(
+    //                         currentAnnotationId,
+    //                     )}
+    //                 </ClickAway>
+    //             </HoverBox>
+    //         </PickerWrapper>
+    //     )
+    // }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
         if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
