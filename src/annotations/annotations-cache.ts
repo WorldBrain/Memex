@@ -20,6 +20,7 @@ import {
     AnnotationShareOpts,
 } from './annotation-save-logic'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 export type CachedAnnotation = Annotation
 
@@ -33,6 +34,12 @@ export const createAnnotationsCache = (
     options: { skipPageIndexing?: boolean } = {},
 ): AnnotationsCache =>
     new AnnotationsCache({
+        getListNameFromId: async (id: number) => {
+            const name = bgModules.customLists
+                .fetchListById({ id })
+                .then((list) => list.name)
+            return name
+        },
         sortingFn: sortByPagePosition,
         backendOperations: {
             load: async (pageUrl) => {
@@ -176,6 +183,7 @@ export type AnnotationCacheChangeEvents = TypedEventEmitter<
 >
 
 export interface AnnotationsCacheDependencies {
+    getListNameFromId: (id: number) => Promise<string>
     sortingFn: AnnotationsSorter
     backendOperations?: {
         load: (
@@ -306,6 +314,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                     annotUrl,
                     annotation.lists,
                 )
+                console.log('annotations-cache create', { sharingState })
             }
         } catch (e) {
             this._annotations = stateBeforeModifications
@@ -325,7 +334,54 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         )
 
         const previousAnnotation = stateBeforeModifications[resultIndex]
-        const nextAnnotation = {
+
+        // Tags
+        if (haveTagsChanged(previousAnnotation.tags ?? [], annotation.tags)) {
+            await this.dependencies.backendOperations.updateTags(
+                annotation.url,
+                annotation.tags,
+            )
+        }
+        // Lists
+        const maybeUpdateLists = async () => {
+            if (
+                haveTagsChanged(
+                    previousAnnotation.lists ?? [],
+                    annotation.lists,
+                )
+            ) {
+                const sharingState = await this.dependencies.backendOperations.updateLists(
+                    annotation.url,
+                    annotation.lists,
+                )
+                // TODO: Convert privacy level
+                const newLists = await Promise.all(
+                    sharingState.localListIds.map((id) =>
+                        this.dependencies.getListNameFromId(id),
+                    ),
+                )
+                const parsedPrivacyLevel = getAnnotationPrivacyState(
+                    sharingState.privacyLevel,
+                )
+                const annotAfterListUpdate = {
+                    ...annotation,
+                    lastEdited: new Date(),
+                    isShared:
+                        shareOpts?.shouldShare ??
+                        parsedPrivacyLevel.public ??
+                        previousAnnotation.isShared,
+                    isBulkShareProtected:
+                        shareOpts?.isBulkShareProtected ??
+                        parsedPrivacyLevel.protected ??
+                        previousAnnotation.isBulkShareProtected,
+                    lists: newLists,
+                }
+                return annotAfterListUpdate
+            }
+            return null
+        }
+        const annotAfterListUpdate = await maybeUpdateLists()
+        const nextAnnotation = annotAfterListUpdate ?? {
             ...annotation,
             lastEdited: new Date(),
             isShared: shareOpts?.shouldShare ?? previousAnnotation.isShared,
@@ -355,28 +411,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 await this.dependencies.backendOperations.update(
                     nextAnnotation,
                     shareOpts,
-                )
-            }
-
-            // Tags
-            if (
-                haveTagsChanged(previousAnnotation.tags ?? [], annotation.tags)
-            ) {
-                await this.dependencies.backendOperations.updateTags(
-                    annotation.url,
-                    annotation.tags,
-                )
-            }
-            // Lists
-            if (
-                haveTagsChanged(
-                    previousAnnotation.lists ?? [],
-                    annotation.lists,
-                )
-            ) {
-                const sharingState = await this.dependencies.backendOperations.updateLists(
-                    annotation.url,
-                    annotation.lists,
                 )
             }
         } catch (e) {
