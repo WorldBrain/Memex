@@ -347,6 +347,13 @@ export const LOCAL_TEST_DATA_V24 = {
             listId: LOCAL_LISTS_V24.first.id,
         },
     },
+    annotationListEntries: {
+        first: {
+            listId: LOCAL_LISTS_V24.first.id,
+            url: LOCAL_ANNOTATIONS_V24.first.url,
+            createdAt: new Date(1625190554990),
+        },
+    },
     templates: {
         first: {
             id: 1,
@@ -949,6 +956,15 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 565,
             updatedWhen: 565,
+        },
+    },
+    personalAnnotationListEntry: {
+        first: {
+            id: 1,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.first.id,
         },
     },
     personalTextTemplate: {
