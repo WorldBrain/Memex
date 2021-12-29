@@ -30,6 +30,7 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { linkStreams } from 'openpgp'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 const styles = require('./annotation-list.css')
 
@@ -365,15 +366,20 @@ class AnnotationList extends Component<Props, State> {
                             await copyToClipboard(link)
                         }}
                         annotationUrl={annot.url}
-                        postShareHook={({ isShared, isProtected }) =>
-                            this.updateAnnotationShareState(annot.url)({
-                                status: isShared ? 'shared' : 'unshared',
+                        postShareHook={(state) => {
+                            const privacyState = getAnnotationPrivacyState(
+                                state.privacyLevel,
+                            )
+                            return this.updateAnnotationShareState(annot.url)({
+                                status: privacyState.public
+                                    ? 'shared'
+                                    : 'unshared',
                                 taskState: 'success',
-                                privacyLevel: isProtected
+                                privacyLevel: privacyState.protected
                                     ? AnnotationPrivacyLevels.PROTECTED
                                     : undefined,
                             })
-                        }
+                        }}
                         closeShareMenu={() =>
                             this.props.setActiveShareMenuNoteId?.(undefined)
                         }

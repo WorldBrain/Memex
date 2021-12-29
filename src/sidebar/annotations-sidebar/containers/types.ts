@@ -12,7 +12,11 @@ import type {
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import type { SidebarTheme } from '../types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+    ContentSharingInterface,
+} from 'src/content-sharing/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { Analytics } from 'src/analytics'
 import type { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
@@ -262,8 +266,8 @@ export type SidebarContainerEvents = UIEvent<
 
         updateAnnotationShareInfo: {
             annotationUrl: string
-        } & NoteShareInfo
-        updateAllAnnotationsShareInfo: NoteShareInfo
+        } & AnnotationSharingState
+        updateAllAnnotationsShareInfo: AnnotationSharingStates
 
         setLoginModalShown: { shown: boolean }
         setDisplayNameSetupModalShown: { shown: boolean }

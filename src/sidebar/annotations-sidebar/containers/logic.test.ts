@@ -15,6 +15,7 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 const setupLogicHelper = async ({
     device,
@@ -282,6 +283,7 @@ describe('SidebarContainerLogic', () => {
 
             expect(sidebar.state.editForms[annotation.url]).toEqual({
                 tags: [DATA.TAG_1, DATA.TAG_2],
+                lists: [],
                 commentText: editedComment,
                 isTagInputActive: false,
                 isBookmarked: false,
@@ -645,10 +647,18 @@ describe('SidebarContainerLogic', () => {
             sidebar.processMutation({
                 annotations: { $set: [{ url: id1 }, { url: id2 }] as any },
             })
+            const sharingState1: AnnotationSharingState = {
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                localListIds: [],
+            }
 
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                isShared: false,
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                localListIds: [],
+                // isShared: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -656,7 +666,9 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                isShared: true,
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                localListIds: [],
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: true, isBulkShareProtected: false },
@@ -664,7 +676,10 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
-                isShared: false,
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                localListIds: [],
+                // isShared: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -672,7 +687,10 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                isShared: true,
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                localListIds: [],
+                // isShared: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
@@ -680,8 +698,11 @@ describe('SidebarContainerLogic', () => {
             ])
             sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
-                isShared: true,
-                isProtected: true,
+                hasLink: false,
+                privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                localListIds: [],
+                // isShared: true,
+                // isProtected: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },

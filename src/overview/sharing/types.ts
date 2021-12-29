@@ -1,6 +1,7 @@
 import type { TaskState } from 'ui-logic-core/lib/types'
 
 import type {
+    AnnotationSharingState,
     AnnotationSharingStates,
     ContentSharingInterface,
 } from 'src/content-sharing/background/types'
@@ -18,7 +19,7 @@ export interface ShareMenuCommonProps {
     customListsBG?: RemoteCollectionsInterface
     closeShareMenu: React.MouseEventHandler
     copyLink: (link: string) => Promise<void>
-    postShareHook?: (changes: PostShareChanges) => void
+    postShareHook?: (state: AnnotationSharingState) => void
     postBulkShareHook?: (states: AnnotationSharingStates) => void
 }
 

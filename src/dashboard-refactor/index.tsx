@@ -846,10 +846,10 @@ export class DashboardContainer extends StatefulUIElement<
                                 searchResults.noteData.byId[noteId]
                                     .shareMenuShowStatus === 'hide',
                         }),
-                    updateShareInfo: (noteId) => (info) =>
+                    updateShareInfo: (noteId) => (state) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            ...info,
+                            ...state,
                         }),
                 }}
                 searchCopyPasterProps={{

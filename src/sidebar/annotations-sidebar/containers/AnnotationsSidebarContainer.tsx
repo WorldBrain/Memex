@@ -289,29 +289,10 @@ export class AnnotationsSidebarContainer<
             ? [...annotLists, added]
             : annotLists.filter((list) => list !== deleted)
 
-        console.log('handleListsUpdate', { added, deleted, newLists, annot })
         const sharingState = await this.props.annotationsCache.update({
             ...annot,
             lists: newLists,
         })
-
-        // we're calling annoationCache update above
-        // but updating list state outside of it,
-        // TODO: this is duplicated from annotations-list
-        // const name = added ?? deleted
-        // const list = await this.props.customLists.fetchListByName({ name })
-        // const id = list.id
-        // if (added != null) {
-        //     this.props.contentSharing.shareAnnotationToSomeLists({
-        //         annotationUrl: annot.url,
-        //         localListIds: [id],
-        //     })
-        // } else if (deleted != null) {
-        //     this.props.contentSharing.unshareAnnotationFromSomeLists({
-        //         annotationUrl: annot.url,
-        //         localListIds: [id],
-        //     })
-        // }
     }
 
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
@@ -407,31 +388,31 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    // TODO: may be used once tags and lists are unified
-    // private renderListPickerForAnnotation = (currentAnnotationId: string) => {
-    //     // Not used yet but will be used for the "Add to collection" button
-    //     if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
-    //         return null
-    //     }
-    //     return (
-    //         <PickerWrapper>
-    //             <HoverBox>
-    //                 <ClickAway
-    //                     onClickAway={() =>
-    //                         this.processEvent(
-    //                             'resetListPickerAnnotationId',
-    //                             null,
-    //                         )
-    //                     }
-    //                 >
-    //                     {this.renderListPickerContentForAnnotation(
-    //                         currentAnnotationId,
-    //                     )}
-    //                 </ClickAway>
-    //             </HoverBox>
-    //         </PickerWrapper>
-    //     )
-    // }
+    private renderListPickerForAnnotation = (currentAnnotationId: string) => {
+        // TODO: may be used once tags and lists are unified
+        // Not used yet but will be used for the "Add to collection" button
+        if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
+            return null
+        }
+        return (
+            <PickerWrapper>
+                <HoverBox>
+                    <ClickAway
+                        onClickAway={() =>
+                            this.processEvent(
+                                'resetListPickerAnnotationId',
+                                null,
+                            )
+                        }
+                    >
+                        {this.renderListPickerContentForAnnotation(
+                            currentAnnotationId,
+                        )}
+                    </ClickAway>
+                </HoverBox>
+            </PickerWrapper>
+        )
+    }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
         if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
@@ -459,10 +440,10 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('copyNoteLink', { link })
                             }
                             annotationUrl={currentAnnotationId}
-                            postShareHook={(shareInfo) =>
+                            postShareHook={(state) =>
                                 this.processEvent('updateAnnotationShareInfo', {
                                     annotationUrl: currentAnnotationId,
-                                    ...shareInfo,
+                                    ...state,
                                 })
                             }
                             closeShareMenu={() =>
@@ -588,10 +569,10 @@ export class AnnotationsSidebarContainer<
                             this.processEvent('copyNoteLink', { link })
                             console.log(link)
                         }}
-                        postBulkShareHook={(shareState) =>
+                        postBulkShareHook={(shareStates) =>
                             this.processEvent(
                                 'updateAllAnnotationsShareInfo',
-                                shareState,
+                                shareStates,
                             )
                         }
                         onCopyBtnClick={() => this.handleCopyAllNotesClick}

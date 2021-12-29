@@ -11,7 +11,10 @@ import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -50,7 +53,7 @@ export type NoteInteractionProps = Omit<
     CommonInteractionProps,
     'onNotesBtnClick'
 > & {
-    updateShareInfo: (info: NoteShareInfo) => void
+    updateShareInfo: (info: AnnotationSharingState) => void
     updateTags: PickerUpdateHandler
     updateLists: PickerUpdateHandler
     onEditCancel: React.MouseEventHandler
@@ -305,7 +308,8 @@ export type Events = UIEvent<{
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     setNoteLists: NoteEventArgs & { added?: string; deleted?: string }
-    updateNoteShareInfo: NoteEventArgs & NoteShareInfo
+    updateNoteShareInfo: NoteEventArgs & AnnotationSharingState
+    // updateNoteShareInfo: NoteEventArgs & NoteShareInfo
     /** NOTE: Does not mutate state */
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null

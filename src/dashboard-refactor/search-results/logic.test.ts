@@ -1814,7 +1814,10 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    isShared: false,
+                    hasLink: false,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    localListIds: [],
+                    // isShared: false,
                 })
 
                 expect(
@@ -1828,7 +1831,10 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    isShared: true,
+                    hasLink: false,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    localListIds: [],
+                    // isShared: true,
                 })
 
                 expect(
@@ -1842,8 +1848,11 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    isShared: false,
-                    isProtected: true,
+                    hasLink: false,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    localListIds: [],
+                    // isShared: false,
+                    // isProtected: true,
                 })
 
                 expect(
@@ -1857,8 +1866,11 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    isShared: true,
-                    isProtected: true,
+                    hasLink: false,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    localListIds: [],
+                    // isShared: true,
+                    // isProtected: true,
                 })
 
                 expect(

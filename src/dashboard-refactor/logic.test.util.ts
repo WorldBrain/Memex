@@ -15,7 +15,10 @@ import { FakeAnalytics } from 'src/analytics/mock'
 import { createUIServices } from 'src/services/ui'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { AnnotationSharingState } from 'src/content-sharing/background/types'
+import {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -248,7 +251,7 @@ export const makeNewShareStates = (
         isShared,
         isBulkShareProtected,
     }: { isShared: boolean; isBulkShareProtected?: boolean },
-) => {
+): AnnotationSharingStates => {
     return objectMap(notesById, (v) => {
         v.privacyLevel = makeNewShareState(v, {
             isShared,

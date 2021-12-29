@@ -33,6 +33,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1127,23 +1128,20 @@ export class SidebarContainerLogic extends UILogic<
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
     > = ({ previousState, event }) => {
-        const isShared = (shareState: AnnotationSharingState) =>
-            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED ||
-            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED_PROTECTED
-        const isBulkShareProtected = (shareState: AnnotationSharingState) =>
-            shareState.privacyLevel == AnnotationPrivacyLevels.PROTECTED ||
-            shareState.privacyLevel == AnnotationPrivacyLevels.SHARED_PROTECTED
-        const nextAnnotations = previousState.annotations.map((annotation) =>
-            event[annotation.url] == null
-                ? annotation
-                : {
-                      ...annotation,
-                      isShared: isShared(event[annotation.url]),
-                      isBulkShareProtected: isBulkShareProtected(
-                          event[annotation.url],
-                      ),
-                  },
-        )
+        const nextAnnotations = previousState.annotations.map((annotation) => {
+            const privacyState = getAnnotationPrivacyState(
+                event[annotation.url].privacyLevel,
+            )
+            const nextAnnotation =
+                event[annotation.url] == null
+                    ? annotation
+                    : {
+                          ...annotation,
+                          isShared: privacyState.public,
+                          isBulkShareProtected: privacyState.protected,
+                      }
+            return nextAnnotation
+        })
 
         this.emitMutation({ annotations: { $set: nextAnnotations } })
     }
@@ -1155,12 +1153,13 @@ export class SidebarContainerLogic extends UILogic<
         const annotationIndex = previousState.annotations.findIndex(
             (a) => a.url === event.annotationUrl,
         )
+        const privacyState = getAnnotationPrivacyState(event.privacyLevel)
         this.emitMutation({
             annotations: {
                 [annotationIndex]: {
-                    isShared: { $set: event.isShared },
+                    isShared: { $set: privacyState.public },
                     isBulkShareProtected: {
-                        $apply: (prev) => !!(event.isProtected ?? prev),
+                        $apply: (prev) => privacyState.protected,
                     },
                 },
             },

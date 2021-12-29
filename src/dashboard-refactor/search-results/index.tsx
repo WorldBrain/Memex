@@ -207,8 +207,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={(shareInfo) =>
-                                    interactionProps.updateShareInfo(shareInfo)
+                                postShareHook={(state) =>
+                                    interactionProps.updateShareInfo(state)
                                 }
                             />
                             <CollectionPicker

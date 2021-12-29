@@ -38,6 +38,7 @@ import {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -802,22 +803,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State
         shareStates: AnnotationSharingStates
     }) => {
-        const isShared = (shareState: AnnotationSharingState) =>
-            shareState.privacyLevel == 200 || shareState.privacyLevel == 300
-        const isBulkShareProtected = (shareState: AnnotationSharingState) =>
-            shareState.privacyLevel == 0 || shareState.privacyLevel == 300
-
         const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
         for (const noteId of params.noteIds) {
+            const privacyState = getAnnotationPrivacyState(
+                params.shareStates[noteId].privacyLevel,
+            )
             mutation.byId = {
                 ...(mutation.byId ?? {}),
                 [noteId]: {
                     isShared: {
-                        $set: isShared(params.shareStates[noteId]),
+                        $set: privacyState.public,
                     },
                     isBulkShareProtected: {
-                        $set: isBulkShareProtected(params.shareStates[noteId]),
+                        $set: privacyState.protected,
                     },
                 },
             }
@@ -1609,48 +1608,60 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
     setNoteLists: EventHandler<'setNoteLists'> = async ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            lists: { $apply: updatePickerValues(event) },
-                        },
-                    },
-                },
-            },
-        })
-        const addedId = event.added
-            ? await this.options.listsBG
-                  .fetchListByName({ name: event.added })
-                  .then((list) => list.id)
+        const added = event.added
+            ? await this.options.listsBG.fetchListByName({ name: event.added })
             : null
-        const deletedId = event.deleted
-            ? await this.options.listsBG
-                  .fetchListByName({ name: event.deleted })
-                  .then((list) => list.id)
+        const deleted = event.deleted
+            ? await this.options.listsBG.fetchListByName({
+                  name: event.deleted,
+              })
             : null
 
-        if (addedId) {
+        let listNames = null
+        if (added) {
             const {
                 sharingState,
             } = await this.options.contentShareBG.shareAnnotationToSomeLists({
                 annotationUrl: event.noteId,
-                localListIds: [addedId],
+                localListIds: [added.id],
             })
-            // return sharingState
+            listNames = await Promise.all(
+                sharingState.localListIds.map(async (id) =>
+                    this.options.listsBG
+                        .fetchListById({ id })
+                        .then((list) => list.name),
+                ),
+            )
         }
-        if (deletedId) {
+        if (deleted) {
             const {
                 sharingState,
             } = await this.options.contentShareBG.unshareAnnotationFromSomeLists(
                 {
                     annotationUrl: event.noteId,
-                    localListIds: [deletedId],
+                    localListIds: [deleted.id],
                 },
             )
-            // return sharingState
+            listNames = await Promise.all(
+                sharingState.localListIds.map(async (id) =>
+                    this.options.listsBG
+                        .fetchListById({ id })
+                        .then((list) => list.name),
+                ),
+            )
         }
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            lists: { $set: listNames ?? [] },
+                            // lists: { $apply: updatePickerValues(event) },
+                        },
+                    },
+                },
+            },
+        })
     }
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
@@ -1658,6 +1669,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         // const prev = previousState.searchResults.noteData.byId[event.noteId]
+
         this.emitMutation({
             searchResults: {
                 noteData: {
