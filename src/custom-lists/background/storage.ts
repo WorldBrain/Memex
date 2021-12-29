@@ -9,15 +9,17 @@ import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { CustomListBookmark } from '@worldbrain/memex-common/lib/storage/modules/lists/types'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { SuggestResult } from 'src/search/types'
-import { PageList, PageListEntry } from './types'
+import { PageList, PageListEntry, RemoteCollectionsInterface } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 export default class CustomListStorage extends StorageModule {
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
+    static LIST_BOOKMARKS_COLL = COLLECTION_NAMES.listBookmark
 
     static filterOutSpecialListEntries = (entry: { listId: number }) =>
         !Object.values<number>(SPECIAL_LIST_IDS).includes(entry.listId)
@@ -136,6 +138,20 @@ export default class CustomListStorage extends StorageModule {
                         query: '$query:string',
                         options: '$options:any',
                     },
+                },
+                createListBookmark: {
+                    operation: 'createObject',
+                    collection: CustomListStorage.LIST_BOOKMARKS_COLL,
+                },
+                findAllListBoommarks: {
+                    operation: 'findObjects',
+                    collection: CustomListStorage.LIST_BOOKMARKS_COLL,
+                    args: {},
+                },
+                deleteListBookmarkById: {
+                    operation: 'deleteObject',
+                    collection: CustomListStorage.LIST_BOOKMARKS_COLL,
+                    args: { id: '$id:pk' },
                 },
             },
         }
@@ -381,5 +397,23 @@ export default class CustomListStorage extends StorageModule {
 
     async fetchListIgnoreCase({ name }: { name: string }) {
         return this.operation('findListByNameIgnoreCase', { name })
+    }
+
+    createListBookmark: RemoteCollectionsInterface['createListBookmark'] = async (
+        bookmark,
+    ) => {
+        const { object } = await this.operation('createListBookmark', bookmark)
+        return { id: object.id }
+    }
+
+    fetchListBookmarks: RemoteCollectionsInterface['fetchListBookmarks'] = async () => {
+        const bookmarks = await this.operation('findAllListBoommarks', {})
+        return bookmarks
+    }
+
+    deleteListBookmark: RemoteCollectionsInterface['deleteListBookmark'] = async (
+        bookmark,
+    ) => {
+        await this.operation('deleteListBookmarkById', { id: bookmark.id })
     }
 }

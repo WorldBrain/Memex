@@ -18,9 +18,10 @@ async function insertTestData({
     storageManager: Storex
 }) {
     // Insert some test data for all tests to use
-    await customLists.createCustomList(DATA.LIST_1)
-    await customLists.createCustomList(DATA.LIST_2)
-    await customLists.createCustomList(DATA.LIST_3)
+    const listIds: number[] = []
+    listIds.push(await customLists.createCustomList(DATA.LIST_1))
+    listIds.push(await customLists.createCustomList(DATA.LIST_2))
+    listIds.push(await customLists.createCustomList(DATA.LIST_3))
     // await customLists.createCustomList(DATA.MOBILE_LIST)
 
     const lists = storageManager.collection('customLists')
@@ -41,6 +42,8 @@ async function insertTestData({
     await customLists.insertPageToList(DATA.PAGE_ENTRY_2)
     await customLists.insertPageToList(DATA.PAGE_ENTRY_3)
     await customLists.insertPageToList(DATA.PAGE_ENTRY_4)
+
+    return { listIds }
 }
 
 async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
@@ -58,8 +61,10 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     let fakeListCount = 0
     customLists.generateListId = () => ++fakeListCount
 
+    let listIds: number[] = []
     if (!skipTestData) {
-        await insertTestData({ customLists, storageManager })
+        const testData = await insertTestData({ customLists, storageManager })
+        listIds = testData.listIds
     }
 
     return {
@@ -68,6 +73,7 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
         searchIndex,
         storageManager,
         fetchPageDataProcessor,
+        listIds,
     }
 }
 
@@ -540,5 +546,31 @@ describe('Collection Cache', () => {
                 DATA.LIST_1.name,
             ])
         })
+    })
+})
+
+describe('Custom list bookmarks', () => {
+    test('should create, fetch and delete list bookmarks', async () => {
+        const { customLists, listIds } = await setupTest()
+        const remoteId = 'someRemoteId'
+        const bookmarks = [
+            await customLists.remoteFunctions.createListBookmark({
+                localId: listIds[0],
+            }),
+            await customLists.remoteFunctions.createListBookmark({
+                localId: listIds[1],
+            }),
+            await customLists.remoteFunctions.createListBookmark({ remoteId }),
+        ]
+        expect(await customLists.remoteFunctions.fetchListBookmarks()).toEqual([
+            { id: bookmarks[0].id, localId: listIds[0] },
+            { id: bookmarks[1].id, localId: listIds[1] },
+            { id: bookmarks[2].id, remoteId },
+        ])
+        await customLists.remoteFunctions.deleteListBookmark(bookmarks[1])
+        expect(await customLists.remoteFunctions.fetchListBookmarks()).toEqual([
+            { id: bookmarks[0].id, localId: listIds[0] },
+            { id: bookmarks[2].id, remoteId },
+        ])
     })
 })

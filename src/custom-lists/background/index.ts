@@ -85,6 +85,9 @@ export default class CustomListBackground {
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
             getInboxUnreadCount: this.getInboxUnreadCount,
+            createListBookmark: this.storage.createListBookmark,
+            fetchListBookmarks: this.storage.fetchListBookmarks,
+            deleteListBookmark: this.storage.deleteListBookmark,
         }
 
         this.localStorage = new BrowserSettingsStore<CollectionsSettings>(

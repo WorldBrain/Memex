@@ -1,4 +1,5 @@
 import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { CustomListBookmark } from '@worldbrain/memex-common/lib/storage/modules/lists/types'
 
 export interface PageList {
     id: number
@@ -101,6 +102,11 @@ export interface RemoteCollectionsInterface {
         skipPageIndexing?: boolean
     }): Promise<void>
     getInboxUnreadCount(): Promise<number>
+    createListBookmark(
+        bookmark: Omit<CustomListBookmark, 'id'>,
+    ): Promise<{ id: number }>
+    fetchListBookmarks(): Promise<CustomListBookmark[]>
+    deleteListBookmark(bookmark: Pick<CustomListBookmark, 'id'>): Promise<void>
 }
 
 export interface CollectionsSettings {
