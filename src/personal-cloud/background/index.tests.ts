@@ -20,6 +20,7 @@ import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middlewar
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -303,6 +304,7 @@ export async function setupSyncBackgroundTest(
             storageManager: serverStorage.storageManager,
             storageModules: serverStorage.storageModules,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
+            clientDeviceType: PersonalDeviceType.DesktopBrowser,
             services,
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,

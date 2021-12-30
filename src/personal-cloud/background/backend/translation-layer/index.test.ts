@@ -16,6 +16,7 @@ import {
     DataChangeType,
     DataUsageAction,
     ContentLocatorFormat,
+    PersonalDeviceType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     PersonalCloudUpdateBatch,
@@ -362,14 +363,24 @@ async function setup(options?: {
         serverStorage,
         testDownload: async (
             expected: PersonalCloudUpdateBatch,
-            downloadOptions?: { skip?: number; deviceIndex?: number },
+            downloadOptions?: {
+                skip?: number
+                deviceIndex?: number
+                clientSchemaVersion?: Date
+                clientDeviceType?: PersonalDeviceType
+            },
         ) => {
             const { batch } = await downloadClientUpdates({
                 getNow,
                 startTime: 0,
                 storageManager: serverStorage.storageManager,
                 userId: TEST_USER.id,
-                clientSchemaVersion: STORAGE_VERSIONS[24].version,
+                clientDeviceType:
+                    downloadOptions?.clientDeviceType ??
+                    PersonalDeviceType.DesktopBrowser,
+                clientSchemaVersion:
+                    downloadOptions?.clientSchemaVersion ??
+                    STORAGE_VERSIONS[24].version,
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
                         .personalCloud.deviceId,
