@@ -380,7 +380,7 @@ async function setup(options?: {
                     PersonalDeviceType.DesktopBrowser,
                 clientSchemaVersion:
                     downloadOptions?.clientSchemaVersion ??
-                    STORAGE_VERSIONS[24].version,
+                    STORAGE_VERSIONS[26].version,
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
                         .personalCloud.deviceId,
@@ -437,6 +437,52 @@ async function setup(options?: {
 }
 
 describe('Personal cloud translation layer', () => {
+    describe('from local schema version 25', () => {
+        it('should skip downloading locators on client schema versions less than v26', async () => {
+            const { setups, testDownload, serverIdCapturer } = await setup()
+            await insertTestPages(setups[0].storageManager)
+            // Create PDF page
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+            await setups[0].storageManager
+                .collection('visits')
+                .createObject(LOCAL_TEST_DATA_V24.visits.fourth)
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                anyId: true,
+            })
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: { ...LOCAL_TEST_DATA_V24.locators.fourth_a, deviceId: testLocators.fourth_a.createdByDevice } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
+            ], { skip: 2, clientSchemaVersion: STORAGE_VERSIONS[26].version })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
+            ], { skip: 2, clientSchemaVersion: STORAGE_VERSIONS[25].version })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
+            ], { skip: 2, clientSchemaVersion: STORAGE_VERSIONS[24].version })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.fourth },
+            ], { skip: 2, clientSchemaVersion: STORAGE_VERSIONS[23].version })
+        })
+    })
+
     describe(`from local schema version 24`, () => {
         it('should not download updates uploaded from the same device', async () => {
             const {
