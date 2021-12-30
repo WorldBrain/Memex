@@ -33,6 +33,7 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
@@ -87,7 +88,7 @@ export interface AnnotationsSidebarProps
     contentSharing: any
     annotationsShareAll: any
     copyPageLink: any
-    postBulkShareHook: (shareState) => void
+    postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext?: string
 }
 

@@ -5,6 +5,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
 import { COLLECTION_NAMES as ANNOT_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/annotations/constants'
+import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 import {
     SearchParams as OldSearchParams,
@@ -23,6 +24,10 @@ import { SocialSearchPlugin } from './social-search'
 import { SocialPage } from 'src/social-integration/types'
 import { SuggestPlugin, SuggestType } from '../plugins/suggest'
 import { Annotation } from 'src/annotations/types'
+import {
+    List,
+    ListEntry,
+} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
 
 export interface SearchStorageProps {
     storageManager: Storex
@@ -44,6 +49,8 @@ export type LegacySearch = (
 
 export default class SearchStorage extends StorageModule {
     static TAGS_COLL = TAG_COLLECTION_NAMES.tag
+    static LISTS_ENTRIES_COLL = ANNOT_COLLECTION_NAMES.listEntry
+    static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static BMS_COLL = ANNOT_COLLECTION_NAMES.bookmark
     private legacySearch
 
@@ -64,6 +71,16 @@ export default class SearchStorage extends StorageModule {
                 collection: SearchStorage.TAGS_COLL,
                 operation: 'findObjects',
                 args: [{ url: { $in: '$annotUrls:string[]' } }],
+            },
+            findAnnotListEntriesByUrl: {
+                collection: SearchStorage.LISTS_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: [{ url: { $in: '$annotUrls:string[]' } }],
+            },
+            findListById: {
+                collection: SearchStorage.LISTS_COLL,
+                operation: 'findObject',
+                args: { id: '$id:pk' },
             },
             searchAnnotsByDay: {
                 operation: AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
@@ -134,6 +151,7 @@ export default class SearchStorage extends StorageModule {
         annotUrls: string[],
     ): Promise<{
         annotsToTags: Map<string, string[]>
+        annotsToLists: Map<string, string[]>
         bmUrls: Set<string>
     }> {
         const bookmarks = await this.operation('findAnnotBookmarksByUrl', {
@@ -151,7 +169,29 @@ export default class SearchStorage extends StorageModule {
             annotsToTags.set(url, [...current, name])
         })
 
-        return { annotsToTags, bmUrls }
+        const listEntries: ListEntry[] = await this.operation(
+            'findAnnotListEntriesByUrl',
+            {
+                annotUrls,
+            },
+        )
+
+        const lists = await Promise.all(
+            listEntries.map(async (listEntry) => {
+                const list = await this.operation('findListById', {
+                    id: listEntry.listId,
+                })
+                return { ...listEntry, ...list }
+            }),
+        )
+        const annotsToLists = new Map<string, string[]>()
+
+        lists.forEach(({ name, url }) => {
+            const current = annotsToLists.get(url) || []
+            annotsToLists.set(url, [...current, name])
+        })
+
+        return { annotsToTags, annotsToLists, bmUrls }
     }
 
     async getMergedAnnotsPages(
@@ -256,13 +296,16 @@ export default class SearchStorage extends StorageModule {
         }
 
         // Get display data for all annots then map them back to their clusters
-        const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData([
-            ...reverseAnnotMap.keys(),
-        ])
+        const {
+            annotsToTags,
+            annotsToLists,
+            bmUrls,
+        } = await this.findAnnotsDisplayData([...reverseAnnotMap.keys()])
 
         reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
             // Delete any annots containing excluded tags
             const tags = annotsToTags.get(annot.url) || []
+            const lists = annotsToLists.get(annot.url) || []
 
             // Skip current annot if contains filtered tags
             if (
@@ -279,6 +322,7 @@ export default class SearchStorage extends StorageModule {
                 {
                     ...annot,
                     tags,
+                    lists,
                     hasBookmark: bmUrls.has(annot.url),
                 } as any,
             ]
@@ -324,15 +368,18 @@ export default class SearchStorage extends StorageModule {
             .map((annot) => annot.url)
 
         // Get display data for all annots then map them back to their clusters
-        const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData(
-            annotUrls,
-        )
+        const {
+            annotsToTags,
+            annotsToLists,
+            bmUrls,
+        } = await this.findAnnotsDisplayData(annotUrls)
 
         return {
             docs: pages.map((page) => {
                 const annotations = results.get(page.pageId).map((annot) => ({
                     ...annot,
                     tags: annotsToTags.get(annot.url) || [],
+                    lists: annotsToLists.get(annot.url) || [],
                     hasBookmark: bmUrls.has(annot.url),
                 }))
 

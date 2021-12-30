@@ -44,6 +44,7 @@ describe('Annotations search', () => {
     }: BackgroundIntegrationTestSetup) {
         const annotsStorage = backgroundModules.directLinking.annotationStorage
         const customListsBg = backgroundModules.customLists
+        const contentSharingBg = backgroundModules.contentSharing
         fetchPageDataProcessor.mockPage = {
             url: DATA.highlight.object.pageUrl,
             hostname: normalizeUrl(DATA.highlight.object.pageUrl),
@@ -128,14 +129,19 @@ describe('Annotations search', () => {
             id: coll1Id,
             url: DATA.fullPageUrl2,
         })
-        await annotsStorage.insertAnnotToList({
-            listId: coll1Id,
-            url: DATA.hybrid.object.url,
+        await contentSharingBg.shareAnnotationToSomeLists({
+            localListIds: [coll1Id, coll2Id],
+            annotationUrl: DATA.hybrid.object.url,
         })
-        await annotsStorage.insertAnnotToList({
-            listId: coll2Id,
-            url: DATA.highlight.object.url,
-        })
+        // TODO: delete below, replaced by the above
+        // await annotsStorage.insertAnnotToList({
+        //     listId: coll1Id,
+        //     url: DATA.hybrid.object.url,
+        // })
+        // await annotsStorage.insertAnnotToList({
+        //     listId: coll2Id,
+        //     url: DATA.highlight.object.url,
+        // })
 
         // Insert tags
         await annotsStorage.modifyTags(true)(
@@ -593,5 +599,25 @@ describe('Annotations search', () => {
 
         expect(resB.docs[0].annotations[0].tags).toEqual([DATA.tag1, DATA.tag2])
         expect(resB.docs[0].annotations[1].tags).toEqual([])
+    })
+
+    test('annotations on page search results should have lists attached', async () => {
+        const { searchBg } = await setupTest()
+
+        const resA = await searchBg.searchAnnotations({ query: 'comment' })
+
+        expect(resA.docs[0].annotations[0].lists).toEqual([
+            DATA.coll1,
+            DATA.coll2,
+        ])
+        expect(resA.docs[0].annotations[1].lists).toEqual([])
+
+        const resB = await searchBg.searchAnnotations({ query: 'comment' })
+
+        expect(resB.docs[0].annotations[0].lists).toEqual([
+            DATA.coll1,
+            DATA.coll2,
+        ])
+        expect(resB.docs[0].annotations[1].lists).toEqual([])
     })
 })
