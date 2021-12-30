@@ -99,6 +99,7 @@ export interface AnnotationsSidebarProps
 
 interface AnnotationsSidebarState {
     searchText?: string
+    isolatedView?: string | null // if null show default view
     showIsolatedViewNotif?: boolean // if null show default view
     isMarkdownHelpShown?: boolean
     showAllNotesCopyPaster?: boolean
