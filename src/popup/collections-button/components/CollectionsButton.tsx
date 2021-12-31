@@ -72,7 +72,7 @@ class CollectionsButton extends PureComponent<Props> {
                     itemClass={styles.button}
                 >
                     <div className={styles.buttonInnerContent}>
-                        Add To Collection(s)
+                        Add to Spaces
                         <p className={buttonStyles.subTitle}>
                             {this.state.highlightInfo}
                         </p>

@@ -33,6 +33,10 @@ const FinishHeader = styled.div`
     margin-bottom: 17px;
 `
 
+const SaveTextContainer = styled.div`
+    padding-left: 40px;
+`
+
 const OptionsList = styled.div`
     display: grid;
     grid-auto-flow: column;
@@ -50,7 +54,7 @@ const OptionItem = styled.div`
     text-align: center;
     padding: 10px 10px;
     cursor: pointer;
-    font-size: bold;
+    font-weight: bold;
     height: 140px;
     width: 140px;
     color: ${(props) => props.theme.colors.primary};
@@ -128,40 +132,49 @@ const AnnotationTitleImage = styled.div`
     padding: 0 5px 0 0;
 `
 
-const MouseOverArea = styled.div`
+const MouseOverArea = styled.div<{ top: string }>`
     width: 20px;
     height: 360px;
     position: absolute;
-    top: -100px;
-    right: -90px;
+    top: ${(props) => (props.top ? props.top : '-100px')};
+    right: -70px;
     background: #ff000040;
     border: 2px solid #ff000080;
     border-radius: 3px;
     opacity: 0;
-    animation: 0.3s ease-in-out 1s MouseAreaAppear 1;
-    animation-fill-mode: forwards;
+    animation: 3s ease-in-out 0.5s MouseAreaAppear infinite;
+    animation-iteration-count: infinite;
+    display: ${(props) => (props.onMouseEnter ? 'none' : 'flex')};
 
     @keyframes MouseAreaAppear {
         0% {
             opacity: 0;
         }
-        100% {
+        50% {
             opacity: 1;
         }
+        100% {
+            opacity: 0;
+        }
     }
+`
+
+const ShortcutLabelContainer = styled.div`
+    margin: 20px 0px;
 `
 
 const ShortcutLabel = styled.span`
     border: 1px solid #f29d9d;
     border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 12px;
+    padding: 4px 14px;
+    font-size: 16px;
     width: fit-content;
     background-color: #f29d9d60;
     white-space: nowrap;
     vertical-align: top;
     color: #545454;
     font-weight: 600;
+    margin: 2px 0px;
 `
 
 const PinTutorialArrow = styled.span`
@@ -256,75 +269,13 @@ export const tutorialSteps: TutorialStepContent[] = [
 
     {
         subtitle: (
-            <PinTitleContainer>
-                <PinTitleImage src={icons.pin} />
-                Pin Memex to your menu
-                <PinTutorialArrow />
-            </PinTitleContainer>
-        ),
-        text: (
-            <div>
-                <p>Easy access to bookmarking, tagging & searching.</p>
-                Save a page with{' '}
-                <ShortcutLabel>{getKeyName({ key: 'alt' })} + s</ShortcutLabel>,
-                search with{' '}
-                <ShortcutLabel>{getKeyName({ key: 'alt' })} + f</ShortcutLabel>
-            </div>
-        ),
-        top: '30px',
-        bottom: null,
-        left: null,
-        right: '140px',
-        width: '400px',
-        height: '200px',
-    },
-
-    {
-        subtitle: (
             <>
                 <PinTitleContainer>
                     <AnnotationTitleContainer>
                         <AnnotationTitleBox>
-                            <AnnotationTitleImage>✍🏽</AnnotationTitleImage>
+                            <PinTitleImage src={icons.heartEmpty} />
                             <AnnotationTitleText>
-                                Add Highlights to the text
-                            </AnnotationTitleText>
-                        </AnnotationTitleBox>
-                        <ShortcutLabel>
-                            {getKeyName({ key: 'alt' })} + a/w
-                        </ShortcutLabel>
-                    </AnnotationTitleContainer>
-                    <AnnotationTutorialArrow />
-                </PinTitleContainer>
-            </>
-        ),
-        text: (
-            <div>
-                <p>
-                    Select some text, then use the tooltip or keyboard
-                    shortcuts.
-                </p>
-                Hold the <ShortcutLabel>shift</ShortcutLabel> key to instantly
-                create a link to the highlight.
-            </div>
-        ),
-        top: '30px',
-        bottom: null,
-        left: null,
-        right: '140px',
-        width: '480px',
-        height: '220px',
-    },
-
-    {
-        subtitle: (
-            <>
-                <PinTitleContainer>
-                    <AnnotationTitleContainer>
-                        <AnnotationTitleBox>
-                            <AnnotationTitleImage>📝</AnnotationTitleImage>
-                            <AnnotationTitleText>
-                                Quick Access Ribbon & Sidebar
+                                Bookmark this page
                             </AnnotationTitleText>
                         </AnnotationTitleBox>
                     </AnnotationTitleContainer>
@@ -334,19 +285,111 @@ export const tutorialSteps: TutorialStepContent[] = [
             </>
         ),
         text: (
-            <div>
-                Hover over the red area to explore the quick access ribbon.{' '}
-                <br />
-                Click on the <SmallImages src={icons.openSidebar} /> to open the
-                annotation sidebar.
-            </div>
+            <SaveTextContainer>
+                <PinTitleContainer>
+                    Use the sidebar or keyboard shortcuts
+                </PinTitleContainer>
+                <ShortcutLabelContainer>
+                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
+                    + <ShortcutLabel>s</ShortcutLabel>
+                </ShortcutLabelContainer>
+            </SaveTextContainer>
         ),
         top: '120px',
         bottom: null,
         left: null,
-        right: '80px',
+        right: '60px',
         width: '470px',
         height: '220px',
+    },
+
+    {
+        subtitle: (
+            <>
+                <PinTitleContainer>
+                    <AnnotationTitleContainer>
+                        <AnnotationTitleBox>
+                            <PinTitleImage src={icons.highlighterFull} />
+                            <AnnotationTitleText>
+                                Add Highlights and Annotations
+                            </AnnotationTitleText>
+                        </AnnotationTitleBox>
+                    </AnnotationTitleContainer>
+                    <AnnotationTutorialArrow />
+                </PinTitleContainer>
+            </>
+        ),
+        text: (
+            <SaveTextContainer>
+                <p>Select text and use the tooltip or keyboard shortcuts</p>
+                <ShortcutLabelContainer>
+                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
+                    + <ShortcutLabel>a</ShortcutLabel> or{' '}
+                    <ShortcutLabel>w</ShortcutLabel>
+                </ShortcutLabelContainer>
+            </SaveTextContainer>
+        ),
+        top: '30px',
+        bottom: null,
+        left: null,
+        right: '40px',
+        width: '480px',
+        height: '230px',
+    },
+
+    {
+        subtitle: (
+            <>
+                <PinTitleContainer>
+                    <AnnotationTitleContainer>
+                        <AnnotationTitleBox>
+                            <PinTitleImage src={icons.openSidebar} />
+                            <AnnotationTitleText>
+                                View your annotations
+                            </AnnotationTitleText>
+                        </AnnotationTitleBox>
+                    </AnnotationTitleContainer>
+                    <RibbonTutorialArrow />
+                </PinTitleContainer>
+                <MouseOverArea top={'-20px'} />
+            </>
+        ),
+        text: (
+            <SaveTextContainer>
+                Hover over the red area to open the annotation sidebar. <br />
+                <ShortcutLabelContainer>
+                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
+                    + <ShortcutLabel>q</ShortcutLabel>
+                </ShortcutLabelContainer>
+            </SaveTextContainer>
+        ),
+        top: '40px',
+        bottom: null,
+        left: null,
+        right: '60px',
+        width: '540px',
+        height: '220px',
+    },
+
+    {
+        subtitle: (
+            <PinTitleContainer>
+                <PinTitleImage src={icons.pin} />
+                Pin Memex to your menu
+                <PinTutorialArrow />
+            </PinTitleContainer>
+        ),
+        text: (
+            <SaveTextContainer>
+                <p>Easy access to bookmarking, tagging & searching.</p>
+            </SaveTextContainer>
+        ),
+        top: '30px',
+        bottom: null,
+        left: null,
+        right: '140px',
+        width: '480px',
+        height: '170px',
     },
 
     {

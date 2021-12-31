@@ -10,6 +10,7 @@ export const settings = browser.extension.getURL('/img/settings.svg')
 
 export const check = browser.runtime.getURL('/img/check.svg')
 export const checkRound = browser.runtime.getURL('/img/checkRound.svg')
+export const highlighterFull = browser.runtime.getURL('/img/highlightOn.svg')
 export const alertRound = browser.runtime.getURL('/img/alertRound.svg')
 export const close = browser.runtime.getURL('/img/close.svg')
 export const tagFull = browser.runtime.getURL('/img/tag_full.svg')

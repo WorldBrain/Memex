@@ -254,13 +254,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
                 <div className={styles.item}>
-                    <TagsButton fetchTags={this.fetchTagsForPage} />
-                </div>
-
-                <div className={styles.item}>
                     <CollectionsButton
                         fetchCollections={this.fetchListsForPage}
                     />
+                </div>
+                <div className={styles.item}>
+                    <TagsButton fetchTags={this.fetchTagsForPage} />
                 </div>
                 <hr />
 

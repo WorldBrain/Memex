@@ -350,7 +350,7 @@ class AnnotationsSidebar extends React.Component<
                     bottom={this.props.isExpanded ? '20px' : '15px'}
                 >
                     <FollowedListSectionTitle>
-                        From Shared Spaces
+                        Annotations from Shared Spaces
                     </FollowedListSectionTitle>
 
                     {this.props.followedListLoadState ===
@@ -530,7 +530,7 @@ class AnnotationsSidebar extends React.Component<
                         }
                     >
                         <FollowedListSectionTitle>
-                            My Notes
+                            My Annotations
                         </FollowedListSectionTitle>
                         {this.props.annotations.length > 0 && (
                             <FollowedListDropdownIcon
