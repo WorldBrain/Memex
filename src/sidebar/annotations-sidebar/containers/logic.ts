@@ -216,9 +216,6 @@ export class SidebarContainerLogic extends UILogic<
         })
         // load followed lists
         if (previousState.followedListLoadState === 'pristine') {
-            // not awaiting, should I?
-            // await this.loadFollowedLists({ previousState })
-            // this.loadFollowedLists({ previousState })
             await this.processUIEvent('loadFollowedLists', {
                 previousState: previousState,
                 event: null,
@@ -882,7 +879,6 @@ export class SidebarContainerLogic extends UILogic<
                     }),
                 ),
             )
-            console.log('areListsContributable', { areListsContributable })
 
             this.emitMutation({
                 followedLists: {

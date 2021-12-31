@@ -63,10 +63,8 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
-    fetchAllFollowedLists(args: {
-        skip?: number
-        limit?: number
-    }): Promise<PageList[]>
+    fetchAllFollowedLists(): Promise<PageList[]>
+    fetchCollaborativeLists(): Promise<PageList[]>
     fetchFollowedListsWithAnnotations(args: {
         normalizedPageUrl: string
     }): Promise<SharedAnnotationList[]>

@@ -655,14 +655,12 @@ export default class ContentSharingBackground {
             }
         }
         return suggestions
-    canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async (
-        params,
-    ) => {
+    }
+    canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
+        remoteId,
+    }) => {
         // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
-        const remoteId = params.remoteId
-        console.log('remoteId', { remoteId })
         const currentUser = await this.options.auth.authService.getCurrentUser()
-        console.log('currentUser', { currentUser })
         const storage = await this.options.getServerStorage()
         const listRole = await storage.contentSharing.getListRole({
             listReference: { type: 'shared-list-reference', id: remoteId },
@@ -671,7 +669,6 @@ export default class ContentSharingBackground {
                 id: currentUser?.id,
             },
         })
-        console.log('listRole', { listRole })
         const canWrite = [
             SharedListRoleID.AddOnly,
             SharedListRoleID.ReadWrite,

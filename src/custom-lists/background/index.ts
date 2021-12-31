@@ -70,6 +70,7 @@ export default class CustomListBackground {
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
+            fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
             fetchListByName: this.fetchListByName,
             fetchFollowedListsWithAnnotations: this
@@ -249,16 +250,12 @@ export default class CustomListBackground {
         }))
     }
 
-    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
-        skip = 0,
-        limit = 20,
-    }) => {
+    private fetchListsFromReferences = async (references) => {
         const { auth } = this.options.services
         const { contentSharing } = await this.options.getServerStorage()
 
-        const sharedListReferences = await this.fetchFollowedListReferences()
         const sharedLists = await contentSharing.getListsByReferences(
-            sharedListReferences,
+            references,
         )
         const currentUser = await auth.getCurrentUser()!
 
@@ -279,6 +276,15 @@ export default class CustomListBackground {
                 name: sharedList.title,
                 isFollowed: true,
             }))
+    }
+    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async () => {
+        const sharedListReferences = await this.fetchFollowedListReferences()
+        return this.fetchListsFromReferences(sharedListReferences)
+    }
+
+    fetchCollaborativeLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async () => {
+        const collabListReferences = await this.fetchCollaborativeListReferences()
+        return this.fetchListsFromReferences(collabListReferences)
     }
 
     fetchAllLists = async ({
