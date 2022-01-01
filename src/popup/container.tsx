@@ -43,6 +43,7 @@ import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
+import { FeedActivityDot } from 'src/activity-indicator/ui'
 
 export interface OwnProps {}
 
@@ -194,6 +195,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return isFullUrlPDF(this.props.url)
     }
 
+    whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
     renderChildren() {
         if (!this.props.initLogicRun) {
             return false
@@ -227,6 +236,17 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <React.Fragment>
+                <FeedActivitySection
+                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                >
+                    <FeedActivityDot
+                        key="activity-feed-indicator"
+                        openFeedUrl={() =>
+                            window.open(this.whichFeed(), '_blank')
+                        }
+                    />
+                    Feed Updates
+                </FeedActivitySection>
                 {this.isCurrentPagePDF &&
                     (checkBrowser() === 'firefox' &&
                     this.getPDFLocation() === 'local' ? (
@@ -377,6 +397,23 @@ const DashboardButtonBox = styled.div`
     &: hover {
         background-color: #e0e0e0;
         border-radius: 3px;
+    }
+`
+
+const FeedActivitySection = styled.div`
+    width: 100%;
+    display: grid;
+    height: 40px;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    padding: 0px 23px;
+    grid-auto-flow: column;
+    grid-gap: 16px;
+    justify-content: flex-start;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f0f0f0;
     }
 `
 
