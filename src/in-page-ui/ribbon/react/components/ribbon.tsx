@@ -351,8 +351,6 @@ export default class Ribbon extends Component<Props, State> {
             return false
         }
 
-        console.log(this.props.hasAnnotations)
-
         return (
             <div
                 className={cx(styles.ribbon, {

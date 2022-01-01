@@ -104,8 +104,9 @@ class ListPicker extends StatefulUIElement<
     handleResultListFocus = (list: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-    handleNewListPress = () =>
+    handleNewListPress = () => {
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
+    }
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
@@ -202,7 +203,7 @@ class ListPicker extends StatefulUIElement<
                                 {this.state.newEntryName}
                             </ListResultItem>
                         }
-                        onPress={this.handleNewListPress}
+                        onPress={() => this.handleNewListPress()}
                     >
                         {this.renderNewListAllTabsButton()}
                     </AddNewEntry>
