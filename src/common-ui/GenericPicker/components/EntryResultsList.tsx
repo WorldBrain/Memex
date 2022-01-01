@@ -24,7 +24,7 @@ export default class EntryResultsList extends React.Component<Props> {
     render = () => {
         return (
             <StyledContainer id={this.props.id}>
-                {this.props.query === '' && (
+                {this.props.query === '' && this.props.entries.length > 0 && (
                     <RecentItemsNotif>Recently used</RecentItemsNotif>
                 )}
                 {/*<FilterHelp>
