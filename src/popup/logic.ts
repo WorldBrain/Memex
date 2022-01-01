@@ -8,6 +8,7 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
 
 export interface Dependencies {
     tabsAPI: Pick<Tabs.Static, 'create' | 'query'>
@@ -25,6 +26,7 @@ export interface State {
     loadState: UITaskState
     currentPageUrl: string
     isPDFReaderEnabled: boolean
+    userBeforeTagUnification: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -42,6 +44,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         loadState: 'pristine',
         isPDFReaderEnabled: false,
         currentPageUrl: '',
+        userBeforeTagUnification: false,
     })
 
     async init() {
@@ -50,6 +53,7 @@ export default class PopupLogic extends UILogic<State, Event> {
             const isPDFReaderEnabled = await syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
             )
+            const userBeforeTagUnification = await isUserBeforeTagsUnification()
             const [currentTab] = await tabsAPI.query({
                 active: true,
                 currentWindow: true,
@@ -57,6 +61,7 @@ export default class PopupLogic extends UILogic<State, Event> {
             this.emitMutation({
                 currentPageUrl: { $set: currentTab?.url },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
+                userBeforeTagUnification: { $set: userBeforeTagUnification },
             })
         })
     }

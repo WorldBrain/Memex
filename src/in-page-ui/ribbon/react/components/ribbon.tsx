@@ -43,6 +43,7 @@ export interface Props extends RibbonSubcomponentProps {
 
 interface State {
     shortcutsReady: boolean
+    userBeforeTagUnification: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -56,7 +57,10 @@ export default class Ribbon extends Component<Props, State> {
     private openOptionsTabRPC
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
-    state: State = { shortcutsReady: false }
+    state: State = {
+        shortcutsReady: false,
+        userBeforeTagUnification: false,
+    }
 
     constructor(props: Props) {
         super(props)
@@ -75,6 +79,12 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
+        await this.userBeforeTagUnification()
+    }
+
+    async userBeforeTagUnification() {
+        const isfrombefore = await isUserBeforeTagsUnification()
+        this.setState({ userBeforeTagUnification: isfrombefore })
     }
 
     focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
@@ -346,6 +356,8 @@ export default class Ribbon extends Component<Props, State> {
             return false
         }
 
+        console.log(this.state.userBeforeTagUnification)
+
         return (
             <div
                 className={cx(styles.ribbon, {
@@ -543,7 +555,8 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </Tooltip>
                                 )}
-                                {isUserBeforeTagsUnification() && (
+                                {this.state.userBeforeTagUnification ===
+                                    true && (
                                     <ButtonTooltip
                                         tooltipText={this.getTooltipText(
                                             'addTag',

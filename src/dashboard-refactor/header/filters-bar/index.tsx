@@ -113,6 +113,19 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         </Margin>
     )
 
+    async componentDidMount() {
+        await this.userBeforeTagUnification()
+    }
+
+    state = {
+        userBeforeTagUnification: false,
+    }
+
+    async userBeforeTagUnification() {
+        const isfrombefore = await isUserBeforeTagsUnification()
+        this.setState({ userBeforeTagUnification: isfrombefore })
+    }
+
     private renderDatePicker = () => {
         if (!this.props.showDatesFilter) {
             return false
@@ -182,7 +195,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.showDomainsFilter,
                             this.props.areDomainsFiltered,
                         )}
-                        {isUserBeforeTagsUnification() &&
+                        {this.state.userBeforeTagUnification === true &&
                             this.renderFilterSelectButton(
                                 'Tags',
                                 'tag',

@@ -36,7 +36,19 @@ export interface Props
     shareMenuProps: Omit<ShareMenuProps, 'annotationsBG' | 'contentSharingBG'>
 }
 
+export interface State {
+    userBeforeTagUnification: boolean
+}
+
 export default class PageResultView extends PureComponent<Props> {
+    async componentDidMount() {
+        await this.userBeforeTagUnification()
+    }
+
+    state = {
+        userBeforeTagUnification: false,
+    }
+
     private get fullUrl(): string {
         return this.props.type === 'pdf'
             ? this.props.fullPdfUrl!
@@ -72,6 +84,11 @@ export default class PageResultView extends PureComponent<Props> {
 
     private get hasLists(): boolean {
         return this.props.lists.length > 0
+    }
+
+    async userBeforeTagUnification() {
+        const isfrombefore = await isUserBeforeTagsUnification()
+        this.setState({ userBeforeTagUnification: isfrombefore })
     }
 
     private renderPopouts() {
@@ -158,7 +175,7 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         if (this.props.hoverState === 'footer') {
-            if (isUserBeforeTagsUnification() === false) {
+            if (this.state.userBeforeTagUnification === false) {
                 return [
                     {
                         key: 'delete-page-btn',
@@ -253,7 +270,7 @@ export default class PageResultView extends PureComponent<Props> {
             }
         }
 
-        if (isUserBeforeTagsUnification() === false) {
+        if (this.state.userBeforeTagUnification === false) {
             return [
                 {
                     key: 'delete-page-btn',

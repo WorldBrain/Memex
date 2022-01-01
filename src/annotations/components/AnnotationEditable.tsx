@@ -82,6 +82,7 @@ export interface AnnotationEditableEventProps {
 interface State {
     editorHeight: string
     showQuickTutorial: boolean
+    userBeforeTagUnification: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -99,12 +100,19 @@ export default class AnnotationEditable extends React.Component<Props> {
     state: State = {
         editorHeight: '50px',
         showQuickTutorial: false,
+        userBeforeTagUnification: false,
     }
 
     focus() {}
 
-    componentDidMount() {
+    async componentDidMount() {
         this.textAreaHeight()
+        await this.userBeforeTagUnification()
+    }
+
+    async userBeforeTagUnification() {
+        const isfrombefore = await isUserBeforeTagsUnification()
+        this.setState({ userBeforeTagUnification: isfrombefore })
     }
 
     private get creationInfo() {
@@ -314,7 +322,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
 
         if (hoverState === 'footer') {
-            if (!isUserBeforeTagsUnification()) {
+            if (this.state.userBeforeTagUnification === false) {
                 return [
                     {
                         key: 'delete-note-btn',
@@ -368,7 +376,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             }
         }
 
-        if (!isUserBeforeTagsUnification()) {
+        if (this.state.userBeforeTagUnification === false) {
             return [
                 {
                     key: 'delete-note-btn',
@@ -525,7 +533,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {isUserBeforeTagsUnification() && (
+                            {this.state.userBeforeTagUnification === true && (
                                 <TagsSegment
                                     tags={this.props.tags}
                                     onMouseEnter={this.props.onTagsHover}
