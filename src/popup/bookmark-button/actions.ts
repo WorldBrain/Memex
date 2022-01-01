@@ -28,15 +28,6 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
                 category: 'Bookmarks',
                 action: 'createBookmarkViaPopup',
             })
-        } else {
-            dispatch(setIsBookmarked(false))
-            await bookmarks.delPageBookmark({ url })
-            dispatch(setIsBookmarked(false))
-
-            analytics.trackEvent({
-                category: 'Bookmarks',
-                action: 'deleteForPage',
-            })
         }
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))

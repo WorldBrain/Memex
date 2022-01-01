@@ -1,6 +1,7 @@
 import React, { Component, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
 import qs from 'query-string'
+import styled from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
@@ -89,14 +90,18 @@ export default class Ribbon extends Component<Props, State> {
         this.props.search.setSearchValue('')
     }
 
-    private handleCommentIconBtnClick = () => {
-        if (this.props.sidebar.isSidebarOpen) {
-            this.props.sidebar.setShowSidebarCommentBox(true)
-            return
+    private handleCommentIconBtnClick = (event) => {
+        if (event.shiftKey) {
+            if (this.props.sidebar.isSidebarOpen) {
+                this.props.sidebar.setShowSidebarCommentBox(true)
+                return
+            }
+            this.props.commentBox.setShowCommentBox(
+                !this.props.commentBox.showCommentBox,
+            )
+        } else {
+            this.props.sidebar.openSidebar({})
         }
-        this.props.commentBox.setShowCommentBox(
-            !this.props.commentBox.showCommentBox,
-        )
     }
 
     private getTooltipText(name: string): string {
@@ -367,46 +372,30 @@ export default class Ribbon extends Component<Props, State> {
                             <div className={styles.generalActions}>
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <>
-                                        <ButtonTooltip
-                                            tooltipText={
-                                                'Close Toolbar for session'
-                                            }
-                                            position="leftNarrow"
-                                        >
-                                            <button
-                                                className={cx(
-                                                    styles.button,
-                                                    styles.cancel,
+                                        {/* <ButtonTooltip
+                                                tooltipText={this.getTooltipText(
+                                                    'toggleSidebar',
                                                 )}
-                                                onClick={() =>
-                                                    this.props.handleRemoveRibbon()
-                                                }
-                                            />
-                                        </ButtonTooltip>
-                                        <ButtonTooltip
-                                            tooltipText={this.getTooltipText(
-                                                'toggleSidebar',
-                                            )}
-                                            position="leftNarrow"
-                                        >
-                                            <div
-                                                className={cx(styles.button, {
-                                                    [styles.arrow]: !this.props
-                                                        .sidebar.isSidebarOpen,
-                                                    [styles.arrowReverse]: this
-                                                        .props.sidebar
-                                                        .isSidebarOpen,
-                                                })}
-                                                onClick={() =>
-                                                    !this.props.sidebar
-                                                        .isSidebarOpen
-                                                        ? this.props.sidebar.openSidebar(
-                                                              {},
-                                                          )
-                                                        : this.props.sidebar.closeSidebar()
-                                                }
-                                            />
-                                        </ButtonTooltip>
+                                                position="leftNarrow"
+                                            >
+                                                <div
+                                                    className={cx(styles.button, {
+                                                        [styles.arrow]: !this.props
+                                                            .sidebar.isSidebarOpen,
+                                                        [styles.arrowReverse]: this
+                                                            .props.sidebar
+                                                            .isSidebarOpen,
+                                                    })}
+                                                    onClick={() =>
+                                                        !this.props.sidebar
+                                                            .isSidebarOpen
+                                                            ? this.props.sidebar.openSidebar(
+                                                                {},
+                                                            )
+                                                            : this.props.sidebar.closeSidebar()
+                                                    }
+                                                />
+                                            </ButtonTooltip> */}
                                     </>
                                 )}
                                 <ButtonTooltip
@@ -484,9 +473,17 @@ export default class Ribbon extends Component<Props, State> {
                                 </ButtonTooltip>
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <ButtonTooltip
-                                        tooltipText={this.getTooltipText(
-                                            'addComment',
-                                        )}
+                                        tooltipText={
+                                            <span>
+                                                {this.getTooltipText(
+                                                    'toggleSidebar',
+                                                )}
+                                                <br />{' '}
+                                                <SubText>
+                                                    Shift+Click to add note
+                                                </SubText>
+                                            </span>
+                                        }
                                         position="leftNarrow"
                                     >
                                         <div
@@ -499,8 +496,10 @@ export default class Ribbon extends Component<Props, State> {
                                                         .isCommentSaved,
                                                 },
                                             )}
-                                            onClick={
-                                                this.handleCommentIconBtnClick
+                                            onClick={(e) =>
+                                                this.handleCommentIconBtnClick(
+                                                    e,
+                                                )
                                             }
                                         />
                                     </ButtonTooltip>
@@ -635,6 +634,35 @@ export default class Ribbon extends Component<Props, State> {
                                         {this.renderTutorial()}
                                     </Tooltip>
                                 )}
+                                <ButtonTooltip
+                                    tooltipText={
+                                        <span>
+                                            Close sidebar this once.
+                                            <br />
+                                            <SubText>
+                                                Shift+Click to disable.
+                                            </SubText>
+                                        </span>
+                                    }
+                                    position="leftNarrow"
+                                >
+                                    <button
+                                        className={cx(
+                                            styles.button,
+                                            styles.cancel,
+                                        )}
+                                        onClick={(event) => {
+                                            if (
+                                                event.shiftKey &&
+                                                this.props.isRibbonEnabled
+                                            ) {
+                                                this.props.handleRibbonToggle()
+                                            } else {
+                                                this.props.handleRemoveRibbon()
+                                            }
+                                        }}
+                                    />
+                                </ButtonTooltip>
                             </div>
                             {/*
                             <div className={styles.settingsActions}>
@@ -745,3 +773,7 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const SubText = styled.span`
+    font-size: 10px;
+`
