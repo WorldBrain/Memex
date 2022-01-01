@@ -39,6 +39,7 @@ export interface Props extends RibbonSubcomponentProps {
     handleRemoveRibbon: () => void
     highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
+    hasAnnotations: boolean
 }
 
 interface State {
@@ -350,6 +351,8 @@ export default class Ribbon extends Component<Props, State> {
             return false
         }
 
+        console.log(this.props.hasAnnotations)
+
         return (
             <div
                 className={cx(styles.ribbon, {
@@ -494,6 +497,8 @@ export default class Ribbon extends Component<Props, State> {
                                                     [styles.saveIcon]: this
                                                         .props.commentBox
                                                         .isCommentSaved,
+                                                    [styles.commentAvailable]: this
+                                                        .props.hasAnnotations,
                                                 },
                                             )}
                                             onClick={(e) =>
