@@ -66,7 +66,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                 </SaveBtnText>
                 <SaveBtnArrow horizontal="1px">
                     <DropdownMenuBtn
-                        btnChildren={<Icon icon="triangle" height="8px" />}
+                        btnChildren={<Icon icon="triangle" height="12px" />}
                         isOpen={this.state.isPrivacyLevelShown}
                         toggleOpen={() =>
                             this.setState((state) => ({

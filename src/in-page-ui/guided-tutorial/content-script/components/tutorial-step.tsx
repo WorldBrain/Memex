@@ -16,10 +16,13 @@ export default class TutorialStep extends React.Component<Props> {
             <React.Fragment>
                 <CardBodyHeader>
                     <TitleBox>
-                        <CardNumber>{this.props.cardIndex + 1}</CardNumber>{' '}
                         <CardSubTitle>{this.props.subtitle}</CardSubTitle>
                     </TitleBox>
-                    <ShortcutLabel>{this.props.keyboardShortcut}</ShortcutLabel>
+                    {this.props.keyboardShortcut && (
+                        <ShortcutLabel>
+                            {this.props.keyboardShortcut}
+                        </ShortcutLabel>
+                    )}
                 </CardBodyHeader>
                 <TutorialText>{this.props.text}</TutorialText>
             </React.Fragment>
@@ -52,24 +55,24 @@ const ShortcutLabel = styled.div`
 `
 
 const CardSubTitle = styled.div`
-    font-size: 1.5em;
+    font-size: 1.7em;
     font-weight: bold;
     text-align: left;
-    padding: 15px 0 0 0;
+    padding: 5px 0 0 0;
     line-height: 30x;
     border-bottom: 0px;
+    width: 100%;
 `
 
 const TutorialText = styled.div`
     border-bottom: 0px;
     align-self: flex-start;
-    font-size: 14px;
     color: ${(props) => props.theme.colors.darkgrey};
-    font-size: 14px;
+    font-size: 16px;
     text-align: left;
     color: #a0a0a0;
     font-weight: normal;
-    line-height: 30px;
+    line-height: 25px;
     margin-top: 20px;
 `
 
@@ -78,6 +81,7 @@ const TitleBox = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     flex-direction: column;
+    width: 100%;
 `
 
 const CardBodyHeader = styled.div`

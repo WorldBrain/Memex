@@ -100,6 +100,7 @@ import type { ReadwiseSettings } from 'src/readwise-integration/background/types
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { runCloudIntegrationSideEffects } from 'src/personal-cloud/background/integration-side-effects'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -224,7 +225,6 @@ export function createBackgroundModules(options: {
         createInboxEntry,
         tabManagement,
         getNow,
-        generateServerId,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)
@@ -539,7 +539,7 @@ export function createBackgroundModules(options: {
                     : options.storageManager
 
             // WARNING: Keep in mind this skips all storage middleware
-            await updateOrCreate({
+            const { opPerformed } = await updateOrCreate({
                 ...params,
                 storageManager: incomingStorageManager,
                 executeOperation: (...args: any[]) => {
@@ -576,7 +576,12 @@ export function createBackgroundModules(options: {
                     { text: processed },
                 )
             }
+
+            return { opPerformed }
         },
+        runIntegrationSideEffects: runCloudIntegrationSideEffects({
+            customLists,
+        }),
         getServerStorageManager,
     })
     options.services.contentSharing.preKeyGeneration = async (params) => {

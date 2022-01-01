@@ -67,7 +67,6 @@ export default class PopupLogic extends UILogic<State, Event> {
         const { runtimeAPI, tabsAPI } = this.dependencies
 
         if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
-            console.log('already on it')
             return
         }
 

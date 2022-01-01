@@ -76,6 +76,7 @@ class AnnotationEdit extends React.Component<Props> {
                     }
                     markdownContent={this.props.comment}
                     onKeyDown={this.handleInputKeyDown}
+                    placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                 />
             </EditorContainer>
         )
