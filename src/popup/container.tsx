@@ -44,6 +44,8 @@ import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
+
 export interface OwnProps {}
 
 interface StateProps {
@@ -258,9 +260,11 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         fetchCollections={this.fetchListsForPage}
                     />
                 </div>
-                <div className={styles.item}>
-                    <TagsButton fetchTags={this.fetchTagsForPage} />
-                </div>
+                {isUserBeforeTagsUnification() && (
+                    <div className={styles.item}>
+                        <TagsButton fetchTags={this.fetchTagsForPage} />
+                    </div>
+                )}
                 <hr />
 
                 <div className={styles.item}>

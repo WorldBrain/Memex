@@ -23,6 +23,7 @@ import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
 
 export interface Props
     extends PageData,
@@ -157,89 +158,169 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         if (this.props.hoverState === 'footer') {
+            if (isUserBeforeTagsUnification() === false) {
+                return [
+                    {
+                        key: 'delete-page-btn',
+                        image: icons.trash,
+                        onClick: this.props.onTrashBtnClick,
+                        tooltipText: 'Delete Page & all related content',
+                    },
+                    {
+                        key: 'copy-paste-page-btn',
+                        image: icons.copy,
+                        onClick: this.props.onCopyPasterBtnClick,
+                        tooltipText: 'Copy Page',
+                    },
+                    {
+                        key: 'share-page-btn',
+                        image: this.props.isShared ? icons.shared : icons.link,
+                        onClick: this.props.onShareBtnClick,
+                        tooltipText: 'Share Page and Notes',
+                    },
+                    {
+                        key: 'list-page-btn',
+                        image: this.hasLists
+                            ? icons.collectionsFull
+                            : icons.collectionsEmpty,
+                        onClick: this.props.onListPickerBtnClick,
+                        tooltipText: 'Add to Spaces',
+                    },
+                    {
+                        key: 'expand-notes-btn',
+                        image: this.hasNotes
+                            ? icons.commentFull
+                            : icons.commentEmpty,
+                        onClick: this.props.onNotesBtnClick,
+                        tooltipText: (
+                            <span>
+                                <strong>Add/View Notes</strong>
+                                <br />
+                                shift+click to open in sidebar
+                            </span>
+                        ),
+                    },
+                ]
+            } else {
+                return [
+                    {
+                        key: 'delete-page-btn',
+                        image: icons.trash,
+                        onClick: this.props.onTrashBtnClick,
+                        tooltipText: 'Delete Page & all related content',
+                    },
+                    {
+                        key: 'copy-paste-page-btn',
+                        image: icons.copy,
+                        onClick: this.props.onCopyPasterBtnClick,
+                        tooltipText: 'Copy Page',
+                    },
+                    {
+                        key: 'share-page-btn',
+                        image: this.props.isShared ? icons.shared : icons.link,
+                        onClick: this.props.onShareBtnClick,
+                        tooltipText: 'Share Page and Notes',
+                    },
+                    {
+                        key: 'tag-page-btn',
+                        image: this.hasTags ? icons.tagFull : icons.tagEmpty,
+                        onClick: this.props.onTagPickerBtnClick,
+                        tooltipText: 'Tag Page',
+                    },
+                    {
+                        key: 'list-page-btn',
+                        image: this.hasLists
+                            ? icons.collectionsFull
+                            : icons.collectionsEmpty,
+                        onClick: this.props.onListPickerBtnClick,
+                        tooltipText: 'Add to Spaces',
+                    },
+                    {
+                        key: 'expand-notes-btn',
+                        image: this.hasNotes
+                            ? icons.commentFull
+                            : icons.commentEmpty,
+                        onClick: this.props.onNotesBtnClick,
+                        tooltipText: (
+                            <span>
+                                <strong>Add/View Notes</strong>
+                                <br />
+                                shift+click to open in sidebar
+                            </span>
+                        ),
+                    },
+                ]
+            }
+        }
+
+        if (isUserBeforeTagsUnification() === false) {
             return [
                 {
                     key: 'delete-page-btn',
+                    isDisabled: true,
                     image: icons.trash,
-                    onClick: this.props.onTrashBtnClick,
-                    tooltipText: 'Delete Page & all related content',
                 },
                 {
                     key: 'copy-paste-page-btn',
+                    isDisabled: true,
                     image: icons.copy,
-                    onClick: this.props.onCopyPasterBtnClick,
-                    tooltipText: 'Copy Page',
                 },
                 {
                     key: 'share-page-btn',
+                    isDisabled: true,
                     image: this.props.isShared ? icons.shared : icons.link,
-                    onClick: this.props.onShareBtnClick,
-                    tooltipText: 'Share Page and Notes',
-                },
-                {
-                    key: 'tag-page-btn',
-                    image: this.hasTags ? icons.tagFull : icons.tagEmpty,
-                    onClick: this.props.onTagPickerBtnClick,
-                    tooltipText: 'Tag Page',
                 },
                 {
                     key: 'list-page-btn',
+                    isDisabled: true,
                     image: this.hasLists
                         ? icons.collectionsFull
                         : icons.collectionsEmpty,
-                    onClick: this.props.onListPickerBtnClick,
-                    tooltipText: 'Edit Spaces',
                 },
                 {
                     key: 'expand-notes-btn',
                     image: this.hasNotes
                         ? icons.commentFull
                         : icons.commentEmpty,
-                    onClick: this.props.onNotesBtnClick,
-                    tooltipText: (
-                        <span>
-                            <strong>Add/View Notes</strong>
-                            <br />
-                            shift+click to open in sidebar
-                        </span>
-                    ),
+                },
+            ]
+        } else {
+            return [
+                {
+                    key: 'delete-page-btn',
+                    isDisabled: true,
+                    image: icons.trash,
+                },
+                {
+                    key: 'copy-paste-page-btn',
+                    isDisabled: true,
+                    image: icons.copy,
+                },
+                {
+                    key: 'share-page-btn',
+                    isDisabled: true,
+                    image: this.props.isShared ? icons.shared : icons.link,
+                },
+                {
+                    key: 'tag-page-btn',
+                    isDisabled: true,
+                    image: this.hasTags ? icons.tagFull : icons.tagEmpty,
+                },
+                {
+                    key: 'list-page-btn',
+                    isDisabled: true,
+                    image: this.hasLists
+                        ? icons.collectionsFull
+                        : icons.collectionsEmpty,
+                },
+                {
+                    key: 'expand-notes-btn',
+                    image: this.hasNotes
+                        ? icons.commentFull
+                        : icons.commentEmpty,
                 },
             ]
         }
-
-        return [
-            {
-                key: 'delete-page-btn',
-                isDisabled: true,
-                image: icons.trash,
-            },
-            {
-                key: 'copy-paste-page-btn',
-                isDisabled: true,
-                image: icons.copy,
-            },
-            {
-                key: 'share-page-btn',
-                isDisabled: true,
-                image: this.props.isShared ? icons.shared : icons.link,
-            },
-            {
-                key: 'tag-page-btn',
-                isDisabled: true,
-                image: this.hasTags ? icons.tagFull : icons.tagEmpty,
-            },
-            {
-                key: 'list-page-btn',
-                isDisabled: true,
-                image: this.hasLists
-                    ? icons.collectionsFull
-                    : icons.collectionsEmpty,
-            },
-            {
-                key: 'expand-notes-btn',
-                image: this.hasNotes ? icons.commentFull : icons.commentEmpty,
-            },
-        ]
     }
 
     render() {

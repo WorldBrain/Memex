@@ -7,6 +7,8 @@ import {
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
+import { setLocalStorage, getLocalStorage } from 'src/util/storage'
+import { getFirebase } from 'src/util/firebase-app-initialized'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -48,10 +50,26 @@ export default class Logic extends UILogic<State, Event> {
             newSignUp: { $set: newSignUp },
         })
 
+        this.setSignupDate()
+
         if (!this.isExistingUser) {
             this.syncPromise = executeUITask(this, 'syncState', async () =>
                 this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
             )
+        }
+    }
+
+    async getSignupDate() {
+        const signupDateLocalStorage = await getLocalStorage('signUpdate')
+        return signupDateLocalStorage
+    }
+
+    async setSignupDate() {
+        const signupDateLocalStorage = this.getSignupDate()
+        if (signupDateLocalStorage) {
+            const SignUpDateFirebase = await getFirebase().auth().currentUser
+                .metadata.creationTime
+            setLocalStorage('signUpdate', SignUpDateFirebase)
         }
     }
 

@@ -21,6 +21,7 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
 
 const styles = require('./ribbon.css')
 
@@ -542,31 +543,35 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </Tooltip>
                                 )}
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText('addTag')}
-                                    position="leftNarrow"
-                                >
-                                    <div
-                                        className={cx(styles.button, {
-                                            [styles.tagFull]:
-                                                this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags.length >
-                                                    0,
-                                            [styles.tag]:
-                                                !this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags
-                                                    .length === 0,
-                                        })}
-                                        onClick={() =>
-                                            this.props.tagging.setShowTagsPicker(
-                                                !this.props.tagging
-                                                    .showTagsPicker,
-                                            )
-                                        }
-                                    />
-                                </ButtonTooltip>
+                                {isUserBeforeTagsUnification() && (
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addTag',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <div
+                                            className={cx(styles.button, {
+                                                [styles.tagFull]:
+                                                    this.props.tagging
+                                                        .pageHasTags ||
+                                                    this.props.tagging.tags
+                                                        .length > 0,
+                                                [styles.tag]:
+                                                    !this.props.tagging
+                                                        .pageHasTags ||
+                                                    this.props.tagging.tags
+                                                        .length === 0,
+                                            })}
+                                            onClick={() =>
+                                                this.props.tagging.setShowTagsPicker(
+                                                    !this.props.tagging
+                                                        .showTagsPicker,
+                                                )
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                )}
                                 {this.renderTagsPicker()}
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(

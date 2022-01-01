@@ -28,6 +28,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -313,6 +314,61 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
 
         if (hoverState === 'footer') {
+            if (!isUserBeforeTagsUnification()) {
+                return [
+                    {
+                        key: 'delete-note-btn',
+                        image: icons.trash,
+                        onClick: footerDeps.onDeleteIconClick,
+                        tooltipText: 'Delete Note',
+                    },
+                    {
+                        key: 'copy-paste-note-btn',
+                        image: icons.copy,
+                        onClick: footerDeps.onCopyPasterBtnClick,
+                        tooltipText: 'Copy Note',
+                    },
+                    {
+                        key: 'share-note-btn',
+                        image: shareIconData.icon,
+                        onClick: footerDeps.onShareClick,
+                        tooltipText: shareIconData.label,
+                    },
+                ]
+            } else {
+                return [
+                    {
+                        key: 'delete-note-btn',
+                        image: icons.trash,
+                        onClick: footerDeps.onDeleteIconClick,
+                        tooltipText: 'Delete Note',
+                    },
+                    {
+                        key: 'copy-paste-note-btn',
+                        image: icons.copy,
+                        onClick: footerDeps.onCopyPasterBtnClick,
+                        tooltipText: 'Copy Note',
+                    },
+                    {
+                        key: 'tag-note-btn',
+                        image:
+                            this.props.tags?.length > 0
+                                ? icons.tagFull
+                                : icons.tagEmpty,
+                        onClick: footerDeps.onTagIconClick,
+                        tooltipText: 'Tag Note',
+                    },
+                    {
+                        key: 'share-note-btn',
+                        image: shareIconData.icon,
+                        onClick: footerDeps.onShareClick,
+                        tooltipText: shareIconData.label,
+                    },
+                ]
+            }
+        }
+
+        if (!isUserBeforeTagsUnification()) {
             return [
                 {
                     key: 'delete-note-btn',
@@ -327,48 +383,39 @@ export default class AnnotationEditable extends React.Component<Props> {
                     tooltipText: 'Copy Note',
                 },
                 {
-                    key: 'tag-note-btn',
-                    image:
-                        this.props.tags?.length > 0
-                            ? icons.tagFull
-                            : icons.tagEmpty,
-                    onClick: footerDeps.onTagIconClick,
-                    tooltipText: 'Tag Note',
-                },
-                {
                     key: 'share-note-btn',
                     image: shareIconData.icon,
                     onClick: footerDeps.onShareClick,
                     tooltipText: shareIconData.label,
                 },
             ]
+        } else {
+            return [
+                {
+                    key: 'delete-note-btn',
+                    isDisabled: true,
+                    image: icons.trash,
+                },
+                {
+                    key: 'copy-paste-note-btn',
+                    isDisabled: true,
+                    image: icons.copy,
+                },
+                {
+                    key: 'tag-note-btn',
+                    isDisabled: true,
+                    image:
+                        this.props.tags?.length > 0
+                            ? icons.tagFull
+                            : icons.tagEmpty,
+                },
+                {
+                    key: 'share-note-btn',
+                    isDisabled: true,
+                    image: shareIconData.icon,
+                },
+            ]
         }
-
-        return [
-            {
-                key: 'delete-note-btn',
-                isDisabled: true,
-                image: icons.trash,
-            },
-            {
-                key: 'copy-paste-note-btn',
-                isDisabled: true,
-                image: icons.copy,
-            },
-            {
-                key: 'tag-note-btn',
-                isDisabled: true,
-                image:
-                    this.props.tags?.length > 0
-                        ? icons.tagFull
-                        : icons.tagEmpty,
-            },
-            {
-                key: 'share-note-btn',
-                isDisabled: true,
-                image: shareIconData.icon,
-            },
-        ]
     }
 
     private renderMarkdownHelpButton() {
@@ -478,16 +525,20 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onTagClick={this.props.onTagClick}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onTagIconClick
-                                }
-                            />
+                            {isUserBeforeTagsUnification() && (
+                                <TagsSegment
+                                    tags={this.props.tags}
+                                    onMouseEnter={this.props.onTagsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'tags'
+                                    }
+                                    onTagClick={this.props.onTagClick}
+                                    onEditBtnClick={
+                                        this.props.annotationFooterDependencies
+                                            ?.onTagIconClick
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                             {this.props.renderTagsPickerForAnnotation && (
                                 <TagPickerWrapper>

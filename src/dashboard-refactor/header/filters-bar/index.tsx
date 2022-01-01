@@ -14,6 +14,7 @@ import { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import isUserBeforeTagsUnification from 'src/util/isUserBeforeTagsUnification'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -181,13 +182,14 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.showDomainsFilter,
                             this.props.areDomainsFiltered,
                         )}
-                        {this.renderFilterSelectButton(
-                            'Tags',
-                            'tag',
-                            this.props.toggleTagsFilter,
-                            this.props.showTagsFilter,
-                            this.props.areTagsFiltered,
-                        )}
+                        {isUserBeforeTagsUnification() &&
+                            this.renderFilterSelectButton(
+                                'Tags',
+                                'tag',
+                                this.props.toggleTagsFilter,
+                                this.props.showTagsFilter,
+                                this.props.areTagsFiltered,
+                            )}
                     </FilterBtnsContainer>
                     <PickersContainer>
                         <Margin horizontal="7px">
