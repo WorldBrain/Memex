@@ -755,7 +755,7 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     cursor: pointer;
     justify-content: space-between;
     width: fill-available;
-    z-index: 1000;
+    z-index: 0;
 `
 
 const FollowedListTitle = styled.span`

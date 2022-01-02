@@ -79,12 +79,10 @@ export default class PopupLogic extends UILogic<State, Event> {
             const originalUrl = decodeURIComponent(
                 currentPageUrl.split('?file=')[1].toString(),
             )
-            console.log('pdftourl')
             setLocalStorage('OneTimeIgnoreReaderEnabled', true)
             pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
             tabsAPI.update(currentTabID, { url: originalUrl })
         } else {
-            console.log('urltoPdf')
             const pdfViewerUrl = constructPDFViewerUrl(currentPageUrl, {
                 runtimeAPI,
             })

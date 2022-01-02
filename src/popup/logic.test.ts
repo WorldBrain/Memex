@@ -25,6 +25,7 @@ async function setupTest(
                 ? ({ url }) => args.openPage(url) as any
                 : browserAPIs.tabs.create,
             query: () => [{ url: args?.currentPageUrl ?? DEFAULT_PAGE }] as any,
+            update: () => [{}] as any,
         },
         runtimeAPI: {
             getURL: () => TEST_EXT_PAGE,
