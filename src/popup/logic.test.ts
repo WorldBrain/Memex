@@ -97,7 +97,7 @@ describe('Popup UI logic', () => {
 
         await logic.init()
         expect(openedPage).toBe(undefined)
-        await logic.processEvent('openPDFReader', null)
+        await logic.processEvent('togglePDFReader', null)
         expect(openedPage).toBe(TEST_EXT_PAGE + '?file=' + DEFAULT_PAGE)
     })
 })
