@@ -315,6 +315,10 @@ export async function setupSyncBackgroundTest(
             getDeviceId: async () =>
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
+            autoPkType:
+                process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+                    ? 'string'
+                    : 'number',
         })
 
         const setup: BackgroundIntegrationTestSetup = await setupBackgroundIntegrationTest(

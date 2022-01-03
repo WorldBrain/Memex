@@ -206,6 +206,10 @@ export async function setupBackgroundIntegrationTest(
                     options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
+                autoPkType:
+                    process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+                        ? 'string'
+                        : 'number',
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.storageManager,
