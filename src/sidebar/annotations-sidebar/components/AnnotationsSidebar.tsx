@@ -125,6 +125,7 @@ class AnnotationsSidebar extends React.Component<
         if (e.key === 'Escape') {
             this.props.onClickOutside(e as any)
         }
+        e.stopPropagation()
     }
 
     private searchEnterHandler = {

@@ -229,7 +229,10 @@ export class AnnotationCreate extends React.Component<Props, State>
             <>
                 <TextBoxContainerStyled>
                     <MemexEditor
-                        onKeyDown={this.handleInputKeyDown}
+                        onKeyDown={(event) => {
+                            event.stopPropagation()
+                            this.handleInputKeyDown
+                        }}
                         onContentUpdate={(content) =>
                             this.props.onCommentChange(content)
                         }
