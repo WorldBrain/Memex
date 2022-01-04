@@ -185,6 +185,14 @@
     float: left;
 }
 
+.copy {
+    background-image: url('/img/copy.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    opacity: 0.8;
+    float: left;
+}
+
 .badge {
     color: #fff;
     background-color: color12;

@@ -25,6 +25,7 @@ import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export type { TagPickerDependencies }
 
@@ -175,6 +176,18 @@ class TagPicker extends StatefulUIElement<
 
         return (
             <>
+                <DeprecationWarning>
+                    Tags will soon be deprecated and merged into our new
+                    'Spaces'.
+                    <PrimaryAction
+                        label="Learn More"
+                        onClick={() =>
+                            window.open(
+                                'https://links.memex.garden/announcements/tags-collections-unification',
+                            )
+                        }
+                    />
+                </DeprecationWarning>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
@@ -227,6 +240,19 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
+
+const DeprecationWarning = styled.div`
+    background-color: ${(props) => props.theme.colors.warning};
+    border-radius: 3px;
+    margin: 0px 8px 5px 8px;
+    display: grid;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5px 10px;
+    color: white;
+    grid-gap: 5px;
+    grid-auto-flow: column;
+`
 
 const LoadingBox = styled.div`
     display: flex;

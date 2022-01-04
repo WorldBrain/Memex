@@ -485,6 +485,7 @@ export function createBackgroundModules(options: {
                     callFirebaseFunction,
                 ),
                 getServerStorageManager,
+                getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),

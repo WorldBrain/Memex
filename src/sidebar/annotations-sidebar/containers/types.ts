@@ -59,6 +59,7 @@ export interface SidebarContainerDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     contentScriptBackground: ContentScriptsInterface<'caller'>
+    hasAnnotations?: boolean
 }
 
 export interface EditForm {
