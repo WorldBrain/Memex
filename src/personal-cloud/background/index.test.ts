@@ -34,7 +34,7 @@ describe('Personal cloud', () => {
         const fullUrl =
             testOptions.type === 'html'
                 ? 'http://www.thetest.com/home'
-                : 'https://www.dude-wheres-my/test.pdf'
+                : 'https://memex.cloud/ct/test-fingerprint.pdf'
         const fullTitle = `The Test`
         const fullText =
             testOptions.type === 'html'
@@ -130,7 +130,8 @@ describe('Personal cloud', () => {
                     expect(docContent).toEqual([
                         {
                             id: expect.any(Number),
-                            normalizedUrl: 'www.dude-wheres-my/test.pdf',
+                            normalizedUrl:
+                                'memex.cloud/ct/test-fingerprint.pdf',
                             storedContentType: StoredContentType.PdfContent,
                             content: {
                                 metadata: {

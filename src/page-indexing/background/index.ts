@@ -43,7 +43,6 @@ import {
     InitContentIdentifierReturns,
     WaitForContentIdentifierReturns,
 } from './types'
-import { GenerateServerID } from '../../background-script/types'
 import {
     remoteFunctionWithExtraArgs,
     registerRemoteFunctions,
@@ -82,7 +81,6 @@ export class PageIndexingBackground {
             fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
-            generateServerId: GenerateServerID
         },
     ) {
         this.storage = new PageStorage({
@@ -110,7 +108,7 @@ export class PageIndexingBackground {
     >['initContentIdentifier']['function'] = async (info, params) => {
         return this.initContentIdentifier({
             ...params,
-            tabId: params.tabId ?? info.tab.id,
+            tabId: params.tabId ?? info.tab?.id,
         })
     }
 
@@ -155,9 +153,7 @@ export class PageIndexingBackground {
                 fingerprints: params.fingerprints,
             })
             if (!stored) {
-                const generatedNormalizedUrl = `memex.cloud/ct/${this.options.generateServerId(
-                    'personalContentMetadata',
-                )}.${params.locator.format}`
+                const generatedNormalizedUrl = `memex.cloud/ct/${params.fingerprints[0].fingerprint}.${params.locator.format}`
                 const generatedIdentifier: ContentIdentifier = {
                     normalizedUrl: generatedNormalizedUrl,
                     fullUrl: `https://${generatedNormalizedUrl}`,
@@ -239,12 +235,11 @@ export class PageIndexingBackground {
         return primaryIdentifier
     }
 
-    async waitForContentIdentifier(params: {
+    waitForContentIdentifier = (params: {
         tabId: number
         fullUrl: string
-    }): Promise<WaitForContentIdentifierReturns> {
-        return this._resolvableForIdentifierTabPage(params)
-    }
+    }): Promise<WaitForContentIdentifierReturns> =>
+        this._resolvableForIdentifierTabPage(params)
 
     getContentFingerprints(
         contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,

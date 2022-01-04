@@ -211,8 +211,16 @@ export default class CustomListStorage extends StorageModule {
         return prepared
     }
 
-    async fetchListById(id: number): Promise<PageList | null> {
-        return this.operation('findListById', { id })
+    async fetchListById(id: number | string): Promise<PageList | null> {
+        // This exists like this as I made a mistake where joined lists will be created with a string ID,
+        //  while all others will have a number ID :/
+        const foundByString = await this.operation('findListById', {
+            id: id.toString(),
+        })
+        if (foundByString != null) {
+            return foundByString
+        }
+        return this.operation('findListById', { id: Number(id) })
     }
 
     async fetchListWithPagesById(id: number) {

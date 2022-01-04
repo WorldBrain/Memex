@@ -22,10 +22,9 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 
-const limitSuggestionsReturnLength = 10
-const limitSuggestionsStorageLength = 20
+const limitSuggestionsReturnLength = 1000
+const limitSuggestionsStorageLength = 1000
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -57,11 +56,7 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             insertPageToList: async (params) => {
-                const currentTab = await this.options.queryTabs?.({
-                    active: true,
-                    currentWindow: true,
-                })
-                params.tabId = currentTab?.[0]?.id
+                await this.setTabIdParamToCurrentTab(params)
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
@@ -85,6 +80,12 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            updateListForPageInCurrentTab: async (params) => {
+                if (params.tabId == null) {
+                    await this.setTabIdParamToCurrentTab(params)
+                }
+                return this.updateListForPage(params)
+            },
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
 
@@ -96,6 +97,16 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
+    }
+
+    private async setTabIdParamToCurrentTab<T extends { tabId?: number }>(
+        params: T,
+    ): Promise<void> {
+        const currentTab = await this.options.queryTabs?.({
+            active: true,
+            currentWindow: true,
+        })
+        params.tabId = currentTab?.[0]?.id
     }
 
     private fetchOwnListReferences = async (): Promise<
@@ -198,6 +209,7 @@ export default class CustomListBackground {
         const fingerprints = this.options.pages.getContentFingerprints({
             normalizedUrl: normalizedPageUrl,
         })
+
         const sharedFingerprintsByList = fingerprints?.length
             ? await contentSharing.getNormalizedUrlsByFingerprints({
                   fingerprints,
@@ -359,7 +371,7 @@ export default class CustomListBackground {
         return lists.map(({ name }) => name)
     }
 
-    _updateListSuggestionsCache = async (args: {
+    updateListSuggestionsCache = async (args: {
         added?: string
         removed?: string
         updated?: [string, string]
@@ -415,7 +427,7 @@ export default class CustomListBackground {
             name,
         })
 
-        await this._updateListSuggestionsCache({ added: name })
+        await this.updateListSuggestionsCache({ added: name })
 
         return inserted
     }
@@ -429,7 +441,7 @@ export default class CustomListBackground {
         oldName: string
         newName: string
     }) => {
-        await this._updateListSuggestionsCache({ updated: [oldName, newName] })
+        await this.updateListSuggestionsCache({ updated: [oldName, newName] })
 
         return this.storage.updateListName({
             id,
@@ -438,7 +450,7 @@ export default class CustomListBackground {
     }
 
     insertPageToList = async (
-        params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
+        params: { url: string } & {
             id: number
             tabId?: number
             skipPageIndexing?: boolean
@@ -447,10 +459,7 @@ export default class CustomListBackground {
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
-        const url =
-            'contentIdentifier' in params
-                ? params.contentIdentifier?.fullUrl
-                : params.url
+        const url = params.url
 
         if (!isFullUrl(url)) {
             throw new Error(
@@ -487,7 +496,7 @@ export default class CustomListBackground {
         })
 
         const list = await this.fetchListById({ id })
-        await this._updateListSuggestionsCache({ added: list.name })
+        await this.updateListSuggestionsCache({ added: list.name })
 
         return retVal
     }
@@ -568,21 +577,21 @@ export default class CustomListBackground {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
+            waitForContentIdentifier: this.options.pages
+                .waitForContentIdentifier,
             createPage: this.options.pages.indexPage,
             time: args.time ?? '$now',
         })
 
-        await Promise.all(
-            indexed.map(({ fullUrl }) => {
-                this.storage.insertPageToList({
-                    listId: args.listId,
-                    fullUrl,
-                    pageUrl: normalizeUrl(fullUrl),
-                })
-            }),
-        )
+        for (const { fullUrl } of indexed) {
+            await this.storage.insertPageToList({
+                listId: args.listId,
+                fullUrl,
+                pageUrl: normalizeUrl(fullUrl),
+            })
+        }
 
-        await this._updateListSuggestionsCache({ added: args.name })
+        await this.updateListSuggestionsCache({ added: args.name })
     }
 
     removeOpenTabsFromList = async ({ listId }: { listId: number }) => {

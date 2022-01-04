@@ -10,6 +10,7 @@ export const settings = browser.extension.getURL('/img/settings.svg')
 
 export const check = browser.runtime.getURL('/img/check.svg')
 export const checkRound = browser.runtime.getURL('/img/checkRound.svg')
+export const highlighterFull = browser.runtime.getURL('/img/highlightOn.svg')
 export const alertRound = browser.runtime.getURL('/img/alertRound.svg')
 export const close = browser.runtime.getURL('/img/close.svg')
 export const tagFull = browser.runtime.getURL('/img/tag_full.svg')
@@ -23,6 +24,8 @@ export const helpIcon = browser.runtime.getURL('/img/help.svg')
 export const searchIcon = browser.runtime.getURL('/img/search.svg')
 export const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 export const commentEdit = browser.runtime.getURL('/img/comment_edit.svg')
+export const compress = browser.runtime.getURL('/img/compress-alt.svg')
+export const expand = browser.runtime.getURL('/img/expand-alt.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -39,10 +42,12 @@ export const plus = browser.runtime.getURL('/img/plus.svg')
 export const dots = browser.runtime.getURL('/img/3dots.svg')
 export const trash = browser.runtime.getURL('/img/trash.svg')
 export const goTo = browser.runtime.getURL('/img/open.svg')
+export const openSidebar = browser.runtime.getURL('/img/openSidebar.svg')
 export const copy = browser.runtime.getURL('/img/copy.svg')
 export const edit = browser.runtime.getURL('/img/edit.svg')
 export const remove = browser.runtime.getURL('/img/remove.svg')
 export const removeX = browser.runtime.getURL('/img/removeX.svg')
+export const pin = browser.runtime.getURL('/img/thumbtack.svg')
 export const share = browser.runtime.getURL('/img/share.svg')
 export const shareWhite = browser.runtime.getURL('/img/shareWhite.svg')
 export const shareEmpty = browser.runtime.getURL('/img/shareEmpty.svg')
@@ -53,6 +58,9 @@ export const shared = browser.runtime.getURL('/img/shared.svg')
 export const sharedProtected = browser.runtime.getURL(
     '/img/sharedprotected.svg',
 )
+
+export const arrowUp = browser.runtime.getURL('/img/arrow-up.svg')
+
 export const saveIcon = browser.runtime.getURL('/img/saveIcon.svg')
 export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
 

@@ -70,12 +70,13 @@ const PioneerPlanBanner = ({
     <DismissibleResultsMessage onDismiss={props.onHideClick}>
         <PioneerPlanContentBox direction={props.direction}>
             <PioneerPlanTitle direction={props.direction}>
-                Memex is in beta state
+                Get a 60% early bird discount
             </PioneerPlanTitle>
             <PioneerPlanDescription>
-                Learn about our roadmap, why we operate as a 'Venture
-                Capital'-free business <br />
-                and the early bird discount on our upcoming subscription plans.
+                Memex is currently in beta and free to use.
+                <br />
+                Support a 'Venture Capital'-free business & get an early bird
+                discount on our upcoming subscriptions.
             </PioneerPlanDescription>
         </PioneerPlanContentBox>
         <PioneerPlanButtonBox>
@@ -83,10 +84,10 @@ const PioneerPlanBanner = ({
                 label="Learn More"
                 onClick={() => window.open(moreInfoUrl)}
             />
-            {/*<PioneerPlanUpgradeButton
+            <PioneerPlanUpgradeButton
                 label="Upgrade"
                 onClick={() => window.open(upgradeUrl)}
-            />*/}
+            />
             {props.showCloseButton && (
                 <ButtonTooltip
                     position="bottom"

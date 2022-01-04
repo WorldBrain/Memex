@@ -118,7 +118,7 @@ class ListPicker extends StatefulUIElement<
                     : undefined
             }
             onFocus={this.handleResultListFocus}
-            key={`ListKeyName-${list.name}`}
+            key={`ListKeyName-${list.name}-${index}`}
             index={index}
             name={list.name}
             selected={list.selected}
@@ -189,6 +189,7 @@ class ListPicker extends StatefulUIElement<
                     }
                 />
                 <EntryResultsList
+                    query={this.state.query}
                     entries={this.state.displayEntries}
                     renderEntryRow={this.renderListRow}
                     emptyView={this.renderEmptyList()}

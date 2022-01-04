@@ -126,6 +126,7 @@ export interface SidebarContainerState
 
     showState: 'visible' | 'hidden'
     isLocked: boolean
+    isWidthLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
     isolatedView?: string | null // if null show default view
@@ -185,6 +186,8 @@ export type SidebarContainerEvents = UIEvent<
         hide: null
         lock: null
         unlock: null
+        lockWidth: null
+        unlockWidth: null
 
         sortAnnotations: { sortingFn: AnnotationsSorter }
 

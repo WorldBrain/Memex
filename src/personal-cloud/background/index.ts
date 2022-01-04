@@ -44,6 +44,7 @@ import * as Raven from 'src/util/raven'
 import { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { IntegrationSideEffectRunner } from './integration-side-effects'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -61,7 +62,8 @@ export interface PersonalCloudBackgroundOptions {
         collection: string
         where?: { [key: string]: any }
         updates: { [key: string]: any }
-    }): Promise<void>
+    }): Promise<{ opPerformed: 'create' | 'update' }>
+    runIntegrationSideEffects?: IntegrationSideEffectRunner
     getServerStorageManager(): Promise<StorageManager>
 }
 
@@ -324,6 +326,7 @@ export class PersonalCloudBackground {
             update.storage === 'persistent'
                 ? this.options.persistentStorageManager
                 : this.options.storageManager
+        let type: 'create' | 'update' | 'delete'
 
         if (update.type === PersonalCloudUpdateType.Overwrite) {
             preprocessPulledObject({
@@ -342,20 +345,23 @@ export class PersonalCloudBackground {
                 }
             }
 
-            await this.options.writeIncomingData({
+            const { opPerformed } = await this.options.writeIncomingData({
                 storageType:
                     update.storage ?? PersonalCloudClientStorageType.Normal,
                 collection: update.collection,
                 updates: update.object,
                 where: update.where,
             })
+            type = opPerformed
         } else if (update.type === PersonalCloudUpdateType.Delete) {
             await storageManager.backend.operation(
                 'deleteObjects',
                 update.collection,
                 update.where,
             )
+            type = 'delete'
         }
+        await this.options.runIntegrationSideEffects?.({ ...update, type })
     }
 
     async downloadMedia(
