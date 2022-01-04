@@ -29,6 +29,12 @@
     }
 }
 
+.disabled {
+    &:hover {
+        background-color: none;
+    }
+}
+
 .itemBtn {
     border: none;
     width: 100%;
