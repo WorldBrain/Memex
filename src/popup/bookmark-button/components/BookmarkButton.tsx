@@ -53,7 +53,7 @@ class BookmarkButton extends PureComponent<Props> {
 
     render() {
         const text = this.props.isBookmarked
-            ? 'Page Bookmarked!'
+            ? 'Un-Bookmark this Page'
             : 'Bookmark this Page'
 
         return (
@@ -68,12 +68,10 @@ class BookmarkButton extends PureComponent<Props> {
                     itemClass={styles.button}
                     disabled={this.props.isDisabled}
                 >
-                    <div className={styles.buttonInnerContent}>
-                        {text}
-                        <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
-                        </p>
-                    </div>
+                    {text}
+                    <p className={buttonStyles.subTitle}>
+                        {this.state.highlightInfo}
+                    </p>
                 </Button>
             </div>
         )

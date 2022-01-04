@@ -235,7 +235,9 @@ class ListContainer extends Component {
                             [styles.addNewHover]: this.props.isSidebarLocked,
                         })}
                     >
-                        <span className={styles.myCollection}>My Spaces </span>
+                        <span className={styles.myCollection}>
+                            My Collections{' '}
+                        </span>
                         <span className={styles.plus} />
                     </div>
                 </div>
@@ -259,7 +261,9 @@ class ListContainer extends Component {
                             <div>
                                 {this.renderAllLists()}
                                 <div className={extStyles.noLists}>
-                                    <strong>You don't have any spaces </strong>
+                                    <strong>
+                                        You don't have any collections{' '}
+                                    </strong>
                                     <br />
                                     Create one with the + icon and drag and drop
                                     items into it.
@@ -271,7 +275,7 @@ class ListContainer extends Component {
                     </div>
                 </div>
                 <DeleteConfirmModal
-                    message="Delete space? This does not delete the pages in it"
+                    message="Delete collection? This does not delete the pages in it"
                     isShown={this.props.isDeleteConfShown}
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}

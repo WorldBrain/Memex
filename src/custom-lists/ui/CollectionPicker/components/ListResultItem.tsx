@@ -17,7 +17,7 @@ export const ListResultItem = styled.div`
     display: block;
     border-radius: 4px;
     color: ${(props) => props.theme.tag.text};
-    padding: 0 8px 0 0;
+    padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
     font-size: ${fontSizeSmall}px;

@@ -526,18 +526,16 @@ class AnnotationsSidebar extends React.Component<
             this.renderSharedListNotesNotIsolated(listId),
         )
         return (
-            <SectionTitleContainer
-                bottom={this.props.isExpanded ? '20px' : '0px'}
-            >
+            <FollowedListNotesContainer bottom="10px">
                 <FollowedListTitleContainer
                     onClick={() =>
                         this.props.expandSharedSpaces(followedLists.allIds)
                     }
                     left="5px"
-                    bottom={this.props.isExpanded ? '20px' : '15px'}
+                    bottom="5px"
                 >
                     <FollowedListSectionTitle>
-                        Annotations from Shared Spaces
+                        From Shared Spaces
                     </FollowedListSectionTitle>
 
                     {this.props.followedListLoadState ===
@@ -576,7 +574,7 @@ class AnnotationsSidebar extends React.Component<
                     ) : (
                         sharedNotesByList
                     ))}
-            </SectionTitleContainer>
+            </FollowedListNotesContainer>
         )
     }
 
@@ -710,7 +708,7 @@ class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <SectionTitleContainer
+            <FollowedListNotesContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
             >
                 <FollowedListTitleContainerMyNotes left="5px">
@@ -721,8 +719,8 @@ class AnnotationsSidebar extends React.Component<
                                 : () => this.props.expandMyNotes()
                         }
                     >
-                        <FollowedListSectionTitle>
-                            My Annotations
+                        <FollowedListSectionTitle title={'My Notes'}>
+                            {'My Notes'}
                         </FollowedListSectionTitle>
                         {this.props.annotations.length > 0 && (
                             <FollowedListDropdownIcon
@@ -779,7 +777,7 @@ class AnnotationsSidebar extends React.Component<
                 ) : (
                     this.props.isExpanded && annots
                 )}
-            </SectionTitleContainer>
+            </FollowedListNotesContainer>
         )
     }
 
@@ -929,13 +927,6 @@ const FollowedListNotesContainer = styled(Margin)`
     align-items: flex-start;
 `
 
-const SectionTitleContainer = styled(Margin)`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-`
-
 const FollowedNotesContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -978,9 +969,10 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
-    width: 98%;
-    cursor: pointer;
+    padding: 5px 10px 5px 5px;
+    width: 415px;
+    cursor: ${(props) =>
+        props.context === 'isolatedView' ? 'default' : 'pointer'};
     border-radius: 3px;
 
     &:hover {
@@ -1012,8 +1004,8 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     align-items: center;
     cursor: pointer;
     justify-content: space-between;
-    width: fill-available;
-    z-index: 1000;
+    width: 420px;
+    z-index: 20;
 `
 
 const FollowedListTitle = styled.span<{ context: string }>`
@@ -1132,8 +1124,10 @@ const annotationCardStyle = css`
     }
 `
 
-const NewAnnotationSection = styled.section`
-    font-family: 'Poppins', sans-serif;
+const NewAnnotationSection = styled.section<{
+    context: string
+}>`
+    font-family: sans-serif;
     height: auto;
     background: #f6f8fb;
     display: flex;
@@ -1153,7 +1147,7 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: 'Poppins', sans-serif;
+    font-family: sans-serif;
     background: #f6f8fb;
     display: flex;
     flex-direction: column;
@@ -1254,26 +1248,24 @@ const TopBarActionBtns = styled.div`
     display: flex;
     gap: 10px;
     height: 24px;
-    z-index: 10000;
 `
 
 const MyNotesClickableArea = styled.div`
     cursor: pointer;
     display: flex;
     align-items: center;
-    width: inherit;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
     position: relative;
-    right: 200px;
+    right: 225px;
     z-index: 10;
     top: 20px;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
     position: relative;
-    right: 200px;
+    right: 190px;
     z-index: 10;
     top: 20px;
 `
@@ -1282,12 +1274,11 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: fill-available;
     overflow-y: scroll;
     padding-bottom: 150px;
-    width: fill-available;
+    width: 450px;
     padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '40px'};
+        props.sidebarContext === 'dashboard' ? '0' : '20px'};
     position: absolute;
-    margin-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '-40px'};
+    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '20px')};
 
     &::-webkit-scrollbar {
         display: none;

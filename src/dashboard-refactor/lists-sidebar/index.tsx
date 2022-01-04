@@ -17,18 +17,17 @@ import ListsSidebarItem, {
 import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
-import { Rnd } from 'react-rnd'
-import { createGlobalStyle } from 'styled-components'
 
-const Sidebar = styled(Rnd)<{
+const Sidebar = styled.div<{
     locked: boolean
     peeking: boolean
 }>`
     display: flex;
     flex-direction: column;
     justify-content: start;
+    width: ${sizeConstants.listsSidebar.widthPx}px;
+    position: fixed;
     z-index: 3000;
-    width: 200px;
 
     ${(props) =>
         props.locked &&
@@ -59,10 +58,7 @@ const Sidebar = styled(Rnd)<{
         `}
 `
 
-const Container = styled.div`
-    position: fixed;
-    z-index: 3000;
-`
+const Container = styled.div``
 
 const PeekTrigger = styled.div`
     height: 100vh;
@@ -74,12 +70,11 @@ const PeekTrigger = styled.div`
 const TopGroup = styled.div`
     border-top: 1px solid ${colors.lightGrey};
 `
-const BottomGroup = styled.div<{ sidebarWidth: string }>`
+const BottomGroup = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
     padding-bottom: 100px;
     height: fill-available;
-    width: ${(props) => props.sidebarWidth};
 
     &::-webkit-scrollbar {
       display: none;
@@ -99,19 +94,6 @@ const NoCollectionsMessage = styled.div`
     }
 `
 
-const GlobalStyle = createGlobalStyle`
-    .sidebarResizeHandleSidebar {
-        width: 4px !important;
-        height: 100% !important;
-
-        &:hover {
-            background: #5671cf30;
-        }
-    }
-
-
-`
-
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
@@ -128,14 +110,7 @@ export interface ListsSidebarProps {
     initDropReceivingState: (listId: number) => DropReceivingState
 }
 
-export interface State {
-    sidebarWidth: string
-}
-
-export default class ListsSidebar extends PureComponent<
-    ListsSidebarProps,
-    State
-> {
+export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     private renderLists = (
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
@@ -155,14 +130,8 @@ export default class ListsSidebar extends PureComponent<
             ),
         )
 
-    private SidebarContainer = React.createRef()
-
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
-    }
-
-    state = {
-        sidebarWidth: '200px',
     }
 
     render() {
@@ -173,24 +142,10 @@ export default class ListsSidebar extends PureComponent<
             searchBarProps,
             listsGroups,
         } = this.props
-
-        const style = {
-            display: !isSidebarPeeking && !isSidebarLocked ? 'none' : 'flex',
-            top: '100',
-            height: isSidebarPeeking ? '90vh' : '100vh',
-        }
-
-        //console.log(this.SidebarContainer)
-
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
-                onMouseEnter={
-                    !isSidebarLocked &&
-                    this.props.peekState.setSidebarPeekState(true)
-                }
             >
-                <GlobalStyle />
                 <PeekTrigger
                     onMouseEnter={this.props.peekState.setSidebarPeekState(
                         true,
@@ -198,44 +153,14 @@ export default class ListsSidebar extends PureComponent<
                     onDragEnter={this.props.peekState.setSidebarPeekState(true)}
                 />
                 <Sidebar
-                    ref={this.SidebarContainer}
-                    style={style}
-                    size={{ height: isSidebarPeeking ? '90vh' : '100vh' }}
                     peeking={isSidebarPeeking}
-                    position={{
-                        x:
-                            isSidebarLocked &&
-                            `$sizeConstants.header.heightPxpx`,
-                    }}
                     locked={isSidebarLocked}
                     onMouseEnter={
                         isSidebarPeeking &&
                         this.props.peekState.setSidebarPeekState(true)
                     }
-                    default={{ width: 200 }}
-                    resizeHandleClasses={{
-                        right: 'sidebarResizeHandleSidebar',
-                    }}
-                    resizeGrid={[1, 0]}
-                    dragAxis={'none'}
-                    minWidth={'200px'}
-                    maxWidth={'500px'}
-                    disableDragging={'true'}
-                    enableResizing={{
-                        top: false,
-                        right: true,
-                        bottom: false,
-                        left: false,
-                        topRight: false,
-                        bottomRight: false,
-                        bottomLeft: false,
-                        topLeft: false,
-                    }}
-                    onResize={(e, direction, ref, delta, position) => {
-                        this.setState({ sidebarWidth: ref.style.width })
-                    }}
                 >
-                    <BottomGroup sidebarWidth={this.state.sidebarWidth}>
+                    <BottomGroup>
                         <Margin vertical="10px">
                             <ListsSidebarGroup
                                 isExpanded
@@ -314,10 +239,12 @@ export default class ListsSidebar extends PureComponent<
                                             errorMessage={addListErrorMessage}
                                         />
                                     )}
-                                    {group.title === 'My Spaces' &&
+                                    {group.title === 'My collections' &&
                                     group.listsArray.length === 0 ? (
                                         <NoCollectionsMessage>
-                                            <strong>No saved spaces</strong>{' '}
+                                            <strong>
+                                                No saved collections
+                                            </strong>{' '}
                                             <br />
                                             <u
                                                 onClick={this.bindRouteGoTo(
@@ -331,7 +258,7 @@ export default class ListsSidebar extends PureComponent<
                                     ) : (
                                         <>
                                             {group.title ===
-                                                'Followed Spaces' &&
+                                                'Followed collections' &&
                                             group.listsArray.length === 0 ? (
                                                 <NoCollectionsMessage>
                                                     <u
@@ -353,7 +280,7 @@ export default class ListsSidebar extends PureComponent<
                                                     >
                                                         follow
                                                     </u>{' '}
-                                                    your first space.
+                                                    your first collection.
                                                 </NoCollectionsMessage>
                                             ) : (
                                                 this.renderLists(
@@ -368,7 +295,6 @@ export default class ListsSidebar extends PureComponent<
                         ))}
                     </BottomGroup>
                 </Sidebar>
-                {/* </Rnd> */}
             </Container>
         )
     }

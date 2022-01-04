@@ -122,7 +122,7 @@ class TagPicker extends StatefulUIElement<
                     : undefined
             }
             onFocus={this.handleResultTagFocus}
-            key={`TagKeyName-${tag.name}-${index}`}
+            key={`TagKeyName-${tag.name}`}
             index={index}
             name={tag.name}
             focused={tag.focused}

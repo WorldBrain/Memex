@@ -10,9 +10,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 const styles = require('./TagsButton.css')
 const buttonStyles = require('../../components/Button.css')
 
-export interface OwnProps {
-    fetchTags?: () => Promise<string[]>
-}
+export interface OwnProps {}
 
 interface StateProps {
     isDisabled: boolean
@@ -28,19 +26,10 @@ export type Props = OwnProps & StateProps & DispatchProps
 class TagsButton extends PureComponent<Props> {
     async componentDidMount() {
         await this.getKeyboardShortcutText()
-
-        const hasTags = await this.props.fetchTags()
-
-        if (hasTags.length > 0) {
-            this.setState({
-                hasTags: true,
-            })
-        }
     }
 
     state = {
         highlightInfo: undefined,
-        hasTags: false,
     }
 
     private async getKeyboardShortcutText() {
@@ -62,15 +51,13 @@ class TagsButton extends PureComponent<Props> {
                 <Button
                     onClick={this.props.toggleTagPopup}
                     disabled={this.props.isDisabled}
-                    btnClass={this.state.hasTags ? styles.hasTag : styles.tag}
+                    btnClass={styles.tag}
                     itemClass={styles.button}
                 >
-                    <div className={styles.buttonInnerContent}>
-                        Add Tag(s)
-                        <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
-                        </p>
-                    </div>
+                    Add Tag(s)
+                    <p className={buttonStyles.subTitle}>
+                        {this.state.highlightInfo}
+                    </p>
                 </Button>
             </div>
         )

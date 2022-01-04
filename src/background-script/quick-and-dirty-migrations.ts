@@ -366,7 +366,7 @@ export const migrations: Migrations = {
     'reseed-collections-suggestion-cache': async ({ localStorage, db }) => {
         const cacheStorageKey = 'custom-lists_suggestions'
 
-        const listEntries = await db.table('customLists').limit(1000).toArray()
+        const listEntries = await db.table('customLists').limit(10).toArray()
         const newCache: string[] = listEntries.map((entry) => entry.name)
 
         await localStorage.set({ [cacheStorageKey]: newCache })

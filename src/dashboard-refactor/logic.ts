@@ -713,7 +713,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: event.fullPageUrl,
             deleted: event.deleted,
             added: event.added,
-            skipPageIndexing: true,
         })
     }
 

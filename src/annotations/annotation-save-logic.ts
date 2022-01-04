@@ -56,7 +56,6 @@ export async function createAnnotation({
             await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
         }
     }
-
     return {
         remoteAnnotationLink: shareOpts?.shouldShare
             ? getNoteShareUrl({ remoteAnnotationId })
@@ -69,13 +68,7 @@ export async function createAnnotation({
                     pageUrl: annotationData.fullPageUrl,
                     selector: annotationData.selector,
                     title: annotationData.pageTitle,
-                    comment: annotationData.comment
-                        .replace(/\\\[/g, '[')
-                        .replace(/\\\]/g, ']')
-                        .replace(/\\\(/g, '(')
-                        .replace(/\\\)/g, ')')
-                        .replace(/\    \n/g, '')
-                        .replace(/\*   /g, ' * '),
+                    comment: annotationData.comment,
                     body: annotationData.body,
                 },
                 { skipPageIndexing },
@@ -130,13 +123,7 @@ export async function updateAnnotation({
         savePromise: (async () => {
             await annotationsBG.editAnnotation(
                 annotationData.localId,
-                annotationData.comment
-                    .replace(/\\\[/g, '[')
-                    .replace(/\\\]/g, ']')
-                    .replace(/\\\(/g, '(')
-                    .replace(/\\\)/g, ')')
-                    .replace(/\    \n/g, '')
-                    .replace(/\*   /g, ' * '),
+                annotationData.comment,
             )
 
             await Promise.all([

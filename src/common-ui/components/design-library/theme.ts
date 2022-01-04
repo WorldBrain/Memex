@@ -57,7 +57,7 @@ export const theme: Theme = {
         smallText: '12px',
     },
     zIndices: {
-        overlay: 5000,
+        overlay: 50,
     },
     icons: {
         copy: icons.copy,

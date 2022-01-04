@@ -90,7 +90,11 @@ export default abstract class GenericPickerLogic<
     }
 
     getInitialState(): State {
-        return INITIAL_STATE as State
+        return {
+            ...INITIAL_STATE,
+            selectedEntries: [],
+            displayEntries: [],
+        } as State
     }
 
     async init() {
@@ -259,7 +263,7 @@ export default abstract class GenericPickerLogic<
         displayEntries: DisplayEntry[],
         term: string,
     ) => {
-        if (list.includes(term)) {
+        if (this._isTermInEntryList(list, term)) {
             this.emitMutation({
                 $apply: (state) => ({
                     ...state,
@@ -309,6 +313,18 @@ export default abstract class GenericPickerLogic<
                     displayEntries,
                 }),
             })
+    }
+
+    /**
+     * Loops through a list of entries and exits if a match is found
+     */
+    _isTermInEntryList = (entryList: string[], term: string) => {
+        for (const entry of entryList) {
+            if (entry === term) {
+                return true
+            }
+        }
+        return false
     }
 
     _queryInitialSuggestions = (term) =>

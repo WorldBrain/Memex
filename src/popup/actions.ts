@@ -10,7 +10,6 @@ import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { getUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
-import { isUrlSupported } from 'src/page-indexing/utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -24,7 +23,6 @@ const bookmarks = runInBackground<BookmarksInterface>()
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
-export const setInitState = createAction<boolean>('popup/setInitState')
 
 const getCurrentTab = async () => {
     let currentTab
@@ -60,19 +58,21 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 async function init() {
     const currentTab = await getCurrentTab()
 
+    const tabUrl = currentTab?.url
+
     // If we can't get the tab data, then can't init action button states
-    if (!currentTab?.url || !isUrlSupported(currentTab)) {
+    if (!tabUrl) {
+        console.warn("initState - Couldn't get a currentTab url")
         return { currentTab: null, fullUrl: null }
     }
 
-    const identifier = await runInBackground<
-        PageIndexingInterface<'caller'>
-    >().waitForContentIdentifier({
+    const pages = runInBackground<PageIndexingInterface<'caller'>>()
+    const identifier = await pages.waitForContentIdentifier({
         tabId: currentTab.id,
-        fullUrl: currentTab.url,
+        fullUrl: tabUrl,
     })
-
-    return { currentTab, fullUrl: identifier.fullUrl }
+    const fullUrl = identifier.fullUrl
+    return { currentTab, fullUrl }
 }
 
 // N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
@@ -89,7 +89,6 @@ export const initBasicStore: () => Thunk = () => async (dispatch) => {
 export const initState: () => Thunk = () => async (dispatch) => {
     const { currentTab, fullUrl } = await init()
     if (!currentTab) {
-        dispatch(setInitState(true))
         return
     }
 
@@ -121,7 +120,5 @@ export const initState: () => Thunk = () => async (dispatch) => {
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)
-    } finally {
-        dispatch(setInitState(true))
     }
 }

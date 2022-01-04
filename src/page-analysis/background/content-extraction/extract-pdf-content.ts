@@ -11,12 +11,10 @@ async function extractContent(
     pdfData: ArrayBuffer,
     rawContent: RawPdfPageContent,
 ) {
-    if (process.env.NODE_ENV !== 'test') {
-        // Point PDF.js to its worker code, a static file in the extension.
-        PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
-            '/build/pdf.worker.min.js',
-        )
-    }
+    // Point PDF.js to its worker code, a static file in the extension.
+    PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
+        '/build/pdf.worker.min.js',
+    )
 
     // Load PDF document into PDF.js
     // @ts-ignore

@@ -136,18 +136,15 @@ export default class ContentSharingBackground {
     getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
         const remoteListIdsDict = await this.storage.getAllRemoteListIds()
         const remoteListData: Array<{
-            localId: number | string
+            localId: number
             remoteId: string
             name: string
         }> = []
 
-        for (const localId of Object.keys(remoteListIdsDict)) {
+        for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
             const list = await this.options.customLists.fetchListById(localId)
-            if (list == null) {
-                continue
-            }
             remoteListData.push({
-                localId: Number(localId),
+                localId,
                 remoteId: remoteListIdsDict[localId],
                 name: list.name,
             })

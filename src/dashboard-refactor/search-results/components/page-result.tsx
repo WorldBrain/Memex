@@ -191,7 +191,7 @@ export default class PageResultView extends PureComponent<Props> {
                         ? icons.collectionsFull
                         : icons.collectionsEmpty,
                     onClick: this.props.onListPickerBtnClick,
-                    tooltipText: 'Edit Spaces',
+                    tooltipText: 'Edit Collections',
                 },
                 {
                     key: 'expand-notes-btn',

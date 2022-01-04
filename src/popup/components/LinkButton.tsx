@@ -44,12 +44,10 @@ class LinkButton extends PureComponent<Props> {
                     btnClass={styles.searchIcon}
                     itemClass={LinkButtonStyles.button}
                 >
-                    <div className={styles.buttonInnerContent}>
-                        Search Memex
-                        <p className={styles.subTitle}>
-                            {this.state.highlightInfo}
-                        </p>
-                    </div>
+                    Search Memex
+                    <p className={styles.subTitle}>
+                        {this.state.highlightInfo}
+                    </p>
                 </Button>
             </div>
         )

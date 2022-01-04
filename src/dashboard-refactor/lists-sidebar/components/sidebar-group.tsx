@@ -33,7 +33,6 @@ const GroupHeaderInnerDiv = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-right: 5px;
 `
 
 const GroupTitle = styled.div`
@@ -42,7 +41,7 @@ const GroupTitle = styled.div`
     line-height: 18px;
     cursor: pointer;
 
-    width: fill-available;
+    width: max-content;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -57,10 +56,6 @@ const IconContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-
-    &:hover {
-        background: #f0f0f0;
-    }
 `
 
 const ErrorMsg = styled.div`
@@ -142,7 +137,7 @@ export default class ListsSidebarGroup extends PureComponent<
                                 <IconContainer
                                     onClick={this.props.onAddBtnClick}
                                 >
-                                    <Margin horizontal="3px" vertical="3px">
+                                    <Margin horizontal="8px">
                                         <Icon
                                             heightAndWidth="12px"
                                             path={icons.plus}

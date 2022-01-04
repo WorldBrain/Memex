@@ -24,15 +24,10 @@ export default class ListDetails extends PureComponent<Props> {
                                 <Name>{this.props.listName}</Name>
                                 {this.props.remoteLink && (
                                     <Note>
-                                        Only your own contributions to this
-                                        space are visible locally. To see all,
-                                        open the{' '}
-                                        <a
-                                            target="_blank"
-                                            href={this.props.remoteLink}
-                                        >
-                                            web view{' '}
-                                        </a>
+                                        You can only see and search your own
+                                        contributions to this collection.
+                                        <br /> Open the collection in the web
+                                        view to see all entries.
                                     </Note>
                                 )}
                             </DetailsContainer>
@@ -59,7 +54,7 @@ export default class ListDetails extends PureComponent<Props> {
                                             type="primary-action"
                                             externalHref={this.props.remoteLink}
                                         >
-                                            Open Web View
+                                            Open
                                         </Button>
                                     </>
                                 ) : (
@@ -101,13 +96,7 @@ const Container = styled.div`
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    align-items: center;
-    z-index: 1002;
-
-    & a {
-        text-decoration: none;
-        font-weight: 600;
-    }
+    align-items: flex-start;
 `
 
 const DetailsContainer = styled.div`
@@ -130,6 +119,7 @@ const ShareCollectionBtnLabel = styled.div`
 const BtnsContainer = styled.div`
     display: flex;
     align-items: center;
+    padding-top: 5px;
     z-index: 100;
 `
 

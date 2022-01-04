@@ -66,7 +66,6 @@ export interface ListEntryArgs {
 }
 
 export interface RibbonListsProps {
-    lists: string[]
     pageBelongsToList: boolean
     showListsPicker: boolean
     updateLists: PickerUpdateHandler

@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill-ts'
+
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
@@ -5,7 +7,6 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
-import { browser } from 'webextension-polyfill-ts'
 import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
@@ -50,6 +51,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         if (!mount) {
             return
         }
+
         destroyInPageUI('sidebar')
         destroyInPageSidebarUI(mount.rootElement, mount.shadowRoot)
     }

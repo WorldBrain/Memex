@@ -488,7 +488,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="5px">
+                <Margin top="10px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -590,7 +590,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     : 'initial'
                             }
                             height="430px"
-                            overflow="scroll"
                         >
                             <QuickTutorial
                                 markdownHelpOnTop={true}
@@ -836,11 +835,9 @@ const ContentContainer = styled.div`
 const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
     font-weight: 800;
-    font-size: 14px;
+    font-size: 15px;
     color: #000;
-    margin-right: 10px;
-    width: 100%;
-    text-align: right;
+    margin-right: 5px;
 `
 
 const CancelBtnStyled = styled.button`
@@ -900,7 +897,6 @@ const ActionBtnStyled = styled.button`
 const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
-    align-items: center;
     border-top: 1px solid #f0f0f0;
     padding: 5px;
 }

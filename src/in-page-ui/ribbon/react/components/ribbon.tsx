@@ -120,12 +120,8 @@ export default class Ribbon extends Component<Props, State> {
             : source
     }
 
-    private hideTagPicker = () => {
-        this.props.tagging.setShowTagsPicker(false)
-    }
-    private hideListPicker = () => {
-        this.props.lists.setShowListsPicker(false)
-    }
+    private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
+    private hideListPicker = () => this.props.lists.setShowListsPicker(false)
 
     private renderTagsPicker() {
         if (!this.props.tagging.showTagsPicker) {
@@ -237,7 +233,7 @@ export default class Ribbon extends Component<Props, State> {
                             </div>
                         ) : (
                             <div className={styles.extraButtonsText}>
-                                Enable Sidebar
+                                Enable Ribbon
                             </div>
                         )}
                     </div>
@@ -553,16 +549,10 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <div
                                         className={cx(styles.button, {
-                                            [styles.tagFull]:
-                                                this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags.length >
-                                                    0,
-                                            [styles.tag]:
-                                                !this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags
-                                                    .length === 0,
+                                            [styles.tagFull]: this.props.tagging
+                                                .pageHasTags,
+                                            [styles.tag]: !this.props.tagging
+                                                .pageHasTags,
                                         })}
                                         onClick={() =>
                                             this.props.tagging.setShowTagsPicker(
@@ -581,16 +571,10 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <div
                                         className={cx(styles.button, {
-                                            [styles.collectionsFull]:
-                                                this.props.lists
-                                                    .pageBelongsToList ||
-                                                this.props.lists.lists.length >
-                                                    0,
-                                            [styles.collections]:
-                                                !this.props.lists
-                                                    .pageBelongsToList ||
-                                                this.props.lists.lists
-                                                    .length === 0,
+                                            [styles.collectionsFull]: this.props
+                                                .lists.pageBelongsToList,
+                                            [styles.collections]: !this.props
+                                                .lists.pageBelongsToList,
                                         })}
                                         onClick={() =>
                                             this.props.lists.setShowListsPicker(

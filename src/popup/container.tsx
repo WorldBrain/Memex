@@ -42,7 +42,6 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import checkBrowser from 'src/util/check-browser'
 
 export interface OwnProps {}
 
@@ -51,7 +50,6 @@ interface StateProps {
     showCollectionsPicker: boolean
     tabId: number
     url: string
-    initLogicRun: boolean
     searchValue: string
 }
 
@@ -81,6 +79,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 }),
             }),
         )
+    }
+
+    private get isCurrentPagePDF(): boolean {
+        return isFullUrlPDF(this.props.url)
     }
 
     async componentDidMount() {
@@ -131,7 +133,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     handleTagUpdate = async ({ added, deleted }) => {
-        const backendResult = tags.updateTagForPageInCurrentTab({
+        const backendResult = tags.updateTagForPage({
             added,
             deleted,
             url: this.props.url,
@@ -151,7 +153,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
     handleListUpdate = async ({ added, deleted }) => {
-        const backendResult = collections.updateListForPageInCurrentTab({
+        const backendResult = collections.updateListForPage({
             added,
             deleted,
             url: this.props.url,
@@ -171,34 +173,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     fetchListsForPage = async () =>
         collections.fetchPageLists({ url: this.props.url })
 
-    getPDFLocation = () => {
-        if (this.state.currentPageUrl.startsWith('file://')) {
-            return 'local'
-        } else {
-            return 'remote'
-        }
-    }
-
-    getPDFmode = () => {
-        if (
-            this.state.currentPageUrl.startsWith('chrome-extension') ||
-            this.state.currentPageUrl.startsWith('moz-extension')
-        ) {
-            return 'reader'
-        } else {
-            return 'original'
-        }
-    }
-
-    private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
-    }
-
     renderChildren() {
-        if (!this.props.initLogicRun) {
-            return false
-        }
-
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
@@ -228,19 +203,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return (
             <React.Fragment>
                 {this.isCurrentPagePDF &&
-                    (checkBrowser() === 'firefox' &&
-                    this.getPDFLocation() === 'local' ? (
-                        <BlurredNotice
-                            browser={checkBrowser()}
-                            location={this.getPDFLocation()}
-                        >
-                            <NoticeTitle>
-                                Saving and annotating locally stored PDFs not
-                                available on Firefox
-                            </NoticeTitle>
-                        </BlurredNotice>
-                    ) : this.getPDFmode() === 'original' ? (
-                        <BlurredNotice browser={checkBrowser()}>
+                    !this.state.currentPageUrl.startsWith(
+                        'chrome-extension',
+                    ) && (
+                        <BlurredNotice>
                             <NoticeTitle>Save & annotate this PDF</NoticeTitle>
                             <PrimaryAction
                                 label={'Open PDF Reader'}
@@ -249,17 +215,16 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                                 }
                             />
                         </BlurredNotice>
-                    ) : null)}
+                    )}
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
                 <div className={styles.item}>
-                    <CollectionsButton
-                        fetchCollections={this.fetchListsForPage}
-                    />
+                    <TagsButton />
                 </div>
+
                 <div className={styles.item}>
-                    <TagsButton fetchTags={this.fetchTagsForPage} />
+                    <CollectionsButton />
                 </div>
                 <hr />
 
@@ -277,22 +242,27 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <TooltipButton closePopup={this.closePopup} />
                 </div>
 
-                <div className={styles.item}>
-                    <ToggleSwitchButton
-                        btnIcon={btnStyles.PDFIcon}
-                        contentType="PDFs"
-                        btnText="Open PDF reader"
-                        btnHoverText="Open current PDF in Memex PDF reader"
-                        toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
-                        isEnabled={this.state.isPDFReaderEnabled}
-                        onBtnClick={() =>
-                            this.processEvent('openPDFReader', null)
-                        }
-                        onToggleClick={() =>
-                            this.processEvent('togglePDFReaderEnabled', null)
-                        }
-                    />
-                </div>
+                {this.isCurrentPagePDF && (
+                    <div className={styles.item}>
+                        <ToggleSwitchButton
+                            btnIcon={btnStyles.PDFIcon}
+                            contentType="PDFs"
+                            btnText="Open PDF reader"
+                            btnHoverText="Open current PDF in Memex PDF reader"
+                            toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
+                            isEnabled={this.state.isPDFReaderEnabled}
+                            onBtnClick={() =>
+                                this.processEvent('openPDFReader', null)
+                            }
+                            onToggleClick={() =>
+                                this.processEvent(
+                                    'togglePDFReaderEnabled',
+                                    null,
+                                )
+                            }
+                        />
+                    </div>
+                )}
 
                 <hr />
 
@@ -336,28 +306,14 @@ const NoticeTitle = styled.div`
     color: ${(props) => props.theme.colors.primary};
     font-weight: bold;
     padding-bottom: 10px;
-    text-align: center;
-    padding: 0 10px;
-    margin-bottom: 20px;
 `
 
-const BlurredNotice = styled.div<{
-    browser: string
-    location: string
-}>`
+const BlurredNotice = styled.div`
     position absolute;
-    height: ${(props) =>
-        props.browser === 'firefox' && props.location === 'local'
-            ? '90%'
-            : '67%'};
+    height: 67%;
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
     z-index: 20;
-    overflow-y: ${(props) =>
-        props.browser === 'firefox' && props.location === 'local'
-            ? 'hidden'
-            : 'scroll'};
-    background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: flex-start;
@@ -403,7 +359,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     searchValue: selectors.searchValue(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
     showTagsPicker: tagsSelectors.showTagsPicker(state),
-    initLogicRun: selectors.initLogicRun(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({

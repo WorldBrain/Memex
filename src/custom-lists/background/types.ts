@@ -101,13 +101,8 @@ export interface RemoteCollectionsInterface {
         added?: string
         deleted?: string
         url: string
-        skipPageIndexing?: boolean
-    }): Promise<void>
-    updateListForPageInCurrentTab(args: {
-        added?: string
-        deleted?: string
-        url: string
         tabId?: number
+        skipPageIndexing?: boolean
     }): Promise<void>
     getInboxUnreadCount(): Promise<number>
 }

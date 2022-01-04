@@ -53,7 +53,6 @@
     justify-content: flex-end;
     height: 105vh;
     width: 40px;
-    border-left: 1px solid #e0e0e0;
 
     & .removeSidebar {
         visibility: hidden;
@@ -87,9 +86,11 @@
 
 .innerRibbonSidebarOpen {
     box-shadow: none;
+    right: 0px;
     height: 100%;
     top: 0px;
     justify-content: flex-start;
+    padding-right: 16px;
     padding-top: 45px;
     width: 20px;
     align-items: flex-end;

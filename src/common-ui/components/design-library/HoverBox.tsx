@@ -10,12 +10,10 @@ export interface Props {
     withRelativeContainer?: boolean
     position?: string
     height?: string
-    overflow?: string
 }
 
 export class HoverBox extends React.Component<Props> {
     render() {
-        console.log(this.props.overflow)
         if (!this.props.withRelativeContainer) {
             return (
                 <HoverBoxDiv {...this.props}>{this.props.children}</HoverBoxDiv>
@@ -30,15 +28,14 @@ export class HoverBox extends React.Component<Props> {
     }
 }
 
-export const HoverBoxContainer = styled.div<Props>`
+export const HoverBoxContainer = styled.div`
     position: relative;
-    overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};
 `
 
 export const HoverBoxDiv = styled.div<Props>`
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
-    overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};;
+    overflow: visible;
     position: ${(props) => (props.position ? props.position : 'absolute')};;
     border-radius: 3px;
     width: ${(props) => (props.width ? props.width : '300px')};

@@ -85,7 +85,6 @@ describe('Ribbon logic', () => {
             annotationsCache: createAnnotationsCache(
                 {
                     ...backgroundModules,
-                    tags: backgroundModules.tags.remoteFunctions,
                     contentSharing:
                         backgroundModules.contentSharing.remoteFunctions,
                     customLists: backgroundModules.customLists.remoteFunctions,
@@ -576,7 +575,7 @@ describe('Ribbon logic', () => {
             dependencies: {
                 tags: {
                     ...device.backgroundModules.tags.remoteFunctions,
-                    updateTagForPageInCurrentTab: ({ added }) => {
+                    updateTagForPage: ({ added }) => {
                         addedTag = added
                     },
                 } as any,
