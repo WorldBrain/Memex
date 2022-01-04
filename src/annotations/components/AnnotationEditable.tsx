@@ -242,6 +242,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                     rows={2}
                     comment={comment}
                     editorHeight={this.state.editorHeight}
+                    isShared={this.props.isShared}
+                    isBulkShareProtected={this.props.isBulkShareProtected}
                 />
             )
         }
@@ -470,12 +472,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 Cancel
                             </CancelBtnStyled>
                         </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                            position="bottom"
-                        >
-                            {confirmBtn}
-                        </ButtonTooltip>
+                        {confirmBtn}
                     </BtnContainerStyled>
                     {this.renderMarkdownHelpButton()}
                 </SaveActionBar>

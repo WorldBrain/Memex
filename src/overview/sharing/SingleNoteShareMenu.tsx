@@ -170,14 +170,20 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         hasProtectedOption: true,
                         onClick: this.handleSetPrivate,
                         isSelected: !this.props.isShared,
-                        shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
+                        shortcut: '',
                         description: 'Private to you, until shared (in bulk)',
                     },
                 ]}
                 shortcutHandlerDict={{
                     // 'mod+shift+enter': this.handleSetProtected,
                     'mod+shift+enter': () => this.handleSetShared(false),
-                    'mod+enter': () => this.handleSetPrivate(false),
+                    'mod+enter': async () => {
+                        if (this.props.isShared) {
+                            this.handleSetShared(false)
+                        } else {
+                            this.handleSetPrivate(false)
+                        }
+                    },
                     'alt+enter': () => this.handleSetPrivate(true),
                     'alt+shift+enter': () => this.handleSetShared(true),
                 }}

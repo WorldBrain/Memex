@@ -25,6 +25,7 @@ async function setupTest(
                 ? ({ url }) => args.openPage(url) as any
                 : browserAPIs.tabs.create,
             query: () => [{ url: args?.currentPageUrl ?? DEFAULT_PAGE }] as any,
+            update: () => [{}] as any,
         },
         runtimeAPI: {
             getURL: () => TEST_EXT_PAGE,
@@ -97,7 +98,7 @@ describe('Popup UI logic', () => {
 
         await logic.init()
         expect(openedPage).toBe(undefined)
-        await logic.processEvent('openPDFReader', null)
+        await logic.processEvent('togglePDFReader', null)
         expect(openedPage).toBe(TEST_EXT_PAGE + '?file=' + DEFAULT_PAGE)
     })
 })

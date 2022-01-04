@@ -18,6 +18,14 @@ import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.te
 import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharingTestHelper } from './index.tests'
+import { LocationSchemeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+
+const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+const expectedIdType = isFBEmu ? String : Number
+
+function convertRemoteId(id: string) {
+    return isFBEmu ? id : parseInt(id, 10)
+}
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -1801,9 +1809,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: maybeInt(
-                                            testData.remoteListId,
-                                        ),
+                                        sharedList: isFBEmu
+                                            ? testData.remoteListId
+                                            : maybeInt(testData.remoteListId),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[0].fingerprintScheme,
@@ -1813,9 +1821,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: maybeInt(
-                                            testData.remoteListId,
-                                        ),
+                                        sharedList: isFBEmu
+                                            ? testData.remoteListId
+                                            : maybeInt(testData.remoteListId),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[1].fingerprintScheme,
