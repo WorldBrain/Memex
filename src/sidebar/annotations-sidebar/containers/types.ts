@@ -130,7 +130,6 @@ export interface SidebarContainerState
     isWidthLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
-    sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
     annotationSharingAccess: AnnotationSharingAccess
