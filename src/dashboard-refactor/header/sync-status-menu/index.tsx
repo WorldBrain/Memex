@@ -74,7 +74,6 @@ const TextBlock = styled.div<{
     line-height: 15px;
     display: flex;
     align-items: center;
-    white-space: nowrap;
 
     ${(props) =>
         css`
@@ -277,19 +276,14 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 <Separator />
                 <RowContainer>
                     <Row>
-                        <Count>
-                            {pendingLocalChangeCount < 0
-                                ? 0
-                                : pendingLocalChangeCount}
-                        </Count>
-                        {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
+                        <Count>{pendingLocalChangeCount}</Count>
                         <TextBlock> pending local changes</TextBlock>
                     </Row>
                     <Row>
                         <Count>
-                            {pendingRemoteChangeCount < 0
-                                ? 0
-                                : pendingRemoteChangeCount}
+                            {pendingRemoteChangeCount
+                                ? pendingRemoteChangeCount
+                                : 0}
                         </Count>
                         <TextBlock> pending remote changes</TextBlock>
                     </Row>

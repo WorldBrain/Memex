@@ -24,6 +24,7 @@ export default class BlurredSidebarOverlay extends React.Component<Props> {
 const OutsideDiv = styled.div`
     position: fixed;
     z-index: 1;
+    backdrop-filter: blur(1px);
     height: fill-available;
     width: 450px;
     right: 40px;

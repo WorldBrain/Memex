@@ -12,7 +12,6 @@ import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
-import CopyPDFLinkButton from './components/CopyPDFLinkButton'
 import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
@@ -246,7 +245,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             <PrimaryAction
                                 label={'Open PDF Reader'}
                                 onClick={() =>
-                                    this.processEvent('togglePDFReader', null)
+                                    this.processEvent('openPDFReader', null)
                                 }
                             />
                         </BlurredNotice>
@@ -282,28 +281,18 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <ToggleSwitchButton
                         btnIcon={btnStyles.PDFIcon}
                         contentType="PDFs"
-                        btnText={
-                            this.getPDFmode() === 'reader'
-                                ? 'Close PDF reader'
-                                : 'Open PDF reader'
-                        }
+                        btnText="Open PDF reader"
                         btnHoverText="Open current PDF in Memex PDF reader"
                         toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
                         isEnabled={this.state.isPDFReaderEnabled}
                         onBtnClick={() =>
-                            this.processEvent('togglePDFReader', null)
+                            this.processEvent('openPDFReader', null)
                         }
                         onToggleClick={() =>
                             this.processEvent('togglePDFReaderEnabled', null)
                         }
                     />
                 </div>
-
-                {this.getPDFmode() === 'reader' && (
-                    <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
-                    />
-                )}
 
                 <hr />
 

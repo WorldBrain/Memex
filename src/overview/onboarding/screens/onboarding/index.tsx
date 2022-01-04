@@ -122,11 +122,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                 </div>
             </div>
             <SignInScreen
-                onSuccess={(isNewUser) => {
+                onSuccess={(isNewUser) =>
                     this.processEvent('onUserLogIn', { newSignUp: isNewUser })
-                    this.processEvent('goToGuidedTutorial', null)
-                    //this.processEvent('finishOnboarding', null)
-                }}
+                }
             />
         </div>
     )
