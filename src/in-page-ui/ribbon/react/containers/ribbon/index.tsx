@@ -102,7 +102,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
                 isExpanded={this.props.state === 'visible'}
-                hasAnnotations={this.state.hasAnnotations}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}

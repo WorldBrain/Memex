@@ -266,9 +266,10 @@ const Menu = styled.ul`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
+    z-index: 10;
     margin-top: 5px;
     flex-direction: column;
     top: 25px;
     left: -65px;
-    z-index: 1100;
+    z-index: 1000;
 `

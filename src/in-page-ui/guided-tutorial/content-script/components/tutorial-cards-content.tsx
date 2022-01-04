@@ -281,7 +281,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </AnnotationTitleContainer>
                     <RibbonTutorialArrow />
                 </PinTitleContainer>
-                <MouseOverArea top={'-40px'} />
+                <MouseOverArea />
             </>
         ),
         text: (
@@ -295,7 +295,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '60px',
+        top: '120px',
         bottom: null,
         left: null,
         right: '60px',
@@ -343,7 +343,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <PinTitleContainer>
                     <AnnotationTitleContainer>
                         <AnnotationTitleBox>
-                            <PinTitleImage src={icons.commentEmpty} />
+                            <PinTitleImage src={icons.openSidebar} />
                             <AnnotationTitleText>
                                 View your annotations
                             </AnnotationTitleText>
@@ -351,7 +351,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </AnnotationTitleContainer>
                     <RibbonTutorialArrow />
                 </PinTitleContainer>
-                <MouseOverArea top={'-70px'} />
+                <MouseOverArea top={'-20px'} />
             </>
         ),
         text: (
@@ -363,7 +363,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '85px',
+        top: '40px',
         bottom: null,
         left: null,
         right: '60px',
@@ -381,14 +381,14 @@ export const tutorialSteps: TutorialStepContent[] = [
         ),
         text: (
             <SaveTextContainer>
-                <p>Easy access to bookmarking, adding to Spaces & searching.</p>
+                <p>Easy access to bookmarking, tagging & searching.</p>
             </SaveTextContainer>
         ),
         top: '30px',
         bottom: null,
         left: null,
         right: '140px',
-        width: '540px',
+        width: '480px',
         height: '170px',
     },
 

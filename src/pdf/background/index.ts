@@ -2,7 +2,6 @@ import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 export class PDFBackground {
     private routeViewer: string
@@ -27,21 +26,13 @@ export class PDFBackground {
             openPdfViewerForNextPdf: async () => {
                 this._shouldOpenOneTime = true
             },
-            doNotOpenPdfViewerForNextPdf: async () => {
-                this._shouldOpenOneTime = false
-            },
         }
     }
 
     private get shouldOpen(): boolean {
-        if (this._shouldOpenOneTime === true) {
+        if (this._shouldOpenOneTime) {
             this._shouldOpenOneTime = false
             return true
-        }
-
-        if (this._shouldOpenOneTime === false) {
-            this._shouldOpenOneTime = false
-            return false
         }
         return this._shouldOpen
     }

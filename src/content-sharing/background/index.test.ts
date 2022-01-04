@@ -21,11 +21,8 @@ import { setupSyncBackgroundTest } from 'src/personal-cloud/background/index.tes
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { LocationSchemeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
-const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
-const expectedIdType = isFBEmu ? String : Number
-
 function convertRemoteId(id: string) {
-    return isFBEmu ? id : parseInt(id, 10)
+    return parseInt(id, 10)
 }
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
@@ -137,13 +134,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    expect.objectContaining({
+                                    {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: 'My shared list',
-                                    }),
+                                        description: null,
+                                    },
                                 ])
                                 expect(
                                     orderBy(
@@ -312,13 +310,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    expect.objectContaining({
+                                    {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: updatedTitle,
-                                    }),
+                                        description: null,
+                                    },
                                 ])
 
                                 // It should not fail when trying to update other fields than the title of the list
@@ -336,13 +335,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    expect.objectContaining({
+                                    {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: updatedTitle,
-                                    }),
+                                        description: null,
+                                    },
                                 ])
                             },
                         },
@@ -1276,9 +1276,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: isFBEmu
-                                            ? testData.remoteListId
-                                            : maybeInt(testData.remoteListId),
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[0].fingerprintScheme,
@@ -1288,9 +1288,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: isFBEmu
-                                            ? testData.remoteListId
-                                            : maybeInt(testData.remoteListId),
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[1].fingerprintScheme,
@@ -1668,7 +1668,7 @@ function makeShareAnnotationTest(options: {
                             createdWhen: expect.any(Number),
                             uploadedWhen: expect.any(Number),
                             updatedWhen: expect.any(Number),
-                            sharedList: expect.any(expectedIdType),
+                            sharedList: expect.any(Number),
                             sharedAnnotation:
                                 convertRemoteId(
                                     remoteAnnotationIds[

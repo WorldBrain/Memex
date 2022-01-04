@@ -19,8 +19,6 @@ export interface AnnotationEditEventProps {
 export interface AnnotationEditGeneralProps {
     comment: string
     editorHeight?: string
-    isShared?: boolean
-    isBulkShareProtected?: boolean
 }
 
 export interface Props
@@ -60,10 +58,7 @@ class AnnotationEdit extends React.Component<Props> {
         }
 
         if (e.key === 'Enter' && e.metaKey) {
-            return this.saveEdit(
-                this.props.isShared,
-                this.props.isBulkShareProtected,
-            )
+            return this.saveEdit(false, false)
         }
 
         if (e.key === 'Escape') {

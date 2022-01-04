@@ -47,7 +47,6 @@ export interface RibbonContainerState {
     lists: ValuesOf<componentTypes.RibbonListsProps>
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
-    hasAnnotations: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -146,16 +145,13 @@ export class RibbonContainerLogic extends UILogic<
             pausing: {
                 isPaused: false,
             },
-            hasAnnotations: false,
         }
     }
 
     init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             const url = await this.dependencies.getPageUrl()
-            this.emitMutation({
-                pageUrl: { $set: url },
-            })
+            this.emitMutation({ pageUrl: { $set: url } })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
@@ -168,9 +164,6 @@ export class RibbonContainerLogic extends UILogic<
         const lists = await this.dependencies.customLists.fetchPageLists({
             url,
         })
-        const annotations = await this.dependencies.annotations.getAllAnnotationsByUrl(
-            { url },
-        )
 
         this.emitMutation({
             pageUrl: { $set: url },
@@ -214,9 +207,6 @@ export class RibbonContainerLogic extends UILogic<
                 lists: {
                     $set: lists,
                 },
-            },
-            hasAnnotations: {
-                $set: annotations.length > 0,
             },
         })
     }
