@@ -277,12 +277,18 @@ export default class CustomListBackground {
                 isFollowed: true,
             }))
     }
-    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async () => {
+    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
         const sharedListReferences = await this.fetchFollowedListReferences()
         return this.fetchListsFromReferences(sharedListReferences)
     }
 
-    fetchCollaborativeLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async () => {
+    fetchCollaborativeLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
         const collabListReferences = await this.fetchCollaborativeListReferences()
         return this.fetchListsFromReferences(collabListReferences)
     }
