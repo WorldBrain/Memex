@@ -583,7 +583,7 @@ export class AnnotationsSidebarContainer<
             height: '100%',
             position: 'relative',
         } as const
-
+        //
         return (
             <ThemeProvider theme={this.props.theme}>
                 <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
