@@ -35,12 +35,12 @@ export class PDFBackground {
 
     private get shouldOpen(): boolean {
         if (this._shouldOpenOneTime === true) {
-            this._shouldOpenOneTime = false
+            this._shouldOpenOneTime = null
             return true
         }
 
         if (this._shouldOpenOneTime === false) {
-            this._shouldOpenOneTime = false
+            this._shouldOpenOneTime = null
             return false
         }
         return this._shouldOpen
