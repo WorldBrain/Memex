@@ -8,7 +8,6 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 export interface Dependencies {
     tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
@@ -48,9 +47,6 @@ export default class PopupLogic extends UILogic<State, Event> {
     async init() {
         const { syncSettings, tabsAPI } = this.dependencies
         await loadInitial(this, async () => {
-            const OneTimeIgnoreReaderEnabled = await getLocalStorage(
-                'OneTimeIgnoreReaderEnabled',
-            )
             const isPDFReaderEnabled = await syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
             )
@@ -69,32 +65,31 @@ export default class PopupLogic extends UILogic<State, Event> {
         previousState: { currentPageUrl },
     }) => {
         const { runtimeAPI, tabsAPI, pdfIntegrationBG } = this.dependencies
-        const currentTab = await tabsAPI.query({
+        const [currentTab] = await tabsAPI.query({
             active: true,
             currentWindow: true,
         })
-        const currentTabID = currentTab[0].id
 
+        let nextPageUrl: string
         if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
-            const originalUrl = decodeURIComponent(
+            nextPageUrl = decodeURIComponent(
                 currentPageUrl.split('?file=')[1].toString(),
             )
-            setLocalStorage('OneTimeIgnoreReaderEnabled', true)
-            pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
-            tabsAPI.update(currentTabID, { url: originalUrl })
+            await pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
         } else {
-            const pdfViewerUrl = constructPDFViewerUrl(currentPageUrl, {
+            nextPageUrl = constructPDFViewerUrl(currentPageUrl, {
                 runtimeAPI,
             })
-            pdfIntegrationBG.openPdfViewerForNextPdf()
-            tabsAPI.update(currentTabID, { url: pdfViewerUrl })
+            await pdfIntegrationBG.openPdfViewerForNextPdf()
         }
+
+        await tabsAPI.update(currentTab.id, { url: nextPageUrl })
+        this.emitMutation({ currentPageUrl: { $set: nextPageUrl } })
     }
 
     togglePDFReaderEnabled: EventHandler<'togglePDFReaderEnabled'> = async ({
         previousState,
     }) => {
-        setLocalStorage('OneTimeIgnoreReaderEnabled', false)
         const { syncSettings, pdfIntegrationBG } = this.dependencies
         this.emitMutation({
             isPDFReaderEnabled: { $set: !previousState.isPDFReaderEnabled },

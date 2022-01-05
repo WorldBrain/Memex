@@ -21,11 +21,11 @@ async function setupTest(
 
     const _logic = new Logic({
         tabsAPI: {
-            create: args?.openPage
-                ? ({ url }) => args.openPage(url) as any
-                : browserAPIs.tabs.create,
+            create: browserAPIs.tabs.create,
             query: () => [{ url: args?.currentPageUrl ?? DEFAULT_PAGE }] as any,
-            update: () => [{}] as any,
+            update: args?.openPage
+                ? (((tabId, { url }) => args.openPage(url)) as any)
+                : () => [{}] as any,
         },
         runtimeAPI: {
             getURL: () => TEST_EXT_PAGE,
@@ -86,9 +86,7 @@ describe('Popup UI logic', () => {
         ).toBe(false)
     })
 
-    it('should be able to open the current page in the Memex PDF viewer', async ({
-        device,
-    }) => {
+    it('should be able to toggle the Memex PDF viewer ', async ({ device }) => {
         let openedPage: string
         const { logic } = await setupTest(device, {
             openPage: (url) => {
@@ -100,5 +98,7 @@ describe('Popup UI logic', () => {
         expect(openedPage).toBe(undefined)
         await logic.processEvent('togglePDFReader', null)
         expect(openedPage).toBe(TEST_EXT_PAGE + '?file=' + DEFAULT_PAGE)
+        await logic.processEvent('togglePDFReader', null)
+        expect(openedPage).toBe(DEFAULT_PAGE)
     })
 })
