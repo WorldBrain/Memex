@@ -181,10 +181,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     getPDFmode = () => {
-        if (
-            this.state.currentPageUrl.startsWith('chrome-extension') ||
-            this.state.currentPageUrl.startsWith('moz-extension')
-        ) {
+        var currentUrlArray = this.state.currentPageUrl.split('/')
+
+        if (currentUrlArray.includes('pdfjs')) {
             return 'reader'
         } else {
             return 'original'
@@ -293,9 +292,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         onBtnClick={() =>
                             this.processEvent('togglePDFReader', null)
                         }
-                        onToggleClick={() =>
+                        onToggleClick={() => {
                             this.processEvent('togglePDFReaderEnabled', null)
-                        }
+                            {
+                                ;(this.getPDFmode() === 'reader' ||
+                                    this.isCurrentPagePDF) &&
+                                    this.processEvent('togglePDFReader', null)
+                            }
+                        }}
                     />
                 </div>
 
