@@ -58,7 +58,8 @@ export default function ListsSegment({
                         }
                     >
                         {tag}
-                        {showEditBtn && (
+                        {/* TODO: uncomment when collection context menu is done */}
+                        {/* {showEditBtn && (
                             <ListPillSettingButton
                                 onClick={() => {
                                     // open the space context modal
@@ -66,7 +67,7 @@ export default function ListsSegment({
                             >
                                 {' ... '}
                             </ListPillSettingButton>
-                        )}
+                        )} */}
                     </ListPillContainer>
                 ))}
             </ListsContainer>
