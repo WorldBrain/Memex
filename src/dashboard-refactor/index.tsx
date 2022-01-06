@@ -112,11 +112,14 @@ export class DashboardContainer extends StatefulUIElement<
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
-        this.annotationsCache = createAnnotationsCache({
-            contentSharing: props.contentShareBG,
-            annotations: props.annotationsBG,
-            tags: props.tagsBG,
-        })
+        this.annotationsCache = createAnnotationsCache(
+            {
+                contentSharing: props.contentShareBG,
+                annotations: props.annotationsBG,
+                tags: props.tagsBG,
+            },
+            { skipPageIndexing: true },
+        )
     }
 
     private getListDetailsProps = (): ListDetailsProps | null => {
