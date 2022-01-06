@@ -1,5 +1,5 @@
 import { maybeIndexTabs } from './utils'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 
 const testTabs = [
     {
@@ -54,10 +54,10 @@ describe('open tabs-based indexing tests', () => {
         })
 
         expect(processed).toEqual([
-            { fullUrl: getUrl(testTabs[4].url) },
-            { fullUrl: getUrl(testTabs[5].url) },
-            { fullUrl: getUrl(testTabs[6].url) },
-            { fullUrl: getUrl(testTabs[7].url) },
+            { fullUrl: getUnderlyingResourceUrl(testTabs[4].url) },
+            { fullUrl: getUnderlyingResourceUrl(testTabs[5].url) },
+            { fullUrl: getUnderlyingResourceUrl(testTabs[6].url) },
+            { fullUrl: getUnderlyingResourceUrl(testTabs[7].url) },
         ])
     })
 })

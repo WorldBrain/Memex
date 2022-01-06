@@ -44,7 +44,7 @@ import { main as searchInjectionMain } from 'src/content-scripts/content_script/
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
@@ -384,7 +384,7 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
-        const fullUrl = getUrl(window.location.href)
+        const fullUrl = getUnderlyingResourceUrl(window.location.href)
         this.isPdf = isFullUrlPDF(fullUrl)
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>

@@ -35,7 +35,7 @@ import { limitSuggestionsStorageLength } from 'src/tags/background'
 import { generateUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { Analytics } from 'src/analytics/types'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
 import type ContentSharingBackground from 'src/content-sharing/background'
@@ -260,7 +260,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pageUrl: this._normalizeUrl(getUrl(tab.url)),
+            pageUrl: this._normalizeUrl(getUnderlyingResourceUrl(tab.url)),
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -306,7 +306,8 @@ export default class DirectLinkingBackground {
             },
         )
 
-        url = url == null && tab != null ? getUrl(tab.url) : url
+        url =
+            url == null && tab != null ? getUnderlyingResourceUrl(tab.url) : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
             : this._normalizeUrl(url)
@@ -360,9 +361,9 @@ export default class DirectLinkingBackground {
         toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let fullPageUrl = toCreate.pageUrl ?? getUrl(tab?.url)
+        let fullPageUrl = toCreate.pageUrl ?? getUnderlyingResourceUrl(tab?.url)
         if (!isFullUrl(fullPageUrl)) {
-            fullPageUrl = getUrl(tab?.url)
+            fullPageUrl = getUnderlyingResourceUrl(tab?.url)
             if (!isFullUrl(fullPageUrl)) {
                 throw new Error(
                     'Could not get full URL while creating annotation',

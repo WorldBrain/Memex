@@ -8,7 +8,7 @@ import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { isUrlSupported } from 'src/page-indexing/utils'
 
@@ -39,7 +39,7 @@ const getCurrentTab = async () => {
             currentTab = await tabs.fetchTabByUrl(url)
         }
     }
-    currentTab.url = getUrl(currentTab.url)
+    currentTab.url = getUnderlyingResourceUrl(currentTab.url)
     return currentTab
 }
 

@@ -2,7 +2,7 @@ import {
     setupTutorialUIContainer,
     destroyUIContainer,
 } from 'src/in-page-ui/guided-tutorial/content-script/components'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { GUIDED_ONBOARDING_URL } from 'src/overview/onboarding/constants'
 
 // Target container for the Tutorial.
@@ -18,7 +18,9 @@ export const insertTutorial = async () => {
     // temporary hack to inject guided tutorial
     if (
         !tutorialTarget &&
-        getUrl(window.location.href).includes(GUIDED_ONBOARDING_URL)
+        getUnderlyingResourceUrl(window.location.href).includes(
+            GUIDED_ONBOARDING_URL,
+        )
     ) {
         tutorialTarget = document.createElement('div')
         tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
