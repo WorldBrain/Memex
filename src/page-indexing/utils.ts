@@ -18,6 +18,12 @@ export const isUrlSupported = (params: { url: string }) => {
         'chrome-extension://',
     ]
     const fullUrl = getUrl(params.url)
+
+    // Ignore file URLs, though check `params.url` as the processed `fullUrl` may be a valid file URL (local PDF opened in PDF reader)
+    if (params.url.startsWith('file://')) {
+        return false
+    }
+
     for (const prefix of unsupportedUrlPrefixes) {
         if (fullUrl.startsWith(prefix)) {
             return false
