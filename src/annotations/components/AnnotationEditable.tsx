@@ -507,7 +507,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {/* lists */}
                             {/* Collections button for annotations. To be added later. */}
 
-                            {/* <TagsSegment
+                            <TagsSegment
                                 tags={this.props.lists}
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
@@ -516,7 +516,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     this.props.annotationFooterDependencies
                                         ?.onListIconClick
                                 }
-                            /> */}
+                            />
                             {/* tags */}
                             <TagsSegment
                                 tags={this.props.tags}
