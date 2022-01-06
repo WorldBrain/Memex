@@ -196,18 +196,18 @@ class AnnotationsSidebar extends React.Component<
     }
     private getListsForAnnotationCreate = (
         followedLists,
-        isolatedView,
-        annotationCreateLists,
+        isolatedView: string,
+        annotationCreateLists: string[],
     ) => {
         // returns lists for AnnotationCreate including isolated view if enabled
         if (isolatedView) {
             const isolatedList = followedLists.byId[isolatedView]
             if (
                 isolatedList.isContributable &&
-                !annotationCreateLists.lists.includes(isolatedList.name)
+                !annotationCreateLists.includes(isolatedList.name)
             ) {
                 const listsToCreate = [
-                    ...annotationCreateLists.lists,
+                    ...annotationCreateLists,
                     isolatedList.name,
                 ]
 
