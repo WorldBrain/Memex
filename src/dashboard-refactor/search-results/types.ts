@@ -38,6 +38,7 @@ export type PageInteractionProps = Omit<
     onMainContentHover: React.MouseEventHandler
     onFooterHover: React.MouseEventHandler
     onTagsHover: React.MouseEventHandler
+    onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
 }
 

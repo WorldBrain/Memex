@@ -19,6 +19,9 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
+import ListsSegment, {
+    AddSpacesButton,
+} from 'src/common-ui/components/result-item-spaces-segment'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
@@ -260,9 +263,17 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
+                        onClick={() => window.open(this.fullUrl)}
                         href={this.fullUrl}
                         target="_blank"
                     >
+                        <PageTitle top="10px" bottom="5px">
+                            {hasTitle
+                                ? this.props.fullTitle === this.props.fullUrl
+                                    ? this.props.fullTitle.split('/').slice(-1)
+                                    : this.props.fullTitle
+                                : this.props.fullUrl}
+                        </PageTitle>
                         <ResultContent>
                             {this.props.favIconURI && (
                                 <FavIconBox>
@@ -274,14 +285,27 @@ export default class PageResultView extends PureComponent<Props> {
                             )}
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
-                        <PageTitle top="10px" bottom="5px">
-                            {hasTitle
-                                ? this.props.fullTitle === this.props.fullUrl
-                                    ? this.props.fullTitle.split('/').slice(-1)
-                                    : this.props.fullTitle
-                                : this.props.fullUrl}
-                        </PageTitle>
+
+                        {this.props.hoverState === 'main-content' &&
+                            this.props.lists.length === 0 && (
+                                <AddSpacesButton
+                                    hasNoLists={true}
+                                    onEditBtnClick={(event) => {
+                                        event.stopPropagation()
+                                        this.props.onListPickerBtnClick(event)
+                                    }}
+                                />
+                            )}
                     </PageContentBox>
+                    {this.props.lists.length > 0 && (
+                        <ListsSegment
+                            lists={this.props.lists}
+                            onMouseEnter={this.props.onListsHover}
+                            showEditBtn={this.props.hoverState === 'lists'}
+                            onEditBtnClick={this.props.onListPickerBtnClick}
+                            // onListClick={this.props.onListClick}
+                        />
+                    )}
                     <TagsSegment
                         tags={this.props.tags}
                         onMouseEnter={this.props.onTagsHover}
@@ -358,7 +382,7 @@ const FavIconImg = styled.img`
     border-radius: 30px;
 `
 
-const PageContentBox = styled.a`
+const PageContentBox = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;

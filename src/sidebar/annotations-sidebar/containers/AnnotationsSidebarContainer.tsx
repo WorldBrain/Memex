@@ -618,9 +618,9 @@ export class AnnotationsSidebarContainer<
                             this.renderTagPickerForAnnotation
                         }
                         // Not used yet but will be used for the "Add to collection" button
-                        // renderListsPickerForAnnotation={
-                        //     this.renderListPickerForAnnotation
-                        // }
+                        renderListsPickerForAnnotation={
+                            this.renderListPickerForAnnotation
+                        }
                         expandMyNotes={() =>
                             this.processEvent('expandMyNotes', null)
                         }

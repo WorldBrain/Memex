@@ -693,6 +693,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: 'tags',
                         }),
+                    onListsHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'lists',
+                        }),
                     onUnhover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,

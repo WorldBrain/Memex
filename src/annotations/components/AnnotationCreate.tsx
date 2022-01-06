@@ -20,6 +20,7 @@ import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickT
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import ListHolder from 'src/custom-lists/ui/list-holder'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 
 interface State {
     isTagPickerShown: boolean
@@ -306,6 +307,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                     />
                     {this.props.comment !== '' && (
                         <>
+                            <ListsSegment
+                                lists={this.props.lists}
+                                onMouseEnter={this.props.onListsHover}
+                                showEditBtn={this.props.hoverState === 'lists'}
+                                onListClick={undefined}
+                                onEditBtnClick={
+                                    this.props.annotationFooterDependencies
+                                        ?.onListIconClick
+                                }
+                            />
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}

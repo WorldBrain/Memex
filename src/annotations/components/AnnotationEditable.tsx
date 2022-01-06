@@ -28,6 +28,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -507,11 +508,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {/* lists */}
                             {/* Collections button for annotations. To be added later. */}
 
-                            <TagsSegment
-                                tags={this.props.lists}
+                            <ListsSegment
+                                lists={this.props.lists}
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
-                                onTagClick={undefined}
+                                onListClick={undefined}
                                 onEditBtnClick={
                                     this.props.annotationFooterDependencies
                                         ?.onListIconClick
@@ -537,13 +538,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 </TagPickerWrapper>
                             )}
                             {/* Collections button for annotations. To be added later. */}
-                            {/* {this.props.renderListsPickerForAnnotation && (
+                            {this.props.renderListsPickerForAnnotation && (
                                 <TagPickerWrapper>
                                     {this.props.renderListsPickerForAnnotation(
                                         this.props.url,
                                     )}
                                 </TagPickerWrapper>
-                            )} */}
+                            )}
                             {this.props.renderCopyPasterForAnnotation && (
                                 <CopyPasterWrapper>
                                     {this.props.renderCopyPasterForAnnotation(
