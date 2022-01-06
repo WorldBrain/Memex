@@ -99,6 +99,8 @@ export interface ContentSharingInterface
     suggestSharedLists(params: {
         prefix: string
     }): Promise<Array<{ localId: number; name: string }>>
+    canWriteToSharedList(params: { localId: number }): Promise<boolean>
+    canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
 }
 
 export interface ContentSharingEvents {

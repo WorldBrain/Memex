@@ -24,6 +24,7 @@ import type {
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
 import AnnotationStorage from 'src/annotations/background/storage'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export default class ContentSharingBackground {
     remoteFunctions: ContentSharingInterface
@@ -105,6 +106,8 @@ export default class ContentSharingBackground {
             suggestSharedLists: this.suggestSharedLists,
             unshareAnnotation: this.unshareAnnotation,
             deleteAnnotationShare: this.deleteAnnotationShare,
+            canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
+            canWriteToSharedList: this.canWriteToSharedList,
         }
     }
 
@@ -652,6 +655,35 @@ export default class ContentSharingBackground {
             }
         }
         return suggestions
+    }
+    canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
+        remoteId,
+    }) => {
+        // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
+        const currentUser = await this.options.auth.authService.getCurrentUser()
+        const storage = await this.options.getServerStorage()
+        const listRole = await storage.contentSharing.getListRole({
+            listReference: { type: 'shared-list-reference', id: remoteId },
+            userReference: {
+                type: 'user-reference',
+                id: currentUser?.id,
+            },
+        })
+        const canWrite = [
+            SharedListRoleID.AddOnly,
+            SharedListRoleID.ReadWrite,
+            SharedListRoleID.Owner,
+            SharedListRoleID.Admin,
+        ].includes(listRole?.roleID)
+        return canWrite
+    }
+    canWriteToSharedList: ContentSharingInterface['canWriteToSharedList'] = async (
+        params,
+    ) => {
+        const remoteId = await this.storage.getRemoteListId({
+            localId: params.localId,
+        })
+        return await this.canWriteToSharedListRemoteId({ remoteId })
     }
 
     async handlePostStorageChange(

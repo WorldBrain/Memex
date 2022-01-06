@@ -67,6 +67,10 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
+    fetchCollaborativeLists(args: {
+        skip?: number
+        limit?: number
+    }): Promise<PageList[]>
     fetchFollowedListsWithAnnotations(args: {
         normalizedPageUrl: string
     }): Promise<SharedAnnotationList[]>

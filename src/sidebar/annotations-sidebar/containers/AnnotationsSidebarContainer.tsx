@@ -206,20 +206,15 @@ export class AnnotationsSidebarContainer<
                 }),
         }
     }
-
+    private loadRemoteListNames = async () => {
+        const remoteLists = await this.props.contentSharing.getAllRemoteLists()
+        return remoteLists.map((list) => list.name)
+    }
     protected getShareCollectionPickerProps() {
-        const loadRemoteListNames = async () => {
-            const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-            return remoteLists.map((list) => list.name)
-        }
         return {
-            // initialSelectedEntriesForNoteId: (id)=>()=>{
-
-            // },
             onListsUpdate: (lists) =>
                 this.processEvent('updateNewPageCommentLists', { lists }),
             listQueryEntries: (prefix) =>
-                // this.props.customLists.searchForListSuggestions({ query }),
                 this.props.contentSharing
                     .suggestSharedLists({ prefix })
                     .then((objArray) => objArray.map((obj) => obj.name)),
@@ -227,13 +222,14 @@ export class AnnotationsSidebarContainer<
                 const defaultNames = await this.props.customLists.fetchInitialListSuggestions(
                     { limit: args?.limit },
                 )
-                const remoteNames = await loadRemoteListNames()
+                const remoteNames = await this.loadRemoteListNames()
                 const sharedDefaultNames = defaultNames.filter((defaultName) =>
                     remoteNames.includes(defaultName),
                 )
-                return sharedDefaultNames
+
+                return [...sharedDefaultNames]
             },
-            loadRemoteListNames,
+            loadRemoteListNames: this.loadRemoteListNames,
         }
     }
 
@@ -261,7 +257,6 @@ export class AnnotationsSidebarContainer<
             loadRemoteListNames: collectionPickerProps.loadRemoteListNames,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
-            // TODO: make into lists
             lists: this.state.commentBox.lists,
             hoverState: null,
         }
@@ -567,7 +562,6 @@ export class AnnotationsSidebarContainer<
                         annotationsShareAll={this.props.annotations}
                         copyPageLink={(link) => {
                             this.processEvent('copyNoteLink', { link })
-                            console.log(link)
                         }}
                         postBulkShareHook={(shareStates) =>
                             this.processEvent(
@@ -631,6 +625,11 @@ export class AnnotationsSidebarContainer<
                         }
                         expandFollowedListNotes={(listId) =>
                             this.processEvent('expandFollowedListNotes', {
+                                listId,
+                            })
+                        }
+                        toggleIsolatedListView={(listId) =>
+                            this.processEvent('toggleIsolatedListView', {
                                 listId,
                             })
                         }
