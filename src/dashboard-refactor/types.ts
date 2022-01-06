@@ -76,7 +76,6 @@ export interface DashboardDependencies {
     localStorage: Browser['storage']['local']
     openFeed: () => void
     openCollectionPage: (remoteCollectionId: string) => void
-    renderDashboardSwitcherLink: () => JSX.Element
     renderUpdateNotifBanner: () => JSX.Element
     services: Pick<
         UIServices,
