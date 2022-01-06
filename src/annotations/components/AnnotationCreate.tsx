@@ -94,6 +94,10 @@ export class AnnotationCreate extends React.Component<Props, State>
         if (this.props.autoFocus) {
             this.focus()
         }
+        if (this.props.lists.length > 0) {
+            // add lists to state (e.g. to begin with an isolated view list)
+            this.props.onListsUpdate(this.props.lists)
+        }
     }
 
     focus() {

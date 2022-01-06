@@ -19,7 +19,10 @@ import {
     updateAnnotation,
     AnnotationShareOpts,
 } from './annotation-save-logic'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import {
+    PageList,
+    RemoteCollectionsInterface,
+} from 'src/custom-lists/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 export type CachedAnnotation = Annotation
@@ -34,12 +37,8 @@ export const createAnnotationsCache = (
     options: { skipPageIndexing?: boolean } = {},
 ): AnnotationsCache =>
     new AnnotationsCache({
-        getListNameFromId: async (id: number) => {
-            const name = bgModules.customLists
-                .fetchListById({ id })
-                .then((list) => list.name)
-            return name
-        },
+        getListFromId: async (id: number) =>
+            bgModules.customLists.fetchListById({ id }),
         sortingFn: sortByPagePosition,
         backendOperations: {
             load: async (pageUrl) => {
@@ -176,6 +175,7 @@ interface AnnotationCacheChanges {
     updated: (annotation: CachedAnnotation) => void
     deleted: (annotation: CachedAnnotation) => void
     load: (annotation: CachedAnnotation[]) => void
+    noteAddedToRemote: (annotation: CachedAnnotation[]) => void
 }
 
 export type AnnotationCacheChangeEvents = TypedEventEmitter<
@@ -183,7 +183,7 @@ export type AnnotationCacheChangeEvents = TypedEventEmitter<
 >
 
 export interface AnnotationsCacheDependencies {
-    getListNameFromId: (id: number) => Promise<string>
+    getListFromId: (id: number) => Promise<PageList>
     sortingFn: AnnotationsSorter
     backendOperations?: {
         load: (
@@ -218,7 +218,7 @@ export interface AnnotationsCacheInterface {
     create: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
         shareOpts?: AnnotationShareOpts,
-    ) => Promise<void>
+    ) => Promise<Annotation>
     update: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
         shareOpts?: AnnotationShareOpts,
@@ -281,35 +281,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', this.annotations)
     }
 
-    private maybeCreateLists = async (annotation, annotUrl, shareOpts) => {
-        // this is a function so we can get a return value while using only const
-        if (annotation.lists.length) {
-            const sharingState = await this.dependencies.backendOperations.updateLists(
-                annotUrl,
-                annotation.lists,
-            )
-            const newLists = await Promise.all(
-                sharingState.localListIds.map((id) =>
-                    this.dependencies.getListNameFromId(id),
-                ),
-            )
-            const parsedPrivacyLevel = getAnnotationPrivacyState(
-                sharingState.privacyLevel,
-            )
-            const annotAfterListUpdate = {
-                ...annotation,
-                lastEdited: new Date(),
-                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
-                isBulkShareProtected:
-                    shareOpts?.isBulkShareProtected ??
-                    parsedPrivacyLevel.protected,
-                lists: newLists,
-            }
-            return annotAfterListUpdate
-        }
-        return null
-    }
-
     create: AnnotationsCacheInterface['create'] = async (
         annotation,
         shareOpts,
@@ -323,11 +294,34 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             await backendOperations.updateTags(annotUrl, annotation.tags)
         }
 
-        const annotAfterListUpdate = await this.maybeCreateLists(
-            annotation,
-            annotUrl,
-            shareOpts,
-        )
+        let annotAfterListUpdate = null
+        let remoteLists = []
+        if (annotation.lists.length) {
+            const sharingState = await this.dependencies.backendOperations.updateLists(
+                annotUrl,
+                annotation.lists,
+            )
+            const newLists = await Promise.all(
+                sharingState.localListIds.map((id) =>
+                    this.dependencies.getListFromId(id),
+                ),
+            )
+            remoteLists = newLists.filter((list) => list.remoteId)
+            const newListNames = newLists.map((list) => list.name)
+            const parsedPrivacyLevel = getAnnotationPrivacyState(
+                sharingState.privacyLevel,
+            )
+            annotAfterListUpdate = {
+                ...annotation,
+                lastEdited: new Date(),
+                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
+                isBulkShareProtected:
+                    shareOpts?.isBulkShareProtected ??
+                    parsedPrivacyLevel.protected,
+                lists: newListNames,
+            }
+        }
+
         const nextAnnotation = annotAfterListUpdate ?? {
             ...annotation,
             createdWhen: new Date(),
@@ -346,6 +340,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         //     this.annotationChanges.emit('rollback', stateBeforeModifications)
         //     throw e
         // }
+        return nextAnnotation
     }
 
     private maybeUpdateLists = async (
@@ -361,9 +356,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             )
             const newLists = await Promise.all(
                 sharingState.localListIds.map((id) =>
-                    this.dependencies.getListNameFromId(id),
+                    this.dependencies.getListFromId(id),
                 ),
             )
+            const newListNames = newLists.map((list) => list.name)
             const parsedPrivacyLevel = getAnnotationPrivacyState(
                 sharingState.privacyLevel,
             )
@@ -374,7 +370,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 isBulkShareProtected:
                     shareOpts?.isBulkShareProtected ??
                     parsedPrivacyLevel.protected,
-                lists: newLists,
+                lists: newListNames,
             }
             return annotAfterListUpdate
         }

@@ -194,12 +194,45 @@ class AnnotationsSidebar extends React.Component<
             return this.props.onClickOutside(e)
         }
     }
+    private getListsForAnnotationCreate = (
+        followedLists,
+        isolatedView,
+        annotationCreateLists,
+    ) => {
+        // returns lists for AnnotationCreate including isolated view if enabled
+        if (isolatedView) {
+            const isolatedList = followedLists.byId[isolatedView]
+            if (
+                isolatedList.isContributable &&
+                !annotationCreateLists.lists.includes(isolatedList.name)
+            ) {
+                const listsToCreate = [
+                    ...annotationCreateLists.lists,
+                    isolatedList.name,
+                ]
+
+                return listsToCreate
+            }
+        }
+        return annotationCreateLists
+    }
 
     private renderNewAnnotation(context?: string) {
+        const listsToCreate = this.getListsForAnnotationCreate(
+            this.props.followedLists,
+            this.props.isolatedView,
+            this.props.annotationCreateProps.lists,
+        )
+        const paddedAnnotationCreateProps = {
+            ...this.props.annotationCreateProps,
+            lists: listsToCreate,
+            // onSave: this.props.annotationCreateProps.onSave
+        }
+        // updateNewPageCommentLists
         return (
             <NewAnnotationSection context={context}>
                 <AnnotationCreate
-                    {...this.props.annotationCreateProps}
+                    {...paddedAnnotationCreateProps}
                     ref={this.annotationCreateRef}
                     autoFocus
                 />
@@ -319,7 +352,6 @@ class AnnotationsSidebar extends React.Component<
         renderNotes,
     ) {
         const { followedListLoadState, followedLists } = this.props
-
         const listData = followedLists.byId[listId]
 
         return (
