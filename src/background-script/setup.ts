@@ -697,6 +697,12 @@ export function createBackgroundModules(options: {
         inPageUI: new InPageUIBackground({
             queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
             contextMenuAPI: options.browserAPIs.contextMenus,
+            bookmarks: async (fullUrl: string) => {
+                const indexedUrl = fullUrl['fullUrl']
+                await bookmarks.addBookmark({
+                    fullUrl: indexedUrl,
+                })
+            },
         }),
         copyPaster,
         activityStreams,

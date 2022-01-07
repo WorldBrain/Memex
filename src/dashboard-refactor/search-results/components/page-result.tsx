@@ -23,6 +23,7 @@ import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { VideoOff } from '@styled-icons/feather'
 
 export interface Props
     extends PageData,
@@ -242,6 +243,50 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
+    isVideoContent(url) {
+        if (url.startsWith('https://www.youtube.com/watch')) {
+            return true
+        }
+    }
+
+    isImageContent(url) {
+        if (
+            url.endsWith('.png') ||
+            url.endsWith('.jpg') ||
+            url.endsWith('.jpeg') ||
+            url.endsWith('.svg')
+        ) {
+            return true
+        }
+    }
+
+    getYoutubeId(url) {
+        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+        var match = url.match(regExp)
+
+        if (match && match[2].length == 11) {
+            return match[2]
+        } else {
+            return 'error'
+        }
+    }
+
+    getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
+        var results = regex.exec(location.search)
+        return results === null
+            ? ''
+            : decodeURIComponent(results[1].replace(/\+/g, ' '))
+    }
+
+    buildYoutubeEmbedd(url) {
+        const videoID = this.getYoutubeId(url)
+        const embedLink = 'https://www.youtube.com/embed/' + videoID
+
+        return embedLink
+    }
+
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
@@ -260,6 +305,16 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
+                        {this.isVideoContent(this.fullUrl) && (
+                            <VideoContent
+                                src={this.buildYoutubeEmbedd(this.fullUrl)}
+                                width={'100%'}
+                                height={400}
+                            />
+                        )}
+                        {this.isImageContent(this.fullUrl) && (
+                            <ImageContent src={this.fullUrl} />
+                        )}
                         <ResultContent>
                             {this.props.favIconURI && (
                                 <FavIconBox>
@@ -299,6 +354,17 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const VideoContent = styled.iframe`
+    margin-bottom: 20px;
+`
+
+const ImageContent = styled.img`
+    margin-bottom: 20px;
+    max-width: 100%;
+    max-height: 200px;
+    width: fit-content;
+`
 
 const PDFIcon = styled.div`
     border: 1px solid rgb(184, 184, 184);
