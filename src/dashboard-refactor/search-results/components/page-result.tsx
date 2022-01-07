@@ -23,6 +23,7 @@ import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { VideoOff } from '@styled-icons/feather'
 
 export interface Props
     extends PageData,
@@ -242,6 +243,48 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
+    isImageContent(url) {
+        if (
+            url.endsWith('.png') ||
+            url.endsWith('.jpg') ||
+            url.endsWith('.jpeg') ||
+            url.endsWith('.gif') ||
+            url.endsWith('.svg')
+        ) {
+            return true
+        }
+    }
+
+    isVideoContent(url) {
+        var patternVimeo = /(?:http?s?:\/\/)?(?:www\.)?(?:vimeo\.com)\/?(\S+)/g
+        var patternYoutube = /(?:http?s?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(\S+)/g
+
+        if (patternVimeo.test(url)) {
+            return 'vimeo'
+        }
+        if (patternYoutube.test(url)) {
+            return 'youtube'
+        }
+    }
+
+    getVideoId(url) {
+        var patternVimeo = /(?:http?s?:\/\/)?(?:www\.)?(?:vimeo\.com)\/?(\S+)/g
+        var patternYoutube = /(?:http?s?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(\S+)/g
+
+        if (patternVimeo.test(url)) {
+            var replacement = 'https://player.vimeo.com/video/$1'
+            var embedUrl = url.replace(patternVimeo, replacement)
+            return embedUrl
+        }
+
+        if (patternYoutube.test(url)) {
+            var replacement = 'http://www.youtube.com/embed/$1'
+            var embedUrl = url.replace(patternYoutube, replacement)
+            // For start time, turn get param & into ?
+            return embedUrl
+        }
+    }
+
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
@@ -260,6 +303,17 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
+                        {(this.isVideoContent(this.fullUrl) === 'youtube' ||
+                            this.isVideoContent(this.fullUrl) === 'vimeo') && (
+                            <VideoContent
+                                src={this.getVideoId(this.fullUrl)}
+                                width={'100%'}
+                                height={400}
+                            />
+                        )}
+                        {this.isImageContent(this.fullUrl) && (
+                            <ImageContent src={this.fullUrl} />
+                        )}
                         <ResultContent>
                             {this.props.favIconURI && (
                                 <FavIconBox>
@@ -299,6 +353,21 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const VideoContent = styled.iframe`
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+`
+
+const ImageContent = styled.img`
+    margin-bottom: 20px;
+    max-width: 100%;
+    max-height: 200px;
+    width: fit-content;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+`
 
 const PDFIcon = styled.div`
     border: 1px solid rgb(184, 184, 184);
