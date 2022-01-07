@@ -37,6 +37,9 @@ export default class Logic extends UILogic<State, Events> {
         }
     }
 
+    ///// IMPORTANT! THIS CODE IS DUPLICATED IN DASHBOARD-REFACTOR/LOGIC
+    ///// FOR THE INSTANCE OF THE SIDEBAR, DON'T FORGET TO UPDATE IT TOO!
+
     init: EventHandler<'init'> = async () => {
         const hasActivityStored = await getLocalStorage('feedactivity')
         if (hasActivityStored === true) {
@@ -61,10 +64,7 @@ export default class Logic extends UILogic<State, Events> {
         this.dependencies.openFeedUrl()
 
         if (previousState.hasFeedActivity) {
-            const hasActivityStored = await setLocalStorage(
-                'feedactivity',
-                false,
-            )
+            await setLocalStorage('feedactivity', false)
             this.emitMutation({ hasFeedActivity: { $set: false } })
             await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
         }

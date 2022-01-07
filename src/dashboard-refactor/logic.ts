@@ -4,6 +4,8 @@ import debounce from 'lodash/debounce'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
@@ -270,13 +272,25 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
-
-        this.emitMutation({
-            listsSidebar: {
-                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-            },
-        })
+        const hasActivityStored = await getLocalStorage('feedactivity')
+        if (hasActivityStored === true) {
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: true },
+                },
+            })
+        } else {
+            const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
+            await setLocalStorage(
+                'feedactivity',
+                activityStatus === 'has-unseen',
+            )
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+                },
+            })
+        }
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
@@ -2446,6 +2460,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
+            await setLocalStorage('feedactivity', false)
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })
