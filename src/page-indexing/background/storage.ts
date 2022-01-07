@@ -152,16 +152,6 @@ export default class PageStorage extends StorageModule {
     async createPage(pageData: PipelineRes) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
-        //////////////////// Remove all body content from image files
-        const urlEndings = ['.svg', '.jpg', '.png', '.jpeg', '.gif']
-        for (const urlEnding of urlEndings) {
-            if (pageData.url.endsWith(urlEnding)) {
-                pageData.terms = []
-                pageData.text = ''
-            }
-        }
-        ////////////////////
-
         await this.operation('createPage', {
             ...pageData,
             url: normalizedUrl,

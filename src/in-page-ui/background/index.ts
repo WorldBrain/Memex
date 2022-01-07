@@ -1,4 +1,4 @@
-import { Tabs, ContextMenus, browser, Menus } from 'webextension-polyfill-ts'
+import { Tabs, ContextMenus, browser } from 'webextension-polyfill-ts'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
@@ -13,7 +13,6 @@ export const CONTEXT_MENU_HIGHLIGHT_ID =
 export interface Props {
     queryTabs: Tabs.Static['query']
     contextMenuAPI: ContextMenus.Static
-    bookmarks: (fullUrl) => Promise<void>
 }
 
 export class InPageUIBackground {
@@ -30,7 +29,6 @@ export class InPageUIBackground {
         }
 
         this.setupContextMenuEntries()
-        this.setupContextMenuSaveImages()
     }
 
     setupRemoteFunctions() {
@@ -62,17 +60,6 @@ export class InPageUIBackground {
         })
     }
 
-    async setupContextMenuSaveImages() {
-        this.options.contextMenuAPI.create({
-            id: CONTEXT_MENU_HIGHLIGHT_ID,
-            title: 'Save Image Reference',
-            contexts: ['image'],
-            onclick: (info, tab) => {
-                this.saveImageInTab(info, tab.id)
-            },
-        })
-    }
-
     async updateContextMenuEntries() {
         await this.options.contextMenuAPI.update(CONTEXT_MENU_HIGHLIGHT_ID, {
             title: await this.getHighlightContextMenuTitle(),
@@ -101,10 +88,4 @@ export class InPageUIBackground {
         runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation(
             false,
         )
-
-    private saveImageInTab = async (info: Menus.OnClickData, tabId: number) => {
-        await this.options.bookmarks({
-            fullUrl: info.srcUrl,
-        })
-    }
 }
