@@ -1,9 +1,11 @@
 import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core'
-import { ActivityIndicatorInterface } from '../background'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { auth } from 'src/util/remote-functions-background'
+import type { ActivityIndicatorInterface } from '../background'
 
 export interface Dependencies {
+    activityIndicatorBG: Pick<
+        ActivityIndicatorInterface,
+        'checkActivityStatus' | 'markActivitiesAsSeen'
+    >
     openFeedUrl: () => void
 }
 
@@ -23,12 +25,8 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export default class Logic extends UILogic<State, Events> {
-    private activityIndicatorBG: ActivityIndicatorInterface
-
     constructor(private dependencies: Dependencies) {
         super()
-
-        this.activityIndicatorBG = runInBackground()
     }
 
     getInitialState(): State {
@@ -39,7 +37,7 @@ export default class Logic extends UILogic<State, Events> {
     }
 
     init: EventHandler<'init'> = async () => {
-        const activityStatus = await this.activityIndicatorBG.checkActivityStatus()
+        const activityStatus = await this.dependencies.activityIndicatorBG.checkActivityStatus()
         this.emitMutation({
             hasFeedActivity: { $set: activityStatus === 'has-unseen' },
         })
@@ -52,7 +50,7 @@ export default class Logic extends UILogic<State, Events> {
 
         if (previousState.hasFeedActivity) {
             this.emitMutation({ hasFeedActivity: { $set: false } })
-            await this.activityIndicatorBG.markActivitiesAsSeen()
+            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
 }

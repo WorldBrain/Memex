@@ -45,6 +45,7 @@ import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 
 export interface OwnProps {}
 
@@ -71,6 +72,7 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
+    private activityIndicatorBG: ActivityIndicatorInterface = runInBackground()
     constructor(props: Props) {
         super(
             props,
@@ -241,6 +243,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 >
                     <FeedActivityDot
                         key="activity-feed-indicator"
+                        activityIndicatorBG={this.activityIndicatorBG}
                         openFeedUrl={() =>
                             window.open(this.whichFeed(), '_blank')
                         }

@@ -176,6 +176,7 @@ export async function main(
                 annotations: annotationsBG,
                 annotationsCache,
                 tags: tagsBG,
+                activityIndicatorBG: runInBackground(),
                 customLists: runInBackground(),
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),

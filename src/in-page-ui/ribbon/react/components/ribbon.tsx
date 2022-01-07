@@ -205,14 +205,6 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    whichFeed = () => {
-        if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.social/feed'
-        } else {
-            return 'https://staging.memex.social/feed'
-        }
-    }
-
     private renderExtraButtons() {
         if (!this.props.showExtraButtons) {
             return
@@ -386,12 +378,7 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <FeedActivityDot
                                         key="activity-feed-indicator"
-                                        openFeedUrl={() =>
-                                            window.open(
-                                                this.whichFeed(),
-                                                '_blank',
-                                            )
-                                        }
+                                        {...this.props.activityIndicator}
                                     />
                                 </ButtonTooltip>
                             </FeedIndicatorBox>

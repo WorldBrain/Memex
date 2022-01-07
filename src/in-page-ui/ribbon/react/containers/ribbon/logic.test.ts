@@ -52,6 +52,7 @@ describe('Ribbon logic', () => {
         const analytics = new FakeAnalytics()
 
         const ribbonLogic = new RibbonContainerLogic({
+            activityIndicatorBG: backgroundModules.activityIndicator,
             getPageUrl: () => currentTab.normalizedUrl,
             analytics,
             setRibbonShouldAutoHide: () => undefined,
