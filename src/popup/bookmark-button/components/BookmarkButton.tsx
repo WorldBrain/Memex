@@ -70,7 +70,7 @@ class BookmarkButton extends PureComponent<Props> {
                         [styles.unbookmarkedBtn]: !this.props.isBookmarked,
                     })}
                     itemClass={styles.button}
-                    disabled={this.props.isBookmarked}
+                    disabled={this.props.isDisabled || this.props.isBookmarked}
                 >
                     <div className={styles.buttonInnerContent}>
                         {text}

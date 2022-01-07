@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'
@@ -39,8 +39,9 @@ const getCurrentTab = async () => {
             currentTab = await tabs.fetchTabByUrl(url)
         }
     }
+    currentTab.originalUrl = currentTab.url
     currentTab.url = getUnderlyingResourceUrl(currentTab.url)
-    return currentTab
+    return currentTab as Tabs.Tab & { originalUrl: string }
 }
 
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
@@ -61,7 +62,7 @@ async function init() {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
-    if (!currentTab?.url || !isUrlSupported(currentTab)) {
+    if (!currentTab?.url || !isUrlSupported({ url: currentTab.originalUrl })) {
         return { currentTab: null, fullUrl: null }
     }
 
