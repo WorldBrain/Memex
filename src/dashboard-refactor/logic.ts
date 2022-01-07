@@ -425,8 +425,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        let nextState: State
-
         const skipMutation: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
@@ -480,39 +478,38 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                const mutation: UIMutation<State> = event.paginate
-                    ? {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: {
-                                  $apply: (prev) =>
-                                      utils.mergeSearchResults(prev, results),
-                              },
-                              pageData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, pageData),
-                              },
-                              noteData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, noteData),
-                              },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-                    : {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: { $set: results },
-                              pageData: { $set: pageData },
-                              noteData: { $set: noteData },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-
-                nextState = this.withMutation(previousState, mutation)
-                this.emitMutation(mutation)
+                this.emitMutation({
+                    searchFilters: skipMutation,
+                    searchResults: {
+                        areResultsExhausted: {
+                            $set: resultsExhausted,
+                        },
+                        noResultsType: { $set: noResultsType },
+                        ...(event.paginate
+                            ? {
+                                  results: {
+                                      $apply: (prev) =>
+                                          utils.mergeSearchResults(
+                                              prev,
+                                              results,
+                                          ),
+                                  },
+                                  pageData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, pageData),
+                                  },
+                                  noteData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, noteData),
+                                  },
+                              }
+                            : {
+                                  results: { $set: results },
+                                  pageData: { $set: pageData },
+                                  noteData: { $set: noteData },
+                              }),
+                    },
+                })
             },
         )
     }
