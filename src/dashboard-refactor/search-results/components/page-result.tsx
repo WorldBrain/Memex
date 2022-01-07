@@ -243,48 +243,46 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
-    isVideoContent(url) {
-        if (url.startsWith('https://www.youtube.com/watch')) {
-            return true
-        }
-    }
-
     isImageContent(url) {
         if (
             url.endsWith('.png') ||
             url.endsWith('.jpg') ||
             url.endsWith('.jpeg') ||
+            url.endsWith('.gif') ||
             url.endsWith('.svg')
         ) {
             return true
         }
     }
 
-    getYoutubeId(url) {
-        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
-        var match = url.match(regExp)
+    isVideoContent(url) {
+        var patternVimeo = /(?:http?s?:\/\/)?(?:www\.)?(?:vimeo\.com)\/?(\S+)/g
+        var patternYoutube = /(?:http?s?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(\S+)/g
 
-        if (match && match[2].length == 11) {
-            return match[2]
-        } else {
-            return 'error'
+        if (patternVimeo.test(url)) {
+            return 'vimeo'
+        }
+        if (patternYoutube.test(url)) {
+            return 'youtube'
         }
     }
 
-    getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
-        var results = regex.exec(location.search)
-        return results === null
-            ? ''
-            : decodeURIComponent(results[1].replace(/\+/g, ' '))
-    }
+    getVideoId(url) {
+        var patternVimeo = /(?:http?s?:\/\/)?(?:www\.)?(?:vimeo\.com)\/?(\S+)/g
+        var patternYoutube = /(?:http?s?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(\S+)/g
 
-    buildYoutubeEmbedd(url) {
-        const videoID = this.getYoutubeId(url)
-        const embedLink = 'https://www.youtube.com/embed/' + videoID
+        if (patternVimeo.test(url)) {
+            var replacement = 'https://player.vimeo.com/video/$1'
+            var embedUrl = url.replace(patternVimeo, replacement)
+            return embedUrl
+        }
 
-        return embedLink
+        if (patternYoutube.test(url)) {
+            var replacement = 'http://www.youtube.com/embed/$1'
+            var embedUrl = url.replace(patternYoutube, replacement)
+            // For start time, turn get param & into ?
+            return embedUrl
+        }
     }
 
     render() {
@@ -305,9 +303,10 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        {this.isVideoContent(this.fullUrl) && (
+                        {(this.isVideoContent(this.fullUrl) === 'youtube' ||
+                            this.isVideoContent(this.fullUrl) === 'vimeo') && (
                             <VideoContent
-                                src={this.buildYoutubeEmbedd(this.fullUrl)}
+                                src={this.getVideoId(this.fullUrl)}
                                 width={'100%'}
                                 height={400}
                             />
@@ -357,6 +356,8 @@ export default class PageResultView extends PureComponent<Props> {
 
 const VideoContent = styled.iframe`
     margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
 `
 
 const ImageContent = styled.img`
@@ -364,6 +365,8 @@ const ImageContent = styled.img`
     max-width: 100%;
     max-height: 200px;
     width: fit-content;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
 `
 
 const PDFIcon = styled.div`
