@@ -35,6 +35,7 @@ import {
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
+import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -272,7 +273,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const hasActivityStored = await getLocalStorage('feedactivity')
+        const hasActivityStored = await getLocalStorage(
+            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+        )
         if (hasActivityStored === true) {
             this.emitMutation({
                 listsSidebar: {
@@ -282,7 +285,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         } else {
             const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
             await setLocalStorage(
-                'feedactivity',
+                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
                 activityStatus === 'has-unseen',
             )
             this.emitMutation({
@@ -2460,7 +2463,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
-            await setLocalStorage('feedactivity', false)
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })
