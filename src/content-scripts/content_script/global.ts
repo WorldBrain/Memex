@@ -1,10 +1,7 @@
 import 'core-js'
 import { EventEmitter } from 'events'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import {
-    ContentIdentifier,
-    ContentLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -64,7 +61,6 @@ export async function main(
 ) {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
-
     if (isPdfViewerRunning) {
         setupPdfViewerListeners({
             onLoadError: () =>
@@ -73,6 +69,8 @@ export async function main(
                     missingPdf: true,
                 }),
         })
+    } else {
+        injectMemexExtDetectionEl()
     }
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
