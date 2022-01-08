@@ -46,6 +46,7 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface OwnProps {}
 
@@ -72,6 +73,7 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
+    private browserName = checkBrowser()
     private activityIndicatorBG: ActivityIndicatorInterface = runInBackground()
     constructor(props: Props) {
         super(
@@ -183,10 +185,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         }
     }
 
-    getPDFmode = () => {
-        var currentUrlArray = this.state.currentPageUrl.split('/')
-
-        if (currentUrlArray.includes('pdfjs')) {
+    getPDFMode = () => {
+        if (
+            isUrlPDFViewerUrl(this.state.currentPageUrl, {
+                runtimeAPI: browser.runtime,
+            })
+        ) {
             return 'reader'
         } else {
             return 'original'
@@ -203,6 +207,41 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         } else {
             return 'https://staging.memex.social/feed'
         }
+    }
+
+    private maybeRenderBlurredNotice() {
+        if (!this.isCurrentPagePDF) {
+            return null
+        }
+        const mode = this.getPDFMode()
+        const location = this.getPDFLocation()
+
+        if (this.browserName === 'firefox' && location === 'local') {
+            return (
+                <BlurredNotice browser={this.browserName} location={location}>
+                    <NoticeTitle>
+                        Saving and annotating locally stored PDFs not available
+                        on Firefox
+                    </NoticeTitle>
+                </BlurredNotice>
+            )
+        }
+
+        if (mode === 'original') {
+            return (
+                <BlurredNotice browser={this.browserName}>
+                    <NoticeTitle>Save & annotate this PDF</NoticeTitle>
+                    <PrimaryAction
+                        label="Open PDF Reader"
+                        onClick={() =>
+                            this.processEvent('togglePDFReader', null)
+                        }
+                    />
+                </BlurredNotice>
+            )
+        }
+
+        return null
     }
 
     renderChildren() {
@@ -250,29 +289,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     />
                     Feed Updates
                 </FeedActivitySection>
-                {this.isCurrentPagePDF &&
-                    (checkBrowser() === 'firefox' &&
-                    this.getPDFLocation() === 'local' ? (
-                        <BlurredNotice
-                            browser={checkBrowser()}
-                            location={this.getPDFLocation()}
-                        >
-                            <NoticeTitle>
-                                Saving and annotating locally stored PDFs not
-                                available on Firefox
-                            </NoticeTitle>
-                        </BlurredNotice>
-                    ) : this.getPDFmode() === 'original' ? (
-                        <BlurredNotice browser={checkBrowser()}>
-                            <NoticeTitle>Save & annotate this PDF</NoticeTitle>
-                            <PrimaryAction
-                                label={'Open PDF Reader'}
-                                onClick={() =>
-                                    this.processEvent('togglePDFReader', null)
-                                }
-                            />
-                        </BlurredNotice>
-                    ) : null)}
+                {this.maybeRenderBlurredNotice()}
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
@@ -305,7 +322,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         btnIcon={btnStyles.PDFIcon}
                         contentType="PDFs"
                         btnText={
-                            this.getPDFmode() === 'reader'
+                            this.getPDFMode() === 'reader'
                                 ? 'Close PDF reader'
                                 : 'Open PDF reader'
                         }
@@ -318,7 +335,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         onToggleClick={() => {
                             this.processEvent('togglePDFReaderEnabled', null)
                             {
-                                ;(this.getPDFmode() === 'reader' ||
+                                ;(this.getPDFMode() === 'reader' ||
                                     this.isCurrentPagePDF) &&
                                     this.processEvent('togglePDFReader', null)
                             }
@@ -326,7 +343,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     />
                 </div>
 
-                {this.getPDFmode() === 'reader' && (
+                {this.getPDFMode() === 'reader' && (
                     <CopyPDFLinkButton
                         currentPageUrl={this.state.currentPageUrl}
                     />

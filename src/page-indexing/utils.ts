@@ -10,7 +10,10 @@ export function pageIsStub(page: Pick<PipelineRes, 'text' | 'terms'>): boolean {
     )
 }
 
-export const isUrlSupported = (params: { url: string }) => {
+export const isUrlSupported = (params: {
+    url: string
+    allowFileUrls?: boolean
+}) => {
     const unsupportedUrlPrefixes = [
         'about:',
         'chrome://',
@@ -20,7 +23,7 @@ export const isUrlSupported = (params: { url: string }) => {
     const fullUrl = getUnderlyingResourceUrl(params.url)
 
     // Ignore file URLs, though check `params.url` as the processed `fullUrl` may be a valid file URL (local PDF opened in PDF reader)
-    if (params.url.startsWith('file://')) {
+    if (params.url.startsWith('file://') && !params.allowFileUrls) {
         return false
     }
 
