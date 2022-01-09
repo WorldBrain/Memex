@@ -449,7 +449,7 @@ class AnnotationsSidebar extends React.Component<
                         this.setState({ showAllNotesShareMenu: false })
                     }
                 >
-                    <HoverBox>
+                    <HoverBox width="340px">
                         <AllNotesShareMenu
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotationsShareAll}
@@ -981,7 +981,7 @@ const CopyPasterWrapperTopBar = styled.div`
 
 const ShareMenuWrapperTopBar = styled.div`
     position: relative;
-    right: 200px;
+    right: 240px;
     z-index: 10;
     top: 20px;
 `

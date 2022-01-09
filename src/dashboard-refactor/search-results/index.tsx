@@ -413,9 +413,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
                     <HoverBox
-                        width="320px"
+                        width="340px"
                         top="20px"
-                        right="-150px"
+                        right="-90px"
                         withRelativeContainer
                     >
                         <ListShareMenu

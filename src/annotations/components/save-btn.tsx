@@ -95,8 +95,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         >
                             <SharePrivacyOption
                                 hasProtectedOption
-                                icon="shared"
-                                title="Shared"
+                                icon="webLogo"
+                                title="Public"
                                 shortcut={`shift+${getKeyName({
                                     key: 'mod',
                                 })}+enter`}
