@@ -10,23 +10,23 @@ export function getShareButtonData(
             icon: icons.sharedProtected,
             label: (
                 <span>
-                    Note Shared
+                    Public
                     <br />& Protected
                 </span>
             ),
         }
     } else if (isShared && !isBulkShareProtected) {
-        return { icon: icons.shared, label: 'Note Shared' }
+        return { icon: icons.webLogo, label: 'Public' }
     } else if (isBulkShareProtected && !isShared) {
         return {
             icon: icons.lock,
             label: (
                 <span>
-                    Note Private
+                    Private
                     <br />& Protected
                 </span>
             ),
         }
     }
-    return { icon: icons.person, label: 'Share Note' }
+    return { icon: icons.link, label: 'Share' }
 }
