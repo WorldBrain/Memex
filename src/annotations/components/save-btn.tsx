@@ -78,7 +78,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 )
                             }
                         >
-                            <Icon filePath={this.saveIcon} height="14px" /> Save
+                            <Icon filePath={this.saveIcon} height="15px" /> Save
                         </SaveBtnText>
                     </ButtonTooltip>
                     <SaveBtnArrow horizontal="1px">
@@ -91,7 +91,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 }))
                             }
                             menuTitle={'Set & save privacy for this note'}
-                            width={'330px'}
+                            width={'340px'}
                         >
                             <SharePrivacyOption
                                 hasProtectedOption
@@ -122,7 +122,6 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 }
 
 const SaveBtn = styled.div`
-    display: flex;
     flex-direction: row;
     align-item: center;
     box-sizing: border-box;
@@ -135,6 +134,8 @@ const SaveBtn = styled.div`
     border-radius: 3px;
     font-weight: 700;
     border 1px solid #f0f0f0;
+    display: grid;
+    grid-auto-flow: column;
 
     &:focus {
         background-color: grey;
@@ -149,10 +150,13 @@ const SaveBtnText = styled.span`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 55px;
     justify-content: space-between;
     display: flex;
     padding: 3px 5px 3px 6px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 5px;
+    width: fit-content;
 `
 
 const SaveBtnArrow = styled(Margin)`

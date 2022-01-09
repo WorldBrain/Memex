@@ -334,11 +334,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                         onToggleClick={() => {
                             this.processEvent('togglePDFReaderEnabled', null)
-                            {
-                                ;(this.getPDFMode() === 'reader' ||
-                                    this.isCurrentPagePDF) &&
-                                    this.processEvent('togglePDFReader', null)
-                            }
                         }}
                     />
                 </div>
@@ -404,7 +399,7 @@ const BlurredNotice = styled.div<{
     height: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? '90%'
-            : '67%'};
+            : '62%'};
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
     z-index: 20;

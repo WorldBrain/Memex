@@ -2,6 +2,8 @@ import React from 'react'
 import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
@@ -177,8 +179,11 @@ class TagPicker extends StatefulUIElement<
         return (
             <>
                 <DeprecationWarning>
-                    Tags will soon be deprecated and merged into our new
-                    'Spaces'.
+                    <DeprecationText>
+                        Tags will soon be deprecated and merged into our new
+                        <IconSpan src={icons.collectionsEmpty} />
+                        <HighlightText>Spaces</HighlightText>.
+                    </DeprecationText>
                     <PrimaryAction
                         label="Learn More"
                         onClick={() =>
@@ -240,6 +245,23 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
+
+const DeprecationText = styled.div`
+    display: inline-block;
+`
+
+const IconSpan = styled.img`
+    height: 12px;
+    width: 12px;
+    vertical-align: middle;
+    margin-right: 2px;
+    margin-left: 5px;
+`
+
+const HighlightText = styled.span`
+    color: ${(props) => props.theme.colors.primary};
+    vertical-align: middle;
+`
 
 const DeprecationWarning = styled.div`
     background-color: ${(props) => props.theme.colors.warning};

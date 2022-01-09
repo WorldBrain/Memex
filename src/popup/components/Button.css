@@ -177,9 +177,11 @@
 }
 
 .PDFIcon {
-    background-image: url('/img/file-pdf.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
+    mask-image: url('/img/file-pdf.svg');
+    background-color: #3a2f45;
+    mask-repeat: no-repeat;
+    mask-size: 20px;
+    mask-position: center center;
     opacity: 0.8;
 }
 
