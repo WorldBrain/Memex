@@ -228,6 +228,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         annotMap: Map<string, Annotation[]>,
     ) {
         const annotTagMap = new Map<string, string[]>()
+        const annotListIdMap = new Map<string, number[]>()
+        let relevantListIds = new Set<number>()
+        const ListIdToNameMap = new Map<number, string>()
         const protectedAnnotUrlsSet = new Set<string>()
         const sharedAnnotUrlsSet = new Set<string>()
 
@@ -246,6 +249,24 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .eachPrimaryKey(([name, url]: [string, string]) => {
                 const prev = annotTagMap.get(url) ?? []
                 annotTagMap.set(url, [...prev, name])
+            })
+
+        await this.backend.dexieInstance
+            .table('annotListEntries')
+            .where('url')
+            .anyOf(annotUrls)
+            .eachPrimaryKey(([id, url]: [number, string]) => {
+                const prev = annotListIdMap.get(url) ?? []
+                annotListIdMap.set(url, [...prev, id])
+                relevantListIds.add(id)
+            })
+
+        await this.backend.dexieInstance
+            .table('customLists')
+            .where('id')
+            .anyOf([...relevantListIds])
+            .each(({ name, id }: { name: string; id: number }) => {
+                ListIdToNameMap.set(id, name)
             })
 
         await this.backend.dexieInstance
@@ -278,6 +299,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 {
                     ...annot,
                     tags: annotTagMap.get(annot.url) ?? [],
+                    lists: (annotListIdMap.get(annot.url) ?? []).map((id) =>
+                        ListIdToNameMap.get(id),
+                    ),
                     isShared: sharedAnnotUrlsSet.has(annot.url),
                     isBulkShareProtected: protectedAnnotUrlsSet.has(annot.url),
                 },
