@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ButtonTooltip } from 'src/common-ui/components/'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 const styles = require('./footer.css')
 

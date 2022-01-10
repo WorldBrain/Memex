@@ -10,14 +10,14 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface Dependencies {
-    tabsAPI: Pick<Tabs.Static, 'create' | 'query'>
+    tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
     runtimeAPI: Pick<Runtime.Static, 'getURL'>
     syncSettings: SyncSettingsStore<'pdfIntegration'>
     pdfIntegrationBG: PDFRemoteInterface
 }
 
 export interface Event {
-    openPDFReader: null
+    togglePDFReader: null
     togglePDFReaderEnabled: null
 }
 
@@ -61,20 +61,30 @@ export default class PopupLogic extends UILogic<State, Event> {
         })
     }
 
-    openPDFReader: EventHandler<'openPDFReader'> = async ({
+    togglePDFReader: EventHandler<'togglePDFReader'> = async ({
         previousState: { currentPageUrl },
     }) => {
-        const { runtimeAPI, tabsAPI } = this.dependencies
+        const { runtimeAPI, tabsAPI, pdfIntegrationBG } = this.dependencies
+        const [currentTab] = await tabsAPI.query({
+            active: true,
+            currentWindow: true,
+        })
 
+        let nextPageUrl: string
         if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
-            console.log('already on it')
-            return
+            nextPageUrl = decodeURIComponent(
+                currentPageUrl.split('?file=')[1].toString(),
+            )
+            await pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
+        } else {
+            nextPageUrl = constructPDFViewerUrl(currentPageUrl, {
+                runtimeAPI,
+            })
+            await pdfIntegrationBG.openPdfViewerForNextPdf()
         }
 
-        const pdfViewerUrl = constructPDFViewerUrl(currentPageUrl, {
-            runtimeAPI,
-        })
-        await tabsAPI.create({ url: pdfViewerUrl })
+        await tabsAPI.update(currentTab.id, { url: nextPageUrl })
+        this.emitMutation({ currentPageUrl: { $set: nextPageUrl } })
     }
 
     togglePDFReaderEnabled: EventHandler<'togglePDFReaderEnabled'> = async ({

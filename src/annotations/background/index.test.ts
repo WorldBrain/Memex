@@ -17,9 +17,11 @@ import {
 import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
+const contentSharing = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.contentSharing
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
@@ -53,17 +55,14 @@ const createAnnotationStep = (args?: {
             DATA.ANNOT_1,
         )
         if (args?.protectAnnotation) {
-            await directLinking(setup).setAnnotationPrivacyLevel(
-                { tab: DATA.TEST_TAB_1 },
-                {
-                    annotation: annotUrl,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                },
-            )
+            await contentSharing(setup).setAnnotationPrivacyLevel({
+                annotation: annotUrl,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
         }
-        annotPrivacyLevel = await directLinking(
+        annotPrivacyLevel = await contentSharing(
             setup,
-        ).annotationStorage.findAnnotationPrivacyLevel({ annotation: annotUrl })
+        ).storage.findAnnotationPrivacyLevel({ annotation: annotUrl })
     },
     expectedStorageChanges: {
         annotations: (): StorageCollectionDiff => ({
@@ -220,6 +219,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                     DATA.HIGHLIGHT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                         annotsCount: 1,
@@ -297,6 +298,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                         annotsCount: 1,
@@ -429,6 +432,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -503,6 +508,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -621,6 +628,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -989,6 +998,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -1182,6 +1193,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -1213,6 +1226,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_2],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -1381,6 +1396,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },
@@ -1412,6 +1429,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                isBulkShareProtected: false,
+                                                isShared: false,
                                             },
                                         ],
                                     },

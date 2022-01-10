@@ -52,6 +52,7 @@ describe('Ribbon logic', () => {
         const analytics = new FakeAnalytics()
 
         const ribbonLogic = new RibbonContainerLogic({
+            activityIndicatorBG: backgroundModules.activityIndicator,
             getPageUrl: () => currentTab.normalizedUrl,
             analytics,
             setRibbonShouldAutoHide: () => undefined,
@@ -85,6 +86,7 @@ describe('Ribbon logic', () => {
             annotationsCache: createAnnotationsCache(
                 {
                     ...backgroundModules,
+                    tags: backgroundModules.tags.remoteFunctions,
                     contentSharing:
                         backgroundModules.contentSharing.remoteFunctions,
                     annotations,
@@ -574,7 +576,7 @@ describe('Ribbon logic', () => {
             dependencies: {
                 tags: {
                     ...device.backgroundModules.tags.remoteFunctions,
-                    updateTagForPage: ({ added }) => {
+                    updateTagForPageInCurrentTab: ({ added }) => {
                         addedTag = added
                     },
                 } as any,

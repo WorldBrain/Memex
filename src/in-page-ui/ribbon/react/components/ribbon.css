@@ -53,6 +53,7 @@
     justify-content: flex-end;
     height: 105vh;
     width: 40px;
+    border-left: 1px solid #e0e0e0;
 
     & .removeSidebar {
         visibility: hidden;
@@ -86,11 +87,9 @@
 
 .innerRibbonSidebarOpen {
     box-shadow: none;
-    right: 0px;
     height: 100%;
     top: 0px;
     justify-content: flex-start;
-    padding-right: 16px;
     padding-top: 45px;
     width: 20px;
     align-items: flex-end;
@@ -209,11 +208,16 @@
 }
 
 .comments {
-    background-image: url('/img/comment_add.svg');
+    background-image: url('/img/comment_empty.svg');
+}
+
+.commentAvailable {
+    background-image: url('/img/comment_full.svg');
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
+    cursor: default;
 }
 
 .notBookmark {

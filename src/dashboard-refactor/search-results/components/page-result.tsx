@@ -36,11 +36,26 @@ export interface Props
 }
 
 export default class PageResultView extends PureComponent<Props> {
-    get domain(): string {
-        return (
-            this.props.fullUrl.split('/')[2]?.replace('www.', '') ??
-            this.props.normalizedUrl
-        )
+    private get fullUrl(): string {
+        return this.props.type === 'pdf'
+            ? this.props.fullPdfUrl!
+            : this.props.fullUrl
+    }
+
+    private get domain(): string {
+        let fullUrl: URL
+        try {
+            fullUrl = new URL(this.fullUrl)
+        } catch (err) {
+            return ''
+        }
+
+        if (fullUrl.protocol.startsWith('http')) {
+            return decodeURIComponent(fullUrl.hostname.replace('www.', ''))
+        } else if (fullUrl.protocol === 'file:') {
+            return decodeURIComponent(fullUrl.pathname)
+        }
+        return ''
     }
 
     private get hasTags(): boolean {
@@ -173,7 +188,7 @@ export default class PageResultView extends PureComponent<Props> {
                         ? icons.collectionsFull
                         : icons.collectionsEmpty,
                     onClick: this.props.onListPickerBtnClick,
-                    tooltipText: 'Edit Collections',
+                    tooltipText: 'Edit Spaces',
                 },
                 {
                     key: 'expand-notes-btn',
@@ -242,7 +257,7 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
-                        href={this.props.fullUrl}
+                        href={this.fullUrl}
                         target="_blank"
                     >
                         <ResultContent>
@@ -250,6 +265,9 @@ export default class PageResultView extends PureComponent<Props> {
                                 <FavIconBox>
                                     <FavIconImg src={this.props.favIconURI} />
                                 </FavIconBox>
+                            )}
+                            {this.props.type === 'pdf' && (
+                                <PDFIcon>PDF</PDFIcon>
                             )}
                             <PageUrl>{this.domain}</PageUrl>
                         </ResultContent>
@@ -281,6 +299,15 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const PDFIcon = styled.div`
+    border: 1px solid rgb(184, 184, 184);
+    border-radius: 5px;
+    padding: 0 8px;
+    font-weight: 500;
+    color: black;
+    margin-right: 10px;
+`
 
 const PopoutContainer = styled.div``
 

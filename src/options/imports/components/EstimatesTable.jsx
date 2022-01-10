@@ -33,12 +33,12 @@ const EstimatesTable = ({
                     <br /> Imported
                 </th>
                 <th>
-                    Import <br />
-                    time
-                </th>
-                <th>
                     Already saved <br />
                     in Memex
+                </th>
+                <th>
+                    Import <br />
+                    time
                 </th>
             </tr>
         </thead>
@@ -60,11 +60,11 @@ const EstimatesTable = ({
                     </Checkbox>
                 </td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
+                <td>{estimates[TYPE.BOOKMARK].complete}</td>
                 <td>
                     {'~'}
                     {estimates[TYPE.BOOKMARK].timeRemaining}
                 </td>
-                <td>{estimates[TYPE.BOOKMARK].complete}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
@@ -146,6 +146,26 @@ const EstimatesTable = ({
                             </td>
                         </React.Fragment>
                     )}
+            </tr>
+            <tr className={localStyles.importTableRow}>
+                <td>
+                    <div className={localStyles.labelContainer}>
+                        <span className={localStyles.checkboxText}>
+                            Import List of URLs
+                        </span>
+                    </div>
+                </td>
+                <td colSpan="3">
+                    Convert the list with{' '}
+                    <a
+                        href="https://www.textfixer.com/html/convert-url-to-html-link.php"
+                        target="_blank"
+                    >
+                        this service{' '}
+                    </a>
+                    . <br />
+                    Save the output as .html file and import it here.
+                </td>
             </tr>
         </tbody>
     </table>

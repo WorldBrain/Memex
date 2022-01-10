@@ -3,6 +3,12 @@ import { extractIdFromAnnotationUrl } from '@worldbrain/memex-common/lib/persona
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
+import {
+    ContentLocatorType,
+    LocationSchemeType,
+    ContentLocatorFormat,
+    FingerprintSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -22,6 +28,13 @@ export async function insertReadwiseAPIKey(
         value: 'test-key',
         user: userId,
     })
+}
+
+const REMOTE_DEVICES_V24 = {
+    first: {
+        id: 1,
+        user: TEST_USER.id,
+    },
 }
 
 const LOCAL_PAGES_V24 = {
@@ -47,6 +60,28 @@ const LOCAL_PAGES_V24 = {
         canonicalUrl: 'https://www.notionized.com/foo',
         description: 'notionized.com/foo description',
     },
+    third: {
+        url: `memex.cloud/ct/test-fingerprint-1.pdf`,
+        fullUrl: 'https://memex.cloud/ct/test-fingerprint-1.pdf',
+        domain: 'memex.cloud',
+        hostname: 'memex.cloud',
+        fullTitle: 'https://memex.cloud/ct/test-fingerprint-1.pdf',
+        text: '',
+        lang: undefined,
+        canonicalUrl: 'https://memex.cloud/ct/test-fingerprint-1.pdf',
+        description: undefined,
+    },
+    fourth: {
+        url: 'memex.cloud/ct/test-fingerprint-2.pdf',
+        fullUrl: 'https://memex.cloud/ct/test-fingerprint-2.pdf',
+        domain: 'memex.cloud',
+        hostname: 'memex.cloud',
+        fullTitle: 'https://memex.cloud/ct/test-fingerprint-2.pdf',
+        text: '',
+        lang: undefined,
+        canonicalUrl: 'https://memex.cloud/ct/test-fingerprint-2.pdf',
+        description: undefined,
+    },
 }
 
 const LOCAL_ANNOTATIONS_V24 = {
@@ -59,8 +94,8 @@ const LOCAL_ANNOTATIONS_V24 = {
         createdWhen: new Date('2020-10-10'),
         lastEdited: new Date('2020-10-10'),
         selector: {
+            descriptor: { content: [], strategy: 'hyp-anchoring' },
             quote: 'This is a test highlight',
-            descriptor: { strategy: 'hyp-anchoring', content: [] },
         },
     },
     second: {
@@ -70,6 +105,30 @@ const LOCAL_ANNOTATIONS_V24 = {
         comment: 'This is another test comment',
         createdWhen: new Date('2020-10-11'),
         lastEdited: new Date('2020-10-20'),
+    },
+    third: {
+        url: LOCAL_PAGES_V24.third.url + '/#111111113',
+        pageUrl: LOCAL_PAGES_V24.third.url,
+        pageTitle: LOCAL_PAGES_V24.third.fullTitle,
+        comment: 'This is a test comment on a PDF page!',
+        createdWhen: new Date('2020-10-12'),
+        lastEdited: new Date('2020-10-12'),
+    },
+    fourth: {
+        url: LOCAL_PAGES_V24.third.url + '/#111111114',
+        pageUrl: LOCAL_PAGES_V24.third.url,
+        pageTitle: LOCAL_PAGES_V24.third.fullTitle,
+        comment: 'This is another test comment on a PDF page',
+        createdWhen: new Date('2020-10-13'),
+        lastEdited: new Date('2020-10-13'),
+    },
+    fifth: {
+        url: LOCAL_PAGES_V24.fourth.url + '/#111111115',
+        pageUrl: LOCAL_PAGES_V24.fourth.url,
+        pageTitle: LOCAL_PAGES_V24.fourth.fullTitle,
+        comment: 'This is a comment on a local PDF page',
+        createdWhen: new Date('2020-10-14'),
+        lastEdited: new Date('2020-10-14'),
     },
 }
 
@@ -109,12 +168,33 @@ export const LOCAL_TEST_DATA_V24 = {
             createdWhen: new Date(1625190554983),
             updatedWhen: new Date(1625190554983),
         },
+        first_private: {
+            id: 1,
+            annotation: LOCAL_ANNOTATIONS_V24.first.url,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            createdWhen: new Date(1625190554983),
+            updatedWhen: new Date(1625190554983),
+        },
         second: {
             id: 2,
             annotation: LOCAL_ANNOTATIONS_V24.second.url,
             privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
             createdWhen: new Date(1625190554984),
             updatedWhen: new Date(1625190554984),
+        },
+        third: {
+            id: 3,
+            annotation: LOCAL_ANNOTATIONS_V24.third.url,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            createdWhen: new Date(1625190554985),
+            updatedWhen: new Date(1625190554985),
+        },
+        fifth: {
+            id: 4,
+            annotation: LOCAL_ANNOTATIONS_V24.fifth.url,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            createdWhen: new Date(1625190554986),
+            updatedWhen: new Date(1625190554986),
         },
     },
     sharedAnnotationMetadata: {
@@ -127,6 +207,69 @@ export const LOCAL_TEST_DATA_V24 = {
             excludeFromLists: true,
             localId: LOCAL_ANNOTATIONS_V24.second.url,
             remoteId: 'test-2',
+        },
+        third: {
+            excludeFromLists: false,
+            localId: LOCAL_ANNOTATIONS_V24.third.url,
+            remoteId: 'test-3',
+        },
+        fifth: {
+            excludeFromLists: false,
+            localId: LOCAL_ANNOTATIONS_V24.fifth.url,
+            remoteId: 'test-4',
+        },
+    },
+    locators: {
+        // NOTE: first and second are skipped, as the corresponding pages are not PDFs.
+        //   Only pages that are PDFs will have local extension locators.
+        third: {
+            id: 1,
+            fingerprint: 'test-fingerprint-1',
+            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            location: 'getmemex.com/test1.pdf',
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.NormalizedUrlV1,
+            normalizedUrl: LOCAL_PAGES_V24.third.url,
+            originalLocation: 'https://getmemex.com/test1.pdf',
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927733923,
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
+        },
+        // NOTE: fourth_a and fourth_b point to the same page
+        fourth_a: {
+            id: 2,
+            fingerprint: 'test-fingerprint-2',
+            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            location: '/home/user/test2.pdf',
+            locationType: ContentLocatorType.Local,
+            locationScheme: LocationSchemeType.FilesystemPathV1,
+            normalizedUrl: LOCAL_PAGES_V24.fourth.url,
+            originalLocation: 'file:///home/user/test2.pdf',
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927733925,
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
+        },
+        fourth_b: {
+            id: 3,
+            fingerprint: 'test-fingerprint-3',
+            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            location: 'getmemex.com/test2.pdf',
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.NormalizedUrlV1,
+            normalizedUrl: LOCAL_PAGES_V24.fourth.url,
+            originalLocation: 'https://getmemex.com/test2.pdf',
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927743925,
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
         },
     },
     visits: {
@@ -147,6 +290,24 @@ export const LOCAL_TEST_DATA_V24 = {
             scrollMaxPx: 320,
             scrollPerc: 30,
             scrollPx: 130,
+        },
+        third: {
+            url: LOCAL_PAGES_V24.third.url,
+            time: 5590,
+            duration: 74,
+            scrollMaxPerc: 0,
+            scrollMaxPx: 0,
+            scrollPerc: 0,
+            scrollPx: 0,
+        },
+        fourth: {
+            url: LOCAL_PAGES_V24.fourth.url,
+            time: 5625,
+            duration: 100,
+            scrollMaxPerc: 0,
+            scrollMaxPx: 0,
+            scrollPerc: 0,
+            scrollPx: 0,
         },
     },
     tags: {
@@ -191,6 +352,18 @@ export const LOCAL_TEST_DATA_V24 = {
             pageUrl: LOCAL_PAGES_V24.second.url,
             listId: LOCAL_LISTS_V24.first.id,
         },
+        third: {
+            createdAt: new Date(1625190554990),
+            fullUrl: LOCAL_PAGES_V24.third.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.third.url,
+            listId: LOCAL_LISTS_V24.first.id,
+        },
+        fourth: {
+            createdAt: new Date(1625190554990),
+            fullUrl: LOCAL_PAGES_V24.fourth.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.fourth.url,
+            listId: LOCAL_LISTS_V24.first.id,
+        },
     },
     templates: {
         first: {
@@ -222,13 +395,6 @@ export const LOCAL_TEST_DATA_V24 = {
     },
 }
 
-const REMOTE_DEVICES_V24 = {
-    first: {
-        id: 1,
-        user: TEST_USER.id,
-    },
-}
-
 const REMOTE_METADATA_V24 = {
     first: {
         id: 1,
@@ -252,6 +418,28 @@ const REMOTE_METADATA_V24 = {
         lang: LOCAL_TEST_DATA_V24.pages.second.lang,
         description: LOCAL_TEST_DATA_V24.pages.second.description,
     },
+    third: {
+        id: 3,
+        createdWhen: 559,
+        updatedWhen: 559,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        canonicalUrl: LOCAL_TEST_DATA_V24.pages.third.canonicalUrl,
+        title: LOCAL_TEST_DATA_V24.pages.third.fullTitle,
+        lang: LOCAL_TEST_DATA_V24.pages.third.lang ?? null,
+        description: LOCAL_TEST_DATA_V24.pages.third.description ?? null,
+    },
+    fourth: {
+        id: 4,
+        createdWhen: 561,
+        updatedWhen: 561,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        canonicalUrl: LOCAL_TEST_DATA_V24.pages.fourth.canonicalUrl,
+        title: LOCAL_TEST_DATA_V24.pages.fourth.fullTitle,
+        lang: LOCAL_TEST_DATA_V24.pages.fourth.lang ?? null,
+        description: LOCAL_TEST_DATA_V24.pages.fourth.description ?? null,
+    },
 }
 
 const REMOTE_LOCATORS_V24 = {
@@ -262,15 +450,16 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.first.id,
-        format: 'html',
+        format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.first.url,
-        locationScheme: 'normalized-url-v1',
-        locationType: 'remote',
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
         originalLocation: LOCAL_TEST_DATA_V24.pages.first.fullUrl,
         primary: true,
         valid: true,
         version: 0,
         lastVisited: 0,
+        localId: null,
         // contentSize: null,
         // fingerprint: null,
     },
@@ -281,17 +470,129 @@ const REMOTE_LOCATORS_V24 = {
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
         personalContentMetadata: REMOTE_METADATA_V24.second.id,
-        format: 'html',
+        format: ContentLocatorFormat.HTML,
         location: LOCAL_TEST_DATA_V24.pages.second.url,
-        locationScheme: 'normalized-url-v1',
-        locationType: 'remote',
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
         originalLocation: LOCAL_TEST_DATA_V24.pages.second.fullUrl,
         primary: true,
         valid: true,
         version: 0,
         lastVisited: 0,
+        localId: null,
         // contentSize: null,
         // fingerprint: null,
+    },
+    // As the third page is a PDF, an extra dummy locator exists to point to the dummy
+    //  memex.cloud/ct/ page that gets created locally for the PDF
+    third_dummy: {
+        id: 3,
+        createdWhen: 560,
+        updatedWhen: 560,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: null,
+        format: ContentLocatorFormat.PDF,
+        location: LOCAL_TEST_DATA_V24.pages.third.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.MemexCloud,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.third.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        fingerprintScheme: null,
+        contentSize: null,
+        fingerprint: null,
+        lastVisited: 0,
+    },
+    third: {
+        id: 4,
+        createdWhen: 562,
+        updatedWhen: 562,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: LOCAL_TEST_DATA_V24.locators.third.id,
+        format: LOCAL_TEST_DATA_V24.locators.third.format,
+        location: LOCAL_TEST_DATA_V24.locators.third.location,
+        locationScheme: LOCAL_TEST_DATA_V24.locators.third.locationScheme,
+        locationType: LOCAL_TEST_DATA_V24.locators.third.locationType,
+        originalLocation: LOCAL_TEST_DATA_V24.locators.third.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.third.lastVisited,
+        // contentSize: null,
+        fingerprint: LOCAL_TEST_DATA_V24.locators.third.fingerprint,
+        fingerprintScheme: LOCAL_TEST_DATA_V24.locators.third.fingerprintScheme,
+    },
+    fourth_dummy: {
+        id: 5,
+        createdWhen: 564,
+        updatedWhen: 564,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: null,
+        format: ContentLocatorFormat.PDF,
+        location: LOCAL_TEST_DATA_V24.pages.fourth.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.MemexCloud,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.fourth.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        fingerprintScheme: null,
+        contentSize: null,
+        fingerprint: null,
+        lastVisited: 0,
+    },
+    fourth_a: {
+        id: 6,
+        createdWhen: 566,
+        updatedWhen: 566,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: LOCAL_TEST_DATA_V24.locators.fourth_a.id,
+        format: LOCAL_TEST_DATA_V24.locators.fourth_a.format,
+        location: LOCAL_TEST_DATA_V24.locators.fourth_a.location,
+        locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_a.locationScheme,
+        locationType: LOCAL_TEST_DATA_V24.locators.fourth_a.locationType,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_a.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_a.lastVisited,
+        // contentSize: null,
+        fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_a.fingerprint,
+        fingerprintScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_a.fingerprintScheme,
+    },
+    fourth_b: {
+        id: 7,
+        createdWhen: 566,
+        updatedWhen: 566,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: LOCAL_TEST_DATA_V24.locators.fourth_b.id,
+        format: LOCAL_TEST_DATA_V24.locators.fourth_b.format,
+        location: LOCAL_TEST_DATA_V24.locators.fourth_b.location,
+        locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_b.locationScheme,
+        locationType: LOCAL_TEST_DATA_V24.locators.fourth_b.locationType,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_b.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_b.lastVisited,
+        // contentSize: null,
+        fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprint,
+        fingerprintScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprintScheme,
     },
 }
 
@@ -318,6 +619,30 @@ const REMOTE_ANNOTATIONS_V24 = {
         comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
         createdWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
         updatedWhen: LOCAL_TEST_DATA_V24.annotations.second.createdWhen.getTime(),
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+    },
+    third: {
+        id: 1,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: extractIdFromAnnotationUrl(
+            LOCAL_TEST_DATA_V24.annotations.third.url,
+        ),
+        comment: LOCAL_TEST_DATA_V24.annotations.third.comment,
+        createdWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        updatedWhen: LOCAL_TEST_DATA_V24.annotations.third.createdWhen.getTime(),
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+    },
+    fifth: {
+        id: 1,
+        personalContentMetadata: REMOTE_METADATA_V24.third.id,
+        localId: extractIdFromAnnotationUrl(
+            LOCAL_TEST_DATA_V24.annotations.fifth.url,
+        ),
+        comment: LOCAL_TEST_DATA_V24.annotations.fifth.comment,
+        createdWhen: LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
+        updatedWhen: LOCAL_TEST_DATA_V24.annotations.fifth.createdWhen.getTime(),
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
@@ -429,6 +754,41 @@ export const REMOTE_TEST_DATA_V24 = {
             // pageTotal: null,
             // pageProgress: null,
         },
+        third: {
+            id: 1,
+            createdWhen: 561,
+            updatedWhen: 561,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            personalContentMetadata: REMOTE_METADATA_V24.third.id,
+            personalContentLocator: REMOTE_LOCATORS_V24.third_dummy.id,
+            readWhen: LOCAL_TEST_DATA_V24.visits.third.time,
+            readDuration: LOCAL_TEST_DATA_V24.visits.third.duration,
+            scrollMaxPercentage: LOCAL_TEST_DATA_V24.visits.third.scrollMaxPerc,
+            scrollEndPercentage: LOCAL_TEST_DATA_V24.visits.third.scrollPerc,
+            scrollMaxPixel: LOCAL_TEST_DATA_V24.visits.third.scrollMaxPx,
+            scrollEndPixel: LOCAL_TEST_DATA_V24.visits.third.scrollPx,
+            // pageTotal: null,
+            // pageProgress: null,
+        },
+        fourth: {
+            id: 1,
+            createdWhen: 562,
+            updatedWhen: 562,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+            personalContentLocator: REMOTE_LOCATORS_V24.fourth_dummy.id,
+            readWhen: LOCAL_TEST_DATA_V24.visits.fourth.time,
+            readDuration: LOCAL_TEST_DATA_V24.visits.fourth.duration,
+            scrollMaxPercentage:
+                LOCAL_TEST_DATA_V24.visits.fourth.scrollMaxPerc,
+            scrollEndPercentage: LOCAL_TEST_DATA_V24.visits.fourth.scrollPerc,
+            scrollMaxPixel: LOCAL_TEST_DATA_V24.visits.fourth.scrollMaxPx,
+            scrollEndPixel: LOCAL_TEST_DATA_V24.visits.fourth.scrollPx,
+            // pageTotal: null,
+            // pageProgress: null,
+        },
     },
     personalBookmark: {
         first: {
@@ -508,6 +868,28 @@ export const REMOTE_TEST_DATA_V24 = {
             createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
             updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.createdWhen.getTime(),
         },
+        third: {
+            id: 1,
+            localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.id,
+            privacyLevel:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.privacyLevel,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.third.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third.createdWhen.getTime(),
+        },
+        fifth: {
+            id: 1,
+            localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.id,
+            privacyLevel:
+                LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.privacyLevel,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.fifth.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
+            updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth.createdWhen.getTime(),
+        },
     },
     personalAnnotationShare: {
         first: {
@@ -535,6 +917,32 @@ export const REMOTE_TEST_DATA_V24 = {
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 565,
             updatedWhen: 565,
+        },
+        third: {
+            id: 1,
+            remoteId:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third.remoteId,
+            excludeFromLists:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third
+                    .excludeFromLists,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.third.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 567,
+            updatedWhen: 567,
+        },
+        fifth: {
+            id: 1,
+            remoteId:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth.remoteId,
+            excludeFromLists:
+                LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth
+                    .excludeFromLists,
+            personalAnnotation: REMOTE_ANNOTATIONS_V24.fifth.id,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 569,
+            updatedWhen: 569,
         },
     },
     personalList: REMOTE_LISTS_V24,
@@ -576,6 +984,24 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 563,
             updatedWhen: 563,
+        },
+        third: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.third.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        fourth: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+            personalList: REMOTE_LISTS_V24.first.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 565,
+            updatedWhen: 565,
         },
     },
     personalTextTemplate: {

@@ -255,7 +255,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
-                                    DATA.ANNOT_1,
+                                    {
+                                        ...DATA.ANNOT_1,
+                                        title: DATA.ANNOT_1.pageTitle,
+                                    },
                                 )
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
@@ -280,7 +283,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_2 },
-                                    DATA.ANNOT_2,
+                                    {
+                                        ...DATA.ANNOT_2,
+                                        title: DATA.ANNOT_2.pageTitle,
+                                    },
                                 )
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_2 },
@@ -363,7 +369,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
-                                    DATA.ANNOT_1,
+                                    {
+                                        ...DATA.ANNOT_1,
+                                        title: DATA.ANNOT_1.pageTitle,
+                                    },
                                 )
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
@@ -452,15 +461,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
-                                    DATA.ANNOT_1,
+                                    {
+                                        ...DATA.ANNOT_1,
+                                        title: DATA.ANNOT_1.pageTitle,
+                                    },
                                 )
                                 const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_2 },
-                                    DATA.ANNOT_2,
+                                    {
+                                        ...DATA.ANNOT_2,
+                                        title: DATA.ANNOT_2.pageTitle,
+                                    },
                                 )
                                 const thirdAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_2 },
-                                    DATA.ANNOT_3,
+                                    {
+                                        ...DATA.ANNOT_3,
+                                        title: DATA.ANNOT_3.pageTitle,
+                                    },
                                 )
 
                                 await setup.backgroundModules.readwise.uploadAllAnnotations(

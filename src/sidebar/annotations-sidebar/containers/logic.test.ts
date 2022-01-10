@@ -896,7 +896,7 @@ describe('SidebarContainerLogic', () => {
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
             })
-            await directLinking.setAnnotationPrivacyLevel(undefined, {
+            await contentSharing.setAnnotationPrivacyLevel({
                 annotation: annotationUrl2,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
@@ -930,18 +930,6 @@ describe('SidebarContainerLogic', () => {
                 DATA.FOLLOWED_LISTS
             const { sidebar } = await setupLogicHelper({ device })
 
-            expect(sidebar.state.displayMode).toEqual('private-notes')
-            expect(sidebar.state.followedListLoadState).toEqual('pristine')
-            expect(sidebar.state.followedLists).toEqual({
-                allIds: [],
-                byId: {},
-            })
-
-            await sidebar.processEvent('setDisplayMode', {
-                mode: 'shared-notes',
-            })
-
-            expect(sidebar.state.displayMode).toEqual('shared-notes')
             expect(sidebar.state.followedListLoadState).toEqual('success')
             expect(sidebar.state.followedLists).toEqual({
                 allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
@@ -970,10 +958,6 @@ describe('SidebarContainerLogic', () => {
                 DATA.SHARED_ANNOTATIONS
             const { sidebar, emittedEvents } = await setupLogicHelper({
                 device,
-            })
-
-            await sidebar.processEvent('setDisplayMode', {
-                mode: 'shared-notes',
             })
 
             const { id: listId } = DATA.FOLLOWED_LISTS[0]
@@ -1015,7 +999,6 @@ describe('SidebarContainerLogic', () => {
             expectedEvents.push({
                 event: 'renderHighlights',
                 args: {
-                    displayMode: 'shared-notes',
                     highlights: [
                         {
                             url: DATA.SHARED_ANNOTATIONS[0].reference.id,

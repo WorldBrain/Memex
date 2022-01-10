@@ -44,6 +44,7 @@ import {
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { Services } from 'src/services/types'
+import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 fetchMock.restore()
 
@@ -195,6 +196,7 @@ export async function setupBackgroundIntegrationTest(
                 storageModules: serverStorage.storageModules,
                 services,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
+                clientDeviceType: PersonalDeviceType.DesktopBrowser,
                 view: new PersonalCloudHub().getView(),
                 getUserId: async () =>
                     (await backgroundModules.auth.authService.getCurrentUser())
@@ -204,6 +206,10 @@ export async function setupBackgroundIntegrationTest(
                     options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
+                autoPkType:
+                    process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+                        ? 'string'
+                        : 'number',
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.storageManager,

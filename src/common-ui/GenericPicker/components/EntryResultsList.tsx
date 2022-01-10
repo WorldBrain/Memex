@@ -9,6 +9,7 @@ interface Props {
     renderEntryRow: (list: DisplayEntry, index: number) => ReactNode
     emptyView?: ReactNode
     id: string
+    query?: string
 }
 
 export default class EntryResultsList extends React.Component<Props> {
@@ -23,6 +24,9 @@ export default class EntryResultsList extends React.Component<Props> {
     render = () => {
         return (
             <StyledContainer id={this.props.id}>
+                {this.props.query === '' && this.props.entries.length > 0 && (
+                    <RecentItemsNotif>Recently used</RecentItemsNotif>
+                )}
                 {/*<FilterHelp>
                     Select lists to include
                     <Check size={18} /> or exclude
@@ -34,6 +38,12 @@ export default class EntryResultsList extends React.Component<Props> {
         )
     }
 }
+
+const RecentItemsNotif = styled.div`
+    padding: 5px 10px;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.subText};
+`
 
 const StyledContainer = styled.div`
     overflow-y: auto;

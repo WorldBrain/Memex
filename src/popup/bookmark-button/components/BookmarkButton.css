@@ -1,9 +1,10 @@
 .button {
     flex: 7;
     text-align: left;
-    display: inline-block;
     padding: 10px 20px;
     height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .buttonContainer {
@@ -11,6 +12,18 @@
     align-items: center;
     justify-content: center;
     margin-top: 5px;
+    cursor: default;
+}
+
+.bookmarkedButtonContainer {
+    cursor: default;
+}
+
+.buttonInnerContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .bookmarkedBtn {
@@ -19,6 +32,10 @@
     background-size: 23px;
     opacity: 0.8;
     float: left;
+}
+
+.bookmarkedBtn * {
+    cursor: default;
 }
 
 .unbookmarkedBtn {

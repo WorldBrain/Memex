@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
@@ -19,6 +19,8 @@ export interface AnnotationEditEventProps {
 export interface AnnotationEditGeneralProps {
     comment: string
     editorHeight?: string
+    isShared?: boolean
+    isBulkShareProtected?: boolean
 }
 
 export interface Props
@@ -58,7 +60,10 @@ class AnnotationEdit extends React.Component<Props> {
         }
 
         if (e.key === 'Enter' && e.metaKey) {
-            return this.saveEdit(false, false)
+            return this.saveEdit(
+                this.props.isShared,
+                this.props.isBulkShareProtected,
+            )
         }
 
         if (e.key === 'Escape') {
@@ -76,6 +81,7 @@ class AnnotationEdit extends React.Component<Props> {
                     }
                     markdownContent={this.props.comment}
                     onKeyDown={this.handleInputKeyDown}
+                    placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                 />
             </EditorContainer>
         )

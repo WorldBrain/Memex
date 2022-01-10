@@ -12,3 +12,5 @@ export type MapDispatchToProps<DispatchProps, OwnProps, RootState> = (
  * Remove from T the keys that are in common with K
  */
 export type Optionalize<T extends K, K> = Omit<T, keyof K>
+
+export type MaybePromise<T> = T | Promise<T>

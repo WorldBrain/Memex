@@ -22,11 +22,12 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -234,6 +235,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                     rows={2}
                     comment={comment}
                     editorHeight={this.state.editorHeight}
+                    isShared={this.props.isShared}
+                    isBulkShareProtected={this.props.isBulkShareProtected}
                 />
             )
         }
@@ -252,7 +255,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                         >
                             <EditNoteIcon
                                 onClick={
-                                    annotationFooterDependencies.onEditIconClick
+                                    annotationFooterDependencies?.onEditIconClick
                                 }
                             />
                         </ButtonTooltip>
@@ -443,12 +446,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 Cancel
                             </CancelBtnStyled>
                         </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                            position="bottom"
-                        >
-                            {confirmBtn}
-                        </ButtonTooltip>
+                        {confirmBtn}
                     </BtnContainerStyled>
                     {this.renderMarkdownHelpButton()}
                 </SaveActionBar>
@@ -457,9 +455,11 @@ export default class AnnotationEditable extends React.Component<Props> {
     }
 
     render() {
+        const { annotationFooterDependencies } = this.props
+
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="10px">
+                <Margin top="5px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -467,7 +467,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                         }}
                     >
                         <AnnotationStyled>
-                            <ContentContainer>
+                            <ContentContainer
+                                onDoubleClick={
+                                    annotationFooterDependencies?.onEditIconClick
+                                }
+                            >
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
@@ -535,8 +539,14 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     : 'initial'
                             }
                             height="430px"
+                            overflow="scroll"
                         >
-                            <QuickTutorial markdownHelpOnTop={true} />
+                            <QuickTutorial
+                                markdownHelpOnTop={true}
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                            />
                         </HoverBox>
                     </ClickAway>
                 )}
@@ -565,8 +575,8 @@ const EditNoteIconBox = styled.div`
     border: none;
     outline: none;
     background: white;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 
@@ -762,7 +772,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        box-shadow: 0px 0px 5px 1px #00000080;
+        outline: 2px solid #5671cfb8;
     `};
 `
 
@@ -775,9 +785,11 @@ const ContentContainer = styled.div`
 const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
     font-weight: 800;
-    font-size: 15px;
+    font-size: 14px;
     color: #000;
-    margin-right: 5px;
+    margin-right: 10px;
+    width: 100%;
+    text-align: right;
 `
 
 const CancelBtnStyled = styled.button`
@@ -837,6 +849,7 @@ const ActionBtnStyled = styled.button`
 const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-top: 1px solid #f0f0f0;
     padding: 5px;
 }

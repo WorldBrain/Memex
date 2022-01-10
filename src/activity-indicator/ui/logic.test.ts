@@ -8,7 +8,10 @@ function setupTest(
     { device }: SingleDeviceUILogicTestContext,
     openFeedUrl: Dependencies['openFeedUrl'] = () => undefined,
 ) {
-    const logicInstance = new Logic({ openFeedUrl })
+    const logicInstance = new Logic({
+        activityIndicatorBG: device.backgroundModules.activityIndicator,
+        openFeedUrl,
+    })
 
     const logic = device.createElement(logicInstance)
 

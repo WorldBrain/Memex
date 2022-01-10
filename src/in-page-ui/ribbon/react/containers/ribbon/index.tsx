@@ -9,6 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -35,6 +36,10 @@ export default class RibbonContainer extends StatefulUIElement<
         )
     }
 
+    private get normalizedPageUrl(): string | null {
+        return this.state.pageUrl ? normalizeUrl(this.state.pageUrl) : null
+    }
+
     componentDidMount() {
         super.componentDidMount()
         this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
@@ -53,6 +58,14 @@ export default class RibbonContainer extends StatefulUIElement<
 
         if (currentTab.url !== prevProps.currentTab.url) {
             this.processEvent('hydrateStateFromDB', { url: currentTab.url })
+        }
+    }
+
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
         }
     }
 
@@ -97,16 +110,19 @@ export default class RibbonContainer extends StatefulUIElement<
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
                 isExpanded={this.props.state === 'visible'}
+                hasAnnotations={this.state.hasAnnotations}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
                 isRibbonEnabled={this.state.isRibbonEnabled}
                 handleRemoveRibbon={() => this.props.inPageUI.removeRibbon()}
-                getUrl={() => this.props.currentTab.url}
-                tabId={this.props.currentTab.id}
                 handleRibbonToggle={() =>
                     this.processEvent('toggleRibbon', null)
                 }
+                activityIndicator={{
+                    activityIndicatorBG: this.props.activityIndicatorBG,
+                    openFeedUrl: () => window.open(this.whichFeed(), '_blank'),
+                }}
                 highlights={{
                     ...this.state.highlights,
                     handleHighlightsToggle: () =>
@@ -155,7 +171,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('updateTags', { value }),
                     fetchInitialTagSelections: () =>
                         this.props.tags.fetchPageTags({
-                            url: this.props.currentTab.url,
+                            url: this.normalizedPageUrl,
                         }),
                     queryEntries: (query) =>
                         this.props.tags.searchForTagSuggestions({ query }),
@@ -174,7 +190,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     fetchInitialListSelections: () =>
                         this.props.customLists.fetchPageLists({
-                            url: this.props.currentTab.url,
+                            url: this.normalizedPageUrl,
                         }),
                     queryEntries: (query) =>
                         this.props.customLists.searchForListSuggestions({

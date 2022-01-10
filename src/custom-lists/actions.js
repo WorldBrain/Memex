@@ -7,7 +7,7 @@ import { selectors as filters } from 'src/search-filters'
 import analytics from 'src/analytics'
 import * as Raven from 'src/util/raven' // eslint-disable-line
 import { collections } from 'src/util/remote-functions-background'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export const setInboxUnreadCount = createAction(
     'custom-lists/setInboxUnreadCount',

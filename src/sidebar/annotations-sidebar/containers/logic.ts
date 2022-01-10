@@ -31,6 +31,9 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { Browser, browser } from 'webextension-polyfill-ts'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -138,8 +141,10 @@ export class SidebarContainerLogic extends UILogic<
     getInitialState(): SidebarContainerState {
         return {
             ...annotationConversationInitialState(),
-            displayMode: 'private-notes',
 
+            isExpanded: true,
+            isExpandedSharedSpaces: true,
+            sidebarWidth: '450px',
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -149,6 +154,7 @@ export class SidebarContainerLogic extends UILogic<
             followedAnnotations: {},
             users: {},
 
+            isWidthLocked: false,
             isLocked: false,
             pageUrl: this.options.pageUrl,
             showState: this.options.initialState ?? 'hidden',
@@ -199,15 +205,29 @@ export class SidebarContainerLogic extends UILogic<
             this.annotationSubscription,
         )
 
+        const SidebarInitialWidth = getLocalStorage(
+            SIDEBAR_WIDTH_STORAGE_KEY,
+        ).then((width) => {
+            if (!width) {
+                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
+            }
+        })
+
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (pageUrl != null) {
+            if (pageUrl) {
                 await annotationsCache.load(pageUrl)
             }
         })
+        if (previousState.followedListLoadState === 'pristine') {
+            await this.processUIEvent('loadFollowedLists', {
+                previousState: previousState,
+                event: null,
+            })
+        }
     }
 
     cleanup = () => {
@@ -220,26 +240,7 @@ export class SidebarContainerLogic extends UILogic<
     private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
             annotations: {
-                // TODO: This complexity is a result of the fact that we're allowing changes to the share
-                //   state outside of the annots cache (SingleNoteShareMenu). We should eventually move all
-                //   data interactions to be done via the cache
-                $apply: (previousAnnots: Annotation[]) => {
-                    const previousAnnotsByUrl = new Map<string, Annotation>()
-                    previousAnnots.forEach((annot) =>
-                        previousAnnotsByUrl.set(annot.url, annot),
-                    )
-                    return nextAnnotations.map((annot) => {
-                        const prev = previousAnnotsByUrl.get(annot.url)
-
-                        return {
-                            ...annot,
-                            isShared: prev?.isShared ?? annot.isShared,
-                            isBulkShareProtected:
-                                prev?.isBulkShareProtected ??
-                                annot.isBulkShareProtected,
-                        }
-                    })
-                },
+                $set: nextAnnotations,
             },
             editForms: {
                 $apply: (editForms: EditForms) => {
@@ -289,35 +290,56 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    setDisplayMode: EventHandler<'setDisplayMode'> = async ({
-        event,
-        previousState,
-    }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            displayMode: { $set: event.mode },
-        }
-
-        this.emitMutation(mutation)
-
-        if (
-            event.mode === 'shared-notes' &&
-            previousState.followedListLoadState === 'pristine'
-        ) {
-            await this.processUIEvent('loadFollowedLists', {
-                previousState: this.withMutation(previousState, mutation),
-                event: null,
-            })
-        }
+    AdjustSidebarWidth = (changes) => {
+        let SidebarWidth = changes[SIDEBAR_WIDTH_STORAGE_KEY].newValue.replace(
+            'px',
+            '',
+        )
+        SidebarWidth = parseFloat(SidebarWidth)
+        let windowWidth = window.innerWidth
+        let width = (windowWidth - SidebarWidth - 40).toString()
+        width = width + 'px'
+        document.body.style.width = width
     }
 
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
     }
 
+    hide: EventHandler<'hide'> = () => {
+        this.emitMutation({
+            showState: { $set: 'hidden' },
+            activeAnnotationUrl: { $set: null },
+        })
+        document.body.style.width = window.innerWidth.toString() + 'px'
+    }
+
     lock: EventHandler<'lock'> = () =>
         this.emitMutation({ isLocked: { $set: true } })
     unlock: EventHandler<'unlock'> = () =>
         this.emitMutation({ isLocked: { $set: false } })
+
+    lockWidth: EventHandler<'lockWidth'> = () => {
+        getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
+            let SidebarInitialAsInteger = parseFloat(
+                width.toString().replace('px', ''),
+            )
+            let WindowInitialWidth =
+                (window.innerWidth - SidebarInitialAsInteger - 40).toString() +
+                'px'
+            document.body.style.width = WindowInitialWidth
+        })
+
+        browser.storage.onChanged.addListener(this.AdjustSidebarWidth)
+
+        this.emitMutation({ isWidthLocked: { $set: true } })
+    }
+
+    unlockWidth: EventHandler<'unlockWidth'> = () => {
+        document.body.style.width = window.innerWidth.toString() + 'px'
+        browser.storage.onChanged.removeListener(this.AdjustSidebarWidth)
+        this.emitMutation({ isWidthLocked: { $set: false } })
+    }
 
     copyNoteLink: EventHandler<'copyNoteLink'> = async ({
         event: { link },
@@ -375,14 +397,16 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        this.emitMutation({
+        const mutation: UIMutation<SidebarContainerState> = {
             followedLists: { $set: initNormalizedState() },
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
-            displayMode: { $set: 'private-notes' },
             users: { $set: {} },
-        })
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
 
         await annotationsCache.load(event.pageUrl)
 
@@ -391,6 +415,10 @@ export class SidebarContainerLogic extends UILogic<
                 highlights: annotationsCache.highlights,
             })
         }
+        await this.processUIEvent('loadFollowedLists', {
+            previousState: nextState,
+            event: null,
+        })
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
@@ -472,13 +500,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             showAllNotesCopyPaster: { $set: false },
             activeCopyPasterAnnotationId: { $set: undefined },
-        })
-    }
-
-    hide: EventHandler<'hide'> = () => {
-        this.emitMutation({
-            showState: { $set: 'hidden' },
-            activeAnnotationUrl: { $set: null },
         })
     }
 
@@ -622,7 +643,7 @@ export class SidebarContainerLogic extends UILogic<
     updateListsForPageResult: EventHandler<
         'updateListsForPageResult'
     > = async ({ event }) => {
-        return this.options.customLists.updateListForPage({
+        return this.options.customLists.updateListForPageInCurrentTab({
             added: event.added,
             deleted: event.deleted,
             url: event.url,
@@ -873,6 +894,82 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    expandMyNotes: EventHandler<'expandMyNotes'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            isExpanded: wasExpanded,
+            loadState,
+            annotations,
+        } = previousState
+
+        const annotIds = annotations.map((annot) => annot.url as string)
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isExpanded: { $set: !wasExpanded },
+        }
+        this.emitMutation(mutation)
+
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: annotIds,
+            })
+            return
+        }
+
+        this.options.events?.emit('renderHighlights', {
+            highlights: annotations
+                .filter((annotation) => annotation?.selector != null)
+                .map((annotation) => ({
+                    url: annotation.url,
+                    selector: annotation.selector,
+                })),
+        })
+    }
+
+    expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
+        event,
+        previousState,
+    }) => {
+        const wasExpanded = previousState.isExpandedSharedSpaces
+        const expandedSharedAnnotationReferences = event.listIds
+            .filter((id) => previousState.followedLists.byId[id].isExpanded)
+            .map(
+                (id) =>
+                    previousState.followedLists.byId[id]
+                        .sharedAnnotationReferences,
+            )
+        const sharedAnnotIds = expandedSharedAnnotationReferences
+            .flat()
+            .map((ref) => ref.id as string)
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isExpandedSharedSpaces: { $set: !wasExpanded },
+        }
+        this.emitMutation(mutation)
+
+        // If collapsing, signal to de-render highlights
+        if (wasExpanded) {
+            this.options.events?.emit('removeAnnotationHighlights', {
+                urls: sharedAnnotIds,
+            })
+            return
+        }
+        this.options.events?.emit('renderHighlights', {
+            highlights: sharedAnnotIds
+                .filter(
+                    (id) =>
+                        previousState.followedAnnotations[id]?.selector != null,
+                )
+                .map((id) => ({
+                    url: id,
+                    selector: previousState.followedAnnotations[id].selector,
+                })),
+        })
+    }
+
     expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
         event,
         previousState,
@@ -916,7 +1013,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.options.events?.emit('renderHighlights', {
-            displayMode: 'shared-notes',
             highlights: followedAnnotIds
                 .filter(
                     (id) =>
@@ -958,7 +1054,6 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 this.options.events?.emit('renderHighlights', {
-                    displayMode: 'shared-notes',
                     highlights: sharedAnnotations
                         .filter((annot) => annot.selector != null)
                         .map((annot) => ({

@@ -4,17 +4,20 @@ import debounce from 'lodash/debounce'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
+    MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
 import { updatePickerValues, stateToSearchParams } from './util'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-storage/lib/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType, NoteShareInfo } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
@@ -31,6 +34,8 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import { isDuringInstall } from 'src/overview/onboarding/utils'
+import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -95,7 +100,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
+        let mode: State['mode'] = 'search'
+        if (isDuringInstall(this.options.location)) {
+            mode = 'onboarding'
+        } else if (
+            this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
+        ) {
+            mode = 'locate-pdf'
+            this.options.pdfViewerBG.openPdfViewerForNextPdf()
+        }
+
         return {
+            mode,
             loadState: 'pristine',
             isCloudEnabled: true,
             currentUser: null,
@@ -257,13 +273,27 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
-
-        this.emitMutation({
-            listsSidebar: {
-                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-            },
-        })
+        const hasActivityStored = await getLocalStorage(
+            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+        )
+        if (hasActivityStored === true) {
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: true },
+                },
+            })
+        } else {
+            const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
+            await setLocalStorage(
+                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+                activityStatus === 'has-unseen',
+            )
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+                },
+            })
+        }
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
@@ -397,7 +427,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
-        this.emitMutation(mutation)
+        this.emitMutation({ ...mutation, mode: { $set: 'search' } })
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -412,8 +442,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        let nextState: State
-
         const skipMutation: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
@@ -467,39 +495,38 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                const mutation: UIMutation<State> = event.paginate
-                    ? {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: {
-                                  $apply: (prev) =>
-                                      utils.mergeSearchResults(prev, results),
-                              },
-                              pageData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, pageData),
-                              },
-                              noteData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, noteData),
-                              },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-                    : {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: { $set: results },
-                              pageData: { $set: pageData },
-                              noteData: { $set: noteData },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-
-                nextState = this.withMutation(previousState, mutation)
-                this.emitMutation(mutation)
+                this.emitMutation({
+                    searchFilters: skipMutation,
+                    searchResults: {
+                        areResultsExhausted: {
+                            $set: resultsExhausted,
+                        },
+                        noResultsType: { $set: noResultsType },
+                        ...(event.paginate
+                            ? {
+                                  results: {
+                                      $apply: (prev) =>
+                                          utils.mergeSearchResults(
+                                              prev,
+                                              results,
+                                          ),
+                                  },
+                                  pageData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, pageData),
+                                  },
+                                  noteData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, noteData),
+                                  },
+                              }
+                            : {
+                                  results: { $set: results },
+                                  pageData: { $set: pageData },
+                                  noteData: { $set: noteData },
+                              }),
+                    },
+                })
             },
         )
     }
@@ -694,6 +721,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: event.fullPageUrl,
             deleted: event.deleted,
             added: event.added,
+            skipPageIndexing: true,
         })
     }
 
@@ -2191,6 +2219,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.options.listsBG.insertPageToList({
             id: event.listId,
             url: fullPageUrl,
+            skipPageIndexing: true,
         })
 
         this.emitMutation({
@@ -2434,6 +2463,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })

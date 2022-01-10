@@ -310,12 +310,11 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                         }
                     />
                 )}
-                {!this.state.isCloudSyncEnabled ? (
-                    this.renderOldBackupPanes()
-                ) : (
-                    this.renderOldBackupPanes()
-                    //<DumpPane onDumpClick={this.props.onDumpRequested} />
-                )}
+                {!this.state.isCloudSyncEnabled
+                    ? this.renderOldBackupPanes()
+                    : this.renderOldBackupPanes()
+                      //<DumpPane onDumpClick={this.props.onDumpRequested} />
+                }
                 {this.state.isDev && (
                     <div className={settingsStyle.section}>
                         <div className={settingsStyle.sectionTitle}>

@@ -1,4 +1,6 @@
-<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.5 1L1 5.5L5.5 10" stroke="#444" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M9.5 1L5 5.5L9.5 10" stroke="#444" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<svg width="68" height="64" viewBox="0 0 68 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="46.9146" height="8" rx="4" transform="matrix(0.733203 -0.68001 0.682064 0.731293 29.1371 31.3914)" fill="#3A2F45"/>
+<rect width="47.3331" height="8" rx="4" transform="matrix(0.7081 0.706112 -0.7081 0.706112 34.6372 26.1534)" fill="#3A2F45"/>
+<rect width="46.9146" height="8" rx="4" transform="matrix(0.733203 -0.68001 0.682064 0.731293 -0.862915 31.3914)" fill="#3A2F45"/>
+<rect width="47.3331" height="8" rx="4" transform="matrix(0.7081 0.706112 -0.7081 0.706112 4.63721 26.1534)" fill="#3A2F45"/>
 </svg>

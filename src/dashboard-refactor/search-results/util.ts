@@ -1,12 +1,12 @@
 import moment from 'moment'
 
-import {
+import type {
     StandardSearchResponse,
     AnnotationsSearchResponse,
     AnnotsByPageUrl,
     AnnotPage,
 } from 'src/search/background/types'
-import {
+import type {
     PageData,
     PageResult,
     PageResultsByDay,
@@ -18,10 +18,11 @@ import {
     NestedResults,
     NotesType,
 } from './types'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import { initNormalizedState, mergeNormalizedStates } from 'src/common-ui/utils'
+import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -117,16 +118,22 @@ export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     editNoteForm: getInitialFormState(inputValue),
 })
 
-const pageResultToPageData = (pageResult: AnnotPage): PageData => ({
-    tags: pageResult.tags,
-    lists: pageResult.lists,
-    fullUrl: pageResult.fullUrl,
-    fullTitle: pageResult.title,
-    normalizedUrl: pageResult.url,
-    favIconURI: pageResult.favIcon,
-    displayTime: pageResult.displayTime,
-    hasNotes: pageResult.annotsCount > 0,
-})
+const pageResultToPageData = (pageResult: AnnotPage): PageData => {
+    const isPdf = isPagePdf(pageResult)
+    return {
+        tags: pageResult.tags,
+        lists: pageResult.lists,
+        fullUrl: pageResult.fullUrl,
+        fullTitle: pageResult.title,
+        normalizedUrl: pageResult.url,
+        favIconURI: pageResult.favIcon,
+        displayTime: pageResult.displayTime,
+        hasNotes: pageResult.annotsCount > 0,
+        type: isPdf ? 'pdf' : 'page',
+        fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
+        pdfUrl: isPdf ? pageResult.pdfUrl! : undefined,
+    }
+}
 
 const annotationToNoteData = (
     annotation: Annotation,

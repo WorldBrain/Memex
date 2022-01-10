@@ -18,7 +18,7 @@ import { PAGE_1 } from 'src/annotations/background/index.test.data'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -54,6 +54,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 steps: [
                     {
                         execute: async ({ setup }) => {
+                            // TODO: properly get this working in test env (currently waits forever)
+                            setup.backgroundModules.pages.waitForContentIdentifier = async (
+                                a,
+                            ) => a as any
+
                             listId = await customLists(
                                 setup,
                             ).remoteFunctions.createCustomList({
@@ -142,6 +147,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 steps: [
                     {
                         execute: async ({ setup }) => {
+                            // TODO: properly get this working in test env (currently waits forever)
+                            setup.backgroundModules.pages.waitForContentIdentifier = async (
+                                a,
+                            ) => a as any
+
                             listId = await customLists(
                                 setup,
                             ).remoteFunctions.createCustomList({

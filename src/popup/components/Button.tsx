@@ -8,6 +8,7 @@ export interface Props extends HTMLProps<HTMLButtonElement> {
     btnClass?: string
     itemClass?: string
     extraClass?: string
+    disabled?: boolean
 }
 
 class Button extends React.PureComponent<Props> {
@@ -20,6 +21,9 @@ class Button extends React.PureComponent<Props> {
                     styles.item,
                     styles.itemBtn,
                     this.props.itemClass,
+                    {
+                        [styles.disabled]: this.props.disabled,
+                    },
                 )}
                 {...btnProps}
             >

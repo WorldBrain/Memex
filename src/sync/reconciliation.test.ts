@@ -2,7 +2,7 @@ import { createMemexReconciliationProcessor } from '@worldbrain/memex-common/lib
 import {
     SPECIAL_LIST_IDS,
     SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { OperationBatch } from '@worldbrain/storex'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 

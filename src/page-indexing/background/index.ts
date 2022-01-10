@@ -1,6 +1,23 @@
+import createResolvable, { Resolvable } from '@josephg/resolvable'
 import StorageManager from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl, isFileUrl } from '@worldbrain/memex-url-utils'
 import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+import {
+    ContentFingerprint,
+    ContentLocatorFormat,
+    ContentLocatorType,
+    LocationSchemeType,
+    FingerprintSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import {
+    ContentIdentifier,
+    ContentLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/types'
+import {
+    fingerprintInArray,
+    fingerprintsEqual,
+    isPagePdf,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
 import {
@@ -19,15 +36,42 @@ import analysePage, {
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
-import { StoredContentType } from './types'
+import {
+    StoredContentType,
+    PageIndexingInterface,
+    InitContentIdentifierParams,
+    InitContentIdentifierReturns,
+    WaitForContentIdentifierReturns,
+} from './types'
+import {
+    remoteFunctionWithExtraArgs,
+    registerRemoteFunctions,
+} from '../../util/webextensionRPC'
 
+interface ContentInfo {
+    locators: Array<ContentLocator>
+    primaryIdentifier: ContentIdentifier // this is the one we store in the DB
+    aliasIdentifiers: ContentIdentifier[] // these are the ones of the other URLs pointing to the primaryNormalizedUrl
+}
 export class PageIndexingBackground {
     storage: PageStorage
     persistentStorage: PersistentPageStorage
     fetch?: typeof fetch
+    remoteFunctions: PageIndexingInterface<'provider'>
 
     // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
     indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
+
+    _identifiersForTabPages: {
+        [tabId: number]: {
+            [fullPageUrl: string]: Resolvable<ContentIdentifier>
+        }
+    } = {}
+
+    contentInfo: {
+        // will contain multiple entries for the same content info because of multiple normalized URLs pointing to one
+        [normalizedUrl: string]: ContentInfo
+    } = {}
 
     constructor(
         public options: {
@@ -45,11 +89,172 @@ export class PageIndexingBackground {
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,
         })
+        this.remoteFunctions = {
+            initContentIdentifier: remoteFunctionWithExtraArgs(
+                this.initContentIdentifierRemote,
+            ),
+            waitForContentIdentifier: remoteFunctionWithExtraArgs(
+                this.waitForContentIdentifierRemote,
+            ),
+        }
+    }
+
+    setupRemoteFunctions() {
+        registerRemoteFunctions(this.remoteFunctions)
+    }
+
+    initContentIdentifierRemote: PageIndexingInterface<
+        'provider'
+    >['initContentIdentifier']['function'] = async (info, params) => {
+        return this.initContentIdentifier({
+            ...params,
+            tabId: params.tabId ?? info.tab?.id,
+        })
+    }
+
+    waitForContentIdentifierRemote: PageIndexingInterface<
+        'provider'
+    >['waitForContentIdentifier']['function'] = async (info, params) => {
+        return this.waitForContentIdentifier({
+            ...params,
+            tabId: params.tabId ?? info.tab.id,
+        })
+    }
+
+    async initContentIdentifier(
+        params: InitContentIdentifierParams & { tabId?: number },
+    ): Promise<InitContentIdentifierReturns> {
+        const resolvable =
+            params.tabId &&
+            this._resolvableForIdentifierTabPage({
+                tabId: params.tabId,
+                fullUrl: params.locator.originalLocation,
+            })
+
+        const regularNormalizedUrl = normalizeUrl(
+            params.locator.originalLocation,
+        )
+        const regularIdentifier: ContentIdentifier = {
+            normalizedUrl: regularNormalizedUrl,
+            fullUrl: params.locator.originalLocation,
+        }
+        if (!params.fingerprints.length) {
+            resolvable?.resolve?.(regularIdentifier)
+            return regularIdentifier
+        }
+        let contentInfo = this.contentInfo[regularNormalizedUrl]
+        let stored: {
+            identifier: ContentIdentifier
+            locators: ContentLocator[]
+        }
+        if (!contentInfo) {
+            stored = await this.storage.getContentIdentifier({
+                regularNormalizedUrl,
+                fingerprints: params.fingerprints,
+            })
+            if (!stored) {
+                const generatedNormalizedUrl = `memex.cloud/ct/${params.fingerprints[0].fingerprint}.${params.locator.format}`
+                const generatedIdentifier: ContentIdentifier = {
+                    normalizedUrl: generatedNormalizedUrl,
+                    fullUrl: `https://${generatedNormalizedUrl}`,
+                }
+                contentInfo = {
+                    primaryIdentifier: generatedIdentifier,
+                    locators: [],
+                    aliasIdentifiers: [regularIdentifier],
+                }
+            } else {
+                contentInfo = this.contentInfo[
+                    stored.identifier.normalizedUrl
+                ] ?? {
+                    primaryIdentifier: stored.identifier,
+                    locators: stored.locators,
+                    aliasIdentifiers: stored.locators.map((locator) => ({
+                        normalizedUrl: normalizeUrl(locator.originalLocation),
+                        fullUrl: locator.originalLocation,
+                    })),
+                }
+            }
+        }
+        this.contentInfo[regularNormalizedUrl] = contentInfo
+        this.contentInfo[
+            contentInfo.primaryIdentifier.normalizedUrl
+        ] = contentInfo
+        const { primaryIdentifier } = contentInfo
+
+        if (
+            !contentInfo.aliasIdentifiers.find(
+                (identifier) =>
+                    identifier.normalizedUrl === regularNormalizedUrl,
+            )
+        ) {
+            contentInfo.aliasIdentifiers.push(regularIdentifier)
+        }
+
+        let hasNewLocators = false
+        for (const fingerprint of params.fingerprints) {
+            if (
+                contentInfo.locators.find(
+                    (locator) =>
+                        fingerprintsEqual(locator, fingerprint) &&
+                        locator.originalLocation ===
+                            params.locator.originalLocation,
+                )
+            ) {
+                continue
+            }
+            hasNewLocators = true
+
+            const isFile = isFileUrl(params.locator.originalLocation)
+            const newLocator: ContentLocator = {
+                ...params.locator,
+                originalLocation: params.locator.originalLocation,
+                location: normalizeUrl(params.locator.originalLocation),
+                locationType: isFile
+                    ? ContentLocatorType.Local
+                    : ContentLocatorType.Remote,
+                locationScheme: isFile
+                    ? LocationSchemeType.FilesystemPathV1
+                    : LocationSchemeType.NormalizedUrlV1,
+                fingerprint: fingerprint.fingerprint,
+                format: params.locator.format,
+                fingerprintScheme: fingerprint.fingerprintScheme,
+                normalizedUrl: primaryIdentifier.normalizedUrl,
+                primary: true,
+                valid: true,
+                version: 0,
+                lastVisited: this.options.getNow(),
+            }
+            contentInfo.locators.push(newLocator)
+        }
+        if (stored && hasNewLocators) {
+            await this.storeLocators(primaryIdentifier)
+        }
+
+        resolvable?.resolve?.(primaryIdentifier)
+        return primaryIdentifier
+    }
+
+    waitForContentIdentifier = (params: {
+        tabId: number
+        fullUrl: string
+    }): Promise<WaitForContentIdentifierReturns> =>
+        this._resolvableForIdentifierTabPage(params)
+
+    getContentFingerprints(
+        contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,
+    ) {
+        return this.contentInfo[contentIdentifier.normalizedUrl]?.locators.map(
+            (locator): ContentFingerprint => ({
+                fingerprintScheme: locator.fingerprintScheme,
+                fingerprint: locator.fingerprint,
+            }),
+        )
     }
 
     /**
      * Adds/updates a page + associated visit (pages never exist without either an assoc.
-     *  visit or bookmark in current model).
+     * visit or bookmark in current model).
      */
     async addPage({
         visits = [],
@@ -173,20 +378,47 @@ export class PageIndexingBackground {
         const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
 
-        const existingPage = await this.storage.getPage(pageData.url)
-        if (existingPage) {
-            return this.storage.updatePage(pageData, existingPage)
+        const contentIdentifier = this.getContentIdentifier(pageData.url)
+        if (contentIdentifier) {
+            pageData.fullUrl = contentIdentifier.fullUrl
+            pageData.url = contentIdentifier.normalizedUrl
         }
+        const normalizedUrl = pageData.url
 
-        await this.storage.createPage(pageData)
+        const existingPage = await this.storage.getPage(normalizedUrl)
+        if (existingPage) {
+            await this.storage.updatePage(pageData, existingPage)
+        } else {
+            await this.storage.createPage(pageData)
+        }
+        await this.storeLocators(contentIdentifier)
 
-        if (opts.addInboxEntryOnCreate) {
+        if (opts.addInboxEntryOnCreate && !existingPage) {
             await this.options.createInboxEntry(pageData.fullUrl)
         }
 
         if (favIconURI != null) {
             await this.addFavIconIfNeeded(pageData.url, favIconURI)
         }
+    }
+
+    getContentIdentifier(normalizedUrl: string) {
+        return this.contentInfo[normalizedUrl]?.primaryIdentifier
+    }
+
+    async storeLocators(identifier: ContentIdentifier) {
+        if (!identifier) {
+            return // there were no fingerprints, so there's no need to use locators
+        }
+
+        const contentInfo = this.contentInfo[identifier.normalizedUrl]
+        if (!contentInfo) {
+            return
+        }
+        await this.storage.storeLocators({
+            identifier: contentInfo.primaryIdentifier,
+            locators: contentInfo.locators,
+        })
     }
 
     private async processPageDataFromTab(
@@ -277,6 +509,20 @@ export class PageIndexingBackground {
             props.fullUrl,
         )
         const { content: pageData } = processed
+        if (processed.pdfFingerprints) {
+            await this.initContentIdentifier({
+                locator: {
+                    format: ContentLocatorFormat.PDF,
+                    originalLocation: props.fullUrl,
+                },
+                fingerprints: processed.pdfFingerprints.map(
+                    (fingerprint): ContentFingerprint => ({
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        fingerprint,
+                    }),
+                ),
+            })
+        }
         await this.storeDocContent(normalizeUrl(pageData.url), processed)
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
@@ -291,23 +537,10 @@ export class PageIndexingBackground {
         props: PageCreationProps,
         opts: PageCreationOpts = {},
     ) => {
-        const foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
-            props.fullUrl,
-        )
-        if (foundTabId) {
-            props.tabId = foundTabId
-        } else {
-            delete props.tabId
-        }
-
-        const pageData = props.tabId
-            ? await this.processPageDataFromTab(props)
-            : await this.processPageDataFromUrl(props)
-
-        if (pageData == null) {
+        const pageData = await this._getPageData(props)
+        if (!pageData) {
             return
         }
-
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
@@ -320,6 +553,44 @@ export class PageIndexingBackground {
                 fullPageUrl: pageData.fullUrl,
             })
         }
+    }
+
+    async _findTabId(fullUrl: string) {
+        let foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
+            fullUrl,
+        )
+        if (foundTabId) {
+            return foundTabId
+        }
+
+        const contentInfo = this.contentInfo[normalizeUrl(fullUrl)]
+        for (const locator of contentInfo?.locators ?? []) {
+            foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
+                locator.originalLocation,
+            )
+            if (foundTabId) {
+                return foundTabId
+            }
+        }
+        return null
+    }
+
+    private async _getPageData(props: PageCreationProps) {
+        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
+        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
+        //     so we don't have to do this dance
+        if (!isPagePdf({ url: props.fullUrl })) {
+            const foundTabId = await this._findTabId(props.fullUrl)
+            if (foundTabId) {
+                props.tabId = foundTabId
+            } else {
+                delete props.tabId
+            }
+        }
+
+        return props.tabId
+            ? this.processPageDataFromTab(props)
+            : this.processPageDataFromUrl(props)
     }
 
     async indexTestPage(props: PageCreationProps) {
@@ -359,6 +630,26 @@ export class PageIndexingBackground {
 
     handleTabClose(event: { tabId: number }) {
         delete this.indexedTabPages[event.tabId]
+        delete this._resolvableForIdentifierTabPage[event.tabId]
+    }
+
+    findLocatorsByNormalizedUrl(normalizedUrl: string) {
+        return this.storage.findLocatorsByNormalizedUrl(normalizedUrl)
+    }
+
+    _resolvableForIdentifierTabPage(params: {
+        tabId: number
+        fullUrl: string
+    }) {
+        const resolvablesForTab =
+            this._identifiersForTabPages[params.tabId] ?? {}
+        this._identifiersForTabPages[params.tabId] = resolvablesForTab
+
+        const resolvable =
+            resolvablesForTab[params.fullUrl] ?? createResolvable()
+        resolvablesForTab[params.fullUrl] = resolvable
+
+        return resolvable
     }
 
     _getTime(time?: number | '$now') {

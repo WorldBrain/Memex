@@ -6,17 +6,17 @@ import { Props } from './result-item'
 import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
-const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
-const tagFull = browser.extension.getURL('/img/tag_full.svg')
-const listAdd = browser.extension.getURL('/img/collections_add.svg')
-const listFull = browser.extension.getURL('/img/collections_full.svg')
-const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
-const heartFull = browser.extension.getURL('/img/star_full.svg')
-const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
-const commentFull = browser.extension.getURL('/img/comment_full.svg')
-const deleteItem = browser.extension.getURL('/img/trash.svg')
-const copy = browser.extension.getURL('/img/copy.svg')
-const readerIcon = browser.extension.getURL('/img/reader.svg')
+const tagEmpty = browser.runtime.getURL('/img/tag_empty.svg')
+const tagFull = browser.runtime.getURL('/img/tag_full.svg')
+const listAdd = browser.runtime.getURL('/img/collections_add.svg')
+const listFull = browser.runtime.getURL('/img/collections_full.svg')
+const heartEmpty = browser.runtime.getURL('/img/star_empty.svg')
+const heartFull = browser.runtime.getURL('/img/star_full.svg')
+const commentEmpty = browser.runtime.getURL('/img/comment_empty.svg')
+const commentFull = browser.runtime.getURL('/img/comment_full.svg')
+const deleteItem = browser.runtime.getURL('/img/trash.svg')
+const copy = browser.runtime.getURL('/img/copy.svg')
+const readerIcon = browser.runtime.getURL('/img/reader.svg')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
@@ -85,7 +85,7 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                             listLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onListBtnClick}
-                        tooltipText="Edit Collections"
+                        tooltipText="Edit Spaces"
                         refHandler={this.props.setListButtonRef}
                     />
                     <ResultItemActionBtn

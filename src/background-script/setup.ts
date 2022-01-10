@@ -100,6 +100,7 @@ import type { ReadwiseSettings } from 'src/readwise-integration/background/types
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { runCloudIntegrationSideEffects } from 'src/personal-cloud/background/integration-side-effects'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -297,15 +298,6 @@ export function createBackgroundModules(options: {
         services: options.services,
     })
 
-    const directLinking = new DirectLinkingBackground({
-        browserAPIs: options.browserAPIs,
-        storageManager,
-        socialBg: social,
-        pages,
-        analytics,
-        getServerStorage,
-    })
-
     const auth =
         options.auth ||
         new AuthBackground({
@@ -370,13 +362,22 @@ export function createBackgroundModules(options: {
         activityStreams,
         storageManager,
         customLists: customLists.storage,
-        annotationStorage: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
         services: options.services,
         captureException: options.captureException,
         generateServerId,
+    })
+
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        pages,
+        analytics,
+        getServerStorage,
+        contentSharingBG: contentSharing,
     })
 
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
@@ -484,6 +485,7 @@ export function createBackgroundModules(options: {
                     callFirebaseFunction,
                 ),
                 getServerStorageManager,
+                getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
@@ -538,7 +540,7 @@ export function createBackgroundModules(options: {
                     : options.storageManager
 
             // WARNING: Keep in mind this skips all storage middleware
-            await updateOrCreate({
+            const { opPerformed } = await updateOrCreate({
                 ...params,
                 storageManager: incomingStorageManager,
                 executeOperation: (...args: any[]) => {
@@ -575,7 +577,12 @@ export function createBackgroundModules(options: {
                     { text: processed },
                 )
             }
+
+            return { opPerformed }
         },
+        runIntegrationSideEffects: runCloudIntegrationSideEffects({
+            customLists,
+        }),
         getServerStorageManager,
     })
     options.services.contentSharing.preKeyGeneration = async (params) => {
@@ -742,6 +749,7 @@ export async function setupBackgroundModules(
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
     backgroundModules.contentConversations.setupRemoteFunctions()
+    backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()

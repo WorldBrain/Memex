@@ -1,7 +1,7 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import * as DATA from './index.test.data'
-import { PageUrlsByDay } from './types'
+import { PageUrlsByDay, AnnotationsSearchResponse } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { Annotation } from 'src/annotations/types'
@@ -493,6 +493,66 @@ describe('Annotations search', () => {
                             isShared: false,
                         }),
                     ],
+                }),
+            ])
+        })
+
+        test('should return share data with annots search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resA = (await searchBg.searchAnnotations(
+                {},
+            )) as AnnotationsSearchResponse
+
+            const foundAnnotationsA: Annotation[] = []
+            const foundAnnotationsB: Annotation[] = []
+
+            for (const annotsByPageUrl of Object.values(resA.annotsByDay)) {
+                const annots = Object.values(annotsByPageUrl) as Annotation[][]
+                foundAnnotationsA.push(...annots.flat())
+            }
+
+            expect(foundAnnotationsA).toEqual([
+                expect.objectContaining({
+                    url: DATA.hybrid.object.url,
+                    isBulkShareProtected: true,
+                    isShared: false,
+                }),
+                expect.objectContaining({
+                    url: DATA.annotation.object.url,
+                    isBulkShareProtected: false,
+                    isShared: true,
+                }),
+                expect.objectContaining({
+                    url: DATA.comment.object.url,
+                    isBulkShareProtected: false,
+                    isShared: false,
+                }),
+                expect.objectContaining({
+                    url: DATA.highlight.object.url,
+                    isBulkShareProtected: true,
+                    isShared: true,
+                }),
+            ])
+
+            const resB = await searchBg.searchAnnotations({
+                query: 'comment',
+            })
+
+            for (const { annotations } of Object.values(resB.docs)) {
+                foundAnnotationsB.push(...annotations)
+            }
+
+            expect(foundAnnotationsB).toEqual([
+                expect.objectContaining({
+                    url: DATA.annotation.object.url,
+                    isBulkShareProtected: false,
+                    isShared: true,
+                }),
+                expect.objectContaining({
+                    url: DATA.comment.object.url,
+                    isBulkShareProtected: false,
+                    isShared: false,
                 }),
             ])
         })

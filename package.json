@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.0.11",
+    "version": "3.1.0",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -20,8 +20,9 @@
         "publish-ff": "node publish --ff",
         "mocha": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register",
         "test": "jest --verbose --silent --config=.jest-config.js",
-        "test-nosync": "SKIP_SYNC_TESTS=true jest --verbose --silent --config=.jest-config.js",
-        "test:watch": "jest --watch --config=.jest-config.js",
+        "test-nosync": "SKIP_SYNC_TESTS=true node --async-stack-traces node_modules/.bin/jest --verbose --silent --config=.jest-config.js",
+        "test:watch": "node --async-stack-traces node_modules/.bin/jest --watch --config=.jest-config.js",
+        "test:watch:debugger": "node --inspect --async-stack-traces node_modules/.bin/jest --watch --no-cache --runInBand --config=.jest-config.js",
         "test-nosync:watch": "SKIP_SYNC_TESTS=true jest --watch --config=.jest-config.js",
         "test:coverage": "jest --silent --coverage --config=.jest-config.js",
         "test:mocha": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register 'src/backup-restore/background/**/*.test.ts' 'src/util/webextensionRPC.test.ts' 'src/util/webextensionRPC.test.ts' 'src/sync/**/*.test.ts' 'src/tests/**/*.test.ts'",
@@ -120,6 +121,7 @@
         "react-markdown": "^5.0.0",
         "react-onclickoutside": "^6.7.1",
         "react-redux": "^5.0.7",
+        "react-rnd": "^10.3.5",
         "react-router": "^3.2.1",
         "react-shadow-dom-retarget-events": "^1.0.8",
         "react-string-replace": "^0.4.4",

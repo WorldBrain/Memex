@@ -1,13 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { getKeyName } from 'src/util/os-specific-key-names'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import { getShareButtonData } from '../sharing-utils'
 import Mousetrap from 'mousetrap'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface Props {
     isShared?: boolean
@@ -27,9 +28,19 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     State
 > {
     state: State = { isPrivacyLevelShown: false }
+    static MOD_KEY = getKeyName({ key: 'mod' })
 
     componentDidMount() {
         Mousetrap.bind('mod+shift+enter', () => this.props.onSave(true, false))
+        {
+            this.props.isShared
+                ? Mousetrap.bind('mod+enter', () =>
+                      this.props.onSave(true, false),
+                  )
+                : Mousetrap.bind('mod+enter', () =>
+                      this.props.onSave(false, false),
+                  )
+        }
         Mousetrap.bind('mod+enter', () => this.props.onSave(false, false))
         Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
         Mousetrap.bind('alt+enter', () => this.props.onSave(false, true))
@@ -53,58 +64,64 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
     render() {
         return (
-            <SaveBtn>
-                <SaveBtnText
-                    onClick={() =>
-                        this.props.onSave(
-                            !!this.props.isShared,
-                            !!this.props.isProtected,
-                        )
-                    }
-                >
-                    <Icon filePath={this.saveIcon} height="14px" /> Save
-                </SaveBtnText>
-                <SaveBtnArrow horizontal="1px">
-                    <DropdownMenuBtn
-                        btnChildren={<Icon icon="triangle" height="8px" />}
-                        isOpen={this.state.isPrivacyLevelShown}
-                        toggleOpen={() =>
-                            this.setState((state) => ({
-                                isPrivacyLevelShown: !state.isPrivacyLevelShown,
-                            }))
-                        }
-                        menuTitle={'Set & save privacy for this note'}
-                        width={'330px'}
+            <>
+                <SaveBtn>
+                    <ButtonTooltip
+                        position="bottom"
+                        tooltipText={`${AnnotationSaveBtn.MOD_KEY} + Enter`}
                     >
-                        <SharePrivacyOption
-                            hasProtectedOption
-                            icon="shared"
-                            title="Shared"
-                            shortcut={`shift+${getKeyName({
-                                key: 'mod',
-                            })}+enter`}
-                            description="Added to shared collections this page is in"
-                            onClick={this.saveWithShareIntent(true)}
-                            isSelected={this.props.isShared}
-                        />
-                        <SharePrivacyOption
-                            hasProtectedOption
-                            icon="person"
-                            title="Private"
-                            shortcut={`${getKeyName({ key: 'mod' })}+enter`}
-                            description="Private to you, until shared (in bulk)"
-                            onClick={this.saveWithShareIntent(false)}
-                            isSelected={!this.props.isShared}
-                        />
-                    </DropdownMenuBtn>
-                </SaveBtnArrow>
-            </SaveBtn>
+                        <SaveBtnText
+                            onClick={() =>
+                                this.props.onSave(
+                                    !!this.props.isShared,
+                                    !!this.props.isProtected,
+                                )
+                            }
+                        >
+                            <Icon filePath={this.saveIcon} height="15px" /> Save
+                        </SaveBtnText>
+                    </ButtonTooltip>
+                    <SaveBtnArrow horizontal="1px">
+                        <DropdownMenuBtn
+                            btnChildren={<Icon icon="triangle" height="12px" />}
+                            isOpen={this.state.isPrivacyLevelShown}
+                            toggleOpen={() =>
+                                this.setState((state) => ({
+                                    isPrivacyLevelShown: !state.isPrivacyLevelShown,
+                                }))
+                            }
+                            menuTitle={'Set & save privacy for this note'}
+                            width={'340px'}
+                        >
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="webLogo"
+                                title="Public"
+                                shortcut={`shift+${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
+                                description="Auto-added to Spaces this page is shared to"
+                                onClick={this.saveWithShareIntent(true)}
+                                isSelected={this.props.isShared}
+                            />
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="person"
+                                title="Private"
+                                shortcut={''}
+                                description="Private to you, until shared (in bulk)"
+                                onClick={this.saveWithShareIntent(false)}
+                                isSelected={!this.props.isShared}
+                            />
+                        </DropdownMenuBtn>
+                    </SaveBtnArrow>
+                </SaveBtn>
+            </>
         )
     }
 }
 
 const SaveBtn = styled.div`
-    display: flex;
     flex-direction: row;
     align-item: center;
     box-sizing: border-box;
@@ -112,12 +129,13 @@ const SaveBtn = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 0 3px 5px;
     margin-right: 5px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
     border 1px solid #f0f0f0;
+    display: grid;
+    grid-auto-flow: column;
 
     &:focus {
         background-color: grey;
@@ -132,14 +150,20 @@ const SaveBtnText = styled.span`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 55px;
     justify-content: space-between;
     display: flex;
+    padding: 3px 5px 3px 6px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 5px;
+    width: fit-content;
 `
 
 const SaveBtnArrow = styled(Margin)`
     width: 24px;
     border-radius: 3px;
+    z-index: 10;
+    margin: 3px 3px 3px 0px;
 
     &:hover {
         background-color: #e0e0e0;

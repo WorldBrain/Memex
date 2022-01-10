@@ -1,14 +1,22 @@
 import { browser } from 'webextension-polyfill-ts'
-import * as PDFJS from 'pdfjs-dist/build/pdf'
+import * as PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 import { PDF_RAW_TEXT_SIZE_LIMIT } from './constants'
+import type { MemexPDFMetadata } from './types'
+import { loadBlob } from 'src/imports/background/utils'
+import type { RawPdfPageContent } from 'src/page-analysis/types'
 
 // Run PDF.js to extract text from each page and read document metadata.
-async function extractContent(pdfData: ArrayBuffer) {
-    // Point PDF.js to its worker code, a static file in the extension.
-    PDFJS.GlobalWorkerOptions.workerSrc = browser.extension.getURL(
-        '/build/pdf.worker.min.js',
-    )
+async function extractContent(
+    pdfData: ArrayBuffer,
+    rawContent: RawPdfPageContent,
+) {
+    if (process.env.NODE_ENV !== 'test') {
+        // Point PDF.js to its worker code, a static file in the extension.
+        PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
+            '/build/pdf.worker.min.js',
+        )
+    }
 
     // Load PDF document into PDF.js
     // @ts-ignore
@@ -40,44 +48,45 @@ async function extractContent(pdfData: ArrayBuffer) {
     })
 
     const metadata = await pdf.getMetadata()
-    if (truncated) {
-        metadata.memexTruncated = true
-        metadata.memexTotalPages = pdf.numPages
-        metadata.memexIncludedPages = pageIndex // not off by one, but pageIndex is the index it discarded
+    const downloadInfo = await pdf.getDownloadInfo()
+
+    const pdfMetadata: MemexPDFMetadata = {
+        memexTotalPages: pdf.numPages,
+        memexIncludedPages: pageIndex,
+        memexDocumentBytes: downloadInfo?.length ?? null,
+        memexOutline: (await pdf.getOutline()) ?? null,
+        documentInformationDict: metadata?.info ?? null,
+        metadataMap: metadata?.metadata?.getAll() ?? null,
+        fingerprints: pdf.fingerprints ? pdf.fingerprints : [pdf.fingerprint],
     }
 
     return {
+        pdfMetadata,
         pdfPageTexts: pageTexts,
-        pdfMetadata: metadata,
         fullText: processedText,
         author: metadata.info.Author,
-        title: metadata.info.Title,
+        title: metadata.info.Title || rawContent.title,
         keywords: metadata.info.Keywords,
     }
 }
 
 // Given a PDF as blob or URL, return a promise of its text and metadata.
 export default async function extractPdfContent(
-    input: { url: string } | { blob: Blob },
+    rawContent: RawPdfPageContent,
     options?: { fetch?: typeof fetch },
 ) {
     // TODO: If the PDF is open in a Memex PDF Reader, we should be able to save the content from that tab
     // instead of re-fetching it.
+    const blob = await (options.fetch
+        ? (await options.fetch(rawContent.url)).blob()
+        : loadBlob<Blob>({
+              url: rawContent.url,
+              timeout: 5000,
+              responseType: 'blob',
+          }))
 
-    // Fetch document if only a URL is given.
-    let blob = 'blob' in input ? input.blob : undefined
-
-    if (!('blob' in input)) {
-        const doFetch = options?.fetch ?? fetch
-        const response = await doFetch(input.url)
-
-        if (response.status >= 400 && response.status < 600) {
-            return Promise.reject(
-                new Error(`Bad response from server: ${response.status}`),
-            )
-        }
-
-        blob = await response.blob()
+    if (!blob) {
+        throw new Error(`Could not load PDF from: ${rawContent.url}`)
     }
 
     const pdfData = await new Promise<ArrayBuffer>(function (resolve, reject) {
@@ -89,5 +98,5 @@ export default async function extractPdfContent(
         fileReader.readAsArrayBuffer(blob)
     })
 
-    return extractContent(pdfData)
+    return extractContent(pdfData, rawContent)
 }

@@ -25,6 +25,7 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { NoteShareInfo } from 'src/dashboard-refactor/search-results/types'
 
@@ -33,7 +34,7 @@ export interface SidebarContainerDependencies {
         topBarLeft?: JSX.Element
     }
     pageUrl?: string
-    getPageUrl: () => string
+    getPageUrl: () => MaybePromise<string>
     pageTitle?: string
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean
@@ -41,6 +42,7 @@ export interface SidebarContainerDependencies {
     onClickOutside?: React.MouseEventHandler
     annotationsCache: AnnotationsCacheInterface
     showAnnotationShareModal?: () => void
+    sidebarContext?: string
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
@@ -57,6 +59,7 @@ export interface SidebarContainerDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     contentScriptBackground: ContentScriptsInterface<'caller'>
+    hasAnnotations?: boolean
 }
 
 export interface EditForm {
@@ -73,7 +76,6 @@ export interface EditForms {
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 export type SearchType = 'notes' | 'page' | 'social'
 export type PageType = 'page' | 'all'
-export type SidebarDisplayMode = 'private-notes' | 'shared-notes'
 export interface SearchTypeChange {
     searchType?: 'notes' | 'page' | 'social'
     resultsSearchType?: 'notes' | 'page' | 'social'
@@ -118,8 +120,11 @@ export interface SidebarContainerState
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
-    displayMode: SidebarDisplayMode
     isLocked: boolean
+    isWidthLocked: boolean
+    isExpanded: boolean
+    isExpandedSharedSpaces: boolean
+    sidebarWidth: string
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -175,10 +180,13 @@ export type SidebarContainerEvents = UIEvent<
         hide: null
         lock: null
         unlock: null
+        lockWidth: null
+        unlockWidth: null
 
         sortAnnotations: { sortingFn: AnnotationsSorter }
 
-        setDisplayMode: { mode: SidebarDisplayMode }
+        expandMyNotes: null
+        expandSharedSpaces: { listIds: string[] }
 
         // Adding a new page comment
         addNewPageComment: { comment?: string; tags?: string[] }

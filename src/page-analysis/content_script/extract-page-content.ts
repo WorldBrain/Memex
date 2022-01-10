@@ -2,7 +2,7 @@ import { getMetadata } from 'page-metadata-parser'
 
 import PAGE_METADATA_RULES from '../page-metadata-rules'
 import { ExtractRawPageContent, RawPageContent } from '../types'
-import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 
 export const DEF_LANG = 'en'
 
@@ -19,11 +19,12 @@ const extractRawPageContent: ExtractRawPageContent = async (
     url = null,
 ) => {
     if (url === null) {
-        url = getUrl(location.href)
+        url = getUnderlyingResourceUrl(location.href)
     }
     if (isFullUrlPDF(url)) {
         const rawContent: RawPageContent = {
             type: 'pdf',
+            title: document.title || undefined,
             url,
         }
         return rawContent

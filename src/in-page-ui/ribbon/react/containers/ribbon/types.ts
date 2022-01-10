@@ -1,12 +1,13 @@
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { RemoteTagsInterface } from 'src/tags/background/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
-import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import type AnnotationsManager from 'src/annotations/annotations-manager'
+import type { BookmarksInterface } from 'src/bookmarks/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { MaybePromise } from 'src/util/types'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -15,7 +16,7 @@ interface FlagSetterInterface {
 
 export interface RibbonContainerDependencies {
     currentTab: { id?: number; url?: string }
-    getPageUrl: () => string
+    getPageUrl: () => MaybePromise<string>
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     highlighter: HighlightInteractionsInterface
     annotationsManager: AnnotationsManager
@@ -23,6 +24,7 @@ export interface RibbonContainerDependencies {
     getSidebarEnabled: () => Promise<boolean>
     bookmarks: BookmarksInterface
     customLists: RemoteCollectionsInterface
+    activityIndicatorBG: ActivityIndicatorInterface
     tags: RemoteTagsInterface
     contentSharing: ContentSharingInterface
     annotations: AnnotationInterface<'caller'>

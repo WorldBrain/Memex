@@ -16,6 +16,7 @@ describe('Backup feature', () => {
 
         expect(backedUp).toEqual({
             pages: { backup: true, watch: true },
+            locators: { backup: true, watch: true },
             readablePageArchives: { backup: true, watch: true },
             readwiseAction: { backup: false, watch: false },
             visits: { backup: true, watch: true },

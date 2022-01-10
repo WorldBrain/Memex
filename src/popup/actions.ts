@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'
@@ -8,7 +8,9 @@ import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
+import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { isUrlSupported } from 'src/page-indexing/utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -22,6 +24,7 @@ const bookmarks = runInBackground<BookmarksInterface>()
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
+export const setInitState = createAction<boolean>('popup/setInitState')
 
 const getCurrentTab = async () => {
     let currentTab
@@ -36,8 +39,9 @@ const getCurrentTab = async () => {
             currentTab = await tabs.fetchTabByUrl(url)
         }
     }
-    currentTab.url = getUrl(currentTab.url)
-    return currentTab
+    currentTab.originalUrl = currentTab.url
+    currentTab.url = getUnderlyingResourceUrl(currentTab.url)
+    return currentTab as Tabs.Tab & { originalUrl: string }
 }
 
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
@@ -54,37 +58,54 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
     await dispatch(bookmarkActs.setIsBookmarked(hasBoomark))
 }
 
-// N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
-export const initBasicStore: () => Thunk = () => async (dispatch) => {
+async function init() {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
-    if (!currentTab || !currentTab.url) {
-        console.warn("initBasicStore - Couldn't get a currentTab url")
-        return false
+    if (
+        !currentTab?.url ||
+        !isUrlSupported({ url: currentTab.originalUrl, allowFileUrls: true })
+    ) {
+        return { currentTab: null, fullUrl: null }
     }
-    await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
-    await dispatch(setTabIsBookmarked(currentTab.url))
+
+    const identifier = await runInBackground<
+        PageIndexingInterface<'caller'>
+    >().waitForContentIdentifier({
+        tabId: currentTab.id,
+        fullUrl: currentTab.url,
+    })
+
+    return { currentTab, fullUrl: identifier.fullUrl }
 }
 
-export const initState: () => Thunk = () => async (dispatch) => {
-    const currentTab = await getCurrentTab()
-
-    // If we can't get the tab data, then can't init action button states
-    if (!currentTab || !currentTab.url) {
-        console.warn("initState - Couldn't get a currentTab url")
+// N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
+export const initBasicStore: () => Thunk = () => async (dispatch) => {
+    const { currentTab, fullUrl } = await init()
+    if (!currentTab) {
         return
     }
 
-    await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
+    await dispatch(setTabAndUrl(currentTab.id, fullUrl))
+    await dispatch(setTabIsBookmarked(fullUrl))
+}
 
-    const isBlacklisted = await isURLBlacklistedRPC(currentTab.url)
+export const initState: () => Thunk = () => async (dispatch) => {
+    const { currentTab, fullUrl } = await init()
+    if (!currentTab) {
+        dispatch(setInitState(true))
+        return
+    }
+
+    await dispatch(setTabAndUrl(currentTab.id, fullUrl))
+
+    const isBlacklisted = await isURLBlacklistedRPC(fullUrl)
     dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
 
     try {
-        await dispatch(setTabIsBookmarked(currentTab.url))
+        await dispatch(setTabIsBookmarked(fullUrl))
 
-        const listsAssocWithPage = await fetchListsRPC({ url: currentTab.url })
+        const listsAssocWithPage = await fetchListsRPC({ url: fullUrl })
         const lists = await fetchAllListsRPC({
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
@@ -94,7 +115,7 @@ export const initState: () => Thunk = () => async (dispatch) => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const pageTags = await fetchPageTagsRPC({ url: currentTab.url })
+        const pageTags = await fetchPageTagsRPC({ url: fullUrl })
         const tags = await fetchInitTagSuggRPC({
             notInclude: pageTags,
             type: 'tag',
@@ -104,5 +125,7 @@ export const initState: () => Thunk = () => async (dispatch) => {
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)
+    } finally {
+        dispatch(setInitState(true))
     }
 }
