@@ -184,7 +184,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
                                 }
                                 onClickOutside={
-                                    interactionProps.onShareBtnClick
+                                    interactionProps.onListPickerBtnClick
                                 }
                                 onUpdateEntrySelection={
                                     interactionProps.updateLists

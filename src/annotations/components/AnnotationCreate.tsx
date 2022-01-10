@@ -231,28 +231,21 @@ export class AnnotationCreate extends React.Component<Props, State>
             />
         )
     }
-    private renderCollectionsPickerAndButton() {
+    private renderCollectionsPicker() {
         // Not used yet but will be used for the "Add to collection" button
         const { lists } = this.props
         const setPickerShown = (isListPickerShown: boolean) =>
             this.setState({ isListPickerShown })
 
-        const listPicker = !this.state.isListPickerShown ? null : (
-            <HoverBox right="0px">
-                <ClickAway onClickAway={() => setPickerShown(false)}>
-                    {this.renderSharedCollectionsPicker()}
-                </ClickAway>
-            </HoverBox>
-        )
         return (
             <div>
-                <ListHolder
-                    lists={lists}
-                    clickHandler={() =>
-                        setPickerShown(!this.state.isListPickerShown)
-                    }
-                />
-                {listPicker}
+                {this.state.isListPickerShown && (
+                    <HoverBox right="0px">
+                        <ClickAway onClickAway={() => setPickerShown(false)}>
+                            {this.renderSharedCollectionsPicker()}
+                        </ClickAway>
+                    </HoverBox>
+                )}
             </div>
         )
     }
@@ -316,9 +309,8 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onListIconClick
+                                onEditBtnClick={() =>
+                                    this.setState({ isListPickerShown: true })
                                 }
                             />
                             <TagsSegment
@@ -331,6 +323,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                         ?.onTagIconClick
                                 }
                             />
+                            {this.renderCollectionsPicker()}
                             <FooterContainer>
                                 <SaveActionBar>
                                     {this.renderActionButtons()}
@@ -338,7 +331,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 </SaveActionBar>
                                 <TagsActionBar>
                                     {this.renderTagPicker()}
-                                    {/* {this.renderCollectionsPickerAndButton()} */}
                                 </TagsActionBar>
                             </FooterContainer>
                         </>

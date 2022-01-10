@@ -1261,7 +1261,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { annotationsBG, contentShareBG } = this.options
+        const { annotationsBG, contentShareBG, listsBG } = this.options
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1300,6 +1300,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                         tags: formState.tags,
                     })
                 }
+                let newNoteListNames = []
+                if (formState.lists.length) {
+                    const toAddLists = await Promise.all(
+                        formState.lists.map((name) =>
+                            listsBG.fetchListByName({ name }),
+                        ),
+                    )
+
+                    const {
+                        sharingState,
+                    } = await contentShareBG.shareAnnotationToSomeLists({
+                        annotationUrl: newNoteId,
+                        localListIds: toAddLists.map((list) => list.id),
+                    })
+                    newNoteListNames = toAddLists
+                        .filter((list) =>
+                            sharingState['localListIds'].includes(list.id),
+                        )
+                        .map((list) => list.name)
+                }
 
                 this.emitMutation({
                     searchResults: {
@@ -1313,6 +1333,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
+                                        lists: newNoteListNames,
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
@@ -1822,9 +1843,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { comment, tags } = previousState.searchResults.noteData.byId[
-            event.noteId
-        ]
+        const {
+            comment,
+            tags,
+            lists,
+        } = previousState.searchResults.noteData.byId[event.noteId]
 
         this.emitMutation({
             searchResults: {
@@ -1834,8 +1857,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                             isEditing: { $set: false },
                             editNoteForm: {
                                 isTagPickerShown: { $set: false },
+                                isListPickerShown: { $set: false },
                                 inputValue: { $set: comment ?? '' },
                                 tags: { $set: tags ?? [] },
+                                lists: { $set: lists ?? [] },
                             },
                         },
                     },
