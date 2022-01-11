@@ -312,7 +312,7 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderTagPickerForAnnotation = (currentAnnotationId: string) => {
+    private renderTagsPickerForAnnotation = (currentAnnotationId: string) => {
         if (this.state.activeTagPickerAnnotationId !== currentAnnotationId) {
             return null
         }
@@ -609,7 +609,7 @@ export class AnnotationsSidebarContainer<
                             this.renderShareMenuForAnnotation
                         }
                         renderTagsPickerForAnnotation={
-                            this.renderTagPickerForAnnotation
+                            this.renderTagsPickerForAnnotation
                         }
                         // Not used yet but will be used for the "Add to collection" button
                         renderListsPickerForAnnotation={
