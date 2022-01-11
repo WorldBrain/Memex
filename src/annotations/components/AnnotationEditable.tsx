@@ -518,6 +518,14 @@ export default class AnnotationEditable extends React.Component<Props> {
                                         ?.onListIconClick
                                 }
                             />
+                            {/* Collections button for annotations. To be added later. */}
+                            {this.props.renderListsPickerForAnnotation && (
+                                <TagPickerWrapper>
+                                    {this.props.renderListsPickerForAnnotation(
+                                        this.props.url,
+                                    )}
+                                </TagPickerWrapper>
+                            )}
                             {/* tags */}
                             <TagsSegment
                                 tags={this.props.tags}
@@ -533,14 +541,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {this.props.renderTagsPickerForAnnotation && (
                                 <TagPickerWrapper>
                                     {this.props.renderTagsPickerForAnnotation(
-                                        this.props.url,
-                                    )}
-                                </TagPickerWrapper>
-                            )}
-                            {/* Collections button for annotations. To be added later. */}
-                            {this.props.renderListsPickerForAnnotation && (
-                                <TagPickerWrapper>
-                                    {this.props.renderListsPickerForAnnotation(
                                         this.props.url,
                                     )}
                                 </TagPickerWrapper>
