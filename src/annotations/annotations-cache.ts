@@ -125,24 +125,45 @@ export const createAnnotationsCache = (
                 const existingListsSet = new Set(existingLists)
                 const newListsSet = new Set(listNames)
 
-                const toAdd = listNames.filter(
+                const namesToAdd = listNames.filter(
                     (list) => !existingListsSet.has(list),
                 )
                 const toDelete = existingLists.filter(
                     (list) => !newListsSet.has(list),
                 )
-                if (toAdd.length) {
-                    const toAddLists = await Promise.all(
-                        toAdd.map((name) =>
-                            bgModules.customLists.fetchListByName({ name }),
-                        ),
-                    )
+                if (namesToAdd.length) {
+                    const existingListsToAdd = (
+                        await Promise.all(
+                            namesToAdd.map((name) =>
+                                bgModules.customLists.fetchListByName({ name }),
+                            ),
+                        )
+                    ).filter((list) => list)
+                    // TODO: uncomment this when we're able to assign non-shared lists to annotations
+                    // Create non-existent lists
+                    // const existingListNamesToAdd = existingListsToAdd.map(
+                    //     (l) => l.name,
+                    // )
+                    // const createdIdsToAdd = await Promise.all(
+                    //     namesToAdd
+                    //         .filter((name) => !existingListNamesToAdd.includes(name))
+                    //         .map((name) =>
+                    //             bgModules.customLists.createCustomList({
+                    //                 name: name,
+                    //             }),
+                    //         ),
+                    // )
+
                     const {
                         sharingState,
                     } = await bgModules.contentSharing.shareAnnotationToSomeLists(
                         {
                             annotationUrl,
-                            localListIds: toAddLists.map((list) => list.id),
+                            localListIds: [
+                                ...existingListsToAdd.map((list) => list.id),
+                                // TODO: uncomment this when we're able to assign non-shared lists to annotations
+                                // ...createdIdsToAdd,
+                            ],
                         },
                     )
                     return sharingState
