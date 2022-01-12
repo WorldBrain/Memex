@@ -47,6 +47,7 @@ import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import { Chrome } from '@styled-icons/feather'
 
 export interface OwnProps {}
 
@@ -70,7 +71,7 @@ interface DispatchProps {
     onCollectionDel: (collection: string) => void
 }
 
-export type Props = OwnProps & StateProps & DispatchProps
+export type Props = OwnProps & StateProps & DispatchProps & State
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
     private browserName = checkBrowser()
@@ -95,6 +96,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             category: 'Global',
             action: 'openPopup',
         })
+
         await this.props.initState()
     }
 
@@ -209,20 +211,51 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         }
     }
 
+    openAsNextTab = async () => {
+        console.log(
+            'files?',
+            await browser.extension.isAllowedFileSchemeAccess(),
+        )
+        let queryOptions = { active: true, currentWindow: true }
+        const currentTab = await browser.tabs.query(queryOptions)
+        const currentIndex = currentTab[0].index
+        browser.tabs.create({
+            url: 'chrome://extensions/?id=abkfbakhjpmblaafnpgjppbmioombali',
+            index: currentIndex,
+        })
+    }
+
     private maybeRenderBlurredNotice() {
         if (!this.isCurrentPagePDF) {
             return null
         }
+
         const mode = this.getPDFMode()
         const location = this.getPDFLocation()
 
         if (this.browserName === 'firefox' && location === 'local') {
             return (
-                <BlurredNotice browser={this.browserName} location={location}>
+                <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        Saving and annotating locally stored PDFs not available
-                        on Firefox
+                        Annotating local PDFs not possible on Firefox
                     </NoticeTitle>
+                    <NoticeSubTitle>Use Chromium based browsers</NoticeSubTitle>
+                </BlurredNotice>
+            )
+        }
+
+        if (this.state.isFileAccessAllowed === false) {
+            console.log('testoii')
+            return (
+                <BlurredNotice browser={this.browserName}>
+                    <NoticeTitle>
+                        To annotate file based PDFs enable the setting
+                    </NoticeTitle>
+                    <NoticeSubTitle>"Allow access to file URLs"</NoticeSubTitle>
+                    <PrimaryAction
+                        label="Go to Settings"
+                        onClick={() => this.openAsNextTab()}
+                    />
                 </BlurredNotice>
             )
         }
@@ -386,6 +419,16 @@ const NoticeTitle = styled.div`
     color: ${(props) => props.theme.colors.primary};
     font-weight: bold;
     padding-bottom: 10px;
+    text-align: center;
+    padding: 0 10px;
+    margin-bottom: 20px;
+`
+
+const NoticeSubTitle = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.darkgrey};
+    font-weight: normal;
+    padding-bottom: 15px;
     text-align: center;
     padding: 0 10px;
     margin-bottom: 20px;
