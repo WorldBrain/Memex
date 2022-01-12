@@ -139,22 +139,22 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 showLink={this.state.showLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                linkTitleCopy="Link to this note"
-                privacyOptionsTitleCopy="Set privacy for this note"
+                linkTitleCopy="Link to this annotation"
+                privacyOptionsTitleCopy="Set privacy for this annotation"
                 isLoading={
                     this.state.shareState === 'running' ||
                     this.state.loadState === 'running'
                 }
                 privacyOptions={[
                     {
-                        icon: 'shared',
-                        title: 'Shared',
+                        icon: 'webLogo',
+                        title: 'Public',
                         hasProtectedOption: true,
                         onClick: this.handleSetShared,
                         isSelected: this.props.isShared,
                         shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
                         description:
-                            'Added to shared collections the page is in',
+                            'Auto-added to Spaces the page is shared to',
                     },
                     {
                         icon: 'person',
@@ -162,14 +162,20 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         hasProtectedOption: true,
                         onClick: this.handleSetPrivate,
                         isSelected: !this.props.isShared,
-                        shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
+                        shortcut: '',
                         description: 'Private to you, until shared (in bulk)',
                     },
                 ]}
                 shortcutHandlerDict={{
                     // 'mod+shift+enter': this.handleSetProtected,
                     'mod+shift+enter': () => this.handleSetShared(false),
-                    'mod+enter': () => this.handleSetPrivate(false),
+                    'mod+enter': async () => {
+                        if (this.props.isShared) {
+                            this.handleSetShared(false)
+                        } else {
+                            this.handleSetPrivate(false)
+                        }
+                    },
                     'alt+enter': () => this.handleSetPrivate(true),
                     'alt+shift+enter': () => this.handleSetShared(true),
                 }}

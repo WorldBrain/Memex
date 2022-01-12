@@ -125,6 +125,7 @@ class AnnotationsSidebar extends React.Component<
         if (e.key === 'Escape') {
             this.props.onClickOutside(e as any)
         }
+        e.stopPropagation()
     }
 
     private searchEnterHandler = {
@@ -448,7 +449,7 @@ class AnnotationsSidebar extends React.Component<
                         this.setState({ showAllNotesShareMenu: false })
                     }
                 >
-                    <HoverBox>
+                    <HoverBox width="340px">
                         <AllNotesShareMenu
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotationsShareAll}
@@ -565,7 +566,7 @@ class AnnotationsSidebar extends React.Component<
                             </ActionBtn>
                         </ButtonTooltip>
                         <ButtonTooltip
-                            tooltipText="Share All Notes"
+                            tooltipText="Share annotated Page"
                             position="bottomRightEdge"
                         >
                             <ActionBtn
@@ -576,7 +577,7 @@ class AnnotationsSidebar extends React.Component<
                                 }
                                 isActive={this.state.showAllNotesShareMenu}
                             >
-                                <ActionIcon src={icons.shareEmpty} />
+                                <ActionIcon src={icons.link} />
                             </ActionBtn>
                         </ButtonTooltip>
                     </TopBarActionBtns>
@@ -755,7 +756,7 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     cursor: pointer;
     justify-content: space-between;
     width: fill-available;
-    z-index: 1000;
+    z-index: 1;
 `
 
 const FollowedListTitle = styled.span`
@@ -980,7 +981,7 @@ const CopyPasterWrapperTopBar = styled.div`
 
 const ShareMenuWrapperTopBar = styled.div`
     position: relative;
-    right: 200px;
+    right: 240px;
     z-index: 10;
     top: 20px;
 `

@@ -2,6 +2,7 @@ import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 export class PDFBackground {
     private routeViewer: string
@@ -26,13 +27,21 @@ export class PDFBackground {
             openPdfViewerForNextPdf: async () => {
                 this._shouldOpenOneTime = true
             },
+            doNotOpenPdfViewerForNextPdf: async () => {
+                this._shouldOpenOneTime = false
+            },
         }
     }
 
     private get shouldOpen(): boolean {
-        if (this._shouldOpenOneTime) {
-            this._shouldOpenOneTime = false
+        if (this._shouldOpenOneTime === true) {
+            this._shouldOpenOneTime = null
             return true
+        }
+
+        if (this._shouldOpenOneTime === false) {
+            this._shouldOpenOneTime = null
+            return false
         }
         return this._shouldOpen
     }
@@ -62,6 +71,7 @@ export class PDFBackground {
     ) => {
         // only called for local files matching *.pdf
         if (!this.shouldOpen || !details.url) {
+            this._shouldOpenOneTime = null
             return
         }
 
@@ -72,9 +82,11 @@ export class PDFBackground {
         details: WebRequest.OnHeadersReceivedDetailsType,
     ) => {
         if (!this.shouldOpen || !details.url) {
+            this._shouldOpenOneTime = null
             return
         }
         if (!this.isPdfRequestForViewer(details)) {
+            this._shouldOpenOneTime = null
             return
         }
 

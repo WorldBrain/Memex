@@ -106,24 +106,25 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 link={this.state.link}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}
-                linkTitleCopy="Link to page and shared notes"
-                privacyOptionsTitleCopy="Set privacy for all notes on this page"
+                linkTitleCopy="Link to page and its public annotations"
+                privacyOptionsTitleCopy="Set privacy for all annotations on this page"
                 isLoading={
                     this.state.shareState === 'running' ||
                     this.state.loadState === 'running'
                 }
                 privacyOptions={[
                     {
-                        title: 'Shared',
+                        title: 'Public',
                         shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
-                        description: 'Shared in collections this page is in',
-                        icon: 'shared',
+                        description:
+                            'Auto-added to Spaces the page is shared to',
+                        icon: 'webLogo',
                         onClick: this.handleSetShared,
                     },
                     {
                         title: 'Private',
                         shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
-                        description: 'Only locally available to you',
+                        description: 'Private to you, until made public',
                         icon: 'person',
                         onClick: this.handleSetPrivate,
                     },

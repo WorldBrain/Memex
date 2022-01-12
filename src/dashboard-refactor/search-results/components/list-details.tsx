@@ -5,6 +5,7 @@ import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props {
     listName: string
@@ -45,9 +46,9 @@ export default class ListDetails extends PureComponent<Props> {
                                                 position="bottom"
                                             >
                                                 <Icon
-                                                    height="18px"
-                                                    icon="addPeople"
-                                                    color="darkgrey"
+                                                    height="19px"
+                                                    filePath={icons.link}
+                                                    color="purple"
                                                     onClick={
                                                         this.props
                                                             .onAddContributorsClick
@@ -77,11 +78,11 @@ export default class ListDetails extends PureComponent<Props> {
                                             <ShareCollectionBtn>
                                                 <Icon
                                                     height="18px"
-                                                    icon="addPeople"
+                                                    filePath={icons.link}
                                                     color="white"
                                                 />
                                                 <ShareCollectionBtnLabel>
-                                                    Share Collection
+                                                    Share Space
                                                 </ShareCollectionBtnLabel>
                                             </ShareCollectionBtn>
                                         </Button>

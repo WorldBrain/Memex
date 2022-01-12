@@ -8,6 +8,11 @@ import ContentSharingBackground from 'src/content-sharing/background'
 import { TemplateDataFetchers } from '../types'
 import fromPairs from 'lodash/fromPairs'
 import flatten from 'lodash/flatten'
+import type { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
+import {
+    isPagePdf,
+    pickBestLocator,
+} from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -40,16 +45,29 @@ export function getTemplateDataFetchers({
                 .collection('pages')
                 .findObjects({ url: { $in: normalizedPageUrls } })
 
-            return pages.reduce(
-                (acc, page) => ({
+            const allLocators: ContentLocator[] = await storageManager
+                .collection('locators')
+                .findObjects({ normalizedUrl: { $in: normalizedPageUrls } })
+
+            return pages.reduce((acc, page) => {
+                let fullUrl = page.fullUrl
+                if (isPagePdf(page)) {
+                    const pageLocators = allLocators.filter(
+                        (l) => l.normalizedUrl === page.url,
+                    )
+                    const mainLocator = pickBestLocator(pageLocators)
+                    fullUrl = mainLocator?.originalLocation
+                        ? encodeURI(mainLocator.originalLocation)
+                        : page.fullUrl
+                }
+                return {
                     ...acc,
                     [page.url]: {
                         fullTitle: page.fullTitle,
-                        fullUrl: page.fullUrl,
+                        fullUrl,
                     },
-                }),
-                {},
-            )
+                }
+            }, {})
         },
         getNotes: async (annotationUrls) => {
             const notes: Note[] = await storageManager

@@ -4,6 +4,8 @@ import debounce from 'lodash/debounce'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+
 import { haveTagsChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
@@ -33,6 +35,7 @@ import {
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
+import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -270,13 +273,27 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
-
-        this.emitMutation({
-            listsSidebar: {
-                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-            },
-        })
+        const hasActivityStored = await getLocalStorage(
+            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+        )
+        if (hasActivityStored === true) {
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: true },
+                },
+            })
+        } else {
+            const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
+            await setLocalStorage(
+                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+                activityStatus === 'has-unseen',
+            )
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+                },
+            })
+        }
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
@@ -425,8 +442,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        let nextState: State
-
         const skipMutation: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
@@ -480,39 +495,38 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                const mutation: UIMutation<State> = event.paginate
-                    ? {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: {
-                                  $apply: (prev) =>
-                                      utils.mergeSearchResults(prev, results),
-                              },
-                              pageData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, pageData),
-                              },
-                              noteData: {
-                                  $apply: (prev) =>
-                                      mergeNormalizedStates(prev, noteData),
-                              },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-                    : {
-                          searchFilters: skipMutation,
-                          searchResults: {
-                              results: { $set: results },
-                              pageData: { $set: pageData },
-                              noteData: { $set: noteData },
-                              areResultsExhausted: { $set: resultsExhausted },
-                              noResultsType: { $set: noResultsType },
-                          },
-                      }
-
-                nextState = this.withMutation(previousState, mutation)
-                this.emitMutation(mutation)
+                this.emitMutation({
+                    searchFilters: skipMutation,
+                    searchResults: {
+                        areResultsExhausted: {
+                            $set: resultsExhausted,
+                        },
+                        noResultsType: { $set: noResultsType },
+                        ...(event.paginate
+                            ? {
+                                  results: {
+                                      $apply: (prev) =>
+                                          utils.mergeSearchResults(
+                                              prev,
+                                              results,
+                                          ),
+                                  },
+                                  pageData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, pageData),
+                                  },
+                                  noteData: {
+                                      $apply: (prev) =>
+                                          mergeNormalizedStates(prev, noteData),
+                                  },
+                              }
+                            : {
+                                  results: { $set: results },
+                                  pageData: { $set: pageData },
+                                  noteData: { $set: noteData },
+                              }),
+                    },
+                })
             },
         )
     }
@@ -2449,6 +2463,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })

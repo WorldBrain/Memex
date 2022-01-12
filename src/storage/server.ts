@@ -83,6 +83,7 @@ export function createLazyServerStorage(
                     autoPkType: 'string',
                 })
             const contentSharing = new ContentSharingStorage({
+                autoPkType: options.autoPkType,
                 storageManager,
                 operationExecuter: operationExecuter('contentSharing'),
                 ...options,
@@ -101,8 +102,8 @@ export function createLazyServerStorage(
                 storageManager,
             })
             const personalCloud = new PersonalCloudStorage({
+                autoPkType: options.autoPkType,
                 storageManager,
-                autoPkType: 'string',
             })
             const activityFollows = new ActivityFollowsStorage({
                 storageManager,
@@ -146,8 +147,11 @@ export function createLazyMemoryServerStorage(options?: {
             return createStorageManager(backend, options)
         },
         {
-            autoPkType: 'number',
             skipApplicationLayer: true,
+            autoPkType:
+                process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+                    ? 'string'
+                    : 'number',
         },
     )
 }

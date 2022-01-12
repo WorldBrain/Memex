@@ -61,6 +61,14 @@ export default class RibbonContainer extends StatefulUIElement<
         }
     }
 
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
     private handleSidebarOpen = () => {
         if (this.state.commentBox.showCommentBox) {
             this.processEvent('cancelComment', null)
@@ -102,6 +110,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
                 isExpanded={this.props.state === 'visible'}
+                hasAnnotations={this.state.hasAnnotations}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
@@ -110,6 +119,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 handleRibbonToggle={() =>
                     this.processEvent('toggleRibbon', null)
                 }
+                activityIndicator={{
+                    activityIndicatorBG: this.props.activityIndicatorBG,
+                    openFeedUrl: () => window.open(this.whichFeed(), '_blank'),
+                }}
                 highlights={{
                     ...this.state.highlights,
                     handleHighlightsToggle: () =>

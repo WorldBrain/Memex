@@ -48,7 +48,7 @@ class ListPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Add to Collection'
+        this.props.searchInputPlaceholder ?? 'Add to Spaces'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
 
     componentDidUpdate(
@@ -104,8 +104,9 @@ class ListPicker extends StatefulUIElement<
     handleResultListFocus = (list: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-    handleNewListPress = () =>
+    handleNewListPress = () => {
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
+    }
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
@@ -152,9 +153,9 @@ class ListPicker extends StatefulUIElement<
 
         return (
             <EmptyListsView>
-                <strong>No Collections yet</strong>
+                <strong>No Spaces added yet</strong>
                 <br />
-                Add new collections
+                Add new Spaces
                 <br />
                 via the search bar
             </EmptyListsView>
@@ -202,7 +203,7 @@ class ListPicker extends StatefulUIElement<
                                 {this.state.newEntryName}
                             </ListResultItem>
                         }
-                        onPress={this.handleNewListPress}
+                        onPress={() => this.handleNewListPress()}
                     >
                         {this.renderNewListAllTabsButton()}
                     </AddNewEntry>

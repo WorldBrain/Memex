@@ -401,10 +401,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <>
-                <ButtonTooltip tooltipText="Share Collection" position="bottom">
+                <ButtonTooltip tooltipText="Share Space" position="bottom">
                     <IconBox>
                         <Icon
-                            icon="shareEmpty"
+                            filePath={icons.link}
                             height="16px"
                             color="primary"
                             onClick={this.props.toggleListShareMenu}
@@ -413,9 +413,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
                     <HoverBox
-                        width="320px"
+                        width="340px"
                         top="20px"
-                        right="-150px"
+                        right="-90px"
                         withRelativeContainer
                     >
                         <ListShareMenu

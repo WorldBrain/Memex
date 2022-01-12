@@ -345,7 +345,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapper>
-                <HoverBox width="320px">
+                <HoverBox width="340px" left={'-20px'}>
                     <SingleNoteShareMenu
                         isShared={currentAnnotation?.isShared}
                         shareImmediately={this.state.immediatelyShareNotes}
@@ -377,7 +377,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapperTopBar>
-                <HoverBox>
+                <HoverBox width={'340px'}>
                     <AllNotesShareMenu
                         contentSharingBG={this.props.contentSharing}
                         annotationsBG={this.props.annotations}

@@ -21,12 +21,25 @@ import { setupSyncBackgroundTest } from 'src/personal-cloud/background/index.tes
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { LocationSchemeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
+const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+const expectedIdType = isFBEmu ? String : Number
+
 function convertRemoteId(id: string) {
-    return parseInt(id, 10)
+    return isFBEmu ? id : parseInt(id, 10)
 }
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
+}
+
+const sortByField = <T = any>(field: keyof T) => (a: T, b: T) => {
+    if (a[field] < b[field]) {
+        return -1
+    }
+    if (a[field] > b[field]) {
+        return 1
+    }
+    return 0
 }
 
 interface TestData {
@@ -71,12 +84,13 @@ async function setupTest(options: {
 
     const getFromDB = (storageManager: StorageManager) => (
         collection: string,
+        opts?: { skipOrdering?: boolean },
     ) =>
         storageManager.operation(
             'findObjects',
             collection,
             {},
-            { order: [['id', 'asc']] },
+            opts?.skipOrdering ? undefined : { order: [['id', 'asc']] },
         )
 
     const getShared = getFromDB(serverStorage.storageManager)
@@ -134,14 +148,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    {
+                                    expect.objectContaining({
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: 'My shared list',
-                                        description: null,
-                                    },
+                                    }),
                                 ])
                                 expect(
                                     orderBy(
@@ -310,14 +323,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    {
+                                    expect.objectContaining({
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: updatedTitle,
-                                        description: null,
-                                    },
+                                    }),
                                 ])
 
                                 // It should not fail when trying to update other fields than the title of the list
@@ -335,14 +347,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {},
                                     ),
                                 ).toEqual([
-                                    {
+                                    expect.objectContaining({
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
                                         createdWhen: expect.any(Number),
                                         updatedWhen: expect.any(Number),
                                         title: updatedTitle,
-                                        description: null,
-                                    },
+                                    }),
                                 ])
                             },
                         },
@@ -630,8 +641,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const sharedAnnotations = await getShared(
                                     'sharedAnnotation',
+                                    { skipOrdering: true },
                                 )
-                                expect(sharedAnnotations).toEqual([
+                                expect(
+                                    sharedAnnotations.sort(sortByField('id')),
+                                ).toEqual([
                                     {
                                         id:
                                             convertRemoteId(
@@ -662,6 +676,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 const sharedAnnotationListEntries = await getShared(
                                     'sharedAnnotationListEntry',
+                                    { skipOrdering: true },
                                 )
                                 const sharedAnnotationId =
                                     convertRemoteId(
@@ -669,7 +684,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             firstAnnotationUrl
                                         ] as string,
                                     ) || remoteAnnotationIds[firstAnnotationUrl]
-                                expect(sharedAnnotationListEntries).toEqual([
+                                expect(
+                                    sharedAnnotationListEntries.sort(
+                                        sortByField('sharedList'),
+                                    ),
+                                ).toEqual([
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
                                             data.ANNOTATION_1_1_DATA.pageUrl,
@@ -827,8 +846,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const sharedAnnotations = await getShared(
                                     'sharedAnnotation',
+                                    { skipOrdering: true },
                                 )
-                                expect(sharedAnnotations).toEqual([
+                                expect(
+                                    sharedAnnotations.sort(sortByField('id')),
+                                ).toEqual([
                                     {
                                         id:
                                             convertRemoteId(
@@ -854,6 +876,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 const sharedAnnotationListEntries = await getShared(
                                     'sharedAnnotationListEntry',
+                                    { skipOrdering: true },
                                 )
                                 const sharedAnnotationId =
                                     convertRemoteId(
@@ -861,7 +884,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             annotationUrl
                                         ] as string,
                                     ) || remoteAnnotationIds[annotationUrl]
-                                expect(sharedAnnotationListEntries).toEqual([
+                                expect(
+                                    sharedAnnotationListEntries.sort(
+                                        sortByField('sharedList'),
+                                    ),
+                                ).toEqual([
                                     expect.objectContaining({
                                         normalizedPageUrl: normalizeUrl(
                                             data.ANNOTATION_1_1_DATA.pageUrl,
@@ -973,16 +1000,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.waitForSync()
 
                                 expect(
-                                    await getShared('sharedAnnotation'),
+                                    await getShared('sharedAnnotation', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([
                                     expect.objectContaining({
                                         body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                                 expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                    ),
+                                    (
+                                        await getShared(
+                                            'sharedAnnotationListEntry',
+                                            { skipOrdering: true },
+                                        )
+                                    ).sort(sortByField('sharedList')),
                                 ).toEqual([
                                     expect.objectContaining({}),
                                     expect.objectContaining({}),
@@ -997,11 +1029,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.waitForSync()
 
                                 expect(
-                                    await getShared('sharedAnnotation'),
+                                    await getShared('sharedAnnotation', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([])
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
+                                        { skipOrdering: true },
                                     ),
                                 ).toEqual([])
                             },
@@ -1057,7 +1092,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.waitForSync()
 
                                 expect(
-                                    await getShared('sharedAnnotation'),
+                                    await getShared('sharedAnnotation', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([
                                     expect.objectContaining({
                                         body: data.ANNOTATION_1_1_DATA.body,
@@ -1066,6 +1103,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
+                                        { skipOrdering: true },
                                     ),
                                 ).toEqual([
                                     expect.objectContaining({}),
@@ -1083,6 +1121,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
+                                        { skipOrdering: true },
                                     ),
                                 ).toEqual([expect.objectContaining({})])
 
@@ -1097,6 +1136,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
+                                        { skipOrdering: true },
                                     ),
                                 ).toEqual([])
                             },
@@ -1189,16 +1229,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
 
                                 expect(
-                                    await getShared('sharedAnnotation'),
+                                    await getShared('sharedAnnotation', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([
                                     expect.objectContaining({
                                         body: data.ANNOTATION_1_1_DATA.body,
                                     }),
                                 ])
                                 expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                    ),
+                                    (
+                                        await getShared(
+                                            'sharedAnnotationListEntry',
+                                            { skipOrdering: true },
+                                        )
+                                    ).sort(sortByField('sharedList')),
                                 ).toEqual([
                                     expect.objectContaining({}),
                                     expect.objectContaining({}),
@@ -1221,11 +1266,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([])
 
                                 expect(
-                                    await getShared('sharedAnnotation'),
+                                    await getShared('sharedAnnotation', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([])
                                 expect(
                                     await getShared(
                                         'sharedAnnotationListEntry',
+                                        { skipOrdering: true },
                                     ),
                                 ).toEqual([])
                             },
@@ -1271,14 +1319,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await personalCloud.waitForSync()
                                 expect(
-                                    await getShared('sharedContentFingerprint'),
+                                    (
+                                        await getShared(
+                                            'sharedContentFingerprint',
+                                            { skipOrdering: true },
+                                        )
+                                    ).sort(sortByField('sharedList')),
                                 ).toEqual([
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: maybeInt(
-                                            testData.remoteListId,
-                                        ),
+                                        sharedList: isFBEmu
+                                            ? testData.remoteListId
+                                            : maybeInt(testData.remoteListId),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[0].fingerprintScheme,
@@ -1288,9 +1341,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: maybeInt(
-                                            testData.remoteListId,
-                                        ),
+                                        sharedList: isFBEmu
+                                            ? testData.remoteListId
+                                            : maybeInt(testData.remoteListId),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[1].fingerprintScheme,
@@ -1299,7 +1352,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
                                 expect(
-                                    await getShared('sharedContentLocator'),
+                                    await getShared('sharedContentLocator', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([])
                             },
                         },
@@ -1668,7 +1723,7 @@ function makeShareAnnotationTest(options: {
                             createdWhen: expect.any(Number),
                             uploadedWhen: expect.any(Number),
                             updatedWhen: expect.any(Number),
-                            sharedList: expect.any(Number),
+                            sharedList: expect.any(expectedIdType),
                             sharedAnnotation:
                                 convertRemoteId(
                                     remoteAnnotationIds[

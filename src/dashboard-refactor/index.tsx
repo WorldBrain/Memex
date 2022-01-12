@@ -44,9 +44,7 @@ import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
 
-export interface Props extends DashboardDependencies {
-    renderDashboardSwitcherLink: () => JSX.Element
-}
+export interface Props extends DashboardDependencies {}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -112,11 +110,14 @@ export class DashboardContainer extends StatefulUIElement<
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
-        this.annotationsCache = createAnnotationsCache({
-            contentSharing: props.contentShareBG,
-            annotations: props.annotationsBG,
-            tags: props.tagsBG,
-        })
+        this.annotationsCache = createAnnotationsCache(
+            {
+                contentSharing: props.contentShareBG,
+                annotations: props.annotationsBG,
+                tags: props.tagsBG,
+            },
+            { skipPageIndexing: true },
+        )
     }
 
     private getListDetailsProps = (): ListDetailsProps | null => {
@@ -963,7 +964,6 @@ export class DashboardContainer extends StatefulUIElement<
             <Container>
                 {this.renderHeader()}
                 {this.renderFiltersBar()}
-                {this.props.renderDashboardSwitcherLink()}
                 <Margin bottom="5px" />
                 {this.renderListsSidebar()}
                 {mode === 'locate-pdf'

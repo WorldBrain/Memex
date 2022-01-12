@@ -208,11 +208,16 @@
 }
 
 .comments {
-    background-image: url('/img/comment_add.svg');
+    background-image: url('/img/comment_empty.svg');
+}
+
+.commentAvailable {
+    background-image: url('/img/comment_full.svg');
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
+    cursor: default;
 }
 
 .notBookmark {

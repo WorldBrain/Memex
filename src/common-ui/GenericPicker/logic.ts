@@ -402,10 +402,19 @@ export default abstract class GenericPickerLogic<
             return
         }
 
+        const newDisplayEntry = {
+            name: entry,
+            selected: true,
+            focused: false,
+        }
+
+        const oldDisplayEntries = this.defaultEntries
+        oldDisplayEntries.unshift(newDisplayEntry)
+
         await this._updateSelectedEntryState({
             ...this._addEntrySelected(
                 entry,
-                this.defaultEntries,
+                oldDisplayEntries,
                 previousState.selectedEntries,
             ),
             added: entry,
