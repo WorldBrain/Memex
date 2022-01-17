@@ -19,13 +19,13 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
-import ListsSegment, {
-    AddSpacesButton,
-} from 'src/common-ui/components/result-item-spaces-segment'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
+import ListsSegment, {
+    AddSpacesButton,
+} from 'src/common-ui/components/result-item-spaces-segment'
 
 export interface Props
     extends PageData,
@@ -78,7 +78,20 @@ export default class PageResultView extends PureComponent<Props> {
     private get hasLists(): boolean {
         return this.props.lists.length > 0
     }
-
+    private renderSpacePicker() {
+        // space picker is separated out to make the Add to Space button contain the call to render the picker
+        if (this.props.isListPickerShown) {
+            return (
+                <HoverBox withRelativeContainer>
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.props.onListPickerUpdate}
+                        initialSelectedEntries={() => this.props.lists}
+                        onClickOutside={this.props.onListPickerBtnClick}
+                    />
+                </HoverBox>
+            )
+        }
+    }
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
@@ -87,18 +100,6 @@ export default class PageResultView extends PureComponent<Props> {
                         onUpdateEntrySelection={this.props.onTagPickerUpdate}
                         initialSelectedEntries={() => this.props.tags}
                         onClickOutside={this.props.onTagPickerBtnClick}
-                    />
-                </HoverBox>
-            )
-        }
-
-        if (this.props.isListPickerShown) {
-            return (
-                <HoverBox right="0" withRelativeContainer>
-                    <CollectionPicker
-                        onUpdateEntrySelection={this.props.onListPickerUpdate}
-                        initialSelectedEntries={() => this.props.lists}
-                        onClickOutside={this.props.onListPickerBtnClick}
                     />
                 </HoverBox>
             )
@@ -284,26 +285,35 @@ export default class PageResultView extends PureComponent<Props> {
                                 <PDFIcon>PDF</PDFIcon>
                             )}
                             <PageUrl>{this.domain}</PageUrl>
+                            {this.props.hoverState === 'main-content' &&
+                                this.props.lists.length === 0 && (
+                                    <AddSpaceButtonContainer>
+                                        <AddSpacesButton
+                                            hasNoLists={true}
+                                            onEditBtnClick={(event) => {
+                                                event.stopPropagation()
+                                                this.props.onListPickerBtnClick(
+                                                    event,
+                                                )
+                                            }}
+                                            renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                                this,
+                                            )}
+                                        />
+                                    </AddSpaceButtonContainer>
+                                )}
                         </ResultContent>
-
-                        {this.props.hoverState === 'main-content' &&
-                            this.props.lists.length === 0 && (
-                                <AddSpacesButton
-                                    hasNoLists={true}
-                                    onEditBtnClick={(event) => {
-                                        event.stopPropagation()
-                                        this.props.onListPickerBtnClick(event)
-                                    }}
-                                />
-                            )}
                     </PageContentBox>
                     {this.props.lists.length > 0 && (
                         <ListsSegment
                             lists={this.props.lists}
                             onMouseEnter={this.props.onListsHover}
                             showEditBtn={this.props.hoverState === 'lists'}
+                            onListClick={undefined}
                             onEditBtnClick={this.props.onListPickerBtnClick}
-                            // onListClick={this.props.onListClick}
+                            renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                this,
+                            )}
                         />
                     )}
                     <TagsSegment
@@ -393,6 +403,10 @@ const PageContentBox = styled.div`
     &:hover {
         background-color: #fafafa;
     }
+`
+
+const AddSpaceButtonContainer = styled.div`
+    margin-left: 1rem;
 `
 
 const ResultContent = styled(Margin)`

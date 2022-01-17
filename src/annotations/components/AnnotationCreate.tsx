@@ -240,7 +240,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <div>
                 {this.state.isListPickerShown && (
-                    <HoverBox right="0px">
+                    <HoverBox>
                         <ClickAway onClickAway={() => setPickerShown(false)}>
                             {this.renderSharedCollectionsPicker()}
                         </ClickAway>
@@ -312,6 +312,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
+                                renderListsPickerForAnnotation={this.renderCollectionsPicker.bind(
+                                    this,
+                                )}
                             />
                             <TagsSegment
                                 tags={this.props.tags}
@@ -323,7 +326,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                                         ?.onTagIconClick
                                 }
                             />
-                            {this.renderCollectionsPicker()}
                             <FooterContainer>
                                 <SaveActionBar>
                                     {this.renderActionButtons()}

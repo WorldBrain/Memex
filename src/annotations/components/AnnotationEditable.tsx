@@ -517,15 +517,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     this.props.annotationFooterDependencies
                                         ?.onListIconClick
                                 }
-                            />
-                            {/* Collections button for annotations. To be added later. */}
-                            {this.props.renderListsPickerForAnnotation && (
-                                <TagPickerWrapper>
-                                    {this.props.renderListsPickerForAnnotation(
+                                renderListsPickerForAnnotation={() =>
+                                    this.props.renderListsPickerForAnnotation(
                                         this.props.url,
-                                    )}
-                                </TagPickerWrapper>
-                            )}
+                                    )
+                                }
+                            />
+
                             {/* tags */}
                             <TagsSegment
                                 tags={this.props.tags}

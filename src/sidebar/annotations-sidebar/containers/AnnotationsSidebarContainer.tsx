@@ -705,7 +705,6 @@ const CopyPasterWrapper = styled.div`
 
 const PickerWrapper = styled.div`
     position: sticky;
-    margin-left: 100px;
     z-index: 5;
 `
 

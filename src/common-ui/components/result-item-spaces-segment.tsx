@@ -1,4 +1,5 @@
 import React, { HTMLProps } from 'react'
+import ReactDOM from 'react-dom'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -8,35 +9,74 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     showEditBtn: boolean
     onListClick?: (tag: string) => void
     onEditBtnClick: React.MouseEventHandler
+    renderListsPickerForAnnotation: () => JSX.Element
 }
 
-export function AddSpacesButton({
-    hasNoLists,
-    onEditBtnClick,
-}: {
+interface ButtonProps {
     hasNoLists: boolean
     onEditBtnClick: React.MouseEventHandler
-}) {
-    if (hasNoLists) {
+    renderListsPickerForAnnotation: () => JSX.Element
+}
+
+export class AddSpacesButton extends React.Component<
+    ButtonProps,
+    { showPicker: boolean }
+> {
+    constructor(props: ButtonProps) {
+        super(props)
+        this.state = {
+            showPicker: false,
+        }
+    }
+
+    render() {
         return (
-            <AddSpacesButtonContainer onClick={onEditBtnClick}>
-                <span>+</span> <span>Add to Space</span>
-            </AddSpacesButtonContainer>
-        )
-    } else {
-        return (
-            <AddSpacesButtonContainer onClick={onEditBtnClick}>
-                <span>+</span>
-            </AddSpacesButtonContainer>
+            <SpacePickerButtonWrapper>
+                <AddSpacesButtonContainer
+                    onClick={(e) => {
+                        // this.setState({ showPicker: !this.state.showPicker })
+                        this.props.onEditBtnClick(e)
+                    }}
+                >
+                    {this.props.hasNoLists ? (
+                        <>
+                            <span>+</span> <span>Add to Space</span>
+                        </>
+                    ) : (
+                        <span>+</span>
+                    )}
+                </AddSpacesButtonContainer>
+                {this.props.renderListsPickerForAnnotation && (
+                    <SpacePickerWrapper
+                        onClick={(e) => {
+                            e.stopPropagation()
+                        }}
+                    >
+                        {this.props.renderListsPickerForAnnotation()}
+                    </SpacePickerWrapper>
+                )}
+            </SpacePickerButtonWrapper>
         )
     }
 }
+
+const SpacePickerButtonWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const SpacePickerWrapper = styled.div`
+    position: relative;
+
+    width: 0rem;
+`
 
 export default function ListsSegment({
     lists,
     onListClick,
     showEditBtn,
     onEditBtnClick,
+    renderListsPickerForAnnotation,
     ...props
 }: Props) {
     // if (!lists?.length) {
@@ -49,15 +89,18 @@ export default function ListsSegment({
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
                     onEditBtnClick={onEditBtnClick}
+                    renderListsPickerForAnnotation={
+                        renderListsPickerForAnnotation
+                    }
                 />
-                {lists.slice(0).map((tag) => (
-                    <ListPillContainer
-                        key={tag}
+                {lists.slice(0).map((space) => (
+                    <ListSpaceContainer
+                        key={space}
                         onClick={
-                            onListClick ? () => onListClick(tag) : undefined
+                            onListClick ? () => onListClick(space) : undefined
                         }
                     >
-                        {tag}
+                        {space}
                         {/* TODO: uncomment when collection context menu is done */}
                         {/* {showEditBtn && (
                             <ListPillSettingButton
@@ -68,7 +111,7 @@ export default function ListsSegment({
                                 {' ... '}
                             </ListPillSettingButton>
                         )} */}
-                    </ListPillContainer>
+                    </ListSpaceContainer>
                 ))}
             </ListsContainer>
         </Container>
@@ -104,7 +147,7 @@ const ListsContainer = styled.div`
     flex-wrap: wrap;
 `
 
-const ListPillContainer = styled.div`
+const ListSpaceContainer = styled.div`
     background-color: #83c9f4;
 
     padding: 2px 8px;
