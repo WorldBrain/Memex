@@ -318,7 +318,6 @@ export default class PageStorage extends StorageModule {
     }
 
     async getContentIdentifier(params: {
-        regularNormalizedUrl: string
         fingerprints: Array<ContentFingerprint>
     }): Promise<{
         identifier: ContentIdentifier
