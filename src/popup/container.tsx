@@ -10,13 +10,10 @@ import Logic, { State, Event } from './logic'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
-import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import CopyPDFLinkButton from './components/CopyPDFLinkButton'
-import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
-import { HistoryPauser } from './pause-button'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -47,7 +44,6 @@ import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
-import { Chrome } from '@styled-icons/feather'
 
 export interface OwnProps {}
 
@@ -71,7 +67,7 @@ interface DispatchProps {
     onCollectionDel: (collection: string) => void
 }
 
-export type Props = OwnProps & StateProps & DispatchProps & State
+export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
     private browserName = checkBrowser()
@@ -82,6 +78,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             new Logic({
                 tabsAPI: browser.tabs,
                 runtimeAPI: browser.runtime,
+                extensionAPI: browser.extension,
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -203,26 +200,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return isFullUrlPDF(this.props.url)
     }
 
-    whichFeed = () => {
+    private whichFeed = () => {
         if (process.env.NODE_ENV === 'production') {
             return 'https://memex.social/feed'
         } else {
             return 'https://staging.memex.social/feed'
         }
-    }
-
-    openAsNextTab = async () => {
-        console.log(
-            'files?',
-            await browser.extension.isAllowedFileSchemeAccess(),
-        )
-        let queryOptions = { active: true, currentWindow: true }
-        const currentTab = await browser.tabs.query(queryOptions)
-        const currentIndex = currentTab[0].index
-        browser.tabs.create({
-            url: 'chrome://extensions/?id=abkfbakhjpmblaafnpgjppbmioombali',
-            index: currentIndex,
-        })
     }
 
     private maybeRenderBlurredNotice() {
@@ -237,15 +220,20 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             return (
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        Annotating local PDFs not possible on Firefox
+                        Annotating local PDFs is not possible on Firefox
                     </NoticeTitle>
-                    <NoticeSubTitle>Use Chromium based browsers</NoticeSubTitle>
+                    <NoticeSubTitle>
+                        Use Chromium-based browsers to use this feature
+                    </NoticeSubTitle>
                 </BlurredNotice>
             )
         }
 
-        if (this.state.isFileAccessAllowed === false) {
-            console.log('testoii')
+        if (
+            this.browserName !== 'firefox' &&
+            location === 'local' &&
+            !this.state.isFileAccessAllowed
+        ) {
             return (
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
@@ -254,7 +242,11 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <NoticeSubTitle>"Allow access to file URLs"</NoticeSubTitle>
                     <PrimaryAction
                         label="Go to Settings"
-                        onClick={() => this.openAsNextTab()}
+                        onClick={() =>
+                            browser.tabs.create({
+                                url: `chrome://extensions/?id=${browser.runtime.id}`,
+                            })
+                        }
                     />
                 </BlurredNotice>
             )
