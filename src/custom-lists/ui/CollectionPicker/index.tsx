@@ -47,6 +47,17 @@ class ListPicker extends StatefulUIElement<
         super(props, new ListPickerLogic(props))
     }
 
+    private get selectedDisplayEntries(): string[] {
+        return this.state.selectedEntries
+            .map(
+                (entryId) =>
+                    this.state.displayEntries.find(
+                        (entry) => entry.localId === entryId,
+                    )?.name,
+            )
+            .filter((entry) => entry != null)
+    }
+
     searchInputPlaceholder =
         this.props.searchInputPlaceholder ?? 'Add to Collection'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
@@ -183,7 +194,7 @@ class ListPicker extends StatefulUIElement<
                     before={
                         <EntrySelectedList
                             dataAttributeName="list-name"
-                            entriesSelected={this.state.selectedEntries}
+                            entriesSelected={this.selectedDisplayEntries}
                             onPress={this.handleSelectedListPress}
                         />
                     }

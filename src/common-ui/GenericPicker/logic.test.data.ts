@@ -60,7 +60,6 @@ export const derivePickerEntries = (
         name: list.name,
         localId: list.id,
         focused: false,
-        selected: false,
         createdAt: list.createdAt.getTime(),
         remoteId:
             TEST_LIST_METADATA.find((meta) => meta.localId === list.id)

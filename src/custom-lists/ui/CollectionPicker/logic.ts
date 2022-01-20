@@ -7,7 +7,9 @@ import type { DisplayEntry } from 'src/common-ui/GenericPicker/types'
 
 export interface ListPickerDependencies
     extends GenericPickerDependencies<ListDisplayEntry> {
-    onSelectedEntriesChange?: (evt: { selectedEntries: string[] }) => void
+    onSelectedEntriesChange?: (evt: {
+        selectedEntries: Array<string | number>
+    }) => void
     onSearchInputChange?: (evt: { query: string }) => void
     loadRemoteListNames: () => Promise<string[]>
     onClickOutside?: React.MouseEventHandler
@@ -38,8 +40,8 @@ export default class CollectionPickerLogic extends GenericPickerLogic<
     constructor(protected dependencies: ListPickerDependencies) {
         super({
             ...dependencies,
-            selectDisplayField: (e) => e.name,
-            selectIdField: (e) => e.localId,
+            getEntryDisplayField: (e) => e.name,
+            getEntryIdField: (e) => e.localId,
         })
     }
 }

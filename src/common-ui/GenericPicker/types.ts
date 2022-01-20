@@ -8,12 +8,13 @@ export type KeyEvent =
     | 'Escape'
 
 export interface DisplayEntry {
+    localId: string | number
     name: string
     focused: boolean
 }
 
 export type PickerUpdateHandler = (args: {
     selected: Array<string | number>
-    added: string
-    deleted: string
+    added: string | number
+    deleted: string | number
 }) => Promise<void>
