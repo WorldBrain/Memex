@@ -40,9 +40,6 @@ export type GenericPickerEvent<
     EntryType extends DisplayEntry = DisplayEntry
 > = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
-    loadedSuggestions: {}
-    loadedQueryResults: {}
-    entryClicked: {}
     searchInputChanged: { query: string }
     selectedEntryPress: { entry: string }
     resultEntryAllPress: { entry: EntryType }
@@ -350,7 +347,7 @@ export default abstract class GenericPickerLogic<
         const {
             getEntryDisplayField,
             getEntryIdField,
-            unselectEntry: deleteEntry,
+            unselectEntry,
         } = this.dependencies
         const entry = previousState.displayEntries.find(
             (entry) => getEntryDisplayField(entry) === entryName,
@@ -362,15 +359,9 @@ export default abstract class GenericPickerLogic<
                     (id) => id !== getEntryIdField(entry),
                 ),
             },
-            displayEntries: {
-                $set: previousState.displayEntries.filter(
-                    (_entry) =>
-                        getEntryIdField(_entry) !== getEntryIdField(entry),
-                ),
-            },
         } as UIMutation<State>)
 
-        await deleteEntry(getEntryIdField(entry))
+        await unselectEntry(getEntryIdField(entry))
     }
 
     resultEntryPress = async ({
@@ -391,23 +382,11 @@ export default abstract class GenericPickerLogic<
                         (id) => id !== entryId,
                     ),
                 },
-                displayEntries: {
-                    $set: previousState.displayEntries.filter(
-                        (_entry) => getEntryIdField(_entry) !== entryId,
-                    ),
-                },
             } as UIMutation<State>)
             await unselectEntry(entryId)
         } else {
             this.emitMutation({
-                selectedEntries: {
-                    $set: previousState.selectedEntries.filter(
-                        (id) => id !== entryId,
-                    ),
-                },
-                displayEntries: {
-                    $set: [...previousState.displayEntries, entryId],
-                },
+                selectedEntries: { $push: [entryId] },
             } as UIMutation<State>)
             await selectEntry(entryId)
         }
@@ -417,7 +396,11 @@ export default abstract class GenericPickerLogic<
         event: { entry },
         previousState,
     }: GenericPickerUIEvent<'resultEntryPress', EntryType>) => {
-        const { getEntryIdField } = this.dependencies
+        const {
+            getEntryIdField,
+            selectEntry,
+            unselectEntry,
+        } = this.dependencies
         const name = this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
 
@@ -472,7 +455,10 @@ export default abstract class GenericPickerLogic<
             newEntryName: { $set: '' },
             selectedEntries: { $push: [newId] },
             displayEntries: {
-                $push: [{ localId: newId, focused: false, name: entry }],
+                $set: [
+                    ...this.defaultEntries,
+                    { localId: newId, focused: false, name: entry },
+                ],
             },
         } as UIMutation<State>)
     }

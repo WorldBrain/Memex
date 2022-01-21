@@ -4,8 +4,8 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import 'jest-extended'
-import { PickerUpdateHandler, KeyEvent } from './types'
 import * as DATA from './logic.test.data'
+import type { KeyEvent } from './types'
 import type { ListDisplayEntry } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 class TestPickerLogic extends GenericPickerLogic<ListDisplayEntry> {
@@ -13,51 +13,6 @@ class TestPickerLogic extends GenericPickerLogic<ListDisplayEntry> {
 
     validateEntry = this._validateEntry
 }
-
-const TESTURL = 'http://test.com'
-
-const stateHelper = ({
-    entryResultEntrySelected,
-    entryResultEntryNotSelected,
-    entryResultEntryFocused,
-    selectedEntries,
-    query,
-    newEntryButton,
-}: {
-    entryResultEntrySelected?: string[]
-    entryResultEntryNotSelected?: string[]
-    entryResultEntryFocused?: string[]
-    selectedEntries?: string[]
-    query?: string
-    newEntryButton?: boolean
-}) => ({
-    displayEntries: [
-        ...(entryResultEntryFocused ?? []).map((t) => ({
-            name: t,
-            focused: true,
-            selected: false,
-        })),
-        ...(entryResultEntryNotSelected ?? [])
-            .filter((t) => !(entryResultEntryFocused ?? []).includes(t))
-            .map((t) => ({
-                name: t,
-                focused: false,
-                selected: false,
-            })),
-        ...(entryResultEntrySelected ?? [])
-            .filter((t) => !(entryResultEntryFocused ?? []).includes(t))
-            .map((t) => ({
-                name: t,
-                focused: false,
-                selected: true,
-            })),
-    ],
-    selectedEntries: selectedEntries ?? [],
-    loadingQueryResults: false,
-    loadingSuggestions: false,
-    query: query ?? '',
-    newEntryName: newEntryButton ? query : '',
-})
 
 async function insertTestData({ storageManager }: UILogicTestDevice) {
     for (const list of DATA.TEST_LISTS) {
@@ -180,13 +135,21 @@ describe('GenericPickerLogic', () => {
             initialSelectedEntries,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([])
-        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                displayEntries: [],
+                selectedEntries: [],
+            }),
+        )
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual(initialSuggestions)
-        expect(testLogic.state.selectedEntries).toEqual(initialSelectedEntries)
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                displayEntries: initialSuggestions,
+                selectedEntries: initialSelectedEntries,
+            }),
+        )
     })
 
     it('should correctly search for a entry when entry is already selected', async ({
@@ -336,69 +299,6 @@ describe('GenericPickerLogic', () => {
         }
     })
 
-    it('should correctly clear search input', async ({ device }) => {
-        const initialSuggestions = DATA.derivePickerEntries(DATA.TEST_LISTS)
-
-        const { testLogic } = await setupLogicHelper({
-            device,
-            initialSuggestions,
-            queryEntries: async (query: string) => initialSuggestions,
-        })
-
-        await testLogic.init()
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
-
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'test',
-                newEntryName: 'test',
-            }),
-        )
-
-        await testLogic.processEvent('searchInputChanged', { query: '' })
-
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: '',
-                newEntryName: '',
-            }),
-        )
-    })
-
-    // it('should show default entries again after selecting any entry', async ({
-    //     device,
-    // }) => {
-    //     const initialSuggestions = DATA.derivePickerEntries(DATA.TEST_LISTS.slice(0, 3))
-
-    //     const { testLogic } = await setupLogicHelper({
-    //         device,
-    //         initialSuggestions,
-    //         queryEntries: async (query: string) => initialSuggestions,
-    //     })
-
-    //     await testLogic.init()
-    //     await testLogic.processEvent('searchInputChanged', { query: 'test' })
-
-    //     expect(element.state).toEqual(
-    //         stateHelper({
-    //             selectedEntries: ['test1'],
-    //             query: 'test',
-    //             newEntryButton: true,
-    //         }),
-    //     )
-
-    //     await element.processEvent('searchInputChanged', { query: '' })
-
-    //     expect(element.state).toEqual(
-    //         stateHelper({
-    //             entryResultEntryNotSelected: [],
-    //             selectedEntries: [],
-    //             query: '',
-    //             newEntryButton: false,
-    //         }),
-    //     )
-    // })
-
     it('should correctly validate new entries', async ({ device }) => {
         const { testLogic, entryPickerLogic } = await setupLogicHelper({
             device,
@@ -419,30 +319,53 @@ describe('GenericPickerLogic', () => {
         )
     })
 
-    // it('should correctly add entry ', async ({ device }) => {
-    //     const initialSuggestions = DATA.derivePickerEntries(DATA.TEST_LISTS.slice(0, 3))
-    //     const { testLogic, entryPickerLogic } = await setupLogicHelper({
-    //         device,
-    //         initialSuggestions,
-    //     })
+    it('should show default entries again after clearing the search query', async ({
+        device,
+    }) => {
+        const initialSuggestions = DATA.derivePickerEntries(
+            DATA.TEST_LISTS.slice(0, 3),
+        )
 
-    //     await testLogic.init()
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+        })
+        const newEntryText = 'testwerwerwerwer'
 
-    //     const entriesBefore = await device.backgroundModules.customLists.fetchAllLists({ limit: 1000 })
+        const expectDefaultState = () =>
+            expect(testLogic.state).toEqual(
+                expect.objectContaining({
+                    query: '',
+                    newEntryName: '',
+                    selectedEntries: [],
+                    displayEntries: initialSuggestions,
+                }),
+            )
 
-    //     await testLogic.processEvent('resultEntryPress', {
-    //         entry: DATA.derivePickerEntries([DATA.TEST_LISTS[0]])[0],
-    //     })
+        await testLogic.init()
 
-    //     await entryPickerLogic.processingUpstreamOperation
+        expectDefaultState()
 
-    //     const entriesAfter = await device.backgroundModules.customLists.fetchAllLists({ limit: 1000 })
+        await testLogic.processEvent('searchInputChanged', {
+            query: newEntryText,
+        })
 
-    //     expect(entriesBefore).toEqual([])
-    //     expect(entriesAfter).toEqual(['sugg1'])
-    // })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: newEntryText,
+                newEntryName: newEntryText,
+                selectedEntries: [],
+                displayEntries: [],
+            }),
+        )
 
-    it('should correctly add existing entry to all tabs', async ({
+        await testLogic.processEvent('searchInputChanged', {
+            query: '',
+        })
+        expectDefaultState()
+    })
+
+    it('should correctly select existing entry for all tabs', async ({
         device,
     }) => {
         const initialSuggestions = DATA.derivePickerEntries(
@@ -467,58 +390,237 @@ describe('GenericPickerLogic', () => {
         ])
     })
 
-    // it('should correctly add a new entry to all tabs', async ({ device }) => {
-    //     const { testLogic, entryPickerLogic } = await setupLogicHelper({
-    //         device,
-    //     })
+    it('should correctly select/unselect existing entry', async ({
+        device,
+    }) => {
+        const initialSuggestions = DATA.derivePickerEntries(
+            DATA.TEST_LISTS.slice(0, 3),
+        )
+        let selectedEntryId = null
+        let unselectedEntryId = null
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            unselectEntry: async (entryId) => {
+                unselectedEntryId = entryId
+            },
+            selectEntry: async (entryId) => {
+                selectedEntryId = entryId
+            },
+        })
 
-    //     const { customLists } = device.backgroundModules
+        await testLogic.init()
 
-    //     expect(testLogic.state.selectedEntries).toEqual([])
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(selectedEntryId).toBe(null)
+        expect(unselectedEntryId).toBe(null)
 
-    //     await testLogic.processEvent('newEntryAllPress', {
-    //         entry: 'sugg1',
-    //     })
-    //     await entryPickerLogic.processingUpstreamOperation
+        await testLogic.processEvent('resultEntryPress', {
+            entry: initialSuggestions[0],
+        })
 
-    //     expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
-    //         'sugg1',
-    //     ])
-    // })
+        expect(testLogic.state.selectedEntries).toEqual([
+            initialSuggestions[0].localId,
+        ])
+        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(unselectedEntryId).toBe(null)
 
-    // it('should be in the right state after an error adding a entry', async ({
-    //     device,
-    // }) => {
-    //     const initialSuggestions = ['sugg1', 'sugg2']
-    //     const testError = Error('test error')
-    //     const onUpdateEntrySelection = async () => {
-    //         throw testError
-    //     }
-    //     const { testLogic, entryPickerLogic } = await setupLogicHelper({
-    //         onUpdateEntrySelection,
-    //         device,
-    //         initialSuggestions,
-    //     })
+        await testLogic.processEvent('resultEntryPress', {
+            entry: initialSuggestions[0],
+        })
 
-    //     const entriesBefore = await device.backgroundModules.customLists.fetchPageLists(
-    //         {
-    //             url: TESTURL,
-    //         },
-    //     )
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
 
-    //     await expect(
-    //         testLogic.processEvent('resultEntryPress', {
-    //             entry: { name: 'sugg1', focused: false, selected: false },
-    //         }),
-    //     ).rejects.toEqual(testError)
+        await testLogic.processEvent('resultEntryPress', {
+            entry: initialSuggestions[0],
+        })
 
-    //     const entriesAfter = await device.backgroundModules.customLists.fetchPageLists(
-    //         {
-    //             url: TESTURL,
-    //         },
-    //     )
+        expect(testLogic.state.selectedEntries).toEqual([
+            initialSuggestions[0].localId,
+        ])
+        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
+    })
 
-    //     expect(entriesBefore).toEqual([])
-    //     expect(entriesAfter).toEqual([])
-    // })
+    it('should correctly unselect selected entries shown in the search input bar', async ({
+        device,
+    }) => {
+        const initialSuggestions = DATA.derivePickerEntries(
+            DATA.TEST_LISTS.slice(0, 3),
+        )
+        let unselectedEntryId = null
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            unselectEntry: async (entryId) => {
+                unselectedEntryId = entryId
+            },
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [],
+                displayEntries: initialSuggestions,
+            }),
+        )
+        expect(unselectedEntryId).toBe(null)
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: initialSuggestions[0],
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [initialSuggestions[0].localId],
+                displayEntries: initialSuggestions,
+            }),
+        )
+        expect(unselectedEntryId).toBe(null)
+
+        await testLogic.processEvent('selectedEntryPress', {
+            entry: initialSuggestions[0].name,
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [],
+                displayEntries: initialSuggestions,
+            }),
+        )
+        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
+    })
+
+    it('should show default entries again + new entry after selecting a new entry', async ({
+        device,
+    }) => {
+        const initialSuggestions = DATA.derivePickerEntries(
+            DATA.TEST_LISTS.slice(0, 3),
+        )
+        const newEntryId = 1000
+        const newEntryText = 'test'
+
+        let newEntryName = null
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            createNewEntry: async (entryName) => {
+                newEntryName = entryName
+                return newEntryId
+            },
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [],
+                displayEntries: initialSuggestions,
+            }),
+        )
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: newEntryText,
+        })
+
+        expect(newEntryName).toBe(null)
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: newEntryText,
+                newEntryName: newEntryText,
+            }),
+        )
+
+        await testLogic.processEvent('newEntryPress', { entry: newEntryText })
+
+        expect(newEntryName).toBe(newEntryText)
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [newEntryId],
+                displayEntries: [
+                    ...initialSuggestions,
+                    expect.objectContaining({
+                        name: newEntryText,
+                        localId: newEntryId,
+                        focused: false,
+                    }),
+                ],
+            }),
+        )
+    })
+
+    it('should correctly add a new entry to all tabs', async ({ device }) => {
+        const initialSuggestions = DATA.derivePickerEntries(
+            DATA.TEST_LISTS.slice(0, 3),
+        )
+        const newEntryId = 1000
+        const newEntryText = 'test'
+
+        let newEntryName = null
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            createNewEntry: async (entryName) => {
+                newEntryName = entryName
+                return newEntryId
+            },
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [],
+                displayEntries: initialSuggestions,
+            }),
+        )
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: newEntryText,
+        })
+
+        expect(newEntryName).toBe(null)
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: newEntryText,
+                newEntryName: newEntryText,
+            }),
+        )
+
+        await testLogic.processEvent('newEntryAllPress', {
+            entry: newEntryText,
+        })
+        expect(newEntryName).toBe(newEntryText)
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                selectedEntries: [newEntryId],
+                displayEntries: [
+                    ...initialSuggestions,
+                    expect.objectContaining({
+                        name: newEntryText,
+                        localId: newEntryId,
+                        focused: false,
+                    }),
+                ],
+            }),
+        )
+    })
 })
