@@ -1,4 +1,5 @@
 import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { ListDisplayEntry } from '../ui/CollectionPicker/logic'
 
 export interface PageList {
     id: number
@@ -6,6 +7,7 @@ export interface PageList {
     remoteId?: string
     description?: string
     pages?: string[]
+    createdAt: Date
     isNestable?: boolean
     isDeletable?: boolean
     isOwned?: boolean
@@ -82,7 +84,9 @@ export interface RemoteCollectionsInterface {
     fetchListById(args: { id: number }): Promise<PageList>
     fetchListByName(args: { name: string }): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
-    fetchInitialListSuggestions(args?: { limit?: number }): Promise<string[]>
+    fetchInitialListSuggestions(args?: {
+        limit?: number
+    }): Promise<ListDisplayEntry[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<string[]>
     fetchListIdsByUrl(args: { url: string }): Promise<number[]>
@@ -90,7 +94,7 @@ export interface RemoteCollectionsInterface {
     searchForListSuggestions(args: {
         query: string
         limit?: number
-    }): Promise<string[]>
+    }): Promise<PageList[]>
     addOpenTabsToList(args: {
         name: string
         listId?: number
@@ -109,4 +113,5 @@ export interface RemoteCollectionsInterface {
 
 export interface CollectionsSettings {
     suggestions?: string[]
+    suggestionIds: number[]
 }

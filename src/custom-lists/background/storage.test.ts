@@ -365,23 +365,29 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch suggestions based on list names', async () => {
-            const { customLists, storageManager } = await setupTest()
+            const { customLists } = await setupTest()
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'go' }),
-            ).toEqual([DATA.LIST_2.name, DATA.LIST_3.name])
+            ).toEqual([
+                expect.objectContaining(DATA.LIST_2),
+                expect.objectContaining(DATA.LIST_3),
+            ])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'some' }),
-            ).toEqual([DATA.LIST_1.name, DATA.LIST_3.name])
+            ).toEqual([
+                expect.objectContaining(DATA.LIST_1),
+                expect.objectContaining(DATA.LIST_3),
+            ])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'ip' }),
-            ).toEqual([DATA.LIST_1.name])
+            ).toEqual([expect.objectContaining(DATA.LIST_1)])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'ipsum' }),
-            ).toEqual([DATA.LIST_1.name])
+            ).toEqual([expect.objectContaining(DATA.LIST_1)])
         })
 
         test('Case insensitive name search', async () => {
@@ -487,27 +493,88 @@ describe('Collection Cache', () => {
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
             await listsModule.createCustomList(DATA.LIST_1)
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_1.name,
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
             ])
 
             await listsModule.createCustomList(DATA.LIST_2)
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_2.name,
-                DATA.LIST_1.name,
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                }),
             ])
 
             await listsModule.createCustomList(DATA.LIST_3)
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_3.name,
-                DATA.LIST_2.name,
-                DATA.LIST_1.name,
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                }),
             ])
 
             await listsModule.createCustomList(DATA.LIST_2)
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_2.name,
-                DATA.LIST_3.name,
-                DATA.LIST_1.name,
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                }),
             ])
         })
 
@@ -520,7 +587,13 @@ describe('Collection Cache', () => {
                 url: 'https://www.ipsum.com/test',
             })
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_1.name,
+                {
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
             ])
 
             await listsModule.updateListForPage({
@@ -528,7 +601,13 @@ describe('Collection Cache', () => {
                 url: 'https://www.ipsum.com/test1',
             })
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_1.name,
+                {
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
             ])
 
             await listsModule.updateListForPage({
@@ -536,8 +615,20 @@ describe('Collection Cache', () => {
                 url: 'https://www.ipsum.com/test',
             })
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                DATA.LIST_2.name,
-                DATA.LIST_1.name,
+                {
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                },
             ])
         })
     })

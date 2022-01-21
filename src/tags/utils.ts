@@ -1,10 +1,9 @@
 export async function updateSuggestionsCache(args: {
-    added?: string
-    removed?: string
-    updated?: [string, string]
+    added?: number
+    removed?: number
     suggestionLimit?: number
-    getCache(): Promise<string[]>
-    setCache(suggestions: string[]): Promise<void>
+    getCache(): Promise<number[]>
+    setCache(suggestions: number[]): Promise<void>
 }) {
     let suggestions = await args.getCache()
 
@@ -15,15 +14,6 @@ export async function updateSuggestionsCache(args: {
             suggestions = suggestions.filter(Boolean)
         }
         suggestions.unshift(args.added)
-    }
-
-    if (args.updated) {
-        const [oldName, newName] = args.updated
-        const i = suggestions.indexOf(oldName)
-
-        if (i !== -1) {
-            suggestions[i] = newName
-        }
     }
 
     if (args.removed) {

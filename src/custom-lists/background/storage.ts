@@ -72,6 +72,11 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObject',
                     args: { id: '$id:pk' },
                 },
+                findListsByIds: {
+                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                    operation: 'findObjects',
+                    args: { id: { $in: '$ids:array' } },
+                },
                 findListEntriesByListId: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'findObjects',
@@ -213,6 +218,10 @@ export default class CustomListStorage extends StorageModule {
 
     async fetchListById(id: number): Promise<PageList | null> {
         return this.operation('findListById', { id })
+    }
+
+    async fetchListByIds(ids: number[]): Promise<PageList[]> {
+        return this.operation('findListsByIds', { ids })
     }
 
     async fetchListWithPagesById(id: number) {
@@ -372,9 +381,12 @@ export default class CustomListStorage extends StorageModule {
             },
         )
 
-        const suggestedLists = await this.operation('findListsIncluding', {
-            includedIds: suggestions.map(({ pk }) => pk),
-        })
+        const suggestedLists: PageList[] = await this.operation(
+            'findListsIncluding',
+            {
+                includedIds: suggestions.map(({ pk }) => pk),
+            },
+        )
 
         return suggestedLists.filter(CustomListStorage.filterOutSpecialLists)
     }
