@@ -254,7 +254,6 @@ export class AnnotationsSidebarContainer<
             listQueryEntries: collectionPickerProps.listQueryEntries,
             loadDefaultListSuggestions:
                 collectionPickerProps.loadDefaultListSuggestions,
-            loadRemoteListNames: collectionPickerProps.loadRemoteListNames,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
@@ -378,7 +377,6 @@ export class AnnotationsSidebarContainer<
                 onEscapeKeyDown={() =>
                     this.processEvent('resetListPickerAnnotationId', null)
                 }
-                loadRemoteListNames={collectionPickerProps.loadRemoteListNames}
             />
         )
     }

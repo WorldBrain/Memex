@@ -65,7 +65,6 @@ export type NoteInteractionProps = Omit<
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
     loadDefaultListSuggestions?: () => string[] | Promise<string[]>
     listQueryEntries?: (query: string) => Promise<string[]>
-    loadRemoteListNames?: () => Promise<string[]>
 }
 
 // NOTE: Derived type - edit the original

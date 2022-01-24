@@ -9,6 +9,7 @@ export type KeyEvent =
 
 export interface DisplayEntry {
     localId: string | number
+    remoteId: string | number | null
     name: string
     focused: boolean
 }

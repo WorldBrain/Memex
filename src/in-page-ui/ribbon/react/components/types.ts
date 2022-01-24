@@ -74,7 +74,6 @@ export interface RibbonListsProps {
     fetchInitialListSelections: () => Promise<string[]>
     loadDefaultSuggestions: () => Promise<string[]>
     queryEntries: (query: string) => Promise<string[]>
-    loadRemoteListNames: () => Promise<string[]>
 }
 
 export interface RibbonSearchProps {

@@ -268,7 +268,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
-                    <TagPicker
+                    {/* <TagPicker
                         onUpdateEntrySelection={(args) =>
                             this.tagsBG.updateTagForPage({
                                 ...args,
@@ -279,7 +279,7 @@ class AnnotationList extends Component<Props, State> {
                         onClickOutside={() =>
                             this.props.setActiveTagPickerNoteId(undefined)
                         }
-                    />
+                    /> */}
                 </HoverBox>
             </div>
         )
@@ -292,7 +292,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
-                    <CollectionPicker
+                    {/* <CollectionPicker
                         onUpdateEntrySelection={async (args) => {
                             //  TODO implement picker
                             const name = args.added ?? args.deleted
@@ -318,7 +318,7 @@ class AnnotationList extends Component<Props, State> {
                         onClickOutside={() =>
                             this.props.setActiveListPickerNoteId(undefined)
                         }
-                    />
+                    /> */}
                 </HoverBox>
             </div>
         )

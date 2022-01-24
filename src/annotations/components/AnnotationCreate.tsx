@@ -42,7 +42,6 @@ export interface AnnotationCreateEventProps {
     onUnhover?: React.MouseEventHandler
     loadDefaultListSuggestions?: () => string[] | Promise<string[]>
     listQueryEntries?: (query: string) => Promise<string[]>
-    loadRemoteListNames?: () => Promise<string[]>
 }
 
 export interface AnnotationCreateGeneralProps {
@@ -64,7 +63,6 @@ export interface Props
     tagQueryEntries?: (query: string) => Promise<string[]>
     loadDefaultListSuggestions?: () => string[] | Promise<string[]>
     listQueryEntries?: (query: string) => Promise<string[]>
-    loadRemoteListNames?: () => Promise<string[]>
 }
 
 export class AnnotationCreate extends React.Component<Props, State>
@@ -227,7 +225,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                 }
                 initialSelectedEntries={() => lists}
                 onEscapeKeyDown={() => setPickerShown(false)}
-                loadRemoteListNames={this.props.loadRemoteListNames}
             />
         )
     }

@@ -14,27 +14,28 @@ export interface Props {
     onPressActOnAll?: (entry: DisplayEntry, index?: number) => void
     index: number
     name: string
+    localId: string | number
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
     selected?: boolean
     focused?: boolean
-    remote?: boolean
+    remoteId: string | number | null
 }
 
 class EntryRow extends React.Component<Props> {
-    _getEntry = (props) => {
-        const { name, selected, focused } = this.props
-        return { name, selected, focused }
+    _getEntry = () => {
+        const { name, selected, focused, localId, remoteId } = this.props
+        return { name, selected, focused, localId, remoteId }
     }
 
     handleEntryPress = () => {
-        this.props.onPress && this.props.onPress(this._getEntry(this.props))
+        this.props.onPress && this.props.onPress(this._getEntry())
     }
 
     handleActOnAllPress = (e: SyntheticEvent) => {
         this.props.onPressActOnAll &&
-            this.props.onPressActOnAll(this._getEntry(this.props))
+            this.props.onPressActOnAll(this._getEntry())
         e.preventDefault()
         e.stopPropagation()
         return false
@@ -42,17 +43,16 @@ class EntryRow extends React.Component<Props> {
 
     handleMouseOver = () => {
         this.props.onFocus &&
-            this.props.onFocus(this._getEntry(this.props), this.props.index)
+            this.props.onFocus(this._getEntry(), this.props.index)
     }
 
     handleMouseOut = () => {
-        this.props.onFocus &&
-            this.props.onFocus(this._getEntry(this.props), null)
+        this.props.onFocus && this.props.onFocus(this._getEntry(), null)
     }
 
     render() {
         const {
-            remote,
+            remoteId,
             selected,
             focused,
             onPressActOnAll,
@@ -68,7 +68,7 @@ class EntryRow extends React.Component<Props> {
             >
                 <NameWrapper>
                     {resultItem}
-                    {remote && (
+                    {remoteId != null && (
                         <ButtonTooltip tooltipText={'shared'} position="bottom">
                             <Icon
                                 heightAndWidth="14px"

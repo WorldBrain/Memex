@@ -778,8 +778,6 @@ export class DashboardContainer extends StatefulUIElement<
                         shareCollectionPickerProps.listQueryEntries,
                     loadDefaultListSuggestions: (day, pageId) =>
                         shareCollectionPickerProps.loadDefaultListSuggestions,
-                    loadRemoteListNames: (day, pageId) =>
-                        shareCollectionPickerProps.loadRemoteListNames,
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -831,8 +829,6 @@ export class DashboardContainer extends StatefulUIElement<
                         shareCollectionPickerProps.listQueryEntries,
                     loadDefaultListSuggestions: (day, pageId) =>
                         shareCollectionPickerProps.loadDefaultListSuggestions,
-                    loadRemoteListNames: (day, pageId) =>
-                        shareCollectionPickerProps.loadRemoteListNames,
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

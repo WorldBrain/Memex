@@ -187,10 +187,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     loadDefaultSuggestions: this.props.customLists
                         .fetchInitialListSuggestions,
-                    loadRemoteListNames: async () => {
-                        const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-                        return remoteLists.map((list) => list.name)
-                    },
                 }}
                 search={{
                     ...this.state.search,

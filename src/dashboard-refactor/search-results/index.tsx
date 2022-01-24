@@ -193,9 +193,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 loadDefaultSuggestions={
                                     interactionProps.loadDefaultListSuggestions
                                 }
-                                loadRemoteListNames={
-                                    interactionProps.loadRemoteListNames
-                                }
                             />
                         </HoverBox>
                     )
@@ -231,9 +228,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 queryEntries={interactionProps.listQueryEntries}
                                 loadDefaultSuggestions={
                                     interactionProps.loadDefaultListSuggestions
-                                }
-                                loadRemoteListNames={
-                                    interactionProps.loadRemoteListNames
                                 }
                             />
                         </HoverBox>

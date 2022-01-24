@@ -1,6 +1,5 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -8,6 +7,7 @@ import ListPickerLogic, {
     ListPickerDependencies,
     ListPickerEvent,
     ListPickerState,
+    ListDisplayEntry,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
@@ -34,12 +34,30 @@ class ListPicker extends StatefulUIElement<
     ListPickerEvent
 > {
     static defaultProps: Partial<ListPickerDependencies> = {
-        queryEntries: (query) =>
-            collections.searchForListSuggestions({ query }),
-        loadDefaultSuggestions: collections.fetchInitialListSuggestions,
-        loadRemoteListNames: async () => {
-            const remoteLists = await contentSharing.getAllRemoteLists()
-            return remoteLists.map((list) => list.name)
+        queryEntries: async (query) => {
+            const suggestions = await collections.searchForListSuggestions({
+                query,
+            })
+            const remoteListIds = await contentSharing.getRemoteListIds({
+                localListIds: suggestions.map((s) => s.id),
+            })
+            return suggestions.map((s) => ({
+                localId: s.id,
+                name: s.name,
+                createdAt: s.createdAt.getTime(),
+                focused: false,
+                remoteId: remoteListIds[s.id] ?? null,
+            }))
+        },
+        loadDefaultSuggestions: async () => {
+            const suggestions = await collections.fetchInitialListSuggestions()
+            const remoteListIds = await contentSharing.getRemoteListIds({
+                localListIds: suggestions.map((s) => s.localId),
+            })
+            return suggestions.map((s) => ({
+                ...s,
+                remoteId: remoteListIds[s.localId] ?? null,
+            }))
         },
     }
 
@@ -58,31 +76,6 @@ class ListPicker extends StatefulUIElement<
             .filter((entry) => entry != null)
     }
 
-    searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Add to Collection'
-    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
-
-    componentDidUpdate(
-        prevProps: ListPickerDependencies,
-        prevState: ListPickerState,
-    ) {
-        if (prevProps.query !== this.props.query) {
-            this.processEvent('searchInputChanged', { query: this.props.query })
-        }
-
-        const prev = prevState.selectedEntries
-        const curr = this.state.selectedEntries
-
-        if (prev.length !== curr.length || !isEqual(prev, curr)) {
-            this.props.onSelectedEntriesChange?.({
-                selectedEntries: this.state.selectedEntries,
-            })
-        }
-    }
-
-    private isListRemote = (name: string): boolean =>
-        this.state.remoteLists.has(name)
-
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e)
@@ -93,18 +86,16 @@ class ListPicker extends StatefulUIElement<
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
-    handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChange?.({ query })
-        return this.processEvent('searchInputChanged', { query })
-    }
+    handleSearchInputChanged = (query: string) =>
+        this.processEvent('searchInputChanged', { query })
 
     handleSelectedListPress = (list: string) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: DisplayEntry) =>
+    handleResultListPress = (list: ListDisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: list })
 
-    handleResultListAllPress = (list: DisplayEntry) =>
+    handleResultListAllPress = (list: ListDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
 
     handleNewListAllPress = () =>
@@ -112,7 +103,7 @@ class ListPicker extends StatefulUIElement<
             entry: this.state.newEntryName,
         })
 
-    handleResultListFocus = (list: DisplayEntry, index?: number) =>
+    handleResultListFocus = (list: ListDisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })
 
     handleNewListPress = () =>
@@ -125,18 +116,20 @@ class ListPicker extends StatefulUIElement<
             onPress={this.handleResultListPress}
             onPressActOnAll={
                 this.props.actOnAllTabs
-                    ? (t) => this.handleResultListAllPress(t)
+                    ? (t) =>
+                          this.handleResultListAllPress(t as ListDisplayEntry)
                     : undefined
             }
             onFocus={this.handleResultListFocus}
             key={`ListKeyName-${list.name}`}
             index={index}
             name={list.name}
-            selected={list.selected}
+            selected={this.state.selectedEntries.includes(list.localId)}
+            localId={list.localId}
             focused={list.focused}
-            remote={this.isListRemote(list.name)}
+            remoteId={list.remoteId}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText={this.removeToolTipText}
+            removeTooltipText="Remove from Space"
             actOnAllTooltipText="Add all tabs in window to list"
         />
     )
@@ -184,7 +177,7 @@ class ListPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder={this.searchInputPlaceholder}
+                    searchInputPlaceholder="Add to Space"
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
