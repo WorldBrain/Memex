@@ -1,4 +1,4 @@
-import type { ListDisplayEntry } from './logic'
+import type { SpaceDisplayEntry } from './logic'
 
 export const TEST_LISTS = [
     {
@@ -55,7 +55,7 @@ export const TEST_LIST_METADATA = [
 
 export const derivePickerEntries = (
     lists: typeof TEST_LISTS,
-): ListDisplayEntry[] =>
+): SpaceDisplayEntry[] =>
     lists.map((list) => ({
         name: list.name,
         localId: list.id,

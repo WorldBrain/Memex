@@ -4,10 +4,10 @@ import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
-    ListPickerDependencies,
-    ListPickerEvent,
-    ListPickerState,
-    ListDisplayEntry,
+    SpacePickerDependencies,
+    SpacePickerEvent,
+    SpacePickerState,
+    SpaceDisplayEntry,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
@@ -28,12 +28,15 @@ import {
     contentSharing,
 } from 'src/util/remote-functions-background'
 
-class ListPicker extends StatefulUIElement<
-    ListPickerDependencies,
-    ListPickerState,
-    ListPickerEvent
+class SpacePicker extends StatefulUIElement<
+    SpacePickerDependencies,
+    SpacePickerState,
+    SpacePickerEvent
 > {
-    static defaultProps: Partial<ListPickerDependencies> = {
+    static defaultProps: Pick<
+        SpacePickerDependencies,
+        'queryEntries' | 'loadDefaultSuggestions'
+    > = {
         queryEntries: async (query) => {
             const suggestions = await collections.searchForListSuggestions({
                 query,
@@ -61,7 +64,7 @@ class ListPicker extends StatefulUIElement<
         },
     }
 
-    constructor(props: ListPickerDependencies) {
+    constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
     }
 
@@ -92,10 +95,10 @@ class ListPicker extends StatefulUIElement<
     handleSelectedListPress = (list: string) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: ListDisplayEntry) =>
+    handleResultListPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: list })
 
-    handleResultListAllPress = (list: ListDisplayEntry) =>
+    handleResultListAllPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
 
     handleNewListAllPress = () =>
@@ -103,7 +106,7 @@ class ListPicker extends StatefulUIElement<
             entry: this.state.newEntryName,
         })
 
-    handleResultListFocus = (list: ListDisplayEntry, index?: number) =>
+    handleResultListFocus = (list: SpaceDisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })
 
     handleNewListPress = () =>
@@ -111,13 +114,13 @@ class ListPicker extends StatefulUIElement<
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderListRow = (list: ListDisplayEntry, index: number) => (
+    renderListRow = (list: SpaceDisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultListPress}
             onPressActOnAll={
                 this.props.actOnAllTabs
                     ? (t) =>
-                          this.handleResultListAllPress(t as ListDisplayEntry)
+                          this.handleResultListAllPress(t as SpaceDisplayEntry)
                     : undefined
             }
             onFocus={this.handleResultListFocus}
@@ -252,4 +255,4 @@ const EmptyListsView = styled.div`
     text-align: center;
 `
 
-export default onClickOutside(ListPicker)
+export default onClickOutside(SpacePicker)

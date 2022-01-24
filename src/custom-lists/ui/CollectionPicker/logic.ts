@@ -2,7 +2,7 @@ import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 
-export interface ListDisplayEntry {
+export interface SpaceDisplayEntry {
     localId: string | number
     remoteId: string | number | null
     name: string
@@ -10,18 +10,16 @@ export interface ListDisplayEntry {
     createdAt: number
 }
 
-export interface ListPickerDependencies {
+export interface SpacePickerDependencies {
     createNewEntry: (name: string) => Promise<string | number>
     selectEntry: (id: string | number) => Promise<void>
     unselectEntry: (id: string | number) => Promise<void>
-    getEntryIdField: (entry: ListDisplayEntry) => string | number
-    getEntryDisplayField: (entry: ListDisplayEntry) => string
-    queryEntries: (query: string) => Promise<ListDisplayEntry[]>
+    queryEntries: (query: string) => Promise<SpaceDisplayEntry[]>
     actOnAllTabs?: (query: string) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
     loadDefaultSuggestions: () =>
-        | ListDisplayEntry[]
-        | Promise<ListDisplayEntry[]>
+        | SpaceDisplayEntry[]
+        | Promise<SpaceDisplayEntry[]>
     initialSelectedEntries?: () =>
         | Array<number | string>
         | Promise<Array<number | string>>
@@ -29,46 +27,46 @@ export interface ListPickerDependencies {
     onClickOutside?: React.MouseEventHandler
 }
 
-export type ListPickerEvent = UIEvent<{
+export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string }
     selectedEntryPress: { entry: string }
-    resultEntryAllPress: { entry: ListDisplayEntry }
+    resultEntryAllPress: { entry: SpaceDisplayEntry }
     newEntryAllPress: { entry: string }
-    resultEntryPress: { entry: ListDisplayEntry }
-    resultEntryFocus: { entry: ListDisplayEntry; index: number }
+    resultEntryPress: { entry: SpaceDisplayEntry }
+    resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
     newEntryPress: { entry: string }
     keyPress: { key: KeyEvent }
     focusInput: {}
 }>
 
-type EventHandler<EventName extends keyof ListPickerEvent> = UIEventHandler<
-    ListPickerState,
-    ListPickerEvent,
+type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
+    SpacePickerState,
+    SpacePickerEvent,
     EventName
 >
 
-export interface ListPickerState {
+export interface SpacePickerState {
     query?: string
     newEntryName: string
-    displayEntries: ListDisplayEntry[]
+    displayEntries: SpaceDisplayEntry[]
     selectedEntries: Array<string | number>
     loadingSuggestions: boolean
     loadingQueryResults: boolean
 }
 
-export default class CollectionPickerLogic extends UILogic<
-    ListPickerState,
-    ListPickerEvent
+export default class SpacePickerLogic extends UILogic<
+    SpacePickerState,
+    SpacePickerEvent
 > {
     private searchInputRef?: HTMLInputElement
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
 
-    constructor(protected dependencies: ListPickerDependencies) {
+    constructor(protected dependencies: SpacePickerDependencies) {
         super()
     }
 
-    protected defaultEntries: ListDisplayEntry[] = []
+    protected defaultEntries: SpaceDisplayEntry[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
@@ -80,7 +78,7 @@ export default class CollectionPickerLogic extends UILogic<
         this._processingUpstreamOperation = val
     }
 
-    getInitialState(): ListPickerState {
+    getInitialState(): SpacePickerState {
         return {
             query: '',
             newEntryName: '',
@@ -88,7 +86,7 @@ export default class CollectionPickerLogic extends UILogic<
             selectedEntries: [],
             loadingSuggestions: false,
             loadingQueryResults: false,
-        } as ListPickerState
+        } as SpacePickerState
     }
 
     init: EventHandler<'init'> = async () => {
@@ -230,8 +228,8 @@ export default class CollectionPickerLogic extends UILogic<
      * (controls the 'Add a new Tag: ...')
      */
     private _setCreateEntryDisplay = (
-        list: ListDisplayEntry[],
-        displayEntries: ListDisplayEntry[],
+        list: SpaceDisplayEntry[],
+        displayEntries: SpaceDisplayEntry[],
         term: string,
     ) => {
         if (this._isTermInEntryList(list, term)) {
@@ -265,7 +263,7 @@ export default class CollectionPickerLogic extends UILogic<
 
     private _updateFocus = (
         focusIndex: number | undefined,
-        displayEntries: ListDisplayEntry[],
+        displayEntries: SpaceDisplayEntry[],
         emit = true,
     ) => {
         this.focusIndex = focusIndex ?? -1
@@ -290,72 +288,57 @@ export default class CollectionPickerLogic extends UILogic<
      * Loops through a list of entries and exits if a match is found
      */
     private _isTermInEntryList = (
-        entryList: ListDisplayEntry[],
+        entryList: SpaceDisplayEntry[],
         term: string,
     ) => {
-        const { getEntryDisplayField } = this.dependencies
         for (const entry of entryList) {
-            if (getEntryDisplayField(entry) === term) {
+            if (entry.name === term) {
                 return true
             }
         }
         return false
     }
 
-    private _queryInitialSuggestions = (term) =>
-        this.defaultEntries.filter((entry) =>
-            this.dependencies.getEntryDisplayField(entry).includes(term),
-        )
-
     selectedEntryPress: EventHandler<'selectedEntryPress'> = async ({
         event: { entry: entryName },
         previousState,
     }) => {
-        const {
-            getEntryDisplayField,
-            getEntryIdField,
-            unselectEntry,
-        } = this.dependencies
+        const { unselectEntry } = this.dependencies
         const entry = previousState.displayEntries.find(
-            (entry) => getEntryDisplayField(entry) === entryName,
+            (entry) => entry.name === entryName,
         )
 
         this.emitMutation({
             selectedEntries: {
                 $set: previousState.selectedEntries.filter(
-                    (id) => id !== getEntryIdField(entry),
+                    (id) => id !== entry.localId,
                 ),
             },
-        } as UIMutation<ListPickerState>)
+        } as UIMutation<SpacePickerState>)
 
-        await unselectEntry(getEntryIdField(entry))
+        await this.dependencies.unselectEntry(entry.localId)
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
         event: { entry },
         previousState,
     }) => {
-        const {
-            getEntryIdField,
-            unselectEntry,
-            selectEntry,
-        } = this.dependencies
-        const entryId = getEntryIdField(entry)
+        const { unselectEntry, selectEntry } = this.dependencies
 
-        if (previousState.selectedEntries.includes(entryId)) {
+        if (previousState.selectedEntries.includes(entry.localId)) {
             this.emitMutation({
                 selectedEntries: {
                     $set: previousState.selectedEntries.filter(
-                        (id) => id !== entryId,
+                        (id) => id !== entry.localId,
                     ),
                 },
-            } as UIMutation<ListPickerState>)
-            await unselectEntry(entryId)
+            } as UIMutation<SpacePickerState>)
+            await unselectEntry(entry.localId)
         } else {
             this.emitMutation({
-                selectedEntries: { $push: [entryId] },
-            } as UIMutation<ListPickerState>)
-            await selectEntry(entryId)
+                selectedEntries: { $push: [entry.localId] },
+            } as UIMutation<SpacePickerState>)
+            await selectEntry(entry.localId)
         }
     }
 
@@ -363,30 +346,22 @@ export default class CollectionPickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const {
-            getEntryIdField,
-            selectEntry,
-            unselectEntry,
-        } = this.dependencies
         const name = this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
 
         const isAlreadySelected = previousState.selectedEntries.includes(
-            getEntryIdField(entry),
+            entry.localId,
         )
 
         this.emitMutation({
             selectedEntries: {
                 $set: isAlreadySelected
                     ? previousState.selectedEntries.filter(
-                          (entryId) => entryId !== getEntryIdField(entry),
+                          (entryId) => entryId !== entry.localId,
                       )
-                    : [
-                          ...previousState.selectedEntries,
-                          getEntryIdField(entry),
-                      ],
+                    : [...previousState.selectedEntries, entry.localId],
             },
-        } as UIMutation<ListPickerState>)
+        } as UIMutation<SpacePickerState>)
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
@@ -427,7 +402,7 @@ export default class CollectionPickerLogic extends UILogic<
                     { localId: newId, focused: false, name: entry },
                 ],
             },
-        } as UIMutation<ListPickerState>)
+        } as UIMutation<SpacePickerState>)
     }
 
     validateEntry = (entry: string) => {

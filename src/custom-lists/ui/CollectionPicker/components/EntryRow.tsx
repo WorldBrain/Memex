@@ -6,12 +6,12 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import { opacify } from 'polished'
-import type { ListDisplayEntry } from '../logic'
+import type { SpaceDisplayEntry } from '../logic'
 
 export interface Props {
-    onPress?: (entry: ListDisplayEntry) => void
-    onFocus?: (entry: ListDisplayEntry, index?: number) => void
-    onPressActOnAll?: (entry: ListDisplayEntry, index?: number) => void
+    onPress?: (entry: SpaceDisplayEntry) => void
+    onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
+    onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     name: string
     localId: string | number

@@ -1,5 +1,5 @@
 import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { ListDisplayEntry } from '../ui/CollectionPicker/logic'
+import { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 export interface PageList {
     id: number
@@ -86,7 +86,7 @@ export interface RemoteCollectionsInterface {
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchInitialListSuggestions(args?: {
         limit?: number
-    }): Promise<ListDisplayEntry[]>
+    }): Promise<SpaceDisplayEntry[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<string[]>
     fetchListIdsByUrl(args: { url: string }): Promise<number[]>

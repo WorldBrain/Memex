@@ -23,7 +23,7 @@ import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import type { ListDisplayEntry } from '../ui/CollectionPicker/logic'
+import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 const limitSuggestionsReturnLength = 10
 const limitSuggestionsStorageLength = 20
@@ -511,9 +511,9 @@ export default class CustomListBackground {
 
     fetchInitialListSuggestions = async (
         { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
-    ): Promise<ListDisplayEntry[]> => {
+    ): Promise<SpaceDisplayEntry[]> => {
         const suggestionIds = await this.localStorage.get('suggestionIds')
-        const listToDisplayEntry = (l: PageList): ListDisplayEntry => ({
+        const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
             localId: l.id,
             name: l.name,
             createdAt: l.createdAt.getTime(),

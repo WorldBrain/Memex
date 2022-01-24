@@ -1,5 +1,5 @@
 import 'jest-extended'
-import SpacePickerLogic, { ListDisplayEntry } from './logic'
+import SpacePickerLogic, { SpaceDisplayEntry } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -28,11 +28,11 @@ const setupLogicHelper = async ({
     ...args
 }: {
     device: UILogicTestDevice
-    queryEntries?: (query: string) => Promise<ListDisplayEntry[]>
+    queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
     createNewEntry?: (name: string) => Promise<string | number>
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
-    initialSuggestions?: ListDisplayEntry[]
+    initialSuggestions?: SpaceDisplayEntry[]
     initialSelectedEntries?: number[]
     skipTestData?: boolean
     url?: string
@@ -51,8 +51,6 @@ const setupLogicHelper = async ({
         loadDefaultSuggestions: () => initialSuggestions ?? [],
         initialSelectedEntries: async () => initialSelectedEntries ?? [],
         actOnAllTabs: async (entry) => null,
-        getEntryDisplayField: ({ name }) => name,
-        getEntryIdField: ({ localId }) => localId,
     })
 
     const testLogic = device.createElement(entryPickerLogic)

@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-import type { ListDisplayEntry } from '../logic'
+import type { SpaceDisplayEntry } from '../logic'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
-    entries: ListDisplayEntry[]
-    renderEntryRow: (list: ListDisplayEntry, index: number) => ReactNode
+    entries: SpaceDisplayEntry[]
+    renderEntryRow: (list: SpaceDisplayEntry, index: number) => ReactNode
     emptyView?: ReactNode
     id: string
 }
