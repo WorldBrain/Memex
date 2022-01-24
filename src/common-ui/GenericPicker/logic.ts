@@ -1,62 +1,60 @@
-import { UILogic, UIEvent, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 
-import type { KeyEvent, DisplayEntry } from './types'
+import type { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
-export interface GenericPickerState<
-    EntryType extends DisplayEntry = DisplayEntry
-> {
+export const INITIAL_STATE: GenericPickerState = {
+    query: '',
+    newEntryName: '',
+    displayEntries: [],
+    selectedEntries: [],
+    loadingSuggestions: false,
+    loadingQueryResults: false,
+}
+
+export interface GenericPickerState {
     query?: string
     newEntryName: string
-    displayEntries: EntryType[]
-    selectedEntries: Array<string | number>
+    displayEntries: DisplayEntry[]
+    selectedEntries: string[]
     loadingSuggestions: boolean
     loadingQueryResults: boolean
 }
 
-export interface GenericPickerDependencies<
-    EntryType extends DisplayEntry = DisplayEntry
-> {
-    createNewEntry: (name: string) => Promise<string | number>
-    selectEntry: (id: string | number) => Promise<void>
-    unselectEntry: (id: string | number) => Promise<void>
-    getEntryIdField: (entry: EntryType) => string | number
-    getEntryDisplayField: (entry: EntryType) => string
-    queryEntries: (query: string) => Promise<EntryType[]>
+export interface GenericPickerDependencies {
+    onUpdateEntrySelection: PickerUpdateHandler
+    queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
-    loadDefaultSuggestions: () => EntryType[] | Promise<EntryType[]>
-    initialSelectedEntries?: () =>
-        | Array<number | string>
-        | Promise<Array<number | string>>
+    loadDefaultSuggestions: () => string[] | Promise<string[]>
+    initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
 }
 
-export type GenericPickerDependenciesMinusSave<
-    EntryType extends DisplayEntry = DisplayEntry
-> = GenericPickerDependencies<EntryType>
+export type GenericPickerDependenciesMinusSave = Omit<
+    GenericPickerDependencies,
+    'onUpdateEntrySelection'
+>
 
-export type GenericPickerEvent<
-    EntryType extends DisplayEntry = DisplayEntry
-> = UIEvent<{
+export type GenericPickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
+    loadedSuggestions: {}
+    loadedQueryResults: {}
+    entryClicked: {}
     searchInputChanged: { query: string }
     selectedEntryPress: { entry: string }
-    resultEntryAllPress: { entry: EntryType }
+    resultEntryAllPress: { entry: DisplayEntry }
     newEntryAllPress: { entry: string }
-    resultEntryPress: { entry: EntryType }
-    resultEntryFocus: { entry: EntryType; index: number }
+    resultEntryPress: { entry: DisplayEntry }
+    resultEntryFocus: { entry: DisplayEntry; index: number }
     newEntryPress: { entry: string }
     keyPress: { key: KeyEvent }
     focusInput: {}
 }>
 
-interface GenericPickerUIEvent<
-    T extends keyof GenericPickerEvent,
-    EntryType extends DisplayEntry
-> {
-    event: GenericPickerEvent<EntryType>[T]
-    previousState: GenericPickerState<EntryType>
+interface GenericPickerUIEvent<T extends keyof GenericPickerEvent> {
+    event: GenericPickerEvent[T]
+    previousState: GenericPickerState
 }
 
 // NOTE: Generic typing of this class resulted in an issue where interacting with the underlying `UILogic`
@@ -64,12 +62,9 @@ interface GenericPickerUIEvent<
 //  `this.emitMutations` to use the `$apply` operator on the entire state instead of a per-state-key mutation
 //  gets passed them. Extended classes of this should work fine.
 export default abstract class GenericPickerLogic<
-    EntryType extends DisplayEntry = DisplayEntry,
-    Dependencies extends GenericPickerDependencies<
-        EntryType
-    > = GenericPickerDependencies<EntryType>,
-    State extends GenericPickerState<EntryType> = GenericPickerState<EntryType>,
-    Event extends GenericPickerEvent<EntryType> = GenericPickerEvent<EntryType>
+    Dependencies extends GenericPickerDependencies = GenericPickerDependencies,
+    State extends GenericPickerState = GenericPickerState,
+    Event extends GenericPickerEvent = GenericPickerEvent
 > extends UILogic<State, Event> {
     private searchInputRef?: HTMLInputElement
 
@@ -82,7 +77,7 @@ export default abstract class GenericPickerLogic<
      */
     protected abstract pickerName: string
 
-    protected defaultEntries: EntryType[] = []
+    private defaultEntries: DisplayEntry[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
@@ -95,14 +90,7 @@ export default abstract class GenericPickerLogic<
     }
 
     getInitialState(): State {
-        return {
-            query: '',
-            newEntryName: '',
-            displayEntries: [],
-            selectedEntries: [],
-            loadingSuggestions: false,
-            loadingQueryResults: false,
-        } as State
+        return INITIAL_STATE as State
     }
 
     async init() {
@@ -119,7 +107,10 @@ export default abstract class GenericPickerLogic<
                 ? this.dependencies.loadDefaultSuggestions
                 : await this.dependencies.loadDefaultSuggestions()
 
-        this.defaultEntries = defaultSuggestions
+        this.defaultEntries = GenericPickerLogic.decorateEntryList(
+            defaultSuggestions,
+            initialSelectedEntries,
+        )
 
         this.emitMutation({
             $apply: (state) => ({
@@ -134,7 +125,7 @@ export default abstract class GenericPickerLogic<
     setSearchInputRef = ({
         event: { ref },
         previousState,
-    }: GenericPickerUIEvent<'setSearchInputRef', EntryType>) => {
+    }: GenericPickerUIEvent<'setSearchInputRef'>) => {
         this.searchInputRef = ref
     }
 
@@ -146,7 +137,7 @@ export default abstract class GenericPickerLogic<
     keyPress = ({
         event: { key },
         previousState,
-    }: GenericPickerUIEvent<'keyPress', EntryType>) => {
+    }: GenericPickerUIEvent<'keyPress'>) => {
         if (this.newTabKeys.includes(key)) {
             if (previousState.newEntryName !== '' && !(this.focusIndex >= 0)) {
                 return this.newEntryPress({
@@ -191,7 +182,7 @@ export default abstract class GenericPickerLogic<
     searchInputChanged = async ({
         event: { query },
         previousState,
-    }: GenericPickerUIEvent<'searchInputChanged', EntryType>) => {
+    }: GenericPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({
             $apply: (state) => ({
                 ...state,
@@ -214,10 +205,7 @@ export default abstract class GenericPickerLogic<
         }
     }
 
-    _queryBoth = async (
-        term: string,
-        selectedEntries: Array<string | number>,
-    ) => {
+    _queryBoth = async (term: string, selectedEntries: string[]) => {
         // await this._queryLocal(term, selectedEntries)
         await this._queryRemote(term, selectedEntries)
     }
@@ -238,17 +226,18 @@ export default abstract class GenericPickerLogic<
     /**
      * Searches for the term via the `queryEntries` function provided to the component
      */
-    _queryRemote = async (
-        term: string,
-        selectedEntries: Array<string | number>,
-    ) => {
+    _queryRemote = async (term: string, selectedEntries: string[]) => {
         this.emitMutation({
             $apply: (state) => ({ ...state, loadingQueryResults: true }),
         })
-        const displayEntries = await this.dependencies.queryEntries(
+        const results = await this.dependencies.queryEntries(
             term.toLocaleLowerCase(),
         )
-        displayEntries.sort()
+        results.sort()
+        const displayEntries = GenericPickerLogic.decorateEntryList(
+            results,
+            selectedEntries,
+        )
         this.emitMutation({
             $apply: (state) => ({
                 ...state,
@@ -256,7 +245,7 @@ export default abstract class GenericPickerLogic<
                 displayEntries,
             }),
         })
-        this._setCreateEntryDisplay(displayEntries, displayEntries, term)
+        this._setCreateEntryDisplay(results, displayEntries, term)
     }
 
     _query = debounce(this._queryBoth, 150, { leading: true })
@@ -265,12 +254,12 @@ export default abstract class GenericPickerLogic<
      * If the term provided does not exist in the entry list, then set the new entry state to the term.
      * (controls the 'Add a new Tag: ...')
      */
-    private _setCreateEntryDisplay = (
-        list: EntryType[],
-        displayEntries: EntryType[],
+    _setCreateEntryDisplay = (
+        list: string[],
+        displayEntries: DisplayEntry[],
         term: string,
     ) => {
-        if (this._isTermInEntryList(list, term)) {
+        if (list.includes(term)) {
             this.emitMutation({
                 $apply: (state) => ({
                     ...state,
@@ -283,7 +272,7 @@ export default abstract class GenericPickerLogic<
             // showing the tick and it might seem like it's already selected.
             this._updateFocus(0, displayEntries, false)
         } else {
-            let entry: string
+            let entry
             try {
                 entry = this.validateEntry(term)
             } catch (e) {
@@ -301,7 +290,7 @@ export default abstract class GenericPickerLogic<
 
     _updateFocus = (
         focusIndex: number | undefined,
-        displayEntries: EntryType[],
+        displayEntries: DisplayEntry[],
         emit = true,
     ) => {
         this.focusIndex = focusIndex ?? -1
@@ -322,110 +311,75 @@ export default abstract class GenericPickerLogic<
             })
     }
 
-    /**
-     * Loops through a list of entries and exits if a match is found
-     */
-    private _isTermInEntryList = (entryList: EntryType[], term: string) => {
-        const { getEntryDisplayField } = this.dependencies
-        for (const entry of entryList) {
-            if (getEntryDisplayField(entry) === term) {
-                return true
-            }
-        }
-        return false
-    }
-
     _queryInitialSuggestions = (term) =>
-        this.defaultEntries.filter((entry) =>
-            this.dependencies.getEntryDisplayField(entry).includes(term),
-        )
+        this.defaultEntries.filter((entry) => entry.name.includes(term))
 
     selectedEntryPress = async ({
-        event: { entry: entryName },
+        event: { entry },
         previousState,
-    }: GenericPickerUIEvent<'selectedEntryPress', EntryType>) => {
-        const {
-            getEntryDisplayField,
-            getEntryIdField,
-            unselectEntry,
-        } = this.dependencies
-        const entry = previousState.displayEntries.find(
-            (entry) => getEntryDisplayField(entry) === entryName,
-        )
-
-        this.emitMutation({
-            selectedEntries: {
-                $set: previousState.selectedEntries.filter(
-                    (id) => id !== getEntryIdField(entry),
-                ),
-            },
-        } as UIMutation<State>)
-
-        await unselectEntry(getEntryIdField(entry))
+    }: GenericPickerUIEvent<'selectedEntryPress'>) => {
+        await this._updateSelectedEntryState({
+            ...this._removeEntrySelected(
+                entry,
+                previousState.displayEntries,
+                previousState.selectedEntries,
+            ),
+            added: null,
+            deleted: entry,
+        })
     }
 
     resultEntryPress = async ({
         event: { entry },
         previousState,
-    }: GenericPickerUIEvent<'resultEntryPress', EntryType>) => {
-        const {
-            getEntryIdField,
-            unselectEntry,
-            selectEntry,
-        } = this.dependencies
-        const entryId = getEntryIdField(entry)
+    }: GenericPickerUIEvent<'resultEntryPress'>) => {
+        // Here we make the decision to make the entry result list go back to the
+        // default suggested entries after an action
+        // if this was prevState.displayEntries, the entry list would persist.
+        const displayEntries = this.defaultEntries
 
-        if (previousState.selectedEntries.includes(entryId)) {
-            this.emitMutation({
-                selectedEntries: {
-                    $set: previousState.selectedEntries.filter(
-                        (id) => id !== entryId,
-                    ),
-                },
-            } as UIMutation<State>)
-            await unselectEntry(entryId)
+        if (entry.selected) {
+            await this._updateSelectedEntryState({
+                ...this._removeEntrySelected(
+                    entry.name,
+                    displayEntries,
+                    previousState.selectedEntries,
+                ),
+                added: null,
+                deleted: entry.name,
+            })
         } else {
-            this.emitMutation({
-                selectedEntries: { $push: [entryId] },
-            } as UIMutation<State>)
-            await selectEntry(entryId)
+            await this._updateSelectedEntryState({
+                ...this._addEntrySelected(
+                    entry.name,
+                    displayEntries,
+                    previousState.selectedEntries,
+                ),
+                added: entry.name,
+                deleted: null,
+            })
         }
     }
 
     resultEntryAllPress = async ({
         event: { entry },
         previousState,
-    }: GenericPickerUIEvent<'resultEntryPress', EntryType>) => {
-        const {
-            getEntryIdField,
-            selectEntry,
-            unselectEntry,
-        } = this.dependencies
+    }: GenericPickerUIEvent<'resultEntryPress'>) => {
+        // TODO: present feedback to the user?
+
         const name = this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
 
-        const isAlreadySelected = previousState.selectedEntries.includes(
-            getEntryIdField(entry),
-        )
-
-        this.emitMutation({
-            selectedEntries: {
-                $set: isAlreadySelected
-                    ? previousState.selectedEntries.filter(
-                          (entryId) => entryId !== getEntryIdField(entry),
-                      )
-                    : [
-                          ...previousState.selectedEntries,
-                          getEntryIdField(entry),
-                      ],
-            },
-        } as UIMutation<State>)
+        // Note `newEntryPres` is used below to ensure when validating that this entry pressed is not
+        // already selected. Otherwise the Tag All Tabs might behave strangely - i.e. Unselecting
+        // from this page but still entry all the other tabs.
+        await this.newEntryPress({ event: { entry: name }, previousState })
     }
 
     newEntryAllPress = async ({
         event: { entry },
         previousState,
-    }: GenericPickerUIEvent<'newEntryAllPress', EntryType>) => {
+    }: GenericPickerUIEvent<'newEntryAllPress'>) => {
         const name = this.validateEntry(entry)
         await this.newEntryPress({ event: { entry: name }, previousState })
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
@@ -434,33 +388,38 @@ export default abstract class GenericPickerLogic<
     resultEntryFocus = ({
         event: { entry, index },
         previousState,
-    }: GenericPickerUIEvent<'resultEntryFocus', EntryType>) => {
+    }: GenericPickerUIEvent<'resultEntryFocus'>) => {
         this._updateFocus(index, previousState.displayEntries)
     }
 
     newEntryPress = async ({
         event: { entry },
         previousState,
-    }: GenericPickerUIEvent<'newEntryPress', EntryType>) => {
+    }: GenericPickerUIEvent<'newEntryPress'>) => {
         entry = this.validateEntry(entry)
 
         if (previousState.selectedEntries.includes(entry)) {
             return
         }
 
-        const newId = await this.dependencies.createNewEntry(entry)
+        const newDisplayEntry = {
+            name: entry,
+            selected: true,
+            focused: false,
+        }
 
-        this.emitMutation({
-            query: { $set: '' },
-            newEntryName: { $set: '' },
-            selectedEntries: { $push: [newId] },
-            displayEntries: {
-                $set: [
-                    ...this.defaultEntries,
-                    { localId: newId, focused: false, name: entry },
-                ],
-            },
-        } as UIMutation<State>)
+        const oldDisplayEntries = this.defaultEntries
+        oldDisplayEntries.unshift(newDisplayEntry)
+
+        await this._updateSelectedEntryState({
+            ...this._addEntrySelected(
+                entry,
+                oldDisplayEntries,
+                previousState.selectedEntries,
+            ),
+            added: entry,
+            deleted: null,
+        })
     }
 
     abstract validateEntry(entry: string): string
@@ -470,10 +429,131 @@ export default abstract class GenericPickerLogic<
 
         if (entry === '') {
             throw Error(
-                `${this.pickerName} Picker Validation: Can't add entry with only whitespace`,
+                `${this.pickerName} Validation: Can't add entry with only whitespace`,
             )
         }
 
         return entry
     }
+
+    _updateSelectedEntryState = async ({
+        displayEntries,
+        selectedEntries = [],
+        added,
+        deleted,
+        skipUpdateCallback,
+    }: {
+        displayEntries: DisplayEntry[]
+        selectedEntries: string[]
+        added: string
+        deleted: string
+        skipUpdateCallback?: boolean
+    }) => {
+        this.emitMutation({
+            $apply: (state) => ({
+                ...state,
+                query: '',
+                newEntryName: '',
+                displayEntries,
+                selectedEntries,
+            }),
+        })
+
+        if (skipUpdateCallback === true) {
+            return
+        }
+
+        try {
+            await this.dependencies.onUpdateEntrySelection({
+                selected: selectedEntries,
+                added,
+                deleted,
+            })
+        } catch (e) {
+            this._undoAfterError({
+                displayEntries,
+                selectedEntries,
+                added,
+                deleted,
+            })
+            throw e
+        }
+    }
+
+    async _undoAfterError({ displayEntries, selectedEntries, added, deleted }) {
+        // Reverse the logic skipping the call to run the update callback
+        if (added) {
+            await this._updateSelectedEntryState({
+                ...this._removeEntrySelected(
+                    added,
+                    displayEntries,
+                    selectedEntries,
+                ),
+                added: null,
+                deleted: added,
+                skipUpdateCallback: true,
+            })
+        } else {
+            await this._updateSelectedEntryState({
+                ...this._addEntrySelected(
+                    deleted,
+                    displayEntries,
+                    selectedEntries,
+                ),
+                added: deleted,
+                deleted: null,
+                skipUpdateCallback: true,
+            })
+        }
+    }
+
+    _addEntrySelected = (
+        entry: string,
+        displayEntries: DisplayEntry[],
+        selectedEntries: string[] = [],
+    ) => {
+        for (const i in displayEntries) {
+            if (displayEntries[i].name === entry) {
+                displayEntries[i].selected = true
+                break
+            }
+        }
+
+        return {
+            displayEntries,
+            selectedEntries: [...selectedEntries, entry],
+        }
+    }
+
+    _removeEntrySelected = (
+        entry: string,
+        displayEntries: DisplayEntry[],
+        selectedEntries: string[] = [],
+    ) => {
+        for (const i in displayEntries) {
+            if (displayEntries[i].name === entry) {
+                displayEntries[i].selected = false
+                break
+            }
+        }
+
+        return {
+            displayEntries,
+            selectedEntries: selectedEntries.filter((t) => t !== entry),
+        }
+    }
+
+    /**
+     * Takes a list of entry results and selected entries and combines them to return whichentry
+     * is selected and which is not.
+     */
+    static decorateEntryList = (
+        entryList: string[],
+        selectedEntries: string[],
+    ): DisplayEntry[] =>
+        entryList.map((entry) => ({
+            name: entry,
+            focused: false,
+            selected: selectedEntries?.includes(entry) ?? false,
+        }))
 }

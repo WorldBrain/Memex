@@ -1,4 +1,4 @@
-import type { ListDisplayEntry } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { ListDisplayEntry } from './logic'
 
 export const TEST_LISTS = [
     {

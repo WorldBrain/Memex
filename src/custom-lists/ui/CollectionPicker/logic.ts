@@ -1,39 +1,444 @@
-import GenericPickerLogic, {
-    GenericPickerDependencies,
-    GenericPickerEvent,
-    GenericPickerState,
-} from 'src/common-ui/GenericPicker/logic'
-import type { DisplayEntry } from 'src/common-ui/GenericPicker/types'
+import debounce from 'lodash/debounce'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 
-export interface ListPickerDependencies
-    extends GenericPickerDependencies<ListDisplayEntry> {
-    onClickOutside?: React.MouseEventHandler
-}
-
-export interface ListDisplayEntry extends DisplayEntry {
-    localId: number
-    remoteId: string | null
+export interface ListDisplayEntry {
+    localId: string | number
+    remoteId: string | number | null
+    name: string
+    focused: boolean
     createdAt: number
 }
 
-export type ListPickerEvent = GenericPickerEvent<ListDisplayEntry>
-export type ListPickerState = GenericPickerState<ListDisplayEntry>
+export interface ListPickerDependencies {
+    createNewEntry: (name: string) => Promise<string | number>
+    selectEntry: (id: string | number) => Promise<void>
+    unselectEntry: (id: string | number) => Promise<void>
+    getEntryIdField: (entry: ListDisplayEntry) => string | number
+    getEntryDisplayField: (entry: ListDisplayEntry) => string
+    queryEntries: (query: string) => Promise<ListDisplayEntry[]>
+    actOnAllTabs?: (query: string) => Promise<void>
+    onEscapeKeyDown?: () => void | Promise<void>
+    loadDefaultSuggestions: () =>
+        | ListDisplayEntry[]
+        | Promise<ListDisplayEntry[]>
+    initialSelectedEntries?: () =>
+        | Array<number | string>
+        | Promise<Array<number | string>>
+    children?: any
+    onClickOutside?: React.MouseEventHandler
+}
 
-export default class CollectionPickerLogic extends GenericPickerLogic<
-    ListDisplayEntry,
-    ListPickerDependencies,
+export type ListPickerEvent = UIEvent<{
+    setSearchInputRef: { ref: HTMLInputElement }
+    searchInputChanged: { query: string }
+    selectedEntryPress: { entry: string }
+    resultEntryAllPress: { entry: ListDisplayEntry }
+    newEntryAllPress: { entry: string }
+    resultEntryPress: { entry: ListDisplayEntry }
+    resultEntryFocus: { entry: ListDisplayEntry; index: number }
+    newEntryPress: { entry: string }
+    keyPress: { key: KeyEvent }
+    focusInput: {}
+}>
+
+type EventHandler<EventName extends keyof ListPickerEvent> = UIEventHandler<
+    ListPickerState,
+    ListPickerEvent,
+    EventName
+>
+
+export interface ListPickerState {
+    query?: string
+    newEntryName: string
+    displayEntries: ListDisplayEntry[]
+    selectedEntries: Array<string | number>
+    loadingSuggestions: boolean
+    loadingQueryResults: boolean
+}
+
+export default class CollectionPickerLogic extends UILogic<
     ListPickerState,
     ListPickerEvent
 > {
-    protected pickerName = 'Spaces'
-
-    validateEntry = this._validateEntry
+    private searchInputRef?: HTMLInputElement
+    private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
 
     constructor(protected dependencies: ListPickerDependencies) {
-        super({
-            ...dependencies,
-            getEntryDisplayField: (e) => e.name,
-            getEntryIdField: (e) => e.localId,
+        super()
+    }
+
+    protected defaultEntries: ListDisplayEntry[] = []
+    private focusIndex = -1
+
+    // For now, the only thing that needs to know if this has finished, is the tests.
+    private _processingUpstreamOperation: Promise<void>
+    get processingUpstreamOperation() {
+        return this._processingUpstreamOperation
+    }
+    set processingUpstreamOperation(val) {
+        this._processingUpstreamOperation = val
+    }
+
+    getInitialState(): ListPickerState {
+        return {
+            query: '',
+            newEntryName: '',
+            displayEntries: [],
+            selectedEntries: [],
+            loadingSuggestions: false,
+            loadingQueryResults: false,
+        } as ListPickerState
+    }
+
+    init: EventHandler<'init'> = async () => {
+        this.emitMutation({
+            $apply: (state) => ({ ...state, loadingSuggestions: true }),
         })
+
+        const initialSelectedEntries = this.dependencies.initialSelectedEntries
+            ? await this.dependencies.initialSelectedEntries()
+            : []
+
+        const defaultSuggestions =
+            typeof this.dependencies.loadDefaultSuggestions === 'string'
+                ? this.dependencies.loadDefaultSuggestions
+                : await this.dependencies.loadDefaultSuggestions()
+
+        this.defaultEntries = defaultSuggestions
+
+        this.emitMutation({
+            $apply: (state) => ({
+                ...state,
+                loadingSuggestions: false,
+                displayEntries: this.defaultEntries,
+                selectedEntries: initialSelectedEntries,
+            }),
+        })
+    }
+
+    setSearchInputRef: EventHandler<'setSearchInputRef'> = ({
+        event: { ref },
+        previousState,
+    }) => {
+        this.searchInputRef = ref
+    }
+
+    focusInput: EventHandler<'focusInput'> = () => {
+        this.searchInputRef?.focus()
+    }
+
+    keyPress: EventHandler<'keyPress'> = ({
+        event: { key },
+        previousState,
+    }) => {
+        if (this.newTabKeys.includes(key)) {
+            if (previousState.newEntryName !== '' && !(this.focusIndex >= 0)) {
+                return this.newEntryPress({
+                    previousState,
+                    event: { entry: previousState.newEntryName },
+                })
+            }
+
+            if (previousState.displayEntries[this.focusIndex]) {
+                return this.resultEntryPress({
+                    event: {
+                        entry: previousState.displayEntries[this.focusIndex],
+                    },
+                    previousState,
+                })
+            }
+        }
+
+        if (key === 'ArrowUp') {
+            if (this.focusIndex > -1) {
+                return this._updateFocus(
+                    --this.focusIndex,
+                    previousState.displayEntries,
+                )
+            }
+        }
+
+        if (key === 'ArrowDown') {
+            if (this.focusIndex < previousState.displayEntries.length - 1) {
+                return this._updateFocus(
+                    ++this.focusIndex,
+                    previousState.displayEntries,
+                )
+            }
+        }
+
+        if (key === 'Escape' && this.dependencies.onEscapeKeyDown) {
+            return this.dependencies.onEscapeKeyDown()
+        }
+    }
+
+    searchInputChanged: EventHandler<'searchInputChanged'> = async ({
+        event: { query },
+        previousState,
+    }) => {
+        this.emitMutation({
+            $apply: (state) => ({
+                ...state,
+                query,
+                newEntryName: query,
+            }),
+        })
+
+        if (!query || query === '') {
+            this.emitMutation({
+                $apply: (state) => ({
+                    ...state,
+                    displayEntries: this.defaultEntries,
+                    newEntryName: '',
+                    query: '',
+                }),
+            })
+        } else {
+            return this._query(query, previousState.selectedEntries)
+        }
+    }
+
+    /**
+     * Searches for the term via the `queryEntries` function provided to the component
+     */
+    private _queryRemote = async (
+        term: string,
+        selectedEntries: Array<string | number>,
+    ) => {
+        this.emitMutation({
+            $apply: (state) => ({ ...state, loadingQueryResults: true }),
+        })
+        const displayEntries = await this.dependencies.queryEntries(
+            term.toLocaleLowerCase(),
+        )
+        displayEntries.sort()
+        this.emitMutation({
+            $apply: (state) => ({
+                ...state,
+                loadingQueryResults: false,
+                displayEntries,
+            }),
+        })
+        this._setCreateEntryDisplay(displayEntries, displayEntries, term)
+    }
+
+    private _query = debounce(this._queryRemote, 150, { leading: true })
+
+    /**
+     * If the term provided does not exist in the entry list, then set the new entry state to the term.
+     * (controls the 'Add a new Tag: ...')
+     */
+    private _setCreateEntryDisplay = (
+        list: ListDisplayEntry[],
+        displayEntries: ListDisplayEntry[],
+        term: string,
+    ) => {
+        if (this._isTermInEntryList(list, term)) {
+            this.emitMutation({
+                $apply: (state) => ({
+                    ...state,
+                    newEntryName: '',
+                }),
+            })
+            // N.B. We update this focus index to this found entry, so that
+            // enter keys will action it. But we don't emit that focus
+            // to the user, because otherwise the style of the button changes
+            // showing the tick and it might seem like it's already selected.
+            this._updateFocus(0, displayEntries, false)
+        } else {
+            let entry: string
+            try {
+                entry = this.validateEntry(term)
+            } catch (e) {
+                return
+            }
+            this.emitMutation({
+                $apply: (state) => ({
+                    ...state,
+                    newEntryName: entry,
+                }),
+            })
+            this._updateFocus(-1, displayEntries)
+        }
+    }
+
+    private _updateFocus = (
+        focusIndex: number | undefined,
+        displayEntries: ListDisplayEntry[],
+        emit = true,
+    ) => {
+        this.focusIndex = focusIndex ?? -1
+        if (!displayEntries) {
+            return
+        }
+
+        for (let i = 0; i < displayEntries.length; i++) {
+            displayEntries[i].focused = focusIndex === i
+        }
+
+        emit &&
+            this.emitMutation({
+                $apply: (state) => ({
+                    ...state,
+                    displayEntries,
+                }),
+            })
+    }
+
+    /**
+     * Loops through a list of entries and exits if a match is found
+     */
+    private _isTermInEntryList = (
+        entryList: ListDisplayEntry[],
+        term: string,
+    ) => {
+        const { getEntryDisplayField } = this.dependencies
+        for (const entry of entryList) {
+            if (getEntryDisplayField(entry) === term) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private _queryInitialSuggestions = (term) =>
+        this.defaultEntries.filter((entry) =>
+            this.dependencies.getEntryDisplayField(entry).includes(term),
+        )
+
+    selectedEntryPress: EventHandler<'selectedEntryPress'> = async ({
+        event: { entry: entryName },
+        previousState,
+    }) => {
+        const {
+            getEntryDisplayField,
+            getEntryIdField,
+            unselectEntry,
+        } = this.dependencies
+        const entry = previousState.displayEntries.find(
+            (entry) => getEntryDisplayField(entry) === entryName,
+        )
+
+        this.emitMutation({
+            selectedEntries: {
+                $set: previousState.selectedEntries.filter(
+                    (id) => id !== getEntryIdField(entry),
+                ),
+            },
+        } as UIMutation<ListPickerState>)
+
+        await unselectEntry(getEntryIdField(entry))
+    }
+
+    resultEntryPress: EventHandler<'resultEntryPress'> = async ({
+        event: { entry },
+        previousState,
+    }) => {
+        const {
+            getEntryIdField,
+            unselectEntry,
+            selectEntry,
+        } = this.dependencies
+        const entryId = getEntryIdField(entry)
+
+        if (previousState.selectedEntries.includes(entryId)) {
+            this.emitMutation({
+                selectedEntries: {
+                    $set: previousState.selectedEntries.filter(
+                        (id) => id !== entryId,
+                    ),
+                },
+            } as UIMutation<ListPickerState>)
+            await unselectEntry(entryId)
+        } else {
+            this.emitMutation({
+                selectedEntries: { $push: [entryId] },
+            } as UIMutation<ListPickerState>)
+            await selectEntry(entryId)
+        }
+    }
+
+    resultEntryAllPress: EventHandler<'resultEntryAllPress'> = async ({
+        event: { entry },
+        previousState,
+    }) => {
+        const {
+            getEntryIdField,
+            selectEntry,
+            unselectEntry,
+        } = this.dependencies
+        const name = this.validateEntry(entry.name)
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
+
+        const isAlreadySelected = previousState.selectedEntries.includes(
+            getEntryIdField(entry),
+        )
+
+        this.emitMutation({
+            selectedEntries: {
+                $set: isAlreadySelected
+                    ? previousState.selectedEntries.filter(
+                          (entryId) => entryId !== getEntryIdField(entry),
+                      )
+                    : [
+                          ...previousState.selectedEntries,
+                          getEntryIdField(entry),
+                      ],
+            },
+        } as UIMutation<ListPickerState>)
+    }
+
+    newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
+        event: { entry },
+        previousState,
+    }) => {
+        const name = this.validateEntry(entry)
+        await this.newEntryPress({ event: { entry: name }, previousState })
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
+    }
+
+    resultEntryFocus: EventHandler<'resultEntryFocus'> = ({
+        event: { entry, index },
+        previousState,
+    }) => {
+        this._updateFocus(index, previousState.displayEntries)
+    }
+
+    newEntryPress: EventHandler<'newEntryPress'> = async ({
+        event: { entry },
+        previousState,
+    }) => {
+        entry = this.validateEntry(entry)
+
+        if (previousState.selectedEntries.includes(entry)) {
+            return
+        }
+
+        const newId = await this.dependencies.createNewEntry(entry)
+
+        this.emitMutation({
+            query: { $set: '' },
+            newEntryName: { $set: '' },
+            selectedEntries: { $push: [newId] },
+            displayEntries: {
+                $set: [
+                    ...this.defaultEntries,
+                    { localId: newId, focused: false, name: entry },
+                ],
+            },
+        } as UIMutation<ListPickerState>)
+    }
+
+    validateEntry = (entry: string) => {
+        entry = entry.trim()
+
+        if (entry === '') {
+            throw Error(
+                `Space Picker Validation: Can't add entry with only whitespace`,
+            )
+        }
+
+        return entry
     }
 }

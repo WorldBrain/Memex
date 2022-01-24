@@ -9,15 +9,15 @@ import ListPickerLogic, {
     ListPickerState,
     ListDisplayEntry,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
-import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
-import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import { PickerSearchInput } from './components/SearchInput'
+import AddNewEntry from './components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
-import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
+import EntryResultsList from './components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,
-} from 'src/common-ui/GenericPicker/components/EntryRow'
-import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
+} from './components/EntryRow'
+import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -52,7 +52,7 @@ class ListPicker extends StatefulUIElement<
         loadDefaultSuggestions: async () => {
             const suggestions = await collections.fetchInitialListSuggestions()
             const remoteListIds = await contentSharing.getRemoteListIds({
-                localListIds: suggestions.map((s) => s.localId),
+                localListIds: suggestions.map((s) => s.localId as number),
             })
             return suggestions.map((s) => ({
                 ...s,
@@ -111,7 +111,7 @@ class ListPicker extends StatefulUIElement<
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderListRow = (list: DisplayEntry, index: number) => (
+    renderListRow = (list: ListDisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultListPress}
             onPressActOnAll={

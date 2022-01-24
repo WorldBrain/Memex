@@ -1,9 +1,9 @@
-export async function updateSuggestionsCache(args: {
-    added?: number
-    removed?: number
+export async function updateSuggestionsCache<T extends string | number>(args: {
+    added?: T
+    removed?: T
     suggestionLimit?: number
-    getCache(): Promise<number[]>
-    setCache(suggestions: number[]): Promise<void>
+    getCache(): Promise<T[]>
+    setCache(suggestions: T[]): Promise<void>
 }) {
     let suggestions = await args.getCache()
 
