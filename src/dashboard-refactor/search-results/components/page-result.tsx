@@ -82,27 +82,29 @@ export default class PageResultView extends PureComponent<Props> {
         // space picker is separated out to make the Add to Space button contain the call to render the picker
         if (this.props.isListPickerShown) {
             return (
-                <HoverBox withRelativeContainer>
-                    <CollectionPicker
-                        selectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: listId,
-                                deleted: null,
-                                selected: [],
-                            })
-                        }
-                        unselectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: null,
-                                deleted: listId,
-                                selected: [],
-                            })
-                        }
-                        createNewEntry={this.props.createNewList}
-                        initialSelectedEntries={() => this.props.lists}
-                        onClickOutside={this.props.onListPickerBtnClick}
-                    />
-                </HoverBox>
+                <div onMouseLeave={this.props.onListPickerBtnClick}>
+                    <HoverBox withRelativeContainer>
+                        <CollectionPicker
+                            selectEntry={(listId) =>
+                                this.props.onListPickerUpdate({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                })
+                            }
+                            unselectEntry={(listId) =>
+                                this.props.onListPickerUpdate({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                })
+                            }
+                            createNewEntry={this.props.createNewList}
+                            initialSelectedEntries={() => this.props.lists}
+                            onClickOutside={this.props.onListPickerBtnClick}
+                        />
+                    </HoverBox>
+                </div>
             )
         }
     }
@@ -278,11 +280,15 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
+                        onMouseLeave={
+                            this.props.isListPickerShown &&
+                            this.props.onListPickerBtnClick
+                        }
                         onClick={() => window.open(this.fullUrl)}
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        <PageTitle top="10px" bottom="5px">
+                        <PageTitle bottom="5px">
                             {hasTitle
                                 ? this.props.fullTitle === this.props.fullUrl
                                     ? this.props.fullTitle.split('/').slice(-1)
@@ -429,6 +435,7 @@ const ResultContent = styled(Margin)`
     align-items: center;
     justify-content: flex-start;
     cursor: pointer;
+    height: 24px;
 `
 
 const PageTitle = styled(Margin)`

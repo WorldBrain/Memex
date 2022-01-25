@@ -178,7 +178,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderListsPickerForAnnotation={() =>
                     noteData.isListPickerShown && (
-                        <HoverBox right="0" withRelativeContainer>
+                        <HoverBox withRelativeContainer>
                             <CollectionPicker
                                 initialSelectedEntries={
                                     () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop

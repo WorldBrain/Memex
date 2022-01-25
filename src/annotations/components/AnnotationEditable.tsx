@@ -624,8 +624,9 @@ const EditNoteIconBox = styled.div`
     border: none;
     outline: none;
     background: white;
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
+    padding: 4px;
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 
