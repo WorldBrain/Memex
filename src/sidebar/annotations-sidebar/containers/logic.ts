@@ -575,18 +575,18 @@ export class SidebarContainerLogic extends UILogic<
             commentBox,
         })
         // check if annotation has lists with remoteId and reload them
-        for (const listName of nextAnnotation.lists) {
-            const list = await this.options.customLists.fetchListByName({
-                name: listName,
-            })
-            if (list.remoteId) {
-                // Want to update the list with the new page comment / note, the following isn't enough though
-                // await this.processUIEvent('loadFollowedLists', {
-                //     previousState: previousState,
-                //     event: null,
-                // })
-            }
-        }
+        // for (const listName of nextAnnotation.lists) {
+        //     const list = await this.options.customLists.fetchListByName({
+        //         name: listName,
+        //     })
+        //     if (list.remoteId) {
+        //         // Want to update the list with the new page comment / note, the following isn't enough though
+        //         // await this.processUIEvent('loadFollowedLists', {
+        //         //     previousState: previousState,
+        //         //     event: null,
+        //         // })
+        //     }
+        // }
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {

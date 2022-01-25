@@ -151,7 +151,7 @@ export default class SearchStorage extends StorageModule {
         annotUrls: string[],
     ): Promise<{
         annotsToTags: Map<string, string[]>
-        annotsToLists: Map<string, string[]>
+        annotsToLists: Map<string, number[]>
         bmUrls: Set<string>
     }> {
         const bookmarks = await this.operation('findAnnotBookmarksByUrl', {
@@ -184,11 +184,11 @@ export default class SearchStorage extends StorageModule {
                 return { ...listEntry, ...list }
             }),
         )
-        const annotsToLists = new Map<string, string[]>()
+        const annotsToLists = new Map<string, number[]>()
 
-        lists.forEach(({ name, url }) => {
+        lists.forEach(({ id, url }) => {
             const current = annotsToLists.get(url) || []
-            annotsToLists.set(url, [...current, name])
+            annotsToLists.set(url, [...current, id])
         })
 
         return { annotsToTags, annotsToLists, bmUrls }

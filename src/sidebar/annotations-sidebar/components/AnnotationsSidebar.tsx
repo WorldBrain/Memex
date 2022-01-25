@@ -31,11 +31,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -218,21 +216,10 @@ class AnnotationsSidebar extends React.Component<
     }
 
     private renderNewAnnotation(context?: string) {
-        const listsToCreate = this.getListsForAnnotationCreate(
-            this.props.followedLists,
-            this.props.isolatedView,
-            this.props.annotationCreateProps.lists,
-        )
-        const paddedAnnotationCreateProps = {
-            ...this.props.annotationCreateProps,
-            lists: listsToCreate,
-            // onSave: this.props.annotationCreateProps.onSave
-        }
-        // updateNewPageCommentLists
         return (
             <NewAnnotationSection context={context}>
                 <AnnotationCreate
-                    {...paddedAnnotationCreateProps}
+                    {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
                     autoFocus
                 />

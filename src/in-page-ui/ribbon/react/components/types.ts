@@ -1,4 +1,5 @@
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -31,7 +32,7 @@ export interface RibbonSidebarProps {
 
 export interface RibbonCommentBoxProps {
     tags: string[]
-    lists: string[]
+    lists: number[]
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
@@ -39,7 +40,7 @@ export interface RibbonCommentBoxProps {
     cancelComment: () => void
     setShowCommentBox: (value: boolean) => void
     updateCommentBoxTags: (tags: string[]) => void
-    updateCommentBoxLists: (tags: string[]) => void
+    updateCommentBoxLists: (lists: number[]) => void
     changeComment: (text: string) => void
 }
 
@@ -68,12 +69,15 @@ export interface ListEntryArgs {
 export interface RibbonListsProps {
     pageBelongsToList: boolean
     showListsPicker: boolean
-    updateLists: PickerUpdateHandler
+    updateLists: PickerUpdateHandler<number>
     listAllTabs: (value: string) => Promise<void>
     setShowListsPicker: (value: boolean) => void
     fetchInitialListSelections: () => Promise<string[]>
-    loadDefaultSuggestions: () => Promise<string[]>
-    queryEntries: (query: string) => Promise<string[]>
+    loadDefaultSuggestions: SpacePickerDependencies['loadDefaultSuggestions']
+    queryEntries: SpacePickerDependencies['queryEntries']
+    selectEntry: SpacePickerDependencies['selectEntry']
+    unselectEntry: SpacePickerDependencies['unselectEntry']
+    createNewEntry: SpacePickerDependencies['createNewEntry']
 }
 
 export interface RibbonSearchProps {

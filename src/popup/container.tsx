@@ -189,7 +189,16 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         if (this.props.showCollectionsPicker) {
             return (
                 <CollectionPicker
-                    onUpdateEntrySelection={this.handleListUpdate}
+                    selectEntry={(listId) =>
+                        this.handleListUpdate({ added: listId, deleted: null })
+                    }
+                    unselectEntry={(listId) =>
+                        this.handleListUpdate({ added: null, deleted: listId })
+                    }
+                    createNewEntry={async (name) => {
+                        this.props.onCollectionAdd(name)
+                        return collections.createCustomList({ name })
+                    }}
                     initialSelectedEntries={this.fetchListsForPage}
                     actOnAllTabs={this.handleListAllTabs}
                 >

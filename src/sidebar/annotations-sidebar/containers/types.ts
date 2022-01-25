@@ -70,7 +70,7 @@ export interface EditForm {
     isTagInputActive: boolean
     commentText: string
     tags: string[]
-    lists: string[]
+    lists: number[]
 }
 
 export interface EditForms {
@@ -199,7 +199,7 @@ export type SidebarContainerEvents = UIEvent<
         saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
         cancelNewPageComment: null
         updateNewPageCommentTags: { tags: string[] }
-        updateNewPageCommentLists: { lists: string[] }
+        updateNewPageCommentLists: { lists: number[] }
 
         setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
@@ -209,8 +209,8 @@ export type SidebarContainerEvents = UIEvent<
             annotationUrl: string
         }
         updateListsForPageResult: {
-            added?: string
-            deleted?: string
+            added?: number
+            deleted?: number
             url: string
         }
         deleteEditCommentTag: { tag: string; annotationUrl: string }

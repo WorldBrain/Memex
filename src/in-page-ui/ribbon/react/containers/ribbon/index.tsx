@@ -181,10 +181,41 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.normalizedPageUrl,
                         }),
-                    queryEntries: (query) =>
-                        this.props.customLists.searchForListSuggestions({
-                            query,
+                    queryEntries: async (query) => {
+                        const suggestions = await this.props.customLists.searchForListSuggestions(
+                            {
+                                query,
+                            },
+                        )
+                        return suggestions.map((sug) => ({
+                            localId: sug.id,
+                            name: sug.name,
+                            remoteId: sug.remoteId ?? null,
+                            createdAt: sug.createdAt.getTime(),
+                            focused: false,
+                        }))
+                    },
+                    selectEntry: (id) =>
+                        this.processEvent('updateLists', {
+                            value: { added: id, deleted: null, selected: [] },
                         }),
+                    unselectEntry: (id) =>
+                        this.processEvent('updateLists', {
+                            value: { added: null, deleted: id, selected: [] },
+                        }),
+                    createNewEntry: async (name) => {
+                        const listId = await this.props.customLists.createCustomList(
+                            { name },
+                        )
+                        await this.processEvent('updateLists', {
+                            value: {
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                            },
+                        })
+                        return listId
+                    },
                     loadDefaultSuggestions: this.props.customLists
                         .fetchInitialListSuggestions,
                 }}

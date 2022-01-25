@@ -162,7 +162,6 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <CollectionPicker
                         {...this.props.lists}
-                        onUpdateEntrySelection={this.props.lists.updateLists}
                         actOnAllTabs={this.props.lists.listAllTabs}
                         initialSelectedEntries={
                             this.props.lists.fetchInitialListSelections
@@ -524,10 +523,6 @@ export default class Ribbon extends Component<Props, State> {
                                             onTagsUpdate={
                                                 this.props.commentBox
                                                     .updateCommentBoxTags
-                                            }
-                                            onListsUpdate={
-                                                this.props.commentBox
-                                                    .updateCommentBoxLists
                                             }
                                             onCommentChange={
                                                 this.props.commentBox

@@ -36,6 +36,7 @@ import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -206,30 +207,45 @@ export class AnnotationsSidebarContainer<
                 }),
         }
     }
-    private loadRemoteListNames = async () => {
-        const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-        return remoteLists.map((list) => list.name)
-    }
-    protected getShareCollectionPickerProps() {
+
+    protected getShareCollectionPickerProps(): SpacePickerDependencies {
         return {
-            onListsUpdate: (lists) =>
-                this.processEvent('updateNewPageCommentLists', { lists }),
-            listQueryEntries: (prefix) =>
-                this.props.contentSharing
-                    .suggestSharedLists({ prefix })
-                    .then((objArray) => objArray.map((obj) => obj.name)),
-            loadDefaultListSuggestions: async (args?: { limit? }) => {
-                const defaultNames = await this.props.customLists.fetchInitialListSuggestions(
-                    { limit: args?.limit },
-                )
-                const remoteNames = await this.loadRemoteListNames()
-                const sharedDefaultNames = defaultNames.filter((defaultName) =>
-                    remoteNames.includes(defaultName),
+            queryEntries: async (prefix) => {
+                const suggestions = await this.props.contentSharing.suggestSharedLists(
+                    { prefix },
                 )
 
-                return [...sharedDefaultNames]
+                return suggestions.map((obj) => ({
+                    ...obj,
+                    focused: false,
+                }))
             },
-            loadRemoteListNames: this.loadRemoteListNames,
+            loadDefaultSuggestions: async (args) => {
+                const suggestions = await this.props.customLists.fetchInitialListSuggestions(
+                    { limit: args?.limit },
+                )
+                const remoteListIds = await this.props.contentSharing.getRemoteListIds(
+                    { localListIds: suggestions.map((list) => list.localId) },
+                )
+                const filteredSuggestions = suggestions.filter(
+                    (suggestion) => remoteListIds[suggestion.localId] != null,
+                )
+                return filteredSuggestions
+            },
+            createNewEntry: async (name) =>
+                this.props.customLists.createCustomList({ name }),
+            selectEntry: async (id) => {
+                this.props.customLists.insertPageToList({
+                    id,
+                    url: this.state.pageUrl,
+                })
+            },
+            unselectEntry: async (id) => {
+                this.props.customLists.removePageFromList({
+                    id,
+                    url: this.state.pageUrl,
+                })
+            },
         }
     }
 
@@ -240,7 +256,6 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('changeNewPageCommentText', { comment }),
             onTagsUpdate: (tags) =>
                 this.processEvent('updateNewPageCommentTags', { tags }),
-            onListsUpdate: collectionPickerProps.onListsUpdate,
             onCancel: () => this.processEvent('cancelNewPageComment', null),
             onSave: (shouldShare, isProtected) =>
                 this.processEvent('saveNewPageComment', {
@@ -251,9 +266,11 @@ export class AnnotationsSidebarContainer<
                 this.props.tags.searchForTagSuggestions({ query }),
             loadDefaultTagSuggestions: this.props.tags
                 .fetchInitialTagSuggestions,
-            listQueryEntries: collectionPickerProps.listQueryEntries,
+            listQueryEntries: collectionPickerProps.queryEntries,
             loadDefaultListSuggestions:
-                collectionPickerProps.loadDefaultListSuggestions,
+                collectionPickerProps.loadDefaultSuggestions,
+            addPageToList: collectionPickerProps.selectEntry,
+            removePageFromList: collectionPickerProps.unselectEntry,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
@@ -271,22 +288,6 @@ export class AnnotationsSidebarContainer<
             : annot.tags.filter((tag) => tag !== deleted)
 
         await this.props.annotationsCache.update({ ...annot, tags: newTags })
-    }
-
-    private handleListsUpdate = (url: string): PickerUpdateHandler => async ({
-        added,
-        deleted,
-    }) => {
-        const annot = this.props.annotationsCache.getAnnotationById(url)
-        const annotLists = annot.lists ?? [] // TODO remove this once lists are implemented
-        const newLists = added
-            ? [...annotLists, added]
-            : annotLists.filter((list) => list !== deleted)
-
-        const sharingState = await this.props.annotationsCache.update({
-            ...annot,
-            lists: newLists,
-        })
     }
 
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
@@ -367,16 +368,16 @@ export class AnnotationsSidebarContainer<
         return (
             <CollectionPicker
                 initialSelectedEntries={() => annot.lists ?? []}
-                queryEntries={collectionPickerProps.listQueryEntries}
+                queryEntries={collectionPickerProps.queryEntries}
                 loadDefaultSuggestions={
-                    collectionPickerProps.loadDefaultListSuggestions
+                    collectionPickerProps.loadDefaultSuggestions
                 }
-                onUpdateEntrySelection={this.handleListsUpdate(
-                    currentAnnotationId,
-                )}
                 onEscapeKeyDown={() =>
                     this.processEvent('resetListPickerAnnotationId', null)
                 }
+                createNewEntry={collectionPickerProps.createNewEntry}
+                unselectEntry={collectionPickerProps.unselectEntry}
+                selectEntry={collectionPickerProps.selectEntry}
             />
         )
     }
