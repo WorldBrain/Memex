@@ -84,7 +84,21 @@ export default class PageResultView extends PureComponent<Props> {
             return (
                 <HoverBox withRelativeContainer>
                     <CollectionPicker
-                        onUpdateEntrySelection={this.props.onListPickerUpdate}
+                        selectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                            })
+                        }
+                        createNewEntry={this.props.createNewList}
                         initialSelectedEntries={() => this.props.lists}
                         onClickOutside={this.props.onListPickerBtnClick}
                     />

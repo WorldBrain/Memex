@@ -237,41 +237,41 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[0].name,
+                added: DATA.LISTS_1[0].id,
                 skipPageIndexing: true,
             })
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[1].name,
+                added: DATA.LISTS_1[1].id,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[0].name, DATA.LISTS_1[1].name])
+            ).toEqual([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                deleted: DATA.LISTS_1[0].name,
+                deleted: DATA.LISTS_1[0].id,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[1].name])
+            ).toEqual([DATA.LISTS_1[1].id])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[2].name,
+                added: DATA.LISTS_1[2].id,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[1].name, DATA.LISTS_1[2].name])
+            ).toEqual([DATA.LISTS_1[1].id, DATA.LISTS_1[2].id])
         })
 
         it('should be able to cancel page deletion', async ({ device }) => {
@@ -436,7 +436,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: list.name,
+                added: list.id,
                 skipPageIndexing: true,
             })
 
@@ -1409,7 +1409,7 @@ describe('Dashboard search results logic', () => {
                     await searchResults.processEvent('setPageLists', {
                         id: pageId,
                         fullPageUrl: 'https://' + pageId,
-                        added: list.name,
+                        added: list.id,
                         skipPageIndexing: true,
                     })
 
@@ -1886,6 +1886,12 @@ describe('Dashboard search results logic', () => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
                 const noteId = DATA.NOTE_2.url
 
                 expect(
@@ -1895,7 +1901,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].name,
+                    added: DATA.LISTS_1[0].id,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
@@ -1904,7 +1910,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].name,
+                    added: DATA.LISTS_1[1].id,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
@@ -1913,7 +1919,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    deleted: DATA.LISTS_1[0].name,
+                    deleted: DATA.LISTS_1[0].id,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
@@ -1921,7 +1927,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual([DATA.LISTS_1[1].name])
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    deleted: DATA.LISTS_1[1].name,
+                    deleted: DATA.LISTS_1[1].id,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]

@@ -34,9 +34,9 @@ class DomainPicker extends StatefulUIElement<
     private get selectedDisplayEntries(): string[] {
         return this.state.selectedEntries
             .map(
-                (entryId) =>
+                (_entry) =>
                     this.state.displayEntries.find(
-                        (entry) => entry.localId === entryId,
+                        (entry) => entry.name === _entry,
                     )?.name,
             )
             .filter((entry) => entry != null)

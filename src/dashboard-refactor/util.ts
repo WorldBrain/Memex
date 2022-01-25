@@ -1,10 +1,10 @@
 import { RootState } from './types'
 import { BackgroundSearchParams } from 'src/search/background/types'
 
-export const updatePickerValues = (event: {
-    added?: string
-    deleted?: string
-}) => (prevState: string[]): string[] => {
+export const updatePickerValues = <T extends string | number>(event: {
+    added?: T
+    deleted?: T
+}) => (prevState: T[]): T[] => {
     if (event.added) {
         return [...new Set([...prevState, event.added])]
     }

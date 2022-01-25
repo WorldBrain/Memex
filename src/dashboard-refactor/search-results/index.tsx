@@ -186,9 +186,21 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 onClickOutside={
                                     interactionProps.onListPickerBtnClick
                                 }
-                                onUpdateEntrySelection={
-                                    interactionProps.updateLists
+                                selectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: listId,
+                                        deleted: null,
+                                        selected: [],
+                                    })
                                 }
+                                unselectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: null,
+                                        deleted: listId,
+                                        selected: [],
+                                    })
+                                }
+                                createNewEntry={interactionProps.createNewList}
                                 queryEntries={interactionProps.listQueryEntries}
                                 loadDefaultSuggestions={
                                     interactionProps.loadDefaultListSuggestions
@@ -222,9 +234,21 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 onClickOutside={
                                     interactionProps.onShareBtnClick
                                 }
-                                onUpdateEntrySelection={
-                                    interactionProps.updateLists
+                                selectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: listId,
+                                        deleted: null,
+                                        selected: [],
+                                    })
                                 }
+                                unselectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: null,
+                                        deleted: listId,
+                                        selected: [],
+                                    })
+                                }
+                                createNewEntry={interactionProps.createNewList}
                                 queryEntries={interactionProps.listQueryEntries}
                                 loadDefaultSuggestions={
                                     interactionProps.loadDefaultListSuggestions

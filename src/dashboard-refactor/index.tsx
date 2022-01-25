@@ -43,6 +43,7 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
+import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 export interface Props extends DashboardDependencies {
     renderDashboardSwitcherLink: () => JSX.Element
@@ -503,28 +504,29 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
-    protected getShareCollectionPickerProps() {
-        const loadRemoteListNames = async () => {
-            const remoteLists = await this.props.contentShareBG.getAllRemoteLists()
-            return remoteLists.map((list) => list.name)
-        }
+    protected getShareCollectionPickerProps(): Pick<
+        SpacePickerDependencies,
+        'queryEntries' | 'loadDefaultSuggestions'
+    > {
         return {
-            listQueryEntries: (prefix: string) =>
-                // this.props.customLists.searchForListSuggestions({ query }),
-                this.props.contentShareBG
-                    .suggestSharedLists({ prefix })
-                    .then((objArray) => objArray.map((obj) => obj.name)),
-            loadDefaultListSuggestions: async (args?: { limit? }) => {
-                const defaultNames = await this.props.listsBG.fetchInitialListSuggestions(
+            queryEntries: async (prefix) => {
+                const suggestions = await this.props.contentShareBG.suggestSharedLists(
+                    { prefix },
+                )
+                return suggestions.map((obj) => ({ ...obj, focused: false }))
+            },
+            loadDefaultSuggestions: async (args?: { limit? }) => {
+                const suggestions = await this.props.listsBG.fetchInitialListSuggestions(
                     { limit: args?.limit },
                 )
-                const remoteNames = await loadRemoteListNames()
-                const sharedDefaultNames = defaultNames.filter((defaultName) =>
-                    remoteNames.includes(defaultName),
+                const remoteIds = await this.props.contentShareBG.getRemoteListIds(
+                    { localListIds: suggestions.map((s) => s.localId) },
                 )
-                return sharedDefaultNames
+                const sharedSuggestionLists = suggestions.filter(
+                    (defaultName) => remoteIds[defaultName.name] != null,
+                )
+                return sharedSuggestionLists
             },
-            loadRemoteListNames,
         }
     }
 
@@ -724,6 +726,20 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
+                    createNewList: (day, pageId) => async (name) => {
+                        const listId = await this.props.listsBG.createCustomList(
+                            { name },
+                        )
+                        this.processEvent('setPageLists', {
+                            id: pageId,
+                            fullPageUrl:
+                                searchResults.pageData.byId[pageId].fullUrl,
+                            added: listId,
+                            deleted: null,
+                            skipPageIndexing: true,
+                        })
+                        return listId
+                    },
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -759,11 +775,24 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
-                    onListsUpdate: (day, pageId) => (lists) =>
+                    addPageToList: (day, pageId) => (listId) =>
                         this.processEvent('setPageNewNoteLists', {
                             day,
                             pageId,
-                            lists,
+                            lists: [
+                                ...this.state.searchResults.pageData.byId[
+                                    pageId
+                                ].lists,
+                                listId,
+                            ],
+                        }),
+                    removePageFromList: (day, pageId) => (listId) =>
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists: this.state.searchResults.pageData.byId[
+                                pageId
+                            ].lists.filter((id) => id !== listId),
                         }),
                     onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
@@ -775,9 +804,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
                     listQueryEntries: (day, pageId) =>
-                        shareCollectionPickerProps.listQueryEntries,
+                        shareCollectionPickerProps.queryEntries,
                     loadDefaultListSuggestions: (day, pageId) =>
-                        shareCollectionPickerProps.loadDefaultListSuggestions,
+                        shareCollectionPickerProps.loadDefaultSuggestions,
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -825,10 +854,24 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
                         this.processEvent('setNoteLists', { ...args, noteId }),
-                    listQueryEntries: (day, pageId) =>
-                        shareCollectionPickerProps.listQueryEntries,
-                    loadDefaultListSuggestions: (day, pageId) =>
-                        shareCollectionPickerProps.loadDefaultListSuggestions,
+                    listQueryEntries: (noteId) =>
+                        shareCollectionPickerProps.queryEntries,
+                    loadDefaultListSuggestions: (noteId) =>
+                        shareCollectionPickerProps.loadDefaultSuggestions,
+                    createNewList: (noteId) => async (name) => {
+                        const listId = await this.props.listsBG.createCustomList(
+                            { name },
+                        )
+                        this.processEvent('setPageLists', {
+                            id: noteId,
+                            fullPageUrl:
+                                searchResults.pageData.byId[noteId].fullUrl,
+                            added: listId,
+                            deleted: null,
+                            skipPageIndexing: true,
+                        })
+                        return listId
+                    },
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

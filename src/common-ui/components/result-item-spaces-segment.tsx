@@ -5,9 +5,9 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
-    lists: string[]
+    lists: number[]
     showEditBtn: boolean
-    onListClick?: (tag: string) => void
+    onListClick?: (tag: number) => void
     onEditBtnClick: React.MouseEventHandler
     renderListsPickerForAnnotation: () => JSX.Element
 }

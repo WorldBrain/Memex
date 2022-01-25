@@ -35,7 +35,7 @@ class SpacePicker extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         SpacePickerDependencies,
-        'queryEntries' | 'loadDefaultSuggestions'
+        'queryEntries' | 'loadDefaultSuggestions' | 'createNewEntry'
     > = {
         queryEntries: async (query) => {
             const suggestions = await collections.searchForListSuggestions({
@@ -62,6 +62,10 @@ class SpacePicker extends StatefulUIElement<
                 remoteId: remoteListIds[s.localId] ?? null,
             }))
         },
+        createNewEntry: async (name) =>
+            collections.createCustomList({
+                name,
+            }),
     }
 
     constructor(props: SpacePickerDependencies) {
@@ -116,6 +120,7 @@ class SpacePicker extends StatefulUIElement<
 
     renderListRow = (list: SpaceDisplayEntry, index: number) => (
         <EntryRow
+            createdAt={list.createdAt}
             onPress={this.handleResultListPress}
             onPressActOnAll={
                 this.props.actOnAllTabs

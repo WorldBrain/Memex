@@ -1303,8 +1303,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 let newNoteListNames = []
                 if (formState.lists.length) {
                     const toAddLists = await Promise.all(
-                        formState.lists.map((name) =>
-                            listsBG.fetchListByName({ name }),
+                        formState.lists.map((id) =>
+                            listsBG.fetchListById({ id }),
                         ),
                     )
 
@@ -1630,11 +1630,11 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
     setNoteLists: EventHandler<'setNoteLists'> = async ({ event }) => {
         const added = event.added
-            ? await this.options.listsBG.fetchListByName({ name: event.added })
+            ? await this.options.listsBG.fetchListById({ id: event.added })
             : null
         const deleted = event.deleted
-            ? await this.options.listsBG.fetchListByName({
-                  name: event.deleted,
+            ? await this.options.listsBG.fetchListById({
+                  id: event.deleted,
               })
             : null
 

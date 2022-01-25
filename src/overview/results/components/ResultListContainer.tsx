@@ -209,13 +209,13 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         return (
             <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
-                    <CollectionPicker
+                    {/* <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
                         initialSelectedEntries={async () => selectedLists}
                         onEscapeKeyDown={
                             this.props.handleListBtnClick(index) as any
                         }
-                    />
+                    /> */}
                 </div>
             </HoverBox>
         )

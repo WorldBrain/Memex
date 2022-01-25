@@ -14,7 +14,8 @@ export interface Props {
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     name: string
-    localId: string | number
+    localId: number
+    createdAt: number
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
@@ -25,8 +26,15 @@ export interface Props {
 
 class EntryRow extends React.Component<Props> {
     _getEntry = () => {
-        const { name, selected, focused, localId, remoteId } = this.props
-        return { name, selected, focused, localId, remoteId }
+        const {
+            name,
+            selected,
+            focused,
+            localId,
+            remoteId,
+            createdAt,
+        } = this.props
+        return { name, selected, focused, localId, remoteId, createdAt }
     }
 
     handleEntryPress = () => {

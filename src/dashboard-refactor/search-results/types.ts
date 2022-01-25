@@ -15,6 +15,7 @@ import {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -22,6 +23,7 @@ export interface CommonInteractionProps {
     onListPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
+    createNewList: (name: string) => Promise<number>
 }
 
 export type PageInteractionProps = Omit<
@@ -55,16 +57,16 @@ export type NoteInteractionProps = Omit<
     'onNotesBtnClick'
 > & {
     updateShareInfo: (info: AnnotationSharingState) => void
-    updateTags: PickerUpdateHandler
-    updateLists: PickerUpdateHandler
+    updateTags: PickerUpdateHandler<string>
+    updateLists: PickerUpdateHandler<number>
     onEditCancel: React.MouseEventHandler
     onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
-    loadDefaultListSuggestions?: () => string[] | Promise<string[]>
-    listQueryEntries?: (query: string) => Promise<string[]>
+    loadDefaultListSuggestions?: SpacePickerDependencies['loadDefaultSuggestions']
+    listQueryEntries?: SpacePickerDependencies['queryEntries']
 }
 
 // NOTE: Derived type - edit the original
@@ -77,8 +79,8 @@ export type NoteInteractionAugdProps = {
 }
 
 export interface PagePickerProps {
-    onListPickerUpdate: PickerUpdateHandler
-    onTagPickerUpdate: PickerUpdateHandler
+    onListPickerUpdate: PickerUpdateHandler<number>
+    onTagPickerUpdate: PickerUpdateHandler<string>
 }
 
 // NOTE: Derived type - edit the original
@@ -98,14 +100,14 @@ export interface NoteFormState {
     isListPickerShown: boolean
     inputValue: string
     tags: string[]
-    lists: string[]
+    lists: number[]
 }
 
 export interface NoteData {
     url: string
     pageUrl: string
     tags: string[]
-    lists: string[]
+    lists: number[]
     comment?: string
     highlight?: string
     isEdited?: boolean
@@ -121,7 +123,7 @@ export type PageData = Pick<
     'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
 > & {
     normalizedUrl: string
-    lists: string[]
+    lists: number[]
     displayTime: number
     hasNotes: boolean
     type: 'pdf' | 'page'
@@ -256,8 +258,8 @@ export type Events = UIEvent<{
     setPageLists: {
         id: string
         fullPageUrl: string
-        added?: string
-        deleted?: string
+        added?: number
+        deleted?: number
         skipPageIndexing?: boolean
     }
     confirmPageDelete: null
@@ -288,7 +290,7 @@ export type Events = UIEvent<{
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
-    setPageNewNoteLists: PageEventArgs & { lists: string[] }
+    setPageNewNoteLists: PageEventArgs & { lists: number[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
@@ -307,7 +309,7 @@ export type Events = UIEvent<{
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    setNoteLists: NoteEventArgs & { added?: string; deleted?: string }
+    setNoteLists: NoteEventArgs & { added?: number; deleted?: number }
     updateNoteShareInfo: NoteEventArgs & AnnotationSharingState
     // updateNoteShareInfo: NoteEventArgs & NoteShareInfo
     /** NOTE: Does not mutate state */

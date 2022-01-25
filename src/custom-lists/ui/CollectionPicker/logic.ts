@@ -3,7 +3,7 @@ import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 
 export interface SpaceDisplayEntry {
-    localId: string | number
+    localId: number
     remoteId: string | number | null
     name: string
     focused: boolean
@@ -11,15 +11,15 @@ export interface SpaceDisplayEntry {
 }
 
 export interface SpacePickerDependencies {
-    createNewEntry: (name: string) => Promise<string | number>
-    selectEntry: (id: string | number) => Promise<void>
-    unselectEntry: (id: string | number) => Promise<void>
+    createNewEntry: (name: string) => Promise<number>
+    selectEntry: (listId: number) => Promise<void>
+    unselectEntry: (listId: number) => Promise<void>
     queryEntries: (query: string) => Promise<SpaceDisplayEntry[]>
     actOnAllTabs?: (query: string) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
-    loadDefaultSuggestions: () =>
-        | SpaceDisplayEntry[]
-        | Promise<SpaceDisplayEntry[]>
+    loadDefaultSuggestions: (args?: {
+        limit?: number
+    }) => SpaceDisplayEntry[] | Promise<SpaceDisplayEntry[]>
     initialSelectedEntries?: () =>
         | Array<number | string>
         | Promise<Array<number | string>>

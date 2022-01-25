@@ -26,7 +26,7 @@ const noteDataToSearchRes = (
     note: NoteData,
     page: PageData,
     tags: string[] = [],
-    lists: string[] = [],
+    lists: number[] = [],
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
     lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,

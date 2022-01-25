@@ -41,7 +41,7 @@ export interface NoteProps extends AnnotationProps {
 
 export interface AnnotationProps {
     tags: string[]
-    lists: string[]
+    lists: number[]
     createdWhen: Date | number
     mode: AnnotationMode
     hoverState: NoteResultHoverState

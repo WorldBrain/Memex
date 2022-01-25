@@ -14,28 +14,27 @@ export interface Props {
     onPressActOnAll?: (entry: DisplayEntry, index?: number) => void
     index: number
     name: string
-    localId: string | number
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
     selected?: boolean
     focused?: boolean
-    remoteId: string | number | null
+    remote?: boolean
 }
 
 class EntryRow extends React.Component<Props> {
-    _getEntry = () => {
-        const { name, selected, focused, localId, remoteId } = this.props
-        return { name, selected, focused, localId, remoteId }
+    _getEntry = (props) => {
+        const { name, selected, focused } = this.props
+        return { name, selected, focused }
     }
 
     handleEntryPress = () => {
-        this.props.onPress && this.props.onPress(this._getEntry())
+        this.props.onPress && this.props.onPress(this._getEntry(this.props))
     }
 
     handleActOnAllPress = (e: SyntheticEvent) => {
         this.props.onPressActOnAll &&
-            this.props.onPressActOnAll(this._getEntry())
+            this.props.onPressActOnAll(this._getEntry(this.props))
         e.preventDefault()
         e.stopPropagation()
         return false
@@ -43,16 +42,17 @@ class EntryRow extends React.Component<Props> {
 
     handleMouseOver = () => {
         this.props.onFocus &&
-            this.props.onFocus(this._getEntry(), this.props.index)
+            this.props.onFocus(this._getEntry(this.props), this.props.index)
     }
 
     handleMouseOut = () => {
-        this.props.onFocus && this.props.onFocus(this._getEntry(), null)
+        this.props.onFocus &&
+            this.props.onFocus(this._getEntry(this.props), null)
     }
 
     render() {
         const {
-            remoteId,
+            remote,
             selected,
             focused,
             onPressActOnAll,
@@ -68,7 +68,7 @@ class EntryRow extends React.Component<Props> {
             >
                 <NameWrapper>
                     {resultItem}
-                    {remoteId != null && (
+                    {remote && (
                         <ButtonTooltip tooltipText={'shared'} position="bottom">
                             <Icon
                                 heightAndWidth="14px"
@@ -110,7 +110,6 @@ export const ActOnAllTabsButton = styled(Layers)`
 
 export const IconStyleWrapper = styled.div`
     display: inline-flex;
-
     ${StyledIconBase} {
         stroke-width: 2px;
         color: ${(props) =>

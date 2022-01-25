@@ -29,7 +29,7 @@ const setupLogicHelper = async ({
 }: {
     device: UILogicTestDevice
     queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
-    createNewEntry?: (name: string) => Promise<string | number>
+    createNewEntry?: (name: string) => Promise<number>
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     initialSuggestions?: SpaceDisplayEntry[]
