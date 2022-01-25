@@ -408,11 +408,17 @@ export default class CustomListBackground {
         return this.storage.countInboxUnread()
     }
 
-    createCustomList = async ({ name }: { name: string }): Promise<number> => {
+    createCustomList = async ({
+        name,
+        id: _id,
+    }: {
+        name: string
+        id?: number
+    }): Promise<number> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
-        const id = this.generateListId()
+        const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({ id, name })
         await this._updateListSuggestionsCache({ added: id })
 
@@ -600,30 +606,18 @@ export default class CustomListBackground {
         )
     }
 
-    // Sugar for the List picking UI component
-    updateListForPage = async ({
+    updateListForPage: RemoteCollectionsInterface['updateListForPage'] = async ({
         added,
         deleted,
         url,
         tabId,
         skipPageIndexing,
-    }: {
-        added?: string
-        deleted?: string
-        url: string
-        tabId?: number
-        skipPageIndexing?: boolean
     }) => {
-        const name = added ?? deleted
-        let list = await this.fetchListByName({ name })
-
-        if (!list) {
-            list = { id: await this.createCustomList({ name }) }
-        }
+        const listId = added ?? deleted
 
         if (added) {
             await this.insertPageToList({
-                id: list.id,
+                id: listId,
                 url,
                 tabId,
                 skipPageIndexing,
@@ -631,7 +625,7 @@ export default class CustomListBackground {
         }
 
         if (deleted) {
-            await this.removePageFromList({ id: list.id, url })
+            await this.removePageFromList({ id: listId, url })
         }
     }
 }

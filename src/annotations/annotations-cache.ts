@@ -118,7 +118,7 @@ export const createAnnotationsCache = (
                     existingListIds.map((id) =>
                         bgModules.customLists
                             .fetchListById({ id })
-                            .then((list) => list.name),
+                            .then((list) => list.id),
                     ),
                 )
 
@@ -134,8 +134,8 @@ export const createAnnotationsCache = (
                 if (namesToAdd.length) {
                     const existingListsToAdd = (
                         await Promise.all(
-                            namesToAdd.map((name) =>
-                                bgModules.customLists.fetchListByName({ name }),
+                            namesToAdd.map((id) =>
+                                bgModules.customLists.fetchListById({ id }),
                             ),
                         )
                     ).filter((list) => list)
@@ -170,8 +170,8 @@ export const createAnnotationsCache = (
                 }
                 if (toDelete.length) {
                     const toDeleteLists = await Promise.all(
-                        toDelete.map((name) =>
-                            bgModules.customLists.fetchListByName({ name }),
+                        toDelete.map((id) =>
+                            bgModules.customLists.fetchListById({ id }),
                         ),
                     )
                     const {

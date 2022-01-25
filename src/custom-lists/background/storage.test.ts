@@ -478,17 +478,30 @@ describe('Custom List Integrations', () => {
 })
 
 describe('Collection Cache', () => {
-    async function setupCacheTest() {
+    async function setupCacheTest(args: { skipTestData?: boolean }) {
         const setup = await setupBackgroundIntegrationTest({
             includePostSyncProcessor: true,
         })
+
+        if (!args?.skipTestData) {
+            await setup.storageManager
+                .collection('customLists')
+                .createObject(DATA.LIST_1)
+            await setup.storageManager
+                .collection('customLists')
+                .createObject(DATA.LIST_2)
+            await setup.storageManager
+                .collection('customLists')
+                .createObject(DATA.LIST_3)
+        }
+
         const listsModule = setup.backgroundModules.customLists
         return { listsModule }
     }
 
     describe('modifies cache', () => {
         test('add lists', async () => {
-            const { listsModule } = await setupCacheTest()
+            const { listsModule } = await setupCacheTest({ skipTestData: true })
 
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
             await listsModule.createCustomList(DATA.LIST_1)
@@ -568,68 +581,65 @@ describe('Collection Cache', () => {
                     focused: false,
                     remoteId: null,
                 }),
-                expect.objectContaining({
-                    createdAt: expect.any(Number),
-                    localId: expect.any(Number),
-                    name: DATA.LIST_2.name,
-                    focused: false,
-                    remoteId: null,
-                }),
             ])
         })
 
-        test("adding new page entry for non-existent list doesn't add dupe cache entries", async () => {
-            const { listsModule } = await setupCacheTest()
+        test("adding multiple page entry for same list doesn't add dupe cache entries", async () => {
+            const { listsModule } = await setupCacheTest({})
 
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
-            await listsModule.updateListForPage({
-                added: DATA.LIST_1.name,
-                url: 'https://www.ipsum.com/test',
-            })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+            const expectedEntries = [
                 {
                     createdAt: expect.any(Number),
-                    localId: expect.any(Number),
-                    name: DATA.LIST_1.name,
-                    focused: false,
-                    remoteId: null,
-                },
-            ])
-
-            await listsModule.updateListForPage({
-                added: DATA.LIST_1.name,
-                url: 'https://www.ipsum.com/test1',
-            })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                {
-                    createdAt: expect.any(Number),
-                    localId: expect.any(Number),
-                    name: DATA.LIST_1.name,
-                    focused: false,
-                    remoteId: null,
-                },
-            ])
-
-            await listsModule.updateListForPage({
-                added: DATA.LIST_2.name,
-                url: 'https://www.ipsum.com/test',
-            })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
-                {
-                    createdAt: expect.any(Number),
-                    localId: expect.any(Number),
+                    localId: DATA.LIST_1.id,
                     name: DATA.LIST_1.name,
                     focused: false,
                     remoteId: null,
                 },
                 {
                     createdAt: expect.any(Number),
-                    localId: expect.any(Number),
+                    localId: DATA.LIST_2.id,
                     name: DATA.LIST_2.name,
                     focused: false,
                     remoteId: null,
                 },
-            ])
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_3.id,
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                },
+            ]
+
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
+                expectedEntries,
+            )
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.id,
+                url: 'https://www.ipsum.com/test',
+                skipPageIndexing: true,
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
+                expectedEntries,
+            )
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.id,
+                url: 'https://www.ipsum.com/test1',
+                skipPageIndexing: true,
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
+                expectedEntries,
+            )
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_2.id,
+                url: 'https://www.ipsum.com/test',
+                skipPageIndexing: true,
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
+                expectedEntries,
+            )
         })
     })
 })

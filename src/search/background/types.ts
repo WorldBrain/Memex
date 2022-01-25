@@ -21,7 +21,7 @@ export interface AnnotPage {
     annotations: Annotation[]
     pageId?: string
     tags: string[]
-    lists: string[]
+    lists: number[]
 }
 
 export interface AnnotSearchParams {

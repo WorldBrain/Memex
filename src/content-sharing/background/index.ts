@@ -645,17 +645,28 @@ export default class ContentSharingBackground {
             skip: 0,
         })
         const remoteIds = await this.storage.getAllRemoteListIds()
-        const suggestions: Array<{ localId: number; name: string }> = []
+        const suggestions: Array<{
+            localId: number
+            name: string
+            remoteId: string
+            createdAt: number
+        }> = []
         for (const list of lists) {
             if (
                 remoteIds[list.id] &&
                 list.name.toLowerCase().startsWith(loweredPrefix)
             ) {
-                suggestions.push({ localId: list.id, name: list.name })
+                suggestions.push({
+                    localId: list.id,
+                    name: list.name,
+                    remoteId: remoteIds[list.id],
+                    createdAt: list.createdAt.getTime(),
+                })
             }
         }
         return suggestions
     }
+
     canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
         remoteId,
     }) => {

@@ -56,7 +56,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         comment: string
         anchor: Anchor
         tags: string[]
-        lists: string[]
+        lists: number[]
         bookmarked?: boolean
         isSocialPost?: boolean
     }) => {

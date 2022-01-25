@@ -211,7 +211,7 @@ export default class AnnotationStorage extends StorageModule {
         const annotationUrls = annotations.map((annotation) => annotation.url)
         let annotationsBookmarkMap = new Map<string, boolean>()
         let annotationsTagMap = new Map<string, string[]>()
-        let annotationsListMap = new Map<string, string[]>() // Lists should be identified by names since tags are too, but annotListEntries only save listIds
+        let annotationsListMap = new Map<string, number[]>()
 
         if (withBookmarks !== false) {
             annotationsBookmarkMap = new Map(
@@ -253,7 +253,7 @@ export default class AnnotationStorage extends StorageModule {
                 const customList: List = await this.operation('findListById', {
                     id: list.listId,
                 })
-                annotationsListMap.set(list.url, [...prev, customList.name])
+                annotationsListMap.set(list.url, [...prev, customList.id])
             }
         }
 

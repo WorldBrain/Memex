@@ -98,7 +98,14 @@ export interface ContentSharingInterface
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
     suggestSharedLists(params: {
         prefix: string
-    }): Promise<Array<{ localId: number; name: string }>>
+    }): Promise<
+        Array<{
+            localId: number
+            name: string
+            remoteId: string
+            createdAt: number
+        }>
+    >
     canWriteToSharedList(params: { localId: number }): Promise<boolean>
     canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
 }

@@ -102,8 +102,8 @@ export interface RemoteCollectionsInterface {
     }): Promise<void>
     removeOpenTabsFromList(args: { listId: number }): Promise<void>
     updateListForPage(args: {
-        added?: string
-        deleted?: string
+        added?: number
+        deleted?: number
         url: string
         tabId?: number
         skipPageIndexing?: boolean
