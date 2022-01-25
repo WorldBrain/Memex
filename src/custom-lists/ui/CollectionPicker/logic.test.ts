@@ -463,7 +463,7 @@ describe('GenericPickerLogic', () => {
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('selectedEntryPress', {
-            entry: initialSuggestions[0].name,
+            entry: initialSuggestions[0].localId,
         })
 
         expect(testLogic.state).toEqual(

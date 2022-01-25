@@ -20,7 +20,7 @@ import {
     fontSizeNormal,
     fontSizeSmall,
 } from 'src/common-ui/components/design-library/typography'
-import { EntrySelectedList } from 'src/custom-lists/ui/CollectionPicker/components/EntrySelectedList'
+import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,

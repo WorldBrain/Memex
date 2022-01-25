@@ -72,13 +72,15 @@ class SpacePicker extends StatefulUIElement<
         super(props, new ListPickerLogic(props))
     }
 
-    private get selectedDisplayEntries(): string[] {
+    private get selectedDisplayEntries(): Array<{
+        localId: number
+        name: string
+    }> {
         return this.state.selectedEntries
-            .map(
-                (entryId) =>
-                    this.state.displayEntries.find(
-                        (entry) => entry.localId === entryId,
-                    )?.name,
+            .map((entryId) =>
+                this.state.displayEntries.find(
+                    (entry) => entry.localId === entryId,
+                ),
             )
             .filter((entry) => entry != null)
     }
@@ -96,7 +98,7 @@ class SpacePicker extends StatefulUIElement<
     handleSearchInputChanged = (query: string) =>
         this.processEvent('searchInputChanged', { query })
 
-    handleSelectedListPress = (list: string) =>
+    handleSelectedListPress = (list: number) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
     handleResultListPress = (list: SpaceDisplayEntry) =>
@@ -194,8 +196,7 @@ class SpacePicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            dataAttributeName="list-name"
-                            entriesSelected={this.selectedDisplayEntries}
+                            entries={this.selectedDisplayEntries}
                             onPress={this.handleSelectedListPress}
                         />
                     }

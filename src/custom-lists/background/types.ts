@@ -88,7 +88,7 @@ export interface RemoteCollectionsInterface {
         limit?: number
     }): Promise<SpaceDisplayEntry[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
-    fetchPageLists(args: { url: string }): Promise<string[]>
+    fetchPageLists(args: { url: string }): Promise<number[]>
     fetchListIdsByUrl(args: { url: string }): Promise<number[]>
     fetchListIgnoreCase(args: { name: string }): Promise<PageList[]>
     searchForListSuggestions(args: {

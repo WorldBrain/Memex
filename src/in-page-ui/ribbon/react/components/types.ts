@@ -72,7 +72,7 @@ export interface RibbonListsProps {
     updateLists: PickerUpdateHandler<number>
     listAllTabs: (value: string) => Promise<void>
     setShowListsPicker: (value: boolean) => void
-    fetchInitialListSelections: () => Promise<string[]>
+    fetchInitialListSelections: () => Promise<number[]>
     loadDefaultSuggestions: SpacePickerDependencies['loadDefaultSuggestions']
     queryEntries: SpacePickerDependencies['queryEntries']
     selectEntry: SpacePickerDependencies['selectEntry']

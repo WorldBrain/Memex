@@ -357,10 +357,10 @@ export default class CustomListBackground {
         return this.storage.fetchListIdsByUrl(normalizeUrl(url))
     }
 
-    fetchPageLists = async ({ url }: { url: string }): Promise<string[]> => {
+    fetchPageLists = async ({ url }: { url: string }): Promise<number[]> => {
         const lists = await this.fetchListPagesByUrl({ url })
 
-        return lists.map(({ name }) => name)
+        return lists.map(({ id }) => id)
     }
 
     _updateListSuggestionsCache = async (args: {

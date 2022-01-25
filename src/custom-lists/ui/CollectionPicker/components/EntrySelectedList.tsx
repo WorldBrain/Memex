@@ -1,32 +1,29 @@
-import React, { ChangeEvent } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { X as XIcon } from '@styled-icons/feather'
 import { ActiveList } from 'src/custom-lists/ui/CollectionPicker/components/ActiveList'
 
 interface Props {
-    dataAttributeName: string
-    entriesSelected: string[]
-    onPress: (entry: string) => void
+    entries: Array<{ localId: number; name: string }>
+    onPress: (entryId: number) => void
 }
 
 export class EntrySelectedList extends React.PureComponent<Props> {
-    private get dataAttribute(): string {
-        return `data-${this.props.dataAttributeName}`
+    handleSelectedTabPress = (listId: number): React.MouseEventHandler => (
+        event,
+    ) => {
+        this.props.onPress(listId)
     }
-
-    handleSelectedTabPress = (event: ChangeEvent) =>
-        this.props.onPress(event.target.getAttribute(this.dataAttribute))
 
     render() {
         return (
             <React.Fragment>
-                {this.props.entriesSelected?.map((entry) => (
+                {this.props.entries?.map((entry) => (
                     <StyledActiveEntry
-                        key={`ActiveTab-${entry}`}
-                        onClick={this.handleSelectedTabPress}
-                        {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
+                        key={`ActiveTab-${entry.localId}`}
+                        onClick={this.handleSelectedTabPress(entry.localId)}
                     >
-                        <Entry>{entry}</Entry>
+                        <Entry>{entry.name}</Entry>
                         <StyledXIcon size={12} />
                     </StyledActiveEntry>
                 ))}

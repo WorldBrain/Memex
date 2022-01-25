@@ -20,9 +20,7 @@ export interface SpacePickerDependencies {
     loadDefaultSuggestions: (args?: {
         limit?: number
     }) => SpaceDisplayEntry[] | Promise<SpaceDisplayEntry[]>
-    initialSelectedEntries?: () =>
-        | Array<number | string>
-        | Promise<Array<number | string>>
+    initialSelectedEntries?: () => number[] | Promise<number[]>
     children?: any
     onClickOutside?: React.MouseEventHandler
 }
@@ -30,7 +28,7 @@ export interface SpacePickerDependencies {
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string }
-    selectedEntryPress: { entry: string }
+    selectedEntryPress: { entry: number }
     resultEntryAllPress: { entry: SpaceDisplayEntry }
     newEntryAllPress: { entry: string }
     resultEntryPress: { entry: SpaceDisplayEntry }
@@ -50,7 +48,7 @@ export interface SpacePickerState {
     query?: string
     newEntryName: string
     displayEntries: SpaceDisplayEntry[]
-    selectedEntries: Array<string | number>
+    selectedEntries: number[]
     loadingSuggestions: boolean
     loadingQueryResults: boolean
 }
@@ -300,23 +298,18 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     selectedEntryPress: EventHandler<'selectedEntryPress'> = async ({
-        event: { entry: entryName },
+        event: { entry },
         previousState,
     }) => {
-        const { unselectEntry } = this.dependencies
-        const entry = previousState.displayEntries.find(
-            (entry) => entry.name === entryName,
-        )
-
         this.emitMutation({
             selectedEntries: {
                 $set: previousState.selectedEntries.filter(
-                    (id) => id !== entry.localId,
+                    (id) => id !== entry,
                 ),
             },
         } as UIMutation<SpacePickerState>)
 
-        await this.dependencies.unselectEntry(entry.localId)
+        await this.dependencies.unselectEntry(entry)
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
@@ -382,13 +375,8 @@ export default class SpacePickerLogic extends UILogic<
 
     newEntryPress: EventHandler<'newEntryPress'> = async ({
         event: { entry },
-        previousState,
     }) => {
         entry = this.validateEntry(entry)
-
-        if (previousState.selectedEntries.includes(entry)) {
-            return
-        }
 
         const newId = await this.dependencies.createNewEntry(entry)
 
