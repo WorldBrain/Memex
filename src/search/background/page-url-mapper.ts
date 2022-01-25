@@ -131,7 +131,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
     private async lookupLists(
         pageUrls: string[],
-        listMap: Map<string, string[]>,
+        listMap: Map<string, number[]>,
     ) {
         const listEntries = (await this.backend.dexieInstance
             .table('pageListEntries')
@@ -139,19 +139,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .anyOf(pageUrls)
             .primaryKeys()) as Array<[number, string]>
 
-        const listIds = new Set(listEntries.map(([listId]) => listId))
-        const nameLookupById = new Map<number, string>()
-
-        await this.backend.dexieInstance
-            .table('customLists')
-            .where('id')
-            .anyOf([...listIds])
-            .each(({ id, name }) => nameLookupById.set(id, name))
-
         for (const [listId, url] of listEntries) {
             const current = listMap.get(url) ?? []
-            const listName = nameLookupById.get(listId)
-            listMap.set(url, [...current, listName])
+            listMap.set(url, [...current, listId])
         }
     }
 
@@ -378,7 +368,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const favIconMap = new Map<string, string>()
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
-        const listMap = new Map<string, string[]>()
+        const listMap = new Map<string, number[]>()
         const annotMap = new Map<string, Annotation[]>()
         const timeMap = new Map<string, number>()
 

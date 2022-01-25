@@ -1300,7 +1300,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         tags: formState.tags,
                     })
                 }
-                let newNoteListNames = []
+                let newNoteListIds: number[] = []
                 if (formState.lists.length) {
                     const toAddLists = await Promise.all(
                         formState.lists.map((id) =>
@@ -1314,11 +1314,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         annotationUrl: newNoteId,
                         localListIds: toAddLists.map((list) => list.id),
                     })
-                    newNoteListNames = toAddLists
+                    newNoteListIds = toAddLists
                         .filter((list) =>
                             sharingState['localListIds'].includes(list.id),
                         )
-                        .map((list) => list.name)
+                        .map((list) => list.id)
                 }
 
                 this.emitMutation({
@@ -1333,7 +1333,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
-                                        lists: newNoteListNames,
+                                        lists: newNoteListIds,
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
