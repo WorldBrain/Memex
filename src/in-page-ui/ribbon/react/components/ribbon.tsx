@@ -554,6 +554,22 @@ export default class Ribbon extends Component<Props, State> {
                                             getListNameById={
                                                 this.props.getListNameById
                                             }
+                                            listQueryEntries={
+                                                this.props.lists.queryEntries
+                                            }
+                                            loadDefaultListSuggestions={
+                                                this.props.lists
+                                                    .loadDefaultSuggestions
+                                            }
+                                            createNewList={
+                                                this.props.lists.createNewEntry
+                                            }
+                                            addPageToList={
+                                                this.props.lists.selectEntry
+                                            }
+                                            removePageFromList={
+                                                this.props.lists.unselectEntry
+                                            }
                                             isRibbonCommentBox={true}
                                         />
                                     </Tooltip>
