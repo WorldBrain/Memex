@@ -277,6 +277,8 @@ export default class PageResultView extends PureComponent<Props> {
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
+        console.log(this.props.lists.includes(20201014, 0))
+
         return (
             <ItemBox
                 firstDivProps={{
@@ -316,7 +318,12 @@ export default class PageResultView extends PureComponent<Props> {
                             )}
                             <PageUrl>{this.domain}</PageUrl>
                             {this.props.hoverState === 'main-content' &&
-                                this.props.lists.length === 0 && (
+                                (this.props.lists.length === 0 ||
+                                    (this.props.lists.length === 1 &&
+                                        this.props.lists.includes(
+                                            20201014,
+                                            0,
+                                        ))) && (
                                     <AddSpaceButtonContainer>
                                         <AddSpacesButton
                                             hasNoLists={true}
@@ -334,18 +341,22 @@ export default class PageResultView extends PureComponent<Props> {
                                 )}
                         </ResultContent>
                     </PageContentBox>
-                    {this.hasLists && (
-                        <ListsSegment
-                            lists={this.displayLists}
-                            onMouseEnter={this.props.onListsHover}
-                            showEditBtn={this.props.hoverState === 'lists'}
-                            onListClick={undefined}
-                            onEditBtnClick={this.props.onListPickerBtnClick}
-                            renderListsPickerForAnnotation={this.renderSpacePicker.bind(
-                                this,
-                            )}
-                        />
-                    )}
+                    {this.hasLists &&
+                        !(
+                            this.props.lists.length === 1 &&
+                            this.props.lists.includes(20201014, 0)
+                        ) && (
+                            <ListsSegment
+                                lists={this.displayLists}
+                                onMouseEnter={this.props.onListsHover}
+                                showEditBtn={this.props.hoverState === 'lists'}
+                                onListClick={undefined}
+                                onEditBtnClick={this.props.onListPickerBtnClick}
+                                renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                    this,
+                                )}
+                            />
+                        )}
                     <TagsSegment
                         tags={this.props.tags}
                         onMouseEnter={this.props.onTagsHover}
