@@ -17,6 +17,7 @@ import ListsSidebarItem, {
 import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
+import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 
 const Sidebar = styled.div<{
     locked: boolean
@@ -115,20 +116,16 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
     ) =>
-        lists.map((listObj, i) =>
-            listObj.isEditing ? (
-                <ListsSidebarEditableItem key={i} {...listObj.editableProps} />
-            ) : (
-                <ListsSidebarItem
-                    key={i}
-                    dropReceivingState={{
-                        ...this.props.initDropReceivingState(listObj.listId),
-                        canReceiveDroppedItems,
-                    }}
-                    {...listObj}
-                />
-            ),
-        )
+        lists.map((listObj, i) => (
+            <ListsSidebarItem
+                key={i}
+                dropReceivingState={{
+                    ...this.props.initDropReceivingState(listObj.listId),
+                    canReceiveDroppedItems,
+                }}
+                {...listObj}
+            />
+        ))
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route

@@ -1,90 +1,42 @@
 import React, { PureComponent } from 'react'
-
 import styled, { css, keyframes } from 'styled-components'
-
 import styles, { fonts } from 'src/dashboard-refactor/styles'
-
 import colors from 'src/dashboard-refactor/colors'
-
 import { Icon } from 'src/dashboard-refactor/styled-components'
-
 import Margin from 'src/dashboard-refactor/components/Margin'
-
 import {
     ListSource,
     DropReceivingState,
     SelectedState,
 } from 'src/dashboard-refactor/types'
-
 import { Props as EditableItemProps } from './sidebar-editable-item'
-
 import { ListNameHighlightIndices } from '../types'
-
 import * as icons from 'src/common-ui/components/design-library/icons'
-
 import { ClickAway } from 'src/util/click-away-wrapper'
-
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
+// import { getViewportBreakpoint } from '@worldbrain/memex-common/lib/common-ui/styles/utils'
+import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
+import EditableMenuItem from './editable-menu-item'
+import { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import ListShareModalLogic from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/logic'
+import { Props as ListSidebarItemProps } from './sidebar-item-with-menu'
 
-export interface Props {
-    className?: string
-
-    isEditing?: boolean
-
-    newItemsCount?: number
-
-    name: string
-
-    listId: number
-
-    source?: ListSource
-
-    hasActivity?: boolean
-
-    isMenuDisplayed?: boolean
-
-    isCollaborative?: boolean
-
-    nameHighlightIndices?: ListNameHighlightIndices
-
-    onUnfollowClick?: React.MouseEventHandler
-
-    onRenameClick?: React.MouseEventHandler
-
-    onDeleteClick?: React.MouseEventHandler
-
-    onShareClick?: React.MouseEventHandler
-
-    dropReceivingState?: DropReceivingState
-
-    editableProps?: EditableItemProps
-
-    selectedState: SelectedState
-
-    onMoreActionClick?: (listId: number) => void
-
-    services?: UIElementServices<'contentSharing' | 'overlay' | 'clipboard'>
-
+export interface Props extends ListSidebarItemProps {
     buttonRef?: React.RefObject<HTMLButtonElement>
-
     position?: { x: number; y: number }
+    shareList?: () => Promise<{ listId: string }>
 }
 
 const Modal = ({
     children,
-
     show,
-
     closeModal,
-
     position,
 }: {
     children: JSX.Element
-
     show: boolean
-
     closeModal: React.MouseEventHandler
-
     position: { x: number; y: number }
 }) => {
     return (
@@ -98,53 +50,63 @@ const Modal = ({
     )
 }
 
-const ModalRoot = styled.div`
-    z-index: 1000;
+const renderCopyableLink = ({
+    link,
+    roleID,
+    linkIndex,
+    showCopyMsg,
+    copyLink,
+}: InviteLink & {
+    linkIndex: number
+    copyLink: ({ event }: { event: { linkIndex: number } }) => Promise<void>
+}) => {
+    const viewportBreakpoint = 'normal'
+    // const viewportBreakpoint = getViewportBreakpoint(this.getViewportWidth(),)
 
-    width: 100%;
-
-    height: 100%;
-
-    position: fixed;
-
-    top: 0;
-
-    left: 0;
-
-    padding-top: 80px;
-`
-
-/* Modal content */
-
-const ModalContent = styled.div<{ x: number; y: number }>`
-    z-index: 999;
-
-    position: absolute;
-
-    top: ${(props) => props.y}px;
-
-    left: ${(props) => props.x}px;
-
-    padding: 20px;
-
-    text-align: center;
-
-    border-radius: 4px;
-`
-
-const Overlay = styled.div`
-    position: absolute;
-
-    left: 0;
-
-    top: 0;
-
-    width: 100%;
-
-    height: 100%;
-
-    z-index: 995;
-`
+    return (
+        <Margin horizontal="10px">
+            <LinkAndRoleBox viewportBreakpoint={viewportBreakpoint}>
+                <CopyLinkBox>
+                    <LinkBox
+                        left="small"
+                        onClick={
+                            () => copyLink({ event: { linkIndex } })
+                            // this.processEvent('copyLink', { linkIndex })
+                        }
+                    >
+                        <Link>
+                            {showCopyMsg ? 'Copied to clipboard' : link}
+                        </Link>
+                        <Icon
+                            heightAndWidth="12px"
+                            path={icons.copy}
+                            height="12px"
+                            onClick={
+                                () =>
+                                    copyLink({
+                                        event: { linkIndex },
+                                    })
+                                // this.processEvent('copyLink', { linkIndex })
+                            }
+                        />
+                        <Icon
+                            heightAndWidth="12px"
+                            path={icons.goTo}
+                            height="12px"
+                            onClick={
+                                () => window.open(link)
+                                // this.processEvent('copyLink', { linkIndex })
+                            }
+                        />
+                    </LinkBox>
+                </CopyLinkBox>
+                <PermissionText viewportBreakpoint={viewportBreakpoint}>
+                    {sharedListRoleIDToString(roleID) + ' Access'}
+                </PermissionText>
+            </LinkAndRoleBox>
+        </Margin>
+    )
+}
 
 export default class SpaceContextMenuButton extends PureComponent<
     Props,
@@ -154,33 +116,24 @@ export default class SpaceContextMenuButton extends PureComponent<
 
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
-
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-
         this.setState({ position: rect ?? { x: 0, y: 0 } })
-
         this.props.onMoreActionClick(this.props.listId)
     }
 
     constructor(props) {
         super(props)
-
         this.buttonRef = React.createRef()
-
         this.state = { position: { x: 0, y: 0 } }
     }
 
     render() {
         const {
             dropReceivingState,
-
             onMoreActionClick,
-
             newItemsCount,
-
             hasActivity,
         } = this.props
-
         if (onMoreActionClick) {
             return (
                 <>
@@ -201,16 +154,128 @@ export default class SpaceContextMenuButton extends PureComponent<
                 </>
             )
         }
-
         return null
     }
 }
 
-export class SpaceContextMenu extends PureComponent<Props> {
-    private handleMoreActionClick: React.MouseEventHandler = (e) => {
-        e.stopPropagation()
+const updateArray = (arr, index, newEl) => {
+    return [...arr.slice(0, index), newEl, ...arr.slice(index + 1)]
+}
+export class SpaceContextMenu extends PureComponent<
+    Props,
+    {
+        inviteLinks: InviteLink[]
+        showSuccessMsg: boolean
+        remoteId?: string
+        nameValue: string
+    }
+> {
+    constructor(props) {
+        super(props)
+        this.state = {
+            inviteLinks: [],
+            showSuccessMsg: false,
+            remoteId: this.props.listData
+                ? this.props.listData.remoteId
+                : undefined,
+            nameValue: this.props.editableProps.initValue,
+        }
+    }
 
+    private closeModal: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
         this.props.onMoreActionClick(this.props.listId)
+        this.props.editableProps.onConfirmClick(this.state.nameValue)
+        console.log('closeModal')
+    }
+
+    private addLinks = async () => {
+        const roleID = SharedListRoleID.ReadWrite
+        const { clipboard, contentSharing } = this.props.services
+
+        console.log('addLinks', {
+            shareList: this.props.shareList,
+            listId: this.props.listId,
+            props: this.props,
+        })
+        if (!this.state.remoteId && this.props.shareList) {
+            const sharedList = await this.props.shareList()
+            this.setState({ remoteId: sharedList.listId })
+            console.log('addLinks', {
+                remoteListId: this.state.remoteId,
+                shareList: this.props.shareList,
+                sharedList,
+            })
+        }
+
+        const { link } = await contentSharing.generateKeyLink({
+            key: { roleID },
+            listReference: {
+                id: this.state.remoteId,
+                type: 'shared-list-reference',
+            },
+        })
+
+        const newLinks: InviteLink[] = [{ link, roleID }]
+
+        // Also create reader link if non-reader link is the first being created
+        if (
+            !this.state.inviteLinks.length
+            // &&
+            // roleID !== SharedListRoleID.Commenter
+        ) {
+            const commenterLink = await contentSharing.generateKeyLink({
+                key: { roleID: SharedListRoleID.Commenter },
+                listReference: {
+                    id: this.state.remoteId,
+                    type: 'shared-list-reference',
+                },
+            })
+
+            newLinks.unshift({
+                link: commenterLink.link,
+                roleID: SharedListRoleID.Commenter,
+            })
+        }
+
+        this.setState({
+            inviteLinks: [...this.state.inviteLinks, ...newLinks],
+            showSuccessMsg: true,
+        })
+
+        await clipboard.copy(link)
+        setTimeout(
+            () => this.setState({ showSuccessMsg: false }),
+            ListShareModalLogic.SUCCESS_MSG_TIMEOUT,
+        )
+    }
+
+    private copyLink = async ({ event }) => {
+        const inviteLink = this.state.inviteLinks[event.linkIndex]
+
+        if (inviteLink == null) {
+            throw new Error('Link to copy does not exist - cannot copy')
+        }
+
+        await this.props.services.clipboard.copy(inviteLink.link)
+        this.setState({
+            inviteLinks: updateArray(this.state.inviteLinks, event.linkIndex, {
+                ...inviteLink,
+                showCopyMsg: true,
+            }),
+        })
+
+        setTimeout(
+            () =>
+                this.setState({
+                    inviteLinks: updateArray(
+                        this.state.inviteLinks,
+                        event.linkIndex,
+                        { ...inviteLink, showCopyMsg: false },
+                    ),
+                }),
+            ListShareModalLogic.COPY_MSG_TIMEOUT,
+        )
     }
 
     render() {
@@ -220,11 +285,11 @@ export class SpaceContextMenu extends PureComponent<Props> {
 
         const renderMenu = (children: React.ReactNode) => (
             <>
-                {/* <ClickAway onClickAway={this.handleMoreActionClick}> */}
+                {/* <ClickAway onClickAway={this.closeModal}> */}
 
                 <Modal
                     show={true}
-                    closeModal={this.handleMoreActionClick}
+                    closeModal={this.closeModal}
                     position={this.props.position}
                 >
                     <MenuContainer>{children}</MenuContainer>
@@ -247,102 +312,101 @@ export class SpaceContextMenu extends PureComponent<Props> {
 
         return renderMenu(
             <>
-                <MenuButton onClick={this.props.onShareClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.link} />
-                    </Margin>
-                    Share
-                </MenuButton>
-
+                {!(this.props.services && !!this.state.inviteLinks.length) ? (
+                    <MenuButton
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            this.addLinks()
+                        }}
+                    >
+                        {/* <MenuButton onClick={this.props.onShareClick}> */}
+                        <Margin horizontal="10px">
+                            <Icon heightAndWidth="12px" path={icons.link} />
+                        </Margin>
+                        Share
+                    </MenuButton>
+                ) : (
+                    <MenuSection
+                        onClick={(e) => {
+                            e.stopPropagation()
+                        }}
+                    >
+                        {this.state.inviteLinks.map((link, linkIndex) =>
+                            renderCopyableLink({
+                                ...link,
+                                linkIndex,
+                                copyLink: this.copyLink,
+                            }),
+                        )}
+                    </MenuSection>
+                )}
                 <MenuButton onClick={this.props.onDeleteClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.remove} />
+                        <Icon heightAndWidth="12px" path={icons.trash} />
                     </Margin>
                     Delete
                 </MenuButton>
-
-                <MenuButton onClick={this.props.onRenameClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.edit} />
-                    </Margin>
-                    Rename
-                </MenuButton>
+                <EditableMenuItem
+                    // key={i}
+                    onRenameStart={this.props.onRenameClick}
+                    nameValueState={{
+                        value: this.state.nameValue,
+                        setValue: (value) =>
+                            this.setState({
+                                nameValue: value,
+                            }),
+                    }}
+                    {...this.props.editableProps}
+                />
             </>,
         )
     }
 }
 
-const ActivityBeacon = styled.div`
-    width: 14px;
-
-    height: 14px;
-
-    border-radius: 10px;
-
-    padding: 8px;
-
-    background-color: ${(props) => props.theme.colors.secondary};
+const ModalRoot = styled.div`
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 80px;
 `
 
-const NewItemsCount = styled.div`
-    width: 30px;
+/* Modal content */
 
-    height: 14px;
-
-    border-radius: 10px;
-
-    display: flex;
-
-    justify-content: flex-end;
-
-    align-items: center;
+const ModalContent = styled.div<{ x: number; y: number }>`
+    z-index: 999;
+    position: absolute;
+    top: ${(props) => props.y}px;
+    left: ${(props) => props.x}px;
+    padding: 20px;
+    text-align: center;
+    border-radius: 4px;
+    width: 250px;
+    width-max: 250px;
 `
 
-const NewItemsCountInnerDiv = styled.div`
-    font-family: ${fonts.primary.name};
-
-    font-weight: ${fonts.primary.weight.bold};
-
-    font-size: 14px;
-
-    line-height: 14px;
-`
-
-const Container = styled.div`
-    position: relative;
-`
-
-const Name = styled.div`
-    display: block;
-
-    overflow-x: hidden;
-
-    text-overflow: ellipsis;
-
-    padding-right: 5px;
+const Overlay = styled.div`
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 995;
 `
 
 const MenuContainer = styled.div`
-    display: 'flex';
-
-    flex-direction: 'column';
-
-    width: min-content;
-
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width:250px
     position: absolute;
-
     background-color: ${colors.white};
-
     box-shadow: ${styles.boxShadow.overlayElement};
-
     border-radius: ${styles.boxShadow.overlayElement};
-
     z-index: 1;
 `
-
-// left: 105px;
-
-// top: 30px;
 
 const IconBox = styled.div<Props>`
     display: ${(props) =>
@@ -354,62 +418,32 @@ const IconBox = styled.div<Props>`
             : 'None'};
 
     height: 100%;
-
     align-items: center;
-
     justify-content: flex-end;
-
     padding-right: 10px;
-
     padding-left: 5px;
-`
-
-const DropZoneMask = styled.div`
-    height: inherit;
-
-    width: inherit;
-
-    position: absolute;
 `
 
 const TitleBox = styled.div`
     display: flex;
-
     flex: 1;
-
     width: 100%;
-
     height: 100%;
-
     padding-left: 15px;
-
     align-items: center;
-
     padding-right: 10px;
 `
 
 const SidebarItem = styled.div<Props>`
-
  height: 30px;
-
  width: 100%;
-
  display: flex;
-
  flex-direction: row;
-
  justify-content: space-between;
-
  align-items: center;
-
  background-color: transparent;
-
-  
-
  &:hover {
-
  background-color: ${colors.onHover};
-
  }
 
   
@@ -435,15 +469,10 @@ const SidebarItem = styled.div<Props>`
      )
          ? 'flex'
          : 'None'};
-
  }
 
-  
-
  &:hover ${TitleBox} {
-
  width: 70%;
-
  }
 
   
@@ -472,101 +501,129 @@ const SidebarItem = styled.div<Props>`
          : `not-allowed`};
 
 `
-
-const MenuButton = styled.div`
-    height: 34px;
-
+const MenuSection = styled.div`
     width: 100%;
-
     font-family: ${fonts.primary.name};
-
     font-weight: ${fonts.primary.weight.normal};
-
     font-size: 12px;
-
     line-height: 18px;
-
     display: flex;
-
-    flex-direction: row;
-
+    flex-direction: column;
     justify-content: flex-start;
-
     align-items: center;
-
     cursor: pointer;
-
     padding: 0px 10px 0 0;
-
     &: ${SidebarItem} {
         background-color: red;
     }
-
+    & > div {
+        width: auto;
+    }
+`
+const MenuButton = styled.div`
+    height: 34px;
+    width: 100%;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 12px;
+    line-height: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+    padding: 0px 10px 0 0;
+    &: ${SidebarItem} {
+        background-color: red;
+    }
     &:hover {
         background-color: ${colors.onHover};
     }
-
     & > div {
         width: auto;
     }
 `
 
-const ListTitle = styled.span<Props>`
-    display: flex;
-
-    align-items: center;
-
-    margin: 0;
-
-    font-family: ${fonts.primary.name};
-
-    font-style: normal;
-
-    ${({ selectedState }: Props) =>
-        selectedState.isSelected &&
-        `font-weight: ${fonts.primary.weight.bold};`}
-
-    font-size: 12px;
-
-    line-height: 18px;
-
-    height: 18px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    padding-right: 5px;
-
-    justify-content: flex-start;
-
-    width: 100%;
-
-    pointer-events: none;
-`
-
 // probably want to use timing function to get this really looking good. This is just quick and dirty
 
 const blinkingAnimation = keyframes`
-
  0% {
-
  background-color: ${colors.onHover};
-
  }
-
  50% {
-
  background-color: transparent;
-
  }
-
  100% {
-
  background-color: ${colors.onHover};
-
  }
 
+`
+
+const LinkAndRoleBox = styled.div<{
+    viewportBreakpoint: string
+}>`
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    ${(props) =>
+        (props.viewportBreakpoint === 'small' ||
+            props.viewportBreakpoint === 'mobile') &&
+        css`
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        `}
+`
+
+const LinkBox = styled(Margin)`
+    width: 100%;
+    display: flex;
+    background-color: ${(props) => props.theme.colors.grey};
+    font-size: 12px;
+    border-radius: 3px;
+    text-align: left;
+    cursor: pointer;
+`
+
+const Link = styled.span`
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 5px 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: scroll;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+
+const CopyLinkBox = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+`
+
+const PermissionText = styled.span<{
+    viewportBreakpoint: string
+}>`
+    color: ${(props) => props.theme.colors.primary};
+    opacity: 0.8;
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    justify-content: flex-end;
+    font-size: 10px;
+
+    ${(props) =>
+        (props.viewportBreakpoint === 'small' ||
+            props.viewportBreakpoint === 'mobile') &&
+        css`
+            padding-left: 0px;
+        `}
 `

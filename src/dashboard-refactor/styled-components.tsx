@@ -10,13 +10,14 @@ const rotate = (rotation: number) => {
     }`
 }
 
-interface IconProps {
+export interface IconProps {
     heightAndWidth: string
     path: string
     rotation: string
     faded: boolean
     paddingHorizontal?: string
     color?: string
+    bgColor?: string
 }
 
 export const Icon = styled.div<IconProps>`
