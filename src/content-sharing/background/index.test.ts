@@ -23,6 +23,16 @@ async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
 }
 
+const sortByField = <T = any>(field: keyof T) => (a: T, b: T) => {
+    if (a[field] < b[field]) {
+        return -1
+    }
+    if (a[field] > b[field]) {
+        return 1
+    }
+    return 0
+}
+
 interface TestData {
     localListId?: number
     remoteListId?: string
@@ -65,12 +75,13 @@ async function setupTest(options: {
 
     const getFromDB = (storageManager: StorageManager) => (
         collection: string,
+        opts?: { skipOrdering?: boolean },
     ) =>
         storageManager.operation(
             'findObjects',
             collection,
             {},
-            { order: [['id', 'asc']] },
+            opts?.skipOrdering ? undefined : { order: [['id', 'asc']] },
         )
 
     const getShared = getFromDB(serverStorage.storageManager)
@@ -500,6 +511,77 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         { annotationId: 1, listId: 2 },
                                     ],
                                 )
+                                // await personalCloud.waitForSync()
+
+                                // const sharedAnnotations = await getShared(
+                                //     'sharedAnnotation',
+                                //     { skipOrdering: true },
+                                // )
+                                // expect(
+                                //     sharedAnnotations.sort(sortByField('id')),
+                                // ).toEqual([
+                                //     {
+                                //         id:
+                                //             convertRemoteId(
+                                //                 remoteAnnotationIds[
+                                //                     firstAnnotationUrl
+                                //                 ] as string,
+                                //             ) ||
+                                //             remoteAnnotationIds[
+                                //                 firstAnnotationUrl
+                                //             ],
+                                //         creator: TEST_USER.id,
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         createdWhen: expect.any(Number),
+                                //         uploadedWhen: expect.any(Number),
+                                //         updatedWhen: expect.any(Number),
+                                //         comment:
+                                //             data.ANNOTATION_1_1_DATA.comment,
+                                //         body: data.ANNOTATION_1_1_DATA.body,
+                                //         selector: JSON.stringify(
+                                //             data.ANNOTATION_1_1_DATA.selector,
+                                //         ),
+                                //     },
+                                //     expect.objectContaining({
+                                //         body: data.ANNOTATION_1_2_DATA.body,
+                                //     }),
+                                // ])
+                                // const sharedAnnotationListEntries = await getShared(
+                                //     'sharedAnnotationListEntry',
+                                //     { skipOrdering: true },
+                                // )
+                                // const sharedAnnotationId =
+                                //     convertRemoteId(
+                                //         remoteAnnotationIds[
+                                //             firstAnnotationUrl
+                                //         ] as string,
+                                //     ) || remoteAnnotationIds[firstAnnotationUrl]
+                                // expect(
+                                //     sharedAnnotationListEntries.sort(
+                                //         sortByField('sharedList'),
+                                //     ),
+                                // ).toEqual([
+                                //     expect.objectContaining({
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         sharedList: convertRemoteId(
+                                //             remoteListIds[0],
+                                //         ),
+                                //         sharedAnnotation: sharedAnnotationId,
+                                //     }),
+                                //     expect.objectContaining({
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         sharedList: convertRemoteId(
+                                //             remoteListIds[1],
+                                //         ),
+                                //         sharedAnnotation: sharedAnnotationId,
+                                //     }),
+                                // ])
                             },
                         },
                     ],
@@ -723,6 +805,71 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                     [],
                                 )
+
+                                // const sharedAnnotations = await getShared(
+                                //     'sharedAnnotation',
+                                //     { skipOrdering: true },
+                                // )
+                                // expect(
+                                //     sharedAnnotations.sort(sortByField('id')),
+                                // ).toEqual([
+                                //     {
+                                //         id:
+                                //             convertRemoteId(
+                                //                 remoteAnnotationIds[
+                                //                     annotationUrl
+                                //                 ] as string,
+                                //             ) ||
+                                //             remoteAnnotationIds[annotationUrl],
+                                //         creator: TEST_USER.id,
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         createdWhen: expect.any(Number),
+                                //         uploadedWhen: expect.any(Number),
+                                //         updatedWhen: expect.any(Number),
+                                //         comment:
+                                //             data.ANNOTATION_1_1_DATA.comment,
+                                //         body: data.ANNOTATION_1_1_DATA.body,
+                                //         selector: JSON.stringify(
+                                //             data.ANNOTATION_1_1_DATA.selector,
+                                //         ),
+                                //     },
+                                // ])
+                                // const sharedAnnotationListEntries = await getShared(
+                                //     'sharedAnnotationListEntry',
+                                //     { skipOrdering: true },
+                                // )
+                                // const sharedAnnotationId =
+                                //     convertRemoteId(
+                                //         remoteAnnotationIds[
+                                //             annotationUrl
+                                //         ] as string,
+                                //     ) || remoteAnnotationIds[annotationUrl]
+                                // expect(
+                                //     sharedAnnotationListEntries.sort(
+                                //         sortByField('sharedList'),
+                                //     ),
+                                // ).toEqual([
+                                //     expect.objectContaining({
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         sharedList: convertRemoteId(
+                                //             remoteListIds[0],
+                                //         ),
+                                //         sharedAnnotation: sharedAnnotationId,
+                                //     }),
+                                //     expect.objectContaining({
+                                //         normalizedPageUrl: normalizeUrl(
+                                //             data.ANNOTATION_1_1_DATA.pageUrl,
+                                //         ),
+                                //         sharedList: convertRemoteId(
+                                //             remoteListIds[1],
+                                //         ),
+                                //         sharedAnnotation: sharedAnnotationId,
+                                //     }),
+                                // ])
                             },
                         },
                     ],
@@ -879,6 +1026,49 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         { annotationId: 1, listId: 2 },
                                     ],
                                 )
+
+                                // await personalCloud.waitForSync()
+
+                                // expect(
+                                //     await getShared('sharedAnnotation', {
+                                //         skipOrdering: true,
+                                //     }),
+                                // ).toEqual([
+                                //     expect.objectContaining({
+                                //         body: data.ANNOTATION_1_1_DATA.body,
+                                //     }),
+                                // ])
+                                // expect(
+                                //     (
+                                //         await getShared(
+                                //             'sharedAnnotationListEntry',
+                                //             { skipOrdering: true },
+                                //         )
+                                //     ).sort(sortByField('sharedList')),
+                                // ).toEqual([
+                                //     expect.objectContaining({}),
+                                //     expect.objectContaining({}),
+                                // ])
+
+                                // await contentSharing.setAnnotationPrivacyLevel({
+                                //     annotation: annotationUrl,
+                                //     privacyLevel:
+                                //         AnnotationPrivacyLevels.PRIVATE,
+                                // })
+
+                                // await personalCloud.waitForSync()
+
+                                // expect(
+                                //     await getShared('sharedAnnotation', {
+                                //         skipOrdering: true,
+                                //     }),
+                                // ).toEqual([])
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([])
                             },
                         },
                     ],
@@ -1658,6 +1848,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         { annotationId: 1, listId: 2 },
                                     ],
                                 )
+                                // await personalCloud.waitForSync()
+
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([expect.objectContaining({})])
 
                                 await helper.removePageFromList(setup, {
                                     pageId: 1,
@@ -1686,6 +1884,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     ],
                                 )
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([])
                             },
                         },
                     ],
@@ -1741,6 +1945,32 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ],
                                 )
 
+                                // expect(
+                                //     await getShared('sharedAnnotation', {
+                                //         skipOrdering: true,
+                                //     }),
+                                // ).toEqual([
+                                //     expect.objectContaining({
+                                //         body: data.ANNOTATION_1_1_DATA.body,
+                                //     }),
+                                // ])
+                                // expect(
+                                //     (
+                                //         await getShared(
+                                //             'sharedAnnotationListEntry',
+                                //             { skipOrdering: true },
+                                //         )
+                                //     ).sort(sortByField('sharedList')),
+                                // ).toEqual([
+                                //     expect.objectContaining({}),
+                                //     expect.objectContaining({}),
+                                // ])
+
+                                // await setup.backgroundModules.directLinking.deleteAnnotation(
+                                //     null,
+                                //     annotationUrl,
+                                // )
+
                                 await helper.deleteAnnotation(setup, { id: 1 })
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [],
@@ -1753,6 +1983,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                     [],
                                 )
+                                // expect(
+                                //     await getLocal('sharedAnnotationMetadata'),
+                                // ).toEqual([])
+                                // expect(
+                                //     await getLocal('annotationPrivacyLevels'),
+                                // ).toEqual([])
+
+                                // expect(
+                                //     await getShared('sharedAnnotation', {
+                                //         skipOrdering: true,
+                                //     }),
+                                // ).toEqual([])
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([])
                             },
                         },
                     ],
@@ -1797,7 +2045,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 await personalCloud.waitForSync()
                                 expect(
-                                    await getShared('sharedContentFingerprint'),
+                                    (
+                                        await getShared(
+                                            'sharedContentFingerprint',
+                                            { skipOrdering: true },
+                                        )
+                                    ).sort(sortByField('sharedList')),
                                 ).toEqual([
                                     {
                                         id: expect.anything(),
@@ -1825,7 +2078,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
                                 expect(
-                                    await getShared('sharedContentLocator'),
+                                    await getShared('sharedContentLocator', {
+                                        skipOrdering: true,
+                                    }),
                                 ).toEqual([])
                             },
                         },

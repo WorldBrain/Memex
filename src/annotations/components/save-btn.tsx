@@ -107,7 +107,6 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 }
 
 const SaveBtn = styled.div`
-    display: flex;
     flex-direction: row;
     align-item: center;
     box-sizing: border-box;
@@ -121,6 +120,8 @@ const SaveBtn = styled.div`
     border-radius: 3px;
     font-weight: 700;
     border 1px solid #f0f0f0;
+    display: grid;
+    grid-auto-flow: column;
 
     &:focus {
         background-color: grey;
@@ -135,7 +136,6 @@ const SaveBtnText = styled.span`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 55px;
     justify-content: space-between;
     display: flex;
 `

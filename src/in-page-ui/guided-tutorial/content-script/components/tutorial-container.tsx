@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { reactEventHandler } from 'src/util/ui-logic'
-import { getUrl } from 'src/util/uri-utils'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { ThemeProvider } from 'styled-components'

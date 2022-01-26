@@ -12,22 +12,29 @@ import { isShareUrl } from 'src/content-sharing/utils'
 async function insertTestData(storageManager: Storex) {
     await storageManager.collection('pages').createObject(DATA.testPageA)
     await storageManager.collection('pages').createObject(DATA.testPageB)
+    await storageManager.collection('pages').createObject(DATA.testPageC)
+
+    await storageManager.collection('locators').createObject(DATA.testLocatorC)
+
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationAUrl,
         comment: DATA.testAnnotationAText,
         pageUrl: DATA.testPageA.url,
     })
-
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationBUrl,
         body: DATA.testAnnotationBHighlight,
         pageUrl: DATA.testPageA.url,
     })
-
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationCUrl,
         body: DATA.testAnnotationCHighlight,
         pageUrl: DATA.testPageB.url,
+    })
+    await storageManager.collection('annotations').createObject({
+        url: DATA.testAnnotationDUrl,
+        body: DATA.testAnnotationDHighlight,
+        pageUrl: DATA.testPageC.url,
     })
 
     const insertTags = (url: string, tags: string[]) =>
@@ -39,9 +46,11 @@ async function insertTestData(storageManager: Storex) {
 
     await insertTags(normalizeUrl(DATA.testPageAUrl), DATA.testPageATags)
     await insertTags(normalizeUrl(DATA.testPageBUrl), DATA.testPageBTags)
+    await insertTags(normalizeUrl(DATA.testPageCUrl), DATA.testPageCTags)
     await insertTags(DATA.testAnnotationAUrl, DATA.testAnnotationATags)
     await insertTags(DATA.testAnnotationBUrl, DATA.testAnnotationBTags)
     await insertTags(DATA.testAnnotationCUrl, DATA.testAnnotationCTags)
+    await insertTags(DATA.testAnnotationDUrl, DATA.testAnnotationDTags)
 }
 
 async function setupTest() {
@@ -65,6 +74,57 @@ async function setupTest() {
 }
 
 describe('Content template doc generation', () => {
+    it('should correctly generate template docs for a single PDF page + notes + page tags + note tags', async () => {
+        const { dataFetchers } = await setupTest()
+
+        expect(
+            await generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({
+                    code: '{{{PageTitle}}} {{{PageUrl}}} {{{PageTags}}}',
+                }),
+                normalizedPageUrls: [DATA.testPageC.url],
+                annotationUrls: [],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageC.fullTitle,
+                PageUrl: DATA.testLocatorC.originalLocation,
+                PageTags: joinTags(DATA.testPageCTags),
+                PageTagList: DATA.testPageCTags,
+                title: DATA.testPageC.fullTitle,
+                url: DATA.testLocatorC.originalLocation,
+                tags: DATA.testPageCTags,
+            },
+        ])
+
+        expect(
+            await generateTemplateDocs({
+                templateAnalysis: analyzeTemplate({
+                    code:
+                        '{{{PageTitle}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteTags}}} {{/Notes}}',
+                }),
+                normalizedPageUrls: [DATA.testPageC.url],
+                annotationUrls: [],
+                dataFetchers,
+            }),
+        ).toEqual([
+            {
+                PageTitle: DATA.testPageC.fullTitle,
+                PageUrl: DATA.testLocatorC.originalLocation,
+                title: DATA.testPageC.fullTitle,
+                url: DATA.testLocatorC.originalLocation,
+                Notes: [
+                    {
+                        NoteHighlight: DATA.testAnnotationDHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationDTags),
+                        NoteTagList: DATA.testAnnotationDTags,
+                    },
+                ],
+            },
+        ])
+    })
+
     it('should correctly generate template docs for a single page', async () => {
         const { dataFetchers } = await setupTest()
 

@@ -57,7 +57,11 @@ class BookmarkButton extends PureComponent<Props> {
             : 'Bookmark this Page'
 
         return (
-            <div className={styles.buttonContainer}>
+            <div
+                className={cx(styles.buttonContainer, {
+                    [styles.bookmarkedButtonContainer]: this.props.isBookmarked,
+                })}
+            >
                 <Button
                     onClick={this.props.toggleBookmark}
                     title={'Bookmark'}
@@ -66,7 +70,7 @@ class BookmarkButton extends PureComponent<Props> {
                         [styles.unbookmarkedBtn]: !this.props.isBookmarked,
                     })}
                     itemClass={styles.button}
-                    disabled={this.props.isDisabled}
+                    disabled={this.props.isDisabled || this.props.isBookmarked}
                 >
                     {text}
                     <p className={buttonStyles.subTitle}>

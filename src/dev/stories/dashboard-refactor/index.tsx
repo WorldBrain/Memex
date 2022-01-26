@@ -52,7 +52,6 @@ async function createDependencies(): Promise<DashboardProps> {
         pdfViewerBG: backgroundModules.pdfBg.remoteFunctions,
         openFeed: () => undefined,
         openCollectionPage: () => undefined,
-        renderDashboardSwitcherLink: () => null,
         renderUpdateNotifBanner: () => null,
         services: createUIServices(),
     }

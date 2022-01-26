@@ -36,7 +36,7 @@ const ShareIconContainer = styled.div`
 `
 
 const ShareIconFull = styled.div`
-    background-image: url(${icons.shared});
+    background-image: url(${icons.webLogo});
     background-position: center center;
     background-repeat: no-repeat;
     width: 30px;
@@ -144,7 +144,7 @@ export default class ShareAnnotationOnboardingModal extends Component<Props> {
                     <ShareIconBox>
                         <ShareIconContainer>
                             <ShareIconFull />
-                            <ShareIconText>Shared</ShareIconText>
+                            <ShareIconText>Public</ShareIconText>
                         </ShareIconContainer>
                         <ShareIconContainer>
                             <ShareIconEmpty />

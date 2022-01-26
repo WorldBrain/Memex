@@ -2,6 +2,8 @@ import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest } from './logic.test.util'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -199,7 +201,7 @@ describe('Dashboard Refactor misc logic', () => {
         })
         device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
             'has-unseen'
-
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
         const { searchResults: logicA } = await setupTest(device)
         expect(logicA.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicA.init()
@@ -207,6 +209,7 @@ describe('Dashboard Refactor misc logic', () => {
 
         device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
             'all-seen'
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
         const { searchResults: logicB } = await setupTest(device)
         expect(logicB.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicB.init()
@@ -214,6 +217,7 @@ describe('Dashboard Refactor misc logic', () => {
 
         device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
             'error'
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
         const { searchResults: logicC } = await setupTest(device)
         expect(logicC.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicC.init()
@@ -221,6 +225,7 @@ describe('Dashboard Refactor misc logic', () => {
 
         device.backgroundModules.activityIndicator.remoteFunctions.checkActivityStatus = async () =>
             'not-logged-in'
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
         const { searchResults: logicD } = await setupTest(device)
         expect(logicD.state.listsSidebar.hasFeedActivity).toBe(false)
         await logicD.init()

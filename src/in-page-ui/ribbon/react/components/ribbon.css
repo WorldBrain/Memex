@@ -214,6 +214,7 @@
 
 .bookmark {
     background-image: url('/img/star_full.svg');
+    cursor: default;
 }
 
 .notBookmark {

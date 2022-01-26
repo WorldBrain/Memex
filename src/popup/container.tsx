@@ -13,6 +13,7 @@ import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import ButtonIcon from './components/ButtonIcon'
+import CopyPDFLinkButton from './components/CopyPDFLinkButton'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { HistoryPauser } from './pause-button'
@@ -42,6 +43,10 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import checkBrowser from 'src/util/check-browser'
+import { FeedActivityDot } from 'src/activity-indicator/ui'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface OwnProps {}
 
@@ -67,6 +72,8 @@ interface DispatchProps {
 export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
+    private browserName = checkBrowser()
+    private activityIndicatorBG: ActivityIndicatorInterface = runInBackground()
     constructor(props: Props) {
         super(
             props,
@@ -173,6 +180,69 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     fetchListsForPage = async () =>
         collections.fetchPageLists({ url: this.props.url })
 
+    getPDFLocation = () => {
+        if (this.state.currentPageUrl.startsWith('file://')) {
+            return 'local'
+        } else {
+            return 'remote'
+        }
+    }
+
+    getPDFMode = () => {
+        if (
+            isUrlPDFViewerUrl(this.state.currentPageUrl, {
+                runtimeAPI: browser.runtime,
+            })
+        ) {
+            return 'reader'
+        } else {
+            return 'original'
+        }
+    }
+
+    whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
+    private maybeRenderBlurredNotice() {
+        if (!this.isCurrentPagePDF) {
+            return null
+        }
+        const mode = this.getPDFMode()
+        const location = this.getPDFLocation()
+
+        if (this.browserName === 'firefox' && location === 'local') {
+            return (
+                <BlurredNotice browser={this.browserName} location={location}>
+                    <NoticeTitle>
+                        Saving and annotating locally stored PDFs not available
+                        on Firefox
+                    </NoticeTitle>
+                </BlurredNotice>
+            )
+        }
+
+        if (mode === 'original') {
+            return (
+                <BlurredNotice browser={this.browserName}>
+                    <NoticeTitle>Save & annotate this PDF</NoticeTitle>
+                    <PrimaryAction
+                        label="Open PDF Reader"
+                        onClick={() =>
+                            this.processEvent('togglePDFReader', null)
+                        }
+                    />
+                </BlurredNotice>
+            )
+        }
+
+        return null
+    }
+
     renderChildren() {
         if (this.props.showTagsPicker) {
             return (
@@ -211,20 +281,19 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <React.Fragment>
-                {this.isCurrentPagePDF &&
-                    !this.state.currentPageUrl.startsWith(
-                        'chrome-extension',
-                    ) && (
-                        <BlurredNotice>
-                            <NoticeTitle>Save & annotate this PDF</NoticeTitle>
-                            <PrimaryAction
-                                label={'Open PDF Reader'}
-                                onClick={() =>
-                                    this.processEvent('openPDFReader', null)
-                                }
-                            />
-                        </BlurredNotice>
-                    )}
+                <FeedActivitySection
+                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                >
+                    <FeedActivityDot
+                        key="activity-feed-indicator"
+                        activityIndicatorBG={this.activityIndicatorBG}
+                        openFeedUrl={() =>
+                            window.open(this.whichFeed(), '_blank')
+                        }
+                    />
+                    Feed Updates
+                </FeedActivitySection>
+                {this.maybeRenderBlurredNotice()}
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
@@ -251,26 +320,31 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <TooltipButton closePopup={this.closePopup} />
                 </div>
 
-                {this.isCurrentPagePDF && (
-                    <div className={styles.item}>
-                        <ToggleSwitchButton
-                            btnIcon={btnStyles.PDFIcon}
-                            contentType="PDFs"
-                            btnText="Open PDF reader"
-                            btnHoverText="Open current PDF in Memex PDF reader"
-                            toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
-                            isEnabled={this.state.isPDFReaderEnabled}
-                            onBtnClick={() =>
-                                this.processEvent('openPDFReader', null)
-                            }
-                            onToggleClick={() =>
-                                this.processEvent(
-                                    'togglePDFReaderEnabled',
-                                    null,
-                                )
-                            }
-                        />
-                    </div>
+                <div className={styles.item}>
+                    <ToggleSwitchButton
+                        btnIcon={btnStyles.PDFIcon}
+                        contentType="PDFs"
+                        btnText={
+                            this.getPDFMode() === 'reader'
+                                ? 'Close PDF reader'
+                                : 'Open PDF reader'
+                        }
+                        btnHoverText="Open current PDF in Memex PDF reader"
+                        toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
+                        isEnabled={this.state.isPDFReaderEnabled}
+                        onBtnClick={() =>
+                            this.processEvent('togglePDFReader', null)
+                        }
+                        onToggleClick={() => {
+                            this.processEvent('togglePDFReaderEnabled', null)
+                        }}
+                    />
+                </div>
+
+                {this.getPDFMode() === 'reader' && (
+                    <CopyPDFLinkButton
+                        currentPageUrl={this.state.currentPageUrl}
+                    />
                 )}
 
                 <hr />
@@ -319,7 +393,10 @@ const NoticeTitle = styled.div`
 
 const BlurredNotice = styled.div`
     position absolute;
-    height: 67%;
+    height: ${(props) =>
+        props.browser === 'firefox' && props.location === 'local'
+            ? '90%'
+            : '62%'};
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
     z-index: 20;
@@ -342,6 +419,23 @@ const DashboardButtonBox = styled.div`
     &: hover {
         background-color: #e0e0e0;
         border-radius: 3px;
+    }
+`
+
+const FeedActivitySection = styled.div`
+    width: 100%;
+    display: grid;
+    height: 40px;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    padding: 0px 23px;
+    grid-auto-flow: column;
+    grid-gap: 16px;
+    justify-content: flex-start;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f0f0f0;
     }
 `
 

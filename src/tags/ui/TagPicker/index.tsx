@@ -2,6 +2,8 @@ import React from 'react'
 import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
@@ -25,6 +27,7 @@ import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export type { TagPickerDependencies }
 
@@ -175,6 +178,21 @@ class TagPicker extends StatefulUIElement<
 
         return (
             <>
+                <DeprecationWarning>
+                    <DeprecationText>
+                        Tags will soon be deprecated and merged into our new
+                        <IconSpan src={icons.collectionsEmpty} />
+                        <HighlightText>Spaces</HighlightText>.
+                    </DeprecationText>
+                    <PrimaryAction
+                        label="Learn More"
+                        onClick={() =>
+                            window.open(
+                                'https://links.memex.garden/announcements/tags-collections-unification',
+                            )
+                        }
+                    />
+                </DeprecationWarning>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
@@ -227,6 +245,36 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
+
+const DeprecationText = styled.div`
+    display: inline-block;
+`
+
+const IconSpan = styled.img`
+    height: 12px;
+    width: 12px;
+    vertical-align: middle;
+    margin-right: 2px;
+    margin-left: 5px;
+`
+
+const HighlightText = styled.span`
+    color: ${(props) => props.theme.colors.primary};
+    vertical-align: middle;
+`
+
+const DeprecationWarning = styled.div`
+    background-color: ${(props) => props.theme.colors.warning};
+    border-radius: 3px;
+    margin: 0px 8px 5px 8px;
+    display: grid;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5px 10px;
+    color: white;
+    grid-gap: 5px;
+    grid-auto-flow: column;
+`
 
 const LoadingBox = styled.div`
     display: flex;

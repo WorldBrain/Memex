@@ -194,52 +194,22 @@ export default class SearchStorage extends StorageModule {
         return { annotsToTags, annotsToLists, bmUrls }
     }
 
-    async getMergedAnnotsPages(
+    private async getMergedAnnotsPages(
         pageUrls: string[],
         params: AnnotSearchParams,
-        postPrefix = 'socialPosts:',
     ): Promise<AnnotPage[]> {
-        const results: Map<string, any> = new Map()
-        const pageIds: string[] = []
-        const postIds: number[] = []
-
-        // Split into post and page annots
-        pageUrls.forEach((url) =>
-            url.startsWith(postPrefix)
-                ? postIds.push(Number(url.split(postPrefix)[1]))
-                : pageIds.push(url),
-        )
+        const results = new Map<string, any>()
 
         const pages: AnnotPage[] = await this.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             {
-                pageUrls: pageIds,
+                pageUrls,
                 base64Img: params.base64Img,
                 upperTimeBound: params.endDate,
             },
         )
 
         pages.forEach((page) => results.set(page.url, page))
-
-        const socialResults: Map<
-            number,
-            Map<string, SocialPage>
-        > = await this.operation(SocialSearchPlugin.MAP_POST_IDS_OP_ID, {
-            postIds,
-        })
-
-        const socialPages: SocialPage[] = await this.operation(
-            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
-            {
-                results: socialResults,
-                base64Img: params.base64Img,
-                upperTimeBound: params.endDate,
-            },
-        )
-
-        socialPages.forEach((page) =>
-            results.set(postPrefix + page.id.toString(), page),
-        )
 
         return pageUrls
             .map((url) => {
@@ -255,6 +225,16 @@ export default class SearchStorage extends StorageModule {
                 }
             })
             .filter((page) => page !== undefined)
+    }
+
+    private mergedAnnotsPagesToAnnotsById(
+        pages: AnnotPage[],
+    ): Map<string, Annotation> {
+        const results = new Map()
+        pages.forEach((page) =>
+            page.annotations.forEach((annot) => results.set(annot.url, annot)),
+        )
+        return results
     }
 
     /**
@@ -280,6 +260,7 @@ export default class SearchStorage extends StorageModule {
             [...pageUrls],
             params,
         )
+        const annotationsById = this.mergedAnnotsPagesToAnnotsById(pages)
 
         const clusteredResults: PageUrlsByDay = {}
 
@@ -290,7 +271,11 @@ export default class SearchStorage extends StorageModule {
             clusteredResults[day] = {}
             for (const [pageUrl, annots] of annotsByPage) {
                 annots.forEach((annot) =>
-                    reverseAnnotMap.set(annot.url, [day, pageUrl, annot]),
+                    reverseAnnotMap.set(annot.url, [
+                        day,
+                        pageUrl,
+                        annotationsById.get(annot.url),
+                    ]),
                 )
             }
         }
@@ -362,6 +347,7 @@ export default class SearchStorage extends StorageModule {
             [...results.keys()],
             params,
         )
+        const annotationsById = this.mergedAnnotsPagesToAnnotsById(pages)
 
         const annotUrls = []
             .concat(...results.values())
@@ -377,7 +363,7 @@ export default class SearchStorage extends StorageModule {
         return {
             docs: pages.map((page) => {
                 const annotations = results.get(page.pageId).map((annot) => ({
-                    ...annot,
+                    ...annotationsById.get(annot.url),
                     tags: annotsToTags.get(annot.url) || [],
                     lists: annotsToLists.get(annot.url) || [],
                     hasBookmark: bmUrls.has(annot.url),

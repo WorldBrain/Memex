@@ -26,13 +26,21 @@ export class PDFBackground {
             openPdfViewerForNextPdf: async () => {
                 this._shouldOpenOneTime = true
             },
+            doNotOpenPdfViewerForNextPdf: async () => {
+                this._shouldOpenOneTime = false
+            },
         }
     }
 
     private get shouldOpen(): boolean {
-        if (this._shouldOpenOneTime) {
-            this._shouldOpenOneTime = false
+        if (this._shouldOpenOneTime === true) {
+            this._shouldOpenOneTime = null
             return true
+        }
+
+        if (this._shouldOpenOneTime === false) {
+            this._shouldOpenOneTime = null
+            return false
         }
         return this._shouldOpen
     }
@@ -62,6 +70,7 @@ export class PDFBackground {
     ) => {
         // only called for local files matching *.pdf
         if (!this.shouldOpen || !details.url) {
+            this._shouldOpenOneTime = null
             return
         }
 
@@ -72,9 +81,11 @@ export class PDFBackground {
         details: WebRequest.OnHeadersReceivedDetailsType,
     ) => {
         if (!this.shouldOpen || !details.url) {
+            this._shouldOpenOneTime = null
             return
         }
         if (!this.isPdfRequestForViewer(details)) {
+            this._shouldOpenOneTime = null
             return
         }
 

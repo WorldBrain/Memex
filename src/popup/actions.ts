@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'
@@ -8,8 +8,9 @@ import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { getUrl } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { isUrlSupported } from 'src/page-indexing/utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -37,8 +38,9 @@ const getCurrentTab = async () => {
             currentTab = await tabs.fetchTabByUrl(url)
         }
     }
-    currentTab.url = getUrl(currentTab.url)
-    return currentTab
+    currentTab.originalUrl = currentTab.url
+    currentTab.url = getUnderlyingResourceUrl(currentTab.url)
+    return currentTab as Tabs.Tab & { originalUrl: string }
 }
 
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
@@ -61,8 +63,10 @@ async function init() {
     const tabUrl = currentTab?.url
 
     // If we can't get the tab data, then can't init action button states
-    if (!tabUrl) {
-        console.warn("initState - Couldn't get a currentTab url")
+    if (
+        !currentTab?.url ||
+        !isUrlSupported({ url: currentTab.originalUrl, allowFileUrls: true })
+    ) {
         return { currentTab: null, fullUrl: null }
     }
 

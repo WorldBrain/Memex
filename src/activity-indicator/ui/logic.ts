@@ -1,9 +1,13 @@
 import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core'
-import { ActivityIndicatorInterface } from '../background'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { auth } from 'src/util/remote-functions-background'
+import type { ActivityIndicatorInterface } from '../background'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from '../constants'
 
 export interface Dependencies {
+    activityIndicatorBG: Pick<
+        ActivityIndicatorInterface,
+        'checkActivityStatus' | 'markActivitiesAsSeen'
+    >
     openFeedUrl: () => void
 }
 
@@ -23,12 +27,8 @@ type EventHandler<EventName extends keyof Events> = UIEventHandler<
 >
 
 export default class Logic extends UILogic<State, Events> {
-    private activityIndicatorBG: ActivityIndicatorInterface
-
     constructor(private dependencies: Dependencies) {
         super()
-
-        this.activityIndicatorBG = runInBackground()
     }
 
     getInitialState(): State {
@@ -38,11 +38,27 @@ export default class Logic extends UILogic<State, Events> {
         }
     }
 
+    ///// IMPORTANT! THIS CODE IS DUPLICATED IN DASHBOARD-REFACTOR/LOGIC
+    ///// FOR THE INSTANCE OF THE SIDEBAR, DON'T FORGET TO UPDATE IT TOO!
+
     init: EventHandler<'init'> = async () => {
-        const activityStatus = await this.activityIndicatorBG.checkActivityStatus()
-        this.emitMutation({
-            hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-        })
+        const hasActivityStored = await getLocalStorage(
+            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+        )
+        if (hasActivityStored === true) {
+            this.emitMutation({
+                hasFeedActivity: { $set: true },
+            })
+        } else {
+            const activityStatus = await this.dependencies.activityIndicatorBG.checkActivityStatus()
+            await setLocalStorage(
+                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+                activityStatus === 'has-unseen',
+            )
+            this.emitMutation({
+                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+            })
+        }
     }
 
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({
@@ -51,8 +67,9 @@ export default class Logic extends UILogic<State, Events> {
         this.dependencies.openFeedUrl()
 
         if (previousState.hasFeedActivity) {
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({ hasFeedActivity: { $set: false } })
-            await this.activityIndicatorBG.markActivitiesAsSeen()
+            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
 }

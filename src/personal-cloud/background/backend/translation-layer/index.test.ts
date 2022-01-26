@@ -3313,7 +3313,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
@@ -3357,7 +3357,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
@@ -3404,7 +3404,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
@@ -3480,7 +3480,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
@@ -3529,7 +3529,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
@@ -3573,7 +3573,7 @@ describe('Personal cloud translation layer', () => {
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
-                        .findAllObjects({}),
+                        .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
         })

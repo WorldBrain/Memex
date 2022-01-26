@@ -1,10 +1,7 @@
 import 'core-js'
 import { EventEmitter } from 'events'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import {
-    ContentIdentifier,
-    ContentLocator,
-} from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -44,7 +41,7 @@ import { main as searchInjectionMain } from 'src/content-scripts/content_script/
 import { TabManagementInterface } from 'src/tab-management/background/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { getUrl, isFullUrlPDF } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
@@ -65,7 +62,6 @@ export async function main(
 ) {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
-
     if (isPdfViewerRunning) {
         setupPdfViewerListeners({
             onLoadError: () =>
@@ -74,6 +70,8 @@ export async function main(
                     missingPdf: true,
                 }),
         })
+    } else {
+        injectMemexExtDetectionEl()
     }
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
@@ -180,6 +178,7 @@ export async function main(
                 annotationsCache,
                 tags: tagsBG,
                 customLists: collectionsBG,
+                activityIndicatorBG: runInBackground(),
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
                 tooltip: {
@@ -387,7 +386,7 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
-        const fullUrl = getUrl(window.location.href)
+        const fullUrl = getUnderlyingResourceUrl(window.location.href)
         this.isPdf = isFullUrlPDF(fullUrl)
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>

@@ -657,7 +657,7 @@ class AnnotationsSidebar extends React.Component<
                         this.setState({ showAllNotesShareMenu: false })
                     }
                 >
-                    <HoverBox>
+                    <HoverBox width="340px">
                         <AllNotesShareMenu
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotationsShareAll}
@@ -775,7 +775,7 @@ class AnnotationsSidebar extends React.Component<
                             </ActionBtn>
                         </ButtonTooltip>
                         <ButtonTooltip
-                            tooltipText="Share All Notes"
+                            tooltipText="Share annotated Page"
                             position="bottomRightEdge"
                         >
                             <ActionBtn
@@ -786,7 +786,7 @@ class AnnotationsSidebar extends React.Component<
                                 }
                                 isActive={this.state.showAllNotesShareMenu}
                             >
-                                <ActionIcon src={icons.shareEmpty} />
+                                <ActionIcon src={icons.link} />
                             </ActionBtn>
                         </ButtonTooltip>
                     </TopBarActionBtns>
@@ -1284,7 +1284,7 @@ const CopyPasterWrapperTopBar = styled.div`
 
 const ShareMenuWrapperTopBar = styled.div`
     position: relative;
-    right: 190px;
+    right: 240px;
     z-index: 10;
     top: 20px;
 `

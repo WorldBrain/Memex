@@ -1,6 +1,7 @@
 import React, { Component, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
 import qs from 'query-string'
+import styled from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
@@ -21,6 +22,7 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import { FeedActivityDot } from 'src/activity-indicator/ui'
 
 const styles = require('./ribbon.css')
 
@@ -359,12 +361,26 @@ export default class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
+                            <FeedIndicatorBox>
+                                <ButtonTooltip
+                                    tooltipText={'View Feed Updates'}
+                                    position="leftNarrow"
+                                >
+                                    <FeedActivityDot
+                                        key="activity-feed-indicator"
+                                        {...this.props.activityIndicator}
+                                    />
+                                </ButtonTooltip>
+                            </FeedIndicatorBox>
+
+                            <div className={styles.horizontalLine} />
                             <div className={styles.generalActions}>
-                                {!this.props.sidebar.isSidebarOpen && (
-                                    <>
+                                {/* {!this.props.sidebar.isSidebarOpen && (
+                                    <> */}
+                                {/*
                                         <ButtonTooltip
                                             tooltipText={
-                                                'Close Toolbar for session'
+                                                'Remove Sidebar for session'
                                             }
                                             position="leftNarrow"
                                         >
@@ -729,3 +745,12 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const SubText = styled.span`
+    font-size: 10px;
+`
+
+const FeedIndicatorBox = styled.div`
+    display: flex;
+    margin-bottom: 5px;
+`

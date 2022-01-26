@@ -577,6 +577,8 @@ export default class CustomListBackground {
 
         const indexed = await maybeIndexTabs(tabs, {
             createPage: this.options.pages.indexPage,
+            waitForContentIdentifier: this.options.pages
+                .waitForContentIdentifier,
             time: args.time ?? '$now',
         })
 

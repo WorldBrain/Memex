@@ -167,7 +167,6 @@ export const TypographyActionText = styled.span`
     font-style: normal;
     font-weight: 600;
     font-size: 1em;
-    font-family: 'Poppins', sans-serif;
 `
 
 export const TypographyBody = styled.span`

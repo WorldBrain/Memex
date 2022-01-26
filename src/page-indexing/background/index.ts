@@ -239,10 +239,10 @@ export class PageIndexingBackground {
         return primaryIdentifier
     }
 
-    async waitForContentIdentifier(params: {
+    waitForContentIdentifier = async (params: {
         tabId: number
         fullUrl: string
-    }): Promise<WaitForContentIdentifierReturns> {
+    }): Promise<WaitForContentIdentifierReturns> => {
         return this._resolvableForIdentifierTabPage(params)
     }
 

@@ -1,5 +1,6 @@
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -11,6 +12,7 @@ export interface RibbonSubcomponentProps {
     lists: RibbonListsProps
     search: RibbonSearchProps
     pausing: RibbonPausingProps
+    activityIndicator: ActivityIndicatorProps
 }
 
 export interface RibbonHighlightsProps {
