@@ -95,11 +95,7 @@ export interface RemoteCollectionsInterface {
         query: string
         limit?: number
     }): Promise<PageList[]>
-    addOpenTabsToList(args: {
-        name: string
-        listId?: number
-        time?: number
-    }): Promise<void>
+    addOpenTabsToList(args: { listId: number; time?: number }): Promise<void>
     removeOpenTabsFromList(args: { listId: number }): Promise<void>
     updateListForPage(args: {
         added?: number

@@ -175,8 +175,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return backendResult
     }
 
-    handleListAllTabs = (listName: string) =>
-        collections.addOpenTabsToList({ name: listName })
+    handleListAllTabs = (listId: number) =>
+        collections.addOpenTabsToList({ listId })
     fetchListsForPage = async () =>
         collections.fetchPageLists({ url: this.props.url })
 

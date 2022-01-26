@@ -502,7 +502,7 @@ export class RibbonContainerLogic extends UILogic<
 
     listAllTabs: EventHandler<'listAllTabs'> = ({ event }) => {
         return this.dependencies.customLists.addOpenTabsToList({
-            name: event.value,
+            listId: event.value,
         })
     }
 

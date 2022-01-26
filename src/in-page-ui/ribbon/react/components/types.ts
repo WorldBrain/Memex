@@ -72,7 +72,7 @@ export interface RibbonListsProps {
     pageBelongsToList: boolean
     showListsPicker: boolean
     updateLists: PickerUpdateHandler<number>
-    listAllTabs: (value: string) => Promise<void>
+    listAllTabs: (value: number) => Promise<void>
     setShowListsPicker: (value: boolean) => void
     fetchInitialListSelections: () => Promise<number[]>
     loadDefaultSuggestions: SpacePickerDependencies['loadDefaultSuggestions']

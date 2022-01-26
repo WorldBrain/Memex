@@ -15,7 +15,7 @@ export interface SpacePickerDependencies {
     selectEntry: (listId: number) => Promise<void>
     unselectEntry: (listId: number) => Promise<void>
     queryEntries: (query: string) => Promise<SpaceDisplayEntry[]>
-    actOnAllTabs?: (query: string) => Promise<void>
+    actOnAllTabs?: (listId: number) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
     loadDefaultSuggestions: (args?: {
         limit?: number
@@ -339,8 +339,10 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const name = this.validateEntry(entry.name)
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
+        this.validateEntry(entry.name)
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
+            entry.localId,
+        )
 
         const isAlreadySelected = previousState.selectedEntries.includes(
             entry.localId,
@@ -357,29 +359,8 @@ export default class SpacePickerLogic extends UILogic<
         } as UIMutation<SpacePickerState>)
     }
 
-    newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
-        event: { entry },
-        previousState,
-    }) => {
-        const name = this.validateEntry(entry)
-        await this.newEntryPress({ event: { entry: name }, previousState })
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(name)
-    }
-
-    resultEntryFocus: EventHandler<'resultEntryFocus'> = ({
-        event: { entry, index },
-        previousState,
-    }) => {
-        this._updateFocus(index, previousState.displayEntries)
-    }
-
-    newEntryPress: EventHandler<'newEntryPress'> = async ({
-        event: { entry },
-    }) => {
-        entry = this.validateEntry(entry)
-
-        const newId = await this.dependencies.createNewEntry(entry)
-
+    private async createAndDisplayNewList(name: string): Promise<number> {
+        const newId = await this.dependencies.createNewEntry(name)
         this.emitMutation({
             query: { $set: '' },
             newEntryName: { $set: '' },
@@ -387,10 +368,34 @@ export default class SpacePickerLogic extends UILogic<
             displayEntries: {
                 $set: [
                     ...this.defaultEntries,
-                    { localId: newId, focused: false, name: entry },
+                    { localId: newId, focused: false, name },
                 ],
             },
         } as UIMutation<SpacePickerState>)
+        return newId
+    }
+
+    newEntryPress: EventHandler<'newEntryPress'> = async ({
+        event: { entry },
+    }) => {
+        entry = this.validateEntry(entry)
+        await this.createAndDisplayNewList(entry)
+    }
+
+    newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
+        event: { entry },
+    }) => {
+        const newId = await this.createAndDisplayNewList(entry)
+        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
+            newId,
+        )
+    }
+
+    resultEntryFocus: EventHandler<'resultEntryFocus'> = ({
+        event: { entry, index },
+        previousState,
+    }) => {
+        this._updateFocus(index, previousState.displayEntries)
     }
 
     validateEntry = (entry: string) => {

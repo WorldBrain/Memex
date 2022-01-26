@@ -68,7 +68,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             await customLists(
                                 setup,
                             ).remoteFunctions.addOpenTabsToList({
-                                name: testList,
+                                listId,
                                 time: 555,
                             })
                         },
@@ -161,7 +161,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             await customLists(
                                 setup,
                             ).remoteFunctions.addOpenTabsToList({
-                                name: testList,
+                                listId,
                                 time: 555,
                             })
                             await customLists(

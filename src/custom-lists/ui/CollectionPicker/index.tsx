@@ -107,10 +107,12 @@ class SpacePicker extends StatefulUIElement<
     handleResultListAllPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
 
-    handleNewListAllPress = () =>
+    handleNewListAllPress: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
         this.processEvent('newEntryAllPress', {
             entry: this.state.newEntryName,
         })
+    }
 
     handleResultListFocus = (list: SpaceDisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: list, index })

@@ -558,19 +558,9 @@ export default class CustomListBackground {
         return suggestions
     }
 
-    addOpenTabsToList = async (args: {
-        name: string
-        listId?: number
-        time?: number
-    }) => {
-        if (!args.listId) {
-            const list = await this.fetchListByName({ name: args.name })
-
-            if (!list) {
-                throw new Error('No list found for name:' + args.name)
-            }
-
-            args.listId = list.id
+    addOpenTabsToList = async (args: { listId: number; time?: number }) => {
+        if (!(await this.fetchListById({ id: args.listId }))) {
+            throw new Error('No list found for ID:' + args.listId)
         }
 
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()

@@ -281,8 +281,9 @@ export default class PageResultView extends PureComponent<Props> {
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
                         onMouseLeave={
-                            this.props.isListPickerShown &&
-                            this.props.onListPickerBtnClick
+                            this.props.isListPickerShown
+                                ? this.props.onListPickerBtnClick
+                                : undefined
                         }
                         onClick={() => window.open(this.fullUrl)}
                         href={this.fullUrl}
