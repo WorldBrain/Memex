@@ -101,6 +101,7 @@ export type Props = RootState &
             day: number,
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
+        getListNameById: (id: number) => string
         paginateSearch(): Promise<void>
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
@@ -137,6 +138,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
+                getListNameById={this.props.getListNameById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
@@ -363,6 +365,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageResult
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
+                    getListNameById={this.props.getListNameById}
                     onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,

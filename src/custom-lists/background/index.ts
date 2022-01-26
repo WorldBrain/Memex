@@ -299,7 +299,7 @@ export default class CustomListBackground {
 
     fetchAllLists = async ({
         skip = 0,
-        limit = 20,
+        limit = 2000,
         skipMobileList = false,
     }): Promise<PageList[]> => {
         return this.storage.fetchAllLists({

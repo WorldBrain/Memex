@@ -34,6 +34,7 @@ export interface Props extends RibbonSubcomponentProps {
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     showTutorial: boolean
+    getListNameById: (id: number) => string
     toggleShowExtraButtons: () => void
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
@@ -550,6 +551,9 @@ export default class Ribbon extends Component<Props, State> {
                                             }
                                             tags={this.props.commentBox.tags}
                                             lists={this.props.commentBox.lists}
+                                            getListNameById={
+                                                this.props.getListNameById
+                                            }
                                             isRibbonCommentBox={true}
                                         />
                                     </Tooltip>

@@ -130,6 +130,8 @@ export interface SidebarContainerState
     isExpandedSharedSpaces: boolean
     isolatedView?: string | null // if null show default view
 
+    listData: { [listId: number]: { name: string } }
+
     annotationSharingAccess: AnnotationSharingAccess
 
     showAllNotesCopyPaster: boolean

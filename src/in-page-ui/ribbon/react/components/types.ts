@@ -71,6 +71,7 @@ export interface ListEntryArgs {
 export interface RibbonListsProps {
     pageBelongsToList: boolean
     showListsPicker: boolean
+    listData: { [listId: number]: { name: string } }
     updateLists: PickerUpdateHandler<number>
     listAllTabs: (value: number) => Promise<void>
     setShowListsPicker: (value: boolean) => void

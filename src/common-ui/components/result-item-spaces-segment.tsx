@@ -4,12 +4,13 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
-    lists: number[]
     showEditBtn: boolean
-    onListClick?: (tag: number) => void
     onEditBtnClick: React.MouseEventHandler
+    lists: Array<{ id: number; name: string }>
+    onListClick?: (tag: number) => void
     renderListsPickerForAnnotation: () => JSX.Element
 }
 
@@ -85,10 +86,6 @@ export default function ListsSegment({
     renderListsPickerForAnnotation,
     ...props
 }: Props) {
-    // if (!lists?.length) {
-    //     return null
-    // }
-
     return (
         <Container {...props}>
             <ListsContainer>
@@ -99,16 +96,23 @@ export default function ListsSegment({
                         renderListsPickerForAnnotation
                     }
                 />
-                {lists.slice(0).map((space) => (
-                    <ListSpaceContainer
-                        key={space}
-                        onClick={
-                            onListClick ? () => onListClick(space) : undefined
-                        }
-                    >
-                        {space}
-                        {/* TODO: uncomment when collection context menu is done */}
-                        {/* {showEditBtn && (
+                {lists
+                    .filter(
+                        (l) => !Object.values(SPECIAL_LIST_IDS).includes(l.id),
+                    )
+                    .slice(0)
+                    .map((space) => (
+                        <ListSpaceContainer
+                            key={space.id}
+                            onClick={
+                                onListClick
+                                    ? () => onListClick(space.id)
+                                    : undefined
+                            }
+                        >
+                            {space.name}
+                            {/* TODO: uncomment when collection context menu is done */}
+                            {/* {showEditBtn && (
                             <ListPillSettingButton
                                 onClick={() => {
                                     // open the space context modal
@@ -117,8 +121,8 @@ export default function ListsSegment({
                                 {' ... '}
                             </ListPillSettingButton>
                         )} */}
-                    </ListSpaceContainer>
-                ))}
+                        </ListSpaceContainer>
+                    ))}
             </ListsContainer>
         </Container>
     )

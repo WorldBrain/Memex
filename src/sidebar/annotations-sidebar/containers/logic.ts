@@ -152,6 +152,7 @@ export class SidebarContainerLogic extends UILogic<
 
             followedLists: initNormalizedState(),
             followedAnnotations: {},
+            listData: {},
             users: {},
 
             isLocked: false,
@@ -199,7 +200,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { annotationsCache, pageUrl } = this.options
+        const { annotationsCache, pageUrl, customLists } = this.options
         annotationsCache.annotationChanges.addListener(
             'newState',
             this.annotationSubscription,
@@ -209,11 +210,18 @@ export class SidebarContainerLogic extends UILogic<
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
+            const lists = await customLists.fetchAllLists({})
+            const listData: SidebarContainerState['listData'] = {}
+            lists.forEach((l) => (listData[l.id] = { name: l.name }))
+
+            this.emitMutation({ listData: { $set: listData } })
+
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl) {
                 await annotationsCache.load(pageUrl)
             }
         })
+
         // load followed lists
         if (previousState.followedListLoadState === 'pristine') {
             await this.processUIEvent('loadFollowedLists', {

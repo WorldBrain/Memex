@@ -66,6 +66,7 @@ export interface AnnotationProps {
     }
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
+    getListNameById: (id: number) => string
     onTagClick?: (tag: string) => void
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderListsPickerForAnnotation?: (id: string) => JSX.Element
@@ -112,6 +113,13 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     componentDidMount() {
         this.textAreaHeight()
+    }
+
+    private get displayLists(): Array<{ id: number; name: string }> {
+        return this.props.lists.map((id) => ({
+            id,
+            name: this.props.getListNameById(id),
+        }))
     }
 
     private get creationInfo() {
@@ -509,7 +517,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {/* Collections button for annotations. To be added later. */}
 
                             <ListsSegment
-                                lists={this.props.lists}
+                                lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}

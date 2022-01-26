@@ -101,6 +101,9 @@ export default class RibbonContainer extends StatefulUIElement<
             <Ribbon
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
+                getListNameById={(id) =>
+                    this.state.lists.listData[id]?.name ?? 'Missing list'
+                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}

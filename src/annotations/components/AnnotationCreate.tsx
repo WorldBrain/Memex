@@ -33,6 +33,7 @@ export interface AnnotationCreateEventProps {
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
+    getListNameById: (id: number) => string
     onTagsHover?: React.MouseEventHandler
     onListsHover?: React.MouseEventHandler
     annotationFooterDependencies?: AnnotationFooterEventProps
@@ -93,6 +94,13 @@ export class AnnotationCreate extends React.Component<Props, State>
         if (this.props.autoFocus) {
             this.focus()
         }
+    }
+
+    private get displayLists(): Array<{ id: number; name: string }> {
+        return this.props.lists.map((id) => ({
+            id,
+            name: this.props.getListNameById(id),
+        }))
     }
 
     focus() {
@@ -297,7 +305,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     {this.props.comment !== '' && (
                         <>
                             <ListsSegment
-                                lists={this.props.lists}
+                                lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}

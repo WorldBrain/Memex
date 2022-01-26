@@ -66,6 +66,9 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    private getListNameById = (listId: number): string =>
+        this.state.listData[listId]?.name ?? 'Missing list'
+
     toggleSidebarShowForPageId(pageId: string) {
         const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
 
@@ -262,6 +265,7 @@ export class AnnotationsSidebarContainer<
                     shouldShare,
                     isProtected,
                 }),
+            getListNameById: this.getListNameById,
             tagQueryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
             loadDefaultTagSuggestions: this.props.tags
@@ -532,6 +536,7 @@ export class AnnotationsSidebarContainer<
                     {this.renderTopBar()}
                     <AnnotationsSidebar
                         {...this.state}
+                        getListNameById={this.getListNameById}
                         sidebarContext={this.props.sidebarContext}
                         ref={(ref) => (this.sidebarRef = ref)}
                         openCollectionPage={(remoteListId) =>

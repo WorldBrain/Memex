@@ -42,6 +42,7 @@ export interface AnnotationsSidebarProps
     annotationModes: { [url: string]: AnnotationMode }
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
+    getListNameById: (id: number) => string
 
     bindSharedAnnotationEventHandlers: (
         sharedAnnotationReference: SharedAnnotationReference,
@@ -311,6 +312,7 @@ class AnnotationsSidebar extends React.Component<
                                     conversation?.thread != null ||
                                     conversation?.replies.length > 0
                                 }
+                                getListNameById={this.props.getListNameById}
                             />
                             <ConversationReplies
                                 {...eventHandlers}

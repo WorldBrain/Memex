@@ -32,6 +32,7 @@ export interface Props
         PageResult,
         PageInteractionProps,
         PagePickerProps {
+    getListNameById: (id: number) => string
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     filteredbyListID: number
@@ -78,6 +79,14 @@ export default class PageResultView extends PureComponent<Props> {
     private get hasLists(): boolean {
         return this.props.lists.length > 0
     }
+
+    private get displayLists(): Array<{ id: number; name: string }> {
+        return this.props.lists.map((id) => ({
+            id,
+            name: this.props.getListNameById(id),
+        }))
+    }
+
     private renderSpacePicker() {
         // space picker is separated out to make the Add to Space button contain the call to render the picker
         if (this.props.isListPickerShown) {
@@ -325,9 +334,9 @@ export default class PageResultView extends PureComponent<Props> {
                                 )}
                         </ResultContent>
                     </PageContentBox>
-                    {this.props.lists.length > 0 && (
+                    {this.hasLists && (
                         <ListsSegment
-                            lists={this.props.lists}
+                            lists={this.displayLists}
                             onMouseEnter={this.props.onListsHover}
                             showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}

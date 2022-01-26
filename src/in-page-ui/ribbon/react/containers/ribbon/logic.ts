@@ -137,6 +137,7 @@ export class RibbonContainerLogic extends UILogic<
             lists: {
                 showListsPicker: false,
                 pageBelongsToList: false,
+                listData: {},
             },
             search: {
                 showSearchBox: false,
@@ -151,7 +152,17 @@ export class RibbonContainerLogic extends UILogic<
     init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             const url = await this.dependencies.getPageUrl()
-            this.emitMutation({ pageUrl: { $set: url } })
+
+            const lists = await this.dependencies.customLists.fetchAllLists({})
+            const listData: componentTypes.RibbonListsProps['listData'] = {}
+            lists.forEach((l) => (listData[l.id] = { name: l.name }))
+
+            this.emitMutation({
+                pageUrl: { $set: url },
+                lists: {
+                    listData: { $set: listData },
+                },
+            })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()

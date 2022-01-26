@@ -122,6 +122,9 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
+    private getListNameById = (id: number): string =>
+        this.state.listsSidebar.listData[id]?.name ?? 'Missing list'
+
     private getListDetailsProps = (): ListDetailsProps | null => {
         const { listsSidebar, searchResults } = this.state
 
@@ -539,6 +542,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                getListNameById={this.getListNameById}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 goToImportRoute={() => {
                     this.bindRouteGoTo('import')()
@@ -759,6 +763,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                 }}
                 newNoteInteractionProps={{
+                    getListNameById: (day, pageId) => this.getListNameById,
                     onCancel: (day, pageId) => () =>
                         this.processEvent('cancelPageNewNote', {
                             day,

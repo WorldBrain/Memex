@@ -407,6 +407,7 @@ class AnnotationList extends Component<Props, State> {
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationEditable
+                getListNameById={(i) => 'dead code'}
                 key={annot.url}
                 {...annot}
                 body={annot.body}
