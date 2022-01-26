@@ -94,7 +94,7 @@ export interface RemoteCollectionsInterface {
     searchForListSuggestions(args: {
         query: string
         limit?: number
-    }): Promise<PageList[]>
+    }): Promise<Array<Omit<PageList, 'createdAt'> & { createdAt: number }>>
     addOpenTabsToList(args: { listId: number; time?: number }): Promise<void>
     removeOpenTabsFromList(args: { listId: number }): Promise<void>
     updateListForPage(args: {

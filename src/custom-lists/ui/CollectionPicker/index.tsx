@@ -47,7 +47,7 @@ class SpacePicker extends StatefulUIElement<
             return suggestions.map((s) => ({
                 localId: s.id,
                 name: s.name,
-                createdAt: s.createdAt.getTime(),
+                createdAt: s.createdAt,
                 focused: false,
                 remoteId: remoteListIds[s.id] ?? null,
             }))
@@ -70,6 +70,13 @@ class SpacePicker extends StatefulUIElement<
 
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
+    }
+
+    private get shouldShowAddNewEntry(): boolean {
+        const { newEntryName, displayEntries } = this.state
+        const input = newEntryName.trim()
+
+        return input !== '' && !displayEntries.find((e) => e.name === input)
     }
 
     private get selectedDisplayEntries(): Array<{
@@ -133,7 +140,7 @@ class SpacePicker extends StatefulUIElement<
                     : undefined
             }
             onFocus={this.handleResultListFocus}
-            key={`ListKeyName-${list.name}`}
+            key={`ListKeyName-${list.localId}`}
             index={index}
             name={list.name}
             selected={this.state.selectedEntries.includes(list.localId)}
@@ -142,7 +149,7 @@ class SpacePicker extends StatefulUIElement<
             remoteId={list.remoteId}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
             removeTooltipText="Remove from Space"
-            actOnAllTooltipText="Add all tabs in window to list"
+            actOnAllTooltipText="Add all tabs in window to Space"
         />
     )
 
@@ -150,7 +157,7 @@ class SpacePicker extends StatefulUIElement<
         this.props.actOnAllTabs && (
             <IconStyleWrapper show>
                 <ButtonTooltip
-                    tooltipText="List all tabs in window"
+                    tooltipText="Add all tabs in window to Space"
                     position="left"
                 >
                     <ActOnAllTabsButton
@@ -168,9 +175,9 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <EmptyListsView>
-                <strong>No Collections yet</strong>
+                <strong>No Spaces yet</strong>
                 <br />
-                Add new collections
+                Add new Spaces
                 <br />
                 via the search bar
             </EmptyListsView>
@@ -209,7 +216,7 @@ class SpacePicker extends StatefulUIElement<
                     emptyView={this.renderEmptyList()}
                     id="listResults"
                 />
-                {this.state.newEntryName !== '' && (
+                {this.shouldShowAddNewEntry && (
                     <AddNewEntry
                         resultItem={
                             <ListResultItem>

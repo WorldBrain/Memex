@@ -194,16 +194,22 @@ export default class RibbonContainer extends StatefulUIElement<
                             url: this.normalizedPageUrl,
                         }),
                     queryEntries: async (query) => {
-                        const suggestions = await this.props.customLists.searchForListSuggestions(
+                        const { customLists, contentSharing } = this.props
+                        const suggestions = await customLists.searchForListSuggestions(
                             {
                                 query,
+                            },
+                        )
+                        const remoteListIds = await contentSharing.getRemoteListIds(
+                            {
+                                localListIds: suggestions.map((s) => s.id),
                             },
                         )
                         return suggestions.map((sug) => ({
                             localId: sug.id,
                             name: sug.name,
-                            remoteId: sug.remoteId ?? null,
-                            createdAt: sug.createdAt.getTime(),
+                            remoteId: remoteListIds[sug.id] ?? null,
+                            createdAt: sug.createdAt,
                             focused: false,
                         }))
                     },

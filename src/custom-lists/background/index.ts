@@ -552,10 +552,13 @@ export default class CustomListBackground {
     searchForListSuggestions = async (args: {
         query: string
         limit?: number
-    }): Promise<PageList[]> => {
+    }): Promise<Array<Omit<PageList, 'createdAt'> & { createdAt: number }>> => {
         const suggestions = await this.storage.suggestLists(args)
 
-        return suggestions
+        return suggestions.map((s) => ({
+            ...s,
+            createdAt: s.createdAt.getTime(),
+        }))
     }
 
     addOpenTabsToList = async (args: { listId: number; time?: number }) => {

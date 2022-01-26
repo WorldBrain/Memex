@@ -379,7 +379,8 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
     }) => {
         entry = this.validateEntry(entry)
-        await this.createAndDisplayNewList(entry)
+        const listId = await this.createAndDisplayNewList(entry)
+        await this.dependencies.selectEntry(listId)
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({

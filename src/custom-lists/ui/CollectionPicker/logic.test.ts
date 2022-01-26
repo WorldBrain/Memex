@@ -486,6 +486,7 @@ describe('GenericPickerLogic', () => {
         const newEntryId = 1000
         const newEntryText = 'test'
 
+        let selectedEntry = null
         let newEntryName = null
         const { testLogic } = await setupLogicHelper({
             device,
@@ -493,6 +494,9 @@ describe('GenericPickerLogic', () => {
             createNewEntry: async (entryName) => {
                 newEntryName = entryName
                 return newEntryId
+            },
+            selectEntry: async (entryId) => {
+                selectedEntry = entryId
             },
         })
 
@@ -511,6 +515,7 @@ describe('GenericPickerLogic', () => {
             query: newEntryText,
         })
 
+        expect(selectedEntry).toBe(null)
         expect(newEntryName).toBe(null)
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -521,6 +526,7 @@ describe('GenericPickerLogic', () => {
 
         await testLogic.processEvent('newEntryPress', { entry: newEntryText })
 
+        expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
         expect(testLogic.state).toEqual(
             expect.objectContaining({
