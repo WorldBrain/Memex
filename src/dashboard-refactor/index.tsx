@@ -172,6 +172,7 @@ export class DashboardContainer extends StatefulUIElement<
             .map((listId) => ({
                 source,
                 listId,
+                listData: listsSidebar.listData[listId],
                 name: listsSidebar.listData[listId].name,
                 isEditing: listsSidebar.editingListId === listId,
                 isCollaborative:
@@ -196,6 +197,8 @@ export class DashboardContainer extends StatefulUIElement<
                                   }),
                 },
                 editableProps: {
+                    changeListName: (value) =>
+                        this.processEvent('changeListName', { value }),
                     onCancelClick: () =>
                         this.processEvent('cancelListEdit', null),
                     onConfirmClick: (value) =>
@@ -217,6 +220,14 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('setDeletingListId', { listId }),
                 onShareClick: () =>
                     this.processEvent('setShareListId', { listId }),
+                services: {
+                    ...this.props.services,
+                    contentSharing: this.props.contentShareBG,
+                },
+                shareList: shareListAndAllEntries(
+                    this.props.contentShareBG,
+                    listId,
+                ),
             }))
     }
 
