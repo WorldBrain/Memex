@@ -170,10 +170,12 @@ export default class SpaceContextMenuButton extends PureComponent<
                     />
 
                     {!(!this.props.source || !this.props.isMenuDisplayed) && (
-                        <SpaceContextMenu
-                            {...this.props}
-                            position={this.state.position}
-                        />
+                        <ClickAway onClickAway={this.handleMoreActionClick}>
+                            <SpaceContextMenu
+                                {...this.props}
+                                position={this.state.position}
+                            />
+                        </ClickAway>
                     )}
                 </>
             )
