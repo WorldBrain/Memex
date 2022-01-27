@@ -52,6 +52,7 @@ export const Icon = styled.div<IconProps>`
             padding-left: ${props.paddingHorizontal};
             padding-right: ${props.paddingHorizontal};
         `}
+    flex: none;
 `
 
 export const LoadingContainer = ({ children }) => {
