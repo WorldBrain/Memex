@@ -80,7 +80,6 @@ export default class EditableMenuItem extends React.PureComponent<
             <>
                 <Container onClick={(e) => e.stopPropagation()}>
                     <EditableListTitle
-                        autoFocus
                         onChange={this.handleChange}
                         value={this.props.nameValueState.value}
                         onKeyDown={this.handleInputKeyDown}
@@ -105,6 +104,7 @@ const EditableListTitle = styled.input`
     min-width: 50px;
     margin-right: 0px;
     font-size: 12px;
+    height: 30px;
 `
 
 const ErrMsg = styled.span`
@@ -114,15 +114,12 @@ const ErrMsg = styled.span`
 const Container = styled.div<Props>`
     height: 30px;
     width: 100%;
-    padding-left: 15px;
-    padding-right: 15px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
 `

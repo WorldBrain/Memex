@@ -160,7 +160,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     isMenuDisplayed={isMenuDisplayed}
                     selectedState={selectedState}
                     dropReceivingState={dropReceivingState}
-                    title={this.props.name}
+                    //title={this.props.name}
                     onClick={this.handleSelection}
                     onDragEnter={this.handleDragEnter}
                 >
