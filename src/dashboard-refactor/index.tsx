@@ -156,79 +156,64 @@ export class DashboardContainer extends StatefulUIElement<
     ): ListSidebarItemProps[] => {
         const { listsSidebar } = this.state
 
-        return listIds
-            .sort((idA, idB) => {
-                const listDataA = listsSidebar.listData[idA]
-                const listDataB = listsSidebar.listData[idB]
-
-                if (listDataA.name < listDataB.name) {
-                    return -1
-                }
-                if (listDataA.name > listDataB.name) {
-                    return 1
-                }
-                return 0
-            })
-            .map((listId) => ({
-                source,
-                listId,
-                listData: listsSidebar.listData[listId],
-                name: listsSidebar.listData[listId].name,
-                isEditing: listsSidebar.editingListId === listId,
-                isCollaborative:
+        return listIds.map((listId) => ({
+            source,
+            listId,
+            listData: listsSidebar.listData[listId],
+            name: listsSidebar.listData[listId].name,
+            isEditing: listsSidebar.editingListId === listId,
+            isCollaborative:
+                source === 'followed-lists'
+                    ? false
+                    : listsSidebar.listData[listId].remoteId != null,
+            isMenuDisplayed:
+                source === 'followed-lists'
+                    ? false
+                    : listsSidebar.showMoreMenuListId === listId,
+            selectedState: {
+                isSelected: listsSidebar.selectedListId === listId,
+                onSelection:
                     source === 'followed-lists'
-                        ? false
-                        : listsSidebar.listData[listId].remoteId != null,
-                isMenuDisplayed:
-                    source === 'followed-lists'
-                        ? false
-                        : listsSidebar.showMoreMenuListId === listId,
-                selectedState: {
-                    isSelected: listsSidebar.selectedListId === listId,
-                    onSelection:
-                        source === 'followed-lists'
-                            ? () =>
-                                  this.props.openCollectionPage(
-                                      listsSidebar.listData[listId].remoteId,
-                                  )
-                            : () =>
-                                  this.processEvent('setSelectedListId', {
-                                      listId: listsSidebar.listData[listId].id,
-                                  }),
-                },
-                editableProps: {
-                    changeListName: (value) =>
-                        this.processEvent('changeListName', { value }),
-                    onCancelClick: () =>
-                        this.processEvent('cancelListEdit', null),
-                    onConfirmClick: (value) =>
-                        this.processEvent('confirmListEdit', { value }),
-                    initValue: listsSidebar.listData[listId].name,
-                    errorMessage: listsSidebar.editListErrorMessage,
-                },
-                onMoreActionClick:
-                    source !== 'followed-lists' &&
-                    listsSidebar.listData[listId].isOwnedList
                         ? () =>
-                              this.processEvent('setShowMoreMenuListId', {
+                              this.props.openCollectionPage(
+                                  listsSidebar.listData[listId].remoteId,
+                              )
+                        : () =>
+                              this.processEvent('setSelectedListId', {
                                   listId: listsSidebar.listData[listId].id,
-                              })
-                        : undefined,
-                onRenameClick: () =>
-                    this.processEvent('setEditingListId', { listId }),
-                onDeleteClick: () =>
-                    this.processEvent('setDeletingListId', { listId }),
-                onShareClick: () =>
-                    this.processEvent('setShareListId', { listId }),
-                services: {
-                    ...this.props.services,
-                    contentSharing: this.props.contentShareBG,
-                },
-                shareList: shareListAndAllEntries(
-                    this.props.contentShareBG,
-                    listId,
-                ),
-            }))
+                              }),
+            },
+            editableProps: {
+                changeListName: (value) =>
+                    this.processEvent('changeListName', { value }),
+                onCancelClick: () => this.processEvent('cancelListEdit', null),
+                onConfirmClick: (value) =>
+                    this.processEvent('confirmListEdit', { value }),
+                initValue: listsSidebar.listData[listId].name,
+                errorMessage: listsSidebar.editListErrorMessage,
+            },
+            onMoreActionClick:
+                source !== 'followed-lists' &&
+                listsSidebar.listData[listId].isOwnedList
+                    ? () =>
+                          this.processEvent('setShowMoreMenuListId', {
+                              listId: listsSidebar.listData[listId].id,
+                          })
+                    : undefined,
+            onRenameClick: () =>
+                this.processEvent('setEditingListId', { listId }),
+            onDeleteClick: () =>
+                this.processEvent('setDeletingListId', { listId }),
+            onShareClick: () => this.processEvent('setShareListId', { listId }),
+            services: {
+                ...this.props.services,
+                contentSharing: this.props.contentShareBG,
+            },
+            shareList: shareListAndAllEntries(
+                this.props.contentShareBG,
+                listId,
+            ),
+        }))
     }
 
     private renderFiltersBar() {

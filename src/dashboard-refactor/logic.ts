@@ -338,7 +338,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const localLists = await listsBG.fetchAllLists({
+                let localLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
                 })
@@ -349,6 +349,16 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
+
+                localLists = localLists.sort((listDataA, listDataB) => {
+                    if (listDataA.name < listDataB.name) {
+                        return -1
+                    }
+                    if (listDataA.name > listDataB.name) {
+                        return 1
+                    }
+                    return 0
+                })
 
                 for (const list of localLists) {
                     const remoteId = localToRemoteIdDict[list.id]
