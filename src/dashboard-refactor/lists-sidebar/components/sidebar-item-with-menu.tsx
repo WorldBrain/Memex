@@ -246,6 +246,7 @@ const TitleBox = styled.div`
     padding-left: 15px;
     align-items: center;
     padding-right: 10px;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const SidebarItem = styled.div<Props>`

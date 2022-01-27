@@ -141,7 +141,8 @@ export default class SpaceContextMenuButton extends PureComponent<
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-        this.setState({ position: rect ?? { x: 0, y: 0 } })
+        console.log(rect)
+        this.setState({ position: { x: rect.x + 35, y: rect.y - 6 } })
         this.props.onMoreActionClick(this.props.listId)
     }
 
@@ -161,13 +162,17 @@ export default class SpaceContextMenuButton extends PureComponent<
         if (onMoreActionClick) {
             return (
                 <>
-                    <Icon
-                        paddingHorizontal="10px"
-                        heightAndWidth="12px"
-                        path={icons.dots}
-                        ref={this.buttonRef}
+                    <MoreIconBackground
                         onClick={this.handleMoreActionClick}
-                    />
+                        ref={this.buttonRef}
+                    >
+                        <Icon
+                            paddingHorizontal="10px"
+                            paddingVertical="10px"
+                            heightAndWidth="12px"
+                            path={icons.dots}
+                        />
+                    </MoreIconBackground>
 
                     {!(!this.props.source || !this.props.isMenuDisplayed) && (
                         <ClickAway onClickAway={this.handleMoreActionClick}>
@@ -240,6 +245,10 @@ export class SpaceContextMenu extends PureComponent<
     }
 
     private addLinks = async () => {
+        this.setState({
+            isLoading: true,
+        })
+
         const roleID = SharedListRoleID.ReadWrite
         const { clipboard, contentSharing } = this.props.services
 
@@ -291,6 +300,7 @@ export class SpaceContextMenu extends PureComponent<
         this.setState({
             inviteLinks: [...this.state.inviteLinks, ...newLinks],
             showSuccessMsg: true,
+            isLoading: false,
         })
 
         await clipboard.copy(link)
@@ -439,6 +449,7 @@ export class SpaceContextMenu extends PureComponent<
 
 const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const IconContainer = styled.div`
@@ -455,6 +466,20 @@ const IconBackground = styled.div`
     border-radius: 3px;
     background: white;
     padding: 2px;
+`
+
+const MoreIconBackground = styled.div`
+    border-radius: 3px;
+    padding: 2px;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+        background: white;
+    }
 `
 
 const LoadingContainer = styled.div`
@@ -480,6 +505,7 @@ const ButtonLabel = styled.div`
 const ModalRoot = styled.div`
     z-index: 1000;
     width: 100%;
+    border-radius: 4px;
     height: 100%;
     position: fixed;
     top: 0;
@@ -495,7 +521,6 @@ const ModalContent = styled.div<{ x: number; y: number }>`
     position: absolute;
     top: ${(props) => props.y}px;
     left: ${(props) => props.x}px;
-    padding: 20px;
     text-align: center;
     border-radius: 4px;
     width: 300px;
@@ -509,6 +534,7 @@ const Overlay = styled.div`
     width: 100%;
     height: 100%;
     z-index: 995;
+    border-radius: 5px;
 `
 
 const MenuContainer = styled.div`
@@ -519,7 +545,7 @@ const MenuContainer = styled.div`
     position: absolute;
     background-color: ${colors.white};
     box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: ${styles.boxShadow.overlayElement};
+    border-radius: 3px;
     z-index: 1;
 `
 
@@ -704,12 +730,13 @@ const LinkAndRoleBox = styled.div<{
 const LinkBox = styled(Margin)`
     width: 100%;
     display: flex;
-    background-color: ${(props) => props.theme.colors.grey};
+    background-color: ${(props) => props.theme.colors.lightgrey};
     font-size: 12px;
     border-radius: 3px;
     text-align: left;
     cursor: pointer;
     padding-right: 10px;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const Link = styled.span`

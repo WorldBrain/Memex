@@ -104,20 +104,26 @@ const EditableListTitle = styled.input`
     min-width: 50px;
     margin-right: 0px;
     font-size: 12px;
-    height: 30px;
+    height: 40px;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.primary};
 `
 
-const ErrMsg = styled.span`
+const ErrMsg = styled.div`
     color: red;
+    width: 100%;
+    text-align: center;
+    margin-top: -5px;
+    margin-bottom: 5px;
 `
 
 const Container = styled.div<Props>`
     height: 30px;
     width: 100%;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     background-color: transparent;
     padding: 10px;
     margin-bottom: 10px;
