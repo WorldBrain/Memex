@@ -122,8 +122,10 @@ const Icon = styled.img`
     width: 15px;
 `
 
-const ErrMsg = styled.span`
+const ErrMsg = styled.div`
     color: red;
+    width: 100%;
+    text-align: center;
 `
 
 const Container = styled.div<Props>`
