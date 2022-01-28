@@ -102,7 +102,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
-                    {this.props.showLink && (
+                    {/* {this.props.showLink && (
                         <TopArea>
                             <TitleContainer>
                                 <SectionTitle>
@@ -126,7 +126,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 </LinkCopier>
                             </LinkCopierBox>
                         </TopArea>
-                    )}
+                    )} */}
                     <PrivacyContainer>
                         {this.props.isLoading ? (
                             <LoadingBox>
