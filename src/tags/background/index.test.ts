@@ -182,9 +182,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                 {
                     execute: async ({ setup }) => {
                         // TODO: properly get this working in test env (currently waits forever)
-                        setup.backgroundModules.pages.waitForContentIdentifier = async (
+                        setup.backgroundModules.pages.waitForContentIdentifier = (async (
                             a,
-                        ) => a as any
+                        ) => a) as any
 
                         const testTabs: Array<
                             FakeTab & { normalized: string }
@@ -265,9 +265,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                 {
                     execute: async ({ setup }) => {
                         // TODO: properly get this working in test env (currently waits forever)
-                        setup.backgroundModules.pages.waitForContentIdentifier = async (
+                        setup.backgroundModules.pages.waitForContentIdentifier = (async (
                             a,
-                        ) => a as any
+                        ) => a) as any
 
                         const testTabs: Array<
                             FakeTab & { normalized: string }

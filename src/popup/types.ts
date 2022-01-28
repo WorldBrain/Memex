@@ -9,6 +9,7 @@ import { State as NotifsBtnState } from './notif-button/reducer'
 import { State as SidebarBtnState } from './sidebar-button/reducer'
 import { State as TooltipBtnState } from './tooltip-button/reducer'
 import { State as PopupState } from './reducer'
+import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
 export interface RootState {
     blacklistBtn?: BlacklistBtnState
@@ -20,6 +21,7 @@ export interface RootState {
     tooltipBtn?: TooltipBtnState
     notifsBtn?: NotifsBtnState
     popup?: PopupState
+    activityIndicator: ActivityIndicatorProps
 }
 
 export type ClickHandler<T extends HTMLElement> = (

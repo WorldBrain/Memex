@@ -1,4 +1,4 @@
-import type { Tabs, Runtime } from 'webextension-polyfill-ts'
+import type { Tabs, Runtime, Extension } from 'webextension-polyfill-ts'
 import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import {
     UILogic,
@@ -10,6 +10,7 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface Dependencies {
+    extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
     tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
     runtimeAPI: Pick<Runtime.Static, 'getURL'>
     syncSettings: SyncSettingsStore<'pdfIntegration'>
@@ -25,6 +26,7 @@ export interface State {
     loadState: UITaskState
     currentPageUrl: string
     isPDFReaderEnabled: boolean
+    isFileAccessAllowed: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -42,10 +44,11 @@ export default class PopupLogic extends UILogic<State, Event> {
         loadState: 'pristine',
         isPDFReaderEnabled: false,
         currentPageUrl: '',
+        isFileAccessAllowed: false,
     })
 
     async init() {
-        const { syncSettings, tabsAPI } = this.dependencies
+        const { syncSettings, tabsAPI, extensionAPI } = this.dependencies
         await loadInitial(this, async () => {
             const isPDFReaderEnabled = await syncSettings.pdfIntegration.get(
                 'shouldAutoOpen',
@@ -54,9 +57,11 @@ export default class PopupLogic extends UILogic<State, Event> {
                 active: true,
                 currentWindow: true,
             })
+            const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
             this.emitMutation({
                 currentPageUrl: { $set: currentTab?.url },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
+                isFileAccessAllowed: { $set: isFileAccessAllowed },
             })
         })
     }

@@ -69,25 +69,18 @@ async function init() {
         return { currentTab: null, fullUrl: null }
     }
 
-    const identifier = await runInBackground<
-        PageIndexingInterface<'caller'>
-    >().waitForContentIdentifier({
-        tabId: currentTab.id,
-        fullUrl: currentTab.url,
-    })
+    try {
+        const identifier = await runInBackground<
+            PageIndexingInterface<'caller'>
+        >().waitForContentIdentifier({
+            tabId: currentTab.id,
+            fullUrl: currentTab.url,
+        })
 
-    return { currentTab, fullUrl: identifier.fullUrl }
-}
-
-// N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
-export const initBasicStore: () => Thunk = () => async (dispatch) => {
-    const { currentTab, fullUrl } = await init()
-    if (!currentTab) {
-        return
+        return { currentTab, fullUrl: identifier.fullUrl }
+    } catch (e) {
+        return { currentTab, fullUrl: currentTab.url }
     }
-
-    await dispatch(setTabAndUrl(currentTab.id, fullUrl))
-    await dispatch(setTabIsBookmarked(fullUrl))
 }
 
 export const initState: () => Thunk = () => async (dispatch) => {

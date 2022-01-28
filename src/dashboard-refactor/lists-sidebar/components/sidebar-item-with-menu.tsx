@@ -1,9 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled, { css, keyframes } from 'styled-components'
-
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import {
@@ -12,9 +10,11 @@ import {
     SelectedState,
 } from 'src/dashboard-refactor/types'
 import { Props as EditableItemProps } from './sidebar-editable-item'
-import { ListNameHighlightIndices } from '../types'
+import { ListData, ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import SpaceContextMenuButton from './space-context-menu'
+import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 
 export interface Props {
     className?: string
@@ -22,6 +22,7 @@ export interface Props {
     newItemsCount?: number
     name: string
     listId: number
+    listData?: ListData
     source?: ListSource
     hasActivity?: boolean
     isMenuDisplayed?: boolean
@@ -35,6 +36,8 @@ export interface Props {
     editableProps?: EditableItemProps
     selectedState: SelectedState
     onMoreActionClick?: (listId: number) => void
+    services?: UIElementServices<'contentSharing' | 'overlay' | 'clipboard'>
+    shareList?: () => Promise<{ listId: string }>
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
@@ -49,7 +52,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
         // Needed to push this op back on the event queue, so it fires after the previous
-        //  list item's `onDropLeave` event
+        //  list item's `onDropLeave` event
         setTimeout(() => this.props.dropReceivingState?.onDragEnter(), 0)
     }
 
@@ -58,54 +61,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         if (!this.props.dropReceivingState?.canReceiveDroppedItems) {
             return
         }
-
         this.props.dropReceivingState?.onDrop(e.dataTransfer)
-    }
-
-    private renderMenuBtns() {
-        if (!this.props.source || !this.props.isMenuDisplayed) {
-            return false
-        }
-
-        const renderMenu = (children: React.ReactNode) => (
-            <ClickAway onClickAway={this.handleMoreActionClick}>
-                <MenuContainer>{children}</MenuContainer>
-            </ClickAway>
-        )
-
-        if (this.props.source === 'followed-lists') {
-            return renderMenu(
-                <MenuButton onClick={this.props.onUnfollowClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
-                    </Margin>
-                    Unfollow
-                </MenuButton>,
-            )
-        }
-
-        return renderMenu(
-            <>
-                <MenuButton onClick={this.props.onShareClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.link} />
-                    </Margin>
-                    Share
-                </MenuButton>
-                <MenuButton onClick={this.props.onDeleteClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.remove} />
-                    </Margin>
-                    Delete
-                </MenuButton>
-                <MenuButton onClick={this.props.onRenameClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.edit} />
-                    </Margin>
-                    Rename
-                </MenuButton>
-            </>,
-        )
     }
 
     private renderIcon() {
@@ -142,13 +98,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (onMoreActionClick) {
-            return (
-                <Icon
-                    paddingHorizontal="10px"
-                    heightAndWidth="12px"
-                    path={icons.dots}
-                />
-            )
+            return <SpaceContextMenuButton {...this.props} />
         }
     }
 
@@ -176,6 +126,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         const [from, to] = this.props.nameHighlightIndices
+
         const [namePre, nameHighlighted, namePost] = [
             this.props.name.slice(0, from),
             this.props.name.slice(from, to),
@@ -209,7 +160,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     isMenuDisplayed={isMenuDisplayed}
                     selectedState={selectedState}
                     dropReceivingState={dropReceivingState}
-                    title={this.props.name}
+                    //title={this.props.name}
                     onClick={this.handleSelection}
                     onDragEnter={this.handleDragEnter}
                 >
@@ -223,18 +174,20 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                             onClick={this.handleSelection}
                         />
                     )}
+
                     <TitleBox> {this.renderTitle()}</TitleBox>
+
                     <IconBox
                         dropReceivingState={dropReceivingState}
                         newItemsCount={newItemsCount}
                         hasActivity={hasActivity}
-                        onClick={this.handleMoreActionClick}
+                        // onClick={this.handleMoreActionClick}
+
                         right="10px"
                     >
                         {this.renderIcon()}
                     </IconBox>
                 </SidebarItem>
-                {this.renderMenuBtns()}
             </Container>
         )
     }
@@ -293,63 +246,81 @@ const TitleBox = styled.div`
     padding-left: 15px;
     align-items: center;
     padding-right: 10px;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const SidebarItem = styled.div<Props>`
-    height: 30px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: transparent;
+ height: 30px;
+ width: 100%;
+ display: flex;
+ flex-direction: row;
+ justify-content: space-between;
+ align-items: center;
+ background-color: transparent;
+  
+ &:hover {
+ background-color: ${colors.onHover};
+ }
 
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+  
 
-    ${({ isMenuDisplayed, dropReceivingState }) =>
-        css`
-            background-color: ${isMenuDisplayed ||
-            (dropReceivingState?.canReceiveDroppedItems &&
-                dropReceivingState?.isDraggedOver)
-                ? `${colors.onHover}`
-                : `transparent`};
-        `};
+ ${({ isMenuDisplayed, dropReceivingState }) =>
+     css`
+         background-color: ${isMenuDisplayed ||
+         (dropReceivingState?.canReceiveDroppedItems &&
+             dropReceivingState?.isDraggedOver)
+             ? `${colors.onHover}`
+             : `transparent`};
+     `};
 
-    &:hover ${IconBox} {
-        display: ${(props) =>
-            !(
-                props.hasActivity ||
-                props.newItemsCount ||
-                props.dropReceivingState?.isDraggedOver
-            )
-                ? 'flex'
-                : 'None'};
-    }
+  
 
-    &:hover ${TitleBox} {
-        width: 70%;
-    }
+ &:hover ${IconBox} {
 
-    ${({ selectedState }: Props) =>
-        selectedState?.isSelected &&
-        css`
-            background-color: ${colors.onSelect};
-        `}
+ display: ${(props) =>
+     !(
+         props.hasActivity ||
+         props.newItemsCount ||
+         props.dropReceivingState?.isDraggedOver
+     )
+         ? 'flex'
+         : 'None'};
 
-    ${({ dropReceivingState }: Props) =>
-        dropReceivingState?.wasPageDropped &&
-        css`
-            animation: ${blinkingAnimation} 0.2s 2;
-        `}
+ }
 
-    cursor: ${({ dropReceivingState }: Props) =>
-        !dropReceivingState?.isDraggedOver
-            ? `pointer`
-            : dropReceivingState?.canReceiveDroppedItems
-            ? `pointer`
-            : `not-allowed`};
+  
+
+ &:hover ${TitleBox} {
+
+ width: 70%;
+
+ }
+
+  
+
+ ${({ selectedState }: Props) =>
+     selectedState?.isSelected &&
+     css`
+         background-color: ${colors.onSelect};
+     `}
+
+  
+
+ ${({ dropReceivingState }: Props) =>
+     dropReceivingState?.wasPageDropped &&
+     css`
+         animation: ${blinkingAnimation} 0.2s 2;
+     `}
+
+  
+
+ cursor: ${({ dropReceivingState }: Props) =>
+     !dropReceivingState?.isDraggedOver
+         ? `pointer`
+         : dropReceivingState?.canReceiveDroppedItems
+         ? `pointer`
+         : `not-allowed`};
+
 `
 
 const MenuButton = styled.div`
@@ -365,15 +336,12 @@ const MenuButton = styled.div`
     align-items: center;
     cursor: pointer;
     padding: 0px 10px 0 0;
-
     &: ${SidebarItem} {
         background-color: red;
     }
-
     &:hover {
         background-color: ${colors.onHover};
     }
-
     & > div {
         width: auto;
     }
@@ -425,14 +393,15 @@ const NewItemsCountInnerDiv = styled.div`
 `
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
+
 const blinkingAnimation = keyframes`
-    0% {
-        background-color: ${colors.onHover};
-    }
-    50% {
-        background-color: transparent;
-    }
-    100% {
-        background-color: ${colors.onHover};
-    }
+ 0% {
+ background-color: ${colors.onHover};
+ }
+ 50% {
+ background-color: transparent;
+ }
+ 100% {
+ background-color: ${colors.onHover};
+ }
 `
