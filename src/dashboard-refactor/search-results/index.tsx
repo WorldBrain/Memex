@@ -240,7 +240,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <PageNotesBox bottom="10px" left="10px">
                 <AnnotationCreate
-                    autoFocus={this.props.shouldFormsAutoFocus}
+                    autoFocus={false}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     {...boundAnnotCreateProps}
@@ -401,10 +401,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <>
-                <ButtonTooltip tooltipText="Share Space" position="bottom">
+                <ButtonTooltip
+                    tooltipText="Bulk-change privacy of annotations in this Space"
+                    position="bottom"
+                >
                     <IconBox>
                         <Icon
-                            filePath={icons.link}
+                            filePath={icons.multiEdit}
                             height="16px"
                             color="primary"
                             onClick={this.props.toggleListShareMenu}
@@ -417,6 +420,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         top="20px"
                         right="-90px"
                         withRelativeContainer
+                        position="absolute"
                     >
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
@@ -462,10 +466,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
                             <RightSideButton>
+                                {this.renderListShareBtn()}
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
-                                {this.renderListShareBtn()}
                                 <ExpandAllNotes
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}
@@ -505,6 +509,10 @@ const IconBox = styled.div`
 
 const RightSideButton = styled.div`
     display: flex;
+    align-items: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 5px;
     align-items: center;
 `
 

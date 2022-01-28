@@ -111,7 +111,7 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isShareMenuShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox width="330px" right="0" withRelativeContainer>
                     <AllNotesShareMenu {...this.props.shareMenuProps} />
                 </HoverBox>
             )

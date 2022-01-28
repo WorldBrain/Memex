@@ -23,7 +23,7 @@ export class HoverBox extends React.Component<Props> {
         }
 
         return (
-            <HoverBoxContainer>
+            <HoverBoxContainer {...this.props}>
                 <HoverBoxDiv {...this.props}>{this.props.children}</HoverBoxDiv>
             </HoverBoxContainer>
         )
@@ -31,7 +31,7 @@ export class HoverBox extends React.Component<Props> {
 }
 
 export const HoverBoxContainer = styled.div<Props>`
-    position: relative;
+    position: ${(props) => (props.position ? props.position : 'relative')};
     overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};
 `
 
