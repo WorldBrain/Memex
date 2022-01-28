@@ -112,21 +112,26 @@ const renderCopyableLink = ({
                         </IconContainer>
                     </LinkBox>
                 </CopyLinkBox>
-                <PermissionText
-                    title={null}
-                    viewportBreakpoint={viewportBreakpoint}
-                >
+                <PermissionArea>
                     <ButtonTooltip
-                        position={'bottom'}
+                        position={'bottomSingleLine'}
                         tooltipText={
-                            sharedListRoleIDToString(roleID) === 'Contributor'
-                                ? 'Add highlights & pages, Reply'
-                                : 'View highlights & pages, Reply'
+                            sharedListRoleIDToString(roleID) ===
+                            'Contributor' ? (
+                                <span>Add highlights, pages & replies</span>
+                            ) : (
+                                <span>View & reply to highlights & pages</span>
+                            )
                         }
                     >
-                        {sharedListRoleIDToString(roleID) + ' Access'}
+                        <PermissionText
+                            title={null}
+                            viewportBreakpoint={viewportBreakpoint}
+                        >
+                            {sharedListRoleIDToString(roleID) + ' Access'}
+                        </PermissionText>
                     </ButtonTooltip>
-                </PermissionText>
+                </PermissionArea>
             </LinkAndRoleBox>
         </Margin>
     )
@@ -447,6 +452,10 @@ export class SpaceContextMenu extends PureComponent<
     }
 }
 
+const PermissionArea = styled.div`
+    z-index: auto;
+`
+
 const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
     color: ${(props) => props.theme.colors.primary};
@@ -710,6 +719,7 @@ const LinkAndRoleBox = styled.div<{
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 5px;
+
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
             props.viewportBreakpoint === 'mobile') &&
@@ -771,6 +781,7 @@ const PermissionText = styled.span<{
     white-space: nowrap;
     justify-content: flex-end;
     font-size: 10px;
+    z-index: 0;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
