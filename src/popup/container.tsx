@@ -37,7 +37,6 @@ const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 import LoadingIndicator from '../../external/@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
-
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
 import { ToggleSwitchButton } from './components/ToggleSwitchButton'
@@ -46,9 +45,8 @@ import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
-import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
-export interface OwnProps { }
+export interface OwnProps {}
 
 interface StateProps {
     showTagsPicker: boolean
@@ -57,7 +55,6 @@ interface StateProps {
     url: string
     initLogicRun: boolean
     searchValue: string
-    activityIndicator: ActivityIndicatorProps
 }
 
 interface DispatchProps {
@@ -314,7 +311,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     onClick={() => window.open(this.whichFeed(), '_blank')}
                 >
                     <FeedActivityDot
-                        {...this.props.activityIndicator}
                         key="activity-feed-indicator"
                         activityIndicatorBG={this.activityIndicatorBG}
                         openFeedUrl={() =>
