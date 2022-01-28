@@ -237,6 +237,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         setEditorInstanceRef={(editor) =>
                             (this.editor = editor)
                         }
+                        autoFocus={true}
                         placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                         isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />

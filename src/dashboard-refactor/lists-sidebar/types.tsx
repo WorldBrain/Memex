@@ -73,6 +73,7 @@ export type Events = UIEvent<{
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
 
+    changeListName: { value: string }
     confirmListEdit: { value: string }
     cancelListEdit: null
     setDragOverListId: { listId?: number }

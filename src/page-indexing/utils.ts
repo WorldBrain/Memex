@@ -45,18 +45,23 @@ export async function maybeIndexTabs(
 ) {
     const indexed: { fullUrl: string }[] = []
 
-    for (const tab of tabs.filter(isUrlSupported)) {
-        const { fullUrl } = await options.waitForContentIdentifier({
-            tabId: tab.id,
-            fullUrl: getUnderlyingResourceUrl(tab.url),
-        })
-        let error = false
+    const tabIdsByUrls = await Promise.all(
+        tabs.filter(isUrlSupported).map(async (tab) => {
+            const { fullUrl } = await options.waitForContentIdentifier({
+                tabId: tab.id,
+                fullUrl: getUnderlyingResourceUrl(tab.url),
+            })
+            return [fullUrl, tab.id] as [string, number]
+        }),
+    )
 
+    for (const [fullUrl, tabId] of tabIdsByUrls) {
+        let error = false
         try {
             await options.createPage(
                 {
+                    tabId,
                     fullUrl,
-                    tabId: tab.id,
                     allowScreenshot: false,
                     visitTime: options.time,
                 },

@@ -10,13 +10,10 @@ import Logic, { State, Event } from './logic'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
-import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import CopyPDFLinkButton from './components/CopyPDFLinkButton'
-import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
-import { HistoryPauser } from './pause-button'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -38,6 +35,7 @@ import { tags, collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
+import LoadingIndicator from '../../external/@worldbrain/memex-common/ts/common-ui/components/loading-indicator'
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
@@ -81,6 +79,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             new Logic({
                 tabsAPI: browser.tabs,
                 runtimeAPI: browser.runtime,
+                extensionAPI: browser.extension,
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -95,6 +94,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             category: 'Global',
             action: 'openPopup',
         })
+
         await this.props.initState()
     }
 
@@ -201,7 +201,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return isFullUrlPDF(this.props.url)
     }
 
-    whichFeed = () => {
+    private whichFeed = () => {
         if (process.env.NODE_ENV === 'production') {
             return 'https://memex.social/feed'
         } else {
@@ -213,16 +213,42 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         if (!this.isCurrentPagePDF) {
             return null
         }
+
         const mode = this.getPDFMode()
         const location = this.getPDFLocation()
 
         if (this.browserName === 'firefox' && location === 'local') {
             return (
-                <BlurredNotice browser={this.browserName} location={location}>
+                <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        Saving and annotating locally stored PDFs not available
-                        on Firefox
+                        Annotating local PDFs is not possible on Firefox
                     </NoticeTitle>
+                    <NoticeSubTitle>
+                        Use Chromium-based browsers to use this feature
+                    </NoticeSubTitle>
+                </BlurredNotice>
+            )
+        }
+
+        if (
+            this.browserName !== 'firefox' &&
+            location === 'local' &&
+            !this.state.isFileAccessAllowed
+        ) {
+            return (
+                <BlurredNotice browser={this.browserName}>
+                    <NoticeTitle>
+                        To annotate file based PDFs enable the setting
+                    </NoticeTitle>
+                    <NoticeSubTitle>"Allow access to file URLs"</NoticeSubTitle>
+                    <PrimaryAction
+                        label="Go to Settings"
+                        onClick={() =>
+                            browser.tabs.create({
+                                url: `chrome://extensions/?id=${browser.runtime.id}`,
+                            })
+                        }
+                    />
                 </BlurredNotice>
             )
         }
@@ -246,7 +272,11 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
     renderChildren() {
         if (!this.props.initLogicRun) {
-            return false
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
         }
 
         if (this.props.showTagsPicker) {
@@ -386,6 +416,23 @@ const NoticeTitle = styled.div`
     color: ${(props) => props.theme.colors.primary};
     font-weight: bold;
     padding-bottom: 10px;
+    text-align: center;
+    padding: 0 10px;
+    margin-bottom: 20px;
+`
+
+const LoadingBox = styled.div`
+    display: flex;
+    height: 200px;
+    justify-content: center;
+    align-items: center;
+`
+
+const NoticeSubTitle = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.darkgrey};
+    font-weight: normal;
+    padding-bottom: 15px;
     text-align: center;
     padding: 0 10px;
     margin-bottom: 20px;

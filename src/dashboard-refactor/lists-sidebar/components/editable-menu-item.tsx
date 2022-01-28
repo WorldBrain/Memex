@@ -8,36 +8,61 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 interface State {
     value: string
 }
-
+interface NameValueState {
+    value: string
+    setValue: (string) => void
+}
 export interface Props {
     initValue?: string
     errorMessage: string | null
     onCancelClick: (value: string) => void
     onConfirmClick: (value: string) => void
+    changeListName: (value: string) => void
+    onRenameStart?: React.MouseEventHandler<Element>
 }
 
-export default class ListsSidebarEditableItem extends React.PureComponent<
-    Props,
+export default class EditableMenuItem extends React.PureComponent<
+    Props & { nameValueState: NameValueState },
     State
 > {
     static defaultProps: Partial<Props> = { initValue: '' }
-    state: State = { value: this.props.initValue }
+    // state: State = { value: this.props.initValue }
+    constructor(props: Props & { nameValueState: NameValueState }) {
+        super(props)
+        this.props.onRenameStart(null)
+    }
+    componentDidMount() {
+        console.log('componentDidMount', { state: this.state })
+    }
 
-    private handleChange: React.MouseEventHandler<HTMLInputElement> = (event) =>
-        this.setState({ value: (event.target as HTMLInputElement).value })
+    componentWillUnmount(): void {
+        console.log('componentWillUnmount', { state: this.state })
+    }
+    private handleChange: React.MouseEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
+        const value = (event.target as HTMLInputElement).value
+        this.props.nameValueState.setValue(value)
+        this.props.changeListName(value)
+    }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
         if (e.key === 'Escape') {
-            if (this.state.value.length) {
+            console.log('handleInputKeyDown Escape', { e })
+            if (this.props.nameValueState.value.length) {
                 e.stopPropagation()
             }
-            this.props.onCancelClick(this.state.value)
+            this.props.onCancelClick(this.props.nameValueState.value)
             return
         }
 
         if (e.key === 'Enter') {
-            this.props.onConfirmClick(this.state.value)
+            console.log('handleInputKeyDown Enter', { e })
+            if (this.props.nameValueState.value.length) {
+                e.stopPropagation()
+                this.props.onConfirmClick(this.props.nameValueState.value)
+            }
         }
 
         // If we don't have this, events will bubble up into the page!
@@ -45,29 +70,20 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 
     private handleConfirm: React.MouseEventHandler = () =>
-        this.props.onConfirmClick(this.state.value)
+        this.props.onConfirmClick(this.props.nameValueState.value)
 
     private handleCancel: React.MouseEventHandler = () =>
-        this.props.onCancelClick(this.state.value)
+        this.props.onCancelClick(this.props.nameValueState.value)
 
     render() {
         return (
             <>
-                <Container>
+                <Container onClick={(e) => e.stopPropagation()}>
                     <EditableListTitle
-                        autoFocus
                         onChange={this.handleChange}
-                        value={this.state.value}
+                        value={this.props.nameValueState.value}
                         onKeyDown={this.handleInputKeyDown}
                     />
-                    <ActionButtonBox left="5px">
-                        <ActionBtn onClick={this.handleConfirm}>
-                            <Icon src={icons.check} />
-                        </ActionBtn>
-                        <ActionBtn onClick={this.handleCancel}>
-                            <Icon src={icons.close} />
-                        </ActionBtn>
-                    </ActionButtonBox>
                 </Container>
                 {this.props.errorMessage && (
                     <ErrMsg>{this.props.errorMessage}</ErrMsg>
@@ -88,57 +104,28 @@ const EditableListTitle = styled.input`
     min-width: 50px;
     margin-right: 0px;
     font-size: 12px;
-`
-
-const ActionButtonBox = styled(Margin)`
-    display: flex;
-    flex: 1;
-`
-
-const ActionBtn = styled.div`
-    border: none;
-    background: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    outline: none;
-    height: 24px;
-    width: 24px;
-
-    > img {
-        height: 12px;
-        width: auto;
-        outline: none;
-    }
-
-    &:hover {
-        background: #e0e0e0;
-    }
-`
-
-const Icon = styled.img`
-    height: 15px;
-    width: 15px;
+    height: 40px;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.primary};
 `
 
 const ErrMsg = styled.div`
     color: red;
     width: 100%;
     text-align: center;
+    margin-top: -5px;
+    margin-bottom: 5px;
 `
 
 const Container = styled.div<Props>`
     height: 30px;
     width: 100%;
-    padding-left: 15px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     background-color: transparent;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
 `

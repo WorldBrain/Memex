@@ -233,7 +233,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
-                    comment={comment}
                     editorHeight={this.state.editorHeight}
                     isShared={this.props.isShared}
                     isBulkShareProtected={this.props.isBulkShareProtected}

@@ -19,6 +19,7 @@ import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
 import { Rnd } from 'react-rnd'
 import { createGlobalStyle } from 'styled-components'
+import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 
 const Sidebar = styled(Rnd)<{
     locked: boolean
@@ -140,20 +141,16 @@ export default class ListsSidebar extends PureComponent<
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
     ) =>
-        lists.map((listObj, i) =>
-            listObj.isEditing ? (
-                <ListsSidebarEditableItem key={i} {...listObj.editableProps} />
-            ) : (
-                <ListsSidebarItem
-                    key={i}
-                    dropReceivingState={{
-                        ...this.props.initDropReceivingState(listObj.listId),
-                        canReceiveDroppedItems,
-                    }}
-                    {...listObj}
-                />
-            ),
-        )
+        lists.map((listObj, i) => (
+            <ListsSidebarItem
+                key={i}
+                dropReceivingState={{
+                    ...this.props.initDropReceivingState(listObj.listId),
+                    canReceiveDroppedItems,
+                }}
+                {...listObj}
+            />
+        ))
 
     private SidebarContainer = React.createRef()
 
