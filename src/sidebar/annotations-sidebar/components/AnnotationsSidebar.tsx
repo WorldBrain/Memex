@@ -855,7 +855,7 @@ const annotationCardStyle = css`
 `
 
 const NewAnnotationSection = styled.section`
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     height: auto;
     background: #f6f8fb;
     display: flex;
@@ -873,7 +873,7 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: #f6f8fb;
     display: flex;
     flex-direction: column;

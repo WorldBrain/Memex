@@ -118,7 +118,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 
     &::placeholder {
@@ -152,7 +152,7 @@
     }
 
     & * {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 }
 

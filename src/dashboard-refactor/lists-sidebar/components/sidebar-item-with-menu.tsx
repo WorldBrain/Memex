@@ -15,6 +15,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import SpaceContextMenuButton from './space-context-menu'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export interface Props {
     className?: string
@@ -106,7 +107,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const { dropReceivingState } = this.props
 
         const collaborationIcon = this.props.isCollaborative && (
-            <Icon faded="0.7" heightAndWidth="12px" path={icons.shared} />
+            <Icon heightAndWidth="12px" path={icons.shared} />
         )
 
         if (!this.props.nameHighlightIndices) {
@@ -118,6 +119,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     onDragEnter={this.handleDragEnter}
                     onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
+                    {...this.props}
                 >
                     <Name>{this.props.name}</Name>
                     {collaborationIcon}
@@ -163,6 +165,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     //title={this.props.name}
                     onClick={this.handleSelection}
                     onDragEnter={this.handleDragEnter}
+                    {...this.props}
                 >
                     {dropReceivingState?.isDraggedOver && (
                         <DropZoneMask
@@ -175,7 +178,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         />
                     )}
 
-                    <TitleBox> {this.renderTitle()}</TitleBox>
+                    <TitleBox {...this.props}> {this.renderTitle()}</TitleBox>
 
                     <IconBox
                         dropReceivingState={dropReceivingState}
@@ -202,6 +205,7 @@ const Name = styled.div`
     overflow-x: hidden;
     text-overflow: ellipsis;
     padding-right: 5px;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const MenuContainer = styled.div`
@@ -238,19 +242,37 @@ const DropZoneMask = styled.div`
     position: absolute;
 `
 
-const TitleBox = styled.div`
+const TitleBox = styled.div<Props>`
     display: flex;
     flex: 1;
     width: 100%;
     height: 100%;
-    padding-left: 15px;
+    padding-left: ${(props) =>
+        props.listId === SPECIAL_LIST_IDS.INBOX ||
+        props.listId === SPECIAL_LIST_IDS.MOBILE
+            ? '35px'
+            : '25px'};
     align-items: center;
-    padding-right: 10px;
-    color: ${(props) => props.theme.colors.primary};
+    padding-right: 20px;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const SidebarItem = styled.div<Props>`
- height: 30px;
+ height: ${(props) =>
+     props.listId === SPECIAL_LIST_IDS.INBOX ||
+     props.listId === SPECIAL_LIST_IDS.MOBILE
+         ? '24px'
+         : '40px'};
+ margin-top:  ${(props) =>
+     props.listId === SPECIAL_LIST_IDS.INBOX ||
+     props.listId === SPECIAL_LIST_IDS.MOBILE
+         ? '-3px'
+         : '0px'};
+    margin-bottom:  ${(props) =>
+        props.listId === SPECIAL_LIST_IDS.INBOX ||
+        props.listId === SPECIAL_LIST_IDS.MOBILE
+            ? '5px'
+            : '0px'};
  width: 100%;
  display: flex;
  flex-direction: row;
@@ -259,7 +281,7 @@ const SidebarItem = styled.div<Props>`
  background-color: transparent;
   
  &:hover {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
 
   
@@ -269,7 +291,7 @@ const SidebarItem = styled.div<Props>`
          background-color: ${isMenuDisplayed ||
          (dropReceivingState?.canReceiveDroppedItems &&
              dropReceivingState?.isDraggedOver)
-             ? `${colors.onHover}`
+             ? `${(props) => props.theme.colors.lightHover}`
              : `transparent`};
      `};
 
@@ -278,13 +300,7 @@ const SidebarItem = styled.div<Props>`
  &:hover ${IconBox} {
 
  display: ${(props) =>
-     !(
-         props.hasActivity ||
-         props.newItemsCount ||
-         props.dropReceivingState?.isDraggedOver
-     )
-         ? 'flex'
-         : 'None'};
+     !props.dropReceivingState?.isDraggedOver ? 'flex' : 'None'};
 
  }
 
@@ -301,7 +317,7 @@ const SidebarItem = styled.div<Props>`
  ${({ selectedState }: Props) =>
      selectedState?.isSelected &&
      css`
-         background-color: ${colors.onSelect};
+         color: ${(props) => props.theme.colors.darkText};
      `}
 
   
@@ -328,7 +344,7 @@ const MenuButton = styled.div`
     width: 100%;
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
+    font-size: 14px;
     line-height: 18px;
     display: flex;
     flex-direction: row;
@@ -340,7 +356,7 @@ const MenuButton = styled.div`
         background-color: red;
     }
     &:hover {
-        background-color: ${colors.onHover};
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
     & > div {
         width: auto;
@@ -352,17 +368,21 @@ const ListTitle = styled.span<Props>`
     align-items: center;
     margin: 0;
     font-family: ${fonts.primary.name};
+    font-weight: 400;
     font-style: normal;
     ${({ selectedState }: Props) =>
-        selectedState.isSelected &&
-        `font-weight: ${fonts.primary.weight.bold};`}
-    font-size: 12px;
+        selectedState.isSelected && `font-weight: 600;`}
+    font-size:  ${(props) =>
+        props.listId === SPECIAL_LIST_IDS.INBOX ||
+        props.listId === SPECIAL_LIST_IDS.MOBILE
+            ? '14px'
+            : '14px'};
     line-height: 18px;
     height: 18px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 5px;
+    padding-right: 20px;
     justify-content: flex-start;
     width: 100%;
     pointer-events: none;
@@ -373,23 +393,30 @@ const ActivityBeacon = styled.div`
     height: 14px;
     border-radius: 10px;
     padding: 8px;
-    background-color: ${(props) => props.theme.colors.secondary};
+    background-color: ${(props) => props.theme.colors.purple};
 `
 
 const NewItemsCount = styled.div`
     width: 30px;
-    height: 14px;
+    height: 16px;
     border-radius: 10px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    background-color: ${(props) => props.theme.colors.purple};
+    padding: 2px 5px;
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    justify-content: center;
 `
 
 const NewItemsCountInnerDiv = styled.div`
     font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.bold};
-    font-size: 14px;
+    font-weight: 500;
+    font-size: 12px;
     line-height: 14px;
+    padding: 2px 0px;
 `
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty

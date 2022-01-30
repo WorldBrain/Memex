@@ -36,8 +36,8 @@ const Sidebar = styled(Rnd)<{
         css`
             height: 100%;
             background-color: ${colors.white};
-            box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
-            top: ${sizeConstants.header.heightPx}px;
+            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
+            padding-top: ${sizeConstants.header.heightPx}px;
         `}
     ${(props) =>
         props.peeking &&
@@ -159,7 +159,7 @@ export default class ListsSidebar extends PureComponent<
     }
 
     state = {
-        sidebarWidth: '200px',
+        sidebarWidth: '250px',
     }
 
     render() {
@@ -277,7 +277,7 @@ export default class ListsSidebar extends PureComponent<
                                             },
                                         },
                                         {
-                                            name: 'Feed',
+                                            name: 'Activity Feed',
                                             listId: SPECIAL_LIST_IDS.INBOX + 2,
                                             hasActivity: this.props
                                                 .hasFeedActivity,

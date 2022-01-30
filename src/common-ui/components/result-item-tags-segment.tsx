@@ -65,7 +65,7 @@ const TagPill = styled.div`
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 `
 
 const EditIcon = styled.button`

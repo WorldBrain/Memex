@@ -1,3 +1,4 @@
+import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 
@@ -11,49 +12,76 @@ const rotate = (rotation: number) => {
 }
 
 export interface IconProps {
-    heightAndWidth: string
-    path: string
-    rotation: string
-    faded: boolean
+    heightAndWidth?: string
+    path?: string
+    rotation?: string
+    faded?: boolean
     paddingHorizontal?: string
-    color?: string
+    color?: ColorThemeKeys
     bgColor?: string
+    onClick?: any
+    hoverOff?: boolean
 }
 
-export const Icon = styled.div<IconProps>`
-    ${(props) =>
-        css`
-            height: ${props.heightAndWidth};
-            width: ${props.heightAndWidth};
-        `};
-    ${(props) =>
-        css`
-            ${props.path &&
-            `mask-image: url(${props.path});
-            mask-repeat: no-repeat;
-            mask-size: contain;
-            mask-position: center;
-            background-color: ${props.color ? props.color : '#3a2f45'};
+export const Icon = (props: IconProps) => {
+    const IconContainer = styled.div<IconProps>`
+        padding: 4px;
+        display: flex;
+        border-radius: 3px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: ${(props) =>
+                props.hoverOff ? 'none' : props.theme.colors.darkhover};
+        }
+    `
+
+    const IconInner = styled.div<IconProps>`
+        ${(props) =>
+            css`
+                height: ${props.heightAndWidth};
+                width: ${props.heightAndWidth};
+            `};
+        ${(props) =>
+            css`
+                ${props.path &&
+                `mask-image: url(${props.path});
+                mask-repeat: no-repeat;
+                mask-size: contain;
+                mask-position: center;
+                background-color: ${
+                    props.color
+                        ? props.theme.colors[props.color]
+                        : props.theme.colors['iconColor']
+                };
+                `}
             `}
-        `}
-    ${(props) =>
-        props.rotation &&
-        css`
-            animation: ${rotate(props.rotation)} 0.2s ease-in-out forwards;
-        `}
-    ${(props) =>
-        props.faded &&
-        css`
-            opacity: 0.5;
-        `}
-    ${(props) =>
-        props.paddingHorizontal &&
-        css`
-            padding-left: ${props.paddingHorizontal};
-            padding-right: ${props.paddingHorizontal};
-        `}
-    flex: none;
-`
+        ${(props) =>
+            props.rotation &&
+            css`
+                animation: ${rotate(props.rotation)} 0.2s ease-in-out forwards;
+                animation-fill-mode: forwards;
+            `}
+        ${(props) =>
+            props.faded &&
+            css`
+                opacity: 0.5;
+            `}
+        ${(props) =>
+            props.paddingHorizontal &&
+            css`
+                padding-left: ${props.paddingHorizontal};
+                padding-right: ${props.paddingHorizontal};
+            `}
+        flex: none;
+        `
+
+    return (
+        <IconContainer onClick={props.onClick} {...props}>
+            <IconInner {...props} />
+        </IconContainer>
+    )
+}
 
 export const LoadingContainer = ({ children }) => {
     const Container = styled.div`

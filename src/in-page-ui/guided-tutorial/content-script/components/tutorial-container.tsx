@@ -156,7 +156,7 @@ const TutorialCardContainer = styled.div<{
     padding: 3em;
     text-align: center;
 
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
     animation: 1s ease-in-out 0s 1 slideInFromLeft;
 

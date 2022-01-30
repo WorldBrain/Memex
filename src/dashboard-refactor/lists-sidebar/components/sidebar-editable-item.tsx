@@ -87,7 +87,8 @@ const EditableListTitle = styled.input`
     display: flex;
     min-width: 50px;
     margin-right: 0px;
-    font-size: 12px;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const ActionButtonBox = styled(Margin)`

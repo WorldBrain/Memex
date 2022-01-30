@@ -16,24 +16,24 @@ const textStyles = `
 `
 
 const SearchBarContainer = styled.div`
-    height: 34px;
+    height: 44px;
     max-width: ${styles.components.searchBar.widthPx}px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${colors.lightGrey};
+    background-color: ${(props) => props.theme.colors.lightHover};
     border-radius: 5px;
     padding: 0px 15px;
 `
 
 const Input = styled.input`
     width: inherit;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 18px;
     border: none;
     background-color: transparent;
-    color: fonts.primary.colors;
+    color: ${(props) => props.theme.colors.normalText};
     font-weight: ${fonts.primary.weight.normal};
 
     &::placeholder {

@@ -171,12 +171,7 @@ export default class SpaceContextMenuButton extends PureComponent<
                         onClick={this.handleMoreActionClick}
                         ref={this.buttonRef}
                     >
-                        <Icon
-                            paddingHorizontal="10px"
-                            paddingVertical="10px"
-                            heightAndWidth="12px"
-                            path={icons.dots}
-                        />
+                        <Icon heightAndWidth="14px" path={icons.dots} />
                     </MoreIconBackground>
 
                     {!(!this.props.source || !this.props.isMenuDisplayed) && (

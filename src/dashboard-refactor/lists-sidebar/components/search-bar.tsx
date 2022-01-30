@@ -11,7 +11,7 @@ import { SidebarLockedState } from '../types'
 const textStyles = `
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
+    font-size: 14px;
     line-height: 15px;
     color: ${(props) => props.theme.colors.primary};
     cursor: text;
@@ -19,16 +19,16 @@ const textStyles = `
 
 const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
-    padding-left: 8px;
-    padding-right: 8px;
-    background-color: ${colors.lightGrey};
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: ${(props) => props.theme.colors.lightHover};
     border-radius: 3px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin: 5px 5px;
+    margin: 5px 15px;
 `
 
 const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
@@ -137,7 +137,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
         } = this.props
         return (
             <OuterContainer isSidebarLocked={isSidebarLocked}>
-                <InnerContainer horizontal="8px">
+                <InnerContainer horizontal="15px">
                     {!!searchQuery ? (
                         <IconContainer>
                             <Margin right="5px">
@@ -154,15 +154,17 @@ export default class ListsSidebarSearchBar extends PureComponent<
                                 <Icon
                                     heightAndWidth="16px"
                                     path="/img/searchIcon.svg"
+                                    hoverOff={true}
                                 />
                             </Margin>
                         </IconContainer>
                     )}
                     <Input
-                        placeholder="Search collections"
+                        placeholder="Search Spaces"
                         ref={this.inputRef}
                         onChange={this.handleInputChange}
                         value={searchQuery}
+                        autoFocus
                     />
                 </InnerContainer>
                 {!!this.props.searchQuery &&
