@@ -2,11 +2,7 @@
  * Everything in here gets injected into the generated HTML as link/script tags.
  * See: https://github.com/jharris4/html-webpack-include-assets-plugin#example
  */
-export const htmlAssets = [
-    'fonts/Inter/inter.css',
-    'fonts/Poppins/poppins.css',
-    'lib/browser-polyfill.js',
-]
+export const htmlAssets = ['fonts/Inter/inter.css', 'lib/browser-polyfill.js']
 
 /**
  * Set the manifest version to be equal to `package.json` version.

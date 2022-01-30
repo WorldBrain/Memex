@@ -260,32 +260,36 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        <ResultContent>
-                            {this.props.favIconURI && (
-                                <FavIconBox>
-                                    <FavIconImg src={this.props.favIconURI} />
-                                </FavIconBox>
-                            )}
-                            {this.props.type === 'pdf' && (
-                                <PDFIcon>PDF</PDFIcon>
-                            )}
-                            <PageUrl>{this.domain}</PageUrl>
-                        </ResultContent>
-                        <PageTitle top="10px" bottom="5px">
+                        <PageTitle>
                             {hasTitle
                                 ? this.props.fullTitle === this.props.fullUrl
                                     ? this.props.fullTitle.split('/').slice(-1)
                                     : this.props.fullTitle
                                 : this.props.fullUrl}
                         </PageTitle>
+                        <ResultContent>
+                            <DomainContainer>
+                                {this.props.favIconURI && (
+                                    <FavIconBox>
+                                        <FavIconImg
+                                            src={this.props.favIconURI}
+                                        />
+                                    </FavIconBox>
+                                )}
+                                {this.props.type === 'pdf' && (
+                                    <PDFIcon>PDF</PDFIcon>
+                                )}
+                                <PageUrl>{this.domain}</PageUrl>
+                            </DomainContainer>
+                            <TagsSegment
+                                tags={this.props.tags}
+                                onMouseEnter={this.props.onTagsHover}
+                                showEditBtn={this.props.hoverState === 'tags'}
+                                onEditBtnClick={this.props.onTagPickerBtnClick}
+                                onTagClick={this.props.onTagClick}
+                            />
+                        </ResultContent>
                     </PageContentBox>
-                    <TagsSegment
-                        tags={this.props.tags}
-                        onMouseEnter={this.props.onTagsHover}
-                        showEditBtn={this.props.hoverState === 'tags'}
-                        onEditBtnClick={this.props.onTagPickerBtnClick}
-                        onTagClick={this.props.onTagClick}
-                    />
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
@@ -299,6 +303,12 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const DomainContainer = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+`
 
 const PDFIcon = styled.div`
     border: 1px solid rgb(184, 184, 184);
@@ -315,10 +325,10 @@ const StyledPageResult = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    border-radius: 5px;
+    border-radius: 12px;
 
     &:hover {
-        box-shadow: 0px 0px 4px 2px #d6d6d6;
+        outline: 2px solid ${(props) => props.theme.colors.lineGrey};
     }
 `
 
@@ -338,9 +348,9 @@ const RemoveFromListBtn = styled.div`
 `
 
 const FavIconBox = styled.div`
-    width: 20px;
-    height: 20px;
-    border: 1px solid #efefef;
+    width: 18px;
+    height: 18px;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
     border-radius: 30px;
     margin-right: 5px;
 `
@@ -369,24 +379,27 @@ const PageContentBox = styled.a`
 `
 
 const ResultContent = styled(Margin)`
-    display: flex;
+    display: grid;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     cursor: pointer;
+    grid-auto-flow: column;
+    grid-grap: 15px;
+    height: 34px;
 `
 
 const PageTitle = styled(Margin)`
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.lightblack};
     justify-content: flex-start;
 `
 const PageUrl = styled.span`
     font-size: 12px;
-    color: #545454;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     height: 20px;
     align-items: center;
-    padding-top: 2px;
 `

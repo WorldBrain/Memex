@@ -28,6 +28,7 @@ export const theme: Theme = {
         },
         lightblack: '#292C38',
         lineGrey: '#ECEFF4',
+        lineLightGrey: '#E0E5ED',
         iconColor: '#96A0B5',
         lightHover: '#F4F9FF',
         darkhover: '#E5F0FF',

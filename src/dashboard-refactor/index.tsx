@@ -1004,7 +1004,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    background-color: #f6f8fb;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
     min-height: 100vh;
     height: 100%;
 `

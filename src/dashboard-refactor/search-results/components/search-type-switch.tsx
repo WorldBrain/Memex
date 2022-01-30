@@ -64,7 +64,7 @@ const SearchTypeBtn = styled.button`
     padding: 2px 8px 2px 8px;
     display: grid;
     grid-auto-flow: column;
-    grid-gap: 10px;
+    grid-gap: 7px;
     border: none;
     align-items: center;
     background-color: transparent;

@@ -486,7 +486,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 120%;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     padding: 0px 15px;
     height: 40px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
@@ -494,7 +494,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     margin-top: -6px;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '90px' : '60px')};
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const IconBox = styled.div`
@@ -540,7 +540,7 @@ const PageNotesBox = styled(Margin)`
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     margin-bottom: -2px;
 `
 

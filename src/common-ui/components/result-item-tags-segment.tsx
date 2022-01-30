@@ -23,6 +23,9 @@ export default function TagsSegment({
 
     return (
         <Container {...props}>
+            <EditIconContainer>
+                <EditIcon onClick={onEditBtnClick} />
+            </EditIconContainer>
             <TagsContainer>
                 {tags.slice(0).map((tag) => (
                     <TagPill
@@ -33,17 +36,17 @@ export default function TagsSegment({
                     </TagPill>
                 ))}
             </TagsContainer>
-            {showEditBtn && <EditIcon onClick={onEditBtnClick} />}
         </Container>
     )
 }
 
 const Container = styled.div`
-    display: inline-box;
+    display: grid;
+    grid-gap: 10px;
     align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #f0f0f0;
+    justify-content: flex-start;
     padding: 5px 15px;
+    grid-auto-flow: column;
 `
 
 const TagsContainer = styled.div`
@@ -52,14 +55,13 @@ const TagsContainer = styled.div`
 `
 
 const TagPill = styled.div`
-    background-color: #83c9f4;
-
+    background-color: ${(props) => props.theme.colors.purple};
+    color: #fff;
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 400;
     height: auto;
-    color: #284150;
     margin: 2px 4px 2px 0;
     display: flex;
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
@@ -68,19 +70,25 @@ const TagPill = styled.div`
     font-family: 'Inter', sans-serif;
 `
 
-const EditIcon = styled.button`
-    border: none;
-    outline: none;
-    width: 20px;
+const EditIconContainer = styled.div`
+    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
     height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.commentEditFull});
+    width: 20px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const EditIcon = styled.div`
+    outline: none;
+    width: 14px;
+    height: 14px;
+    background-color: ${(props) => props.theme.colors.purple};
+    mask-image: url(${icons.plus});
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: 16px;
+    mask-size: 14px;
     cursor: pointer;
-    right: 30px;
-    position: relative;
     z-index: 10;
 `
