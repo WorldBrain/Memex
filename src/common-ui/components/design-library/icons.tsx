@@ -52,6 +52,7 @@ export const collectionsFull = browser.runtime.getURL(
 )
 export const triangle = browser.runtime.getURL('/img/chevron-down.svg')
 export const plus = browser.runtime.getURL('/img/plus.svg')
+export const readwise = browser.runtime.getURL('/img/readwise.svg')
 export const dots = browser.runtime.getURL('/img/3dots.svg')
 export const trash = browser.runtime.getURL('/img/trash.svg')
 export const goTo = browser.runtime.getURL('/img/open.svg')

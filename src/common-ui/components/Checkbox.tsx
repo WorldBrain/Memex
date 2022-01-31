@@ -49,10 +49,7 @@ class Checkbox extends React.PureComponent<Props> {
                         name={this.props.name}
                     />
                     <LabelText>
-                        <LabelCheck
-                            isChecked={this.props.isChecked}
-                            className={styles.label__check}
-                        >
+                        <LabelCheck isChecked={this.props.isChecked}>
                             <Icon
                                 filePath={icons.check}
                                 color="white"
@@ -106,7 +103,7 @@ const LabelCheck = styled.span<{ isChecked }>`
     background: ${(props) =>
         props.isChecked ? props.theme.colors.purple : 'white'};
     vertical-align: middle;
-    margin-right: 20px;
+    margin-right: 15px;
     width: 25px;
     height: 25px;
     display: flex;

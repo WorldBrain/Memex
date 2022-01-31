@@ -4,10 +4,6 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
-import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
-
-import localStyles from './Import.css'
-
 const StatusReport = ({
     successCount,
     failCount,
@@ -107,11 +103,6 @@ const Number = styled.div`
     font-weight: bold;
 `
 
-const NumberSmall = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 18px;
-    font-weight: bold;
-`
 const SubTitle = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
     font-size: 16px;

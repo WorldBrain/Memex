@@ -11,14 +11,11 @@ import { ProgressBar } from 'src/common-ui/components'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
 import ProgressTable from './components/ProgressTable'
-import ActionButton from './components/ActionButton'
 import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-import ShowDownloadDetails from './components/ShowDownloadDetails'
 import { acts as searchBarActs } from 'src/overview/search-bar'
-import styles from './components/ActionButton.css'
 import { OPTIONS_URL } from 'src/constants'
 import AdvSettings from '../imports/components/AdvSettingsContainer'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
@@ -459,13 +456,6 @@ const ButtonContent = styled.div`
     grid-gap: 5px;
     align-items: center;
     justify-content: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    margin-bottom: 20px;
-    font-weight: 500;
 `
 
 const SectionTitleSmall = styled.div`

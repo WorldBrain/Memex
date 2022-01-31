@@ -120,6 +120,21 @@ class ReadwiseSettings extends StatefulUIElement<
                         </div>
                     </SuccessMessage>
                 )}
+                {selectors.formEditable(this.state) && (
+                    <ExistingHighlightBox>
+                        <Checkbox
+                            id="Existing Highlight Settings"
+                            isChecked={this.state.syncExistingNotes ?? false}
+                            handleChange={(e) =>
+                                this.processEvent(
+                                    'toggleSyncExistingNotes',
+                                    null,
+                                )
+                            }
+                        />{' '}
+                        Sync existing highlights
+                    </ExistingHighlightBox>
+                )}
                 {selectors.showKeySaveError(this.state) && (
                     <ErrorMessage>
                         {selectors.keySaveErrorMessage(this.state)}
@@ -170,21 +185,6 @@ class ReadwiseSettings extends StatefulUIElement<
                         />
                     )}
                 </MainBox>
-                {selectors.formEditable(this.state) && (
-                    <ExistingHighlightBox>
-                        <Checkbox
-                            id="Existing Highlight Settings"
-                            isChecked={this.state.syncExistingNotes ?? false}
-                            handleChange={(e) =>
-                                this.processEvent(
-                                    'toggleSyncExistingNotes',
-                                    null,
-                                )
-                            }
-                        />{' '}
-                        Sync existing highlights
-                    </ExistingHighlightBox>
-                )}
             </div>
         )
     }
@@ -207,7 +207,7 @@ export default connect(null, (dispatch) => ({
 }))(withCurrentUser(ReadwiseSettingsContainer))
 
 const KeyBox = styled.input`
-    background: #e0e0e0;
+    background: ${(props) => props.theme.colors.backgroundColor};
     border-radius: 3px;
     padding: 5px 10px;
     border: none;
@@ -216,6 +216,7 @@ const KeyBox = styled.input`
     height: 36px;
     margin-left: 0;
     margin-right: 15px;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
 `
 
 const MainBox = styled.div`
@@ -226,10 +227,10 @@ const MainBox = styled.div`
 
 const ExistingHighlightBox = styled.div`
     display: flex;
-    margin: 10px 0px;
+    margin: 10px 0px 20px;
     font-size: 14px;
-    color: 3a2f45;
     align-items: center;
+    color: ${(props) => props.theme.colors.darkerText};
 `
 
 const ErrorMessage = styled.div`
@@ -247,12 +248,12 @@ const ErrorMessage = styled.div`
 
 const SuccessMessage = styled.div`
     display: flex;
-    margin: 10px 0px;
+    margin: 10px 0px 20px 0px;
     font-size: 14px;
     border-radius: 3px;
     border: none;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     flex-direction: column;
 `
 

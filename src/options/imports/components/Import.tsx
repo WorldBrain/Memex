@@ -76,8 +76,8 @@ class Import extends React.PureComponent<Props> {
                 <Section>
                     <SectionCircle>
                         <Icon
-                            filePath={icons.atSign}
-                            heightAndWidth="34px"
+                            filePath={icons.readwise}
+                            heightAndWidth="45px"
                             color="purple"
                             hoverOff
                         />
