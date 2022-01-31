@@ -288,7 +288,7 @@ const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
     padding-top: 8px;
     padding-bottom: 8px;
-    border-radius: 3px;
+    border-radius: 12px;
 `
 
 const EmptyTagsView = styled.div`

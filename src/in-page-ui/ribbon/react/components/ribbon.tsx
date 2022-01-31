@@ -23,6 +23,8 @@ import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const styles = require('./ribbon.css')
 
@@ -371,20 +373,18 @@ export default class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
-                            <FeedIndicatorBox>
-                                <ButtonTooltip
-                                    tooltipText={'View Feed Updates'}
-                                    position="leftNarrow"
-                                >
-                                    <FeedActivityDot
-                                        key="activity-feed-indicator"
-                                        {...this.props.activityIndicator}
-                                    />
-                                </ButtonTooltip>
-                            </FeedIndicatorBox>
-
-                            <div className={styles.horizontalLine} />
-                            <div className={styles.generalActions}>
+                            <GeneralActions>
+                                <FeedIndicatorBox>
+                                    <ButtonTooltip
+                                        tooltipText={'View Feed Updates'}
+                                        position="leftNarrow"
+                                    >
+                                        <FeedActivityDot
+                                            key="activity-feed-indicator"
+                                            {...this.props.activityIndicator}
+                                        />
+                                    </ButtonTooltip>
+                                </FeedIndicatorBox>
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <>
                                         {/*
@@ -427,14 +427,12 @@ export default class Ribbon extends Component<Props, State> {
                                     )}
                                     position="leftNarrow"
                                 >
-                                    <div
+                                    <Icon
                                         onClick={() =>
                                             this.openOverviewTabRPC()
                                         }
-                                        className={cx(
-                                            styles.button,
-                                            styles.search,
-                                        )}
+                                        heightAndWidth="18px"
+                                        filePath={icons.searchIcon}
                                     />
                                 </ButtonTooltip>
                                 {/*<ButtonTooltip
@@ -473,24 +471,24 @@ export default class Ribbon extends Component<Props, State> {
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>*/}
-                            </div>
-                            <div className={styles.horizontalLine} />
-                            <div className={styles.pageActions}>
+                            </GeneralActions>
+                            <HorizontalLine />
+                            <PageAction>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'createBookmark',
                                     )}
                                     position="leftNarrow"
                                 >
-                                    <div
-                                        className={cx(styles.button, {
-                                            [styles.bookmark]: this.props
-                                                .bookmark.isBookmarked,
-                                            [styles.notBookmark]: !this.props
-                                                .bookmark.isBookmarked,
-                                        })}
+                                    <Icon
                                         onClick={() =>
                                             this.props.bookmark.toggleBookmark()
+                                        }
+                                        heightAndWidth="18px"
+                                        filePath={
+                                            this.props.bookmark.isBookmarked
+                                                ? icons.heartFull
+                                                : icons.heartEmpty
                                         }
                                     />
                                 </ButtonTooltip>
@@ -509,22 +507,20 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                         position="leftNarrow"
                                     >
-                                        <div
-                                            className={cx(
-                                                styles.button,
-                                                styles.comments,
-                                                {
-                                                    [styles.saveIcon]: this
-                                                        .props.commentBox
-                                                        .isCommentSaved,
-                                                    [styles.commentAvailable]: this
-                                                        .props.hasAnnotations,
-                                                },
-                                            )}
+                                        <Icon
                                             onClick={(e) =>
                                                 this.handleCommentIconBtnClick(
                                                     e,
                                                 )
+                                            }
+                                            heightAndWidth="18px"
+                                            filePath={
+                                                this.props.commentBox
+                                                    .isCommentSaved
+                                                    ? icons.saveIcon
+                                                    : this.props.hasAnnotations
+                                                    ? icons.commentFull
+                                                    : icons.commentEmpty
                                             }
                                         />
                                     </ButtonTooltip>
@@ -572,24 +568,20 @@ export default class Ribbon extends Component<Props, State> {
                                     )}
                                     position="leftNarrow"
                                 >
-                                    <div
-                                        className={cx(styles.button, {
-                                            [styles.collectionsFull]:
-                                                this.props.lists
-                                                    .pageBelongsToList ||
-                                                this.props.lists.lists.length >
-                                                    0,
-                                            [styles.collections]:
-                                                !this.props.lists
-                                                    .pageBelongsToList ||
-                                                this.props.lists.lists
-                                                    .length === 0,
-                                        })}
+                                    <Icon
                                         onClick={() =>
                                             this.props.lists.setShowListsPicker(
                                                 !this.props.lists
                                                     .showListsPicker,
                                             )
+                                        }
+                                        heightAndWidth="18px"
+                                        filePath={
+                                            this.props.lists
+                                                .pageBelongsToList ||
+                                            this.props.lists.lists.length > 0
+                                                ? icons.collectionsFull
+                                                : icons.collectionsEmpty
                                         }
                                     />
                                 </ButtonTooltip>
@@ -598,41 +590,34 @@ export default class Ribbon extends Component<Props, State> {
                                     tooltipText={this.getTooltipText('addTag')}
                                     position="leftNarrow"
                                 >
-                                    <div
-                                        className={cx(styles.button, {
-                                            [styles.tagFull]:
-                                                this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags.length >
-                                                    0,
-                                            [styles.tag]:
-                                                !this.props.tagging
-                                                    .pageHasTags ||
-                                                this.props.tagging.tags
-                                                    .length === 0,
-                                        })}
+                                    <Icon
                                         onClick={() =>
                                             this.props.tagging.setShowTagsPicker(
                                                 !this.props.tagging
                                                     .showTagsPicker,
                                             )
                                         }
+                                        heightAndWidth="16px"
+                                        filePath={
+                                            this.props.tagging.pageHasTags ||
+                                            this.props.tagging.tags.length > 0
+                                                ? icons.tagFull
+                                                : icons.tagEmpty
+                                        }
                                     />
                                 </ButtonTooltip>
                                 {this.renderTagsPicker()}
-                                <div className={styles.horizontalLine} />
+                                <HorizontalLine />
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="leftNarrow"
                                 >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.settings,
-                                        )}
+                                    <Icon
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
+                                        heightAndWidth="16px"
+                                        filePath={icons.settings}
                                     />
                                 </ButtonTooltip>
                                 {this.props.showExtraButtons && (
@@ -644,14 +629,12 @@ export default class Ribbon extends Component<Props, State> {
                                     tooltipText="Quick Tutorial & Help"
                                     position="leftNarrow"
                                 >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.help,
-                                        )}
+                                    <Icon
                                         onClick={() =>
                                             this.props.toggleShowTutorial()
                                         }
+                                        heightAndWidth="16px"
+                                        filePath={icons.helpIcon}
                                     />
                                 </ButtonTooltip>
                                 {this.props.showTutorial && (
@@ -671,11 +654,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     position="leftNarrow"
                                 >
-                                    <button
-                                        className={cx(
-                                            styles.button,
-                                            styles.cancel,
-                                        )}
+                                    <Icon
                                         onClick={(event) => {
                                             if (
                                                 event.shiftKey &&
@@ -686,9 +665,11 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.props.handleRemoveRibbon()
                                             }
                                         }}
+                                        heightAndWidth="14px"
+                                        filePath={icons.removeX}
                                     />
                                 </ButtonTooltip>
-                            </div>
+                            </PageAction>
                             {/*
                             <div className={styles.settingsActions}>
                                 <ButtonTooltip
@@ -799,6 +780,27 @@ export default class Ribbon extends Component<Props, State> {
     }
 }
 
+const GeneralActions = styled.div`
+    display: grid;
+    grid-gap: 15px;
+    grid-auto-flow: row;
+    align-items: center;
+    justify-content: center;
+`
+
+const HorizontalLine = styled.div`
+    width: 100%;
+    margin: 10px 0;
+`
+
+const PageAction = styled.div`
+    display: grid;
+    grid-gap: 5px;
+    grid-auto-flow: row;
+    align-items: center;
+    justify-content: center;
+`
+
 const SubText = styled.span`
     font-size: 10px;
 `
@@ -806,4 +808,5 @@ const SubText = styled.span`
 const FeedIndicatorBox = styled.div`
     display: flex;
     margin-bottom: 5px;
+    justify-content: center;
 `

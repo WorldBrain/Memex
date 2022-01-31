@@ -86,29 +86,26 @@ const renderCopyableLink = ({
                                 : link.split('https://')[1]}
                         </Link>
                         <IconContainer id={'iconContainer'}>
-                            <IconBackground>
-                                <Icon
-                                    heightAndWidth="14px"
-                                    path={icons.copy}
-                                    onClick={
-                                        () =>
-                                            copyLink({
-                                                event: { linkIndex },
-                                            })
-                                        // this.processEvent('copyLink', { linkIndex })
-                                    }
-                                />
-                            </IconBackground>
-                            <IconBackground>
-                                <Icon
-                                    heightAndWidth="14px"
-                                    path={icons.goTo}
-                                    onClick={
-                                        () => window.open(link)
-                                        // this.processEvent('copyLink', { linkIndex })
-                                    }
-                                />
-                            </IconBackground>
+                            <Icon
+                                heightAndWidth="14px"
+                                path={icons.copy}
+                                hoverOff
+                                onClick={
+                                    () =>
+                                        copyLink({
+                                            event: { linkIndex },
+                                        })
+                                    // this.processEvent('copyLink', { linkIndex })
+                                }
+                            />
+                            <Icon
+                                heightAndWidth="14px"
+                                path={icons.goTo}
+                                onClick={
+                                    () => window.open(link)
+                                    // this.processEvent('copyLink', { linkIndex })
+                                }
+                            />
                         </IconContainer>
                     </LinkBox>
                 </CopyLinkBox>
@@ -424,7 +421,7 @@ export class SpaceContextMenu extends PureComponent<
                 )}
                 <MenuButton onClick={this.props.onDeleteClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.trash} />
+                        <Icon heightAndWidth="14px" path={icons.trash} />
                     </Margin>
                     Delete
                 </MenuButton>
@@ -453,7 +450,7 @@ const PermissionArea = styled.div`
 
 const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const IconContainer = styled.div`
@@ -509,7 +506,7 @@ const ButtonLabel = styled.div`
 const ModalRoot = styled.div`
     z-index: 1000;
     width: 100%;
-    border-radius: 4px;
+    border-radius: 12px;
     height: 100%;
     position: fixed;
     top: 0;
@@ -548,8 +545,8 @@ const MenuContainer = styled.div`
     max-width:3 50px
     position: absolute;
     background-color: ${colors.white};
-    box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: 3px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
     z-index: 1;
 `
 
@@ -588,7 +585,7 @@ const SidebarItem = styled.div<Props>`
  align-items: center;
  background-color: transparent;
  &:hover {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
 
   
@@ -668,9 +665,10 @@ const MenuSection = styled.div`
 const MenuButton = styled.div`
     height: 34px;
     width: 100%;
-    font-family: ${fonts.primary.name};
+    font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
     line-height: 18px;
     display: flex;
     flex-direction: row;
@@ -684,7 +682,7 @@ const MenuButton = styled.div`
         background-color: red;
     }
     &:hover {
-        background-color: ${colors.onHover};
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
     & > div {
         width: auto;
@@ -695,13 +693,13 @@ const MenuButton = styled.div`
 
 const blinkingAnimation = keyframes`
  0% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
  50% {
  background-color: transparent;
  }
  100% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
 
 `

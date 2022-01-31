@@ -7,17 +7,18 @@ import colors from '../../colors'
 import styles, { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { Icon } from 'src/dashboard-refactor/styled-components'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 const textStyles = `
     font-family: ${fonts.primary.name};
     font-style: normal;
     font-weight: ${fonts.primary.weight.bold};
-    color: ${fonts.primary.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const SearchBarContainer = styled.div`
     height: 44px;
-    max-width: ${styles.components.searchBar.widthPx}px;
+    max-width: 450px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -119,9 +120,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                         {!!searchQuery ? (
                             <IconContainer>
                                 <Margin right="5px">
-                                    <StyledIcon
-                                        heightAndWidth="12px"
-                                        path="/img/cross_grey.svg"
+                                    <Icon
+                                        heightAndWidth="14px"
+                                        path={icons.removeX}
                                         onClick={() => this.handleClearSearch()}
                                     />
                                 </Margin>
@@ -131,7 +132,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 <Margin right="5px">
                                     <Icon
                                         heightAndWidth="16px"
-                                        path="/img/searchIcon.svg"
+                                        path={icons.searchIcon}
                                     />
                                 </Margin>
                             </IconContainer>
@@ -147,10 +148,27 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             autoComplete="off"
                         />
                     </FullWidthMargin>
-                    <FilterButton left="15px" onClick={onSearchFiltersOpen}>
-                        {searchFiltersOpen ? 'Remove Filters' : 'Filters'}
-                    </FilterButton>
                 </SearchBarContainer>
+                <FilterButton left="15px" onClick={onSearchFiltersOpen}>
+                    {searchFiltersOpen ? (
+                        <ButtonTooltip
+                            position={'bottom'}
+                            tooltipText={'Clear Filters'}
+                        >
+                            <Icon path={icons.removeX} heightAndWidth="16px" />
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            position={'bottom'}
+                            tooltipText={'Apply Filters'}
+                        >
+                            <Icon
+                                path={icons.filterIcon}
+                                heightAndWidth="20px"
+                            />
+                        </ButtonTooltip>
+                    )}
+                </FilterButton>
             </Margin>
         )
     }

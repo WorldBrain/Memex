@@ -15,13 +15,12 @@ const backgroundHoverSelected = (props) => {
 
 export const TagResultItem = styled.div`
     display: flex;
-    background: ${(props) =>
-        props.selected ? props.theme.tag.selected : props.theme.tag.tag};
+    background: ${(props) => props.theme.colors.purple};
     border: 2px solid
         ${(props) => (props.selected ? props.theme.tag.tag : 'transparent')};
     border-radius: 4px;
-    color: ${(props) => props.theme.tag.text};
-    padding: 0 8px;
+    color: white;
+    padding: 2px 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
     font-size: ${fontSizeSmall}px;

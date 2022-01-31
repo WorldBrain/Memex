@@ -11,6 +11,10 @@ import type { BaseKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/ty
 import analytics from 'src/analytics'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const styles = require('./settings.css')
 
@@ -52,6 +56,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     handleEnabledToggle = async (e) => {
+        console.log(e)
         const name = e.target.name as string
         const enabled = e.target.checked as boolean
 
@@ -102,29 +107,29 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         return this.props.shortcutsData.map(({ id, name, text, subText }) => {
             if (this.state[name]) {
                 return (
-                    <Checkbox
-                        key={id}
-                        id={id}
-                        isChecked={this.state[name].enabled}
-                        handleChange={this.handleEnabledToggle}
-                        isDisabled={!this.state.shortcutsEnabled}
-                        name={name}
-                    >
-                        {text}
-                        <div className={styles.rightBox}>
-                            <input
-                                type="text"
-                                value={this.state[name].shortcut}
-                                onKeyDown={this.recordBinding}
-                                onChange={(e) => e.preventDefault()}
-                                disabled={!this.state.shortcutsEnabled}
-                                name={name}
-                            />{' '}
-                            <span className={styles.kbShortcutSubText}>
-                                {subText}
-                            </span>
-                        </div>
-                    </Checkbox>
+                    <CheckBoxRow>
+                        <Checkbox
+                            key={id}
+                            id={id}
+                            isChecked={this.state[name].enabled}
+                            handleChange={this.handleEnabledToggle}
+                            isDisabled={!this.state.shortcutsEnabled}
+                            name={name}
+                        >
+                            {text}
+                            <RightBox>
+                                <KeyboardInput
+                                    type="text"
+                                    value={this.state[name].shortcut}
+                                    onKeyDown={this.recordBinding}
+                                    onChange={(e) => e.preventDefault()}
+                                    disabled={!this.state.shortcutsEnabled}
+                                    name={name}
+                                />{' '}
+                                <SubText>{subText}</SubText>
+                            </RightBox>
+                        </Checkbox>
+                    </CheckBoxRow>
                 )
             }
         })
@@ -132,12 +137,20 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <div className={styles.section}>
-                <div className={styles.sectionTitle}>Keyboard Shortcuts</div>
-                <div className={styles.infoText}>
+            <Section>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.atSign}
+                        heightAndWidth="34px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>Keyboard Shortcuts</SectionTitle>
+                <InfoText>
                     You can also use shift, ctrl, alt, or meta to define
                     keyboard shortcuts.
-                </div>
+                </InfoText>
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}
@@ -146,10 +159,84 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                 >
                     Enable Keyboard Shortcuts
                 </Checkbox>
-                {this.renderCheckboxes()}
-            </div>
+                {this.state.shortcutsEnabled && (
+                    <CheckBoxContainer>
+                        {this.renderCheckboxes()}
+                    </CheckBoxContainer>
+                )}
+            </Section>
         )
     }
 }
+
+const RightBox = styled.div`
+    display: grid;
+    align-items: center;
+    grid-auto-flow: column;
+    grid-gap: 10px;
+    width: 240px;
+`
+
+const SubText = styled.span`
+    color: ${(props) => props.theme.colors.normalText};
+    padding-left: 5px;
+`
+
+const CheckBoxContainer = styled.div`
+    margin-top: 30px;
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    padding-top: 10px;
+`
+
+const CheckBoxRow = styled.div`
+    height: 50px;
+`
+
+const KeyboardInput = styled.input`
+    background: ${(props) => props.theme.colors.backgroundColor};
+    height: 40px;
+    width: 120px;
+    padding: 0 15px;
+    align-items: center;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.darkerText};
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    outline: none;
+    text-align: center;
+    border-radius: 5px;
+`
+
+const Section = styled.div`
+    background: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 50px;
+    margin-bottom: 30px;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 100px;
+    height: 80px;
+    width: 80px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default KeyboardShortcutsContainer

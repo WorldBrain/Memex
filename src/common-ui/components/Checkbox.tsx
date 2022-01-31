@@ -1,7 +1,10 @@
 import * as React from 'react'
 import cx from 'classnames'
+import styled from 'styled-components'
 
 const styles = require('./Checkbox.css')
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export type CheckboxToggle = (
     event: React.SyntheticEvent<HTMLInputElement>,
@@ -36,12 +39,8 @@ class Checkbox extends React.PureComponent<Props> {
     render() {
         return (
             <div className={cx(styles.container, this.props.containerClass)}>
-                <label className={this.labelClass} htmlFor={this.props.id}>
-                    <input
-                        className={cx(
-                            styles.label__checkbox,
-                            this.props.inputClass,
-                        )}
+                <LabelContainer htmlFor={this.props.id}>
+                    <InputContainer
                         type="checkbox"
                         checked={this.props.isChecked}
                         onChange={this.props.handleChange}
@@ -49,20 +48,78 @@ class Checkbox extends React.PureComponent<Props> {
                         disabled={this.props.isDisabled}
                         name={this.props.name}
                     />
-                    <span
-                        className={cx(styles.label__text, this.props.textClass)}
-                    >
-                        <span className={styles.label__check}>
-                            <span className={this.iconClass} />
-                        </span>
-                        <span className={styles.childrenBox}>
-                            {this.props.children}
-                        </span>
-                    </span>
-                </label>
+                    <LabelText>
+                        <LabelCheck
+                            isChecked={this.props.isChecked}
+                            className={styles.label__check}
+                        >
+                            <Icon
+                                filePath={icons.check}
+                                color="white"
+                                heightAndWidth={'14px'}
+                                hoverOff
+                            />
+                        </LabelCheck>
+                        <ChildrenBox>{this.props.children}</ChildrenBox>
+                    </LabelText>
+                </LabelContainer>
             </div>
         )
     }
 }
+
+const ChildrenBox = styled.span`
+    color: ${(props) => props.theme.colors.darkerText};
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+`
+
+const LabelContainer = styled.label`
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+`
+
+const InputContainer = styled.input`
+    display: none;
+    padding: 2px;
+    border: 2px solid ${(props) => props.theme.colors.purple};
+`
+
+const LabelText = styled.span`
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    width: inherit;
+
+    &:hover {
+        color: black;
+    }
+`
+
+const LabelCheck = styled.span<{ isChecked }>`
+    border-radius: 3px;
+    border: 2px solid ${(props) => props.theme.colors.purple};
+    background: ${(props) =>
+        props.isChecked ? props.theme.colors.purple : 'white'};
+    vertical-align: middle;
+    margin-right: 20px;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        outline: none;
+    }
+
+    &:focus {
+        outline: none;
+    }
+`
 
 export default Checkbox

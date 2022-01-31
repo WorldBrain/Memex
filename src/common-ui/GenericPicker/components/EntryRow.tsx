@@ -131,13 +131,15 @@ export const IconStyleWrapper = styled.div`
 
 const Row = styled.div`
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.border};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineLightGrey};
     display: flex;
-    padding: 4px 20px 4px 18px; // give space to the right for a scrollbar
+    padding: 4px 15px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
+    height: 40px;
     cursor: pointer;
-    background: ${(props) => props.isFocused && props.theme.border};
+    color: ${(props) => props.isFocused && props.theme.colors.normalText};
+    background: ${(props) => props.isFocused && props.theme.colors.lightHover};
 `
 
 const NameWrapper = styled.div`

@@ -249,10 +249,6 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     &:focus {
         background-color: #79797945;
     }
-
-    & div {
-        padding: 0 5px;
-    }
 `
 
 const Menu = styled.ul`

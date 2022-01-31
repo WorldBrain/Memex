@@ -10,7 +10,7 @@ const CopyPasterWrapper = styled.div`
     padding: 0 0 5px 0;
 
     & * {
-        font-family: 'Poppins', 'Arial';
+        font-family: 'Inter', 'Arial';
     }
 `
 

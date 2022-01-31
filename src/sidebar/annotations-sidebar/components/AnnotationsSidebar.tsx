@@ -356,12 +356,13 @@ class AnnotationsSidebar extends React.Component<
 
                     {this.props.followedListLoadState ===
                     'running' ? null : followedLists.allIds.length ? (
-                        <FollowedListDropdownIcon
-                            icon="triangle"
-                            height="12px"
-                            isExpanded={this.props.isExpandedSharedSpaces}
-                            marginLeft="5px"
-                        />
+                        <Margin width="unset" left="5px">
+                            <FollowedListDropdownIcon
+                                filePath={icons.triangle}
+                                heightAndWidth="14px"
+                                isExpanded={this.props.isExpandedSharedSpaces}
+                            />
+                        </Margin>
                     ) : (
                         <FollowedListNoteCount left="5px" right="15px">
                             0
@@ -534,12 +535,13 @@ class AnnotationsSidebar extends React.Component<
                             My Annotations
                         </FollowedListSectionTitle>
                         {this.props.annotations.length > 0 && (
-                            <FollowedListDropdownIcon
-                                icon="triangle"
-                                height="12px"
-                                isExpanded={this.props.isExpanded}
-                                marginLeft="5px"
-                            />
+                            <Margin width="unset" left="5px">
+                                <FollowedListDropdownIcon
+                                    isExpanded={this.props.isExpanded}
+                                    filePath={icons.triangle}
+                                    heightAndWidth="14px"
+                                />
+                            </Margin>
                         )}
                     </MyNotesClickableArea>
                     <TopBarActionBtns>
@@ -554,31 +556,29 @@ class AnnotationsSidebar extends React.Component<
                             tooltipText="Copy All Notes"
                             position="bottomSidebar"
                         >
-                            <ActionBtn
+                            <Icon
+                                filePath={icons.copy}
                                 onClick={() =>
                                     this.setState({
                                         showAllNotesCopyPaster: true,
                                     })
                                 }
-                                isActive={this.state.showAllNotesCopyPaster}
-                            >
-                                <ActionIcon src={icons.copy} />
-                            </ActionBtn>
+                                heightAndWidth="16px"
+                            />
                         </ButtonTooltip>
                         <ButtonTooltip
                             tooltipText="Share annotated Page"
                             position="bottomRightEdge"
                         >
-                            <ActionBtn
+                            <Icon
                                 onClick={() =>
                                     this.setState({
                                         showAllNotesShareMenu: true,
                                     })
                                 }
-                                isActive={this.state.showAllNotesShareMenu}
-                            >
-                                <ActionIcon src={icons.link} />
-                            </ActionBtn>
+                                heightAndWidth="14px"
+                                filePath={icons.link}
+                            />
                         </ButtonTooltip>
                     </TopBarActionBtns>
                 </FollowedListTitleContainerMyNotes>
@@ -735,10 +735,11 @@ const FollowedListRow = styled(Margin)`
 `
 
 const FollowedListSectionTitle = styled(Margin)`
-    font-size: 16px;
-    color: #c0c0c0;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.darkerBlue};
     justify-content: flex-start;
     width: max-content;
+    font-weight: 600;
 `
 
 const FollowedListTitleContainer = styled(Margin)`
@@ -779,11 +780,8 @@ const FollowedListNoteCount = styled(Margin)`
 
 const FollowedListDropdownIcon = styled(Icon)<{
     isExpanded: boolean
-    marginLeft: string
 }>`
     transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
-    margin-left: ${(props) => (props.marginLeft ? props.marginLeft : 'none')};
-    margin-right: 5px;
 `
 
 const CloseIconStyled = styled.div`
@@ -814,7 +812,7 @@ const CloseButtonStyled = styled.button`
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -857,7 +855,7 @@ const annotationCardStyle = css`
 const NewAnnotationSection = styled.section`
     font-family: 'Inter', sans-serif;
     height: auto;
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -874,7 +872,7 @@ const NewAnnotationSeparator = styled.div`
 
 const AnnotationsSectionStyled = styled.section`
     font-family: 'Inter', sans-serif;
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

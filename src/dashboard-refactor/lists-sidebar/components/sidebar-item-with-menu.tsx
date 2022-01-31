@@ -261,7 +261,7 @@ const SidebarItem = styled.div<Props>`
  height: ${(props) =>
      props.listId === SPECIAL_LIST_IDS.INBOX ||
      props.listId === SPECIAL_LIST_IDS.MOBILE
-         ? '24px'
+         ? '30px'
          : '40px'};
  margin-top:  ${(props) =>
      props.listId === SPECIAL_LIST_IDS.INBOX ||

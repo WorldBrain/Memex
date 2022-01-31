@@ -250,7 +250,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <>
                         <Margin top="3px" />
                         <NoteTopBarBox
-                            rightSide={
+                            leftSide={
                                 <TopBarRightSideWrapper>
                                     <SortingDropdownMenuBtn
                                         onMenuItemClick={({ sortingFn }) =>
@@ -405,14 +405,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     tooltipText="Bulk-change privacy of annotations in this Space"
                     position="bottom"
                 >
-                    <IconBox>
-                        <Icon
-                            filePath={icons.multiEdit}
-                            height="16px"
-                            color="primary"
-                            onClick={this.props.toggleListShareMenu}
-                        />
-                    </IconBox>
+                    <Icon
+                        filePath={icons.multiEdit}
+                        height="16px"
+                        onClick={this.props.toggleListShareMenu}
+                    />
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
                     <HoverBox
@@ -493,7 +490,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     z-index: 1001;
     margin-top: -6px;
     position: sticky;
-    top: ${(props) => (props.isDisplayed === true ? '90px' : '60px')};
+    top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
 `
 
@@ -535,7 +532,7 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid #e0e0e0;
+    border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const Separator = styled.div`

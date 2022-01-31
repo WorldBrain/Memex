@@ -78,9 +78,9 @@ const StyledSearchIcon = styled(SearchIcon)`
 
 const SearchBox = styled.div`
     align-items: center;
-    background-color: ${(props) => props.theme.inputBackground};
+    background-color: ${(props) => props.theme.colors.backgroundColor};
     border-radius: 3px;
-    color: ${(props) => props.theme.text};
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
@@ -100,7 +100,7 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${(props) => props.theme.text};
+    color: ${(props) => props.theme.colors.normalText};
     font-family: ${(props) => props.theme.fonts.primary};
     font-size: ${fontSizeSmall}px;
     min-height: 24px;

@@ -168,7 +168,7 @@ const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
     padding-top: 8px;
     padding-bottom: 8px;
-    border-radius: 3px;
+    border-radius: 12px;
 `
 
 const EmptyDomainsView = styled.div`
@@ -182,7 +182,7 @@ const EmptyDomainsView = styled.div`
 const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
-    color: ${(props) => props.theme.tag.text};
+    color: ${(props) => props.theme.colors.normalText};
     padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;

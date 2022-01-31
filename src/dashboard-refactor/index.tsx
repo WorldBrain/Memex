@@ -235,6 +235,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
+                searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
                 showDatesFilter={searchFilters.isDateFilterActive}

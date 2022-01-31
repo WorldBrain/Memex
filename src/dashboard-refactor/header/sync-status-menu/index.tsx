@@ -25,6 +25,16 @@ const Separator = styled.div`
     border-bottom: 1px solid #ddd;
 `
 
+const TopBox = styled(Margin)`
+    height: min-content;
+    display: grid;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    grid-auto-flow: row;
+    grid-gap: 10px;
+`
+
 const Row = styled(Margin)`
     height: min-content;
     display: grid;
@@ -219,12 +229,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (!isLoggedIn) {
             return (
                 <RowContainer>
-                    <Row>
+                    <TopBox>
                         <TextBlock bold>
                             You're not logged in and syncing
                         </TextBlock>
                         <PrimaryAction label="Login" onClick={onLoginClick} />
-                    </Row>
+                    </TopBox>
                 </RowContainer>
             )
         }
@@ -232,7 +242,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (!isCloudEnabled) {
             return (
                 <RowContainer>
-                    <Row>
+                    <TopBox>
                         <TextBlock bold>
                             You haven't migrated to Memex Cloud
                         </TextBlock>
@@ -240,7 +250,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             label="Migrate"
                             onClick={onMigrateClick}
                         />
-                    </Row>
+                    </TopBox>
                 </RowContainer>
             )
         }

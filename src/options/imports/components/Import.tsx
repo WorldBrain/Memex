@@ -7,6 +7,10 @@ import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-se
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
+import * as icons from 'src/common-ui/components/design-library/icons'
+
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import styled from 'styled-components'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -43,9 +47,21 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.sectionTitle}>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.atSign}
+                        heightAndWidth="34px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>
                     Import Bookmarks from other services
-                </div>
+                </SectionTitle>
+                <InfoText>
+                    Import your existing bookmarks of your browser, and other
+                    services like Pocket, Pinboard, Raindrop or Diigo.
+                </InfoText>
             </div>
         )
     }
@@ -108,7 +124,7 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.section}>
+                <Section>
                     {this.renderEstimates()}
                     {this.renderProgress()}
                     {isStopped && (
@@ -130,11 +146,44 @@ class Import extends React.PureComponent<Props> {
                             </div>
                         )}
                     </div>
-                </div>
+                </Section>
                 {this.renderReadwise()}
             </div>
         )
     }
 }
+
+const Section = styled.div`
+    background: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 50px;
+    margin-bottom: 30px;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 100px;
+    height: 80px;
+    width: 80px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default Import

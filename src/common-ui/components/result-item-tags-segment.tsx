@@ -82,8 +82,8 @@ const EditIconContainer = styled.div`
 
 const EditIcon = styled.div`
     outline: none;
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
     background-color: ${(props) => props.theme.colors.purple};
     mask-image: url(${icons.plus});
     mask-position: center;

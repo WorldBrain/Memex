@@ -3,17 +3,18 @@ import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState } from '../types'
 
 const textStyles = `
-    font-family: ${fonts.primary.name};
+    font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
     font-size: 14px;
     line-height: 15px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     cursor: text;
 `
 
@@ -25,7 +26,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     border-radius: 3px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     margin: 5px 15px;
@@ -50,6 +51,7 @@ const Input = styled.input`
     ${textStyles}
     width: 100%;
     border: none;
+    color: ${(props) => props.theme.colors.normalText};
     background: inherit;
     &::placeholder {
         opacity: 0.6;
@@ -141,9 +143,9 @@ export default class ListsSidebarSearchBar extends PureComponent<
                     {!!searchQuery ? (
                         <IconContainer>
                             <Margin right="5px">
-                                <StyledIcon
-                                    heightAndWidth="12px"
-                                    path="/img/cross_grey.svg"
+                                <Icon
+                                    heightAndWidth="14px"
+                                    path={icons.removeX}
                                     onClick={() => this.handleClearSearch()}
                                 />
                             </Margin>
@@ -153,7 +155,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                             <Margin right="5px">
                                 <Icon
                                     heightAndWidth="16px"
-                                    path="/img/searchIcon.svg"
+                                    path={icons.searchIcon}
                                     hoverOff={true}
                                 />
                             </Margin>

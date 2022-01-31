@@ -36,11 +36,10 @@ export const HoverBoxContainer = styled.div<Props>`
 `
 
 export const HoverBoxDiv = styled.div<Props>`
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
     overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};;
     position: ${(props) => (props.position ? props.position : 'absolute')};;
-    border-radius: 3px;
     width: ${(props) => (props.width ? props.width : '300px')};
     height: ${(props) => (props.height ? props.height : 'fit-content')};
     ${(props) => (props.top ? `top: ${props.top};` : '')}
@@ -48,7 +47,6 @@ export const HoverBoxDiv = styled.div<Props>`
     ${(props) => (props.right ? `right: ${props.right};` : '')}
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
     background-color: #fff;
-    border-radius: 3px;
     z-index: 1001;
 
     &::-webkit-scrollbar {
@@ -66,7 +64,7 @@ export const HoverBoxDashboard = styled.div`
     width: 300px;
     z-index: 1;
     background-color: #fff;
-    border-radius: 3px;
+    border-radius: 12px;
     right: 20px;
     top: 40px;
 

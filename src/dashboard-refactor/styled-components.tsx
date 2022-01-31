@@ -23,20 +23,19 @@ export interface IconProps {
     hoverOff?: boolean
 }
 
-export const Icon = (props: IconProps) => {
-    const IconContainer = styled.div<IconProps>`
-        padding: 4px;
-        display: flex;
-        border-radius: 3px;
-        cursor: pointer;
+const IconContainer = styled.div<IconProps>`
+    padding: 4px;
+    display: flex;
+    border-radius: 3px;
+    cursor: pointer;
 
-        &:hover {
-            background-color: ${(props) =>
-                props.hoverOff ? 'none' : props.theme.colors.darkhover};
-        }
-    `
+    &:hover {
+        background-color: ${(props) =>
+            props.hoverOff ? 'none' : props.theme.colors.darkhover};
+    }
+`
 
-    const IconInner = styled.div<IconProps>`
+const IconInner = styled.div<IconProps>`
         ${(props) =>
             css`
                 height: ${props.heightAndWidth};
@@ -76,6 +75,7 @@ export const Icon = (props: IconProps) => {
         flex: none;
         `
 
+export const Icon = (props: IconProps) => {
     return (
         <IconContainer onClick={props.onClick} {...props}>
             <IconInner {...props} />

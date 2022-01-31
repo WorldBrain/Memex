@@ -369,7 +369,7 @@ const PageContentBox = styled.a`
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    padding: 15px 15px 5px 15px;
+    padding: 15px 20px 5px 20px;
     text-decoration: none;
     border-radius: 5px;
 

@@ -49,7 +49,7 @@ export const EXCLUDE_PATTERN = /^-(site:)?(?=\w+)/
  */
 export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 
-export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
+export const DATE_PICKER_DATE_FORMAT = 'DD. MMM YYYY'
 
 export const PAGE_SIZE = 10
 
