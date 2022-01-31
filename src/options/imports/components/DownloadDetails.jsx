@@ -1,45 +1,32 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-// import classNames from 'classnames'
-
-import localStyles from './DownloadDetails.css'
-// import styles from '../../options.css'
-
-// const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const DownloadDetails = ({ children, filterHandlers, filter }) => (
-    <div className={localStyles.detailsContainer}>
-        {/* <div className={localStyles.filters}>
-            <button className={filterClass} onClick={filterHandlers.all}>
-                All
-            </button>
-            <button className={filterClass} onClick={filterHandlers.succ}>
-                Success
-            </button>
-            <button className={filterClass} onClick={filterHandlers.fail}>
-                Failed (
-                <a
-                    target="_blank"
-                    href="https://worldbrain.io/import_bug"
-                >
-                    ?
-                </a>
-                )
-            </button>
-        </div> */}
-        <table className={localStyles.detailsTable}>
-            <thead className={localStyles.detailsTableHead}>
-                <tr>
-                    <th className={localStyles.urlCol}>URL</th>
-                    {filter !== 'success' && (
-                        <th className={localStyles.errorsCol}>Errors</th>
-                    )}
-                </tr>
-            </thead>
-            <tbody className={localStyles.detailsTableBody}>{children}</tbody>
-        </table>
-    </div>
+    <DetailsContainer>
+        <DetailsTable>
+            <DetailsTableBody>{children}</DetailsTableBody>
+        </DetailsTable>
+    </DetailsContainer>
 )
+
+const DetailsContainer = styled.div`
+    max-height: 600px;
+
+    overflow: scroll;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+
+const DetailsTable = styled.table``
+
+const DetailsTableBody = styled.tbody``
 
 DownloadDetails.propTypes = {
     // Event handlers

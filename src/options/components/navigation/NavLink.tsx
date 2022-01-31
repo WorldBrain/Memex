@@ -32,7 +32,7 @@ class NavLink extends PureComponent<Props> {
                             filePath={'img/' + this.props.icon}
                             heightAndWidth="20px"
                             hoverOff
-                            color={this.props.isActive && 'purple'}
+                            color={this.props.isActive ? 'purple' : null}
                         />
                         <RouteTitle isActive={this.props.isActive}>
                             {this.props.name}

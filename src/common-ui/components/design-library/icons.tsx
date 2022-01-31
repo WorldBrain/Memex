@@ -35,6 +35,10 @@ export const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 export const commentEdit = browser.runtime.getURL('/img/comment_edit.svg')
 export const compress = browser.runtime.getURL('/img/compress-alt.svg')
 export const expand = browser.runtime.getURL('/img/expand-alt.svg')
+export const play = browser.runtime.getURL('/img/play.svg')
+export const playFull = browser.runtime.getURL('/img/playFull.svg')
+export const pause = browser.runtime.getURL('/img/pause.svg')
+export const stop = browser.runtime.getURL('/img/stop.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -62,6 +66,7 @@ export const shareWhite = browser.runtime.getURL('/img/shareWhite.svg')
 export const shareEmpty = browser.runtime.getURL('/img/shareEmpty.svg')
 export const lock = browser.runtime.getURL('/img/lock.svg')
 export const sort = browser.runtime.getURL('/img/sort.svg')
+export const redo = browser.runtime.getURL('/img/redo.svg')
 export const person = browser.runtime.getURL('/img/person.svg')
 export const shared = browser.runtime.getURL('/img/shared.svg')
 export const sharedProtected = browser.runtime.getURL(

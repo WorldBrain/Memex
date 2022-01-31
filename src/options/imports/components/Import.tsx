@@ -32,13 +32,13 @@ const Warning = ({ children }) => (
 )
 
 class Import extends React.PureComponent<Props> {
-    private renderSettings() {
-        if (!this.props.shouldRenderEsts) {
-            return
-        }
+    // private renderSettings() {
+    //     if (!this.props.shouldRenderEsts) {
+    //         return
+    //     }
 
-        return <AdvSettings />
-    }
+    //     return <AdvSettings />
+    // }
 
     private renderEstimates() {
         if (!this.props.shouldRenderEsts) {
@@ -73,14 +73,18 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.section}>
-                    <div className={localStyles.titleBox}>
-                        <div className={settingsStyle.sectionTitle}>
-                            ReadWise.io integration
-                        </div>
-                    </div>
+                <Section>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.atSign}
+                            heightAndWidth="34px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>ReadWise.io integration</SectionTitle>
                     <ReadwiseSettings />
-                </div>
+                </Section>
             </div>
         )
     }
@@ -92,23 +96,26 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.sectionTitle}>
-                    Import Progress
-                </div>
-                <div className={localStyles.stepText}>
-                    <Warning>
-                        The import may freeze because of a browser setting. Go
-                        to{' '}
-                        <a
-                            className={localStyles.link}
-                            target="_blank"
-                            href="https://worldbrain.io/import_bug"
-                        >
-                            <b>worldbrain.io/import_bug</b>
-                        </a>{' '}
-                        to fix it.
-                    </Warning>
-                </div>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.play}
+                        heightAndWidth="34px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>Import Progress</SectionTitle>
+                <InfoText>
+                    The import may freeze because of a browser setting. Go to{' '}
+                    <a
+                        className={localStyles.link}
+                        target="_blank"
+                        href="https://links.memex.garden/import_bug"
+                    >
+                        <b>links.memex.garden/import_bug</b>
+                    </a>{' '}
+                    to fix it.
+                </InfoText>
             </div>
         )
     }
@@ -128,14 +135,22 @@ class Import extends React.PureComponent<Props> {
                     {this.renderEstimates()}
                     {this.renderProgress()}
                     {isStopped && (
-                        <div className={settingsStyle.sectionTitle}>
-                            Import Report
-                        </div>
+                        <>
+                            <SectionCircle>
+                                <Icon
+                                    filePath={icons.check}
+                                    heightAndWidth="34px"
+                                    color="purple"
+                                    hoverOff
+                                />
+                            </SectionCircle>
+                            <SectionTitle>Import Finished</SectionTitle>
+                        </>
                     )}
                     <div className={localStyles.mainContainer}>
                         <div className={localStyles.importTableContainer}>
                             {children}
-                            {this.renderSettings()}
+                            {/* {this.renderSettings()} */}
                         </div>
                         {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                             <div className={localStyles.loadingBlocker}>
