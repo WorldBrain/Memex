@@ -1,7 +1,6 @@
 import ImportContainer from './imports'
 // import SettingsContainer from './containers/settings'
 import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
-import Privacy from './privacy'
 import Statistics from './statistics'
 import Settings from './settings'
 import UserScreen from '../authentication/components/UserScreen'

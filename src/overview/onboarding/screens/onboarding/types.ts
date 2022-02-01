@@ -11,12 +11,18 @@ export interface Dependencies {
 }
 
 export interface State {
+    saveState: UITaskState
     loadState: UITaskState
     syncState: UITaskState
     step: 'tutorial' | 'sync'
     shouldShowLogin: boolean
     newSignUp: boolean
     mode: 'signup' | 'login'
+    email: string
+    password: string
+    passwordConfirm: string
+    displayName: string
+    passwordMatch: boolean
 }
 
 export type Event = UIEvent<{
@@ -25,7 +31,9 @@ export type Event = UIEvent<{
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
     editEmail: { value: string }
+    passwordMatch: { value: boolean }
     editPassword: { value: string }
+    editPasswordConfirm: { value: string }
     emailPasswordConfirm: null
     toggleMode: null
     editDisplayName: { value: string }

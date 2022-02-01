@@ -6,6 +6,8 @@ import { formBackground } from 'src/common-ui/components/design-library/colors'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import { LoadingIndicator } from 'src/common-ui/components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props {
     refreshUserInfoOnInit?: boolean
@@ -20,21 +22,49 @@ interface State {
     displayName: string
 }
 
-const NameInput = styled.input`
-    background-color: ${formBackground};
-    border-radius: 3px;
-    outline: none;
-    border: none;
-    width: 300px;
-    height: 35px;
-    margin: 0 0 20px 0;
-    text-align: center;
+const Container = styled.div`
+    width: fill-available;
+`
+const TextInputContainer = styled.div`
+    display: flex;
+    grid-auto-flow: column;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    height: 50px;
+    border-radius: 8px;
+    width: fill-available;
+    padding: 0 15px;
 `
 
-const InputContainer = styled.div`
+const TextInput = styled.input`
+    outline: none;
+    height: fill-available;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    border: none;
+    background: transparent;
+
+    &::placeholder {
+        color: ${(props) => props.theme.colors.lighterText};
+    }
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 12px;
+    opacity: 0.7;
+    padding-left: 10px;
+    margin-top: 5px;
+`
+
+const InputBox = styled.div`
     display: flex;
-    flex-direction: column;
     align-items: center;
+    grid-gap: 10px;
+    width: fill-available;
 `
 
 export default class DisplayNameSetup extends PureComponent<Props, State> {
@@ -100,19 +130,33 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
 
     render() {
         return (
-            <div>
-                <InputContainer>
-                    <NameInput
-                        value={this.state.displayNameInput}
-                        onChange={this.changeInput}
-                        disabled={this.state.saveState === 'running'}
-                    />
-                    <PrimaryAction
-                        label={this.renderBtnLabel()}
-                        onClick={this.confirmSave}
-                    />
-                </InputContainer>
-            </div>
+            <Container>
+                <InputBox>
+                    <TextInputContainer>
+                        <Icon
+                            filePath={icons.smileFace}
+                            heightAndWidth="20px"
+                            hoverOff
+                        />
+                        <TextInput
+                            value={this.state.displayNameInput}
+                            onChange={this.changeInput}
+                            disabled={this.state.saveState === 'running'}
+                            placeholder={'Add Display Name'}
+                        />
+                    </TextInputContainer>
+                    {this.state.saveState === 'pristine' && (
+                        <PrimaryAction
+                            label={this.renderBtnLabel()}
+                            onClick={this.confirmSave}
+                        />
+                    )}
+                </InputBox>
+                <InfoText>
+                    Display name shown on shared Spaces, page links and
+                    annotations
+                </InfoText>
+            </Container>
         )
     }
 }

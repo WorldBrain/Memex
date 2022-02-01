@@ -81,6 +81,9 @@ export const redo = browser.runtime.getURL('/img/redo.svg')
 export const person = browser.runtime.getURL('/img/person.svg')
 export const shared = browser.runtime.getURL('/img/shared.svg')
 export const shield = browser.runtime.getURL('/img/shield.svg')
+export const smileFace = browser.runtime.getURL('/img/smileFace.svg')
+export const login = browser.runtime.getURL('/img/login.svg')
+export const logout = browser.runtime.getURL('/img/logout.svg')
 
 export const sharedProtected = browser.runtime.getURL(
     '/img/sharedprotected.svg',

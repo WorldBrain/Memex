@@ -27,6 +27,12 @@ export interface AuthRemoteFunctionsInterface {
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
 
     hasSubscribedBefore(): Promise<boolean>
+    registerWithEmailPassword(
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: RegistrationResult }>
+    loginWithEmailPassword(
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: LoginResult }>
 }
 
 export interface AuthRemoteEvents {
@@ -55,4 +61,44 @@ export type MemexUser = {
 
 export interface AuthSettings {
     beta?: boolean
+}
+
+export interface EmailPasswordCredentials {
+    email: string
+    password: string
+    displayName: string
+}
+export interface AuthRequest {
+    reason?: AuthRequestReason
+    header?: { title: string; subtitle?: string }
+}
+export type AuthRequestReason = 'login-requested' | 'registration-requested'
+
+export type AuthResult = LoginResult | RegistrationResult
+export type AuthError = LoginError | RegistrationError
+export type LoginResult =
+    | {
+          status: 'authenticated' | 'cancelled'
+      }
+    | LoginError
+export interface LoginError {
+    status: 'error'
+    reason:
+        | 'popup-blocked'
+        | 'invalid-email'
+        | 'user-not-found'
+        | 'wrong-password'
+        | 'unknown'
+    internalReason?: string
+}
+
+export type RegistrationResult =
+    | {
+          status: 'registered-and-authenticated' | 'cancelled'
+      }
+    | RegistrationError
+export interface RegistrationError {
+    status: 'error'
+    reason: 'invalid-email' | 'email-exists' | 'weak-password' | 'unknown'
+    internalReason?: string
 }

@@ -50,7 +50,7 @@ const Sidebar = styled(Rnd)<{
             margin-top: 50px;
             margin-bottom: 9px;
             height: 90vh;
-            top: 5px;
+            top: 20px;
             border-top-right-radius: 3px;
             border-bottom-right-radius: 3px;
         `}
@@ -209,7 +209,8 @@ export default class ListsSidebar extends PureComponent<
             height: isSidebarPeeking ? '90vh' : '100vh',
         }
 
-        //console.log(this.SidebarContainer)
+        console.log(listsGroups)
+        console.log(searchBarProps)
 
         return (
             <Container
@@ -345,7 +346,26 @@ export default class ListsSidebar extends PureComponent<
                                     )}
                                     {group.title === 'My Spaces' &&
                                     group.listsArray.length === 0 ? (
-                                        !group.isAddInputShown && (
+                                        !group.isAddInputShown &&
+                                        (searchBarProps.searchQuery.length >
+                                        0 ? (
+                                            <NoCollectionsMessage
+                                                onClick={group.onAddBtnClick}
+                                            >
+                                                <SectionCircle>
+                                                    <Icon
+                                                        filePath={icons.plus}
+                                                        heightAndWidth="14px"
+                                                        color="purple"
+                                                        hoverOff
+                                                    />
+                                                </SectionCircle>
+                                                <InfoText>
+                                                    Create a
+                                                    <Link> new Space</Link>
+                                                </InfoText>
+                                            </NoCollectionsMessage>
+                                        ) : (
                                             <NoCollectionsMessage
                                                 onClick={group.onAddBtnClick}
                                             >
@@ -362,20 +382,8 @@ export default class ListsSidebar extends PureComponent<
                                                     <Link>first Space</Link>
                                                 </InfoText>
                                             </NoCollectionsMessage>
-                                        )
+                                        ))
                                     ) : (
-                                        // <NoCollectionsMessage>
-                                        //     <strong>No saved spaces</strong>{' '}
-                                        //     <br />
-                                        //     <u
-                                        //         onClick={this.bindRouteGoTo(
-                                        //             'import',
-                                        //         )}
-                                        //     >
-                                        //         Import
-                                        //     </u>{' '}
-                                        //     bookmark folders
-                                        // </NoCollectionsMessage>
                                         <>
                                             {group.title ===
                                                 'Followed Spaces' &&

@@ -22,6 +22,9 @@ import {
     AuthRemoteFunctionsInterface,
     AuthSettings,
     AuthBackendFunctions,
+    EmailPasswordCredentials,
+    RegistrationResult,
+    LoginResult,
 } from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
@@ -30,6 +33,7 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
+import firebase from 'firebase'
 
 export class AuthBackground {
     authService: AuthService
@@ -39,6 +43,7 @@ export class AuthBackground {
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
     getUserManagement: () => Promise<UserStorage>
+    private _firebase: typeof firebase
 
     private _userProfile?: Promise<User>
 
@@ -67,6 +72,8 @@ export class AuthBackground {
 
         this.remoteFunctions = {
             refreshUserInfo: this.refreshUserInfo,
+            registerWithEmailPassword: this.registerWithEmailPassword,
+            loginWithEmailPassword: this.loginWithEmailPassword,
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => {
                 delete this._userProfile
@@ -215,5 +222,55 @@ export class AuthBackground {
                 userWithClaims,
             )
         })
+    }
+
+    async registerWithEmailPassword(
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: RegistrationResult }> {
+        try {
+            await this._firebase
+                .auth()
+                .createUserWithEmailAndPassword(options.email, options.password)
+            return { result: { status: 'registered-and-authenticated' } }
+        } catch (e) {
+            const firebaseError: firebase.FirebaseError = e
+            if (firebaseError.code === 'auth/invalid-email') {
+                return { result: { status: 'error', reason: 'invalid-email' } }
+            }
+            if (firebaseError.code === 'auth/email-already-in-use') {
+                return { result: { status: 'error', reason: 'email-exists' } }
+            }
+            if (firebaseError.code === 'auth/weak-password') {
+                return { result: { status: 'error', reason: 'weak-password' } }
+            }
+            return { result: { status: 'error', reason: 'unknown' } }
+        }
+    }
+
+    async loginWithEmailPassword(
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: LoginResult }> {
+        try {
+            const waitForChange = new Promise((resolve) =>
+                this.authService.events.once('changed', () => resolve()),
+            )
+            await this._firebase
+                .auth()
+                .signInWithEmailAndPassword(options.email, options.password)
+            await waitForChange
+            return { result: { status: 'authenticated' } }
+        } catch (e) {
+            const firebaseError: firebase.FirebaseError = e
+            if (firebaseError.code === 'auth/invalid-email') {
+                return { result: { status: 'error', reason: 'invalid-email' } }
+            }
+            if (firebaseError.code === 'auth/user-not-found') {
+                return { result: { status: 'error', reason: 'user-not-found' } }
+            }
+            if (firebaseError.code === 'auth/wrong-password') {
+                return { result: { status: 'error', reason: 'wrong-password' } }
+            }
+            return { result: { status: 'error', reason: 'unknown' } }
+        }
     }
 }

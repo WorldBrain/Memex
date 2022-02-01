@@ -129,6 +129,14 @@ export default class OnboardingScreen extends StatefulUIElement<
         }
     }
 
+    private checkPasswordMatch(value) {
+        if (this.state.password === value) {
+            this.processEvent('passwordMatch', { value: true })
+        } else {
+            this.processEvent('passwordMatch', { value: false })
+        }
+    }
+
     renderAuthForm() {
         const { state } = this
         // const { header } = state
@@ -149,11 +157,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                         <TextInput
                                             type="DisplayName"
                                             placeholder="Display Name"
-                                            // value={this.state.email}
+                                            value={this.state.displayName}
                                             onChange={(e) =>
-                                                this.processEvent('editEmail', {
-                                                    value: e.target.value,
-                                                })
+                                                this.processEvent(
+                                                    'editDisplayName',
+                                                    {
+                                                        value: e.target.value,
+                                                    },
+                                                )
                                             }
                                             onConfirm={() => {
                                                 this.processEvent(
@@ -165,7 +176,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     </TextInputContainer>
                                     <InfoText>
                                         Name shown on shared Spaces, page links
-                                        or annotations
+                                        and annotations
                                     </InfoText>
                                 </DisplayNameContainer>
                                 <TextInputContainer>
@@ -177,7 +188,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     <TextInput
                                         type="email"
                                         placeholder="E-mail"
-                                        // value={this.state.email}
+                                        value={this.state.email}
                                         onChange={(e) =>
                                             this.processEvent('editEmail', {
                                                 value: e.target.value,
@@ -200,7 +211,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     <TextInput
                                         type="password"
                                         placeholder="Password"
-                                        //value={this.state.password}
+                                        value={this.state.password}
                                         onChange={(e) =>
                                             this.processEvent('editPassword', {
                                                 value: e.target.value,
@@ -223,32 +234,42 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     <TextInput
                                         type="password"
                                         placeholder="Confirm Password"
-                                        //value={this.state.password}
-                                        onChange={(e) =>
-                                            this.processEvent('editPassword', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onConfirm={() => {
+                                        value={this.state.passwordConfirm}
+                                        onChange={(e) => {
                                             this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
+                                                'editPasswordConfirm',
+                                                {
+                                                    value: e.target.value,
+                                                },
+                                            )
+                                            this.checkPasswordMatch(
+                                                e.target.value,
                                             )
                                         }}
                                     />
                                 </TextInputContainer>
                                 <ConfirmContainer>
                                     <PrimaryAction
-                                        onClick={() =>
+                                        onClick={() => {
                                             this.processEvent(
                                                 'emailPasswordConfirm',
                                                 null,
                                             )
+                                        }}
+                                        disabled={
+                                            !(
+                                                this.state.passwordMatch &&
+                                                this.state.email.includes(
+                                                    '@',
+                                                ) &&
+                                                this.state.email.includes(
+                                                    '.',
+                                                ) &&
+                                                this.state.displayName.length >=
+                                                    3
+                                            )
                                         }
-                                        label={
-                                            'Sign Up'
-                                            //state.mode === 'login' ? 'Log in' : 'Sign up'
-                                        }
+                                        label={'Sign Up'}
                                         fontSize={'14px'}
                                     />
                                     {/* {this.renderAuthError()} */}
@@ -274,7 +295,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     <TextInput
                                         type="email"
                                         placeholder="E-mail"
-                                        // value={this.state.email}
+                                        value={this.state.email}
                                         onChange={(e) =>
                                             this.processEvent('editEmail', {
                                                 value: e.target.value,
@@ -297,7 +318,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     <TextInput
                                         type="password"
                                         placeholder="Password"
-                                        //value={this.state.password}
+                                        value={this.state.password}
                                         onChange={(e) =>
                                             this.processEvent('editPassword', {
                                                 value: e.target.value,
@@ -319,10 +340,17 @@ export default class OnboardingScreen extends StatefulUIElement<
                                                 null,
                                             )
                                         }
-                                        label={
-                                            'Sign Up'
-                                            //state.mode === 'login' ? 'Log in' : 'Sign up'
+                                        disabled={
+                                            !(
+                                                this.state.password.length >
+                                                    0 &&
+                                                this.state.email.includes(
+                                                    '@',
+                                                ) &&
+                                                this.state.email.includes('.')
+                                            )
                                         }
+                                        label={'Login'}
                                         fontSize={'14px'}
                                     />
                                     {/* {this.renderAuthError()} */}
@@ -421,7 +449,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     render() {
         return (
             <OnboardingBox>
-                {this.state.shouldShowLogin
+                {!this.state.shouldShowLogin
                     ? this.renderLoginStep()
                     : this.renderOnboardingSteps()}
             </OnboardingBox>

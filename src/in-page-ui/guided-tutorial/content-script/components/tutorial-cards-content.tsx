@@ -119,6 +119,7 @@ const AnnotationTitleBox = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: 100%;
+    grid-gap: 10px;
 `
 
 const FinishTitleBox = styled.div`
