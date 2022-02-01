@@ -56,7 +56,6 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     handleEnabledToggle = async (e) => {
-        console.log(e)
         const name = e.target.name as string
         const enabled = e.target.checked as boolean
 
@@ -186,6 +185,7 @@ const CheckBoxContainer = styled.div`
     margin-top: 30px;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     padding-top: 10px;
+    cursor: pointer;
 `
 
 const CheckBoxRow = styled.div`

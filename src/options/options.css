@@ -5,10 +5,15 @@
     font-family: 'Inter', sans-serif;
 }
 
+body {
+    margin: 0;
+}
+
 html,
 body {
     margin: 0px;
 }
+
 .root {
     font-size: 18px;
     font-weight: 200;

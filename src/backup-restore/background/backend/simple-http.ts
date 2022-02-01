@@ -21,6 +21,7 @@ export class MemexLocalBackend extends BackupBackend {
     async isConnected() {
         try {
             const response = await fetch(`${this.url}/status`)
+            console.log(response)
             return response.status === 200
         } catch (e) {
             return false
@@ -79,7 +80,7 @@ export class MemexLocalBackend extends BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
-        const stringify = obj => JSON.stringify(obj, null, 4)
+        const stringify = (obj) => JSON.stringify(obj, null, 4)
         const { images, changes } = await separateDataFromImageChanges(
             unprocessedChanges,
         )

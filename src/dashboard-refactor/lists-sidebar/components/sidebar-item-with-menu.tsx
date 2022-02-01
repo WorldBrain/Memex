@@ -244,7 +244,7 @@ const DropZoneMask = styled.div`
 
 const TitleBox = styled.div<Props>`
     display: flex;
-    flex: 1;
+    flex: 0 1 100%;
     width: 100%;
     height: 100%;
     padding-left: ${(props) =>
@@ -253,7 +253,6 @@ const TitleBox = styled.div<Props>`
             ? '35px'
             : '25px'};
     align-items: center;
-    padding-right: 20px;
     color: ${(props) => props.theme.colors.normalText};
 `
 

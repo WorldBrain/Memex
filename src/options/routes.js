@@ -32,13 +32,13 @@ export default [
         name: 'Import & Integrations',
         pathname: '/import',
         component: ImportContainer,
-        icon: 'import.svg',
+        icon: 'integrate.svg',
     },
     {
         name: 'Backup',
         pathname: '/backup',
         component: BackupSettingsContainer,
-        icon: 'backup.svg',
+        icon: 'import.svg',
     },
     {
         name: 'My Account',

@@ -23,6 +23,7 @@ const Container = styled.tr`
     align-items: center;
     grid-auto-rows: min-content;
     padding: 10px 10px;
+    cursor: pointer;
 
     &:nth-child(2n + 2) {
         background: ${(props) => props.theme.colors.backgroundColor};

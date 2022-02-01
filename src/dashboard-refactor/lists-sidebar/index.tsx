@@ -101,6 +101,10 @@ const NoCollectionsMessage = styled.div`
 `
 
 const GlobalStyle = createGlobalStyle`
+body {
+    margin: 0;
+  } 
+
     .sidebarResizeHandleSidebar {
         width: 4px !important;
         height: 100% !important;

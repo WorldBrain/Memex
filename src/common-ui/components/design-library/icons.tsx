@@ -39,6 +39,8 @@ export const play = browser.runtime.getURL('/img/play.svg')
 export const playFull = browser.runtime.getURL('/img/playFull.svg')
 export const pause = browser.runtime.getURL('/img/pause.svg')
 export const stop = browser.runtime.getURL('/img/stop.svg')
+export const warning = browser.runtime.getURL('/img/warning_red.svg')
+export const integrate = browser.runtime.getURL('/img/integrate.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -50,10 +52,13 @@ export const collectionsEmpty = browser.runtime.getURL(
 export const collectionsFull = browser.runtime.getURL(
     '/img/collections_full.svg',
 )
+export const folder = browser.runtime.getURL('/img/folder.svg')
 export const triangle = browser.runtime.getURL('/img/chevron-down.svg')
 export const plus = browser.runtime.getURL('/img/plus.svg')
+export const backup = browser.runtime.getURL('/img/backup.svg')
 export const readwise = browser.runtime.getURL('/img/readwise.svg')
 export const dots = browser.runtime.getURL('/img/3dots.svg')
+export const imports = browser.runtime.getURL('/img/import.svg')
 export const trash = browser.runtime.getURL('/img/trash.svg')
 export const goTo = browser.runtime.getURL('/img/open.svg')
 export const openSidebar = browser.runtime.getURL('/img/openSidebar.svg')

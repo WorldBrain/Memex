@@ -3,11 +3,15 @@
 
 @import url('/fonts/Poppins/poppins.css');
 
+body {
+    margin: 0;
+}
+
 .root {
     background-color: white;
     display: flex;
     flex-direction: row;
-    margin: -8px;
+    margin: 0px;
 
     & * {
         box-sizing: border-box;

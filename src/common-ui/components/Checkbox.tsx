@@ -38,7 +38,7 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={cx(styles.container, this.props.containerClass)}>
+            <Container>
                 <LabelContainer htmlFor={this.props.id}>
                     <InputContainer
                         type="checkbox"
@@ -60,10 +60,14 @@ class Checkbox extends React.PureComponent<Props> {
                         <ChildrenBox>{this.props.children}</ChildrenBox>
                     </LabelText>
                 </LabelContainer>
-            </div>
+            </Container>
         )
     }
 }
+
+const Container = styled.div`
+    cursor: pointer;
+`
 
 const ChildrenBox = styled.span`
     color: ${(props) => props.theme.colors.darkerText};
@@ -71,6 +75,11 @@ const ChildrenBox = styled.span`
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const LabelContainer = styled.label`
@@ -84,6 +93,7 @@ const InputContainer = styled.input`
     display: none;
     padding: 2px;
     border: 2px solid ${(props) => props.theme.colors.purple};
+    cursor: pointer;
 `
 
 const LabelText = styled.span`
@@ -91,6 +101,7 @@ const LabelText = styled.span`
     display: flex;
     align-items: center;
     width: inherit;
+    cursor: pointer;
 
     &:hover {
         color: black;
@@ -109,6 +120,11 @@ const LabelCheck = styled.span<{ isChecked }>`
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+
+    & * {
+        cursor: pointer !important;
+    }
 
     &:hover {
         outline: none;

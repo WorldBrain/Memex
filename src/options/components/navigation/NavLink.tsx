@@ -25,24 +25,41 @@ class NavLink extends PureComponent<Props> {
 
     render() {
         return (
-            <RouteItem name={this.props.name} isActive={this.props.isActive}>
+            <Container>
                 <this.LinkComponent to={this.props.pathname}>
-                    <RouteItemContent>
-                        <Icon
-                            filePath={'img/' + this.props.icon}
-                            heightAndWidth="20px"
-                            hoverOff
-                            color={this.props.isActive ? 'purple' : null}
-                        />
-                        <RouteTitle isActive={this.props.isActive}>
-                            {this.props.name}
-                        </RouteTitle>
-                    </RouteItemContent>
+                    <RouteItem
+                        name={this.props.name}
+                        isActive={this.props.isActive}
+                    >
+                        <RouteItemContent>
+                            <Icon
+                                filePath={'img/' + this.props.icon}
+                                heightAndWidth="20px"
+                                hoverOff
+                                color={this.props.isActive ? 'purple' : null}
+                            />
+                            <RouteTitle isActive={this.props.isActive}>
+                                {this.props.name}
+                            </RouteTitle>
+                        </RouteItemContent>
+                    </RouteItem>
                 </this.LinkComponent>
-            </RouteItem>
+            </Container>
         )
     }
 }
+
+const Container = styled.div`
+    width: 100%;
+    & > a {
+        display: flex;
+        text-decoration: none;
+    }
+
+    & * {
+        cursor: pointer !important;
+    }
+`
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
     color: ${(props) =>
@@ -55,6 +72,7 @@ const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
     text-decoration: none;
     display: flex;
     justify-content: flex-start;
+    width: 100%;
 `
 
 const RouteItemContent = styled.div`
@@ -62,6 +80,7 @@ const RouteItemContent = styled.div`
     grid-auto-flow: column;
     grid-gap: 10px;
     align-items: center;
+    width: 100%;
 `
 
 const RouteItem = styled.li<{ name: string; isActive: boolean }>`
@@ -71,6 +90,8 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     align-items: center;
     padding: 0 35px;
     height: 50px;
+    width: 100%;
+    justify-content: flex-start;
 
     & > a {
         display: flex;

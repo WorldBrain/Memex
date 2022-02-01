@@ -243,20 +243,15 @@ export async function processEvent({
             onChoice: async () => {
                 // initializing the backend of the users choice
                 const location = event.choice
-                remoteFunction('setBackendLocation')(location)
+                remoteFunction('setBackendLocation')('local')
                 analytics.trackEvent({
                     category: 'Backup',
                     action: 'onboarding-where-chosen',
                 })
-
-                const isAutomaticBackupEnabled = await remoteFunction(
-                    'isAutomaticBackupEnabled',
-                )()
-                if (isAutomaticBackupEnabled) {
-                    return { screen: 'onboarding-size' }
-                } else {
-                    return { screen: 'onboarding-how' }
-                }
+                localStorage.setItem('backup.automatic-backups-enabled', 'true')
+                await remoteFunction('enableAutomaticBackup')
+                localStorage.setItem('backup.onboarding.running-backup', true)
+                return { screen: 'running-backup' }
             },
             onChangeLocalLocation: () => {
                 if (
@@ -272,6 +267,7 @@ export async function processEvent({
         'onboarding-how': {
             onChoice: async () => {
                 const { choice } = event
+                remoteFunction('setBackendLocation')('local')
 
                 await analytics.trackEvent({
                     category: 'Backup',
@@ -315,9 +311,6 @@ export async function processEvent({
         'running-backup': {
             onFinish: async () => {
                 await localStorage.removeItem('backup.onboarding')
-                await localStorage.removeItem(
-                    'backup.onboarding.authenticating',
-                )
                 await localStorage.removeItem(
                     'backup.onboarding.running-backup',
                 )
