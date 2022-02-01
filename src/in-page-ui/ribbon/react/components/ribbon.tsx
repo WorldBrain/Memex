@@ -25,6 +25,7 @@ import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickT
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const styles = require('./ribbon.css')
 
@@ -142,7 +143,7 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <Tooltip position="left">
+            <HoverBox position="absolute" top="160px" right="40px">
                 <BlurredSidebarOverlay
                     onOutsideClick={this.hideTagPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}
@@ -158,7 +159,7 @@ export default class Ribbon extends Component<Props, State> {
                         handleClickOutside={this.hideTagPicker}
                     />
                 </BlurredSidebarOverlay>
-            </Tooltip>
+            </HoverBox>
         )
     }
 
@@ -168,7 +169,7 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <Tooltip position="left">
+            <HoverBox position="absolute" top="140px" right="40px">
                 <BlurredSidebarOverlay
                     onOutsideClick={this.hideListPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}
@@ -184,7 +185,7 @@ export default class Ribbon extends Component<Props, State> {
                         handleClickOutside={this.hideListPicker}
                     />
                 </BlurredSidebarOverlay>
-            </Tooltip>
+            </HoverBox>
         )
     }
 

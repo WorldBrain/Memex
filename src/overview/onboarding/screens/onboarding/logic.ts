@@ -28,10 +28,15 @@ export default class Logic extends UILogic<State, Event> {
         syncState: 'pristine',
         shouldShowLogin: true,
         newSignUp: false,
+        mode: 'signup',
     })
 
     async init() {
         const { authBG } = this.dependencies
+
+        this.emitMutation({
+            mode: { $set: 'signup' },
+        })
 
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
@@ -76,5 +81,17 @@ export default class Logic extends UILogic<State, Event> {
 
     finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
         this.dependencies.navToDashboard()
+    }
+
+    toggleMode: EventHandler<'toggleMode'> = async ({ previousState }) => {
+        if (previousState.mode !== 'signup' && previousState.mode !== 'login') {
+            return
+        }
+
+        this.emitMutation({
+            mode: {
+                $set: previousState.mode === 'signup' ? 'login' : 'signup',
+            },
+        })
     }
 }

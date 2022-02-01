@@ -29,6 +29,7 @@ export const heartFullGrey = browser.runtime.getURL('/img/star_full_grey.svg')
 export const heartEmpty = browser.runtime.getURL('/img/star_empty.svg')
 export const heartEmptyGrey = browser.runtime.getURL('/img/star_empty_grey.svg')
 export const dropImage = browser.runtime.getURL('/img/dropImage.svg')
+export const phone = browser.runtime.getURL('/img/phone.svg')
 export const helpIcon = browser.runtime.getURL('/img/help.svg')
 export const searchIcon = browser.runtime.getURL('/img/search.svg')
 export const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
@@ -41,6 +42,10 @@ export const pause = browser.runtime.getURL('/img/pause.svg')
 export const stop = browser.runtime.getURL('/img/stop.svg')
 export const warning = browser.runtime.getURL('/img/warning_red.svg')
 export const integrate = browser.runtime.getURL('/img/integrate.svg')
+export const noNote = browser.runtime.getURL('/img/noNote.svg')
+export const lockFine = browser.runtime.getURL('/img/lockFine.svg')
+export const mail = browser.runtime.getURL('/img/mail.svg')
+export const personFine = browser.runtime.getURL('/img/personFine.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -75,6 +80,8 @@ export const sort = browser.runtime.getURL('/img/sort.svg')
 export const redo = browser.runtime.getURL('/img/redo.svg')
 export const person = browser.runtime.getURL('/img/person.svg')
 export const shared = browser.runtime.getURL('/img/shared.svg')
+export const shield = browser.runtime.getURL('/img/shield.svg')
+
 export const sharedProtected = browser.runtime.getURL(
     '/img/sharedprotected.svg',
 )

@@ -260,10 +260,12 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        <PageTitle>
+                        <PageTitle isUrl={!hasTitle}>
                             {hasTitle
                                 ? this.props.fullTitle === this.props.fullUrl
-                                    ? this.props.fullTitle.split('/').slice(-1)
+                                    ? this.props.fullTitle
+                                          .split('://')
+                                          .slice(-1)
                                     : this.props.fullTitle
                                 : this.props.fullUrl}
                         </PageTitle>
@@ -281,15 +283,15 @@ export default class PageResultView extends PureComponent<Props> {
                                 )}
                                 <PageUrl>{this.domain}</PageUrl>
                             </DomainContainer>
-                            <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onEditBtnClick={this.props.onTagPickerBtnClick}
-                                onTagClick={this.props.onTagClick}
-                            />
                         </ResultContent>
                     </PageContentBox>
+                    <TagsSegment
+                        tags={this.props.tags}
+                        onMouseEnter={this.props.onTagsHover}
+                        showEditBtn={this.props.hoverState === 'tags'}
+                        onEditBtnClick={this.props.onTagPickerBtnClick}
+                        onTagClick={this.props.onTagClick}
+                    />
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
@@ -325,7 +327,7 @@ const StyledPageResult = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    border-radius: 12px;
+    border-radius: 8px;
 
     &:hover {
         outline: 2px solid ${(props) => props.theme.colors.lineGrey};
@@ -394,6 +396,7 @@ const PageTitle = styled(Margin)`
     font-weight: 600;
     color: ${(props) => props.theme.colors.lightblack};
     justify-content: flex-start;
+    line-break: ${(props) => (props.isUrl ? 'anywhere' : 'unset')};
 `
 const PageUrl = styled.span`
     font-size: 12px;

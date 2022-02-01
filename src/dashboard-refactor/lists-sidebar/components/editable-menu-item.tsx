@@ -102,7 +102,7 @@ const EditableListTitle = styled.input`
     display: flex;
     min-width: 50px;
     margin-right: 0px;
-    font-size: 12px;
+    font-size: 14px;
     height: 50px;
     outline: none;
     border: none;
@@ -121,7 +121,7 @@ const ErrMsg = styled.div`
 
 const Container = styled.div<Props>`
     height: 50px;
-    width: 100%;
+    width: fill-available;
     display: flex;
     flex-direction: column;
     justify-content: center;

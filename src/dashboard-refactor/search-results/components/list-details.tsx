@@ -6,6 +6,7 @@ import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 export interface Props {
     listName: string
@@ -68,24 +69,25 @@ export default class ListDetails extends PureComponent<Props> {
                                         tooltipText="Invite people to this collection"
                                         position="bottom"
                                     >
-                                        <Button
-                                            type="primary-action"
+                                        <PrimaryAction
                                             onClick={
                                                 this.props
                                                     .onAddContributorsClick
                                             }
-                                        >
-                                            <ShareCollectionBtn>
-                                                <Icon
-                                                    height="18px"
-                                                    filePath={icons.link}
-                                                    color="white"
-                                                />
-                                                <ShareCollectionBtnLabel>
-                                                    Share Space
-                                                </ShareCollectionBtnLabel>
-                                            </ShareCollectionBtn>
-                                        </Button>
+                                            label={
+                                                <ShareCollectionBtn>
+                                                    <Icon
+                                                        height="16px"
+                                                        filePath={icons.link}
+                                                        color="white"
+                                                        hoverOff
+                                                    />
+                                                    <ShareCollectionBtnLabel>
+                                                        Share Space
+                                                    </ShareCollectionBtnLabel>
+                                                </ShareCollectionBtn>
+                                            }
+                                        />
                                     </ButtonTooltip>
                                 )}
                             </BtnsContainer>

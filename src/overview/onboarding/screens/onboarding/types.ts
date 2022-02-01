@@ -16,6 +16,7 @@ export interface State {
     step: 'tutorial' | 'sync'
     shouldShowLogin: boolean
     newSignUp: boolean
+    mode: 'signup' | 'login'
 }
 
 export type Event = UIEvent<{
@@ -23,4 +24,9 @@ export type Event = UIEvent<{
     goToSyncStep: null
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
+    editEmail: { value: string }
+    editPassword: { value: string }
+    emailPasswordConfirm: null
+    toggleMode: null
+    editDisplayName: { value: string }
 }>

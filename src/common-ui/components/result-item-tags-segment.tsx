@@ -23,8 +23,8 @@ export default function TagsSegment({
 
     return (
         <Container {...props}>
-            <EditIconContainer>
-                <EditIcon onClick={onEditBtnClick} />
+            <EditIconContainer onClick={onEditBtnClick}>
+                <EditIcon />
             </EditIconContainer>
             <TagsContainer>
                 {tags.slice(0).map((tag) => (
@@ -47,6 +47,7 @@ const Container = styled.div`
     justify-content: flex-start;
     padding: 5px 15px;
     grid-auto-flow: column;
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const TagsContainer = styled.div`
@@ -67,7 +68,7 @@ const TagPill = styled.div`
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
 `
 
 const EditIconContainer = styled.div`
@@ -78,6 +79,7 @@ const EditIconContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 `
 
 const EditIcon = styled.div`

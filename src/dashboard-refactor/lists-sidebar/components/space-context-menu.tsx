@@ -451,6 +451,7 @@ const PermissionArea = styled.div`
 const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
     color: ${(props) => props.theme.colors.normalText};
+    width: fill-available;
 `
 
 const IconContainer = styled.div`
@@ -477,10 +478,6 @@ const MoreIconBackground = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &:hover {
-        background: white;
-    }
 `
 
 const LoadingContainer = styled.div`
@@ -665,7 +662,7 @@ const MenuSection = styled.div`
 const MenuButton = styled.div`
     height: 34px;
     width: 100%;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-weight: ${fonts.primary.weight.normal};
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;

@@ -1,7 +1,7 @@
-@import url('/fonts/Poppins/poppins.css');
+@import url('/fonts/Inter/inter.css');
 
 :host * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
 }
 
 .extraPanel {

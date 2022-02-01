@@ -245,7 +245,7 @@ const DropZoneMask = styled.div`
 const TitleBox = styled.div<Props>`
     display: flex;
     flex: 0 1 100%;
-    width: 100%;
+    width: 91%;
     height: 100%;
     padding-left: ${(props) =>
         props.listId === SPECIAL_LIST_IDS.INBOX ||

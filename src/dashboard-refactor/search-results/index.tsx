@@ -64,6 +64,8 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        searchResults?: any
+        searchQuery?: string
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
@@ -314,47 +316,154 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 
     private renderNoResults() {
-        if (this.props.noResultsType === 'onboarding-msg') {
-            return (
-                <NoResults title="You don't have anything saved yet">
-                    <OnboardingMsg
-                        goToImportRoute={this.props.goToImportRoute}
-                    />
-                </NoResults>
-            )
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            this.props.searchQuery.length === 0
+        ) {
+            if (this.props.searchType === 'notes') {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.highlighterEmpty}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults
+                            title={
+                                <span>
+                                    Make your first highlight or annotation
+                                </span>
+                            }
+                        />
+                    </ResultsMessage>
+                )
+            }
+
+            if (this.props.noResultsType === 'mobile-list-ad') {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.phone}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults title="Save & annotate from your mobile devices">
+                            <DismissibleResultsMessage
+                                onDismiss={this.props.onDismissMobileAd}
+                            >
+                                <MobileAppAd />
+                            </DismissibleResultsMessage>
+                        </NoResults>
+                    </ResultsMessage>
+                )
+            } else {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.heartEmpty}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults
+                            title={
+                                <span>
+                                    Save your first website or{' '}
+                                    <ImportInfo
+                                        onClick={() =>
+                                            (window.location.hash = '#/import')
+                                        }
+                                    >
+                                        import your bookmarks.
+                                    </ImportInfo>
+                                </span>
+                            }
+                        ></NoResults>
+                    </ResultsMessage>
+                )
+            }
         }
 
-        if (this.props.noResultsType === 'mobile-list') {
+        if (
+            this.props.noResultsType === 'mobile-list' &&
+            this.props.searchQuery.length === 0
+        ) {
             return (
-                <NoResults title="You don't have anything saved from the mobile app yet" />
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.phone}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="Save & annotate from your mobile devices"></NoResults>
+                </ResultsMessage>
             )
         }
 
         if (this.props.noResultsType === 'mobile-list-ad') {
             return (
-                <NoResults title="You don't have anything saved from the mobile app yet">
-                    <DismissibleResultsMessage
-                        onDismiss={this.props.onDismissMobileAd}
-                    >
-                        <MobileAppAd />
-                    </DismissibleResultsMessage>
-                </NoResults>
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.phone}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="Save & annotate from your mobile devices">
+                        <DismissibleResultsMessage
+                            onDismiss={this.props.onDismissMobileAd}
+                        >
+                            <MobileAppAd />
+                        </DismissibleResultsMessage>
+                    </NoResults>
+                </ResultsMessage>
             )
         }
 
         if (this.props.noResultsType === 'stop-words') {
             return (
-                <NoResults title="No Results">
-                    Search terms are too common, or have been filtered out to
-                    increase performance.
-                </NoResults>
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="No Results">
+                        Search terms are too common <br />
+                        or have been filtered out to increase performance.
+                    </NoResults>
+                </ResultsMessage>
             )
         }
 
         return (
-            <NoResults title="Nothing found for this query">
-                ¯\_(ツ)_/¯
-            </NoResults>
+            <ResultsMessage>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.searchIcon}
+                        heightAndWidth="24px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <NoResults title="Nothing found for this query" />
+            </ResultsMessage>
         )
     }
 
@@ -481,6 +590,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
+const ResultsMessage = styled.div`
+    padding-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
@@ -587,4 +704,21 @@ const ShareBtn = styled.button`
 const IconImg = styled.img`
     height: 18px;
     width: 18px;
+`
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 60px;
+    width: 60px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ImportInfo = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    margin-bottom: 40px;
+    font-weight: 500;
+    cursor: pointer;
 `

@@ -44,7 +44,7 @@ export default [
         name: 'My Account',
         pathname: '/account',
         component: UserScreen,
-        icon: 'person.svg',
+        icon: 'personFine.svg',
     },
     // {
     //     name: 'Blocklist',
@@ -52,12 +52,12 @@ export default [
     //     component: SettingsContainer,
     //     icon: 'block.svg',
     // },
-    {
-        name: 'Privacy',
-        pathname: '/privacy',
-        component: Privacy,
-        icon: 'privacy.svg',
-    },
+    // {
+    //     name: 'Privacy',
+    //     pathname: '/privacy',
+    //     component: Privacy,
+    //     icon: 'shield.svg',
+    // },
     // {
     //     name: 'Memex Team',
     //     pathname: 'https://worldbrain.io/team',
@@ -65,23 +65,23 @@ export default [
     //     isExternal: true,
     // },
     {
-        name: 'Help',
+        name: 'Forum',
         pathname: 'https://worldbrain.io/help',
         icon: 'help.svg',
         isExternal: true,
     },
     {
         name: 'Tutorial',
-        pathname: 'https://worldbrain.io/tutorials',
+        pathname: 'https://tutorials.memex.garden',
         isExternal: true,
         icon: 'info.svg',
     },
-    {
-        name: 'Get Early Bird Discount',
-        pathname: 'https://worldbrain.io/announcements/pioneer-plan',
-        isExternal: true,
-        icon: 'money.svg',
-    },
+    // {
+    //     name: 'Get Early Bird Discount',
+    //     pathname: 'https://worldbrain.io/announcements/pioneer-plan',
+    //     isExternal: true,
+    //     icon: 'money.svg',
+    // },
     {
         name: 'User Account',
         pathname: '/account',

@@ -1,4 +1,6 @@
 import React from 'react'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
 
 export interface Props {
@@ -27,54 +29,40 @@ export default class DismissibleResultsMessage extends React.PureComponent<
 
         return (
             <Container>
+                <DismissButton>
+                    <Icon
+                        filePath={icons.close}
+                        heightAndWidth="16px"
+                        onClick={this.handleDismiss}
+                    />
+                </DismissButton>
                 {this.props.children}
-                <DismissButton onClick={this.handleDismiss} />
             </Container>
         )
     }
 }
 
 const Container = styled.div`
-    // composes: boxShadow from 'src/common-ui/colors.css';
-    border-radius: radius3;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
-    transition: background 120ms ease-in 0s;
+    background: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 50px;
 
     // composes: fadeIn from 'src/common-ui/elements.css';
     animation: fadeIn 500ms ease;
 
     align-items: center;
-    background-color: white;
-    border-radius: 3px;
     display: flex;
     flex-direction: column;
     position: relative;
-    padding: 2rem;
-    margin: 20px 0 40px 0;
+    margin: 50px 0 40px 0;
     width: 100%;
 `
 
-const DismissButton = styled.button`
-    // composes: removeIcon from 'src/common-ui/icons.css';
-    // composes: standardIcon;
-    mask-position: center;
-    mask-repeat: no-repeat;
-    height: 20px;
-    width: 20px;
-    mask-size: 16px;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-image: url('/img/close.svg');
-
+const DismissButton = styled.div`
     border: none;
     outline: none;
     position: absolute;
     top: 1rem;
     right: 1rem;
-
-    &:hover {
-        cursor: pointer;
-    }
 `

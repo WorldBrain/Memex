@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import colors from 'src/dashboard-refactor/colors'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface State {
     value: string
@@ -44,8 +45,10 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         e.stopPropagation()
     }
 
-    private handleConfirm: React.MouseEventHandler = () =>
+    private handleConfirm: React.MouseEventHandler = () => {
+        console.log('test')
         this.props.onConfirmClick(this.state.value)
+    }
 
     private handleCancel: React.MouseEventHandler = () =>
         this.props.onCancelClick(this.state.value)
@@ -60,13 +63,18 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                         value={this.state.value}
                         onKeyDown={this.handleInputKeyDown}
                     />
-                    <ActionButtonBox left="5px">
-                        <ActionBtn onClick={this.handleConfirm}>
-                            <Icon src={icons.check} />
-                        </ActionBtn>
-                        <ActionBtn onClick={this.handleCancel}>
-                            <Icon src={icons.close} />
-                        </ActionBtn>
+                    <ActionButtonBox right="5px">
+                        <Icon
+                            filePath={icons.check}
+                            heightAndWidth="14px"
+                            onClick={this.handleConfirm}
+                        />
+                        <Icon
+                            filePath={icons.close}
+                            heightAndWidth="12px"
+                            onClick={this.handleCancel}
+                            padding={'5px'}
+                        />
                     </ActionButtonBox>
                 </Container>
                 {this.props.errorMessage && (
@@ -78,49 +86,28 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
 }
 
 const EditableListTitle = styled.input`
-    border: 1px solid #e0e0e0;
-    padding: 2px 5px;
+    padding: 2px 10px;
     border-radius: 3px;
     outline: none;
     background: white;
-    flex: 2;
+    flex: 0 1 100%;
     display: flex;
-    min-width: 50px;
-    margin-right: 0px;
+    width: 70%;
+    margin: 5px 0 5px 10px;
     font-size: 14px;
+    height: 30px;
+    outline: none;
+    border: none;
     color: ${(props) => props.theme.colors.normalText};
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const ActionButtonBox = styled(Margin)`
-    display: flex;
-    flex: 1;
-`
-
-const ActionBtn = styled.div`
-    border: none;
-    background: none;
-    display: flex;
+    display: grid;
+    grid-gap: 5px;
     justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    outline: none;
-    height: 24px;
-    width: 24px;
-
-    > img {
-        height: 12px;
-        width: auto;
-        outline: none;
-    }
-
-    &:hover {
-        background: #e0e0e0;
-    }
-`
-
-const Icon = styled.img`
-    height: 15px;
-    width: 15px;
+    grid-auto-flow: column;
+    width: 30px;
 `
 
 const ErrMsg = styled.div`
@@ -130,16 +117,11 @@ const ErrMsg = styled.div`
 `
 
 const Container = styled.div<Props>`
-    height: 30px;
-    width: 100%;
-    padding-left: 15px;
+    width: fill-available;
     display: flex;
-    flex-direction: row;
+    grid-gap: 15px;
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-
-    &:hover {
-        background-color: ${colors.onHover};
-    }
+    padding: 10px;
 `

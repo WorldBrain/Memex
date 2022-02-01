@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
+import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -43,6 +44,7 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
+// import GlobalFonts from '../../fonts/Inter/inter'
 
 export interface Props extends DashboardDependencies {}
 
@@ -506,6 +508,8 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                searchResults={searchResults.pageData}
+                searchQuery={searchFilters.searchQuery}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 goToImportRoute={() => {
                     this.bindRouteGoTo('import')()
@@ -530,9 +534,9 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissMobileAd={() =>
                     this.processEvent('dismissMobileAd', null)
                 }
-                onDismissOnboardingMsg={() =>
+                onDismissOnboardingMsg={() => {
                     this.processEvent('dismissOnboardingMsg', null)
-                }
+                }}
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
@@ -947,6 +951,8 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     render() {
+        // <GlobalFonts />
+        // <GlobalStyle />
         const { listsSidebar, mode } = this.state
         if (mode === 'onboarding') {
             return (
@@ -1001,11 +1007,26 @@ export class DashboardContainer extends StatefulUIElement<
     }
 }
 
+const GlobalStyle = createGlobalStyle`
+
+    * {
+        font-family: 'Inter';,
+    }
+
+    body {
+        font-family: 'Inter';';
+    }
+`
+
 const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: fill-available;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    min-height: 100vh;
-    height: 100%;
+display: flex;
+flex-direction: column;
+width: fill-available;
+background-color: ${(props) => props.theme.colors.backgroundColor};
+min-height: 100vh;
+height: 100%;
+
+    & * {
+        font-family: 'Inter';,
+    }
 `

@@ -17,7 +17,6 @@ const StyledHoverBox = styled(HoverBox)`
     width: 230px;
     background-color: ${colors.white};
     flex-direction: column;
-    box-shadow: ${styles.boxShadow.overlayElement};
     overflow: hidden;
 `
 

@@ -86,10 +86,6 @@ export const copyPatterns = [
         to: 'fonts/Inter/[name].[ext]',
     },
     {
-        from: 'fonts/Poppins/*',
-        to: 'fonts/Poppins/[name].[ext]',
-    },
-    {
         from:
             'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',
         to: 'fonts/material-icons/[name].[ext]',

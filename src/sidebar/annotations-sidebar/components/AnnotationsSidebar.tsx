@@ -612,14 +612,20 @@ export default onClickOutside(AnnotationsSidebar)
 const EmptyMessage = () => (
     <FollowedListsMsgContainer>
         <FollowedListsMsgHead>
-            No notes or highlights on this page
+            <NoNoteImg src={icons.noNote} />
         </FollowedListsMsgHead>
         <FollowedListsMsg>
-            Type in the text field above <br />
-            or highlight sections of the page
+            Add a note or highlight sections of the page
         </FollowedListsMsg>
     </FollowedListsMsgContainer>
 )
+
+const NoNoteImg = styled.img`
+    height: 80px;
+    width: 80px;
+    display: flex;
+    justify-self: center;
+`
 
 const ButtonStyled = styled.button`
     cursor: pointer;
@@ -700,14 +706,19 @@ const FollowedListsMsgContainer = styled.div`
 const FollowedListsMsgHead = styled.span`
     font-weight: bold;
     text-align: center;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     padding-top: 10px;
     padding-bottom: 5px;
     font-size: 14px;
     line-height: 20px;
+    justify-content: center;
+    display: grid;
+    grid-auto-flow: row;
+    align-items: center;
+    grid-gap: 5px;
 `
 const FollowedListsMsg = styled.span`
-    color: ${(props) => props.theme.colors.darkgrey};
+    color: ${(props) => props.theme.colors.lighterText};
     text-align: center;
     font-size: 14px;
     line-height: 17px;
@@ -853,7 +864,7 @@ const annotationCardStyle = css`
 `
 
 const NewAnnotationSection = styled.section`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     height: auto;
     background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
@@ -871,7 +882,7 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;

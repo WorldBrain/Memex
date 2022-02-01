@@ -215,7 +215,7 @@ const Section = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.backgroundHighlight};
     border-radius: 100px;
     height: 80px;
     width: 80px;

@@ -28,6 +28,7 @@ import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import colors from 'src/dashboard-refactor/colors'
 
 export type { TagPickerDependencies }
 
@@ -181,7 +182,6 @@ class TagPicker extends StatefulUIElement<
                 <DeprecationWarning>
                     <DeprecationText>
                         Tags will soon be deprecated and merged into our new
-                        <IconSpan src={icons.collectionsEmpty} />
                         <HighlightText>Spaces</HighlightText>.
                     </DeprecationText>
                     <PrimaryAction
@@ -248,11 +248,10 @@ class TagPicker extends StatefulUIElement<
 
 const DeprecationText = styled.div`
     display: inline-block;
+    font-size: 12px;
 `
 
-const IconSpan = styled.img`
-    height: 12px;
-    width: 12px;
+const IconSpan = styled(Icon)`
     vertical-align: middle;
     margin-right: 2px;
     margin-left: 5px;
@@ -261,6 +260,7 @@ const IconSpan = styled.img`
 const HighlightText = styled.span`
     color: ${(props) => props.theme.colors.primary};
     vertical-align: middle;
+    padding-left: 5px;
 `
 
 const DeprecationWarning = styled.div`
