@@ -33,4 +33,5 @@ const OutsideDiv = styled.div`
 const WrapperDiv = styled.div`
     position: relative;
     z-index: 2;
+    padding: 5px 0px 0px 0px;
 `

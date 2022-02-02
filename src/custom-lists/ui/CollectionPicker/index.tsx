@@ -103,14 +103,24 @@ class ListPicker extends StatefulUIElement<
             entry: this.state.newEntryName,
         })
 
-    handleResultListFocus = (list: DisplayEntry, index?: number) =>
+    handleResultListFocus = (list: DisplayEntry, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
+
+        const offsetTop = document.getElementById(
+            `ListKeyName-${list.name}-${index}`,
+        ).offsetTop
+        document.getElementById(
+            `ListKeyName-${list.name}-${index}`,
+        ).scrollTop = offsetTop
+    }
 
     handleNewListPress = () => {
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
     }
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
+    handleKeyPress = (key: KeyEvent) => {
+        this.processEvent('keyPress', { key })
+    }
 
     renderListRow = (list: DisplayEntry, index: number) => (
         <EntryRow
@@ -121,6 +131,7 @@ class ListPicker extends StatefulUIElement<
                     : undefined
             }
             onFocus={this.handleResultListFocus}
+            id={`ID-${list.name}-${index}`}
             key={`ListKeyName-${list.name}-${index}`}
             index={index}
             name={list.name}

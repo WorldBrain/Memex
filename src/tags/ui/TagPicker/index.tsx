@@ -179,20 +179,6 @@ class TagPicker extends StatefulUIElement<
 
         return (
             <>
-                <DeprecationWarning>
-                    <DeprecationText>
-                        Tags will soon be deprecated and merged into our new
-                        <HighlightText>Spaces</HighlightText>.
-                    </DeprecationText>
-                    <PrimaryAction
-                        label="Learn More"
-                        onClick={() =>
-                            window.open(
-                                'https://links.memex.garden/announcements/tags-collections-unification',
-                            )
-                        }
-                    />
-                </DeprecationWarning>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
@@ -227,6 +213,23 @@ class TagPicker extends StatefulUIElement<
                         {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
+                <DeprecationWarningContainer>
+                    <DeprecationWarning>
+                        <DeprecationText>
+                            Tags will soon be deprecated and merged into our new
+                            <HighlightText>Spaces</HighlightText>.
+                        </DeprecationText>
+                        <PrimaryAction
+                            label="Learn More"
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/announcements/tags-collections-unification',
+                                )
+                            }
+                            fontSize="10px"
+                        />
+                    </DeprecationWarning>
+                </DeprecationWarningContainer>
             </>
         )
     }
@@ -263,16 +266,23 @@ const HighlightText = styled.span`
     padding-left: 5px;
 `
 
+const DeprecationWarningContainer = styled.div`
+    padding-top: 5px;
+    border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
+    margin-top: 5px;
+`
+
 const DeprecationWarning = styled.div`
     background-color: ${(props) => props.theme.colors.warning};
     border-radius: 3px;
-    margin: 0px 8px 5px 8px;
+    padding-top: 5px;
+    margin: 5px 8px 5px 8px;
     display: grid;
     justify-content: flex-start;
     align-items: center;
     padding: 5px 10px;
     color: white;
-    grid-gap: 5px;
+    grid-gap: 10px;
     grid-auto-flow: column;
 `
 

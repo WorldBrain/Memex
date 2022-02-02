@@ -5,6 +5,8 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import styled from 'styled-components'
+
 import {
     Container,
     BtnBox,
@@ -66,27 +68,25 @@ export default class DataMigrator extends React.PureComponent<Props> {
                     <TopComponent>
                         <LoadingIndicator />
                     </TopComponent>
-                    <Header>Preparing Cloud Migration</Header>
-                    <Text>
+                    <SectionTitle>Preparing Cloud Migration</SectionTitle>
+                    <InfoText>
                         Don't close your browser or shut off your computer in
                         this stage or you have to restart the migration.
-                    </Text>
+                    </InfoText>
                 </>
             ) : (
                 <>
                     <TopComponent>
                         <LoadingIndicator />
                     </TopComponent>
-                    <Header>Cloud Migration in Progress</Header>
-                    <Text>
+                    <SectionTitle>Cloud Migration in Progress</SectionTitle>
+                    <InfoText>
                         You can close this modal, as the sync process will
                         continue in the background.
                         <br />
-                        Login on other devices to sync them too.
-                        <br />
-                        It may take a while for all content to appear on all
-                        your devices.
-                    </Text>
+                        Login on other devices to sync them too. It may take a
+                        while for all content to appear on all your devices.
+                    </InfoText>
                 </>
             )
         }
@@ -96,13 +96,13 @@ export default class DataMigrator extends React.PureComponent<Props> {
                     <TopComponent>
                         <Icon icon="alertRound" height="20px" />
                     </TopComponent>
-                    <Header>
+                    <SectionTitle>
                         There was an error with migrating your data to the cloud
-                    </Header>
-                    <Text>
+                    </SectionTitle>
+                    <InfoText>
                         <a href={supportLink}>Contact support</a> if problem
                         persists.
-                    </Text>
+                    </InfoText>
                 </>
             )
         }
@@ -111,8 +111,8 @@ export default class DataMigrator extends React.PureComponent<Props> {
                 <TopComponent>
                     <LoadingIndicator />
                 </TopComponent>
-                <Header>Cloud Migration in Progress</Header>
-                <Text>
+                <SectionTitle>Cloud Migration in Progress</SectionTitle>
+                <InfoText>
                     You can close this modal, as the sync process will continue
                     in the background.
                     <br />
@@ -120,7 +120,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
                     <br />
                     It may take a while for all content to appear on all your
                     devices.
-                </Text>
+                </InfoText>
             </>
         )
     }
@@ -134,3 +134,17 @@ export default class DataMigrator extends React.PureComponent<Props> {
         )
     }
 }
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`

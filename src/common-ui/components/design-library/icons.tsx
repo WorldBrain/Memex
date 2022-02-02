@@ -45,6 +45,13 @@ export const integrate = browser.runtime.getURL('/img/integrate.svg')
 export const noNote = browser.runtime.getURL('/img/noNote.svg')
 export const lockFine = browser.runtime.getURL('/img/lockFine.svg')
 export const mail = browser.runtime.getURL('/img/mail.svg')
+export const inbox = browser.runtime.getURL('/img/inbox.svg')
+export const emptyCircle = browser.runtime.getURL('/img/emptyCircle.svg')
+export const sadFace = browser.runtime.getURL('/img/sadFace.svg')
+export const ribbonOn = browser.runtime.getURL('/img/ribbonOn.svg')
+export const ribbonOff = browser.runtime.getURL('/img/ribbonOff.svg')
+export const tooltipOn = browser.runtime.getURL('/img/tooltipOn.svg')
+export const tooltipOff = browser.runtime.getURL('/img/tooltipOff.svg')
 export const personFine = browser.runtime.getURL('/img/personFine.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',

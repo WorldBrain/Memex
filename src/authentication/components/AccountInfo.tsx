@@ -50,7 +50,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                         refreshUserInfoOnInit
                                     />
                                 </DisplayNameBox>
-                                <TextInputContainer>
+                                <TextInputContainerDisabled>
                                     <Icon
                                         filePath={icons.mail}
                                         heightAndWidth="20px"
@@ -59,12 +59,11 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                     <TextInput
                                         type={'text'}
                                         defaultValue={user.email}
-                                        readonly
-                                        disabled
+                                        readOnly
                                     />
-                                </TextInputContainer>
+                                </TextInputContainerDisabled>
                                 <DisplayNameBox>
-                                    <TextInputContainer>
+                                    <TextInputContainerDisabled>
                                         <Icon
                                             filePath={icons.personFine}
                                             heightAndWidth="20px"
@@ -76,7 +75,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                                             defaultValue={user.id}
                                             readOnly
                                         />
-                                    </TextInputContainer>
+                                    </TextInputContainerDisabled>
                                     <InfoText>
                                         Your internal user ID for support
                                         requests
@@ -155,11 +154,27 @@ const TextInputContainer = styled.div`
     padding: 0 15px;
 `
 
+const TextInputContainerDisabled = styled.div`
+    display: flex;
+    grid-auto-flow: column;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    height: 50px;
+    border-radius: 8px;
+    width: fill-available;
+    padding: 0 15px;
+`
+
 const TextInput = styled.input`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) =>
+        props.readOnly
+            ? props.theme.colors.lighterText
+            : props.theme.colors.normalText};
     font-size: 14px;
     border: none;
     background: transparent;

@@ -104,6 +104,77 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
     }
 
+    private renderListIcon(listId) {
+        if (listId === 20201015) {
+            return (
+                <IconContainer>
+                    <Icon
+                        filePath={icons.phone}
+                        heightAndWidth="18px"
+                        hoverOff
+                        color={
+                            this.props.selectedState.isSelected
+                                ? 'purple'
+                                : null
+                        }
+                    />
+                </IconContainer>
+            )
+        }
+        if (listId === 20201014) {
+            return (
+                <IconContainer>
+                    <Icon
+                        filePath={icons.inbox}
+                        heightAndWidth="18px"
+                        hoverOff
+                        color={
+                            this.props.selectedState.isSelected
+                                ? 'purple'
+                                : null
+                        }
+                    />
+                </IconContainer>
+            )
+        }
+        if (listId === -1) {
+            return (
+                <IconContainer>
+                    <Icon
+                        filePath={icons.heartEmpty}
+                        heightAndWidth="18px"
+                        hoverOff
+                        color={
+                            this.props.selectedState.isSelected
+                                ? 'purple'
+                                : null
+                        }
+                    />
+                </IconContainer>
+            )
+        }
+
+        if (listId === 20201016) {
+            if (this.props.hasActivity) {
+                return (
+                    <IconContainer>
+                        <ActivityBeacon />
+                    </IconContainer>
+                )
+            } else {
+                return (
+                    <IconContainer>
+                        <Icon
+                            filePath={icons.emptyCircle}
+                            heightAndWidth="16px"
+                            hoverOff
+                        />
+                    </IconContainer>
+                )
+            }
+        }
+    }
+
     private renderTitle() {
         const { dropReceivingState } = this.props
 
@@ -130,6 +201,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     onDrop={this.handleDrop}
                     {...this.props}
                 >
+                    {this.renderListIcon(this.props.listId)}
                     <Name>{this.props.name}</Name>
                     {collaborationIcon}
                 </ListTitle>
@@ -148,7 +220,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             <ListTitle selectedState={this.props.selectedState}>
                 {namePre.length > 0 && <span>{namePre}</span>}
                 <span style={{ fontWeight: fonts.primary.weight.bold }}>
-                    {nameHighlighted}
+                    {nameHighlighted} test
                 </span>
                 {namePost.length > 0 && <span>{namePost}</span>}
                 {collaborationIcon}
@@ -256,31 +328,13 @@ const TitleBox = styled.div<Props>`
     flex: 0 1 100%;
     width: 91%;
     height: 100%;
-    padding-left: ${(props) =>
-        props.listId === SPECIAL_LIST_IDS.INBOX ||
-        props.listId === SPECIAL_LIST_IDS.MOBILE
-            ? '35px'
-            : '25px'};
+    padding-left: 25px;
     align-items: center;
     color: ${(props) => props.theme.colors.normalText};
 `
 
 const SidebarItem = styled.div<Props>`
- height: ${(props) =>
-     props.listId === SPECIAL_LIST_IDS.INBOX ||
-     props.listId === SPECIAL_LIST_IDS.MOBILE
-         ? '30px'
-         : '40px'};
- margin-top:  ${(props) =>
-     props.listId === SPECIAL_LIST_IDS.INBOX ||
-     props.listId === SPECIAL_LIST_IDS.MOBILE
-         ? '-3px'
-         : '0px'};
-    margin-bottom:  ${(props) =>
-        props.listId === SPECIAL_LIST_IDS.INBOX ||
-        props.listId === SPECIAL_LIST_IDS.MOBILE
-            ? '5px'
-            : '0px'};
+ height: 40px;
  width: 100%;
  display: flex;
  flex-direction: row;
@@ -373,6 +427,7 @@ const MenuButton = styled.div`
 
 const ListTitle = styled.span<Props>`
     display: flex;
+    grid-gap: 10px;
     align-items: center;
     margin: 0;
     font-family: ${fonts.primary.name};
@@ -380,13 +435,9 @@ const ListTitle = styled.span<Props>`
     font-style: normal;
     ${({ selectedState }: Props) =>
         selectedState.isSelected && `font-weight: 600;`}
-    font-size:  ${(props) =>
-        props.listId === SPECIAL_LIST_IDS.INBOX ||
-        props.listId === SPECIAL_LIST_IDS.MOBILE
-            ? '14px'
-            : '14px'};
-    line-height: 18px;
-    height: 18px;
+    font-size:  14px;
+    line-height: 22px;
+    height: 22px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -396,11 +447,25 @@ const ListTitle = styled.span<Props>`
     pointer-events: none;
 `
 
+const IconContainer = styled.div`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ActivityBeaconEmpty = styled.div`
+    height: 14px;
+    width: 14px;
+    border-radius: 20px;
+    border: 1.5px solid ${(props) => props.theme.colors.iconColor};
+`
+
 const ActivityBeacon = styled.div`
     width: 14px;
     height: 14px;
-    border-radius: 10px;
-    padding: 8px;
+    border-radius: 20px;
     background-color: ${(props) => props.theme.colors.purple};
 `
 

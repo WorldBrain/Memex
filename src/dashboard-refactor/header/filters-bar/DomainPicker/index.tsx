@@ -186,7 +186,7 @@ const DomainResultItem = styled.div`
     padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
-    font-size: ${fontSizeSmall}px;
+    font-size: 14px;
     transition: all 0.1s;
     word-break: break-word;
 

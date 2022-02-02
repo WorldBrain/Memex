@@ -1,5 +1,6 @@
 import React, { HTMLProps } from 'react'
 import styled from 'styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 
@@ -18,7 +19,19 @@ export default function TagsSegment({
     ...props
 }: Props) {
     if (!tags?.length) {
-        return null
+        return (
+            <Container {...props}>
+                <EditIconContainerWithText onClick={onEditBtnClick}>
+                    <Icon
+                        filePath={icons.plus}
+                        heightAndWidth="10px"
+                        color={'purple'}
+                        hoverOff
+                    />
+                    Add Tags
+                </EditIconContainerWithText>
+            </Container>
+        )
     }
 
     return (
@@ -80,6 +93,26 @@ const EditIconContainer = styled.div`
     justify-content: center;
     align-items: center;
     cursor: pointer;
+`
+
+const EditIconContainerWithText = styled.div`
+    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
+    height: 20px;
+    width: fit-content;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 3px 0 1px;
+    grid-gap: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+    color: ${(props) => props.theme.colors.purple};
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const EditIcon = styled.div`

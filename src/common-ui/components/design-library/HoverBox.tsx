@@ -11,6 +11,7 @@ export interface Props {
     position?: string
     height?: string
     overflow?: string
+    padding?: string
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -48,6 +49,7 @@ export const HoverBoxDiv = styled.div<Props>`
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
     background-color: #fff;
     z-index: 1001;
+    padding: ${(props) => props.padding && props.padding};
 
     &::-webkit-scrollbar {
       display: none;
@@ -57,8 +59,7 @@ export const HoverBoxDiv = styled.div<Props>`
 `
 
 export const HoverBoxDashboard = styled.div`
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     overflow: scroll;
     position: absolute;
     width: 300px;

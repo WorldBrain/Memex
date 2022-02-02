@@ -21,6 +21,7 @@ export interface Props {
     selected?: boolean
     focused?: boolean
     remote?: boolean
+    id?: string
 }
 
 class EntryRow extends React.Component<Props> {
@@ -163,6 +164,10 @@ const Row = styled.div`
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
     // background: ${(props) =>
         props.isFocused && props.theme.colors.lightHover};
+
+    &:last-child {
+        border-bottom: none;
+    }
 `
 
 const NameWrapper = styled.div`

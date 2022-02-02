@@ -181,21 +181,22 @@ const MenuItem = styled.li`
             ? 'color: #97b2b8;'
             : '&:hover { background: #e0e0e0; cursor: pointer; }'};
     ${({ theme }) => theme.isSelected && 'background: #f0f0f0;'};
-    padding: 10px 20px;
+    padding: 10px 10px;
     line-height: 20px;
     width: fill-available;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
+    border-radius: 5px;
 `
 
 const MenuTitle = styled.div`
-    font-size: 13px;
-    font-weight: normal;
+    font-size: 14px;
+    font-weight: bold;
     padding: 8px 15px 0px 15px;
-    opacity: 0.5;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.darkBlue};
+    margin-bottom: 10px;
 `
 
 const SoonPill = styled.span`
@@ -237,18 +238,6 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     justify-content: center;
     height: 100%;
     width: 100%;
-
-    &:focus {
-        background-color: grey;
-    }
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
 `
 
 const Menu = styled.ul`
@@ -257,14 +246,14 @@ const Menu = styled.ul`
     list-style: none;
     padding: 5px 0;
     background: white;
-    border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    border-radius: 8px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
     margin-top: 5px;
     flex-direction: column;
-    top: 25px;
-    left: -65px;
+    top: 30px;
+    left: -55px;
     z-index: 1100;
+    padding: 15px;
 `

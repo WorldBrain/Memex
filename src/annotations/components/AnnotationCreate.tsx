@@ -163,7 +163,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.setState({ isTagPickerShown })
 
         const tagPicker = !this.state.isTagPickerShown ? null : (
-            <HoverBox right="0px">
+            <HoverBox left="10px">
                 <ClickAway onClickAway={() => setPickerShown(false)}>
                     <TagPicker
                         {...this.props}
@@ -177,20 +177,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             </HoverBox>
         )
 
-        return (
-            <div>
-                <TagHolder
-                    tags={tags}
-                    deleteTag={(tag) =>
-                        onTagsUpdate(tags.filter((t) => t !== tag))
-                    }
-                    clickHandler={() =>
-                        setPickerShown(!this.state.isTagPickerShown)
-                    }
-                />
-                {tagPicker}
-            </div>
-        )
+        return <div>{tagPicker}</div>
     }
 
     private renderMarkdownHelpButton() {
@@ -225,6 +212,9 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     render() {
+        const setPickerShown = (isTagPickerShown: boolean) =>
+            this.setState({ isTagPickerShown })
+
         return (
             <>
                 <TextBoxContainerStyled>
@@ -248,17 +238,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onMouseEnter={this.props.onTagsHover}
                                 showEditBtn={this.props.hoverState === 'tags'}
                                 onTagClick={this.props.onTagClick}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onTagIconClick
+                                onEditBtnClick={() =>
+                                    setPickerShown(!this.state.isTagPickerShown)
                                 }
                             />
+                            {this.renderTagPicker()}
                             <FooterContainer>
                                 <SaveActionBar>
                                     {this.renderActionButtons()}
                                     {this.renderMarkdownHelpButton()}
                                 </SaveActionBar>
-                                {this.renderTagPicker()}
                             </FooterContainer>
                         </>
                     )}
@@ -345,8 +334,7 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: 100%;
-    box-shadow: rgb(0 0 0 / 10%) 0px 1px 2px 0px;
-    border-radius: 5px;
+    border-radius: 12px;
     background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
 
     & * {
@@ -406,8 +394,7 @@ const CancelBtnStyled = styled.div`
     color: red;
 
     &:hover {
-        background-color: #e0e0e0;
-    }
+        background-color: ${(props) => props.theme.colors.backgroundColor};
 
     &:focus {
         background-color: #79797945;

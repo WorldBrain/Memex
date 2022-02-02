@@ -53,13 +53,9 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     heightAndWidth="14px"
                     hoverOff
                 />
-                {this.props.before}
+                {/* {this.props.before} */}
                 <SearchInput
-                    placeholder={
-                        this.props.showPlaceholder ?? true
-                            ? this.props.searchInputPlaceholder
-                            : ''
-                    }
+                    placeholder={this.props.searchInputPlaceholder}
                     defaultValue={this.props.value}
                     onChange={this.onChange}
                     onKeyDown={(e) => e.stopPropagation()}
@@ -92,12 +88,12 @@ const SearchBox = styled.div`
     flex-wrap: wrap;
     font-size: 1rem;
     padding: 10px;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 14px;
+    margin-right: 14px;
     transition: border 0.1s;
     margin-bottom: 4px;
-    min-height: 34px;
     grid-gap: 5px;
+    min-height: 26px;
 `
 
 const SearchInput = styled(TextInputControlled)`

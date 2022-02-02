@@ -76,7 +76,7 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     justify-content: flex-start;
     padding: 5px 20px;
     height: 55px;
-    cursor: 'pointer';
+    cursor: pointer;
 
     &:hover {
         background: ${(props) => props.theme.colors.backgroundColor};

@@ -123,5 +123,5 @@ const Container = styled.div<Props>`
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-    padding: 10px;
+    padding: 5px 10px;
 `

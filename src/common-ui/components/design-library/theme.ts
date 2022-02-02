@@ -12,7 +12,7 @@ export const theme: Theme = {
     },
     colors: {
         background: 'white',
-        warning: 'red',
+        warning: '#ff9090',
         primary: '#3a2f45',
         subText: '#aeaeae',
         purple: '#347AE2',

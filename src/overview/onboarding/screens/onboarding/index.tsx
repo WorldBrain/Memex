@@ -449,7 +449,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     render() {
         return (
             <OnboardingBox>
-                {!this.state.shouldShowLogin
+                {this.state.shouldShowLogin
                     ? this.renderLoginStep()
                     : this.renderOnboardingSteps()}
             </OnboardingBox>

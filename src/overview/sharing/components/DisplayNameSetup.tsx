@@ -42,13 +42,13 @@ const TextInput = styled.input`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     border: none;
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.normalText};
     }
 `
 
@@ -145,7 +145,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
                             placeholder={'Add Display Name'}
                         />
                     </TextInputContainer>
-                    {this.state.saveState === 'pristine' && (
+                    {this.state.displayName !== this.state.displayNameInput && (
                         <PrimaryAction
                             label={this.renderBtnLabel()}
                             onClick={this.confirmSave}

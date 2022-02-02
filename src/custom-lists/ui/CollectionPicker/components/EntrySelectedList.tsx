@@ -40,8 +40,8 @@ export class EntrySelectedList extends React.PureComponent<Props> {
 const StyledActiveEntry = styled(ActiveList)`
     display: inline-flex;
     cursor: pointer;
-    height: 18px;
-    padding: 3px 8px;
+    min-height: 18px;
+    padding: 2px 8px;
     &:hover {
         background: ${(props) => props.theme.colors.darkhover};
     }
@@ -50,7 +50,7 @@ const StyledActiveEntry = styled(ActiveList)`
 const Entry = styled.div`
     display: block;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: break-spaces;
     overflow-x: hidden;
     text-overflow: ellipsis;
     font-size: 14px;

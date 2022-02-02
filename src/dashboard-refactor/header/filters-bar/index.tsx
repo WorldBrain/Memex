@@ -65,6 +65,16 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     background: #ffffff;
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    white-space: nowrap;
+    max-width: 300px;
+    overflow: scroll;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
     cursor: pointer;
     height: 30px;
     color: ${(props) =>
@@ -78,6 +88,24 @@ const TextSpan = styled.span`
 font - weight: ${fonts.primary.weight.normal};
 font - size: 12px;
 line - height: 15px;
+`
+
+const TagPill = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 2px 6px;
+    background: ${(props) => props.theme.colors.purple};
+    color: white;
+    border-radius: 3px;
+`
+
+const DomainPill = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 2px 6px;
+    border: 1px solid ${(props) => props.theme.colors.lightgrey};
+    color: ${(props) => props.theme.colors.normalText};
+    border-radius: 3px;
 `
 
 export interface FiltersBarProps {
@@ -170,7 +198,13 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             return (
                 <>
                     {isFiltered && (
-                        <>{domainsIncluded.map((domain) => domain + ' ')}</>
+                        <>
+                            {domainsIncluded
+                                .map((domain) => (
+                                    <DomainPill>{domain}</DomainPill>
+                                ))
+                                .reverse()}
+                        </>
                     )}
                 </>
             )
@@ -180,7 +214,15 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             var tagsIncluded = this.props.searchFilters.tagsIncluded
 
             return (
-                <>{isFiltered && <>{tagsIncluded.map((tag) => tag + ' ')}</>}</>
+                <>
+                    {isFiltered && (
+                        <>
+                            {tagsIncluded
+                                .map((tag) => <TagPill>{tag}</TagPill>)
+                                .reverse()}
+                        </>
+                    )}
+                </>
             )
         }
 

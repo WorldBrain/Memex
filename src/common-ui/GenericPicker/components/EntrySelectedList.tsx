@@ -52,7 +52,7 @@ const createStyledActiveEntry = (ActiveEntry: typeof React.Component) => styled(
 const Entry = styled.div`
     display: block;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: break-spaces;
     overflow-x: hidden;
     text-overflow: ellipsis;
     font-size: 14px;

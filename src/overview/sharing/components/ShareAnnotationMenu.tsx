@@ -159,7 +159,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
-    padding-bottom: 10px;
+    padding: 10px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -230,12 +230,12 @@ const PrivacyContainer = styled.div`
 `
 
 const PrivacyTitle = styled.div`
-    font-size: 13px;
+    font-size: 14px;
     font-weight: normal;
     padding: 0px 15px;
-    opacity: 0.5;
-    margin-bottom: -5px;
-    color: ${(props) => props.theme.colors.primary};
+    //opacity: 0.5;
+    margin-bottom: 10px;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const PrivacyOptionContainer = styled(Margin)`
