@@ -658,7 +658,7 @@ const LoadingBox = styled.div`
     margin-left: 3px;
     width: 30px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
 `
 
 const TopBar = styled.div`
@@ -811,7 +811,7 @@ const FollowedListRow = styled(Margin)`
     height: 40px;
     padding: 5px 15px 5px 20px;
     background: white;
-    margin: 10px 0px 0px 0px;
+    margin: 5px 0px 5px 0px;
 `
 
 const ButtonContainer = styled.div`
@@ -821,7 +821,7 @@ const ButtonContainer = styled.div`
 `
 
 const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
-    font-size: 14px;
+    font-size: 13px;
     color: ${(props) =>
         props.active
             ? props.theme.colors.darkerText
@@ -830,7 +830,7 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
     width: max-content;
     font-weight: 400;
     flex-direction: row;
-    grid-gap: 5px;
+    grid-gap: 2px;
     align-items: center;
 
     & * {

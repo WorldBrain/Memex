@@ -825,7 +825,8 @@ export class DashboardContainer extends StatefulUIElement<
             return (
                 <DeleteConfirmModal
                     isShown
-                    message="Delete collection? This does not delete the pages in it"
+                    message="Delete this Space?"
+                    submessage="This does not delete the pages in it"
                     onClose={() => this.processEvent('cancelListDelete', null)}
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
