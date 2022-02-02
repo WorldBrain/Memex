@@ -23,7 +23,7 @@ const SearchBarContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.lightHover};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     border-radius: 5px;
     padding: 0px 15px;
 `

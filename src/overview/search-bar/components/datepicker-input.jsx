@@ -66,7 +66,7 @@ const Input = styled.input`
     margin-right: 10px;
     margin-left: 10px;
     outline: none;
-    background: ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
     color: ${(props) => props.theme.colors.normalText};
     border: none;
     height: 25px;

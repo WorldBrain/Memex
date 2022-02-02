@@ -27,6 +27,8 @@ import {
     collections,
     contentSharing,
 } from 'src/util/remote-functions-background'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -138,8 +140,9 @@ class ListPicker extends StatefulUIElement<
                     tooltipText="List all tabs in window"
                     position="left"
                 >
-                    <ActOnAllTabsButton
-                        size={20}
+                    <Icon
+                        filePath={icons.multiEdit}
+                        heightAndWidth="20px"
                         onClick={this.handleNewListAllPress}
                     />
                 </ButtonTooltip>

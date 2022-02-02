@@ -7,6 +7,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { opacify } from 'polished'
 import { DisplayEntry } from '../types'
+import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 
 export interface Props {
     onPress?: (entry: DisplayEntry) => void
@@ -63,7 +64,7 @@ class EntryRow extends React.Component<Props> {
             <Row
                 onClick={this.handleEntryPress}
                 onMouseOver={this.handleMouseOver}
-                onMouseOut={this.handleMouseOut}
+                onMouseLeave={this.handleMouseOut}
                 isFocused={focused}
             >
                 <NameWrapper>
@@ -82,25 +83,35 @@ class EntryRow extends React.Component<Props> {
                         </ButtonTooltip>
                     )}
                 </NameWrapper>
-                <IconStyleWrapper show={focused}>
-                    {selected && (
-                        <ButtonTooltip
-                            tooltipText={this.props.removeTooltipText ?? ''}
-                            position="left"
-                        >
-                            <XIcon size={20} onClick={this.handleEntryPress} />
-                        </ButtonTooltip>
+                <IconStyleWrapper>
+                    {focused && (
+                        <ButtonContainer>
+                            <ButtonTooltip
+                                tooltipText={
+                                    this.props.actOnAllTooltipText ?? ''
+                                }
+                                position="left"
+                            >
+                                <Icon
+                                    filePath={icons.multiEdit}
+                                    heightAndWidth="16px"
+                                    onClick={this.handleActOnAllPress}
+                                />
+                            </ButtonTooltip>
+                        </ButtonContainer>
                     )}
-                    {onPressActOnAll && (
-                        <ButtonTooltip
-                            tooltipText={this.props.actOnAllTooltipText ?? ''}
-                            position="left"
-                        >
-                            <ActOnAllTabsButton
-                                size={20}
-                                onClick={this.handleActOnAllPress}
-                            />
-                        </ButtonTooltip>
+                    {selected ? (
+                        <ButtonContainer>
+                            <IconImg src={icons.blueRoundCheck} />
+                        </ButtonContainer>
+                    ) : focused ? (
+                        <ButtonContainer>
+                            <IconImg src={icons.blueRoundCheck} faded={true} />
+                        </ButtonContainer>
+                    ) : (
+                        <ButtonContainer>
+                            <EmptyCircle />
+                        </ButtonContainer>
                     )}
                 </IconStyleWrapper>
             </Row>
@@ -112,38 +123,46 @@ export const ActOnAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-export const IconStyleWrapper = styled.div`
-    display: inline-flex;
+const ButtonContainer = styled.div`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
-    ${StyledIconBase} {
-        stroke-width: 2px;
-        color: ${(props) =>
-            props.isFocused
-                ? props.theme.tag.hoverIcon
-                : opacify(0.5, props.theme.tag.icon)};
-        opacity: ${(props) => (props.show ? '1' : '0')};
-        transition: all 0.3s;
-        pointer-events: none;
-        padding: 2px;
-        border-radius: 3px;
-        &:hover {
-            color: ${(props) => props.theme.tag.iconHover};
-            background: ${(props) => props.theme.tag.iconHoverBg};
-        }
-    }
+const IconImg = styled.img<{ faded? }>`
+    opacity: ${(props) => props.faded && '0.5'};
+    height: 20px;
+    width: 20px;
+`
+
+const EmptyCircle = styled.div`
+    height: 18px;
+    width: 18px;
+    border-radius: 18px;
+    border 2px solid ${(props) => props.theme.colors.lineGrey};
+`
+
+export const IconStyleWrapper = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
 `
 
 const Row = styled.div`
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
     display: flex;
-    padding: 4px 15px; // give space to the right for a scrollbar
+    padding: 4px 0px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
-    height: 40px;
+    height: 34px;
+    margin: 0px 20px;
     cursor: pointer;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
-    background: ${(props) => props.isFocused && props.theme.colors.lightHover};
+    // background: ${(props) =>
+        props.isFocused && props.theme.colors.lightHover};
 `
 
 const NameWrapper = styled.div`
@@ -151,6 +170,7 @@ const NameWrapper = styled.div`
     flex-direction: row;
     align-items: center;
     width: 80%;
+    font-size: 14px;
 `
 
 export default EntryRow

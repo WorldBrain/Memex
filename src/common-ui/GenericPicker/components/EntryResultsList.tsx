@@ -40,8 +40,8 @@ export default class EntryResultsList extends React.Component<Props> {
 }
 
 const RecentItemsNotif = styled.div`
-    padding: 5px 10px;
-    font-size: 12px;
+    padding: 10px 20px 5px 20px;
+    font-size: 14px;
     color: ${(props) => props.theme.colors.lighterText};
 `
 

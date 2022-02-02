@@ -99,7 +99,7 @@ const EditableListTitle = styled.input`
     outline: none;
     border: none;
     color: ${(props) => props.theme.colors.normalText};
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
 `
 
 const ActionButtonBox = styled(Margin)`

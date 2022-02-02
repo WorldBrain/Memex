@@ -22,7 +22,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
     padding-left: 15px;
     padding-right: 15px;
-    background-color: ${(props) => props.theme.colors.lightHover};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     border-radius: 3px;
     display: flex;
     flex-direction: column;

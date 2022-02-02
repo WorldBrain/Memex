@@ -32,7 +32,7 @@ class PDFreaderButton extends PureComponent<Props> {
                 <ButtonInnerContainer onClick={this.props.onBtnClick}>
                     <SectionCircle>
                         <Icon
-                            filePath={icons.highlighterEmpty}
+                            filePath={icons.pdf}
                             heightAndWidth="18px"
                             hoverOff
                         />
@@ -41,7 +41,7 @@ class PDFreaderButton extends PureComponent<Props> {
                         {this.props.pdfMode === 'reader'
                             ? 'Close PDF reader'
                             : 'Open PDF reader'}
-                        <SubTitle>when selecting text on current page</SubTitle>
+                        <SubTitle>One-time open current PDF</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
                 <ToggleSwitchButton

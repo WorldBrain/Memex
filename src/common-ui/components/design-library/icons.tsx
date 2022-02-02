@@ -85,6 +85,8 @@ export const shield = browser.runtime.getURL('/img/shield.svg')
 export const smileFace = browser.runtime.getURL('/img/smileFace.svg')
 export const login = browser.runtime.getURL('/img/login.svg')
 export const logout = browser.runtime.getURL('/img/logout.svg')
+export const pdf = browser.runtime.getURL('/img/file-pdf.svg')
+export const blueRoundCheck = browser.runtime.getURL('/img/blueRoundCheck.svg')
 
 export const sharedProtected = browser.runtime.getURL(
     '/img/sharedprotected.svg',

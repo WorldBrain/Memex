@@ -284,27 +284,33 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         if (this.props.showTagsPicker) {
             return (
-                <TagPicker
-                    onUpdateEntrySelection={this.handleTagUpdate}
-                    initialSelectedEntries={this.fetchTagsForPage}
-                    actOnAllTabs={this.handleTagAllTabs}
-                >
-                    <BackContainer onClick={this.props.toggleShowTagsPicker} />
-                </TagPicker>
+                <SpacePickerContainer>
+                    <BackContainer
+                        onClick={this.props.toggleShowTagsPicker}
+                        header="Add Tags"
+                    />
+                    <TagPicker
+                        onUpdateEntrySelection={this.handleTagUpdate}
+                        initialSelectedEntries={this.fetchTagsForPage}
+                        actOnAllTabs={this.handleTagAllTabs}
+                    ></TagPicker>
+                </SpacePickerContainer>
             )
         }
 
         if (this.props.showCollectionsPicker) {
             return (
-                <CollectionPicker
-                    onUpdateEntrySelection={this.handleListUpdate}
-                    initialSelectedEntries={this.fetchListsForPage}
-                    actOnAllTabs={this.handleListAllTabs}
-                >
+                <SpacePickerContainer>
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
+                        header={'Add to Spaces'}
                     />
-                </CollectionPicker>
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.handleListUpdate}
+                        initialSelectedEntries={this.fetchListsForPage}
+                        actOnAllTabs={this.handleListAllTabs}
+                    />
+                </SpacePickerContainer>
             )
         }
 
@@ -498,6 +504,11 @@ const BottomBarBox = styled.div`
 const LinkButtonBox = styled.img`
     height: 24px;
     width: 24px;
+`
+
+const SpacePickerContainer = styled.div`
+    display: flex;
+    flex-direction: column;
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
