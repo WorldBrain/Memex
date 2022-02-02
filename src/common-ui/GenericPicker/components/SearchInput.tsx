@@ -88,12 +88,12 @@ const SearchBox = styled.div`
     flex-wrap: wrap;
     font-size: 1rem;
     padding: 10px;
-    margin-left: 14px;
-    margin-right: 14px;
+    margin-left: 10px;
+    margin-right: 10px;
     transition: border 0.1s;
     margin-bottom: 4px;
     grid-gap: 5px;
-    min-height: 26px;
+    min-height: 20px;
 `
 
 const SearchInput = styled(TextInputControlled)`

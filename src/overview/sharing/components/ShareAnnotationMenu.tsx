@@ -83,17 +83,13 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         if (copyState === 'running' || this.props.isLoading) {
             return <LoadingIndicator />
         } else if (copyState === 'success') {
-            return (
-                <TypographyTextNormal>Copied to Clipboard</TypographyTextNormal>
-            )
+            return <LinkContent>Copied to Clipboard</LinkContent>
         } else {
             return (
-                <>
-                    <TypographyTextNormal>
-                        {this.props.link}
-                    </TypographyTextNormal>
-                    <img src={icons.copy} />
-                </>
+                <LinkBox>
+                    <LinkContent>{this.props.link.split('://')[1]}</LinkContent>
+                    <Icon filePath={icons.copy} heightAndWidth="14px" />
+                </LinkBox>
             )
         }
     }
@@ -102,21 +98,18 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         return (
             <ClickAway onClickAway={this.props.onClickOutside}>
                 <Menu>
-                    {/* {this.props.showLink && (
+                    {this.props.showLink && (
                         <TopArea>
-                            <TitleContainer>
-                                <SectionTitle>
-                                    {this.props.linkTitleCopy}
-                                </SectionTitle>
-                                {this.props.onPlusBtnClick && (
+                            <PrivacyTitle>
+                                {this.props.linkTitleCopy}
+                            </PrivacyTitle>
+                            {/* {this.props.onPlusBtnClick && (
                                     <Icon
                                         icon="plus"
                                         height="18px"
-                                        color="primary"
                                         onClick={this.props.onPlusBtnClick}
                                     />
-                                )}
-                            </TitleContainer>
+                                )} */}
                             <LinkCopierBox>
                                 <LinkCopier
                                     state={this.state.copyState}
@@ -126,14 +119,14 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 </LinkCopier>
                             </LinkCopierBox>
                         </TopArea>
-                    )} */}
+                    )}
                     <PrivacyContainer>
                         {this.props.isLoading ? (
                             <LoadingBox>
                                 <LoadingIndicator />
                             </LoadingBox>
                         ) : (
-                            <>
+                            <TopArea>
                                 <PrivacyTitle>
                                     {this.props.privacyOptionsTitleCopy}
                                 </PrivacyTitle>
@@ -147,7 +140,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         ),
                                     )}
                                 </PrivacyOptionContainer>
-                            </>
+                            </TopArea>
                         )}
                     </PrivacyContainer>
                 </Menu>
@@ -159,7 +152,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
-    padding: 10px;
+    padding: 5px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -167,7 +160,7 @@ const Menu = styled.div`
 `
 
 const TopArea = styled.div`
-    padding: 10px 15px;
+    padding: 15px 15px 10px 15px;
 `
 
 const TitleContainer = styled.div`
@@ -190,6 +183,8 @@ const LinkCopierBox = styled.div`
     align-items: center;
     cursor: pointer;
     margin: 5px 0;
+    background-color: ${(props) => props.theme.colors.lighterText};
+    border-radius: 5px;
 `
 
 const LoadingBox = styled.div`
@@ -221,6 +216,20 @@ const LinkCopier = styled.button`
     }
 `
 
+const LinkBox = styled.div`
+    display: flex;
+    width: 100%;
+    align-items: center;
+`
+
+const LinkContent = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    width: -webkit-fill-available;
+    text-overflow: ellipsis;
+    overflow: hidden;
+`
+
 const PrivacyContainer = styled.div`
     width: 100%;
 
@@ -232,8 +241,6 @@ const PrivacyContainer = styled.div`
 const PrivacyTitle = styled.div`
     font-size: 14px;
     font-weight: normal;
-    padding: 0px 15px;
-    //opacity: 0.5;
     margin-bottom: 10px;
     color: ${(props) => props.theme.colors.normalText};
 `

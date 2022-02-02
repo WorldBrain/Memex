@@ -153,17 +153,17 @@ export const IconStyleWrapper = styled.div`
 
 const Row = styled.div`
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
     display: flex;
-    padding: 4px 0px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
-    height: 34px;
-    margin: 0px 20px;
+    height: 40px;
+    margin: 0px 15px;
     cursor: pointer;
+    border-radius: 5px;
+    padding: 0 10px;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
-    // background: ${(props) =>
-        props.isFocused && props.theme.colors.lightHover};
+    background: ${(props) =>
+        props.isFocused && props.theme.colors.backgroundColor};
 
     &:last-child {
         border-bottom: none;

@@ -103,7 +103,7 @@ const EditableListTitle = styled.input`
     min-width: 50px;
     margin-right: 0px;
     font-size: 14px;
-    height: 50px;
+    height: 40px;
     outline: none;
     border: none;
     width: fill-available;
@@ -120,7 +120,7 @@ margin - bottom: 5px;
 `
 
 const Container = styled.div<Props>`
-height: 50px;
+height: 40px;
 width: fill - available;
 display: flex;
 flex - direction: column;

@@ -112,6 +112,7 @@ class ListPicker extends StatefulUIElement<
         document.getElementById(
             `ListKeyName-${list.name}-${index}`,
         ).scrollTop = offsetTop
+        console.log(offsetTop)
     }
 
     handleNewListPress = () => {
@@ -251,8 +252,8 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border-radius: 12px;
 `
 

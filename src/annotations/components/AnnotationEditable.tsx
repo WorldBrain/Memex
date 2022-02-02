@@ -170,7 +170,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {footerDeps?.onEditIconClick && (
                         <ButtonTooltip
                             tooltipText="Add/Edit Note"
-                            position="bottom"
+                            position="left"
                         >
                             <HighlightAction>
                                 <AddNoteIcon
@@ -441,7 +441,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="5px">
+                <Margin top="5px" bottom="5px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,

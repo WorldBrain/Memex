@@ -53,6 +53,7 @@ export const ribbonOff = browser.runtime.getURL('/img/ribbonOff.svg')
 export const tooltipOn = browser.runtime.getURL('/img/tooltipOn.svg')
 export const tooltipOff = browser.runtime.getURL('/img/tooltipOff.svg')
 export const personFine = browser.runtime.getURL('/img/personFine.svg')
+export const peopleFine = browser.runtime.getURL('/img/peopleFine.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )

@@ -21,11 +21,13 @@ export default class ListDetails extends PureComponent<Props> {
             <>
                 {this.props.listName && (
                     <Margin top="10px" bottom="20px">
-                        <Container>
+                        <Container center={!this.props.remoteLink}>
                             <DetailsContainer>
-                                <Name>{this.props.listName}</Name>
+                                <SectionTitle>
+                                    {this.props.listName}
+                                </SectionTitle>
                                 {this.props.remoteLink && (
-                                    <Note>
+                                    <InfoText>
                                         Only your own contributions to this
                                         space are visible locally. To see all,
                                         open the{' '}
@@ -35,7 +37,7 @@ export default class ListDetails extends PureComponent<Props> {
                                         >
                                             web view{' '}
                                         </a>
-                                    </Note>
+                                    </InfoText>
                                 )}
                             </DetailsContainer>
                             <BtnsContainer>
@@ -57,12 +59,15 @@ export default class ListDetails extends PureComponent<Props> {
                                                 />
                                             </ButtonTooltip>
                                         </Margin>
-                                        <Button
-                                            type="primary-action"
-                                            externalHref={this.props.remoteLink}
-                                        >
-                                            Open Web View
-                                        </Button>
+                                        <PrimaryAction
+                                            onClick={() =>
+                                                window.open(
+                                                    this.props.remoteLink,
+                                                )
+                                            }
+                                            label="Open Web View"
+                                            fontSize={'14px'}
+                                        />
                                     </>
                                 ) : (
                                     <ButtonTooltip
@@ -77,7 +82,7 @@ export default class ListDetails extends PureComponent<Props> {
                                             label={
                                                 <ShareCollectionBtn>
                                                     <Icon
-                                                        height="16px"
+                                                        height="14px"
                                                         filePath={icons.link}
                                                         color="white"
                                                         hoverOff
@@ -99,12 +104,24 @@ export default class ListDetails extends PureComponent<Props> {
     }
 }
 
-const Container = styled.div`
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    font-weight: 300;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+`
+
+const Container = styled.div<{ center: boolean }>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    align-items: center;
+    align-items: ${(props) => (props.center ? 'center' : 'flex-start')};
     z-index: 1002;
 
     & a {
@@ -116,6 +133,7 @@ const Container = styled.div`
 const DetailsContainer = styled.div`
     display: flex;
     flex-direction: column;
+    grid-gap: 5px;
 `
 
 const ShareCollectionBtn = styled.div`
@@ -127,7 +145,7 @@ const ShareCollectionBtn = styled.div`
 
 const ShareCollectionBtnLabel = styled.div`
     padding-left: 10px;
-    font-size: 12px;
+    font-size: 14px;
 `
 
 const BtnsContainer = styled.div`

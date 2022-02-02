@@ -451,6 +451,7 @@ const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
     color: ${(props) => props.theme.colors.normalText};
     width: fill-available;
+    padding-bottom: 5px;
 `
 
 const IconContainer = styled.div`
