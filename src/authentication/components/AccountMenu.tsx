@@ -64,7 +64,7 @@ const BottomLeft = styled.div`
     height: 50px;
     justify-content: flex-start;
     align-items: center;
-    position: absolute;
+    position: fixed;
     bottom: 20px;
 
     & * {

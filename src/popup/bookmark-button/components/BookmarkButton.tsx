@@ -7,6 +7,9 @@ import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const styles = require('./BookmarkButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -56,33 +59,77 @@ class BookmarkButton extends PureComponent<Props> {
             ? 'Page Bookmarked!'
             : 'Bookmark this Page'
 
+        console.log(this.props.isDisabled)
         return (
-            <div
-                className={cx(styles.buttonContainer, {
-                    [styles.bookmarkedButtonContainer]: this.props.isBookmarked,
-                })}
+            <ButtonItem
+                onClick={!this.props.isDisabled && this.props.toggleBookmark}
+                disabled={this.props.isDisabled || this.props.isBookmarked}
             >
-                <Button
-                    onClick={this.props.toggleBookmark}
-                    title={'Bookmark'}
-                    btnClass={cx({
-                        [styles.bookmarkedBtn]: this.props.isBookmarked,
-                        [styles.unbookmarkedBtn]: !this.props.isBookmarked,
-                    })}
-                    itemClass={styles.button}
-                    disabled={this.props.isDisabled || this.props.isBookmarked}
-                >
-                    <div className={styles.buttonInnerContent}>
-                        {text}
-                        <p className={buttonStyles.subTitle}>
-                            {this.state.highlightInfo}
-                        </p>
-                    </div>
-                </Button>
-            </div>
+                <SectionCircle>
+                    <Icon
+                        filePath={
+                            this.props.isBookmarked
+                                ? icons.heartFull
+                                : icons.heartEmpty
+                        }
+                        heightAndWidth="18px"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <ButtonInnerContent>
+                    {text}
+                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                </ButtonInnerContent>
+            </ButtonItem>
         )
     }
 }
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight}68;
+    border-radius: 100px;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ButtonItem = styled.div<{ disabled: boolean }>`
+    display: flex;
+    grid-gap: 15px;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5px 20px;
+    height: 55px;
+    cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+
+    &:hover {
+        background: ${(props) => props.theme.colors.backgroundColor};
+    }
+
+    & * {
+        cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    }
+`
+
+const ButtonInnerContent = styled.div`
+    display: flex;
+    grid-gap: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    font-size: 14px;
+    font-weight: 600;
+    color: ${(props) => props.theme.colors.darkerText};
+`
+
+const SubTitle = styled.div`
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-weight: 400;
+`
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isBookmarked: selectors.isBookmarked(state),

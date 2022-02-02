@@ -70,7 +70,7 @@ const renderCopyableLink = ({
     // const viewportBreakpoint = getViewportBreakpoint(this.getViewportWidth(),)
 
     return (
-        <Margin>
+        <Margin bottom="3px">
             <LinkAndRoleBox viewportBreakpoint={viewportBreakpoint}>
                 <CopyLinkBox>
                     <LinkBox
@@ -89,7 +89,6 @@ const renderCopyableLink = ({
                             <Icon
                                 heightAndWidth="14px"
                                 path={icons.copy}
-                                hoverOff
                                 onClick={
                                     () =>
                                         copyLink({
@@ -728,15 +727,16 @@ const LinkAndRoleBox = styled.div<{
 `
 
 const LinkBox = styled(Margin)`
-    width: 100%;
+    width: fill-available;
     display: flex;
-    background-color: ${(props) => props.theme.colors.lightgrey};
-    font-size: 12px;
+    background-color: ${(props) => props.theme.colors.lineGrey};
+    font-size: 14px;
     border-radius: 3px;
     text-align: left;
+    height: 30px;
     cursor: pointer;
     padding-right: 10px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.lighterText};
 `
 
 const Link = styled.span`
@@ -764,13 +764,13 @@ const CopyLinkBox = styled.div`
 const PermissionText = styled.span<{
     viewportBreakpoint: string
 }>`
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     opacity: 0.8;
     display: flex;
     flex-direction: row;
     white-space: nowrap;
     justify-content: flex-end;
-    font-size: 10px;
+    font-size: 12px;
     z-index: 0;
 
     ${(props) =>

@@ -209,9 +209,6 @@ export default class ListsSidebar extends PureComponent<
             height: isSidebarPeeking ? '90vh' : '100vh',
         }
 
-        console.log(listsGroups)
-        console.log(searchBarProps)
-
         return (
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}

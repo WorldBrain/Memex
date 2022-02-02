@@ -115,7 +115,10 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                             isDisabled={!this.state.shortcutsEnabled}
                             name={name}
                         >
-                            {text}
+                            <Title>
+                                {text}{' '}
+                                {subText && <SubText>({subText})</SubText>}
+                            </Title>
                             <RightBox>
                                 <KeyboardInput
                                     type="text"
@@ -125,7 +128,6 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                                     disabled={!this.state.shortcutsEnabled}
                                     name={name}
                                 />{' '}
-                                <SubText>{subText}</SubText>
                             </RightBox>
                         </Checkbox>
                     </CheckBoxRow>
@@ -169,11 +171,16 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 }
 
 const RightBox = styled.div`
-    display: grid;
+    display: flex;
     align-items: center;
     grid-auto-flow: column;
     grid-gap: 10px;
-    width: 240px;
+`
+
+const Title = styled.span`
+    display: flex;
+    grid-gap: 5px;
+    align-items: center;
 `
 
 const SubText = styled.span`

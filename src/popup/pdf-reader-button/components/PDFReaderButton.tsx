@@ -6,38 +6,30 @@ import type { RootState } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { CheckboxToggle } from 'src/common-ui/components'
-import { ButtonTooltip } from 'src/common-ui/components'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const buttonStyles = require('../../components/Button.css')
 
-export interface OwnProps {
-    closePopup: () => void
-}
+export interface OwnProps {}
 
 interface StateProps {
     isEnabled: boolean
+    pdfMode: string
+    onBtnClick: () => void
+    onToggleClick: () => void
 }
 
-interface DispatchProps {
-    handleChange: CheckboxToggle
-    showTooltip: React.MouseEventHandler
-    initState: () => Promise<void>
-}
+interface DispatchProps {}
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class InPageSwitches extends PureComponent<Props> {
-    async componentDidMount() {
-        await this.props.initState()
-    }
-
+class PDFreaderButton extends PureComponent<Props> {
     render() {
         return (
             <ButtonItem>
-                <ButtonInnerContainer onClick={this.props.showTooltip}>
+                <ButtonInnerContainer onClick={this.props.onBtnClick}>
                     <SectionCircle>
                         <Icon
                             filePath={icons.highlighterEmpty}
@@ -46,19 +38,16 @@ class InPageSwitches extends PureComponent<Props> {
                         />
                     </SectionCircle>
                     <ButtonInnerContent>
-                        Show Highlighter Tooltip
+                        {this.props.pdfMode === 'reader'
+                            ? 'Close PDF reader'
+                            : 'Open PDF reader'}
                         <SubTitle>when selecting text on current page</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
                 <ToggleSwitchButton
-                    toggleHoverText={
-                        <span>
-                            Always Show <br />
-                            when selecting Text
-                        </span>
-                    }
+                    toggleHoverText={'Open every PDF with the reader'}
                     isEnabled={this.props.isEnabled}
-                    onToggleClick={this.props.handleChange}
+                    onToggleClick={this.props.onToggleClick}
                 />
             </ButtonItem>
         )
@@ -87,7 +76,7 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     align-items: center;
     justify-content: space-between;
     padding: 5px 10px 5px 20px;
-    height: 60px;
+    height: 55px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
@@ -116,28 +105,4 @@ const SubTitle = styled.div`
     font-weight: 400;
 `
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
-    isEnabled: selectors.isTooltipEnabled(state),
-})
-
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
-    dispatch,
-    props,
-) => ({
-    showTooltip: async (e) => {
-        e.preventDefault()
-        await dispatch(acts.showTooltip())
-        setTimeout(props.closePopup, 200)
-    },
-    handleChange: async (e) => {
-        e.preventDefault()
-        await dispatch(acts.toggleTooltipFlag())
-        // setTimeout(props.closePopup, 200)
-    },
-    initState: () => dispatch(acts.init()),
-})
-
-export default connect<StateProps, DispatchProps, OwnProps>(
-    mapState,
-    mapDispatch,
-)(InPageSwitches)
+export default PDFreaderButton

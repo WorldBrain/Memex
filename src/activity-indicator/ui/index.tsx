@@ -57,9 +57,14 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
 
 const Dot = styled.div<{ unread: boolean }>`
     border-radius: 10px;
-    width: 14px;
-    height: 14px;
-    background: ${(props) => (props.unread ? '#5cd9a6' : 'unset')};
-    border: 2px solid ${(props) => (props.unread ? '#5cd9a6' : '#5671cf')};
+    width: 16px;
+    height: 16px;
+    background: ${(props) =>
+        props.unread ? props.theme.colors.purple : 'unset'};
+    border: 2px solid
+        ${(props) =>
+            props.unread
+                ? props.theme.colors.purple
+                : props.theme.colors.lineGrey};
     cursor: pointer;
 `

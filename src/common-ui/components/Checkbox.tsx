@@ -11,7 +11,7 @@ export type CheckboxToggle = (
 ) => void
 
 export interface Props {
-    id: string
+    id?: string
     handleChange: CheckboxToggle
     name?: string
     isChecked: boolean
@@ -20,6 +20,8 @@ export interface Props {
     textClass?: string
     inputClass?: string
     labelClass?: string
+    mode?: 'radio' | 'multiSelect'
+    size?: number
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -49,7 +51,11 @@ class Checkbox extends React.PureComponent<Props> {
                         name={this.props.name}
                     />
                     <LabelText>
-                        <LabelCheck isChecked={this.props.isChecked}>
+                        <LabelCheck
+                            size={this.props.size}
+                            mode={this.props.mode}
+                            isChecked={this.props.isChecked}
+                        >
                             <Icon
                                 filePath={icons.check}
                                 color="white"
@@ -57,7 +63,9 @@ class Checkbox extends React.PureComponent<Props> {
                                 hoverOff
                             />
                         </LabelCheck>
-                        <ChildrenBox>{this.props.children}</ChildrenBox>
+                        <ChildrenBox mode={this.props.mode}>
+                            {this.props.children}
+                        </ChildrenBox>
                     </LabelText>
                 </LabelContainer>
             </Container>
@@ -69,8 +77,9 @@ const Container = styled.div`
     cursor: pointer;
 `
 
-const ChildrenBox = styled.span`
+const ChildrenBox = styled.span<{ mode }>`
     color: ${(props) => props.theme.colors.darkerText};
+    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -108,15 +117,15 @@ const LabelText = styled.span`
     }
 `
 
-const LabelCheck = styled.span<{ isChecked }>`
-    border-radius: 3px;
-    border: 2px solid ${(props) => props.theme.colors.purple};
+const LabelCheck = styled.span<{ isChecked; mode; size }>`
+    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
+    border: 2px solid ${(props) => props.theme.colors.purple}70;
     background: ${(props) =>
         props.isChecked ? props.theme.colors.purple : 'white'};
     vertical-align: middle;
     margin-right: 15px;
-    width: 25px;
-    height: 25px;
+    width: ${(props) => (props.size ? props.size + 'px' : '24px')};
+    height: ${(props) => (props.size ? props.size + 'px' : '24px')};
     display: flex;
     align-items: center;
     justify-content: center;

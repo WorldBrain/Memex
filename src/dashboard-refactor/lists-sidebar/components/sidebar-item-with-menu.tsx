@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import {
     ListSource,
@@ -16,6 +16,7 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import SpaceContextMenuButton from './space-context-menu'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface Props {
     className?: string
@@ -88,14 +89,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (dropReceivingState?.wasPageDropped) {
-            return <Icon heightAndWidth="12px" path={icons.check} />
+            return <Icon heightAndWidth="12px" filePath={icons.check} />
         }
 
         if (
             dropReceivingState?.canReceiveDroppedItems &&
             dropReceivingState?.isDraggedOver
         ) {
-            return <Icon heightAndWidth="12px" path={icons.plus} />
+            return <Icon heightAndWidth="12px" filePath={icons.plus} />
         }
 
         if (onMoreActionClick) {
@@ -107,7 +108,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const { dropReceivingState } = this.props
 
         const collaborationIcon = this.props.isCollaborative && (
-            <Icon heightAndWidth="12px" path={icons.shared} />
+            <>
+                <ButtonTooltip tooltipText={'Shared Space'} position="bottom">
+                    <Icon
+                        heightAndWidth="12px"
+                        filePath={icons.link}
+                        hoverOff
+                    />
+                </ButtonTooltip>
+            </>
         )
 
         if (!this.props.nameHighlightIndices) {

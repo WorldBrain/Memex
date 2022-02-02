@@ -38,6 +38,7 @@ export const theme: Theme = {
         lighterText: '#96A0B5',
         backgroundColor: '#F8FBFF',
         darkerBlue: '#5E6278',
+        blue: '2563EB',
     },
     fonts: {
         primary: '"Inter", sans-serif',

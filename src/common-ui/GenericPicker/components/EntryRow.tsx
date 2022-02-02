@@ -4,7 +4,7 @@ import { Layers, X as XIcon } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { opacify } from 'polished'
 import { DisplayEntry } from '../types'
 
@@ -69,11 +69,15 @@ class EntryRow extends React.Component<Props> {
                 <NameWrapper>
                     {resultItem}
                     {remote && (
-                        <ButtonTooltip tooltipText={'shared'} position="bottom">
+                        <ButtonTooltip
+                            tooltipText={'Shared Space'}
+                            position="bottom"
+                        >
                             <Icon
-                                heightAndWidth="14px"
-                                path={icons.shared}
-                                faded
+                                heightAndWidth="12px"
+                                padding="6px"
+                                filePath={icons.link}
+                                hoverOff
                             />
                         </ButtonTooltip>
                     )}
