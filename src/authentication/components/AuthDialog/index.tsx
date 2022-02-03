@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { AuthError } from '@worldbrain/memex-common/lib/authentication/types'
+import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
@@ -56,14 +57,15 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             hoverOff
                                         />
                                         <TextInput
-                                            type="DisplayName"
+                                            type="input"
                                             placeholder="Display Name"
                                             value={this.state.displayName}
-                                            onChange={(e) =>
+                                            onChange={(event) =>
                                                 this.processEvent(
                                                     'editDisplayName',
                                                     {
-                                                        value: e.target.value,
+                                                        value:
+                                                            event.target.value,
                                                     },
                                                 )
                                             }
@@ -90,9 +92,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         type="email"
                                         placeholder="E-mail"
                                         value={this.state.email}
-                                        onChange={(e) =>
+                                        onChange={(event) =>
                                             this.processEvent('editEmail', {
-                                                value: e.target.value,
+                                                value: event.target.value,
                                             })
                                         }
                                         onKeyDown={handleEnter(() => {
@@ -113,9 +115,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         type="password"
                                         placeholder="Password"
                                         value={this.state.password}
-                                        onChange={(e) =>
+                                        onChange={(event) =>
                                             this.processEvent('editPassword', {
-                                                value: e.target.value,
+                                                value: event.target.value,
                                             })
                                         }
                                         onKeyDown={handleEnter(() => {
@@ -136,15 +138,15 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         type="password"
                                         placeholder="Confirm Password"
                                         value={this.state.passwordConfirm}
-                                        onChange={(e) => {
+                                        onChange={(event) => {
                                             this.processEvent(
                                                 'editPasswordConfirm',
                                                 {
-                                                    value: e.target.value,
+                                                    value: event.target.value,
                                                 },
                                             )
                                             this.checkPasswordMatch(
-                                                e.target.value,
+                                                event.target.value,
                                             )
                                         }}
                                         onKeyDown={handleEnter(() => {
@@ -391,7 +393,7 @@ const TextInputContainer = styled.div`
     padding: 0 15px;
 `
 
-const TextInput = styled.input`
+const TextInput = styled(SimpleTextInput)`
     outline: none;
     height: fill-available;
     width: fill-available;
