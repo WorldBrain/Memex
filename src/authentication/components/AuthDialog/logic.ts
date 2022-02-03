@@ -35,6 +35,7 @@ export default class Logic extends UILogic<State, Event> {
         this.emitMutation({
             mode: { $set: 'signup' },
         })
+        this.dependencies.onModeChange?.({ mode: 'signup' })
     }
 
     toggleMode: EventHandler<'toggleMode'> = async ({ previousState }) => {

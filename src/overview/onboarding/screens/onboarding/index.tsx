@@ -150,11 +150,15 @@ export default class OnboardingScreen extends StatefulUIElement<
         <>
             <WelcomeContainer>
                 <LeftSide>
+                    Hello, I'm in {this.state.authDialogMode} mode!
                     <AuthDialog
                         onAuth={({ reason }) => {
                             this.processEvent('onUserLogIn', {
                                 newSignUp: reason === 'register',
                             })
+                        }}
+                        onModeChange={({ mode }) => {
+                            this.processEvent('setAuthDialogMode', { mode })
                         }}
                     />
                 </LeftSide>

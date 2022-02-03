@@ -88,4 +88,8 @@ export default class Logic extends UILogic<State, Event> {
     finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
         this.dependencies.navToDashboard()
     }
+
+    setAuthDialogMode: EventHandler<'setAuthDialogMode'> = ({ event }) => {
+        return { authDialogMode: { $set: event.mode } }
+    }
 }

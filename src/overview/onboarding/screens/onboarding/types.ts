@@ -2,6 +2,7 @@ import type { UIEvent } from 'ui-logic-core'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
+import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -14,6 +15,7 @@ export interface State {
     saveState: UITaskState
     loadState: UITaskState
     syncState: UITaskState
+    authDialogMode?: AuthDialogMode
     step: 'tutorial' | 'sync'
     shouldShowLogin: boolean
     newSignUp: boolean
@@ -30,4 +32,5 @@ export type Event = UIEvent<{
     goToSyncStep: null
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
+    setAuthDialogMode: { mode: AuthDialogMode }
 }>
