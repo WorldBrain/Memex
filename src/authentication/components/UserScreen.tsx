@@ -2,6 +2,7 @@ import * as React from 'react'
 import 'firebase/auth'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import AccountInfo from 'src/authentication/components/AccountInfo'
+import AuthDialog from 'src/authentication/components/AuthDialog'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { LOGIN_URL } from 'src/constants'
 import { AuthContextInterface } from 'src/authentication/background/types'
@@ -39,7 +40,9 @@ class UserScreen extends React.Component<Props & AuthContextInterface> {
                                 ' To create an account, type in a new email address'
                             }
                         </p>
-                        <SignInScreen redirectTo={LOGIN_URL} />
+                        <AuthDialog
+                            onAuth={() => (window.location.href = LOGIN_URL)}
+                        />
                     </div>
                 ) : (
                     <AccountInfo refreshUser={this.props.refreshUser} />

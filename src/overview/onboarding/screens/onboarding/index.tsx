@@ -152,7 +152,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <LeftSide>
                     <AuthDialog
                         onAuth={({ reason }) => {
-                            console.log('on auth')
                             this.processEvent('onUserLogIn', {
                                 newSignUp: reason === 'register',
                             })
