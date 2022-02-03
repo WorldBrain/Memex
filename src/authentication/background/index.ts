@@ -1,6 +1,8 @@
 import {
     AuthenticatedUser,
     AuthService,
+    RegistrationResult,
+    LoginResult,
 } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     UserPlan,
@@ -23,8 +25,6 @@ import {
     AuthSettings,
     AuthBackendFunctions,
     EmailPasswordCredentials,
-    RegistrationResult,
-    LoginResult,
 } from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
@@ -224,40 +224,48 @@ export class AuthBackground {
         })
     }
 
-    async registerWithEmailPassword(
+    registerWithEmailPassword = async (
         options: EmailPasswordCredentials,
-    ): Promise<{ result: RegistrationResult }> {
-        try {
-            await this._firebase
-                .auth()
-                .createUserWithEmailAndPassword(options.email, options.password)
-            return { result: { status: 'registered-and-authenticated' } }
-        } catch (e) {
-            const firebaseError: firebase.FirebaseError = e
-            if (firebaseError.code === 'auth/invalid-email') {
-                return { result: { status: 'error', reason: 'invalid-email' } }
-            }
-            if (firebaseError.code === 'auth/email-already-in-use') {
-                return { result: { status: 'error', reason: 'email-exists' } }
-            }
-            if (firebaseError.code === 'auth/weak-password') {
-                return { result: { status: 'error', reason: 'weak-password' } }
-            }
-            return { result: { status: 'error', reason: 'unknown' } }
+    ): Promise<{ result: RegistrationResult }> => {
+        const { result } = await this.authService.registerWithEmailAndPassword(
+            options.email,
+            options.password,
+        )
+        if (result.status !== 'registered-and-authenticated') {
+            return { result }
         }
+        const user = await this.authService.getCurrentUser()
+        if (!user) {
+            const message = `User registered successfuly, but didn't detect authenticated user after`
+            console.error(`Error while registering user`, message)
+            return {
+                result: {
+                    status: 'error',
+                    reason: 'unknown',
+                    internalReason: message,
+                },
+            }
+        }
+
+        if (options.displayName) {
+            const userManagement = await this.getUserManagement()
+            await userManagement.updateUser(
+                { type: 'user-reference', id: user.id },
+                { knownStatus: 'new' },
+                { displayName: options.displayName },
+            )
+        }
+        return { result: { status: 'registered-and-authenticated' } }
     }
 
-    async loginWithEmailPassword(
+    loginWithEmailPassword = async (
         options: EmailPasswordCredentials,
-    ): Promise<{ result: LoginResult }> {
+    ): Promise<{ result: LoginResult }> => {
         try {
-            const waitForChange = new Promise((resolve) =>
-                this.authService.events.once('changed', () => resolve()),
+            await this.authService.loginWithEmailAndPassword(
+                options.email,
+                options.password,
             )
-            await this._firebase
-                .auth()
-                .signInWithEmailAndPassword(options.email, options.password)
-            await waitForChange
             return { result: { status: 'authenticated' } }
         } catch (e) {
             const firebaseError: firebase.FirebaseError = e

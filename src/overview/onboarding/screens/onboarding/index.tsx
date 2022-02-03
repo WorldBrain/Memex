@@ -11,6 +11,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
+import AuthDialog from 'src/authentication/components/AuthDialog/index'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -90,7 +91,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </TutorialContainer>
                 </ContentBox>
             </LeftSide>
-            {this.RenderInfoSide()}
+            {this.renderInfoSide()}
         </WelcomeContainer>
     )
 
@@ -129,273 +130,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         }
     }
 
-    private checkPasswordMatch(value) {
-        if (this.state.password === value) {
-            this.processEvent('passwordMatch', { value: true })
-        } else {
-            this.processEvent('passwordMatch', { value: false })
-        }
-    }
-
-    renderAuthForm() {
-        const { state } = this
-        // const { header } = state
-
-        if (this.state.mode !== 'login') {
-            return (
-                <StyledAuthDialog>
-                    <AuthBox top="medium">
-                        <AuthenticationMethods>
-                            <EmailPasswordLogin>
-                                <DisplayNameContainer>
-                                    <TextInputContainer>
-                                        <Icon
-                                            filePath={icons.personFine}
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                        />
-                                        <TextInput
-                                            type="DisplayName"
-                                            placeholder="Display Name"
-                                            value={this.state.displayName}
-                                            onChange={(e) =>
-                                                this.processEvent(
-                                                    'editDisplayName',
-                                                    {
-                                                        value: e.target.value,
-                                                    },
-                                                )
-                                            }
-                                            onConfirm={() => {
-                                                this.processEvent(
-                                                    'emailPasswordConfirm',
-                                                    null,
-                                                )
-                                            }}
-                                        />
-                                    </TextInputContainer>
-                                    <InfoText>
-                                        Name shown on shared Spaces, page links
-                                        and annotations
-                                    </InfoText>
-                                </DisplayNameContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.mail}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="email"
-                                        placeholder="E-mail"
-                                        value={this.state.email}
-                                        onChange={(e) =>
-                                            this.processEvent('editEmail', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onConfirm={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                    />
-                                </TextInputContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.lockFine}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                        onChange={(e) =>
-                                            this.processEvent('editPassword', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onConfirm={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                    />
-                                </TextInputContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.reload}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Confirm Password"
-                                        value={this.state.passwordConfirm}
-                                        onChange={(e) => {
-                                            this.processEvent(
-                                                'editPasswordConfirm',
-                                                {
-                                                    value: e.target.value,
-                                                },
-                                            )
-                                            this.checkPasswordMatch(
-                                                e.target.value,
-                                            )
-                                        }}
-                                    />
-                                </TextInputContainer>
-                                <ConfirmContainer>
-                                    <PrimaryAction
-                                        onClick={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                        disabled={
-                                            !(
-                                                this.state.passwordMatch &&
-                                                this.state.email.includes(
-                                                    '@',
-                                                ) &&
-                                                this.state.email.includes(
-                                                    '.',
-                                                ) &&
-                                                this.state.displayName.length >=
-                                                    3
-                                            )
-                                        }
-                                        label={'Sign Up'}
-                                        fontSize={'14px'}
-                                    />
-                                    {/* {this.renderAuthError()} */}
-                                </ConfirmContainer>
-                                {this.renderLoginTypeSwitcher()}
-                            </EmailPasswordLogin>
-                        </AuthenticationMethods>
-                    </AuthBox>
-                </StyledAuthDialog>
-            )
-        } else {
-            return (
-                <StyledAuthDialog>
-                    <AuthBox top="medium">
-                        <AuthenticationMethods>
-                            <EmailPasswordLogin>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.mail}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="email"
-                                        placeholder="E-mail"
-                                        value={this.state.email}
-                                        onChange={(e) =>
-                                            this.processEvent('editEmail', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onConfirm={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                    />
-                                </TextInputContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.lockFine}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                        onChange={(e) =>
-                                            this.processEvent('editPassword', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onConfirm={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                    />
-                                </TextInputContainer>
-                                <ConfirmContainer>
-                                    <PrimaryAction
-                                        onClick={() =>
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }
-                                        disabled={
-                                            !(
-                                                this.state.password.length >
-                                                    0 &&
-                                                this.state.email.includes(
-                                                    '@',
-                                                ) &&
-                                                this.state.email.includes('.')
-                                            )
-                                        }
-                                        label={'Login'}
-                                        fontSize={'14px'}
-                                    />
-                                    {/* {this.renderAuthError()} */}
-                                </ConfirmContainer>
-                                {this.renderLoginTypeSwitcher()}
-                            </EmailPasswordLogin>
-                        </AuthenticationMethods>
-                    </AuthBox>
-                </StyledAuthDialog>
-            )
-        }
-    }
-
-    private renderLoginTypeSwitcher() {
-        return (
-            <Footer>
-                {this.state.mode === 'login' && (
-                    <>
-                        Don’t have an account?{' '}
-                        <ModeSwitch
-                            onClick={() =>
-                                this.processEvent('toggleMode', null)
-                            }
-                        >
-                            Sign up
-                        </ModeSwitch>
-                    </>
-                )}
-                {this.state.mode === 'signup' && (
-                    <>
-                        Already have an account?{' '}
-                        <ModeSwitch
-                            onClick={() =>
-                                this.processEvent('toggleMode', null)
-                            }
-                        >
-                            Log in
-                        </ModeSwitch>
-                    </>
-                )}
-            </Footer>
-        )
-    }
-
-    private RenderInfoSide = () => {
+    private renderInfoSide = () => {
         return (
             <RightSide>
                 <CommentDemo src={'img/commentDemo.svg'} />
@@ -415,33 +150,16 @@ export default class OnboardingScreen extends StatefulUIElement<
         <>
             <WelcomeContainer>
                 <LeftSide>
-                    {this.state.mode === 'login' ? (
-                        <ContentBox>
-                            <LogoImg src={'/img/onlyIconLogo.svg'} />
-                            <Title>Welcome back!</Title>
-                            <DescriptionText></DescriptionText>
-                            {this.renderAuthForm()}
-                        </ContentBox>
-                    ) : (
-                        <ContentBox>
-                            <LogoImg src={'/img/onlyIconLogo.svg'} />
-                            <Title>Welcome to Memex</Title>
-                            <DescriptionText>
-                                Create an account to get started
-                            </DescriptionText>
-                            {this.renderAuthForm()}
-                        </ContentBox>
-                    )}
+                    <AuthDialog
+                        onAuth={({ reason }) => {
+                            console.log('on auth')
+                            this.processEvent('onUserLogIn', {
+                                newSignUp: reason === 'register',
+                            })
+                        }}
+                    />
                 </LeftSide>
-                {this.RenderInfoSide()}
-
-                {/* <SignInScreen
-                onSuccess={(isNewUser) => {
-                    this.processEvent('onUserLogIn', { newSignUp: isNewUser })
-                    this.processEvent('goToGuidedTutorial', null)
-                    //this.processEvent('finishOnboarding', null)
-                }}
-            /> */}
+                {this.renderInfoSide()}
             </WelcomeContainer>
         </>
     )
