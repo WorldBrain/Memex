@@ -100,7 +100,7 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isCopyPasterShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox padding={'0px'} right="0" withRelativeContainer>
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
@@ -111,7 +111,12 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isShareMenuShown) {
             return (
-                <HoverBox width="330px" right="0" withRelativeContainer>
+                <HoverBox
+                    padding={'0px'}
+                    width="330px"
+                    right="0"
+                    withRelativeContainer
+                >
                     <AllNotesShareMenu {...this.props.shareMenuProps} />
                 </HoverBox>
             )
@@ -177,12 +182,6 @@ export default class PageResultView extends PureComponent<Props> {
                     tooltipText: 'Share Page and Notes',
                 },
                 {
-                    key: 'tag-page-btn',
-                    image: this.hasTags ? icons.tagFull : icons.tagEmpty,
-                    onClick: this.props.onTagPickerBtnClick,
-                    tooltipText: 'Tag Page',
-                },
-                {
                     key: 'list-page-btn',
                     image: this.hasLists
                         ? icons.collectionsFull
@@ -222,11 +221,6 @@ export default class PageResultView extends PureComponent<Props> {
                 key: 'share-page-btn',
                 isDisabled: true,
                 image: this.props.isShared ? icons.shared : icons.link,
-            },
-            {
-                key: 'tag-page-btn',
-                isDisabled: true,
-                image: this.hasTags ? icons.tagFull : icons.tagEmpty,
             },
             {
                 key: 'list-page-btn',

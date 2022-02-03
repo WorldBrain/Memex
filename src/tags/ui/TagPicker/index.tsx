@@ -162,7 +162,7 @@ class TagPicker extends StatefulUIElement<
             return
         }
 
-        if (this.state.query === '') {
+        if (this.state.query === '' && this.props.filterMode) {
             return (
                 <EmptyTagsView>
                     <SectionCircle>
@@ -173,8 +173,25 @@ class TagPicker extends StatefulUIElement<
                             hoverOff
                         />
                     </SectionCircle>
-                    <SectionTitle>No Tags created yet</SectionTitle>
-                    <InfoText>Add a tag to a page or annotation</InfoText>
+                    <SectionTitle>Create your first Tag</SectionTitle>
+                    <InfoText>by adding one to a page or annotation</InfoText>
+                </EmptyTagsView>
+            )
+        }
+
+        if (this.state.query === '' && !this.props.filterMode) {
+            return (
+                <EmptyTagsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>Create your first Tag</SectionTitle>
+                    <InfoText>by typing into the search field</InfoText>
                 </EmptyTagsView>
             )
         }
@@ -283,6 +300,7 @@ const SectionCircle = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 5px;
 `
 
 const SectionTitle = styled.div`
@@ -344,8 +362,6 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 10px;
-    padding-bottom: 10px;
     border-radius: 12px;
 `
 
@@ -354,7 +370,7 @@ const EmptyTagsView = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    grid-gap: 10px;
+    grid-gap: 5px;
     padding: 20px 15px;
 `
 

@@ -49,7 +49,7 @@ export const HoverBoxDiv = styled.div<Props>`
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
     background-color: #fff;
     z-index: 1001;
-    padding: ${(props) => props.padding && props.padding};
+    padding: ${(props) => (props.padding ? props.padding : '10px 0px')};
 
     &::-webkit-scrollbar {
       display: none;
@@ -67,6 +67,7 @@ export const HoverBoxDashboard = styled.div`
     background-color: #fff;
     border-radius: 12px;
     right: 20px;
+    padding: 10px 0px;
     top: 40px;
 
     &::-webkit-scrollbar {

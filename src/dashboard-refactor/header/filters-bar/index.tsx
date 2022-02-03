@@ -239,7 +239,12 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         }
 
         return (
-            <HoverBox position="absolute" top={'50px'} width="auto">
+            <HoverBox
+                padding={'0px'}
+                position="absolute"
+                top={'50px'}
+                width="auto"
+            >
                 <DatePicker
                     {...this.props.datePickerProps}
                     outsideClickIgnoreClass="date-picker-button"

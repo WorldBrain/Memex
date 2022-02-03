@@ -191,6 +191,7 @@ const SectionCircle = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 5px;
 `
 
 const SectionTitle = styled.div`
@@ -215,8 +216,6 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 8px;
-    padding-bottom: 8px;
     border-radius: 12px;
 `
 
@@ -225,7 +224,7 @@ const EmptyDomainsView = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    grid-gap: 10px;
+    grid-gap: 5px;
     padding: 20px 15px;
 `
 
