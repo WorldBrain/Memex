@@ -1,23 +1,17 @@
 import type { UIEvent } from 'ui-logic-core'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
-    personalCloudBG: PersonalCloudRemoteInterface
-    navToDashboard: () => void
-    navToGuidedTutorial: () => void
+    onAuth?(event: { reason: 'login' | 'register' }): void
 }
 
 export interface State {
     saveState: UITaskState
     loadState: UITaskState
-    syncState: UITaskState
-    step: 'tutorial' | 'sync'
-    shouldShowLogin: boolean
-    newSignUp: boolean
     mode: 'signup' | 'login'
+    error?: string
     email: string
     password: string
     passwordConfirm: string
@@ -26,8 +20,11 @@ export interface State {
 }
 
 export type Event = UIEvent<{
-    finishOnboarding: null
-    goToSyncStep: null
-    goToGuidedTutorial: null
-    onUserLogIn: { newSignUp?: boolean }
+    editEmail: { value: string }
+    passwordMatch: { value: boolean }
+    editPassword: { value: string }
+    editPasswordConfirm: { value: string }
+    emailPasswordConfirm: null
+    toggleMode: null
+    editDisplayName: { value: string }
 }>

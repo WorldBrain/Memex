@@ -1,4 +1,8 @@
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
+    AuthenticatedUser,
+    RegistrationResult,
+    LoginResult,
+} from '@worldbrain/memex-common/lib/authentication/types'
 import type {
     UserFeature,
     UserPlan,
@@ -73,32 +77,3 @@ export interface AuthRequest {
     header?: { title: string; subtitle?: string }
 }
 export type AuthRequestReason = 'login-requested' | 'registration-requested'
-
-export type AuthResult = LoginResult | RegistrationResult
-export type AuthError = LoginError | RegistrationError
-export type LoginResult =
-    | {
-          status: 'authenticated' | 'cancelled'
-      }
-    | LoginError
-export interface LoginError {
-    status: 'error'
-    reason:
-        | 'popup-blocked'
-        | 'invalid-email'
-        | 'user-not-found'
-        | 'wrong-password'
-        | 'unknown'
-    internalReason?: string
-}
-
-export type RegistrationResult =
-    | {
-          status: 'registered-and-authenticated' | 'cancelled'
-      }
-    | RegistrationError
-export interface RegistrationError {
-    status: 'error'
-    reason: 'invalid-email' | 'email-exists' | 'weak-password' | 'unknown'
-    internalReason?: string
-}
