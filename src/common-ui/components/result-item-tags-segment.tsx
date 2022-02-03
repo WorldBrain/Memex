@@ -59,6 +59,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: flex-start;
     padding: 5px 15px;
+    height: 24px;
     grid-auto-flow: column;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 `

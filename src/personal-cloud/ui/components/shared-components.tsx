@@ -7,6 +7,7 @@ export const Container = styled.div`
     width: 800px;
     height: 400px;
     align-items: center;
+    border-radius: 12px;
 `
 
 export const BtnBox = styled.div`

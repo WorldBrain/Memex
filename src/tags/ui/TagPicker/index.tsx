@@ -158,17 +158,38 @@ class TagPicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName !== '') {
+        if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return
+        }
+
+        if (this.state.query === '') {
+            return (
+                <EmptyTagsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>No Tags created yet</SectionTitle>
+                    <InfoText>Add a tag to a page or annotation</InfoText>
+                </EmptyTagsView>
+            )
         }
 
         return (
             <EmptyTagsView>
-                <strong>No Tags yet</strong>
-                <br />
-                Add new tags
-                <br />
-                via the search bar
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.backup}
+                        heightAndWidth="16px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>No Tags found for query</SectionTitle>
             </EmptyTagsView>
         )
     }
@@ -254,6 +275,28 @@ class TagPicker extends StatefulUIElement<
     }
 }
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+`
+
 const DeprecationText = styled.div`
     display: inline-block;
     font-size: 12px;
@@ -307,11 +350,12 @@ const OuterSearchBox = styled.div`
 `
 
 const EmptyTagsView = styled.div`
-    color: ${(props) => props.theme.tag.text};
-    padding: 10px 15px;
-    font-weight: 400;
-    font-size: ${fontSizeNormal}px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 10px;
+    padding: 20px 15px;
 `
 
 export default onClickOutside(TagPicker)

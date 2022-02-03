@@ -84,8 +84,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
                         You can close this modal, as the sync process will
                         continue in the background.
                         <br />
-                        Login on other devices to sync them too. It may take a
-                        while for all content to appear on all your devices.
+                        Login on other devices to sync them too.
                     </InfoText>
                 </>
             )
@@ -146,5 +145,6 @@ const InfoText = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     margin-bottom: 40px;
+    text-align: center;
     font-weight: 500;
 `
