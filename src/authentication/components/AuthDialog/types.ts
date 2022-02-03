@@ -4,13 +4,16 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
+    onModeChange?(event: { mode: AuthDialogMode }): void
     onAuth?(event: { reason: 'login' | 'register' }): void
 }
+
+export type AuthDialogMode = 'signup' | 'login'
 
 export interface State {
     saveState: UITaskState
     loadState: UITaskState
-    mode: 'signup' | 'login'
+    mode: AuthDialogMode
     error?: string
     email: string
     password: string

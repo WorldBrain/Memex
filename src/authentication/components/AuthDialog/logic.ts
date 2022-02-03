@@ -3,7 +3,7 @@ import {
     executeUITask,
     UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import type { Dependencies, State, Event } from './types'
+import type { Dependencies, State, Event, AuthDialogMode } from './types'
 import { EmailPasswordCredentials } from 'src/authentication/background/types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -42,11 +42,14 @@ export default class Logic extends UILogic<State, Event> {
             return
         }
 
+        const mode: AuthDialogMode =
+            previousState.mode === 'signup' ? 'login' : 'signup'
         this.emitMutation({
             mode: {
-                $set: previousState.mode === 'signup' ? 'login' : 'signup',
+                $set: mode,
             },
         })
+        this.dependencies.onModeChange?.({ mode })
     }
 
     editEmail: EventHandler<'editEmail'> = ({ event }) => {
