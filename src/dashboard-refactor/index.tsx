@@ -365,6 +365,7 @@ export class DashboardContainer extends StatefulUIElement<
                 selectedListName={
                     listsSidebar.listData[listsSidebar.selectedListId]?.name
                 }
+                activityStatus={listsSidebar.hasFeedActivity}
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
@@ -509,6 +510,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 searchResults={searchResults.pageData}
+                searchFilters={searchFilters}
                 searchQuery={searchFilters.searchQuery}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 goToImportRoute={() => {

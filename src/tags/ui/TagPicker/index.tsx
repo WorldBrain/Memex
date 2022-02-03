@@ -49,7 +49,7 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
-    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Add Tags'
+    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Search Tags'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove tag from page'
 
     componentDidUpdate(
@@ -115,7 +115,12 @@ class TagPicker extends StatefulUIElement<
     handleNewTagPress = () =>
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
+    handleKeyPress = (key: KeyEvent) => {
+        if (key === 'Escape') {
+            this.handleClickOutside(key)
+        }
+        this.processEvent('keyPress', { key })
+    }
 
     renderTagRow = (tag: DisplayEntry, index: number) => (
         <EntryRow

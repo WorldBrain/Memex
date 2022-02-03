@@ -114,8 +114,22 @@ const CollectionTitle = styled.p`
     display: flex;
 `
 
+const ActivityIndicator = styled.div<{ hasActivities }>`
+    border-radius: 20px;
+    height: 10px;
+    width: 10px;
+    margin-left: -24px;
+    border: ${(props) =>
+        props.hasActivities
+            ? '2px solid' + props.theme.colors.purple
+            : '1px solid' + props.theme.colors.lightgrey};
+    background: ${(props) => props.hasActivities && props.theme.colors.purple};
+`
+
 const SidebarToggleBox = styled(Margin)`
-    width: min-content;
+    width: fit-content;
+    display: flex;
+    align-items: center;
 `
 
 export interface HeaderProps {
@@ -125,6 +139,7 @@ export interface HeaderProps {
     searchBarProps: SearchBarProps
     syncStatusMenuProps: SyncStatusMenuProps
     syncStatusIconState: SyncStatusIconState
+    activityStatus?: boolean
 }
 
 export default class Header extends PureComponent<HeaderProps> {
@@ -144,6 +159,9 @@ export default class Header extends PureComponent<HeaderProps> {
                         <SidebarToggle
                             sidebarLockedState={this.props.sidebarLockedState}
                             hoverState={this.props.sidebarToggleHoverState}
+                        />
+                        <ActivityIndicator
+                            hasActivities={this.props.activityStatus}
                         />
                     </SidebarToggleBox>
                 </SidebarHeaderContainer>

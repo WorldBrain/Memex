@@ -76,7 +76,7 @@ export default class PageResultView extends PureComponent<Props> {
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox top="-40px" left="0" withRelativeContainer>
                     <TagPicker
                         onUpdateEntrySelection={this.props.onTagPickerUpdate}
                         initialSelectedEntries={() => this.props.tags}

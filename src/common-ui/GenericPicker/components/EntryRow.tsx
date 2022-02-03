@@ -157,7 +157,7 @@ const Row = styled.div`
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    margin: 0px 15px;
+    margin: 0px 10px;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;

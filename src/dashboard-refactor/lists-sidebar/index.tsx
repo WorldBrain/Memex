@@ -388,7 +388,7 @@ export default class ListsSidebar extends PureComponent<
                                                 <NoCollectionsMessage
                                                     onClick={() =>
                                                         window.open(
-                                                            'https://memex.social/c/oiLz5UIXw9JXermqZmXW',
+                                                            'https://links.memex.garden/follow-first-space',
                                                         )
                                                     }
                                                 >

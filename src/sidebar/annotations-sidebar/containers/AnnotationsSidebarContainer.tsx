@@ -819,22 +819,6 @@ const ContainerStyled = styled.div`
     scrollbar-width: none;
 `
 
-const TopBarContainerStyled = styled.div`
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: #f6f8fb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 34px;
-    box-sizing: border-box;
-    padding: 5px 15px 5px 5px;
-    width: 100%;
-    margin-bottom: 2px;
-    box-shadow: 0px 3px 5px -3px #c9c9c9;
-`
-
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     display: grid;
     justify-content: flex-start;

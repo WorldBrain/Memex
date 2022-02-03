@@ -36,7 +36,7 @@ export class AccountInfo extends React.Component<Props & AuthContextInterface> {
                         <Section>
                             <SectionCircle>
                                 <Icon
-                                    filePath={icons.play}
+                                    filePath={icons.personFine}
                                     heightAndWidth="34px"
                                     color="purple"
                                     hoverOff

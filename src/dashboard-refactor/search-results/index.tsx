@@ -64,6 +64,7 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        searchFilters?: any
         searchResults?: any
         searchQuery?: string
         goToImportRoute: () => void
@@ -158,7 +159,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderTagsPickerForAnnotation={() =>
                     noteData.isTagPickerShown && (
-                        <HoverBox right="0" withRelativeContainer>
+                        <HoverBox left="0" top="-40px" withRelativeContainer>
                             <TagPicker
                                 initialSelectedEntries={() => noteData.tags}
                                 onClickOutside={
@@ -318,30 +319,34 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     private renderNoResults() {
         if (
             this.props.searchResults.allIds.length === 0 &&
-            this.props.searchQuery.length === 0
+            (this.props.searchQuery.length > 0 ||
+                this.props.searchFilters.tagsIncluded.length > 0 ||
+                this.props.searchFilters.domainsIncluded.length > 0 ||
+                this.props.searchFilters.dateTo > 0 ||
+                this.props.searchFilters.dateFrom > 0)
         ) {
-            if (this.props.searchType === 'notes') {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
-                            <Icon
-                                filePath={icons.highlighterEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
-                                hoverOff
-                            />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Make your first highlight or annotation
-                                </span>
-                            }
+            return (
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
                         />
-                    </ResultsMessage>
-                )
-            }
+                    </SectionCircle>
+                    <NoResults title="Nothing found for this query" />
+                </ResultsMessage>
+            )
+        }
 
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            this.props.searchQuery.length === 0 &&
+            !this.props.searchFilters.isDateFilterActive &&
+            !this.props.searchFilters.isTagFilterActive &&
+            !this.props.searchFilters.isDomainFilterActive
+        ) {
             if (this.props.noResultsType === 'mobile-list-ad') {
                 return (
                     <ResultsMessage>
@@ -360,6 +365,28 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 <MobileAppAd />
                             </DismissibleResultsMessage>
                         </NoResults>
+                    </ResultsMessage>
+                )
+            }
+
+            if (this.props.searchType === 'notes') {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.highlighterEmpty}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults
+                            title={
+                                <span>
+                                    Make your first highlight or annotation
+                                </span>
+                            }
+                        />
                     </ResultsMessage>
                 )
             } else {
@@ -451,20 +478,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 </ResultsMessage>
             )
         }
-
-        return (
-            <ResultsMessage>
-                <SectionCircle>
-                    <Icon
-                        filePath={icons.searchIcon}
-                        heightAndWidth="24px"
-                        color="purple"
-                        hoverOff
-                    />
-                </SectionCircle>
-                <NoResults title="Nothing found for this query" />
-            </ResultsMessage>
-        )
     }
 
     private renderResultsByDay() {
@@ -628,7 +641,7 @@ const RightSideButton = styled.div`
     align-items: center;
     display: grid;
     grid-auto-flow: column;
-    grid-gap: 5px;
+    grid-gap: 10px;
     align-items: center;
 `
 

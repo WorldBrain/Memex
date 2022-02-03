@@ -418,7 +418,34 @@ class AnnotationsSidebar extends React.Component<
                             </FollowedListsMsg>
                         </FollowedListsMsgContainer>
                     ) : (
-                        sharedNotesByList
+                        <>
+                            {this.props.followedLists.allIds.length > 0 ? (
+                                sharedNotesByList
+                            ) : (
+                                <EmptyMessageContainer>
+                                    <SectionCircle>
+                                        <Icon
+                                            filePath={icons.peopleFine}
+                                            heightAndWidth="20px"
+                                            color="purple"
+                                            hoverOff
+                                        />
+                                    </SectionCircle>
+                                    <InfoText>
+                                        Create your first
+                                        <Link
+                                            onClick={() =>
+                                                window.open(
+                                                    'https://links.memex.garden/tutorials/collaborative-spaces',
+                                                )
+                                            }
+                                        >
+                                            collaborative Space
+                                        </Link>
+                                    </InfoText>
+                                </EmptyMessageContainer>
+                            )}
+                        </>
                     ))}
             </SectionTitleContainer>
         )
@@ -495,15 +522,28 @@ class AnnotationsSidebar extends React.Component<
             <SectionTitleContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
             >
-                {!this.props.annotations.length ? (
-                    <EmptyMessage />
-                ) : (
-                    this.props.isExpanded && (
-                        <>
-                            {this.renderNewAnnotation()}
-                            {annots}
-                        </>
-                    )
+                {this.props.isExpanded && (
+                    <>
+                        {this.renderNewAnnotation()}
+
+                        {this.props.annotations.length > 0 ? (
+                            <>{annots}</>
+                        ) : (
+                            <EmptyMessageContainer>
+                                <SectionCircle>
+                                    <Icon
+                                        filePath={icons.commentEmpty}
+                                        heightAndWidth="20px"
+                                        color="purple"
+                                        hoverOff
+                                    />
+                                </SectionCircle>
+                                <InfoText>
+                                    Add a note or highlight sections of the page
+                                </InfoText>
+                            </EmptyMessageContainer>
+                        )}
+                    </>
                 )}
             </SectionTitleContainer>
         )
@@ -516,7 +556,6 @@ class AnnotationsSidebar extends React.Component<
                 <FollowedListTitleContainerMyNotes left="5px">
                     <MyNotesClickableArea
                         onClick={
-                            !this.props.annotations.length ||
                             this.props.isExpanded
                                 ? null
                                 : () => {
@@ -654,6 +693,12 @@ export default onClickOutside(AnnotationsSidebar)
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const Link = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    padding-left: 4px;
+    cursor: pointer;
+`
+
 const LoadingBox = styled.div`
     margin-left: 3px;
     width: 30px;
@@ -676,17 +721,32 @@ const TopBarContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
 `
+const EmptyMessageContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 20px 5px;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+`
 
-const EmptyMessage = () => (
-    <FollowedListsMsgContainer>
-        <FollowedListsMsgHead>
-            <NoNoteImg src={icons.noNote} />
-        </FollowedListsMsgHead>
-        <FollowedListsMsg>
-            Add a note or highlight sections of the page
-        </FollowedListsMsg>
-    </FollowedListsMsgContainer>
-)
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 50px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+`
 
 const NoNoteImg = styled.img`
     height: 80px;

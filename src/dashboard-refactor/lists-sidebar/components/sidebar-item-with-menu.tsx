@@ -74,9 +74,9 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             hasActivity,
         } = this.props
 
-        if (hasActivity) {
-            return <ActivityBeacon />
-        }
+        // if (hasActivity) {
+        //     return <ActivityBeacon />
+        // }
 
         if (newItemsCount) {
             return (
@@ -89,14 +89,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (dropReceivingState?.wasPageDropped) {
-            return <Icon heightAndWidth="12px" filePath={icons.check} />
+            return <Icon heightAndWidth="14px" filePath={icons.check} />
         }
 
         if (
             dropReceivingState?.canReceiveDroppedItems &&
             dropReceivingState?.isDraggedOver
         ) {
-            return <Icon heightAndWidth="12px" filePath={icons.plus} />
+            return <Icon heightAndWidth="14px" filePath={icons.plus} />
         }
 
         if (onMoreActionClick) {
@@ -304,7 +304,6 @@ const MenuContainer = styled.div`
 
 const IconBox = styled.div<Props>`
     display: ${(props) =>
-        props.hasActivity ||
         props.newItemsCount ||
         props.dropReceivingState?.isDraggedOver ||
         props.dropReceivingState?.wasPageDropped
@@ -340,11 +339,17 @@ const SidebarItem = styled.div<Props>`
  flex-direction: row;
  justify-content: space-between;
  align-items: center;
- background-color: transparent;
+ background-color: ${(props) =>
+     props.dropReceivingState?.isDraggedOver
+         ? props.theme.colors.backgroundColorDarker
+         : 'transparent'};
   
  &:hover {
     background-color: ${(props) => props.theme.colors.lightHover};
  }
+
+
+ 
 
   
 
@@ -382,15 +387,6 @@ const SidebarItem = styled.div<Props>`
          color: ${(props) => props.theme.colors.darkText};
      `}
 
-  
-
- ${({ dropReceivingState }: Props) =>
-     dropReceivingState?.wasPageDropped &&
-     css`
-         animation: ${blinkingAnimation} 0.2s 2;
-     `}
-
-  
 
  cursor: ${({ dropReceivingState }: Props) =>
      !dropReceivingState?.isDraggedOver
@@ -470,14 +466,15 @@ const ActivityBeacon = styled.div`
 `
 
 const NewItemsCount = styled.div`
-    width: 30px;
-    height: 16px;
+    width: fit-content;
+    min-width: 20px;
+    height: 14px;
     border-radius: 10px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     background-color: ${(props) => props.theme.colors.purple};
-    padding: 2px 5px;
+    padding: 2px 8px;
     color: white;
     text-align: center;
     font-weight: 600;
@@ -496,12 +493,12 @@ const NewItemsCountInnerDiv = styled.div`
 
 const blinkingAnimation = keyframes`
  0% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
  }
  50% {
- background-color: transparent;
+    background-color: transparent;
  }
  100% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
  }
 `

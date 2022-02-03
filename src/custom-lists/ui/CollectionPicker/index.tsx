@@ -50,7 +50,7 @@ class ListPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Add to Spaces'
+        this.props.searchInputPlaceholder ?? 'Search Spaces'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
 
     componentDidUpdate(
@@ -120,6 +120,9 @@ class ListPicker extends StatefulUIElement<
     }
 
     handleKeyPress = (key: KeyEvent) => {
+        if (key === 'Escape') {
+            this.handleClickOutside(key)
+        }
         this.processEvent('keyPress', { key })
     }
 

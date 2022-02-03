@@ -58,7 +58,9 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     placeholder={this.props.searchInputPlaceholder}
                     defaultValue={this.props.value}
                     onChange={this.onChange}
-                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                        e.stopPropagation()
+                    }}
                     onFocus={() => this.setState({ isFocused: true })}
                     onBlur={() => this.setState({ isFocused: false })}
                     specialHandlers={[this.handleSpecialKeyPress]}
