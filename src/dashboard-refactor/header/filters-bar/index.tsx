@@ -61,7 +61,7 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     grid-gap: 5px;
     grid-auto-flow: column;
     align-items: center;
-    padding: 3px 6px;
+    padding: 3px 12px;
     background: #ffffff;
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;

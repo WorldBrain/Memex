@@ -60,15 +60,23 @@ const Title = styled.div`
 const BottomLeft = styled.div`
     display: flex;
     grid-gap: 10px;
-    padding: 0 35px;
+    padding: 0 25px;
     height: 50px;
     justify-content: flex-start;
     align-items: center;
     position: fixed;
     bottom: 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    width: 240px;
 
     & * {
         cursor: pointer;
+    }
+
+    &: hover {
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
     }
 `
 

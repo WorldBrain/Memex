@@ -67,7 +67,7 @@ const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
             ? props.theme.colors.darkerText
             : props.theme.colors.normalText};
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     text-align: left;
     text-decoration: none;
     display: flex;
@@ -88,10 +88,12 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     grid-auto-flow: column;
     grid-gap: 10px;
     align-items: center;
-    padding: 0 35px;
+    padding: 0 25px;
     height: 50px;
     width: 100%;
     justify-content: flex-start;
+    margin: 0 10px;
+    border-radius: 5px;
 
     & > a {
         display: flex;
@@ -99,7 +101,8 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     }
 
     &: hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
     }
 
     ${(props) =>
