@@ -342,19 +342,18 @@ export default class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
+                            <FeedIndicatorBox>
+                                <ButtonTooltip
+                                    tooltipText={'View Feed Updates'}
+                                    position="leftNarrow"
+                                >
+                                    <FeedActivityDot
+                                        key="activity-feed-indicator"
+                                        {...this.props.activityIndicator}
+                                    />
+                                </ButtonTooltip>
+                            </FeedIndicatorBox>
                             <GeneralActions>
-                                <FeedIndicatorBox>
-                                    <ButtonTooltip
-                                        tooltipText={'View Feed Updates'}
-                                        position="leftNarrow"
-                                    >
-                                        <FeedActivityDot
-                                            key="activity-feed-indicator"
-                                            {...this.props.activityIndicator}
-                                        />
-                                    </ButtonTooltip>
-                                </FeedIndicatorBox>
-
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'openDashboard',
@@ -367,27 +366,6 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                         heightAndWidth="18px"
                                         filePath={icons.searchIcon}
-                                    />
-                                </ButtonTooltip>
-                            </GeneralActions>
-                            <HorizontalLine />
-                            <PageAction>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'createBookmark',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.bookmark.toggleBookmark()
-                                        }
-                                        heightAndWidth="18px"
-                                        filePath={
-                                            this.props.bookmark.isBookmarked
-                                                ? icons.heartFull
-                                                : icons.heartEmpty
-                                        }
                                     />
                                 </ButtonTooltip>
                                 {!this.props.sidebar.isSidebarOpen && (
@@ -423,11 +401,33 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </ButtonTooltip>
                                 )}
+                            </GeneralActions>
+                            <HorizontalLine />
+                            <PageAction>
+                                <ButtonTooltip
+                                    tooltipText={this.getTooltipText(
+                                        'createBookmark',
+                                    )}
+                                    position="leftNarrow"
+                                >
+                                    <Icon
+                                        onClick={() =>
+                                            this.props.bookmark.toggleBookmark()
+                                        }
+                                        heightAndWidth="18px"
+                                        filePath={
+                                            this.props.bookmark.isBookmarked
+                                                ? icons.heartFull
+                                                : icons.heartEmpty
+                                        }
+                                    />
+                                </ButtonTooltip>
                                 {this.props.commentBox.showCommentBox && (
                                     <HoverBox
                                         position="absolute"
-                                        top="135px"
+                                        top="115px"
                                         right="40px"
+                                        padding={'0px'}
                                     >
                                         <AnnotationCreate
                                             {...this.props.tagging}
@@ -527,6 +527,7 @@ export default class Ribbon extends Component<Props, State> {
                                         position="absolute"
                                         top="240px"
                                         right="40px"
+                                        padding={'0px'}
                                     >
                                         {this.renderExtraButtons()}
                                     </HoverBox>
@@ -544,9 +545,15 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 {this.props.showTutorial && (
-                                    <Tooltip position="leftTutorial">
+                                    <HoverBox
+                                        position="absolute"
+                                        top="250px"
+                                        right="40px"
+                                        padding={'0px'}
+                                        width={'400px'}
+                                    >
                                         {this.renderTutorial()}
-                                    </Tooltip>
+                                    </HoverBox>
                                 )}
                                 <ButtonTooltip
                                     tooltipText={
@@ -607,7 +614,8 @@ const ExtraButtonRow = styled.div`
 
 const GeneralActions = styled.div`
     display: grid;
-    grid-gap: 15px;
+    grid-gap: 5px;
+    margin-top: 15px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;

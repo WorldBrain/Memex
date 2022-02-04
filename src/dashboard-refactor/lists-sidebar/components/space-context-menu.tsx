@@ -48,13 +48,14 @@ const Modal = ({
     onMouseLeave: any
 }) => {
     return (
-        <ModalRoot
-            onMouseLeave={onMouseLeave}
-            style={{ display: show ? 'block' : 'none' }}
-        >
+        <ModalRoot style={{ display: show ? 'block' : 'none' }}>
             <Overlay onClick={closeModal} />
 
-            <ModalContent x={position.x} y={position.y}>
+            <ModalContent
+                onMouseLeave={closeModal}
+                x={position.x}
+                y={position.y}
+            >
                 {children}
             </ModalContent>
         </ModalRoot>

@@ -218,7 +218,7 @@ class AnnotationsSidebar extends React.Component<
                         this.setState({ showAllNotesShareMenu: false })
                     }
                 >
-                    <HoverBox width="340px">
+                    <HoverBox padding={'0px'} width="340px">
                         <AllNotesShareMenu
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotationsShareAll}
@@ -827,8 +827,9 @@ const AnnotationContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding-bottom: 150px;
+    padding-bottom: 350px;
     overflow: scroll;
+    height: fill-available;
 
     scrollbar-width: none;
 

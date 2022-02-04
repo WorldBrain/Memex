@@ -32,7 +32,7 @@
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
     border-right: none; */
-    width: 8px;
+    width: 15px;
     height: 40vh;
     margin-right: 5px;
 
@@ -82,9 +82,10 @@
 
 .innerRibbonExpanded {
     border-radius: 20px;
-    box-shadow: -1px 1px 7px 2px #13131321;
-    background: #f6f8fb;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    background: white;
     display: flex;
+    border: 1px solid #f0f0f0;
 }
 
 .innerRibbonSidebarOpen {
