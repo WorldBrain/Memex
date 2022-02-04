@@ -11,6 +11,7 @@ interface State {
     isLoading: boolean
     templates: Template[]
     tmpTemplate: Template | undefined
+    isNew: boolean
 }
 
 export interface Props {
@@ -42,10 +43,12 @@ export default class CopyPasterContainer extends React.PureComponent<
         isLoading: false,
         tmpTemplate: undefined,
         templates: this.props.initTemplates ?? [],
+        isNew: undefined,
     }
 
     async componentDidMount() {
         await this.syncTemplates()
+        this.setState({ isNew: undefined })
     }
 
     private async syncTemplates() {
@@ -116,13 +119,14 @@ export default class CopyPasterContainer extends React.PureComponent<
             await this.copyPasterBG.updateTemplate(tmpTemplate)
         }
 
-        this.setState({ tmpTemplate: undefined })
+        this.setState({ tmpTemplate: undefined, isNew: undefined })
         await this.syncTemplates()
     }
 
     render() {
         return (
             <CopyPaster
+                isNew={this.state.isNew}
                 templates={this.state.templates}
                 isLoading={this.state.isLoading}
                 onClick={this.handleTemplateCopy}
@@ -133,14 +137,18 @@ export default class CopyPasterContainer extends React.PureComponent<
                 copyPasterEditingTemplate={this.state.tmpTemplate}
                 onClickEdit={(id) => {
                     const template = this.findTemplateForId(id)
-                    this.setState({ tmpTemplate: template })
+                    this.setState({ tmpTemplate: template, isNew: false })
                 }}
                 onClickCancel={() => {
-                    this.setState({ tmpTemplate: undefined })
+                    this.setState({
+                        tmpTemplate: undefined,
+                        isNew: undefined,
+                    })
                 }}
                 onClickNew={() => {
                     this.setState({
                         tmpTemplate: CopyPasterContainer.DEF_TEMPLATE,
+                        isNew: true,
                     })
                 }}
                 onClickHowto={() => {

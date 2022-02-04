@@ -2,8 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 
 export interface Props {
-    title: string
-    children?: React.ReactChild
+    title: any
+    children?: any
 }
 
 export default function NoResults(props: Props) {
@@ -16,18 +16,18 @@ export default function NoResults(props: Props) {
 }
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.primary};
-    font-size: 18px;
-    font-weight: 700;
-    padding-top: 30px;
-    margin-bottom: 20px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 10px;
     text-align center;
 `
 
 const Subtitle = styled.div`
-    color: ${(props) => props.theme.colors.primary};
-    font-size: 15px;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
     font-weight: 300;
     display: flex;
     justify-content: center;
+    text-align: center;
 `

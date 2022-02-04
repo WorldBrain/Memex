@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react'
 import { Template } from '../types'
 import styled, { css } from 'styled-components'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const styles = require('./TemplateEditorStyles.css')
 
@@ -9,17 +11,11 @@ const FlexContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 5px 15px;
+    padding: 5px 15px 10px 15px;
 `
 
 const TextInputBox = styled.div`
-    padding: 0px 10px;
-`
-
-const TextArea = styled.textarea`
-    resize: both;
-    min-width: 280px;
-    font-family: monospace;
+    padding: 10px 10px;
 `
 
 const HeaderText = styled.div`
@@ -67,8 +63,68 @@ const Button = styled.button`
         `}
 `
 
+const Header = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 15px 10px 15px;
+    height: 30px;
+    align-items: center;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const TextInput = styled.input`
+    outline: none;
+    height: fill-available;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    border: none;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+
+    &::placeholder {
+        color: ${(props) => props.theme.colors.lighterText};
+    }
+`
+
+const TextArea = styled.textarea`
+    outline: none;
+    height: fill-available;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    border: none;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    margin: 0;
+
+    &::placeholder {
+        color: ${(props) => props.theme.colors.lighterText};
+    }
+`
+
+const HowtoBox = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 400;
+    display: flex;
+    grid-gap: 5px;
+    align-items: centeR;
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
+`
+
 interface TemplateEditorProps {
     template?: Template
+    isNew?: boolean
 
     onClickSave: () => void
     onClickCancel: () => void
@@ -80,10 +136,6 @@ interface TemplateEditorProps {
 }
 
 export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
-    private get isNewTemplate(): boolean {
-        return this.props.template == null
-    }
-
     private get isSaveDisabled(): boolean {
         return !this.props.template?.title.length
     }
@@ -93,26 +145,26 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
 
         return (
             <>
-                <FlexContainer>
-                    <HeaderText>
-                        {this.isNewTemplate ? 'Add New' : 'Edit'}
-                    </HeaderText>
-
-                    <ButtonContainer>
-                        <Button danger onClick={this.props.onClickCancel}>
-                            Cancel
-                        </Button>
-                        <Button
-                            disabled={this.isSaveDisabled}
-                            onClick={this.props.onClickSave}
-                        >
-                            Save
-                        </Button>
-                    </ButtonContainer>
-                </FlexContainer>
+                <Header>
+                    <Icon
+                        filePath={icons.close}
+                        heightAndWidth="12px"
+                        padding={'6px'}
+                        onClick={this.props.onClickCancel}
+                    />
+                    <SectionTitle>
+                        {this.props.isNew ? 'Add New' : 'Edit'}
+                    </SectionTitle>
+                    <Icon
+                        filePath={icons.check}
+                        color="purple"
+                        heightAndWidth="16px"
+                        onClick={this.props.onClickSave}
+                    />
+                </Header>
 
                 <TextInputBox>
-                    <input
+                    <TextInput
                         type="text"
                         placeholder="Title"
                         className={styles.titleInput}
@@ -135,13 +187,16 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                 </TextInputBox>
 
                 <FlexContainer>
-                    <LesserLink
-                        label={'How to write templates'}
-                        onClick={this.props.onClickHowto}
-                    />
-                    {!this.isNewTemplate && (
+                    <HowtoBox onClick={this.props.onClickHowto}>
+                        <Icon
+                            filePath={icons.helpIcon}
+                            heightAndWidth="16px"
+                            hoverOff
+                        />
+                        How to write templates
+                    </HowtoBox>
+                    {!this.props.isNew && (
                         <Button
-                            small
                             danger
                             onClick={() => this.props?.onClickDelete()}
                         >

@@ -47,12 +47,6 @@
     margin-top: 1px;
 }
 
-.dateRangeDiv {
-    display: flex;
-    background: white;
-    align-items: flex-start;
-}
-
 .pickerContainer {
     display: flex;
     flex-direction: column;
@@ -89,18 +83,6 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-}
-
-.timeInput {
-    border-radius: 3px;
-    margin-right: 10px;
-    margin-left: 10px;
-    outline: none;
-    background: color11;
-    border: none;
-    height: 25px;
-    padding: 6px;
-    font-size: 14px;
 }
 
 .datepickerInput {

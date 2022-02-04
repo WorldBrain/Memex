@@ -295,9 +295,7 @@ export class BackupBackgroundModule {
     }
 
     async scheduleAutomaticBackupIfEnabled() {
-        if (await this.isAutomaticBackupEnabled()) {
-            this.scheduleAutomaticBackup()
-        }
+        this.scheduleAutomaticBackup()
     }
 
     scheduleAutomaticBackup() {
@@ -398,7 +396,6 @@ export class BackupBackgroundModule {
         const always = () => {
             this.scheduleAutomaticBackupIfEnabled()
         }
-
         this.storage.startRecordingChanges()
         if (!(await this.backend.isReachable())) {
             await this.maybeShowBackupProblemNotif('incremental_backup_down')

@@ -1,13 +1,16 @@
-@import url('/fonts/Poppins/poppins.css');
+@import url('/fonts/Inter/inter.css');
 
 * {
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    margin: 0;
 }
 
 html,
 body {
-    margin: 0;
+    margin: 0px;
 }
 
 .root {

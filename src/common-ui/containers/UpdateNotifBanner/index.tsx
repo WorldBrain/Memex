@@ -37,7 +37,10 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
                 mainText="Memex Updated!"
                 mainBtnText="What's new?"
                 onCloseBtnClick={() => this.processEvent('hide', null)}
-                onMainBtnClick={() => this.props.openLink(CHANGE_LOG_LINK)}
+                onMainBtnClick={() => {
+                    this.processEvent('hide', null)
+                    this.props.openLink(CHANGE_LOG_LINK)
+                }}
                 {...this.props}
             />
         )

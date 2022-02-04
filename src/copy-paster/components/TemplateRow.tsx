@@ -5,6 +5,7 @@ import { Template } from '../types'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { LoadingIndicator } from 'src/common-ui/components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const COPY_TIMEOUT = 2000
 
@@ -44,7 +45,6 @@ export default class TemplateRow extends Component<Props, State> {
     }
 
     private copy = async () => {
-        console.log('copying')
         this.setState({ isLoading: true })
         await this.props.onClick()
         this.setState({ hasCopied: true, isLoading: false })
@@ -77,30 +77,15 @@ export default class TemplateRow extends Component<Props, State> {
             <>
                 <Title>{title}</Title>
                 <ActionsContainer>
-                    <ResultItemActionBtn
+                    <Icon
+                        filePath={icons.copy}
+                        heightAndWidth="16px"
                         onClick={this.handleSingleCopy}
-                        tooltipPosition="bottom"
-                        imgSrc={icons.copy}
-                        tooltipText="Copy"
                     />
-                    {/*<ResultItemActionBtn
-                        imgSrc={isFavourite ? starImg : emptyStarImg}
-                        onClick={() =>
-                            this.props.onClickSetIsFavourite(!isFavourite)
-                        }
-                        tooltipText={
-                            isFavourite
-                                ? 'Remove from favourites'
-                                : 'Add to favourites'
-                        }
-                        tooltipPosition="left"
-                    />
-                    */}
-                    <ResultItemActionBtn
-                        imgSrc={icons.edit}
+                    <Icon
+                        filePath={icons.edit}
+                        heightAndWidth="16px"
                         onClick={this.props.onClickEdit}
-                        tooltipText="Edit"
-                        tooltipPosition="bottom"
                     />
                 </ActionsContainer>
             </>
@@ -112,14 +97,34 @@ export default class TemplateRow extends Component<Props, State> {
     }
 }
 
+const ActionsContainer = styled.div`
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 5px;
+    display: none;
+`
+
 const Row = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    height: 40px;
+    border-radius: 5px;
+    padding: 0px 15px;
+    // border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+
+    &:last-child {
+        border-bottom: none;
+    }
 
     &:hover {
-        background-color: #efefef;
+        background-color: ${(props) => props.theme.colors.backgroundColor};
+
+        ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
+            display: flex;
+        }
     }
 `
 
@@ -130,24 +135,12 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: ${(props) => props.theme.fonts.primary};
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: ${(props) => (props.fullWidth ? 'bold' : 'normal')};
+    font-weight: normal;
     font-size: 14px;
-    color: ${(props) => props.theme.colors.primary};
-
-    padding: 4px 10px;
+    color: ${(props) => props.theme.colors.normalText};
 
     outline: none;
     border: none;
-    background: ${(props) =>
-        props.fullWidth ? 'rgba(196, 196, 196, 0.5)' : 'transparent'};
-`
-
-const ActionsContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-right: 8px;
 `

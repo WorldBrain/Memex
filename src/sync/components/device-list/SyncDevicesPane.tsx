@@ -13,6 +13,7 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import analytics from 'src/analytics'
 import { AuthContextInterface } from 'src/authentication/background/types'
+import styled from 'styled-components'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
@@ -381,13 +382,11 @@ class SyncDevicesPaneContainer extends React.Component<
                     <div className={styles.mobileSection}>
                         <div className={styles.contentSection}>
                             <div className={styles.textSection}>
-                                <div className={settingsStyle.sectionTitle}>
-                                    Download Memex GO
-                                </div>
-                                <div className={settingsStyle.infoText}>
+                                <SectionTitle>Download Memex GO</SectionTitle>
+                                <InfoText>
                                     Our mobile app to annotate and organise
                                     websites on the Go
-                                </div>
+                                </InfoText>
                             </div>
                             <div className={styles.storeSection}>
                                 <img
@@ -422,6 +421,20 @@ class SyncDevicesPaneContainer extends React.Component<
         )
     }
 }
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),

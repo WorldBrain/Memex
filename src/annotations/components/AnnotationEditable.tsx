@@ -170,7 +170,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {footerDeps?.onEditIconClick && (
                         <ButtonTooltip
                             tooltipText="Add/Edit Note"
-                            position="bottom"
+                            position="left"
                         >
                             <HighlightAction>
                                 <AddNoteIcon
@@ -328,15 +328,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     tooltipText: 'Copy Note',
                 },
                 {
-                    key: 'tag-note-btn',
-                    image:
-                        this.props.tags?.length > 0
-                            ? icons.tagFull
-                            : icons.tagEmpty,
-                    onClick: footerDeps.onTagIconClick,
-                    tooltipText: 'Tag Note',
-                },
-                {
                     key: 'share-note-btn',
                     image: shareIconData.icon,
                     onClick: footerDeps.onShareClick,
@@ -355,14 +346,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                 key: 'copy-paste-note-btn',
                 isDisabled: true,
                 image: icons.copy,
-            },
-            {
-                key: 'tag-note-btn',
-                isDisabled: true,
-                image:
-                    this.props.tags?.length > 0
-                        ? icons.tagFull
-                        : icons.tagEmpty,
             },
             {
                 key: 'share-note-btn',
@@ -458,7 +441,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="5px">
+                <Margin top="5px" bottom="5px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -803,7 +786,7 @@ const CancelBtnStyled = styled.button`
     color: red;
 
     &:hover {
-        background-color: #e0e0e0;
+        background-color: ${(props) => props.theme.colors.backgroundColor};
     }
 
     &:focus {

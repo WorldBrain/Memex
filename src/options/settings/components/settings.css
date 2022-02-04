@@ -2,7 +2,7 @@
 @value color1, color2, color6, color4 from colors;
 
 .container * {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .section {
@@ -83,7 +83,7 @@
     font-weight: bold;
 }
 
-.block input {
+/* .block input {
     margin-right: 10px;
     vertical-align: middle;
     margin-left: 10px;
@@ -93,7 +93,7 @@
     border: 1px solid #d2d2d2;
     width: 130px;
     text-align: center;
-}
+} */
 
 .featureBlock {
     display: flex;

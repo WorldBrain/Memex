@@ -40,14 +40,20 @@ export default class EntryResultsList extends React.Component<Props> {
 }
 
 const RecentItemsNotif = styled.div`
-    padding: 5px 10px;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.subText};
+    padding: 10px 20px 5px 20px;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.lighterText};
 `
 
 const StyledContainer = styled.div`
     overflow-y: auto;
     max-height: 280px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 `
 const FilterHelp = styled.div`
     font-size: ${fontSizeSmall}px;

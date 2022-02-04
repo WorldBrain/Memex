@@ -60,7 +60,7 @@ export function createShadowRootIfSupported(
 
         var innerHTML = ''
         innerHTML += '<style>'
-        innerHTML += ':host {all: initial}'
+        innerHTML += ':host {all: initial; font-family: "Inter"}'
         innerHTML += '</style>'
         shadow.innerHTML = innerHTML
 

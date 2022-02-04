@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './provider-list.css'
-import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
@@ -17,19 +16,10 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             onChange={() => onChange('local')}
                         />
                         <div className={Styles.textBlock}>
-                            <div className={Styles.providerTitle}>
-                                To your local hard drive
-                            </div>
                             <p className={settingsStyle.infoText}>
-                                Also use any cloud provider with sync folders
-                                (e.g. Dropbox, Spideroak, GDrive){' '}
-                                <a
-                                    className={Styles.link}
-                                    target="_blank"
-                                    href="https://worldbrain.io/tutorials/backups"
-                                >
-                                    Learn More ▸
-                                </a>
+                                Backup your data locally and use any cloud
+                                provider with sync folders (e.g. Dropbox,
+                                Spideroak, GDrive){' '}
                             </p>
                             {backupPath !== null ? (
                                 <button
@@ -57,8 +47,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         </div>
                     </div>
                 </label>
-                <WhiteSpacer20 />
-                <label className={Styles.label}>
+                {/* <label className={Styles.label}>
                     <div className={Styles.option}>
                         <input
                             type="radio"
@@ -90,7 +79,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             </p>
                         </div>
                     </div>
-                </label>
+                </label> */}
             </form>
         </div>
     )

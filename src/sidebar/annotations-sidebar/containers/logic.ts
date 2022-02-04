@@ -143,7 +143,7 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationConversationInitialState(),
 
             isExpanded: true,
-            isExpandedSharedSpaces: true,
+            isExpandedSharedSpaces: false,
             sidebarWidth: '450px',
             loadState: 'pristine',
             primarySearchState: 'pristine',

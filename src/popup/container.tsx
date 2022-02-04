@@ -24,6 +24,7 @@ import {
     acts as collectionActs,
     CollectionsButton,
 } from './collections-button'
+import { PDFReaderButton } from './pdf-reader-button'
 import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
@@ -45,6 +46,8 @@ import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface OwnProps {}
 
@@ -281,128 +284,99 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         if (this.props.showTagsPicker) {
             return (
-                <TagPicker
-                    onUpdateEntrySelection={this.handleTagUpdate}
-                    initialSelectedEntries={this.fetchTagsForPage}
-                    actOnAllTabs={this.handleTagAllTabs}
-                >
-                    <BackContainer onClick={this.props.toggleShowTagsPicker} />
-                </TagPicker>
+                <SpacePickerContainer>
+                    <BackContainer
+                        onClick={this.props.toggleShowTagsPicker}
+                        header="Add Tags"
+                    />
+                    <TagPicker
+                        onUpdateEntrySelection={this.handleTagUpdate}
+                        initialSelectedEntries={this.fetchTagsForPage}
+                        actOnAllTabs={this.handleTagAllTabs}
+                    ></TagPicker>
+                </SpacePickerContainer>
             )
         }
 
         if (this.props.showCollectionsPicker) {
             return (
-                <CollectionPicker
-                    onUpdateEntrySelection={this.handleListUpdate}
-                    initialSelectedEntries={this.fetchListsForPage}
-                    actOnAllTabs={this.handleListAllTabs}
-                >
+                <SpacePickerContainer>
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
+                        header={'Add to Spaces'}
                     />
-                </CollectionPicker>
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.handleListUpdate}
+                        initialSelectedEntries={this.fetchListsForPage}
+                        actOnAllTabs={this.handleListAllTabs}
+                    />
+                </SpacePickerContainer>
             )
         }
 
         return (
-            <React.Fragment>
-                <FeedActivitySection
-                    onClick={() => window.open(this.whichFeed(), '_blank')}
-                >
-                    <FeedActivityDot
-                        key="activity-feed-indicator"
-                        activityIndicatorBG={this.activityIndicatorBG}
-                        openFeedUrl={() =>
-                            window.open(this.whichFeed(), '_blank')
-                        }
-                    />
-                    Feed Updates
-                </FeedActivitySection>
-                {this.maybeRenderBlurredNotice()}
-                <div className={styles.item}>
-                    <BookmarkButton closePopup={this.closePopup} />
-                </div>
-                <div className={styles.item}>
-                    <CollectionsButton
-                        fetchCollections={this.fetchListsForPage}
-                    />
-                </div>
-                <div className={styles.item}>
-                    <TagsButton fetchTags={this.fetchTagsForPage} />
-                </div>
-                <hr />
-
-                <div className={styles.item}>
-                    <LinkButton goToDashboard={this.onSearchClick} />
-                </div>
-
-                <hr />
-
-                <div className={styles.item}>
-                    <SidebarButton closePopup={this.closePopup} />
-                </div>
-
-                <div className={styles.item}>
-                    <TooltipButton closePopup={this.closePopup} />
-                </div>
-
-                <div className={styles.item}>
-                    <ToggleSwitchButton
-                        btnIcon={btnStyles.PDFIcon}
-                        contentType="PDFs"
-                        btnText={
-                            this.getPDFMode() === 'reader'
-                                ? 'Close PDF reader'
-                                : 'Open PDF reader'
-                        }
-                        btnHoverText="Open current PDF in Memex PDF reader"
-                        toggleHoverText="Enable/disable Memex PDF reader on web PDFs"
-                        isEnabled={this.state.isPDFReaderEnabled}
-                        onBtnClick={() =>
-                            this.processEvent('togglePDFReader', null)
-                        }
-                        onToggleClick={() => {
-                            this.processEvent('togglePDFReaderEnabled', null)
-                        }}
-                    />
-                </div>
-
-                {this.getPDFMode() === 'reader' && (
-                    <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
-                    />
-                )}
-
-                <hr />
-
-                <div className={styles.buttonContainer}>
-                    <a
-                        href="https://worldbrain.io/feedback"
-                        target="_blank"
-                        className={styles.feedbackButton}
+            <PopupContainerContainer>
+                <FeedActivitySection>
+                    <FeedActivitySectionInnerContainer
+                        onClick={() => window.open(this.whichFeed(), '_blank')}
                     >
-                        🐞 Feedback
-                    </a>
-                    <div className={styles.buttonBox}>
-                        <div
+                        <FeedActivityDot
+                            key="activity-feed-indicator"
+                            activityIndicatorBG={this.activityIndicatorBG}
+                            openFeedUrl={() =>
+                                window.open(this.whichFeed(), '_blank')
+                            }
+                        />
+                        Activity Feed
+                    </FeedActivitySectionInnerContainer>
+                    <ButtonContainer>
+                        <Icon
+                            onClick={() =>
+                                window.open('https://worldbrain.io/tutorials')
+                            }
+                            filePath={icons.helpIcon}
+                            heightAndWidth={'20px'}
+                        />
+                        <Icon
                             onClick={() =>
                                 window.open(
                                     `${constants.OPTIONS_URL}#/settings`,
                                 )
                             }
-                            className={btnStyles.settings}
-                        />
-                        <div
-                            onClick={() =>
-                                window.open('https://worldbrain.io/tutorials')
-                            }
-                            className={btnStyles.help}
+                            filePath={icons.settings}
+                            heightAndWidth={'20px'}
                         />
                         {/*<NotifButton />*/}
-                    </div>
-                </div>
-            </React.Fragment>
+                    </ButtonContainer>
+                </FeedActivitySection>
+                {this.maybeRenderBlurredNotice()}
+                <BookmarkButton closePopup={this.closePopup} />
+                <CollectionsButton fetchCollections={this.fetchListsForPage} />
+                <TagsButton fetchTags={this.fetchTagsForPage} />
+                <hr />
+                <LinkButton goToDashboard={this.onSearchClick} />
+
+                <hr />
+
+                <SidebarButton closePopup={this.closePopup} />
+                <TooltipButton closePopup={this.closePopup} />
+                <PDFReaderButton
+                    pdfMode={this.getPDFMode()}
+                    //closePopup={this.closePopup}
+                    onBtnClick={() =>
+                        this.processEvent('togglePDFReader', null)
+                    }
+                    onToggleClick={() => {
+                        this.processEvent('togglePDFReaderEnabled', null)
+                    }}
+                    isEnabled={this.state.isPDFReaderEnabled}
+                />
+                {this.getPDFMode() === 'reader' && (
+                    <CopyPDFLinkButton
+                        currentPageUrl={this.state.currentPageUrl}
+                    />
+                )}
+            </PopupContainerContainer>
         )
     }
 
@@ -410,6 +384,29 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return <div className={styles.popup}>{this.renderChildren()}</div>
     }
 }
+
+const PopupContainerContainer = styled.div`
+    padding-bottom: 10px;
+`
+
+const ButtonContainer = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+`
+
+const FeedActivitySectionInnerContainer = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 16px;
+    font-size: 14px;
+    justify-content: flex-start;
+    cursor: pointer;
+    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 700;
+    flex: 1;
+    max-width: 50%;
+`
 
 const NoticeTitle = styled.div`
     font-size: 16px;
@@ -478,20 +475,18 @@ const DashboardButtonBox = styled.div`
 `
 
 const FeedActivitySection = styled.div`
-    width: 100%;
-    display: grid;
-    height: 40px;
-    border-bottom: 1px solid #f0f0f0;
+    width: fill-available;
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     align-items: center;
-    padding: 0px 23px;
+    padding: 0px 10px 0px 24px;
     grid-auto-flow: column;
-    grid-gap: 16px;
-    justify-content: flex-start;
-    cursor: pointer;
 
-    &:hover {
-        background-color: #f0f0f0;
-    }
+    // &:hover {
+    //     background-color: ${(props) => props.theme.colors.backgroundColor};
+    // }
 `
 
 const BottomBarBox = styled.div`
@@ -509,6 +504,11 @@ const BottomBarBox = styled.div`
 const LinkButtonBox = styled.img`
     height: 24px;
     width: 24px;
+`
+
+const SpacePickerContainer = styled.div`
+    display: flex;
+    flex-direction: column;
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({

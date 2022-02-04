@@ -8,10 +8,12 @@ import {
     fontSizeSmall,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
+import { props } from 'lodash/fp'
 
 const StyledPrimaryAction = styled.div`
     padding: 8px 20px;
     height: 35px;
+    font-weight: normal;
     overflow: visible;
     white-space: nowrap;
     display: flex;
@@ -34,8 +36,10 @@ const StyledPrimaryAction = styled.div`
     }
 `
 
-const StyledPrimaryActionLinkText = styled(TypographyActionText)`
-    font-size: ${fontSizeSmall}px;
+const StyledPrimaryActionLinkText = styled(TypographyActionText)<{
+    fontSize: string
+}>`
+    font-size: ${(props) => (props.fontSize ? props.fontSize : fontSizeSmall)};
     color: white;
 `
 export const PrimaryAction = ({
@@ -43,11 +47,13 @@ export const PrimaryAction = ({
     onClick,
     disabled,
     innerRef,
+    fontSize,
 }: {
     label: React.ReactNode
     onClick: React.MouseEventHandler
     disabled?: boolean
     innerRef?: any
+    fontSize?: string
 }) => (
     <StyledPrimaryAction
         autoFocus
@@ -57,6 +63,8 @@ export const PrimaryAction = ({
         ref={innerRef}
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
     >
-        <StyledPrimaryActionLinkText>{label}</StyledPrimaryActionLinkText>
+        <StyledPrimaryActionLinkText fontSize={fontSize}>
+            {label}
+        </StyledPrimaryActionLinkText>
     </StyledPrimaryAction>
 )

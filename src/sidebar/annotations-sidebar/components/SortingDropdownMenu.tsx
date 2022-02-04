@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import {
     sortByCreatedTime,
     sortByPagePosition,
@@ -43,7 +44,13 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
         return (
             <DropdownMenuContainer>
                 <DropdownMenuBtn
-                    btnChildren={<IconImg src={icons.sort} />}
+                    btnChildren={
+                        <Icon
+                            height="16px"
+                            width="20px"
+                            filePath={icons.sort}
+                        />
+                    }
                     onMenuItemClick={this.props.onMenuItemClick}
                     menuItems={this.props.menuItems}
                     theme={{ leftMenuOffset: '-125px' }}
@@ -65,14 +72,4 @@ const DropdownMenuContainer = styled.div`
         width: 24px;
         padding: 2px;
     }
-
-    & #DropdownMenuBtn {
-        height: 24px;
-        width: 24px;
-    }
-`
-
-const IconImg = styled.img`
-    width: fill-available;
-    padding: 5px;
 `
