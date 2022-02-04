@@ -304,6 +304,7 @@ const DomainContainer = styled.div`
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    grid-gap: 3px;
 `
 
 const PDFIcon = styled.div`
@@ -393,8 +394,8 @@ const PageTitle = styled(Margin)`
     line-break: ${(props) => (props.isUrl ? 'anywhere' : 'unset')};
 `
 const PageUrl = styled.span`
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
     color: ${(props) => props.theme.colors.normalText};
     display: flex;
     height: 20px;

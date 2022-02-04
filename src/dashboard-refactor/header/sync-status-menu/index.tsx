@@ -14,24 +14,24 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
-    width: 230px;
+    width: 270px;
     background-color: ${colors.white};
     flex-direction: column;
     overflow: hidden;
 `
 
 const Separator = styled.div`
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 `
 
 const TopBox = styled(Margin)`
     height: min-content;
     display: grid;
-    flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     grid-auto-flow: row;
-    grid-gap: 10px;
+    grid-gap: 15px;
+    flex-direction: column;
 `
 
 const Row = styled(Margin)`
@@ -41,7 +41,9 @@ const Row = styled(Margin)`
     align-items: center;
     justify-content: flex-start;
     grid-auto-flow: column;
+    height: 30px;
     grid-gap: 10px;
+    padding: 0 10px;
 
     &:last-child {
         margin-bottom: 0px;
@@ -49,7 +51,7 @@ const Row = styled(Margin)`
 `
 
 const BottomRow = styled.div`
-    padding: 5px 10px 5px 10px;
+    padding: 10px 10px 5px 10px;
     display: flex;
     justify-content: center;
     cursor: pointer;
@@ -58,7 +60,7 @@ const BottomRow = styled.div`
 
 const RowContainer = styled.div`
     height: max-content;
-    width: 100%;
+    width: fill-available;
     display: flex;
     flex-direction: column;
     padding: 15px;
@@ -74,16 +76,27 @@ const textStyles = `
     color: ${colors.fonts.primary};
 `
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 20px;
+    width: fit-content;
+    font-weight: bold;
+    display: flex;
+    padding: 0 8px;
+    justify-content: center;
+    align-items: center;
+    color: ${(props) => props.theme.colors.purple};
+`
+
 const TextBlock = styled.div<{
     bold: boolean
 }>`
-    height: 18px;
-    ${textStyles}
-    font-size: 12px;
+    font-size: 14px;
     line-height: 15px;
-    display: flex;
+    display: grid;
     align-items: center;
-    white-space: nowrap;
+    text-align: center;
 
     ${(props) =>
         css`
@@ -93,12 +106,17 @@ const TextBlock = styled.div<{
         `}
 `
 
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+`
+
 const HelpTextBlock = styled.span<{
     bold: boolean
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     display: flex;
     align-items: center;
@@ -111,7 +129,7 @@ const HelpTextBlockLink = styled.a<{
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     display: flex;
     align-items: center;
@@ -230,7 +248,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 <RowContainer>
                     <TopBox>
                         <TextBlock bold>
-                            You're not logged in and syncing
+                            You're logged out and not syncing
                         </TextBlock>
                         <PrimaryAction label="Login" onClick={onLoginClick} />
                     </TopBox>
@@ -286,21 +304,21 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 <Separator />
                 <RowContainer>
                     <Row>
-                        <Count>
+                        <SectionCircle>
                             {pendingLocalChangeCount < 0
                                 ? 0
                                 : pendingLocalChangeCount}
-                        </Count>
+                        </SectionCircle>
                         {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
-                        <TextBlock> pending local changes</TextBlock>
+                        <InfoText> pending local changes</InfoText>
                     </Row>
                     <Row>
-                        <Count>
+                        <SectionCircle>
                             {pendingRemoteChangeCount < 0
                                 ? 0
                                 : pendingRemoteChangeCount}
-                        </Count>
-                        <TextBlock> pending remote changes</TextBlock>
+                        </SectionCircle>
+                        <InfoText> pending remote changes</InfoText>
                     </Row>
                 </RowContainer>
                 <Separator />

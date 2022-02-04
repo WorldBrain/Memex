@@ -327,14 +327,15 @@ const TitleBox = styled.div<Props>`
     flex: 0 1 100%;
     width: 91%;
     height: 100%;
-    padding-left: 25px;
+    padding-left: 15px;
     align-items: center;
     color: ${(props) => props.theme.colors.normalText};
 `
 
 const SidebarItem = styled.div<Props>`
  height: 40px;
- width: 100%;
+margin: 0 10px;
+border-radius: 5px;
  display: flex;
  flex-direction: row;
  justify-content: space-between;

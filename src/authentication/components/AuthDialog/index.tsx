@@ -12,6 +12,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 export interface Props extends Dependencies {}
 
@@ -175,7 +176,11 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                     '.',
                                                 ) &&
                                                 this.state.displayName.length >=
-                                                    3
+                                                    3 &&
+                                                this.state.password.length >
+                                                    0 &&
+                                                this.state.passwordConfirm
+                                                    .length > 0
                                             )
                                         }
                                         label={'Sign Up'}
@@ -330,22 +335,10 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return this.state.mode === 'login' ? (
-            <ContentBox>
-                <LogoImg src={'/img/onlyIconLogo.svg'} />
-                <Title>Welcome back!</Title>
-                <DescriptionText />
-                {this.renderAuthForm()}
-            </ContentBox>
+        return this.state.saveState === 'running' ? (
+            <LoadingIndicator />
         ) : (
-            <ContentBox>
-                <LogoImg src={'/img/onlyIconLogo.svg'} />
-                <Title>Welcome to Memex</Title>
-                <DescriptionText>
-                    Create an account to get started
-                </DescriptionText>
-                {this.renderAuthForm()}
-            </ContentBox>
+            <ContentBox>{this.renderAuthForm()}</ContentBox>
         )
     }
 }

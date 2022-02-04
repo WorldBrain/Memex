@@ -46,6 +46,7 @@ export default function SearchCopyPaster(props: Props) {
                     withRelativeContainer
                     top="25px"
                     left="-155px"
+                    padding={'0px'}
                 >
                     <CopyPaster
                         searchParams={props.searchParams}

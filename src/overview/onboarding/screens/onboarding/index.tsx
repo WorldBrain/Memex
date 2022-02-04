@@ -150,17 +150,35 @@ export default class OnboardingScreen extends StatefulUIElement<
         <>
             <WelcomeContainer>
                 <LeftSide>
-                    Hello, I'm in {this.state.authDialogMode} mode!
-                    <AuthDialog
-                        onAuth={({ reason }) => {
-                            this.processEvent('onUserLogIn', {
-                                newSignUp: reason === 'register',
-                            })
-                        }}
-                        onModeChange={({ mode }) => {
-                            this.processEvent('setAuthDialogMode', { mode })
-                        }}
-                    />
+                    <ContentBox>
+                        {this.state.authDialogMode === 'signup' ? (
+                            <>
+                                <LogoImg src={'/img/onlyIconLogo.svg'} />
+                                <Title>Welcome to Memex</Title>
+                                <DescriptionText>
+                                    Create an account to get started
+                                </DescriptionText>
+                            </>
+                        ) : (
+                            <>
+                                <LogoImg src={'/img/onlyIconLogo.svg'} />
+                                <Title>Welcome back</Title>
+                                <DescriptionText>
+                                    Good to see you again!
+                                </DescriptionText>
+                            </>
+                        )}
+                        <AuthDialog
+                            onAuth={({ reason }) => {
+                                this.processEvent('onUserLogIn', {
+                                    newSignUp: reason === 'register',
+                                })
+                            }}
+                            onModeChange={({ mode }) => {
+                                this.processEvent('setAuthDialogMode', { mode })
+                            }}
+                        />
+                    </ContentBox>
                 </LeftSide>
                 {this.renderInfoSide()}
             </WelcomeContainer>

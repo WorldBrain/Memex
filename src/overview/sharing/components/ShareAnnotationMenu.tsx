@@ -126,7 +126,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     </LinkCopierBox>
                                 </TopArea>
                             )}
-                            <PrivacyContainer>
+                            <PrivacyContainer isLinkShown={this.props.showLink}>
                                 <TopArea>
                                     <PrivacyTitle>
                                         {this.props.privacyOptionsTitleCopy}
@@ -232,11 +232,11 @@ const LinkContent = styled.div`
     overflow: hidden;
 `
 
-const PrivacyContainer = styled.div`
+const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
     width: 100%;
 
     &:first-child {
-        padding-top: 15px;
+        padding-top: ${(props) => (props.isLinkShown ? '15px' : '0px')};
     }
 `
 

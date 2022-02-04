@@ -146,7 +146,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 mode={noteData.isEditing ? 'edit' : 'default'}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
-                        <HoverBox right="0" withRelativeContainer>
+                        <HoverBox
+                            padding={'0px'}
+                            right="0"
+                            withRelativeContainer
+                        >
                             <PageNotesCopyPaster
                                 annotationUrls={[noteId]}
                                 normalizedPageUrls={[pageId]}
@@ -174,7 +178,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
-                        <HoverBox width="350px" right="0" withRelativeContainer>
+                        <HoverBox
+                            padding={'0px'}
+                            width="350px"
+                            right="0"
+                            withRelativeContainer
+                        >
                             <SingleNoteShareMenu
                                 isShared={noteData.isShared}
                                 shareImmediately={
@@ -540,6 +549,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         right="-90px"
                         withRelativeContainer
                         position="absolute"
+                        padding={'0px'}
                     >
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
