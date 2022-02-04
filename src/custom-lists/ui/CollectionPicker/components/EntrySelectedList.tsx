@@ -2,6 +2,8 @@ import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { X as XIcon } from '@styled-icons/feather'
 import { ActiveList } from 'src/custom-lists/ui/CollectionPicker/components/ActiveList'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface Props {
     dataAttributeName: string
@@ -27,7 +29,7 @@ export class EntrySelectedList extends React.PureComponent<Props> {
                         {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
                         <Entry>{entry}</Entry>
-                        <StyledXIcon size={12} />
+                        <Icon heightAndWidth={'10px'} filePath={icons.close} />
                     </StyledActiveEntry>
                 ))}
             </React.Fragment>
@@ -38,27 +40,19 @@ export class EntrySelectedList extends React.PureComponent<Props> {
 const StyledActiveEntry = styled(ActiveList)`
     display: inline-flex;
     cursor: pointer;
-    max-width: 100%;
+    min-height: 18px;
+    padding: 2px 8px;
+    &:hover {
+        background: ${(props) => props.theme.colors.darkhover};
+    }
 `
 
 const Entry = styled.div`
     display: block;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: break-spaces;
     overflow-x: hidden;
     text-overflow: ellipsis;
-`
-
-const StyledXIcon = styled(XIcon)`
-    stroke: ${(props) => props.theme.tag.text};
-    stroke-width: 2px;
-    margin-left: 4px;
-    display: flex;
-    flex-shrink: 0;
-    pointer-events: none;
-
-    &:hover {
-        stroke-width: 3px;
-        stroke: darken(0.2, ${(props) => props.theme.tag.text});
-    }
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
 `

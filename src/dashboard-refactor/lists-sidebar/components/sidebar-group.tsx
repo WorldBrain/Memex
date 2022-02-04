@@ -7,6 +7,7 @@ import {
     LoadingIndicator,
 } from 'src/dashboard-refactor/styled-components'
 import styled from 'styled-components'
+import { ThemeProvider } from 'styled-components'
 
 import { TaskState } from 'ui-logic-core/lib/types'
 import { Props as ListsSidebarItemProps } from './sidebar-item-with-menu'
@@ -37,7 +38,7 @@ const GroupHeaderInnerDiv = styled.div`
 `
 
 const GroupTitle = styled.div`
-    color: ${fonts.primary.colors.secondary};
+    color: ${(props) => props.theme.colors.darkerBlue};
     font-family: ${fonts.primary.name};
     line-height: 18px;
     cursor: pointer;
@@ -47,9 +48,8 @@ const GroupTitle = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 14px;
-    font-weight: 300;
-    padding: 5px 0px 5px 5px;
-    opacity: 0.7;
+    font-weight: 600;
+    padding: 5px 0px 5px 20px;
 `
 
 const IconContainer = styled.div`
@@ -61,6 +61,13 @@ const IconContainer = styled.div`
     &:hover {
         background: #f0f0f0;
     }
+`
+
+const IconGroup = styled.div`
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 5px;
+    align-items: center;
 `
 
 const ErrorMsg = styled.div`
@@ -119,37 +126,31 @@ export default class ListsSidebarGroup extends PureComponent<
             <Container>
                 {this.props.title && (
                     <GroupHeaderContainer>
-                        {this.props.onExpandBtnClick && (
-                            <IconContainer
-                                onClick={this.props.onExpandBtnClick}
-                            >
-                                <Margin left="5px">
-                                    <Icon
-                                        rotation={
-                                            this.props.isExpanded ? '0' : '-90'
-                                        }
-                                        heightAndWidth="8px"
-                                        path={icons.triangle}
-                                    />
-                                </Margin>
-                            </IconContainer>
-                        )}
                         <GroupHeaderInnerDiv className="inner">
                             <GroupTitle onClick={this.props.onExpandBtnClick}>
                                 {this.props.title}
                             </GroupTitle>
-                            {this.props.onAddBtnClick && (
-                                <IconContainer
-                                    onClick={this.props.onAddBtnClick}
-                                >
-                                    <Margin horizontal="3px" vertical="3px">
-                                        <Icon
-                                            heightAndWidth="12px"
-                                            path={icons.plus}
-                                        />
-                                    </Margin>
-                                </IconContainer>
-                            )}
+                            <IconGroup>
+                                {this.props.onAddBtnClick && (
+                                    <Icon
+                                        heightAndWidth="14px"
+                                        path={icons.plus}
+                                        color={'purple'}
+                                        onClick={this.props.onAddBtnClick}
+                                    />
+                                )}
+                                {this.props.onExpandBtnClick && (
+                                    <Icon
+                                        rotation={
+                                            this.props.isExpanded ? '0' : '-90'
+                                        }
+                                        heightAndWidth="16px"
+                                        path={icons.triangle}
+                                        color={'iconColor'}
+                                        onClick={this.props.onExpandBtnClick}
+                                    />
+                                )}
+                            </IconGroup>
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}

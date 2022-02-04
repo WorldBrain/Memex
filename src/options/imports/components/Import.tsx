@@ -7,6 +7,10 @@ import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-se
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
+import * as icons from 'src/common-ui/components/design-library/icons'
+
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import styled from 'styled-components'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -28,13 +32,13 @@ const Warning = ({ children }) => (
 )
 
 class Import extends React.PureComponent<Props> {
-    private renderSettings() {
-        if (!this.props.shouldRenderEsts) {
-            return
-        }
+    // private renderSettings() {
+    //     if (!this.props.shouldRenderEsts) {
+    //         return
+    //     }
 
-        return <AdvSettings />
-    }
+    //     return <AdvSettings />
+    // }
 
     private renderEstimates() {
         if (!this.props.shouldRenderEsts) {
@@ -43,9 +47,21 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.sectionTitle}>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.bookmarkRibbon}
+                        heightAndWidth="34px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>
                     Import Bookmarks from other services
-                </div>
+                </SectionTitle>
+                <InfoText>
+                    Import your existing bookmarks of your browser, and other
+                    services like Pocket, Pinboard, Raindrop or Diigo.
+                </InfoText>
             </div>
         )
     }
@@ -57,14 +73,18 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.section}>
-                    <div className={localStyles.titleBox}>
-                        <div className={settingsStyle.sectionTitle}>
-                            ReadWise.io integration
-                        </div>
-                    </div>
+                <Section>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.readwise}
+                            heightAndWidth="45px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>ReadWise.io integration</SectionTitle>
                     <ReadwiseSettings />
-                </div>
+                </Section>
             </div>
         )
     }
@@ -76,23 +96,26 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.sectionTitle}>
-                    Import Progress
-                </div>
-                <div className={localStyles.stepText}>
-                    <Warning>
-                        The import may freeze because of a browser setting. Go
-                        to{' '}
-                        <a
-                            className={localStyles.link}
-                            target="_blank"
-                            href="https://worldbrain.io/import_bug"
-                        >
-                            <b>worldbrain.io/import_bug</b>
-                        </a>{' '}
-                        to fix it.
-                    </Warning>
-                </div>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.play}
+                        heightAndWidth="34px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>Import Progress</SectionTitle>
+                <InfoText>
+                    The import may freeze because of a browser setting. Go to{' '}
+                    <a
+                        className={localStyles.link}
+                        target="_blank"
+                        href="https://links.memex.garden/import_bug"
+                    >
+                        <b>links.memex.garden/import_bug</b>
+                    </a>{' '}
+                    to fix it.
+                </InfoText>
             </div>
         )
     }
@@ -108,18 +131,26 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.section}>
+                <Section>
                     {this.renderEstimates()}
                     {this.renderProgress()}
                     {isStopped && (
-                        <div className={settingsStyle.sectionTitle}>
-                            Import Report
-                        </div>
+                        <>
+                            <SectionCircle>
+                                <Icon
+                                    filePath={icons.check}
+                                    heightAndWidth="34px"
+                                    color="purple"
+                                    hoverOff
+                                />
+                            </SectionCircle>
+                            <SectionTitle>Import Finished</SectionTitle>
+                        </>
                     )}
                     <div className={localStyles.mainContainer}>
                         <div className={localStyles.importTableContainer}>
                             {children}
-                            {this.renderSettings()}
+                            {/* {this.renderSettings()} */}
                         </div>
                         {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                             <div className={localStyles.loadingBlocker}>
@@ -130,11 +161,44 @@ class Import extends React.PureComponent<Props> {
                             </div>
                         )}
                     </div>
-                </div>
+                </Section>
                 {this.renderReadwise()}
             </div>
         )
     }
 }
+
+const Section = styled.div`
+    background: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 50px;
+    margin-bottom: 30px;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 80px;
+    width: 80px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default Import

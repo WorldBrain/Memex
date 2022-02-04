@@ -27,6 +27,8 @@ import {
     collections,
     contentSharing,
 } from 'src/util/remote-functions-background'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -48,7 +50,7 @@ class ListPicker extends StatefulUIElement<
     }
 
     searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Add to Spaces'
+        this.props.searchInputPlaceholder ?? 'Search Spaces'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
 
     componentDidUpdate(
@@ -101,14 +103,28 @@ class ListPicker extends StatefulUIElement<
             entry: this.state.newEntryName,
         })
 
-    handleResultListFocus = (list: DisplayEntry, index?: number) =>
+    handleResultListFocus = (list: DisplayEntry, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
+
+        const offsetTop = document.getElementById(
+            `ListKeyName-${list.name}-${index}`,
+        ).offsetTop
+        document.getElementById(
+            `ListKeyName-${list.name}-${index}`,
+        ).scrollTop = offsetTop
+        console.log(offsetTop)
+    }
 
     handleNewListPress = () => {
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
     }
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
+    handleKeyPress = (key: KeyEvent) => {
+        if (key === 'Escape') {
+            this.handleClickOutside(key)
+        }
+        this.processEvent('keyPress', { key })
+    }
 
     renderListRow = (list: DisplayEntry, index: number) => (
         <EntryRow
@@ -119,6 +135,7 @@ class ListPicker extends StatefulUIElement<
                     : undefined
             }
             onFocus={this.handleResultListFocus}
+            id={`ID-${list.name}-${index}`}
             key={`ListKeyName-${list.name}-${index}`}
             index={index}
             name={list.name}
@@ -138,8 +155,9 @@ class ListPicker extends StatefulUIElement<
                     tooltipText="List all tabs in window"
                     position="left"
                 >
-                    <ActOnAllTabsButton
-                        size={20}
+                    <Icon
+                        filePath={icons.multiEdit}
+                        heightAndWidth="20px"
                         onClick={this.handleNewListAllPress}
                     />
                 </ButtonTooltip>
@@ -147,19 +165,26 @@ class ListPicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName !== '') {
+        if (this.state.newEntryName.length > 0) {
             return
         }
 
-        return (
-            <EmptyListsView>
-                <strong>No Spaces added yet</strong>
-                <br />
-                Add new Spaces
-                <br />
-                via the search bar
-            </EmptyListsView>
-        )
+        if (this.state.query === '') {
+            return (
+                <EmptyListsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>Create your first space</SectionTitle>
+                    <InfoText>by typing into the search field </InfoText>
+                </EmptyListsView>
+            )
+        }
     }
 
     renderMainContent() {
@@ -227,6 +252,31 @@ class ListPicker extends StatefulUIElement<
     }
 }
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    line-height: 18px;
+`
+
 const LoadingBox = styled.div`
     display: flex;
     align-items: center;
@@ -237,17 +287,16 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border-radius: 3px;
+    border-radius: 12px;
 `
 
 const EmptyListsView = styled.div`
-    color: ${(props) => props.theme.tag.text};
-    padding: 10px 15px;
-    font-weight: 400;
-    font-size: ${fontSizeNormal}px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
+    padding: 20px 15px;
 `
 
 export default onClickOutside(ListPicker)

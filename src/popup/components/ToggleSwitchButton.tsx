@@ -1,4 +1,6 @@
 import React from 'react'
+import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 import Button from './Button'
 import ToggleSwitch from './ToggleSwitch'
@@ -6,40 +8,21 @@ import ToggleSwitch from './ToggleSwitch'
 const styles = require('./ToggleSwitchButton.css')
 
 export interface Props {
-    btnIcon: string
-    btnText: string
     isEnabled: boolean
-    btnSubText?: string
-    btnHoverText?: string
-    toggleHoverText?: string
+    toggleHoverText?: any
     contentType?: 'pages' | 'PDFs'
-    onBtnClick: React.MouseEventHandler
-    onToggleClick: React.MouseEventHandler
+    onToggleClick: CheckboxToggle
 }
 
 export const ToggleSwitchButton = (props: Props) => (
     <div className={styles.switchBlocks}>
-        <div className={styles.option}>
-            <Button
-                onClick={props.onBtnClick}
-                itemClass={styles.button}
-                btnClass={props.btnIcon}
-                title={props.btnHoverText}
-            >
-                <div className={styles.buttonInner}>
-                    {props.btnText}
-                    {props.btnSubText && (
-                        <p className={styles.subTitle}>{props.btnSubText}</p>
-                    )}
-                </div>
-            </Button>
-        </div>
-        <div className={styles.switch} title={props.toggleHoverText}>
-            <ToggleSwitch
+        <ButtonTooltip tooltipText={props.toggleHoverText} position="leftBig">
+            <Checkbox
                 isChecked={props.isEnabled}
-                onChange={props.onToggleClick}
-                contentType={props.contentType}
+                handleChange={props.onToggleClick}
+                mode={'radio'}
+                size={20}
             />
-        </div>
+        </ButtonTooltip>
     </div>
 )

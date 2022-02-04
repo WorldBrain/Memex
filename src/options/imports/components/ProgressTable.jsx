@@ -1,19 +1,50 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { IMPORT_TYPE as TYPE } from '../constants'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
-import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
-
-import localStyles from './Import.css'
-
-const ProgressRow = ({ label, total, complete, success, fail }) => (
-    <tr className={localStyles.importTableRow}>
-        <td>{label}</td>
-        <td>
-            {complete}/{total}
-        </td>
-        <td>{success}</td>
-        <td>{fail}</td>
-    </tr>
+const ProgressRow = ({
+    label,
+    total,
+    complete,
+    success,
+    fail,
+    changeShowDetails,
+    showDownloadDetails,
+}) => (
+    <ProgressRowContainer>
+        <InfoBlock>
+            <Progress>
+                <Number>{complete}</Number>
+                <NumberSmall>/{total}</NumberSmall>
+            </Progress>
+            <SubTitle>Progress</SubTitle>
+        </InfoBlock>
+        <InfoBlock>
+            <Number>{success}</Number>
+            <SubTitle>Successful</SubTitle>
+        </InfoBlock>
+        <InfoBlock>
+            <Number>{fail}</Number>
+            <SubTitle>
+                Failed (
+                <a target="_blank" href="https://worldbrain.io/import_bug">
+                    ?
+                </a>
+                )
+            </SubTitle>
+        </InfoBlock>
+        <ViewFailedItems onClick={changeShowDetails}>
+            View Failed Items
+            <Icon
+                filePath={icons.triangle}
+                rotation={!showDownloadDetails ? '-90' : '0'}
+                heightAndWidth={'16px'}
+            />
+        </ViewFailedItems>
+    </ProgressRowContainer>
 )
 
 ProgressRow.propTypes = {
@@ -22,48 +53,32 @@ ProgressRow.propTypes = {
     complete: PropTypes.number.isRequired,
     success: PropTypes.number.isRequired,
     fail: PropTypes.number.isRequired,
+    changeShowDetails: PropTypes.func,
+    showDownloadDetails: PropTypes.bool,
 }
 
-const ProgressTable = ({ progress, allowTypes }) => (
-    <table className={localStyles.importTable}>
-        <colgroup>
-            <col className={localStyles.importTableCol} />
-            <col className={localStyles.importTableCol} />
-            <col className={localStyles.importTableCol} />
-            <col className={localStyles.importTableCol} />
-        </colgroup>
-        <thead className={localStyles.importTableHead}>
-            <tr>
-                <th />
-                <th>Total Progress</th>
-                <th>Successful</th>
-                <th>
-                    Failed (
-                    <a target="_blank" href="https://worldbrain.io/import_bug">
-                        ?
-                    </a>
-                    )
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {allowTypes[TYPE.HISTORY] && (
-                <ProgressRow
-                    label="Browsing History"
-                    {...progress[TYPE.HISTORY]}
-                />
-            )}
-            {allowTypes[TYPE.BOOKMARK] && (
-                <ProgressRow label="Bookmarks" {...progress[TYPE.BOOKMARK]} />
-            )}
-            {allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
-                <ProgressRow label="Pocket" {...progress[TYPE.OTHERS]} />
-            )}
-            {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
-                <ProgressRow label="HTML" {...progress[TYPE.OTHERS]} />
-            )}
-        </tbody>
-    </table>
+const ProgressTable = ({
+    progress,
+    allowTypes,
+    changeShowDetails,
+    showDownloadDetails,
+}) => (
+    <>
+        <ProgressRow
+            label="Bookmarks"
+            total={progress[TYPE.OTHERS].total + progress[TYPE.BOOKMARK].total}
+            complete={
+                progress[TYPE.OTHERS].complete +
+                progress[TYPE.BOOKMARK].complete
+            }
+            success={
+                progress[TYPE.OTHERS].success + progress[TYPE.BOOKMARK].success
+            }
+            fail={progress[TYPE.OTHERS].fail + progress[TYPE.BOOKMARK].fail}
+            changeShowDetails={changeShowDetails}
+            showDownloadDetails={showDownloadDetails}
+        />
+    </>
 )
 
 const progressShape = PropTypes.shape({
@@ -82,5 +97,59 @@ ProgressTable.propTypes = {
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
 }
+
+const ViewFailedItems = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 16px;
+    display: grid;
+    grid-gap: 10px;
+    grid-auto-flow: column;
+    align-items: center;
+    cursor: pointer;
+`
+
+const ProgressRowContainer = styled.div`
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 50px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding-left: 20px;
+`
+
+const InfoBlock = styled.div`
+    display: grid;
+    grid-gap: 5px;
+    grid-auto-flow: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100px;
+`
+
+const Progress = styled.div`
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 3px;
+    align-items: center;
+`
+
+const Number = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 22px;
+    font-weight: bold;
+`
+
+const NumberSmall = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 18px;
+    font-weight: bold;
+`
+const SubTitle = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 16px;
+    font-weight: normal;
+`
 
 export default ProgressTable

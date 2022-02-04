@@ -6,7 +6,6 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
-import { GUIDED_ONBOARDING_URL } from '../../constants'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -17,6 +16,7 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 export default class Logic extends UILogic<State, Event> {
     syncPromise: Promise<any>
     isExistingUser = false
+    action?: 'login' | 'register'
 
     constructor(private dependencies: Dependencies) {
         super()
@@ -28,10 +28,21 @@ export default class Logic extends UILogic<State, Event> {
         syncState: 'pristine',
         shouldShowLogin: true,
         newSignUp: false,
+        mode: 'signup',
+        email: '',
+        password: '',
+        displayName: '',
+        saveState: 'pristine',
+        passwordMatch: false,
+        passwordConfirm: '',
     })
 
     async init() {
         const { authBG } = this.dependencies
+
+        this.emitMutation({
+            mode: { $set: 'signup' },
+        })
 
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
@@ -76,5 +87,9 @@ export default class Logic extends UILogic<State, Event> {
 
     finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
         this.dependencies.navToDashboard()
+    }
+
+    setAuthDialogMode: EventHandler<'setAuthDialogMode'> = ({ event }) => {
+        return { authDialogMode: { $set: event.mode } }
     }
 }

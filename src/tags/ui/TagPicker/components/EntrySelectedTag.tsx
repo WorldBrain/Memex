@@ -2,6 +2,8 @@ import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { X as XIcon } from '@styled-icons/feather'
 import { ActiveTag } from './ActiveTag'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface Props {
     dataAttributeName: string
@@ -27,7 +29,6 @@ export class EntrySelectedTag extends React.PureComponent<Props> {
                         {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
                         {entry}
-                        <StyledXIcon size={12} />
                     </StyledActiveEntry>
                 ))}
             </React.Fragment>
@@ -36,20 +37,9 @@ export class EntrySelectedTag extends React.PureComponent<Props> {
 }
 
 const StyledActiveEntry = styled(ActiveTag)`
-    display: inline-flex;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 5px;
+    align-items: center;
     cursor: pointer;
-`
-
-const StyledXIcon = styled(XIcon)`
-    stroke: ${(props) => props.theme.tag.text};
-    stroke-width: 2px;
-    margin-left: 4px;
-    display: flex;
-    flex-shrink: 0;
-    pointer-events: none;
-
-    &:hover {
-        stroke-width: 3px;
-        stroke: darken(0.2, ${(props) => props.theme.tag.text});
-    }
 `

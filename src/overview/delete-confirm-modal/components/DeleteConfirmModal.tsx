@@ -5,6 +5,7 @@ import { ConfirmModal, ConfirmModalProps } from '../../../common-ui/components'
 
 export interface Props extends ConfirmModalProps {
     deleteDocs: () => Promise<void>
+    submessage?: string
 }
 
 class DeleteConfirmModal extends PureComponent<Props> {
@@ -25,7 +26,11 @@ class DeleteConfirmModal extends PureComponent<Props> {
         const { deleteDocs, ...modalProps } = this.props
 
         return (
-            <ConfirmModal {...modalProps} message={this.props.message}>
+            <ConfirmModal
+                {...modalProps}
+                message={this.props.message}
+                submessage={this.props.submessage}
+            >
                 <PrimaryAction
                     label="Delete"
                     onClick={deleteDocs}

@@ -162,18 +162,6 @@ const PreviewBtn = styled.button`
     padding: 3px 5px;
     background: transparent;
     border-radius: 3px;
-
-    &:focus {
-        background-color: grey;
-    }
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
 `
 
 const Container = styled.div`

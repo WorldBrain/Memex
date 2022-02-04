@@ -3,7 +3,7 @@ import colors from './colors'
 
 export const fonts = {
     primary: {
-        name: 'Poppins',
+        name: 'Inter',
         colors: {
             primary: colors.fonts.primary,
             secondary: colors.fonts.secondary,

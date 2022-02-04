@@ -30,6 +30,11 @@ const Container = styled.div`
 
 const SearchSection = styled(Margin)`
     flex: 2;
+    justify-content: flex-start !important;
+
+    & > div {
+        justify-content: flex-start !important;
+    }
 `
 
 const SettingsSection = styled(Margin)`
@@ -43,7 +48,7 @@ const SettingsSection = styled(Margin)`
     border-radius: 3px;
 
     &:hover {
-        background-color: #e8e8e8;
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
 `
 
@@ -70,18 +75,17 @@ const SyncStatusHeaderBox = styled.div`
     }
 
     &:hover {
-        background-color: #e8e8e8;
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
 `
 
 const SyncStatusHeaderText = styled.span<{
     textCentered: boolean
 }>`
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.bold};
-    color: ${fonts.primary.colors.primary};
-    font-size: 12px;
-    line-height: 15px;
+    font-family: 'Inter';
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
@@ -110,8 +114,22 @@ const CollectionTitle = styled.p`
     display: flex;
 `
 
+const ActivityIndicator = styled.div<{ hasActivities }>`
+    border-radius: 20px;
+    height: 10px;
+    width: 10px;
+    margin-left: -24px;
+    border: ${(props) =>
+        props.hasActivities
+            ? '2px solid' + props.theme.colors.purple
+            : '1px solid' + props.theme.colors.lightgrey};
+    background: ${(props) => props.hasActivities && props.theme.colors.purple};
+`
+
 const SidebarToggleBox = styled(Margin)`
-    width: min-content;
+    width: fit-content;
+    display: flex;
+    align-items: center;
 `
 
 export interface HeaderProps {
@@ -121,6 +139,7 @@ export interface HeaderProps {
     searchBarProps: SearchBarProps
     syncStatusMenuProps: SyncStatusMenuProps
     syncStatusIconState: SyncStatusIconState
+    activityStatus?: boolean
 }
 
 export default class Header extends PureComponent<HeaderProps> {
@@ -141,9 +160,12 @@ export default class Header extends PureComponent<HeaderProps> {
                             sidebarLockedState={this.props.sidebarLockedState}
                             hoverState={this.props.sidebarToggleHoverState}
                         />
+                        <ActivityIndicator
+                            hasActivities={this.props.activityStatus}
+                        />
                     </SidebarToggleBox>
                 </SidebarHeaderContainer>
-                <SearchSection vertical="auto" horizontal="17px">
+                <SearchSection vertical="auto" left="24px">
                     <SearchBar {...searchBarProps} />
                 </SearchSection>
                 <RightHeader>

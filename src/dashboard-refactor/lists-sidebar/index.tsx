@@ -20,6 +20,8 @@ import ListsSidebarEditableItem from './components/sidebar-editable-item'
 import { Rnd } from 'react-rnd'
 import { createGlobalStyle } from 'styled-components'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const Sidebar = styled(Rnd)<{
     locked: boolean
@@ -36,8 +38,8 @@ const Sidebar = styled(Rnd)<{
         css`
             height: 100%;
             background-color: ${colors.white};
-            box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
-            top: ${sizeConstants.header.heightPx}px;
+            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
+            padding-top: ${sizeConstants.header.heightPx}px;
         `}
     ${(props) =>
         props.peeking &&
@@ -48,7 +50,7 @@ const Sidebar = styled(Rnd)<{
             margin-top: 50px;
             margin-bottom: 9px;
             height: 90vh;
-            top: 5px;
+            top: 20px;
             border-top-right-radius: 3px;
             border-bottom-right-radius: 3px;
         `}
@@ -91,16 +93,27 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
 `
 
 const NoCollectionsMessage = styled.div`
-    font-size: 12px;
-    color: #3a2f45;
-    padding: 5px 18px 10px 18px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 25px;
+    width: fill-available;
+    margin-top: 5px;
+    justify-content: flex-start;
 
-    & u {
+    & * {
         cursor: pointer;
+    }
+
+    &: hover {
+        background-color: ${(props) => props.theme.colors.backgroundColor};
     }
 `
 
 const GlobalStyle = createGlobalStyle`
+
     .sidebarResizeHandleSidebar {
         width: 4px !important;
         height: 100% !important;
@@ -109,8 +122,27 @@ const GlobalStyle = createGlobalStyle`
             background: #5671cf30;
         }
     }
+`
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 300;
+`
+
+const Link = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    padding-left: 3px;
 `
 
 export interface ListsSidebarProps {
@@ -159,7 +191,7 @@ export default class ListsSidebar extends PureComponent<
     }
 
     state = {
-        sidebarWidth: '200px',
+        sidebarWidth: '250px',
     }
 
     render() {
@@ -176,8 +208,6 @@ export default class ListsSidebar extends PureComponent<
             top: '100',
             height: isSidebarPeeking ? '90vh' : '100vh',
         }
-
-        //console.log(this.SidebarContainer)
 
         return (
             <Container
@@ -277,7 +307,7 @@ export default class ListsSidebar extends PureComponent<
                                             },
                                         },
                                         {
-                                            name: 'Feed',
+                                            name: 'Activity Feed',
                                             listId: SPECIAL_LIST_IDS.INBOX + 2,
                                             hasActivity: this.props
                                                 .hasFeedActivity,
@@ -313,44 +343,69 @@ export default class ListsSidebar extends PureComponent<
                                     )}
                                     {group.title === 'My Spaces' &&
                                     group.listsArray.length === 0 ? (
-                                        <NoCollectionsMessage>
-                                            <strong>No saved spaces</strong>{' '}
-                                            <br />
-                                            <u
-                                                onClick={this.bindRouteGoTo(
-                                                    'import',
-                                                )}
+                                        !group.isAddInputShown &&
+                                        (searchBarProps.searchQuery.length >
+                                        0 ? (
+                                            <NoCollectionsMessage
+                                                onClick={group.onAddBtnClick}
                                             >
-                                                Import
-                                            </u>{' '}
-                                            bookmark folders
-                                        </NoCollectionsMessage>
+                                                <SectionCircle>
+                                                    <Icon
+                                                        filePath={icons.plus}
+                                                        heightAndWidth="14px"
+                                                        color="purple"
+                                                        hoverOff
+                                                    />
+                                                </SectionCircle>
+                                                <InfoText>
+                                                    Create a
+                                                    <Link> new Space</Link>
+                                                </InfoText>
+                                            </NoCollectionsMessage>
+                                        ) : (
+                                            <NoCollectionsMessage
+                                                onClick={group.onAddBtnClick}
+                                            >
+                                                <SectionCircle>
+                                                    <Icon
+                                                        filePath={icons.plus}
+                                                        heightAndWidth="14px"
+                                                        color="purple"
+                                                        hoverOff
+                                                    />
+                                                </SectionCircle>
+                                                <InfoText>
+                                                    Create your
+                                                    <Link>first Space</Link>
+                                                </InfoText>
+                                            </NoCollectionsMessage>
+                                        ))
                                     ) : (
                                         <>
                                             {group.title ===
                                                 'Followed Spaces' &&
                                             group.listsArray.length === 0 ? (
-                                                <NoCollectionsMessage>
-                                                    <u
-                                                        onClick={() =>
-                                                            window.open(
-                                                                'https://tutorials.memex.garden/sharing-collections-annotated-pages-and-highlights',
-                                                            )
-                                                        }
-                                                    >
-                                                        Collaborate
-                                                    </u>{' '}
-                                                    with friends or{' '}
-                                                    <u
-                                                        onClick={() =>
-                                                            window.open(
-                                                                'https://memex.social/c/oiLz5UIXw9JXermqZmXW',
-                                                            )
-                                                        }
-                                                    >
-                                                        follow
-                                                    </u>{' '}
-                                                    your first space.
+                                                <NoCollectionsMessage
+                                                    onClick={() =>
+                                                        window.open(
+                                                            'https://links.memex.garden/follow-first-space',
+                                                        )
+                                                    }
+                                                >
+                                                    <SectionCircle>
+                                                        <Icon
+                                                            filePath={
+                                                                icons.heartEmpty
+                                                            }
+                                                            heightAndWidth="14px"
+                                                            color="purple"
+                                                            hoverOff
+                                                        />
+                                                    </SectionCircle>
+                                                    <InfoText>
+                                                        Follow your
+                                                        <Link>first Space</Link>
+                                                    </InfoText>
                                                 </NoCollectionsMessage>
                                             ) : (
                                                 this.renderLists(

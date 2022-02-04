@@ -17,7 +17,7 @@ const PioneerPlanContainer = styled.div`
     margin-bottom: 30px;
     width: 100%;
     flex-direction: column;
-    font-family: 'Poppins';
+    font-family: 'Inter';
 `
 const PioneerPlanContentBox = styled.div`
     display: flex;
@@ -69,15 +69,15 @@ const PioneerPlanBanner = ({
 }: Props) => (
     <DismissibleResultsMessage onDismiss={props.onHideClick}>
         <PioneerPlanContentBox direction={props.direction}>
-            <PioneerPlanTitle direction={props.direction}>
+            <SectionTitle direction={props.direction}>
                 Get a 60% early bird discount
-            </PioneerPlanTitle>
-            <PioneerPlanDescription>
+            </SectionTitle>
+            <InfoText>
                 Memex is currently in beta and free to use.
                 <br />
-                Support a 'Venture Capital'-free business & get an early bird
-                discount on our upcoming subscriptions.
-            </PioneerPlanDescription>
+                Get an early bird discount on our upcoming subscriptions <br />&
+                support a 'Venture Capital'-free business.
+            </InfoText>
         </PioneerPlanContentBox>
         <PioneerPlanButtonBox>
             <PioneerPlanLearnMoreButton
@@ -103,5 +103,19 @@ const PioneerPlanBanner = ({
         </PioneerPlanButtonBox>
     </DismissibleResultsMessage>
 )
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+`
 
 export default PioneerPlanBanner

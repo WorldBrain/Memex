@@ -28,6 +28,7 @@ import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import colors from 'src/dashboard-refactor/colors'
 
 export type { TagPickerDependencies }
 
@@ -48,7 +49,7 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
-    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Add Tags'
+    searchInputPlaceholder = this.props.searchInputPlaceholder ?? 'Search Tags'
     removeToolTipText = this.props.removeToolTipText ?? 'Remove tag from page'
 
     componentDidUpdate(
@@ -114,7 +115,12 @@ class TagPicker extends StatefulUIElement<
     handleNewTagPress = () =>
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
-    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
+    handleKeyPress = (key: KeyEvent) => {
+        if (key === 'Escape') {
+            this.handleClickOutside(key)
+        }
+        this.processEvent('keyPress', { key })
+    }
 
     renderTagRow = (tag: DisplayEntry, index: number) => (
         <EntryRow
@@ -152,17 +158,55 @@ class TagPicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName !== '') {
+        if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return
+        }
+
+        if (this.state.query === '' && this.props.filterMode) {
+            return (
+                <EmptyTagsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>Create your first Tag</SectionTitle>
+                    <InfoText>by adding one to a page or annotation</InfoText>
+                </EmptyTagsView>
+            )
+        }
+
+        if (this.state.query === '' && !this.props.filterMode) {
+            return (
+                <EmptyTagsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>Create your first Tag</SectionTitle>
+                    <InfoText>by typing into the search field</InfoText>
+                </EmptyTagsView>
+            )
         }
 
         return (
             <EmptyTagsView>
-                <strong>No Tags yet</strong>
-                <br />
-                Add new tags
-                <br />
-                via the search bar
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.backup}
+                        heightAndWidth="16px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>No Tags found for query</SectionTitle>
             </EmptyTagsView>
         )
     }
@@ -178,21 +222,6 @@ class TagPicker extends StatefulUIElement<
 
         return (
             <>
-                <DeprecationWarning>
-                    <DeprecationText>
-                        Tags will soon be deprecated and merged into our new
-                        <IconSpan src={icons.collectionsEmpty} />
-                        <HighlightText>Spaces</HighlightText>.
-                    </DeprecationText>
-                    <PrimaryAction
-                        label="Learn More"
-                        onClick={() =>
-                            window.open(
-                                'https://links.memex.garden/announcements/tags-collections-unification',
-                            )
-                        }
-                    />
-                </DeprecationWarning>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
@@ -227,6 +256,23 @@ class TagPicker extends StatefulUIElement<
                         {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
+                <DeprecationWarningContainer>
+                    <DeprecationWarning>
+                        <DeprecationText>
+                            Tags will soon be deprecated and merged into our new
+                            <HighlightText>Spaces</HighlightText>.
+                        </DeprecationText>
+                        <PrimaryAction
+                            label="Learn More"
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/announcements/tags-collections-unification',
+                                )
+                            }
+                            fontSize="10px"
+                        />
+                    </DeprecationWarning>
+                </DeprecationWarningContainer>
             </>
         )
     }
@@ -246,13 +292,35 @@ class TagPicker extends StatefulUIElement<
     }
 }
 
-const DeprecationText = styled.div`
-    display: inline-block;
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
 `
 
-const IconSpan = styled.img`
-    height: 12px;
-    width: 12px;
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+`
+
+const DeprecationText = styled.div`
+    display: inline-block;
+    font-size: 12px;
+`
+
+const IconSpan = styled(Icon)`
     vertical-align: middle;
     margin-right: 2px;
     margin-left: 5px;
@@ -261,18 +329,26 @@ const IconSpan = styled.img`
 const HighlightText = styled.span`
     color: ${(props) => props.theme.colors.primary};
     vertical-align: middle;
+    padding-left: 5px;
+`
+
+const DeprecationWarningContainer = styled.div`
+    padding-top: 5px;
+    border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
+    margin-top: 5px;
 `
 
 const DeprecationWarning = styled.div`
     background-color: ${(props) => props.theme.colors.warning};
     border-radius: 3px;
-    margin: 0px 8px 5px 8px;
+    padding-top: 5px;
+    margin: 5px 8px 5px 8px;
     display: grid;
     justify-content: flex-start;
     align-items: center;
     padding: 5px 10px;
     color: white;
-    grid-gap: 5px;
+    grid-gap: 10px;
     grid-auto-flow: column;
 `
 
@@ -286,17 +362,16 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border-radius: 3px;
+    border-radius: 12px;
 `
 
 const EmptyTagsView = styled.div`
-    color: ${(props) => props.theme.tag.text};
-    padding: 10px 15px;
-    font-weight: 400;
-    font-size: ${fontSizeNormal}px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
+    padding: 20px 15px;
 `
 
 export default onClickOutside(TagPicker)
