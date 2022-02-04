@@ -45,6 +45,10 @@ const Row = styled(Margin)`
     grid-gap: 10px;
     padding: 0 10px;
 
+    &:first-child {
+        height: fit-content;
+    }
+
     &:last-child {
         margin-bottom: 0px;
     }
@@ -97,6 +101,7 @@ const TextBlock = styled.div<{
     display: grid;
     align-items: center;
     text-align: center;
+    color: ${(props) => props.theme.colors.darkerText};
 
     ${(props) =>
         css`
@@ -138,19 +143,19 @@ const HelpTextBlockLink = styled.a<{
 `
 
 const TextBlockSmall = styled.div`
-    ${textStyles}
     font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.darkgrey};
-    font-size: 10px;
-    line-height: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    line-height: 16px;
     text-align: left;
 `
 
 const TextContainer = styled.div`
-    ${textStyles}
     flex-direction: column;
     display: flex;
     align-items: flex-start;
+    grid-gap: 5px;
+    padding-left: 5px;
 `
 
 export const timeSinceNowToString = (date: Date | null): string => {
@@ -224,8 +229,13 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
+
+        console.log(new Date(lastSuccessfulSyncDate).getTime())
+
+        if (new Date(lastSuccessfulSyncDate).getTime() === 0) {
+            return null
+        }
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
-            console.log(lastSuccessfulSyncDate)
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
         if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
@@ -278,9 +288,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     <SyncStatusIcon color={syncStatusIconState} />
                     <TextContainer>
                         <TextBlock bold>{this.renderTitleText()}</TextBlock>
-                        <TextBlockSmall>
-                            {this.renderLastSyncText()}
-                        </TextBlockSmall>
+                        {new Date(this.props.lastSuccessfulSyncDate).getTime() >
+                            0 && (
+                            <TextBlockSmall>
+                                {this.renderLastSyncText()}
+                            </TextBlockSmall>
+                        )}
                     </TextContainer>
                 </Row>
             </RowContainer>
@@ -299,7 +312,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         }
 
         return (
-            <StyledHoverBox width="min-content" right="50px" top="45px">
+            <StyledHoverBox width="min-content" right="50px" top="65px">
                 {this.renderStatus()}
                 <Separator />
                 <RowContainer>
