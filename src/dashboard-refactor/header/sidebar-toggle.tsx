@@ -3,26 +3,9 @@ import styled from 'styled-components'
 
 import colors from '../colors'
 import { SidebarLockedState } from '../lists-sidebar/types'
+import { Icon } from '../styled-components'
 import { HoverState } from '../types'
-
-const buttonStyles = `
-    height: 20px;
-    width: 20px;
-    color: ${colors.iconDefault};
-    border: none;
-    cursor: pointer;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 20px;
-
-    &:active {
-        opacity: 1;
-    }
-
-    &:focus {
-        outline: none;
-    }
-`
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 const arrowStyles = `
     left: 2px;
@@ -54,19 +37,16 @@ export const BtnBackground = styled.div`
 `
 
 export const HamburgerButton = styled.div`
-    ${buttonStyles}
     opacity: 0.8;
     background-image: url('/img/hamburger.svg');
 `
 
 export const LeftArrow = styled.div`
-    ${buttonStyles}
     ${arrowStyles}
     background-image: url('/img/doubleArrow.svg');
 `
 
 export const RightArrow = styled.div`
-    ${buttonStyles}
     ${arrowStyles}
     background-image: url('/img/doubleArrow.svg');
     transform: rotate(180deg);
@@ -90,13 +70,26 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 isHovered={isHovered}
                 onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
+                onMouseEnter={onHoverEnter}
             >
                 {isHovered ? (
                     <BtnBackground>
-                        {isSidebarLocked ? <LeftArrow /> : <RightArrow />}
+                        {isSidebarLocked ? (
+                            <Icon
+                                path={icons.doubleArrow}
+                                rotation="0"
+                                heightAndWidth="20px"
+                            />
+                        ) : (
+                            <Icon
+                                path={icons.doubleArrow}
+                                rotation="180"
+                                heightAndWidth="20px"
+                            />
+                        )}
                     </BtnBackground>
                 ) : (
-                    <HamburgerButton onMouseEnter={onHoverEnter} />
+                    <Icon path={icons.hamburger} heightAndWidth="20px" />
                 )}
             </Container>
         )

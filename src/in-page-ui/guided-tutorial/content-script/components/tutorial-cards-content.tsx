@@ -5,6 +5,7 @@ import TutorialStep from './tutorial-step'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { browser } from 'webextension-polyfill-ts'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {
@@ -18,6 +19,20 @@ export type TutorialStepContent = {
     width?: string
     height?: string
 }
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 18px;
+    margin-bottom: 40px;
+    font-weight: 500;
+    margin-top: 10px;
+`
 
 const SmallImages = styled.img`
     width: 16px;
@@ -57,11 +72,11 @@ const OptionItem = styled.div`
     font-weight: bold;
     height: 140px;
     width: 140px;
-    color: ${(props) => props.theme.colors.primary};
-    box-shadow: 0px 1px 5px 1px rgba(0, 0, 0, 0.1);
+    color: ${(props) => props.theme.colors.normalText};
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
 
     &:hover {
-        background-color: #f0f0f0;
+        background-color: #f5f5f5;
     }
 `
 
@@ -85,7 +100,7 @@ const PinTitleContainer = styled.div`
     width: 100%;
 `
 
-const PinTitleImage = styled.img`
+const PinTitleImage = styled(Icon)`
     width: 24px;
     height: 24px;
     vertical-align: sub;
@@ -104,6 +119,7 @@ const AnnotationTitleBox = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: 100%;
+    grid-gap: 10px;
 `
 
 const FinishTitleBox = styled.div`
@@ -273,10 +289,12 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <PinTitleContainer>
                     <AnnotationTitleContainer>
                         <AnnotationTitleBox>
-                            <PinTitleImage src={icons.heartEmpty} />
-                            <AnnotationTitleText>
-                                Bookmark this page
-                            </AnnotationTitleText>
+                            <PinTitleImage
+                                filePath={icons.heartEmpty}
+                                heightAndWidth="20px"
+                                hoverOff
+                            />
+                            <SectionTitle>Bookmark this page</SectionTitle>
                         </AnnotationTitleBox>
                     </AnnotationTitleContainer>
                     <RibbonTutorialArrow />
@@ -286,9 +304,7 @@ export const tutorialSteps: TutorialStepContent[] = [
         ),
         text: (
             <SaveTextContainer>
-                <PinTitleContainer>
-                    Use the sidebar or keyboard shortcuts
-                </PinTitleContainer>
+                <InfoText>Use the sidebar or keyboard shortcuts</InfoText>
                 <ShortcutLabelContainer>
                     <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
                     + <ShortcutLabel>s</ShortcutLabel>
@@ -309,10 +325,14 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <PinTitleContainer>
                     <AnnotationTitleContainer>
                         <AnnotationTitleBox>
-                            <PinTitleImage src={icons.highlighterFull} />
-                            <AnnotationTitleText>
+                            <PinTitleImage
+                                filePath={icons.highlighterFull}
+                                heightAndWidth="20px"
+                                hoverOff
+                            />
+                            <SectionTitle>
                                 Add Highlights and Annotations
-                            </AnnotationTitleText>
+                            </SectionTitle>
                         </AnnotationTitleBox>
                     </AnnotationTitleContainer>
                     <AnnotationTutorialArrow />
@@ -321,7 +341,9 @@ export const tutorialSteps: TutorialStepContent[] = [
         ),
         text: (
             <SaveTextContainer>
-                <p>Select text and use the tooltip or keyboard shortcuts</p>
+                <InfoText>
+                    Select text and use the tooltip or keyboard shortcuts
+                </InfoText>
                 <ShortcutLabelContainer>
                     <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
                     + <ShortcutLabel>a</ShortcutLabel> or{' '}
@@ -343,10 +365,12 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <PinTitleContainer>
                     <AnnotationTitleContainer>
                         <AnnotationTitleBox>
-                            <PinTitleImage src={icons.commentEmpty} />
-                            <AnnotationTitleText>
-                                View your annotations
-                            </AnnotationTitleText>
+                            <PinTitleImage
+                                filePath={icons.commentEmpty}
+                                heightAndWidth="20px"
+                                hoverOff
+                            />
+                            <SectionTitle>View your annotations</SectionTitle>
                         </AnnotationTitleBox>
                     </AnnotationTitleContainer>
                     <RibbonTutorialArrow />
@@ -356,7 +380,10 @@ export const tutorialSteps: TutorialStepContent[] = [
         ),
         text: (
             <SaveTextContainer>
-                Hover over the red area to open the annotation sidebar. <br />
+                <InfoText>
+                    Hover over the red area to open the annotation sidebar.
+                </InfoText>
+                <br />
                 <ShortcutLabelContainer>
                     <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
                     + <ShortcutLabel>q</ShortcutLabel>
@@ -374,14 +401,20 @@ export const tutorialSteps: TutorialStepContent[] = [
     {
         subtitle: (
             <PinTitleContainer>
-                <PinTitleImage src={icons.pin} />
-                Pin Memex to your menu
+                <PinTitleImage
+                    filePath={icons.pin}
+                    heightAndWidth="20px"
+                    hoverOff
+                />
+                <SectionTitle>Pin Memex to your menu</SectionTitle>
                 <PinTutorialArrow />
             </PinTitleContainer>
         ),
         text: (
             <SaveTextContainer>
-                <p>Easy access to bookmarking, adding to Spaces & searching.</p>
+                <InfoText>
+                    Easy access to bookmarking, adding to Spaces & searching.
+                </InfoText>
             </SaveTextContainer>
         ),
         top: '30px',
@@ -397,13 +430,13 @@ export const tutorialSteps: TutorialStepContent[] = [
             <>
                 <FinishContainer>
                     <FinishTitleBox>
-                        <AnnotationTitleText>
+                        <SectionTitle>
                             <AnnotationTitleImage>✌🏽</AnnotationTitleImage>{' '}
                             Done!
-                        </AnnotationTitleText>
-                        <AnnotationSubTitleText>
+                        </SectionTitle>
+                        <InfoText>
                             Here are some next steps you can do.
-                        </AnnotationSubTitleText>
+                        </InfoText>
                     </FinishTitleBox>
                     <OptionsList>
                         {/* <OptionItem

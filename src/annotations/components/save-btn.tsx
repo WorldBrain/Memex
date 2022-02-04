@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
 import { getShareButtonData } from '../sharing-utils'
@@ -78,19 +79,31 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 )
                             }
                         >
-                            <Icon filePath={this.saveIcon} height="15px" /> Save
+                            {this.props.isShared ||
+                                (this.props.isProtected && (
+                                    <Icon
+                                        hoverOff
+                                        filePath={this.saveIcon}
+                                        heightAndWidth="14px"
+                                    />
+                                ))}{' '}
+                            Save
                         </SaveBtnText>
                     </ButtonTooltip>
                     <SaveBtnArrow horizontal="1px">
                         <DropdownMenuBtn
-                            btnChildren={<Icon icon="triangle" height="12px" />}
+                            btnChildren={
+                                <Icon
+                                    filePath={icons.triangle}
+                                    heightAndWidth="12px"
+                                />
+                            }
                             isOpen={this.state.isPrivacyLevelShown}
                             toggleOpen={() =>
                                 this.setState((state) => ({
                                     isPrivacyLevelShown: !state.isPrivacyLevelShown,
                                 }))
                             }
-                            menuTitle={'Set & save privacy for this note'}
                             width={'340px'}
                         >
                             <SharePrivacyOption
@@ -108,7 +121,9 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 hasProtectedOption
                                 icon="person"
                                 title="Private"
-                                shortcut={''}
+                                shortcut={`${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
                                 description="Private to you, until shared (in bulk)"
                                 onClick={this.saveWithShareIntent(false)}
                                 isSelected={!this.props.isShared}
@@ -136,14 +151,6 @@ const SaveBtn = styled.div`
     border 1px solid #f0f0f0;
     display: grid;
     grid-auto-flow: column;
-
-    &:focus {
-        background-color: grey;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
 `
 
 const SaveBtnText = styled.span`
@@ -152,11 +159,15 @@ const SaveBtnText = styled.span`
     align-items: center;
     justify-content: space-between;
     display: flex;
-    padding: 3px 5px 3px 6px;
-    display: grid;
+    padding: 3px 5px 3px 10px;
     grid-auto-flow: column;
     grid-gap: 5px;
     width: fit-content;
+    color: ${(props) => props.theme.colors.darkerText};
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const SaveBtnArrow = styled(Margin)`
@@ -164,8 +175,4 @@ const SaveBtnArrow = styled(Margin)`
     border-radius: 3px;
     z-index: 10;
     margin: 3px 3px 3px 0px;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
 `

@@ -101,7 +101,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         : false,
                 }}
             >
-                <MenuItemName>
+                <MenuItemName isSelected={this.state.selected === i}>
                     {props.name}
                     {props.isDisabled && props.soonAvailable && (
                         <SoonPill>Coming Soon</SoonPill>
@@ -134,6 +134,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     render() {
+        console.log(this.theme)
         return (
             <ThemeProvider theme={this.theme}>
                 <MenuContainer>
@@ -179,23 +180,21 @@ const MenuItem = styled.li`
     ${({ theme }) =>
         theme.isDisabled
             ? 'color: #97b2b8;'
-            : '&:hover { background: #e0e0e0; cursor: pointer; }'};
-    ${({ theme }) => theme.isSelected && 'background: #f0f0f0;'};
-    padding: 10px 20px;
+            : '&:hover { background: #F8FBFF; cursor: pointer; }'};
+    ${({ theme }) => theme.isSelected && 'background: #e5f0ff80;'};
+    padding: 10px 10px;
     line-height: 20px;
     width: fill-available;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
+    border-radius: 5px;
 `
 
 const MenuTitle = styled.div`
-    font-size: 13px;
-    font-weight: normal;
     padding: 8px 15px 0px 15px;
-    opacity: 0.5;
-    color: ${(props) => props.theme.colors.primary};
+    margin-bottom: 10px;
 `
 
 const SoonPill = styled.span`
@@ -210,12 +209,12 @@ const SoonPill = styled.span`
     font-size: 10px;
 `
 
-const MenuItemName = styled.div`
-    font-weight: 500;
+const MenuItemName = styled.div<{ isSelected }>`
+    font-weight: ${(props) => (props.isSelected ? '500' : '400')};
+    color: ${(props) => (props.isSelected ? '#347AE2' : '#96A0B5')};
     font-size: 14px;
     display: flex;
     align-items: center;
-    font-weight: bold;
 `
 
 const MenuItemInfo = styled.div`
@@ -230,45 +229,28 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     font-size: 14px;
     border: none;
     outline: none;
-    background: ${(props) => (props.isOpen ? '#e0e0e0' : 'transparent')};
     border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
     width: 100%;
-
-    &:focus {
-        background-color: grey;
-    }
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
-
-    & div {
-        padding: 0 5px;
-    }
 `
 
 const Menu = styled.ul`
     position: absolute;
-    width: max-content;
+    width: 150px;
     list-style: none;
     padding: 5px 0;
     background: white;
-    border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    border-radius: 8px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
     margin-top: 5px;
     flex-direction: column;
-    top: 25px;
-    left: -65px;
+    top: 30px;
+    left: 0px;
     z-index: 1100;
+    padding: 10px;
 `

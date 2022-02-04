@@ -6,6 +6,7 @@
     flex-direction: column;
     justify-content: center; /* We need the white box to sit in the middle of the screen */
     height: 100vh;
+    overflow: hidden;
 }
 
 /* We cant target the body class easily to set a bg color since it shares the layout with the whole extension */

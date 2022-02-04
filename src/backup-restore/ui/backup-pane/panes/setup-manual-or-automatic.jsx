@@ -13,21 +13,7 @@ const settingsStyle = require('src/options/settings/components/settings.css')
 class SetupManualOrAutomatic extends React.Component {
     state = {
         mode: 'automatic',
-        automatic: false,
-    }
-
-    async componentDidMount() {
-        await this.fetchAuthorizedFeatures()
-    }
-
-    async fetchAuthorizedFeatures() {
-        if (
-            await this.props.currentUser?.authorizedFeatures.includes('backup')
-        ) {
-            this.setState({
-                automatic: true,
-            })
-        }
+        automatic: true,
     }
 
     render() {
@@ -85,5 +71,5 @@ SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     showSubscriptionModal: PropTypes.func.isRequired,
-    currentUser: PropTypes.object.isRequired,
+    // currentUser: PropTypes.object.isRequired,
 }

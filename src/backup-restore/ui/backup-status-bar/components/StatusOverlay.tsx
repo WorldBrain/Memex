@@ -202,7 +202,6 @@ export default class StatusOverlay extends PureComponent<Props> {
                                     {lastBackup && (
                                         <div className={styles.bottomBorder} />
                                     )}
-
                                     {nextBackup &&
                                         this.state.automaticBackupEnabled && (
                                             <div className={styles.backup}>

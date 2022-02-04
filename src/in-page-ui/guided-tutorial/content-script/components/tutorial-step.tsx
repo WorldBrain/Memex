@@ -70,10 +70,8 @@ const TutorialText = styled.div`
     color: ${(props) => props.theme.colors.darkgrey};
     font-size: 16px;
     text-align: left;
-    color: #a0a0a0;
     font-weight: normal;
     line-height: 25px;
-    margin-top: 20px;
 `
 
 const TitleBox = styled.div`

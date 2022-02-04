@@ -2,16 +2,17 @@ import React from 'react'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('./mobile-app-ad.css')
+import styled from 'styled-components'
 
 export interface Props {}
 
 const MobileAppAd: React.StatelessComponent<Props> = (props) => (
     <div className={styles.mobileSection}>
         <div className={styles.contentSection}>
-            <div className={settingsStyle.sectionTitle}>Download Memex GO</div>
-            <div className={settingsStyle.infoText}>
+            <SectionTitle>Download Memex GO</SectionTitle>
+            <InfoText>
                 Our mobile app to annotate and organise websites on the Go
-            </div>
+            </InfoText>
             <div className={settingsStyle.storeSection}>
                 <img
                     onClick={() => {
@@ -36,5 +37,19 @@ const MobileAppAd: React.StatelessComponent<Props> = (props) => (
         </div>
     </div>
 )
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default MobileAppAd

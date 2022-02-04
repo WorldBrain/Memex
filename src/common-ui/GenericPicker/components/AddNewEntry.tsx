@@ -11,8 +11,10 @@ interface Props {
 export default (props: Props) => {
     return (
         <AddNew onClick={props.onPress}>
-            <span>Create (Enter)</span>
-            {props.resultItem}
+            <ContentBox>
+                <Title>Create (Enter)</Title>
+                {props.resultItem}
+            </ContentBox>
             <Flex />
             {props.children}
         </AddNew>
@@ -29,12 +31,23 @@ export const AddNew = styled.div`
     align-items: center;
     color: ${(props) => props.theme.text};
     font-size: ${fontSizeSmall}px;
-    padding: 4px;
     font-weight: 700;
+    height: 50px;
+    padding: 0 20px;
     word-break: break-word;
-    span {
-        margin-right: 5px;
-        padding-left 12px;
-    }
     cursor: pointer;
+`
+
+const ContentBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    grid-gap: 10px;
+    fonts-size: 14px;
+    align-items: center;
+    color: ${(props) => props.theme.colors.normalText};
+`
+
+const Title = styled.span`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
 `

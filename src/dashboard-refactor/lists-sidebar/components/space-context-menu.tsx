@@ -70,7 +70,7 @@ const renderCopyableLink = ({
     // const viewportBreakpoint = getViewportBreakpoint(this.getViewportWidth(),)
 
     return (
-        <Margin>
+        <Margin bottom="3px">
             <LinkAndRoleBox viewportBreakpoint={viewportBreakpoint}>
                 <CopyLinkBox>
                     <LinkBox
@@ -86,29 +86,25 @@ const renderCopyableLink = ({
                                 : link.split('https://')[1]}
                         </Link>
                         <IconContainer id={'iconContainer'}>
-                            <IconBackground>
-                                <Icon
-                                    heightAndWidth="14px"
-                                    path={icons.copy}
-                                    onClick={
-                                        () =>
-                                            copyLink({
-                                                event: { linkIndex },
-                                            })
-                                        // this.processEvent('copyLink', { linkIndex })
-                                    }
-                                />
-                            </IconBackground>
-                            <IconBackground>
-                                <Icon
-                                    heightAndWidth="14px"
-                                    path={icons.goTo}
-                                    onClick={
-                                        () => window.open(link)
-                                        // this.processEvent('copyLink', { linkIndex })
-                                    }
-                                />
-                            </IconBackground>
+                            <Icon
+                                heightAndWidth="14px"
+                                path={icons.copy}
+                                onClick={
+                                    () =>
+                                        copyLink({
+                                            event: { linkIndex },
+                                        })
+                                    // this.processEvent('copyLink', { linkIndex })
+                                }
+                            />
+                            <Icon
+                                heightAndWidth="14px"
+                                path={icons.goTo}
+                                onClick={
+                                    () => window.open(link)
+                                    // this.processEvent('copyLink', { linkIndex })
+                                }
+                            />
                         </IconContainer>
                     </LinkBox>
                 </CopyLinkBox>
@@ -171,12 +167,7 @@ export default class SpaceContextMenuButton extends PureComponent<
                         onClick={this.handleMoreActionClick}
                         ref={this.buttonRef}
                     >
-                        <Icon
-                            paddingHorizontal="10px"
-                            paddingVertical="10px"
-                            heightAndWidth="12px"
-                            path={icons.dots}
-                        />
+                        <Icon heightAndWidth="14px" path={icons.dots} />
                     </MoreIconBackground>
 
                     {!(!this.props.source || !this.props.isMenuDisplayed) && (
@@ -429,7 +420,7 @@ export class SpaceContextMenu extends PureComponent<
                 )}
                 <MenuButton onClick={this.props.onDeleteClick}>
                     <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={icons.trash} />
+                        <Icon heightAndWidth="14px" path={icons.trash} />
                     </Margin>
                     Delete
                 </MenuButton>
@@ -458,7 +449,9 @@ const PermissionArea = styled.div`
 
 const EditArea = styled.div`
     border-top: 1px solid #f0f0f0;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
+    width: fill-available;
+    padding-bottom: 5px;
 `
 
 const IconContainer = styled.div`
@@ -485,10 +478,6 @@ const MoreIconBackground = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &:hover {
-        background: white;
-    }
 `
 
 const LoadingContainer = styled.div`
@@ -514,7 +503,7 @@ const ButtonLabel = styled.div`
 const ModalRoot = styled.div`
     z-index: 1000;
     width: 100%;
-    border-radius: 4px;
+    border-radius: 12px;
     height: 100%;
     position: fixed;
     top: 0;
@@ -553,8 +542,8 @@ const MenuContainer = styled.div`
     max-width:3 50px
     position: absolute;
     background-color: ${colors.white};
-    box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: 3px;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
     z-index: 1;
 `
 
@@ -593,7 +582,7 @@ const SidebarItem = styled.div<Props>`
  align-items: center;
  background-color: transparent;
  &:hover {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
 
   
@@ -673,9 +662,10 @@ const MenuSection = styled.div`
 const MenuButton = styled.div`
     height: 34px;
     width: 100%;
-    font-family: ${fonts.primary.name};
+    font-family: 'Inter';
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
     line-height: 18px;
     display: flex;
     flex-direction: row;
@@ -689,7 +679,7 @@ const MenuButton = styled.div`
         background-color: red;
     }
     &:hover {
-        background-color: ${colors.onHover};
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
     & > div {
         width: auto;
@@ -700,13 +690,13 @@ const MenuButton = styled.div`
 
 const blinkingAnimation = keyframes`
  0% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
  50% {
  background-color: transparent;
  }
  100% {
- background-color: ${colors.onHover};
+    background-color: ${(props) => props.theme.colors.lightHover};
  }
 
 `
@@ -738,15 +728,16 @@ const LinkAndRoleBox = styled.div<{
 `
 
 const LinkBox = styled(Margin)`
-    width: 100%;
+    width: fill-available;
     display: flex;
-    background-color: ${(props) => props.theme.colors.lightgrey};
-    font-size: 12px;
+    background-color: ${(props) => props.theme.colors.lineGrey};
+    font-size: 14px;
     border-radius: 3px;
     text-align: left;
+    height: 30px;
     cursor: pointer;
     padding-right: 10px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.lighterText};
 `
 
 const Link = styled.span`
@@ -774,13 +765,13 @@ const CopyLinkBox = styled.div`
 const PermissionText = styled.span<{
     viewportBreakpoint: string
 }>`
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     opacity: 0.8;
     display: flex;
     flex-direction: row;
     white-space: nowrap;
     justify-content: flex-end;
-    font-size: 10px;
+    font-size: 12px;
     z-index: 0;
 
     ${(props) =>

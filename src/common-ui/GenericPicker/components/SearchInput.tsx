@@ -4,6 +4,8 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { KeyEvent } from '../types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface Props {
     onChange: (value: string) => void
@@ -46,16 +48,19 @@ export class PickerSearchInput extends React.Component<Props, State> {
     render() {
         return (
             <SearchBox isFocused={this.state.isFocused} id={'pickerSearchBox'}>
-                {this.props.before}
+                <Icon
+                    filePath={icons.searchIcon}
+                    heightAndWidth="14px"
+                    hoverOff
+                />
+                {/* {this.props.before} */}
                 <SearchInput
-                    placeholder={
-                        this.props.showPlaceholder ?? true
-                            ? this.props.searchInputPlaceholder
-                            : ''
-                    }
+                    placeholder={this.props.searchInputPlaceholder}
                     defaultValue={this.props.value}
                     onChange={this.onChange}
-                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                        e.stopPropagation()
+                    }}
                     onFocus={() => this.setState({ isFocused: true })}
                     onBlur={() => this.setState({ isFocused: false })}
                     specialHandlers={[this.handleSpecialKeyPress]}
@@ -78,17 +83,19 @@ const StyledSearchIcon = styled(SearchIcon)`
 
 const SearchBox = styled.div`
     align-items: center;
-    background-color: ${(props) => props.theme.inputBackground};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     border-radius: 3px;
-    color: ${(props) => props.theme.text};
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
-    padding: 3px 8px;
-    margin-left: 8px;
-    margin-right: 8px;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
     transition: border 0.1s;
     margin-bottom: 4px;
+    grid-gap: 5px;
+    min-height: 20px;
 `
 
 const SearchInput = styled(TextInputControlled)`
@@ -100,10 +107,11 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${(props) => props.theme.text};
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-size: ${fontSizeSmall}px;
-    min-height: 24px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-family: 'Inter'
+    font-size: 14px;
+    height: fill-available;
+    width: fill-available;
 
     &:focus {
         border: none;
