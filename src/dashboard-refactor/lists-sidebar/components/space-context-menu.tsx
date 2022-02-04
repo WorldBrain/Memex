@@ -39,14 +39,19 @@ const Modal = ({
     show,
     closeModal,
     position,
+    onMouseLeave,
 }: {
     children: JSX.Element
     show: boolean
     closeModal: React.MouseEventHandler
     position: { x: number; y: number }
+    onMouseLeave: any
 }) => {
     return (
-        <ModalRoot style={{ display: show ? 'block' : 'none' }}>
+        <ModalRoot
+            onMouseLeave={onMouseLeave}
+            style={{ display: show ? 'block' : 'none' }}
+        >
             <Overlay onClick={closeModal} />
 
             <ModalContent x={position.x} y={position.y}>
@@ -347,6 +352,7 @@ export class SpaceContextMenu extends PureComponent<
                     show={true}
                     closeModal={this.closeModal}
                     position={this.props.position}
+                    onMouseLeave={this.closeModal}
                 >
                     <MenuContainer>{children}</MenuContainer>
                 </Modal>
@@ -390,6 +396,7 @@ export class SpaceContextMenu extends PureComponent<
                                                 color="white"
                                                 heightAndWidth="12px"
                                                 path={icons.link}
+                                                hoverOff
                                             />{' '}
                                             Share this Space
                                         </ButtonLabel>
@@ -497,6 +504,10 @@ const ButtonLabel = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const ModalRoot = styled.div`
