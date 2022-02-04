@@ -420,7 +420,9 @@ class AnnotationsSidebar extends React.Component<
                     ) : (
                         <>
                             {this.props.followedLists.allIds.length > 0 ? (
-                                sharedNotesByList
+                                <AnnotationContainer>
+                                    {sharedNotesByList}
+                                </AnnotationContainer>
                             ) : (
                                 <EmptyMessageContainer>
                                     <SectionCircle>
@@ -471,7 +473,7 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <>
+                <AnnotationBox>
                     <AnnotationEditable
                         key={i}
                         {...annot}
@@ -497,7 +499,7 @@ class AnnotationsSidebar extends React.Component<
                         }
                         ref={(ref) => (this.annotationEditRef = ref)}
                     />
-                </>
+                </AnnotationBox>
             )
         })
 
@@ -527,7 +529,7 @@ class AnnotationsSidebar extends React.Component<
                         {this.renderNewAnnotation()}
 
                         {this.props.annotations.length > 0 ? (
-                            <>{annots}</>
+                            <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
                                 <SectionCircle>
@@ -730,6 +732,9 @@ const EmptyMessageContainer = styled.div`
     align-items: center;
     width: 100%;
 `
+const AnnotationBox = styled.div`
+    padding: 0 2px;
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.backgroundHighlight};
@@ -814,6 +819,22 @@ const SectionTitleContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    height: 100%;
+`
+
+const AnnotationContainer = styled(Margin)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-bottom: 150px;
+    overflow: scroll;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 `
 
 const FollowedNotesContainer = styled.div`
@@ -1023,8 +1044,8 @@ const NewAnnotationSection = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     width: fill-available;
-    margin-bottom: 5px;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 `
 
 const NewAnnotationSeparator = styled.div`
@@ -1042,6 +1063,7 @@ const AnnotationsSectionStyled = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     padding: 5px 10px;
+    height: 100%;
 `
 
 const NewAnnotationBoxStyled = styled.div`
@@ -1149,9 +1171,7 @@ const ShareMenuWrapperTopBar = styled.div`
 `
 
 const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
-    height: fill-available;
-    overflow-y: scroll;
-    padding-bottom: 150px;
+    height: 100vh;
     width: fill-available;
     padding-right: ${(props) =>
         props.sidebarContext === 'dashboard' ? '0' : '40px'};
