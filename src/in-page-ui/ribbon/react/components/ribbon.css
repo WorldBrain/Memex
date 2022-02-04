@@ -77,27 +77,27 @@
     justify-content: center;
     padding: 5px 0;
     display: none;
-    background-color: #f6f8fb;
 }
 
 .innerRibbonExpanded {
     border-radius: 20px;
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     background: white;
     display: flex;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     border: 1px solid #f0f0f0;
 }
 
 .innerRibbonSidebarOpen {
-    box-shadow: none;
     height: 100%;
     top: 0px;
-    width: 40px;
+    width: 44px;
     justify-content: flex-start;
     padding-top: 15px;
     align-items: center;
     display: flex;
     background: transparent;
+    box-shadow: none;
+    border: none;
 }
 
 /* SECTIONS */

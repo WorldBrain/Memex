@@ -342,7 +342,9 @@ export default class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
-                            <FeedIndicatorBox>
+                            <FeedIndicatorBox
+                                isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                            >
                                 <ButtonTooltip
                                     tooltipText={'View Feed Updates'}
                                     position="leftNarrow"
@@ -638,10 +640,11 @@ const SubText = styled.span`
     font-size: 10px;
 `
 
-const FeedIndicatorBox = styled.div`
+const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
     display: flex;
     margin-bottom: 5px;
     justify-content: center;
+    margin-left: ${(props) => !props.isSidebarOpen && '-1px'};
 `
 
 const InfoText = styled.div`
