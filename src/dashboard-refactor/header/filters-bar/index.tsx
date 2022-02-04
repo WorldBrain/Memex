@@ -68,6 +68,7 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     white-space: nowrap;
     max-width: 300px;
     overflow: scroll;
+    font-size: 13px;
 
     scrollbar-width: none;
 

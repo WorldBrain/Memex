@@ -375,8 +375,7 @@ export class SpaceContextMenu extends PureComponent<
                 ) : (
                     <>
                         {!(
-                            this.props.services &&
-                            !!this.state.inviteLinks.length
+                            this.props.services && this.state.inviteLinks.length
                         ) ? (
                             <ShareSectionContainer
                                 onClick={(e) => {
