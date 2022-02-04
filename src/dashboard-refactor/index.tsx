@@ -1013,11 +1013,11 @@ export class DashboardContainer extends StatefulUIElement<
 const GlobalStyle = createGlobalStyle`
 
     * {
-        font-family: 'Inter';,
+        font-family: 'Inter', sans-serif;,
     }
 
     body {
-        font-family: 'Inter';';
+        font-family: 'Inter', sans-serif;';
     }
 `
 
@@ -1030,6 +1030,6 @@ min-height: 100vh;
 height: 100%;
 
     & * {
-        font-family: 'Inter';,
+        font-family: 'Inter', sans-serif;,
     }
 `

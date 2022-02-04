@@ -1,12 +1,12 @@
 @import url('/fonts/Inter/inter.css');
 
 :host * {
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 .extraPanel {
     all: initial;
-    font-family: sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
 }
 

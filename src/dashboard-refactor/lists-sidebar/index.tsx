@@ -93,22 +93,27 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
 `
 
 const NoCollectionsMessage = styled.div`
+    font-family: 'Inter', sans-serif;
     display: grid;
     grid-auto-flow: column;
     grid-gap: 10px;
     align-items: center;
     cursor: pointer;
-    padding: 5px 25px;
+    padding: 0px 15px;
+    margin: 5px 10px;
     width: fill-available;
     margin-top: 5px;
+    height: 40px;
     justify-content: flex-start;
+    border-radius: 5px;
 
     & * {
         cursor: pointer;
     }
 
     &: hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
     }
 `
 
@@ -138,6 +143,7 @@ const InfoText = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
     font-size: 14px;
     font-weight: 300;
+    font-family: 'Inter', sans-serif;
 `
 
 const Link = styled.span`
