@@ -354,10 +354,6 @@ class AnnotationsSidebar extends React.Component<
     private renderSharedNotesByList() {
         const { followedLists } = this.props
 
-        // if (!followedLists.allIds.length) {
-        //     return null
-        // }
-
         const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
@@ -459,12 +455,15 @@ class AnnotationsSidebar extends React.Component<
         }
         return (
             <React.Fragment>
-                <AnnotationsSectionStyled>
-                    {this.renderAnnotationsEditable()}
-                </AnnotationsSectionStyled>
-                <AnnotationsSectionStyled>
-                    {this.renderSharedNotesByList()}
-                </AnnotationsSectionStyled>
+                {this.props.isExpanded ? (
+                    <AnnotationsSectionStyled>
+                        {this.renderAnnotationsEditable()}
+                    </AnnotationsSectionStyled>
+                ) : (
+                    <AnnotationsSectionStyled>
+                        {this.renderSharedNotesByList()}
+                    </AnnotationsSectionStyled>
+                )}
             </React.Fragment>
         )
     }
@@ -734,6 +733,7 @@ const EmptyMessageContainer = styled.div`
 `
 const AnnotationBox = styled.div`
     padding: 0 2px;
+    width: fill-available;
 `
 
 const SectionCircle = styled.div`
