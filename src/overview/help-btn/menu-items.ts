@@ -48,7 +48,7 @@ export const menuItems: MenuOptions = [
     },
     {
         text: 'Twitter - @memexgarden',
-        link: 'https://twitter.com/worldbrain',
+        link: 'https://twitter.com/memexgarden',
         icon: icons.twitter,
     },
 ]
