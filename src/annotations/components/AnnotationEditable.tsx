@@ -28,6 +28,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -163,7 +164,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                             position="bottom"
                         >
                             <HighlightAction right="2px">
-                                <GoToHighlightIcon onClick={onGoToAnnotation} />
+                                <Icon
+                                    onClick={onGoToAnnotation}
+                                    filePath={icons.goTo}
+                                    heightAndWidth={'16px'}
+                                />
                             </HighlightAction>
                         </ButtonTooltip>
                     )}
@@ -173,8 +178,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                             position="left"
                         >
                             <HighlightAction>
-                                <AddNoteIcon
+                                <Icon
                                     onClick={footerDeps.onEditIconClick}
+                                    filePath={icons.plus}
+                                    heightAndWidth={'14px'}
+                                    padding={'5px'}
                                 />
                             </HighlightAction>
                         </ButtonTooltip>
@@ -678,8 +686,9 @@ const HighlightText = styled.span`
     overflow: hidden;
     line-height: 25px;
     font-style: normal;
-    background-color: #d4e8ff;
-    color: ${(props) => props.theme.colors.primary};
+    border-radius: 3px;
+    background-color: ${(props) => props.theme.colors.backgroundHighlight};
+    color: ${(props) => props.theme.colors.darkerText};
     padding: 2px 5px;
 `
 

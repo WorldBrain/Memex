@@ -14,7 +14,9 @@ import { theme } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 
 export const handleRender = async (
-    { docs, totalCount },
+    query,
+    requestSearcher,
+    //{ docs, totalCount },
     searchEngine,
     syncSettings: SyncSettingsStoreInterface,
 ) => {
@@ -23,11 +25,12 @@ export const handleRender = async (
     // Injects CSS into the search page.
     // Calls renderComponent to render the react component
 
+    // const searchRes = await requestSearcher({ query, limit: 21 })
+
     const renderComponent = async () => {
         // Accesses docs, totalCount from parent through closure
         // Gets position from settings
         // Renders React Component on the respective container
-
         const position =
             (await syncSettings.searchInjection.get('memexResultsPosition')) ??
             'side'
@@ -63,55 +66,17 @@ export const handleRender = async (
             <StyleSheetManager target={target}>
                 <ThemeProvider theme={theme}>
                     <Container
-                        results={docs.slice(0, limit)}
-                        len={totalCount}
+                        query={query}
+                        requestSearcher={requestSearcher}
+                        // results={searchRes.docs.slice(0, limit)}
+                        // len={searchRes.totalCount}
                         rerender={renderComponent}
                         searchEngine={searchEngine}
                         syncSettings={syncSettings}
+                        position={position}
                     />
                 </ThemeProvider>
             </StyleSheetManager>,
-            target,
-        )
-    }
-
-    const renderLoading = async () => {
-        const position =
-            (await syncSettings.searchInjection.get('memexResultsPosition')) ??
-            'side'
-
-        const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
-        if (!searchEngineObj) {
-            return false
-        }
-        const containerType = searchEngineObj.containerType
-        const containerIdentifier = searchEngineObj.container[position]
-        const container =
-            containerType === 'class'
-                ? document.getElementsByClassName(containerIdentifier)[0]
-                : document.getElementById(containerIdentifier)
-
-        // If re-rendering remove the already present component
-        const component = document.getElementById('memexResults')
-        if (component) {
-            component.parentNode.removeChild(component)
-        }
-
-        const target = document.createElement('div')
-        target.setAttribute('id', 'memexResults')
-        container.insertBefore(target, container.firstChild)
-
-        // Number of results to limit
-        const limit = constants.LIMIT[position]
-
-        // Render the React component on the target element
-        // Passing this same function so that it can change position
-        ReactDOM.render(
-            <ThemeProvider theme={theme}>
-                <div>
-                    <LoadingIndicator />
-                </div>
-            </ThemeProvider>,
             target,
         )
     }
@@ -128,7 +93,9 @@ export const handleRender = async (
     // Check if the document has completed loading,
     // if it has, execute the rendering function immediately
     // else attach it to the DOMContentLoaded event listener
+
     renderComponent()
+
     if (
         !(
             document.readyState === 'complete' ||

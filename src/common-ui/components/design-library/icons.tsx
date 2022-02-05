@@ -108,6 +108,7 @@ export const arrowUp = browser.runtime.getURL('/img/arrow-up.svg')
 
 export const saveIcon = browser.runtime.getURL('/img/saveIcon.svg')
 export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
+export const peoplePlusFine = browser.runtime.getURL('/img/peoplePlusFine.svg')
 
 export const arrowRight = browser.runtime.getURL('/img/arrowRight.svg')
 export const reload = browser.runtime.getURL('/img/reload.svg')

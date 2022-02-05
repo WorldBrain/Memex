@@ -154,7 +154,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 export default ShareAnnotationMenu
 
 const Menu = styled.div`
-    padding: 5px;
+    padding: 5px 0px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -162,7 +162,7 @@ const Menu = styled.div`
 `
 
 const TopArea = styled.div`
-    padding: 15px 15px 10px 15px;
+    padding: 10px 15px 10px 15px;
 `
 
 const TitleContainer = styled.div`

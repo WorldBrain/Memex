@@ -68,6 +68,7 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     white-space: nowrap;
     max-width: 300px;
     overflow: scroll;
+    font-size: 13px;
 
     scrollbar-width: none;
 
@@ -167,8 +168,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             if (!filterProps.endDateText && isFiltered) {
                 var endDate = 'Now'
             }
-
-            console.log(this.props.searchFilters)
 
             return (
                 <>

@@ -39,17 +39,23 @@ const Modal = ({
     show,
     closeModal,
     position,
+    onMouseLeave,
 }: {
     children: JSX.Element
     show: boolean
     closeModal: React.MouseEventHandler
     position: { x: number; y: number }
+    onMouseLeave: any
 }) => {
     return (
         <ModalRoot style={{ display: show ? 'block' : 'none' }}>
             <Overlay onClick={closeModal} />
 
-            <ModalContent x={position.x} y={position.y}>
+            <ModalContent
+                onMouseLeave={closeModal}
+                x={position.x}
+                y={position.y}
+            >
                 {children}
             </ModalContent>
         </ModalRoot>
@@ -142,7 +148,6 @@ export default class SpaceContextMenuButton extends PureComponent<
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-        console.log(rect)
         this.setState({ position: { x: rect.x + 35, y: rect.y - 6 } })
         this.props.onMoreActionClick(this.props.listId)
     }
@@ -215,7 +220,6 @@ export class SpaceContextMenu extends PureComponent<
         e.stopPropagation()
         this.props.onMoreActionClick(this.props.listId)
         this.props.editableProps.onConfirmClick(this.state.nameValue)
-        console.log('closeModal')
     }
 
     async componentDidMount() {
@@ -347,6 +351,7 @@ export class SpaceContextMenu extends PureComponent<
                     show={true}
                     closeModal={this.closeModal}
                     position={this.props.position}
+                    onMouseLeave={this.closeModal}
                 >
                     <MenuContainer>{children}</MenuContainer>
                 </Modal>
@@ -375,8 +380,7 @@ export class SpaceContextMenu extends PureComponent<
                 ) : (
                     <>
                         {!(
-                            this.props.services &&
-                            !!this.state.inviteLinks.length
+                            this.props.services && this.state.inviteLinks.length
                         ) ? (
                             <ShareSectionContainer
                                 onClick={(e) => {
@@ -391,6 +395,7 @@ export class SpaceContextMenu extends PureComponent<
                                                 color="white"
                                                 heightAndWidth="12px"
                                                 path={icons.link}
+                                                hoverOff
                                             />{' '}
                                             Share this Space
                                         </ButtonLabel>
@@ -498,6 +503,10 @@ const ButtonLabel = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const ModalRoot = styled.div`

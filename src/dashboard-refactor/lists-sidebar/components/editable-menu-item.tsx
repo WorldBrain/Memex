@@ -31,13 +31,7 @@ export default class EditableMenuItem extends React.PureComponent<
         super(props)
         this.props.onRenameStart(null)
     }
-    componentDidMount() {
-        console.log('componentDidMount', { state: this.state })
-    }
 
-    componentWillUnmount(): void {
-        console.log('componentWillUnmount', { state: this.state })
-    }
     private handleChange: React.MouseEventHandler<HTMLInputElement> = (
         event,
     ) => {
@@ -49,7 +43,6 @@ export default class EditableMenuItem extends React.PureComponent<
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
         if (e.key === 'Escape') {
-            console.log('handleInputKeyDown Escape', { e })
             if (this.props.nameValueState.value.length) {
                 e.stopPropagation()
             }
@@ -58,7 +51,6 @@ export default class EditableMenuItem extends React.PureComponent<
         }
 
         if (e.key === 'Enter') {
-            console.log('handleInputKeyDown Enter', { e })
             if (this.props.nameValueState.value.length) {
                 e.stopPropagation()
                 this.props.onConfirmClick(this.props.nameValueState.value)

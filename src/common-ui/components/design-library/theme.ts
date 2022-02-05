@@ -37,7 +37,7 @@ export const theme: Theme = {
         darkerText: '#292C38',
         lighterText: '#96A0B5',
         backgroundColor: '#F8FBFF',
-        backgroundColorDarker: '#e5f0ff80',
+        backgroundColorDarker: '#e5f0ff70',
         darkerBlue: '#5E6278',
         blue: '2563EB',
     },

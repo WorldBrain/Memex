@@ -108,6 +108,8 @@ const PrivacyOptionItem = styled(Margin)`
     width: fill-available;
     grid-gap: 10px;
     border-radius: 5px;
+    background-color: ${(props) =>
+        props.isSelected && props.theme.colors.backgroundColorDarker};
 
     &:hover {
         background-color: ${(props) => props.theme.colors.backgroundColor};

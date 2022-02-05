@@ -14,7 +14,7 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
 
 export default class Logic extends UILogic<State, Event> {
     syncPromise: Promise<any>
-    action?: 'login' | 'register'
+    action?: 'login' | 'register' | 'resetPassword'
 
     constructor(private dependencies: Dependencies) {
         super()
@@ -38,19 +38,13 @@ export default class Logic extends UILogic<State, Event> {
         this.dependencies.onModeChange?.({ mode: 'signup' })
     }
 
-    toggleMode: EventHandler<'toggleMode'> = async ({ previousState }) => {
-        if (previousState.mode !== 'signup' && previousState.mode !== 'login') {
-            return
-        }
-
-        const mode: AuthDialogMode =
-            previousState.mode === 'signup' ? 'login' : 'signup'
+    toggleMode: EventHandler<'toggleMode'> = ({ event }) => {
         this.emitMutation({
             mode: {
-                $set: mode,
+                $set: event.mode,
             },
         })
-        this.dependencies.onModeChange?.({ mode })
+        this.dependencies.onModeChange?.({ mode: event.mode })
     }
 
     editEmail: EventHandler<'editEmail'> = ({ event }) => {
@@ -67,6 +61,32 @@ export default class Logic extends UILogic<State, Event> {
 
     passwordMatch: EventHandler<'passwordMatch'> = ({ event }) => {
         return { passwordMatch: { $set: event.value } }
+    }
+
+    passwordResetSwitch: EventHandler<'passwordResetSwitch'> = () => {
+        this.emitMutation({
+            mode: {
+                $set: 'resetPassword',
+            },
+        })
+        this.dependencies.onModeChange?.({ mode: 'resetPassword' })
+    }
+
+    passwordResetConfirm: EventHandler<'passwordResetConfirm'> = () => {
+        this.emitMutation({
+            mode: {
+                $set: 'ConfirmResetPassword',
+            },
+        })
+        this.dependencies.onModeChange?.({ mode: 'ConfirmResetPassword' })
+    }
+
+    passwordReset: EventHandler<'passwordReset'> = async ({
+        event,
+        previousState,
+    }) => {
+        const auth = this.dependencies.authBG
+        await auth.sendPasswordResetEmailProcess(previousState.email)
     }
 
     editDisplayName: EventHandler<'editDisplayName'> = ({ event }) => {
@@ -105,6 +125,10 @@ export default class Logic extends UILogic<State, Event> {
                 }
                 this.dependencies.onAuth?.({ reason: 'register' })
             } else if (previousState.mode === 'login') {
+                this.dependencies.onModeChange?.({
+                    mode: 'login',
+                    setSaveState: 'running',
+                })
                 const { result } = await auth.loginWithEmailPassword(
                     credentials,
                 )

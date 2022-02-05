@@ -68,6 +68,7 @@ export default class ContentSharingService
                 links: [readerLink, ...foundLinks],
             }
         } catch (e) {
+            console.error(e)
             return {
                 links: [],
             }
