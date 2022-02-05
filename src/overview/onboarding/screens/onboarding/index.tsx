@@ -146,12 +146,12 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private renderLoginStep = () => (
+    private renderLoginStep = (setSaveState) => (
         <>
             <WelcomeContainer>
                 <LeftSide>
                     <ContentBox>
-                        {this.state.authDialogMode === 'signup' ? (
+                        {this.state.authDialogMode === 'signup' && (
                             <>
                                 <LogoImg src={'/img/onlyIconLogo.svg'} />
                                 <Title>Welcome to Memex</Title>
@@ -159,14 +159,54 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     Create an account to get started
                                 </DescriptionText>
                             </>
-                        ) : (
-                            <>
-                                <LogoImg src={'/img/onlyIconLogo.svg'} />
-                                <Title>Welcome back</Title>
+                        )}
+                        {this.state.authDialogMode === 'login' &&
+                            setSaveState !== 'running' && (
+                                <UserScreenContainer>
+                                    <SectionCircle>
+                                        <Icon
+                                            filePath={icons.login}
+                                            heightAndWidth="24px"
+                                            color="purple"
+                                            hoverOff
+                                        />
+                                    </SectionCircle>
+                                    <SectionTitle>Welcome Back!</SectionTitle>
+                                    <DescriptionText>
+                                        Login to continue
+                                    </DescriptionText>
+                                </UserScreenContainer>
+                            )}
+                        {this.state.authDialogMode === 'resetPassword' && (
+                            <UserScreenContainer>
+                                <SectionCircle>
+                                    <Icon
+                                        filePath={icons.reload}
+                                        heightAndWidth="24px"
+                                        color="purple"
+                                        hoverOff
+                                    />
+                                </SectionCircle>
+                                <SectionTitle>Reset your password</SectionTitle>
+                                <DescriptionText></DescriptionText>
+                            </UserScreenContainer>
+                        )}
+                        {this.state.authDialogMode ===
+                            'ConfirmResetPassword' && (
+                            <UserScreenContainer>
+                                <SectionCircle>
+                                    <Icon
+                                        filePath={icons.mail}
+                                        heightAndWidth="24px"
+                                        color="purple"
+                                        hoverOff
+                                    />
+                                </SectionCircle>
+                                <SectionTitle>Check your Emails</SectionTitle>
                                 <DescriptionText>
-                                    Good to see you again!
+                                    Don't forget the spam folder!
                                 </DescriptionText>
-                            </>
+                            </UserScreenContainer>
                         )}
                         <AuthDialog
                             onAuth={({ reason }) => {
@@ -174,8 +214,11 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     newSignUp: reason === 'register',
                                 })
                             }}
-                            onModeChange={({ mode }) => {
+                            onModeChange={({ mode, setSaveState }) => {
                                 this.processEvent('setAuthDialogMode', { mode })
+                                this.processEvent('setSaveState', {
+                                    setSaveState,
+                                })
                             }}
                         />
                     </ContentBox>
@@ -186,15 +229,27 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     render() {
+        console.log(this.state.setSaveState)
+
         return (
             <OnboardingBox>
                 {this.state.shouldShowLogin
-                    ? this.renderLoginStep()
+                    ? this.renderLoginStep(this.state.setSaveState)
                     : this.renderOnboardingSteps()}
             </OnboardingBox>
         )
     }
 }
+
+const UserScreenContainer = styled.div`
+    margin-bottom: 30px;
+`
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
 
 const TutorialContainer = styled.div`
     display: grid;
@@ -314,8 +369,8 @@ const DescriptionText = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 18px;
     font-weight: normal;
-    margin-bottom: 30px;
-    text-align: center;
+    margin-bottom: 20px;
+    text-align: left;
 `
 
 const RightSide = styled.div`

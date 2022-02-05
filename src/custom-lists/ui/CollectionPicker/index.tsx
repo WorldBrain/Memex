@@ -112,7 +112,6 @@ class ListPicker extends StatefulUIElement<
         document.getElementById(
             `ListKeyName-${list.name}-${index}`,
         ).scrollTop = offsetTop
-        console.log(offsetTop)
     }
 
     handleNewListPress = () => {

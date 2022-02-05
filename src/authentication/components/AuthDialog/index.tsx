@@ -13,6 +13,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import { LoadingIndicator } from 'src/common-ui/components'
+import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
 
@@ -44,7 +45,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
     }
 
     renderAuthForm() {
-        if (this.state.mode !== 'login') {
+        if (this.state.mode === 'signup') {
             return (
                 <StyledAuthDialog>
                     <AuthBox top="medium">
@@ -194,7 +195,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                     </AuthBox>
                 </StyledAuthDialog>
             )
-        } else {
+        }
+        if (this.state.mode === 'login') {
             return (
                 <StyledAuthDialog>
                     <AuthBox top="medium">
@@ -224,27 +226,42 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                     />
                                 </TextInputContainer>
                                 <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.lockFine}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                        onChange={(e) =>
-                                            this.processEvent('editPassword', {
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        onKeyDown={handleEnter(() => {
+                                    <>
+                                        <Icon
+                                            filePath={icons.lockFine}
+                                            heightAndWidth="20px"
+                                            hoverOff
+                                        />
+                                        <TextInput
+                                            type="password"
+                                            placeholder="Password"
+                                            value={this.state.password}
+                                            onChange={(e) =>
+                                                this.processEvent(
+                                                    'editPassword',
+                                                    {
+                                                        value: e.target.value,
+                                                    },
+                                                )
+                                            }
+                                            onKeyDown={handleEnter(() => {
+                                                this.processEvent(
+                                                    'emailPasswordConfirm',
+                                                    null,
+                                                )
+                                            })}
+                                        />
+                                    </>
+                                    <ForgotPassword
+                                        onClick={() => {
                                             this.processEvent(
-                                                'emailPasswordConfirm',
+                                                'passwordResetSwitch',
                                                 null,
                                             )
-                                        })}
-                                    />
+                                        }}
+                                    >
+                                        Forgot Password?
+                                    </ForgotPassword>
                                 </TextInputContainer>
                                 <ConfirmContainer>
                                     <PrimaryAction
@@ -276,6 +293,102 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                 </StyledAuthDialog>
             )
         }
+        if (this.state.mode === 'resetPassword') {
+            return (
+                <StyledAuthDialog>
+                    <AuthBox top="medium">
+                        <AuthenticationMethods>
+                            <EmailPasswordLogin>
+                                <TextInputContainer>
+                                    <Icon
+                                        filePath={icons.mail}
+                                        heightAndWidth="20px"
+                                        hoverOff
+                                    />
+                                    <TextInput
+                                        type="email"
+                                        placeholder="E-mail"
+                                        value={this.state.email}
+                                        onChange={(e) =>
+                                            this.processEvent('editEmail', {
+                                                value: e.target.value,
+                                            })
+                                        }
+                                        onKeyDown={handleEnter(() => {
+                                            this.processEvent(
+                                                'passwordReset',
+                                                null,
+                                            )
+                                            this.processEvent(
+                                                'passwordResetConfirm',
+                                                null,
+                                            )
+                                        })}
+                                    />
+                                </TextInputContainer>
+                                <ConfirmContainer>
+                                    <PrimaryAction
+                                        onClick={() => {
+                                            this.processEvent(
+                                                'passwordReset',
+                                                null,
+                                            )
+                                            this.processEvent(
+                                                'passwordResetConfirm',
+                                                null,
+                                            )
+                                        }}
+                                        disabled={
+                                            !(
+                                                this.state.email.includes(
+                                                    '@',
+                                                ) &&
+                                                this.state.email.includes('.')
+                                            )
+                                        }
+                                        label={'Login'}
+                                        fontSize={'14px'}
+                                    />
+                                    {this.renderAuthError()}
+                                </ConfirmContainer>
+                                {this.renderLoginTypeSwitcher()}
+                            </EmailPasswordLogin>
+                        </AuthenticationMethods>
+                    </AuthBox>
+                </StyledAuthDialog>
+            )
+        }
+        if (this.state.mode === 'ConfirmResetPassword') {
+            return (
+                <>
+                    <PrimaryAction
+                        label={'Back to Login'}
+                        onClick={() =>
+                            this.processEvent('toggleMode', { mode: 'login' })
+                        }
+                    />
+                </>
+                // <StyledAuthDialog>
+                //     <SectionContainer>
+                //         <SectionCircle>
+                //             <Icon
+                //                 filePath={icons.mail}
+                //                 heightAndWidth="34px"
+                //                 color="purple"
+                //                 hoverOff
+                //             />
+                //         </SectionCircle>
+
+                //         <SectionTitle>
+                //             Password-Reset email sent
+                //         </SectionTitle>
+                //         <InfoTextBig>
+                //             Check your email inbox. Emails may also land in your spamn folder.
+                //         </InfoTextBig>
+                //     </SectionContainer>
+                // </StyledAuthDialog>
+            )
+        }
     }
 
     private renderLoginTypeSwitcher() {
@@ -286,7 +399,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         Don’t have an account?{' '}
                         <ModeSwitch
                             onClick={() =>
-                                this.processEvent('toggleMode', null)
+                                this.processEvent('toggleMode', {
+                                    mode: 'signup',
+                                })
                             }
                         >
                             Sign up
@@ -298,7 +413,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         Already have an account?{' '}
                         <ModeSwitch
                             onClick={() =>
-                                this.processEvent('toggleMode', null)
+                                this.processEvent('toggleMode', {
+                                    mode: 'login',
+                                })
                             }
                         >
                             Log in
@@ -342,6 +459,45 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const SectionContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    margin: 20px 0px;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 60px;
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 18px;
+    font-weight: bold;
+`
+
+const InfoTextBig = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+`
+
+const ForgotPassword = styled.div`
+    white-space: nowrap;
+    color: ${(props) => props.theme.colors.purple};
+    cursor: pointer;
+    font-weight: 500;
+`
 
 const DisplayNameContainer = styled.div`
     display: grid;

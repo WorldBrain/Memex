@@ -169,8 +169,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 var endDate = 'Now'
             }
 
-            console.log(this.props.searchFilters)
-
             return (
                 <>
                     {isFiltered && (

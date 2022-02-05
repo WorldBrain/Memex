@@ -50,7 +50,6 @@ const extractFavIcon = (url, doc = document) => {
     try {
         return getFavIcon(getFavIconURLFromDOM(url, doc))
     } catch (err) {
-        console.log('error')
         console.log(err)
 
         return undefined // carry on without fav-icon

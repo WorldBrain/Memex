@@ -16,7 +16,6 @@ export interface Props {
 
 export class HoverBox extends React.Component<Props> {
     render() {
-        console.log(this.props.overflow)
         if (!this.props.withRelativeContainer) {
             return (
                 <HoverBoxDiv {...this.props}>{this.props.children}</HoverBoxDiv>

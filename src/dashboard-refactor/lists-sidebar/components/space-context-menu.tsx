@@ -148,7 +148,6 @@ export default class SpaceContextMenuButton extends PureComponent<
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-        console.log(rect)
         this.setState({ position: { x: rect.x + 35, y: rect.y - 6 } })
         this.props.onMoreActionClick(this.props.listId)
     }
@@ -221,7 +220,6 @@ export class SpaceContextMenu extends PureComponent<
         e.stopPropagation()
         this.props.onMoreActionClick(this.props.listId)
         this.props.editableProps.onConfirmClick(this.state.nameValue)
-        console.log('closeModal')
     }
 
     async componentDidMount() {

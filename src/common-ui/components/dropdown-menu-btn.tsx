@@ -134,7 +134,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     render() {
-        console.log(this.theme)
         return (
             <ThemeProvider theme={this.theme}>
                 <MenuContainer>

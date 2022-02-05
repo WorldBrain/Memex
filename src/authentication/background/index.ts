@@ -79,6 +79,7 @@ export class AuthBackground {
                 delete this._userProfile
                 this.authService.signOut()
             },
+            sendPasswordResetEmailProcess: this.sendPasswordResetEmailProcess,
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -188,6 +189,10 @@ export class AuthBackground {
                 job: () => null,
             })
         }
+    }
+
+    sendPasswordResetEmailProcess = async (email) => {
+        return firebase.auth().sendPasswordResetEmail(email)
     }
 
     registerRemoteEmitter() {

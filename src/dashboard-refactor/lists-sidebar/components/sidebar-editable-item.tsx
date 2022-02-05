@@ -46,7 +46,6 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 
     private handleConfirm: React.MouseEventHandler = () => {
-        console.log('test')
         this.props.onConfirmClick(this.state.value)
     }
 

@@ -1,12 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Dropdown from './Dropdown'
-import styles from './Results.css'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { browser } from 'webextension-polyfill-ts'
 
 const settings = browser.runtime.getURL('/img/settings.svg')
 const compress = browser.runtime.getURL('/img/compress-alt.svg')
@@ -14,7 +14,6 @@ const expand = browser.runtime.getURL('/img/expand-alt.svg')
 const search = browser.runtime.getURL('/img/search.svg')
 
 const Results = (props) => {
-    console.log(props.renderResultItems().length)
     // const searchEngineClass = `${props.searchEngine}_${props.position}`
     return (
         <>
@@ -88,9 +87,9 @@ const Results = (props) => {
                         {props.renderResultItems().length ? (
                             props.renderResultItems()
                         ) : (
-                            <div className={styles.loadingBox}>
+                            <LoadingBox>
                                 <LoadingIndicator />
-                            </div>
+                            </LoadingBox>
                         )}
                     </ResultsContainer>
                 )}
@@ -98,6 +97,15 @@ const Results = (props) => {
         </>
     )
 }
+
+const LoadingBox = styled.div`
+    border-radius: 3px;
+    margin-bottom: 30px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const MemexContainer = styled.div`
     display: flex;
@@ -116,10 +124,7 @@ const MemexContainer = styled.div`
     background: white;
 `
 
-const TopBarArea =
-    styled.div <
-    { hideResults } >
-    `
+const TopBarArea = styled.div<{ hideResults }>`
     border-bottom: ${(props) =>
         props.hideResults
             ? 'none'
