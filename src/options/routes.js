@@ -3,7 +3,7 @@ import ImportContainer from './imports'
 import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
 import Statistics from './statistics'
 import Settings from './settings'
-import UserScreen from '../authentication/components/UserScreen'
+import UserScreen from 'src/authentication/components/UserScreen'
 import React from 'react'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 

@@ -18,6 +18,7 @@ export interface AuthRemoteFunctionsInterface {
     getCurrentUser(): Promise<AuthenticatedUser | null>
     signOut(): void
     refreshUserInfo(): Promise<void>
+    sendPasswordResetEmailProcess: (email) => Promise<void>
 
     getUserProfile(): Promise<{ displayName?: string } | null>
     getUserByReference(reference: UserReference): Promise<User | null>

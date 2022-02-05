@@ -4,11 +4,18 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
-    onModeChange?(event: { mode: AuthDialogMode }): void
+    onModeChange?(event: {
+        mode: AuthDialogMode
+        setSaveState?: UITaskState
+    }): void
     onAuth?(event: { reason: 'login' | 'register' }): void
 }
 
-export type AuthDialogMode = 'signup' | 'login'
+export type AuthDialogMode =
+    | 'signup'
+    | 'login'
+    | 'resetPassword'
+    | 'ConfirmResetPassword'
 
 export interface State {
     saveState: UITaskState
@@ -28,6 +35,9 @@ export type Event = UIEvent<{
     editPassword: { value: string }
     editPasswordConfirm: { value: string }
     emailPasswordConfirm: null
-    toggleMode: null
+    toggleMode: { mode: AuthDialogMode }
     editDisplayName: { value: string }
+    passwordReset: null
+    passwordResetSwitch: null
+    passwordResetConfirm: null
 }>

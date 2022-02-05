@@ -35,7 +35,7 @@ export default class Logic extends UILogic<State, Event> {
         saveState: 'pristine',
         passwordMatch: false,
         passwordConfirm: '',
-        setSaveState: 'pristine',
+        currentUser: null,
     })
 
     async init() {
@@ -67,34 +67,17 @@ export default class Logic extends UILogic<State, Event> {
         }
     }
 
+    getCurrentUser: EventHandler<'getCurrentUser'> = ({ event }) => {
+        this.emitMutation({
+            currentUser: { $set: event.currentUser },
+        })
+    }
+
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         await this._onUserLogIn(!!event.newSignUp)
     }
 
-    goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {
-        if (!this.isExistingUser && !previousState.newSignUp) {
-            this.emitMutation({ step: { $set: 'sync' } })
-
-            await (previousState.syncState === 'success'
-                ? delay(3000)
-                : this.syncPromise)
-        }
-        this.dependencies.navToDashboard()
-    }
-
-    goToGuidedTutorial: EventHandler<'goToGuidedTutorial'> = ({}) => {
-        this.dependencies.navToGuidedTutorial()
-    }
-
-    finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
-        this.dependencies.navToDashboard()
-    }
-
     setAuthDialogMode: EventHandler<'setAuthDialogMode'> = ({ event }) => {
         return { authDialogMode: { $set: event.mode } }
-    }
-
-    setSaveState: EventHandler<'setSaveState'> = ({ event }) => {
-        return { setSaveState: { $set: event.setSaveState } }
     }
 }

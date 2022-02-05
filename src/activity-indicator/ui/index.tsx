@@ -57,8 +57,8 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
 
 const Dot = styled.div<{ unread: boolean }>`
     border-radius: 10px;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     background: ${(props) =>
         props.unread ? props.theme.colors.purple : 'unset'};
     border: 2px solid

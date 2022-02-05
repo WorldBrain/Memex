@@ -99,14 +99,11 @@ class ResultsContainer extends React.Component<Props, State> {
     private getOnboardingStatus = async () => {
         const onboardingStage = await localStorage.getItem('stage.Onboarding')
 
-        console.log(onboardingStage)
-
         return onboardingStage
     }
 
     private renderContent = async () => {
         const showOnboarding = await this.getOnboardingStatus()
-        console.log('test', showOnboarding)
         const showMobileAd = localStorage.getItem('stage.MobileAppAd') ?? 'true'
 
         if (this.props.isMobileListFiltered && this.props.noResults) {

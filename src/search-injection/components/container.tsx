@@ -21,13 +21,17 @@ import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-b
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
+import { sleepPromise } from 'src/util/promises'
 
 export interface Props {
-    results: ResultItemProps[]
-    len: number
+    // results: ResultItemProps[]
+    // len: number
     rerender: () => void
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<'dashboard' | 'searchInjection'>
+    query
+    requestSearcher
+    position
 }
 
 interface State {
@@ -39,6 +43,7 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
+    searchResults: ResultItemProps[]
 }
 
 class Container extends React.Component<Props, State> {
@@ -77,11 +82,11 @@ class Container extends React.Component<Props, State> {
         position: null,
         isNotif: true,
         notification: {},
+        searchResults: [],
     }
 
     async componentDidMount() {
         let notification
-
         for (const notif of UPDATE_NOTIFS) {
             if (notif.search) {
                 notification = {
@@ -119,6 +124,19 @@ class Container extends React.Component<Props, State> {
             isSubscriptionBannerShown:
                 subBannerShownAfter != null && subBannerShownAfter < Date.now(),
         })
+
+        const limit = constants.LIMIT[this.props.position]
+        const query = this.props.query
+
+        const searchRes = await this.props.requestSearcher({
+            query,
+            limit: limit,
+        })
+        const searchResDocs = searchRes.docs.slice(0, limit)
+
+        this.setState({
+            searchResults: searchResDocs,
+        })
     }
 
     handleResultLinkClick = () =>
@@ -127,14 +145,21 @@ class Container extends React.Component<Props, State> {
         })
 
     renderResultItems() {
-        const resultItems = this.props.results.map((result, i) => (
-            <ResultItem
-                key={i}
-                onLinkClick={this.handleResultLinkClick}
-                searchEngine={this.props.searchEngine}
-                {...result}
-            />
+        const resultItems = this.state.searchResults.map((result, i) => (
+            <>
+                <ResultItem
+                    key={i}
+                    onLinkClick={this.handleResultLinkClick}
+                    searchEngine={this.props.searchEngine}
+                    {...result}
+                    displayTime={result.displayTime}
+                    url={result.url}
+                    title={result.title}
+                    tags={result.tags}
+                />
+            </>
         ))
+
         return resultItems
     }
 
@@ -377,7 +402,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.props.len}
+                    totalCount={this.state.searchResults.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}
