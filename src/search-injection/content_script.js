@@ -19,12 +19,10 @@ export async function initSearchInjection({ requestSearcher, syncSettingsBG }) {
     if (matched && searchInjection[matched]) {
         try {
             const query = utils.fetchQuery(url)
-            const searchRes = await requestSearcher({ query, limit: 21 })
-            if (searchRes.docs.length) {
-                await handleRender(searchRes, matched, syncSettings)
-            }
+
+            await handleRender(query, requestSearcher, matched, syncSettings)
         } catch (err) {
-            // Let it fail
+            console.error(err)
         }
     }
 }

@@ -14,5 +14,6 @@ export interface ResultItemProps {
     title: string
     displayTime: number
     searchEngine: SearchEngineName
+    tags: []
     onLinkClick: React.MouseEventHandler
 }
