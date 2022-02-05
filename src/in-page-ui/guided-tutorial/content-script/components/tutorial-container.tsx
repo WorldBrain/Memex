@@ -157,7 +157,7 @@ const TutorialCardContainer = styled.div<{
     padding: 3em;
     text-align: center;
 
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
     border: 4px solid ${(props) => props.theme.colors.purple};
     animation: 1s ease-in-out 0s 1 slideInFromLeft;

@@ -6,7 +6,7 @@
     background-color: white;
     margin: 30px;
     justify-content: flex-start;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 .alertIcon {

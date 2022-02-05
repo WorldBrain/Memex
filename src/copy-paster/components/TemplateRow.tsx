@@ -135,7 +135,7 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;

@@ -82,7 +82,7 @@ const SyncStatusHeaderBox = styled.div`
 const SyncStatusHeaderText = styled.span<{
     textCentered: boolean
 }>`
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: 500;
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;

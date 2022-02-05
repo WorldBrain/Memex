@@ -406,7 +406,7 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
