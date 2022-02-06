@@ -1,4 +1,4 @@
-export type SearchEngineName = 'google' | 'duckduckgo'
+export type SearchEngineName = 'google' | 'duckduckgo' | 'brave'
 export interface SearchEngineInfo {
     regex: RegExp // Regular Expression to match the url
     container: {

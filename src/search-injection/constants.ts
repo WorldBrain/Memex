@@ -30,6 +30,15 @@ export const SEARCH_ENGINES: {
         },
         containerType: 'class',
     },
+    brave: {
+        regex: /(http[s]?:\/\/)?(www.)?brave[.\w]+\/search\?.*/,
+        container: {
+            above: 'center_col',
+            side: 'side-right',
+            sideAlternative: 'rcnt',
+        },
+        containerType: 'id',
+    },
 }
 
 // These are values of the `tbm` query param in Google searches. It denotes
@@ -54,4 +63,5 @@ export const __OLD_POSITION_KEY = 'RESULTS_POSITION_'
 export const SEARCH_INJECTION_DEFAULT = {
     google: true,
     duckduckgo: true,
+    brave: true,
 }

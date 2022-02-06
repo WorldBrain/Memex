@@ -24,7 +24,8 @@ const Results = (props) => {
                 <UpdateNotifBannerBox>
                     <UpdateNotifBanner
                         theme={{
-                            width: props.position === 'side' && '410px',
+                            width:
+                                props.position === 'side' && 'fill-available',
                             position: 'relative',
                             iconSize: '20px',
                         }}
