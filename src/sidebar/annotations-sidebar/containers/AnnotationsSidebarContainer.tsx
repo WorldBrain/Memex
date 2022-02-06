@@ -404,7 +404,7 @@ export class AnnotationsSidebarContainer<
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <HoverBox>
+            <HoverBox padding={'0px'}>
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
