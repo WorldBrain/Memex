@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Dropdown from './Dropdown'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -61,7 +60,7 @@ const Results = (props) => {
                                 onClick={props.seeMoreResults}
                             />
                         </ButtonTooltip>
-                        <div>
+                        <SettingsButtonContainer>
                             <ButtonTooltip
                                 position={'bottom'}
                                 tooltipText={'Settings'}
@@ -79,18 +78,12 @@ const Results = (props) => {
                                     closeDropdown={props.closeDropdown}
                                 />
                             )}
-                        </div>
+                        </SettingsButtonContainer>
                     </IconArea>
                 </TopBarArea>
                 {!props.hideResults && (
                     <ResultsContainer>
-                        {props.renderResultItems().length ? (
-                            props.renderResultItems()
-                        ) : (
-                            <LoadingBox>
-                                <LoadingIndicator />
-                            </LoadingBox>
-                        )}
+                        {props.renderResultItems()}
                     </ResultsContainer>
                 )}
             </MemexContainer>
@@ -98,13 +91,8 @@ const Results = (props) => {
     )
 }
 
-const LoadingBox = styled.div`
-    border-radius: 3px;
-    margin-bottom: 30px;
-    height: 300px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+const SettingsButtonContainer = styled.div`
+    height: 24px;
 `
 
 const MemexContainer = styled.div`
@@ -190,7 +178,7 @@ const UpdateNotifBannerBox = styled.div`
 Results.propTypes = {
     position: PropTypes.string.isRequired,
     searchEngine: PropTypes.string.isRequired,
-    totalCount: PropTypes.number.isRequired,
+    totalCount: PropTypes.number,
     seeMoreResults: PropTypes.func.isRequired,
     toggleHideResults: PropTypes.func.isRequired,
     hideResults: PropTypes.bool.isRequired,

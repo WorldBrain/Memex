@@ -5,6 +5,7 @@ export interface SearchEngineInfo {
         // Identifier of the containers to append elements
         above: string
         side: string
+        sideAlternative?: string
     }
     containerType: 'id' | 'class'
 }
