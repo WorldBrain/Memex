@@ -49,7 +49,7 @@ const DropDownContainer = styled.div`
     box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     height: fit-content;
     padding: 10px;
-    width: 180px;
+    width: 200px;
     position: absolute;
     right: 0px;
     top: 50px;
@@ -64,6 +64,7 @@ const DropDownItem = styled.div`
     grid-gap: 10px;
     align-items: center;
     cursor: pointer;
+    font-size: 14px;
 
     & * {
         cursor: pointer;

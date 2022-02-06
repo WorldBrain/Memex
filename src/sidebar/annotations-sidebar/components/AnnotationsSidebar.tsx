@@ -95,6 +95,7 @@ interface AnnotationsSidebarState {
     isMarkdownHelpShown?: boolean
     showAllNotesCopyPaster?: boolean
     showAllNotesShareMenu?: boolean
+    showSortDropDown?: boolean
 }
 
 class AnnotationsSidebar extends React.Component<
@@ -109,6 +110,7 @@ class AnnotationsSidebar extends React.Component<
         isMarkdownHelpShown: false,
         showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
+        showSortDropDown: false,
     }
 
     componentDidMount() {
@@ -180,7 +182,7 @@ class AnnotationsSidebar extends React.Component<
 
     private renderCopyPasterManager(annotationUrls) {
         return (
-            <HoverBox>
+            <HoverBox padding={'0px'}>
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
@@ -631,18 +633,47 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderTopBarActionButtons() {
+    private renderSortingMenuDropDown() {
+        if (!this.state.showSortDropDown) {
+            return null
+        }
+
         return (
-            <TopBarActionBtns>
-                {this.renderAllNotesShareMenu()}
-                {this.renderAllNotesCopyPaster()}
+            <HoverBox right={'-20px'} padding={'0px'} top={'30px'}>
                 <SortingDropdownMenuBtn
                     onMenuItemClick={(sortingFn) =>
                         this.props.onMenuItemClick(sortingFn)
                     }
+                    onClickOutSide={() =>
+                        this.setState({ showSortDropDown: false })
+                    }
                 />
+            </HoverBox>
+        )
+    }
+
+    private renderTopBarActionButtons() {
+        this.state
+
+        return (
+            <TopBarActionBtns>
+                {this.renderAllNotesShareMenu()}
+                {this.renderAllNotesCopyPaster()}
+                <ButtonTooltip tooltipText="Sort Notes" position="bottom">
+                    <Icon
+                        filePath={icons.sort}
+                        onClick={() =>
+                            this.setState({
+                                showSortDropDown: true,
+                            })
+                        }
+                        height="18px"
+                        width="20px"
+                    />
+                </ButtonTooltip>
+                {this.renderSortingMenuDropDown()}
                 <ButtonTooltip
-                    tooltipText="Copy All Notes"
+                    tooltipText={'Copy All Notes'}
                     position="bottomSidebar"
                 >
                     <Icon

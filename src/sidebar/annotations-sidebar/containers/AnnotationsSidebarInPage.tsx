@@ -268,7 +268,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     protected renderTopBanner() {
         return (
             <UpdateNotifBanner
-                theme={{ position: 'fixed', width: '410px', iconSize: '20px' }}
+                theme={{
+                    position: 'fixed',
+                    width: 'fill-available',
+                    iconSize: '20px',
+                }}
             />
         )
     }

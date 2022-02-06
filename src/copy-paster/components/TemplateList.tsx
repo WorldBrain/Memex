@@ -176,7 +176,15 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <>
                 <Header>
-                    <HeaderplaceHolder />
+                    <Icon
+                        filePath={icons.helpIcon}
+                        heightAndWidth="16px"
+                        onClick={() =>
+                            window.open(
+                                'https://links.memex.garden/tutorials/text-exporter',
+                            )
+                        }
+                    />
                     <SectionTitle>Copy/Paste Templates</SectionTitle>
                     <Icon
                         filePath={icons.plus}

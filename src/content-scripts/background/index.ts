@@ -1,7 +1,7 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { Tabs, WebNavigation, Runtime } from 'webextension-polyfill-ts'
+import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill-ts'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 
@@ -17,6 +17,7 @@ export class ContentScriptsBackground {
             getTab: Tabs.Static['get']
             getURL: Runtime.Static['getURL']
             webNavigation: WebNavigation.Static
+            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
         },
     ) {
         this.remoteFunctions = {
@@ -31,7 +32,10 @@ export class ContentScriptsBackground {
             },
             openAuthSettings: async () => {
                 const optionsPageUrl = this.options.getURL('options.html')
-                window.open(optionsPageUrl + '#/account')
+                await this.options.browserAPIs.tabs.create({
+                    active: true,
+                    url: optionsPageUrl + '#/account',
+                })
             },
         }
 
