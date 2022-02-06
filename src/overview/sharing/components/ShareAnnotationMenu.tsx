@@ -285,10 +285,6 @@ const Menu = styled.div`
 
 const TopArea = styled.div`
     padding: 10px 15px 10px 15px;
-
-    &:first-child {
-        padding: 0px 15px 10px 15px;
-    }
 `
 
 const TitleContainer = styled.div`
@@ -353,10 +349,6 @@ const LinkContent = styled.div`
 
 const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
     width: 100%;
-
-    &:first-child {
-        padding-top: ${(props) => (props.isLinkShown ? '15px' : '0px')};
-    }
 `
 
 const PrivacyTitle = styled.div`

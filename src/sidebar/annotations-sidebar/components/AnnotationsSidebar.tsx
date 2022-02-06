@@ -359,7 +359,7 @@ class AnnotationsSidebar extends React.Component<
         const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
-                <FollowedListNotesContainer bottom="20px" top="-15px">
+                <FollowedListNotesContainer bottom="20px" top="0px">
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         key={listId}
@@ -659,7 +659,7 @@ class AnnotationsSidebar extends React.Component<
             <TopBarActionBtns>
                 {this.renderAllNotesShareMenu()}
                 {this.renderAllNotesCopyPaster()}
-                <ButtonTooltip tooltipText="Sort Notes" position="bottom">
+                <ButtonTooltip tooltipText="Sort Annotations" position="bottom">
                     <Icon
                         filePath={icons.sort}
                         onClick={() =>
