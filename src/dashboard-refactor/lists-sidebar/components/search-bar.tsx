@@ -10,7 +10,7 @@ import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState } from '../types'
 
 const textStyles = `
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
     font-size: 14px;
     line-height: 15px;

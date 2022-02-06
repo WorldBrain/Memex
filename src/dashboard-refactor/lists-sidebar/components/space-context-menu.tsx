@@ -671,7 +671,7 @@ const MenuSection = styled.div`
 const MenuButton = styled.div`
     height: 34px;
     width: 100%;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
