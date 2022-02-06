@@ -130,6 +130,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
                 isListShareMenuShown: false,
+                isSortMenuShown: false,
                 isSearchCopyPasterShown: false,
                 isCloudUpgradeBannerShown: false,
                 isSubscriptionBannerShown: false,
@@ -1407,6 +1408,12 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation({
             searchResults: { isListShareMenuShown: { $set: event.isShown } },
+        })
+    }
+
+    setSortMenuShown: EventHandler<'setSortMenuShown'> = async ({ event }) => {
+        this.emitMutation({
+            searchResults: { isSortMenuShown: { $set: event.isShown } },
         })
     }
 
