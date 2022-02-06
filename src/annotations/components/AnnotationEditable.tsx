@@ -298,6 +298,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                           key: 'replies-btn',
                           onClick: onReplyBtnClick,
                           tooltipText: 'Toggle replies',
+                          tooltipPosition: 'left',
                           image: hasReplies
                               ? icons.commentFull
                               : icons.commentEmpty,
