@@ -17,7 +17,7 @@ const PioneerPlanContainer = styled.div`
     margin-bottom: 30px;
     width: 100%;
     flex-direction: column;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 `
 const PioneerPlanContentBox = styled.div`
     display: flex;

@@ -9,7 +9,7 @@ import { isLoading } from 'src/overview/results/selectors'
 
 const CopyPasterWrapper = styled.div`
     & * {
-        font-family: 'Inter';
+        font-family: 'Inter', sans-serif;
     }
 `
 

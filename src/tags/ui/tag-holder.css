@@ -44,7 +44,7 @@
 .placeholder {
     display: inline-flex;
     color: #888;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     align-items: center;
     padding: 2px 5px;
