@@ -133,8 +133,6 @@ class Container extends React.Component<Props, State> {
         const limit = constants.LIMIT[this.props.position]
         const query = this.props.query
 
-        await sleepPromise(3000)
-
         try {
             const searchRes = await this.props.requestSearcher({
                 query,
@@ -201,7 +199,11 @@ class Container extends React.Component<Props, State> {
                     </SectionCircle>
                     <SectionTitle>No Results for this Query</SectionTitle>
                     <InfoText>
-                        For faster and more flexible search, go to the dashboard
+                        For more flexible search,
+                        <SearchLink onClick={this.seeMoreResults}>
+                            {' '}
+                            go to the dashboard
+                        </SearchLink>
                     </InfoText>
                 </NoResultsSection>
             )
@@ -465,7 +467,8 @@ class Container extends React.Component<Props, State> {
 }
 
 const SearchLink = styled.span`
-    padding-left: 3px;
+    padding-left: 2px;
+    cursor: pointer;
     color: ${(props) => props.theme.colors.purple};
 `
 

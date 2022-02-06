@@ -30,6 +30,7 @@ export const theme: Theme = {
         lineGrey: '#ECEFF4',
         lineLightGrey: '#E0E5ED',
         iconColor: '#96A0B5',
+        darkerIconColor: '#7d8598',
         lightHover: '#F4F9FF',
         backgroundHighlight: '#e6f1ff',
         darkhover: '#E5F0FF',
