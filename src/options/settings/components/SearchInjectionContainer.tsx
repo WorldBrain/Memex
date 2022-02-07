@@ -79,6 +79,15 @@ class SearchInjectionContainer extends React.Component {
                         DuckDuckGo
                     </Checkbox>
                 </CheckBoxRow>
+                <CheckBoxRow>
+                    <Checkbox
+                        isChecked={this.state.injectionPreference.brave}
+                        handleChange={this.bindToggleInjection('brave')}
+                        id="si-brave"
+                    >
+                        Brave
+                    </Checkbox>
+                </CheckBoxRow>
             </SearchInjection>
         )
     }

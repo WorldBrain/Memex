@@ -177,6 +177,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     </DescriptionText>
                                 </UserScreenContainer>
                             )}
+                        {setSaveState === 'running' && <></>}
                         {this.state.authDialogMode === 'resetPassword' && (
                             <UserScreenContainer>
                                 <SectionCircle>
@@ -229,8 +230,6 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     render() {
-        console.log(this.state.setSaveState)
-
         return (
             <OnboardingBox>
                 {this.state.shouldShowLogin
@@ -406,7 +405,7 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     display: flex;
     justify-content: center;
     align-items: center;

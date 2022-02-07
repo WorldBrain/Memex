@@ -3,6 +3,7 @@ import { SearchEngineName } from './types'
 const SEARCH_ENGINE_NAMES: { [Name in SearchEngineName]: true } = {
     google: true,
     duckduckgo: true,
+    brave: true,
 }
 
 export function shouldIncludeSearchInjection(host: string): boolean {

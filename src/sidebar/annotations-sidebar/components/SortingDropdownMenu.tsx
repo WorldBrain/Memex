@@ -35,6 +35,7 @@ export const defaultSortingMenuItems: SortingMenuItemProps[] = [
 interface Props {
     onMenuItemClick: (props: SortingMenuItemProps) => void
     menuItems?: SortingMenuItemProps[]
+    onClickOutSide?: React.MouseEventHandler
 }
 
 export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
@@ -42,26 +43,18 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 
     render() {
         return (
-            <DropdownMenuContainer>
-                <DropdownMenuBtn
-                    btnChildren={
-                        <Icon
-                            height="16px"
-                            width="20px"
-                            filePath={icons.sort}
-                        />
-                    }
-                    onMenuItemClick={this.props.onMenuItemClick}
-                    menuItems={this.props.menuItems}
-                    theme={{ leftMenuOffset: '-125px' }}
-                    btnId="DropdownMenuBtn"
-                    keepSelectedState
-                    tooltipProps={{
-                        tooltipText: 'Sort notes',
-                        position: 'bottomSidebar',
-                    }}
-                />
-            </DropdownMenuContainer>
+            <DropdownMenuBtn
+                onMenuItemClick={this.props.onMenuItemClick}
+                menuItems={this.props.menuItems}
+                theme={{ leftMenuOffset: '-125px' }}
+                btnId="DropdownMenuBtn"
+                keepSelectedState
+                tooltipProps={{
+                    tooltipText: 'Sort notes',
+                    position: 'bottomSidebar',
+                }}
+                onClickOutside={this.props.onClickOutSide}
+            />
         )
     }
 }

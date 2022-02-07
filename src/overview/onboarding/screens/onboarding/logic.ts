@@ -56,14 +56,26 @@ export default class Logic extends UILogic<State, Event> {
 
     private async _onUserLogIn(newSignUp: boolean) {
         this.emitMutation({
-            shouldShowLogin: { $set: false },
             newSignUp: { $set: newSignUp },
         })
 
         if (!this.isExistingUser) {
+            this.emitMutation({
+                shouldShowLogin: { $set: false },
+            })
             this.syncPromise = executeUITask(this, 'syncState', async () =>
                 this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
             )
+        }
+        if (!newSignUp) {
+            this.emitMutation({
+                setSaveState: { $set: 'running' },
+                authDialogMode: { $set: 'login' },
+            })
+            this.syncPromise = executeUITask(this, 'syncState', async () =>
+                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
+            )
+            this.dependencies.navToDashboard()
         }
     }
 

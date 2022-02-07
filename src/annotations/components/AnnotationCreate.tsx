@@ -228,7 +228,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             (this.editor = editor)
                         }
                         autoFocus={this.props.autoFocus}
-                        placeholder={`Add private note. Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                        placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                         isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />
                     {this.props.comment !== '' && (
