@@ -63,6 +63,7 @@ export const commentEditFull = browser.runtime.getURL(
 )
 export const commentEmpty = browser.runtime.getURL('/img/comment_empty.svg')
 export const commentFull = browser.runtime.getURL('/img/comment_full.svg')
+export const comment = browser.runtime.getURL('/img/comment_full.svg')
 export const collectionsEmpty = browser.runtime.getURL(
     '/img/collections_add.svg',
 )
@@ -72,6 +73,7 @@ export const collectionsFull = browser.runtime.getURL(
 export const folder = browser.runtime.getURL('/img/folder.svg')
 export const triangle = browser.runtime.getURL('/img/chevron-down.svg')
 export const plus = browser.runtime.getURL('/img/plus.svg')
+export const plusIcon = browser.runtime.getURL('/img/plus.svg')
 export const backup = browser.runtime.getURL('/img/backup.svg')
 export const readwise = browser.runtime.getURL('/img/readwise.svg')
 export const dots = browser.runtime.getURL('/img/3dots.svg')
@@ -109,6 +111,7 @@ export const arrowUp = browser.runtime.getURL('/img/arrow-up.svg')
 export const saveIcon = browser.runtime.getURL('/img/saveIcon.svg')
 export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
 export const peoplePlusFine = browser.runtime.getURL('/img/peoplePlusFine.svg')
+export const people = ''
 
 export const arrowRight = browser.runtime.getURL('/img/arrowRight.svg')
 export const reload = browser.runtime.getURL('/img/reload.svg')
