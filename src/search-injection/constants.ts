@@ -33,8 +33,17 @@ export const SEARCH_ENGINES: {
     brave: {
         regex: /(http[s]?:\/\/)?(www.)?brave[.\w]+\/search\?.*/,
         container: {
-            above: 'center_col',
+            above: 'results',
             side: 'side-right',
+            sideAlternative: 'rcnt',
+        },
+        containerType: 'id',
+    },
+    bing: {
+        regex: /(http[s]?:\/\/)?(www.)?bing[.\w]+\/search\?.*/,
+        container: {
+            above: 'b_results',
+            side: 'b_context',
             sideAlternative: 'rcnt',
         },
         containerType: 'id',
@@ -64,4 +73,5 @@ export const SEARCH_INJECTION_DEFAULT = {
     google: true,
     duckduckgo: true,
     brave: true,
+    bing: true,
 }
