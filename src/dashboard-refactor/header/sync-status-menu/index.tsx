@@ -14,15 +14,24 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
-    width: 230px;
+    width: 270px;
     background-color: ${colors.white};
     flex-direction: column;
-    box-shadow: ${styles.boxShadow.overlayElement};
     overflow: hidden;
 `
 
 const Separator = styled.div`
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+`
+
+const TopBox = styled(Margin)`
+    height: min-content;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-auto-flow: row;
+    grid-gap: 15px;
+    flex-direction: column;
 `
 
 const Row = styled(Margin)`
@@ -32,7 +41,13 @@ const Row = styled(Margin)`
     align-items: center;
     justify-content: flex-start;
     grid-auto-flow: column;
+    height: 30px;
     grid-gap: 10px;
+    padding: 0 10px;
+
+    &:first-child {
+        height: fit-content;
+    }
 
     &:last-child {
         margin-bottom: 0px;
@@ -40,7 +55,7 @@ const Row = styled(Margin)`
 `
 
 const BottomRow = styled.div`
-    padding: 5px 10px 5px 10px;
+    padding: 10px 10px 5px 10px;
     display: flex;
     justify-content: center;
     cursor: pointer;
@@ -49,7 +64,7 @@ const BottomRow = styled.div`
 
 const RowContainer = styled.div`
     height: max-content;
-    width: 100%;
+    width: fill-available;
     display: flex;
     flex-direction: column;
     padding: 15px;
@@ -65,15 +80,28 @@ const textStyles = `
     color: ${colors.fonts.primary};
 `
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 20px;
+    width: fit-content;
+    font-weight: bold;
+    display: flex;
+    padding: 0 8px;
+    justify-content: center;
+    align-items: center;
+    color: ${(props) => props.theme.colors.purple};
+`
+
 const TextBlock = styled.div<{
     bold: boolean
 }>`
-    height: 18px;
-    ${textStyles}
-    font-size: 12px;
+    font-size: 14px;
     line-height: 15px;
-    display: flex;
+    display: grid;
     align-items: center;
+    text-align: center;
+    color: ${(props) => props.theme.colors.darkerText};
 
     ${(props) =>
         css`
@@ -83,12 +111,18 @@ const TextBlock = styled.div<{
         `}
 `
 
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    height: 20px;
+`
+
 const HelpTextBlock = styled.span<{
     bold: boolean
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     display: flex;
     align-items: center;
@@ -101,7 +135,7 @@ const HelpTextBlockLink = styled.a<{
 }>`
     height: 18px;
     ${textStyles}
-    font-size: 10px;
+    font-size: 12px;
     line-height: 15px;
     display: flex;
     align-items: center;
@@ -110,19 +144,19 @@ const HelpTextBlockLink = styled.a<{
 `
 
 const TextBlockSmall = styled.div`
-    ${textStyles}
     font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.darkgrey};
-    font-size: 10px;
-    line-height: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    line-height: 16px;
     text-align: left;
 `
 
 const TextContainer = styled.div`
-    ${textStyles}
     flex-direction: column;
     display: flex;
     align-items: flex-start;
+    grid-gap: 5px;
+    padding-left: 5px;
 `
 
 export const timeSinceNowToString = (date: Date | null): string => {
@@ -196,8 +230,13 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
 
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
+
+        console.log(new Date(lastSuccessfulSyncDate).getTime())
+
+        if (new Date(lastSuccessfulSyncDate).getTime() === 0) {
+            return null
+        }
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
-            console.log(lastSuccessfulSyncDate)
             return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
         }
         if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
@@ -218,12 +257,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (!isLoggedIn) {
             return (
                 <RowContainer>
-                    <Row>
+                    <TopBox>
                         <TextBlock bold>
-                            You're not logged in and syncing
+                            You're logged out and not syncing
                         </TextBlock>
                         <PrimaryAction label="Login" onClick={onLoginClick} />
-                    </Row>
+                    </TopBox>
                 </RowContainer>
             )
         }
@@ -231,7 +270,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         if (!isCloudEnabled) {
             return (
                 <RowContainer>
-                    <Row>
+                    <TopBox>
                         <TextBlock bold>
                             You haven't migrated to Memex Cloud
                         </TextBlock>
@@ -239,7 +278,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             label="Migrate"
                             onClick={onMigrateClick}
                         />
-                    </Row>
+                    </TopBox>
                 </RowContainer>
             )
         }
@@ -250,9 +289,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     <SyncStatusIcon color={syncStatusIconState} />
                     <TextContainer>
                         <TextBlock bold>{this.renderTitleText()}</TextBlock>
-                        <TextBlockSmall>
-                            {this.renderLastSyncText()}
-                        </TextBlockSmall>
+                        {new Date(this.props.lastSuccessfulSyncDate).getTime() >
+                            0 && (
+                            <TextBlockSmall>
+                                {this.renderLastSyncText()}
+                            </TextBlockSmall>
+                        )}
                     </TextContainer>
                 </Row>
             </RowContainer>
@@ -271,21 +313,26 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         }
 
         return (
-            <StyledHoverBox width="min-content" right="50px" top="45px">
+            <StyledHoverBox width="min-content" right="50px" top="65px">
                 {this.renderStatus()}
                 <Separator />
                 <RowContainer>
                     <Row>
-                        <Count>{pendingLocalChangeCount}</Count>
-                        <TextBlock> pending local changes</TextBlock>
+                        <SectionCircle>
+                            {pendingLocalChangeCount < 0
+                                ? 0
+                                : pendingLocalChangeCount}
+                        </SectionCircle>
+                        {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
+                        <InfoText> pending local changes</InfoText>
                     </Row>
                     <Row>
-                        <Count>
-                            {pendingRemoteChangeCount
-                                ? pendingRemoteChangeCount
-                                : 0}
-                        </Count>
-                        <TextBlock> pending remote changes</TextBlock>
+                        <SectionCircle>
+                            {pendingRemoteChangeCount < 0
+                                ? 0
+                                : pendingRemoteChangeCount}
+                        </SectionCircle>
+                        <InfoText> pending remote changes</InfoText>
                     </Row>
                 </RowContainer>
                 <Separator />

@@ -29,6 +29,7 @@ import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickT
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -179,18 +180,25 @@ export default class AnnotationEditable extends React.Component<Props> {
                             position="bottom"
                         >
                             <HighlightAction right="2px">
-                                <GoToHighlightIcon onClick={onGoToAnnotation} />
+                                <Icon
+                                    onClick={onGoToAnnotation}
+                                    filePath={icons.goTo}
+                                    heightAndWidth={'16px'}
+                                />
                             </HighlightAction>
                         </ButtonTooltip>
                     )}
                     {footerDeps?.onEditIconClick && (
                         <ButtonTooltip
                             tooltipText="Add/Edit Note"
-                            position="bottom"
+                            position="left"
                         >
                             <HighlightAction>
-                                <AddNoteIcon
+                                <Icon
                                     onClick={footerDeps.onEditIconClick}
+                                    filePath={icons.plus}
+                                    heightAndWidth={'14px'}
+                                    padding={'5px'}
                                 />
                             </HighlightAction>
                         </ButtonTooltip>
@@ -249,7 +257,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
-                    comment={comment}
                     editorHeight={this.state.editorHeight}
                 />
             )
@@ -305,6 +312,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                           key: 'replies-btn',
                           onClick: onReplyBtnClick,
                           tooltipText: 'Toggle replies',
+                          tooltipPosition: 'left',
                           image: hasReplies
                               ? icons.commentFull
                               : icons.commentEmpty,
@@ -342,25 +350,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onCopyPasterBtnClick,
                     tooltipText: 'Copy Note',
                 },
-                {
-                    key: 'tag-note-btn',
-                    image:
-                        this.props.tags?.length > 0
-                            ? icons.tagFull
-                            : icons.tagEmpty,
-                    onClick: footerDeps.onTagIconClick,
-                    tooltipText: 'Tag Note',
-                },
-                // Collections button for annotations. To be added later.
-                // {
-                //     key: 'list-note-btn',
-                //     image:
-                //         this.props.lists?.length > 0
-                //             ? icons.collectionsFull
-                //             : icons.collectionsEmpty,
-                //     onClick: footerDeps.onListIconClick,
-                //     tooltipText: 'Add Collections',
-                // },
                 {
                     key: 'share-note-btn',
                     image: shareIconData.icon,
@@ -497,7 +486,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="10px">
+                <Margin top="5px" bottom="5px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -754,8 +743,9 @@ const HighlightText = styled.span`
     overflow: hidden;
     line-height: 25px;
     font-style: normal;
-    background-color: #d4e8ff;
-    color: ${(props) => props.theme.colors.primary};
+    border-radius: 3px;
+    background-color: ${(props) => props.theme.colors.backgroundHighlight};
+    color: ${(props) => props.theme.colors.darkerText};
     padding: 2px 5px;
 `
 
@@ -860,7 +850,7 @@ const CancelBtnStyled = styled.button`
     color: red;
 
     &:hover {
-        background-color: #e0e0e0;
+        background-color: ${(props) => props.theme.colors.backgroundColor};
     }
 
     &:focus {

@@ -13,6 +13,7 @@ import {
     WhiteSpacer30,
 } from 'src/common-ui/components/design-library/typography'
 import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
+import styled from 'styled-components'
 
 const overviewStyles = require('src/backup-restore/ui/styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -146,9 +147,8 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     async handleCancel() {
-        this.setState({ canceling: true })
-        await localStorage.removeItem('backup.restore.restore-running')
-        await remoteFunction(this.props.functionNames.cancel)()
+        //await localStorage.removeItem('backup.restore.restore-running')
+        //await remoteFunction(this.props.functionNames.cancel)()
         this.props.onFinish()
     }
 
@@ -161,20 +161,8 @@ export default class RunningProcess extends React.Component<Props> {
         return (
             <div>
                 {this.props.renderHeader()}
-                <WhiteSpacer10 />
-                {localStorage.getItem('backup.restore.restore-running') ===
-                    'false' && (
-                    <div className={overviewStyles.showWarning}>
-                        <span className={overviewStyles.WarningIcon} />
-                        <span className={overviewStyles.showWarningText}>
-                            With a lot of data ({'>'} 25.000 pages) it is
-                            recommended running this over night.
-                        </span>
-                    </div>
-                )}
-                <WhiteSpacer30 />
                 <div className={localStyles.steps}>
-                    {this.renderSteps(info)}
+                    {/* {this.renderSteps(info)} */}
                     <ProgressBar progress={progressPercentage} />
                 </div>
                 <WhiteSpacer20 />
@@ -238,21 +226,14 @@ export default class RunningProcess extends React.Component<Props> {
         return (
             <div className={localStyles.actions}>
                 {info.state !== 'paused' && info.state !== 'pausing' && (
-                    <div
-                        className={localStyles.actionCancel}
+                    <PrimaryAction
+                        label={!this.state.canceling ? 'Cancel' : 'Sure?'}
                         onClick={() => {
-                            !this.state.canceling && this.handleCancel()
+                            this.state.canceling
+                                ? this.handleCancel()
+                                : this.setState({ canceling: true })
                         }}
-                    >
-                        {!this.state.canceling ? (
-                            'Cancel'
-                        ) : (
-                            <MovingDotsLabel
-                                text="Finishing current batch"
-                                intervalMs={500}
-                            />
-                        )}
-                    </div>
+                    />
                 )}
             </div>
         )
@@ -260,7 +241,7 @@ export default class RunningProcess extends React.Component<Props> {
 
     renderSuccess() {
         return (
-            <div className={localStyles.finish}>
+            <FinishContainer>
                 {this.props.renderSuccessMessage()}
                 <PrimaryAction
                     onClick={() => {
@@ -268,7 +249,7 @@ export default class RunningProcess extends React.Component<Props> {
                     }}
                     label={'Return to Settings'}
                 />
-            </div>
+            </FinishContainer>
         )
     }
 
@@ -297,7 +278,7 @@ export default class RunningProcess extends React.Component<Props> {
 
         return (
             <div>
-                <div className={settingsStyle.section}>
+                <Section>
                     {status === 'running' && this.renderRunning(info)}
                     {status === 'success' && this.renderSuccess()}
                     {status === 'fail' && this.renderFail()}
@@ -312,8 +293,23 @@ export default class RunningProcess extends React.Component<Props> {
                             })
                         }}
                     />
-                </div>
+                </Section>
             </div>
         )
     }
 }
+
+const FinishContainer = styled.div`
+    display: grid;
+    grid-gap: 30px;
+    grid-auto-flow: row;
+    justify-content: flex-start;
+`
+
+const Section = styled.div`
+    background: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 50px;
+    margin-bottom: 30px;
+`

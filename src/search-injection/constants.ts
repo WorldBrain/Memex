@@ -2,8 +2,8 @@ import { SearchEngineName, SearchEngineInfo } from './types'
 
 // Limit for the number of search results to be fetched
 export const LIMIT = {
-    above: 20,
-    side: 20,
+    above: 100,
+    side: 100,
 }
 
 // regex - Regular Expression to match the url
@@ -18,6 +18,7 @@ export const SEARCH_ENGINES: {
         container: {
             above: 'center_col',
             side: 'rhs',
+            sideAlternative: 'rcnt',
         },
         containerType: 'id',
     },
@@ -28,6 +29,15 @@ export const SEARCH_ENGINES: {
             side: 'results--sidebar',
         },
         containerType: 'class',
+    },
+    brave: {
+        regex: /(http[s]?:\/\/)?(www.)?brave[.\w]+\/search\?.*/,
+        container: {
+            above: 'center_col',
+            side: 'side-right',
+            sideAlternative: 'rcnt',
+        },
+        containerType: 'id',
     },
 }
 
@@ -53,4 +63,5 @@ export const __OLD_POSITION_KEY = 'RESULTS_POSITION_'
 export const SEARCH_INJECTION_DEFAULT = {
     google: true,
     duckduckgo: true,
+    brave: true,
 }

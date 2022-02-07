@@ -21,13 +21,22 @@ import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-b
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
+import { sleepPromise } from 'src/util/promises'
+import styled from 'styled-components'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+
+const search = browser.runtime.getURL('/img/search.svg')
 
 export interface Props {
-    results: ResultItemProps[]
-    len: number
+    // results: ResultItemProps[]
+    // len: number
     rerender: () => void
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<'dashboard' | 'searchInjection'>
+    query
+    requestSearcher
+    position
 }
 
 interface State {
@@ -39,6 +48,7 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
+    searchResults: ResultItemProps[] | null
 }
 
 class Container extends React.Component<Props, State> {
@@ -77,11 +87,11 @@ class Container extends React.Component<Props, State> {
         position: null,
         isNotif: true,
         notification: {},
+        searchResults: null,
     }
 
     async componentDidMount() {
         let notification
-
         for (const notif of UPDATE_NOTIFS) {
             if (notif.search) {
                 notification = {
@@ -119,6 +129,28 @@ class Container extends React.Component<Props, State> {
             isSubscriptionBannerShown:
                 subBannerShownAfter != null && subBannerShownAfter < Date.now(),
         })
+
+        const limit = constants.LIMIT[this.props.position]
+        const query = this.props.query
+
+        try {
+            const searchRes = await this.props.requestSearcher({
+                query,
+                limit: limit,
+            })
+            const searchResDocs = searchRes.docs.slice(0, limit)
+
+            this.setState({
+                searchResults: searchResDocs,
+            })
+        } catch (e) {
+            const searchRes = []
+            const searchResDocs = searchRes.slice(0, limit)
+            console.log(e)
+            this.setState({
+                searchResults: searchResDocs,
+            })
+        }
     }
 
     handleResultLinkClick = () =>
@@ -127,15 +159,55 @@ class Container extends React.Component<Props, State> {
         })
 
     renderResultItems() {
-        const resultItems = this.props.results.map((result, i) => (
-            <ResultItem
-                key={i}
-                onLinkClick={this.handleResultLinkClick}
-                searchEngine={this.props.searchEngine}
-                {...result}
-            />
-        ))
-        return resultItems
+        if (!this.state.searchResults) {
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
+        }
+
+        if (this.state.searchResults?.length > 0) {
+            const resultItems = this.state.searchResults.map((result, i) => (
+                <>
+                    <ResultItem
+                        key={i}
+                        onLinkClick={this.handleResultLinkClick}
+                        searchEngine={this.props.searchEngine}
+                        {...result}
+                        displayTime={result.displayTime}
+                        url={result.url}
+                        title={result.title}
+                        tags={result.tags}
+                    />
+                </>
+            ))
+
+            return resultItems
+        }
+
+        if (this.state.searchResults?.length === 0) {
+            return (
+                <NoResultsSection>
+                    <SectionCircle>
+                        <Icon
+                            filePath={search}
+                            heightAndWidth="20px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>No Results for this Query</SectionTitle>
+                    <InfoText>
+                        For more flexible search,
+                        <SearchLink onClick={this.seeMoreResults}>
+                            {' '}
+                            go to the dashboard
+                        </SearchLink>
+                    </InfoText>
+                </NoResultsSection>
+            )
+        }
     }
 
     seeMoreResults() {
@@ -377,7 +449,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.props.len}
+                    totalCount={this.state.searchResults?.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}
@@ -393,5 +465,53 @@ class Container extends React.Component<Props, State> {
         )
     }
 }
+
+const SearchLink = styled.span`
+    padding-left: 2px;
+    cursor: pointer;
+    color: ${(props) => props.theme.colors.purple};
+`
+
+const NoResultsSection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 30px 0px;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 50px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+`
+
+const LoadingBox = styled.div`
+    border-radius: 3px;
+    margin-bottom: 30px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 export default Container

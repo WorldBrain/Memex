@@ -6,6 +6,9 @@ import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import styled from 'styled-components'
 
 const styles = require('./TagsButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -47,22 +50,74 @@ class TagsButton extends PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.buttonContainer}>
-                <Button
-                    onClick={this.props.toggleTagPopup}
-                    disabled={this.props.isDisabled}
-                    btnClass={styles.tag}
-                    itemClass={styles.button}
-                >
+            <ButtonItem
+                onClick={!this.props.isDisabled && this.props.toggleTagPopup}
+                disabled={this.props.isDisabled}
+            >
+                <SectionCircle>
+                    <Icon
+                        filePath={
+                            // this.state.hasTags ? icons.tagFull : icons.tagEmpty
+                            icons.tagEmpty
+                        }
+                        heightAndWidth="18px"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <ButtonInnerContent>
                     Add Tag(s)
-                    <p className={buttonStyles.subTitle}>
-                        {this.state.highlightInfo}
-                    </p>
-                </Button>
-            </div>
+                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                </ButtonInnerContent>
+            </ButtonItem>
         )
     }
 }
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight}80;
+    border-radius: 100px;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ButtonItem = styled.div<{ disabled: boolean }>`
+    display: flex;
+    grid-gap: 15px;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5px 20px;
+    height: 55px;
+    cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+
+    &:hover {
+        background: ${(props) => props.theme.colors.backgroundColor};
+    }
+
+    & * {
+        cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    }
+`
+
+const ButtonInnerContent = styled.div`
+    display: flex;
+    grid-gap: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    font-size: 14px;
+    font-weight: 600;
+    color: ${(props) => props.theme.colors.darkerText};
+`
+
+const SubTitle = styled.div`
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    font-weight: 400;
+`
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isDisabled: !popup.isLoggable(state),

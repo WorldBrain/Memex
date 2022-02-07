@@ -32,6 +32,7 @@ async function setupTest(
         },
         syncSettings: syncSettingsStore,
         pdfIntegrationBG: backgroundModules.pdfBg.remoteFunctions,
+        extensionAPI: { isAllowedFileSchemeAccess: async () => true },
     })
 
     const logic = createElement<State, Event>(_logic)

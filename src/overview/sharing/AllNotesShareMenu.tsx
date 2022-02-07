@@ -101,6 +101,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
         return (
             <ShareAnnotationMenu
                 showLink
+                context={'AllNotesShare'}
                 link={this.state.link}
                 onCopyLinkClick={this.handleLinkCopy}
                 onClickOutside={this.props.closeShareMenu}

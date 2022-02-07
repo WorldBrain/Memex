@@ -91,6 +91,7 @@ const BackButton = styled.div`
     font-weight: bold;
     margin-right: 20px;
     cursor: pointer;
+    color: ${(props) => props.theme.colors.lighterText};
 `
 
 const TutorialCardContainer = styled.div`
@@ -101,19 +102,17 @@ const TutorialCardContainer = styled.div`
     position: fixed;
     left: 0px;
     background: #ffffff;
-    border-radius: 3px;
+    border-radius: 12px;
     color: black !important;
     font-size: 11px;
     font-weight: 500;
     line-height: 1.4;
     padding: 3em;
     text-align: center;
-    width: 300px;
-    height: 500px;
-    font-family: 'Poppins', sans-serif;
-    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-    top: 50%;
-    margin-top: -250px;
+
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
+    border: 4px solid ${(props) => props.theme.colors.purple};
     animation: 1s ease-in-out 0s 1 slideInFromLeft;
 
     @keyframes slideInFromLeft {

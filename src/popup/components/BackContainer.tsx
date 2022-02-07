@@ -6,44 +6,60 @@ import {
     colorGrey9,
 } from 'src/common-ui/components/design-library/colors'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface Props {
     children?: any
     onClick: () => void
+    header?: string
 }
 
 export const BackContainer = (props: Props) => (
-    <div>
-        {props.children}
-        <Container>
-            <BackButton onClick={props.onClick}>Back</BackButton>
-            <AutoSaveNote>Autosaved</AutoSaveNote>
-        </Container>
-    </div>
+    <Container>
+        <IconBoxBox>
+            <IconBox>
+                <Icon
+                    filePath={icons.arrowRight}
+                    heightAndWidth="16px"
+                    onClick={props.onClick}
+                />
+            </IconBox>
+        </IconBoxBox>
+        <Header>{props.header}</Header>
+        <AutoSaveNote>Autosaved</AutoSaveNote>
+    </Container>
 )
 
+const IconBoxBox = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    width: 60px;
+`
+
+const IconBox = styled.div`
+    transform: rotate(-180deg);
+    width: fit-content;
+`
+
+const Header = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 700;
+    font-size: 16px;
+`
+
 const Container = styled.div`
-    margin: 8px 8px 0px 8px;
+    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    padding: 0 20px;
 `
 
 const AutoSaveNote = styled.div`
-    font-weight: bold;
+    font-weight: 400;
     font-size: 12px;
-`
-
-const BackButton = styled.button`
-    padding: 3px 8px 3px 8px;
-    border: 0;
-    border-radius: 3px;
-    background: ${colorGrey3};
-    color: ${colorGrey9};
-    font-size: ${fontSizeSmall}px;
-    cursor: pointer;
-
-    &:hover {
-        background: ${colorGrey4};
-    }
+    color: ${(props) => props.theme.colors.lighterText};
+    width: 60px;
 `

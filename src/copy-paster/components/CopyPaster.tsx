@@ -5,12 +5,11 @@ import { Template } from '../types'
 import TemplateEditor from './TemplateEditor'
 import TemplateList from './TemplateList'
 import { ClickAway } from 'src/util/click-away-wrapper'
+import { isLoading } from 'src/overview/results/selectors'
 
 const CopyPasterWrapper = styled.div`
-    padding: 0 0 5px 0;
-
     & * {
-        font-family: 'Poppins', 'Arial';
+        font-family: 'Inter', sans-serif;
     }
 `
 
@@ -18,6 +17,7 @@ interface CopyPasterProps {
     isLoading: boolean
     templates: Template[]
     copyPasterEditingTemplate?: Template
+    isNew: boolean
 
     onClickNew: () => void
     onClickEdit: (id: number) => void
@@ -36,6 +36,9 @@ interface CopyPasterProps {
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
     handleClickOutside: React.MouseEventHandler = (e) => {
+        if (this.props.isLoading) {
+            null
+        }
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e)
         }
@@ -49,6 +52,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                 <CopyPasterWrapper>
                     {copyPasterEditingTemplate ? (
                         <TemplateEditor
+                            isNew={this.props.isNew}
                             template={copyPasterEditingTemplate}
                             onClickSave={() => this.props.onClickSave()}
                             onClickCancel={this.props.onClickCancel}

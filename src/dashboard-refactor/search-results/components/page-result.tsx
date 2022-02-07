@@ -120,7 +120,7 @@ export default class PageResultView extends PureComponent<Props> {
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox top="-40px" left="0" withRelativeContainer>
                     <TagPicker
                         onUpdateEntrySelection={this.props.onTagPickerUpdate}
                         initialSelectedEntries={() => this.props.tags}
@@ -132,7 +132,7 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isCopyPasterShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox padding={'0px'} right="0" withRelativeContainer>
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
@@ -143,7 +143,12 @@ export default class PageResultView extends PureComponent<Props> {
 
         if (this.props.isShareMenuShown) {
             return (
-                <HoverBox right="0" withRelativeContainer>
+                <HoverBox
+                    padding={'0px'}
+                    width="330px"
+                    right="0"
+                    withRelativeContainer
+                >
                     <AllNotesShareMenu {...this.props.shareMenuProps} />
                 </HoverBox>
             )
@@ -209,12 +214,6 @@ export default class PageResultView extends PureComponent<Props> {
                     tooltipText: 'Share Page and Notes',
                 },
                 {
-                    key: 'tag-page-btn',
-                    image: this.hasTags ? icons.tagFull : icons.tagEmpty,
-                    onClick: this.props.onTagPickerBtnClick,
-                    tooltipText: 'Tag Page',
-                },
-                {
                     key: 'list-page-btn',
                     image: this.hasLists
                         ? icons.collectionsFull
@@ -256,11 +255,6 @@ export default class PageResultView extends PureComponent<Props> {
                 image: this.props.isShared ? icons.shared : icons.link,
             },
             {
-                key: 'tag-page-btn',
-                isDisabled: true,
-                image: this.hasTags ? icons.tagFull : icons.tagEmpty,
-            },
-            {
                 key: 'list-page-btn',
                 isDisabled: true,
                 image: this.hasLists
@@ -300,45 +294,51 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        <PageTitle bottom="5px">
+                        <PageTitle isUrl={!hasTitle}>
                             {hasTitle
                                 ? this.props.fullTitle === this.props.fullUrl
-                                    ? this.props.fullTitle.split('/').slice(-1)
+                                    ? this.props.fullTitle
+                                          .split('://')
+                                          .slice(-1)
                                     : this.props.fullTitle
                                 : this.props.fullUrl}
                         </PageTitle>
                         <ResultContent>
-                            {this.props.favIconURI && (
-                                <FavIconBox>
-                                    <FavIconImg src={this.props.favIconURI} />
-                                </FavIconBox>
-                            )}
-                            {this.props.type === 'pdf' && (
-                                <PDFIcon>PDF</PDFIcon>
-                            )}
-                            <PageUrl>{this.domain}</PageUrl>
-                            {this.props.hoverState === 'main-content' &&
-                                (this.props.lists.length === 0 ||
-                                    (this.props.lists.length === 1 &&
-                                        this.props.lists.includes(
-                                            20201014,
-                                            0,
-                                        ))) && (
-                                    <AddSpaceButtonContainer>
-                                        <AddSpacesButton
-                                            hasNoLists={true}
-                                            onEditBtnClick={(event) => {
-                                                event.stopPropagation()
-                                                this.props.onListPickerBtnClick(
-                                                    event,
-                                                )
-                                            }}
-                                            renderListsPickerForAnnotation={this.renderSpacePicker.bind(
-                                                this,
-                                            )}
+                            <DomainContainer>
+                                {this.props.favIconURI && (
+                                    <FavIconBox>
+                                        <FavIconImg
+                                            src={this.props.favIconURI}
                                         />
-                                    </AddSpaceButtonContainer>
+                                    </FavIconBox>
                                 )}
+                                {this.props.type === 'pdf' && (
+                                    <PDFIcon>PDF</PDFIcon>
+                                )}
+                                <PageUrl>{this.domain}</PageUrl>
+                                {this.props.hoverState === 'main-content' &&
+                                    (this.props.lists.length === 0 ||
+                                        (this.props.lists.length === 1 &&
+                                            this.props.lists.includes(
+                                                20201014,
+                                                0,
+                                            ))) && (
+                                        <AddSpaceButtonContainer>
+                                            <AddSpacesButton
+                                                hasNoLists={true}
+                                                onEditBtnClick={(event) => {
+                                                    event.stopPropagation()
+                                                    this.props.onListPickerBtnClick(
+                                                        event,
+                                                    )
+                                                }}
+                                                renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                                    this,
+                                                )}
+                                            />
+                                        </AddSpaceButtonContainer>
+                                    )}
+                            </DomainContainer>
                         </ResultContent>
                     </PageContentBox>
                     {this.hasLists &&
@@ -378,6 +378,13 @@ export default class PageResultView extends PureComponent<Props> {
     }
 }
 
+const DomainContainer = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    grid-gap: 3px;
+`
+
 const PDFIcon = styled.div`
     border: 1px solid rgb(184, 184, 184);
     border-radius: 5px;
@@ -393,10 +400,10 @@ const StyledPageResult = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    border-radius: 5px;
+    border-radius: 8px;
 
     &:hover {
-        box-shadow: 0px 0px 4px 2px #d6d6d6;
+        outline: 2px solid ${(props) => props.theme.colors.lineGrey};
     }
 `
 
@@ -416,9 +423,9 @@ const RemoveFromListBtn = styled.div`
 `
 
 const FavIconBox = styled.div`
-    width: 20px;
-    height: 20px;
-    border: 1px solid #efefef;
+    width: 18px;
+    height: 18px;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
     border-radius: 30px;
     margin-right: 5px;
 `
@@ -437,7 +444,7 @@ const PageContentBox = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    padding: 15px 15px 5px 15px;
+    padding: 15px 20px 5px 20px;
     text-decoration: none;
     border-radius: 5px;
 
@@ -451,25 +458,28 @@ const AddSpaceButtonContainer = styled.div`
 `
 
 const ResultContent = styled(Margin)`
-    display: flex;
+    display: grid;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     cursor: pointer;
-    height: 24px;
+    grid-auto-flow: column;
+    grid-grap: 15px;
+    height: 34px;
 `
 
 const PageTitle = styled(Margin)`
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.lightblack};
     justify-content: flex-start;
+    line-break: ${(props) => (props.isUrl ? 'anywhere' : 'unset')};
 `
 const PageUrl = styled.span`
-    font-size: 12px;
-    color: #545454;
+    font-size: 14px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     height: 20px;
     align-items: center;
-    padding-top: 2px;
 `

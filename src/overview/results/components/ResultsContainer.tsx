@@ -25,6 +25,9 @@ import { setLocalStorage } from 'src/util/storage'
 import { DEPRECATED_SEARCH_WARNING_KEY } from 'src/overview/constants'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const styles = require('./ResultList.css')
 
@@ -93,8 +96,14 @@ class ResultsContainer extends React.Component<Props, State> {
         })
     }
 
-    private renderContent() {
-        const showOnboarding = localStorage.getItem('stage.Onboarding')
+    private getOnboardingStatus = async () => {
+        const onboardingStage = await localStorage.getItem('stage.Onboarding')
+
+        return onboardingStage
+    }
+
+    private renderContent = async () => {
+        const showOnboarding = await this.getOnboardingStatus()
         const showMobileAd = localStorage.getItem('stage.MobileAppAd') ?? 'true'
 
         if (this.props.isMobileListFiltered && this.props.noResults) {
@@ -107,11 +116,36 @@ class ResultsContainer extends React.Component<Props, State> {
             )
         }
 
-        if (showOnboarding === 'true' && this.props.noResults) {
+        if (showOnboarding && this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <NoResultBadTerm title="You don't have anything saved yet">
-                        <OnboardingMessage />
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.heartEmpty}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResultBadTerm
+                        title={
+                            <span>
+                                Save your first website or{' '}
+                                <ImportInfo
+                                    onClick={() => {
+                                        localStorage.setItem(
+                                            'stage.Onboarding',
+                                            'false',
+                                        )
+                                        window.location.hash = '#/import'
+                                    }}
+                                >
+                                    import your bookmarks.
+                                </ImportInfo>
+                            </span>
+                        }
+                    >
+                        {/* <OnboardingMessage /> */}
                     </NoResultBadTerm>
                 </ResultsMessage>
             )
@@ -223,5 +257,23 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         dispatch(actions.toggleAreAnnotationsExpanded())
     },
 })
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 100px;
+    height: 60px;
+    width: 60px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ImportInfo = styled.div`
+    color: ${(props) => props.theme.colors.purple};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`
 
 export default connect(mapState, mapDispatch)(ResultsContainer)

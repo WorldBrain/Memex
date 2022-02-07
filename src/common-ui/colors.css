@@ -31,7 +31,7 @@
 
 /* FONTS */
 
-@value mainFont: 'Poppins'
+@value mainFont: 'Inter'
 
 /* CONFIGURATIONS */
 
@@ -136,12 +136,12 @@
     opacity: 1;
 
     &:placeholder-shown {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         color: color3;
     }
 
     &:placeholder {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         color: color3;
     }
 }

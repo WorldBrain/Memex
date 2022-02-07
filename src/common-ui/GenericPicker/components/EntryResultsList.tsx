@@ -38,6 +38,12 @@ export default class EntryResultsList extends React.Component<Props> {
 const StyledContainer = styled.div`
     overflow-y: auto;
     max-height: 280px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 `
 const FilterHelp = styled.div`
     font-size: ${fontSizeSmall}px;

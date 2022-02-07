@@ -37,6 +37,7 @@ import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -91,6 +92,12 @@ export class AnnotationsSidebarContainer<
     toggleSidebarLock = () =>
         this.processEvent(this.state.isLocked ? 'unlock' : 'lock', null)
 
+    toggleSidebarWidthLock = () => {
+        this.processEvent(
+            this.state.isWidthLocked ? 'unlockWidth' : 'lockWidth',
+            null,
+        )
+    }
     setPageUrl = (pageUrl: string) => {
         this.processEvent('setPageUrl', { pageUrl })
     }
@@ -327,7 +334,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <PickerWrapper>
-                <HoverBox>
+                <HoverBox left="-130px" top="-40px" position="absolute">
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent(
@@ -461,7 +468,7 @@ export class AnnotationsSidebarContainer<
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <HoverBox>
+            <HoverBox padding={'0px'}>
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
@@ -494,29 +501,57 @@ export class AnnotationsSidebarContainer<
                         tooltipText="Close (ESC)"
                         position="rightCentered"
                     >
-                        <CloseBtn onClick={() => this.hideSidebar()}>
-                            <ActionIcon src={icons.close} />
-                        </CloseBtn>
+                        <Icon
+                            filePath={icons.close}
+                            heightAndWidth="16px"
+                            onClick={() => this.hideSidebar()}
+                        />
                     </ButtonTooltip>
                     {this.state.isLocked ? (
                         <ButtonTooltip
                             tooltipText="Unlock sidebar"
                             position="rightCentered"
                         >
-                            <CloseBtn onClick={this.toggleSidebarLock}>
-                                <SidebarLockIconReverse
-                                    src={icons.doubleArrow}
-                                />
-                            </CloseBtn>
+                            <Icon
+                                filePath={icons.doubleArrow}
+                                heightAndWidth="16px"
+                                rotation={'180'}
+                                onClick={this.toggleSidebarLock}
+                            />
                         </ButtonTooltip>
                     ) : (
                         <ButtonTooltip
                             tooltipText="Lock sidebar open"
                             position="rightCentered"
                         >
-                            <CloseBtn onClick={this.toggleSidebarLock}>
-                                <SidebarLockIcon src={icons.doubleArrow} />
-                            </CloseBtn>
+                            <Icon
+                                filePath={icons.doubleArrow}
+                                heightAndWidth="16px"
+                                onClick={this.toggleSidebarLock}
+                            />
+                        </ButtonTooltip>
+                    )}
+                    {!this.state.isWidthLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Adjusted Page Width"
+                            position="rightCentered"
+                        >
+                            <Icon
+                                filePath={icons.compress}
+                                heightAndWidth="16px"
+                                onClick={() => this.toggleSidebarWidthLock()}
+                            />
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Full page width"
+                            position="rightCentered"
+                        >
+                            <Icon
+                                filePath={icons.expand}
+                                heightAndWidth="16px"
+                                onClick={() => this.toggleSidebarWidthLock()}
+                            />
                         </ButtonTooltip>
                     )}
                 </TopBarActionBtns>
@@ -724,12 +759,10 @@ const ContainerStyled = styled.div`
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
-
-    font-family: sans-serif;
+    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    font-family: 'Inter', sans-serif;
 
     &::-webkit-scrollbar {
         display: none;
@@ -754,18 +787,20 @@ const TopBarContainerStyled = styled.div`
     box-shadow: 0px 3px 5px -3px #c9c9c9;
 `
 
-const TopBarActionBtns = styled.div<{ sidebarContext: string }>`
+const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     display: grid;
     justify-content: flex-start;
     position: absolute;
     align-items: center;
     gap: 8px;
-    right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '450px' : '490px'};
-    background-color: #f5f8fb;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
     border-radius: 0 0 0 5px;
-    box-shadow: -3px 2px 4px -1px #d0d0d0;
     padding: 5px 1px 5px 3px;
+    z-index: 10000;
+    right: 4px;
+    position: relative;
+    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const CloseBtn = styled.button`
@@ -782,10 +817,6 @@ const CloseBtn = styled.button`
     justify-content: center;
     border-radius: 3px;
     align-items: center;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
 `
 
 const ActionIcon = styled.img`

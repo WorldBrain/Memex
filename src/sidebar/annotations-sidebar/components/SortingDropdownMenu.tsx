@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import {
     sortByCreatedTime,
     sortByPagePosition,
@@ -34,6 +35,7 @@ export const defaultSortingMenuItems: SortingMenuItemProps[] = [
 interface Props {
     onMenuItemClick: (props: SortingMenuItemProps) => void
     menuItems?: SortingMenuItemProps[]
+    onClickOutSide?: React.MouseEventHandler
 }
 
 export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
@@ -41,20 +43,18 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 
     render() {
         return (
-            <DropdownMenuContainer>
-                <DropdownMenuBtn
-                    btnChildren={<IconImg src={icons.sort} />}
-                    onMenuItemClick={this.props.onMenuItemClick}
-                    menuItems={this.props.menuItems}
-                    theme={{ leftMenuOffset: '-125px' }}
-                    btnId="DropdownMenuBtn"
-                    keepSelectedState
-                    tooltipProps={{
-                        tooltipText: 'Sort notes',
-                        position: 'bottomSidebar',
-                    }}
-                />
-            </DropdownMenuContainer>
+            <DropdownMenuBtn
+                onMenuItemClick={this.props.onMenuItemClick}
+                menuItems={this.props.menuItems}
+                theme={{ leftMenuOffset: '-125px' }}
+                btnId="DropdownMenuBtn"
+                keepSelectedState
+                tooltipProps={{
+                    tooltipText: 'Sort notes',
+                    position: 'bottomSidebar',
+                }}
+                onClickOutside={this.props.onClickOutSide}
+            />
         )
     }
 }
@@ -65,14 +65,4 @@ const DropdownMenuContainer = styled.div`
         width: 24px;
         padding: 2px;
     }
-
-    & #DropdownMenuBtn {
-        height: 24px;
-        width: 24px;
-    }
-`
-
-const IconImg = styled.img`
-    width: fill-available;
-    padding: 5px;
 `

@@ -1,6 +1,8 @@
 import {
     AuthenticatedUser,
     AuthService,
+    RegistrationResult,
+    LoginResult,
 } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     UserPlan,
@@ -22,6 +24,7 @@ import {
     AuthRemoteFunctionsInterface,
     AuthSettings,
     AuthBackendFunctions,
+    EmailPasswordCredentials,
 } from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
@@ -30,6 +33,7 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
+import firebase from 'firebase'
 
 export class AuthBackground {
     authService: AuthService
@@ -39,6 +43,7 @@ export class AuthBackground {
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
     getUserManagement: () => Promise<UserStorage>
+    private _firebase: typeof firebase
 
     private _userProfile?: Promise<User>
 
@@ -67,11 +72,14 @@ export class AuthBackground {
 
         this.remoteFunctions = {
             refreshUserInfo: this.refreshUserInfo,
+            registerWithEmailPassword: this.registerWithEmailPassword,
+            loginWithEmailPassword: this.loginWithEmailPassword,
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => {
                 delete this._userProfile
                 this.authService.signOut()
             },
+            sendPasswordResetEmailProcess: this.sendPasswordResetEmailProcess,
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -183,6 +191,10 @@ export class AuthBackground {
         }
     }
 
+    sendPasswordResetEmailProcess = async (email) => {
+        return firebase.auth().sendPasswordResetEmail(email)
+    }
+
     registerRemoteEmitter() {
         this.authService.events.on('changed', async ({ user }) => {
             await this.options.remoteEmitter.emit('onLoadingUser', true)
@@ -215,5 +227,63 @@ export class AuthBackground {
                 userWithClaims,
             )
         })
+    }
+
+    registerWithEmailPassword = async (
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: RegistrationResult }> => {
+        const { result } = await this.authService.registerWithEmailAndPassword(
+            options.email,
+            options.password,
+        )
+        if (result.status !== 'registered-and-authenticated') {
+            return { result }
+        }
+        const user = await this.authService.getCurrentUser()
+        if (!user) {
+            const message = `User registered successfuly, but didn't detect authenticated user after`
+            console.error(`Error while registering user`, message)
+            return {
+                result: {
+                    status: 'error',
+                    reason: 'unknown',
+                    internalReason: message,
+                },
+            }
+        }
+
+        if (options.displayName) {
+            const userManagement = await this.getUserManagement()
+            await userManagement.updateUser(
+                { type: 'user-reference', id: user.id },
+                { knownStatus: 'new' },
+                { displayName: options.displayName },
+            )
+        }
+        return { result: { status: 'registered-and-authenticated' } }
+    }
+
+    loginWithEmailPassword = async (
+        options: EmailPasswordCredentials,
+    ): Promise<{ result: LoginResult }> => {
+        try {
+            await this.authService.loginWithEmailAndPassword(
+                options.email,
+                options.password,
+            )
+            return { result: { status: 'authenticated' } }
+        } catch (e) {
+            const firebaseError: firebase.FirebaseError = e
+            if (firebaseError.code === 'auth/invalid-email') {
+                return { result: { status: 'error', reason: 'invalid-email' } }
+            }
+            if (firebaseError.code === 'auth/user-not-found') {
+                return { result: { status: 'error', reason: 'user-not-found' } }
+            }
+            if (firebaseError.code === 'auth/wrong-password') {
+                return { result: { status: 'error', reason: 'wrong-password' } }
+            }
+            return { result: { status: 'error', reason: 'unknown' } }
+        }
     }
 }

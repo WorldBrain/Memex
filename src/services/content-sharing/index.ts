@@ -42,33 +42,41 @@ export default class ContentSharingService
     getExistingKeyLinksForList: ContentSharingServiceInterface['getExistingKeyLinksForList'] = async (
         params,
     ) => {
-        const sharedListKeys = await this.dependencies.storage.contentSharing.getListKeys(
-            { listReference: params.listReference },
-        )
-
-        const foundLinks = sharedListKeys.map((key) => {
-            const keyString = key.reference.id as string
-            return {
-                keyString,
-                roleID: key.roleID,
-                link: this.getKeyLink({
-                    listReference: params.listReference,
-                    keyString,
-                }),
-            }
-        })
-
-        // There will always be a static reader link for collections that
-        //  are already shared. In Memex ext, that would be the case if this service
-        //  method is called.
         const readerLink = {
             link: this.getKeyLink({ listReference: params.listReference }),
             roleID: SharedListRoleID.Commenter,
         }
 
-        return {
-            links: [readerLink, ...foundLinks],
+        try {
+            const sharedListKeys = await this.dependencies.storage.contentSharing.getListKeys(
+                { listReference: params.listReference },
+            )
+
+            const foundLinks = sharedListKeys.map((key) => {
+                const keyString = key.reference.id as string
+                return {
+                    keyString,
+                    roleID: key.roleID,
+                    link: this.getKeyLink({
+                        listReference: params.listReference,
+                        keyString,
+                    }),
+                }
+            })
+
+            return {
+                links: [readerLink, ...foundLinks],
+            }
+        } catch (e) {
+            console.error(e)
+            return {
+                links: [],
+            }
         }
+
+        // There will always be a static reader link for collections that
+        //  are already shared. In Memex ext, that would be the case if this service
+        //  method is called.
     }
 
     generateKeyLink: ContentSharingServiceInterface['generateKeyLink'] = async (

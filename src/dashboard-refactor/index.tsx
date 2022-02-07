@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
+import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -44,6 +45,7 @@ import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
 import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+// import GlobalFonts from '../../fonts/Inter/inter'
 
 export interface Props extends DashboardDependencies {}
 
@@ -161,68 +163,64 @@ export class DashboardContainer extends StatefulUIElement<
     ): ListSidebarItemProps[] => {
         const { listsSidebar } = this.state
 
-        return listIds
-            .sort((idA, idB) => {
-                const listDataA = listsSidebar.listData[idA]
-                const listDataB = listsSidebar.listData[idB]
-
-                if (listDataA.name < listDataB.name) {
-                    return -1
-                }
-                if (listDataA.name > listDataB.name) {
-                    return 1
-                }
-                return 0
-            })
-            .map((listId) => ({
-                source,
-                listId,
-                name: listsSidebar.listData[listId].name,
-                isEditing: listsSidebar.editingListId === listId,
-                isCollaborative:
+        return listIds.map((listId) => ({
+            source,
+            listId,
+            listData: listsSidebar.listData[listId],
+            name: listsSidebar.listData[listId].name,
+            isEditing: listsSidebar.editingListId === listId,
+            isCollaborative:
+                source === 'followed-lists'
+                    ? false
+                    : listsSidebar.listData[listId].remoteId != null,
+            isMenuDisplayed:
+                source === 'followed-lists'
+                    ? false
+                    : listsSidebar.showMoreMenuListId === listId,
+            selectedState: {
+                isSelected: listsSidebar.selectedListId === listId,
+                onSelection:
                     source === 'followed-lists'
-                        ? false
-                        : listsSidebar.listData[listId].remoteId != null,
-                isMenuDisplayed:
-                    source === 'followed-lists'
-                        ? false
-                        : listsSidebar.showMoreMenuListId === listId,
-                selectedState: {
-                    isSelected: listsSidebar.selectedListId === listId,
-                    onSelection:
-                        source === 'followed-lists'
-                            ? () =>
-                                  this.props.openCollectionPage(
-                                      listsSidebar.listData[listId].remoteId,
-                                  )
-                            : () =>
-                                  this.processEvent('setSelectedListId', {
-                                      listId: listsSidebar.listData[listId].id,
-                                  }),
-                },
-                editableProps: {
-                    onCancelClick: () =>
-                        this.processEvent('cancelListEdit', null),
-                    onConfirmClick: (value) =>
-                        this.processEvent('confirmListEdit', { value }),
-                    initValue: listsSidebar.listData[listId].name,
-                    errorMessage: listsSidebar.editListErrorMessage,
-                },
-                onMoreActionClick:
-                    source !== 'followed-lists' &&
-                    listsSidebar.listData[listId].isOwnedList
                         ? () =>
-                              this.processEvent('setShowMoreMenuListId', {
+                              this.props.openCollectionPage(
+                                  listsSidebar.listData[listId].remoteId,
+                              )
+                        : () =>
+                              this.processEvent('setSelectedListId', {
                                   listId: listsSidebar.listData[listId].id,
-                              })
-                        : undefined,
-                onRenameClick: () =>
-                    this.processEvent('setEditingListId', { listId }),
-                onDeleteClick: () =>
-                    this.processEvent('setDeletingListId', { listId }),
-                onShareClick: () =>
-                    this.processEvent('setShareListId', { listId }),
-            }))
+                              }),
+            },
+            editableProps: {
+                changeListName: (value) =>
+                    this.processEvent('changeListName', { value }),
+                onCancelClick: () => this.processEvent('cancelListEdit', null),
+                onConfirmClick: (value) =>
+                    this.processEvent('confirmListEdit', { value }),
+                initValue: listsSidebar.listData[listId].name,
+                errorMessage: listsSidebar.editListErrorMessage,
+            },
+            onMoreActionClick:
+                source !== 'followed-lists' &&
+                listsSidebar.listData[listId].isOwnedList
+                    ? () =>
+                          this.processEvent('setShowMoreMenuListId', {
+                              listId: listsSidebar.listData[listId].id,
+                          })
+                    : undefined,
+            onRenameClick: () =>
+                this.processEvent('setEditingListId', { listId }),
+            onDeleteClick: () =>
+                this.processEvent('setDeletingListId', { listId }),
+            onShareClick: () => this.processEvent('setShareListId', { listId }),
+            services: {
+                ...this.props.services,
+                contentSharing: this.props.contentShareBG,
+            },
+            shareList: shareListAndAllEntries(
+                this.props.contentShareBG,
+                listId,
+            ),
+        }))
     }
 
     private renderFiltersBar() {
@@ -244,6 +242,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
+                searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
                 showDatesFilter={searchFilters.isDateFilterActive}
@@ -371,6 +370,7 @@ export class DashboardContainer extends StatefulUIElement<
                 selectedListName={
                     listsSidebar.listData[listsSidebar.selectedListId]?.name
                 }
+                activityStatus={listsSidebar.hasFeedActivity}
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
@@ -543,6 +543,14 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 getListNameById={this.getListNameById}
+                toggleSortMenuShown={() =>
+                    this.processEvent('setSortMenuShown', {
+                        isShown: !searchResults.isSortMenuShown,
+                    })
+                }
+                searchResults={searchResults.pageData}
+                searchFilters={searchFilters}
+                searchQuery={searchFilters.searchQuery}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 goToImportRoute={() => {
                     this.bindRouteGoTo('import')()
@@ -567,9 +575,9 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissMobileAd={() =>
                     this.processEvent('dismissMobileAd', null)
                 }
-                onDismissOnboardingMsg={() =>
+                onDismissOnboardingMsg={() => {
                     this.processEvent('dismissOnboardingMsg', null)
-                }
+                }}
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
@@ -928,7 +936,8 @@ export class DashboardContainer extends StatefulUIElement<
             return (
                 <DeleteConfirmModal
                     isShown
-                    message="Delete collection? This does not delete the pages in it"
+                    message="Delete this Space?"
+                    submessage="This does not delete the pages in it"
                     onClose={() => this.processEvent('cancelListDelete', null)}
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
@@ -1054,6 +1063,8 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     render() {
+        // <GlobalFonts />
+        // <GlobalStyle />
         const { listsSidebar, mode } = this.state
         if (mode === 'onboarding') {
             return (
@@ -1108,11 +1119,26 @@ export class DashboardContainer extends StatefulUIElement<
     }
 }
 
+const GlobalStyle = createGlobalStyle`
+
+    * {
+        font-family: 'Inter', sans-serif;,
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;';
+    }
+`
+
 const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: fill-available;
-    background-color: #f6f8fb;
-    min-height: 100vh;
-    height: 100%;
+display: flex;
+flex-direction: column;
+width: fill-available;
+background-color: ${(props) => props.theme.colors.backgroundColor};
+min-height: 100vh;
+height: 100%;
+
+    & * {
+        font-family: 'Inter', sans-serif;,
+    }
 `

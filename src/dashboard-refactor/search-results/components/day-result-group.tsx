@@ -24,4 +24,8 @@ const DayContainer = styled.div`
     width: fill-available;
 `
 
-const DayWhenText = styled.h1``
+const DayWhenText = styled.h1`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+`

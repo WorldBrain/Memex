@@ -2,7 +2,7 @@
 @value color6 from colors;
 
 .container * {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .container {

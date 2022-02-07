@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from 'src/dashboard-refactor/colors'
+import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ButtonTooltip } from 'src/common-ui/components'
@@ -11,7 +12,7 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 export interface Props {
     icon: IconKeys
     title: string
-    shortcut: string
+    shortcut?: string
     description: string
     isSelected?: boolean
     hasProtectedOption?: boolean
@@ -49,7 +50,12 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                 onMouseEnter={this.setHoverState(true)}
                 onMouseLeave={this.setHoverState(false)}
             >
-                <Icon height="18px" icon={this.props.icon} color="primary" />
+                <Icon
+                    heightAndWidth="18px"
+                    icon={this.props.icon}
+                    hoverOff
+                    color={this.props.isSelected ? 'purple' : null}
+                />
                 <PrivacyOptionBox>
                     <PrivacyOptionTitleBox>
                         <PrivacyOptionTitle>
@@ -71,16 +77,17 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                                 <br />
                                 No status change in bulk action.
                                 <br />
-                                <i>{this.protectedModeShortcut}</i>
+                                {this.props.shortcut && (
+                                    <i>{this.protectedModeShortcut}</i>
+                                )}
                             </span>
                         }
-                        position="bottomRightEdge"
+                        position="left"
                     >
                         <Icon
                             onClick={this.handleProtectedClick}
-                            height="14px"
-                            icon="lock"
-                            color="black"
+                            heightAndWidth="14px"
+                            filePath={icons.lock}
                         />
                     </ButtonTooltip>
                 )}
@@ -97,11 +104,15 @@ const PrivacyOptionItem = styled(Margin)`
     align-items: center;
     flex-direction: row;
     cursor: pointer;
-    padding: 10px 20px;
+    padding: 10px 10px;
     width: fill-available;
+    grid-gap: 10px;
+    border-radius: 5px;
+    background-color: ${(props) =>
+        props.isSelected && props.theme.colors.backgroundColorDarker};
 
     &:hover {
-        background-color: ${colors.onHover};
+        background-color: ${(props) => props.theme.colors.backgroundColor};
     }
 
     &:last-child {
@@ -111,9 +122,6 @@ const PrivacyOptionItem = styled(Margin)`
     &:first-child {
         margin-top: 0px;
     }
-
-    ${(props) =>
-        props.isSelected ? `background-color: ${colors.lightGrey};` : ''}
 `
 
 const PrivacyOptionBox = styled.div`
@@ -122,8 +130,8 @@ const PrivacyOptionBox = styled.div`
     align-items: flex-start;
     justify-content: center;
     flex-direction: column;
-    padding-left: 10px;
     width: 200px;
+    grid-gap: 5px;
 `
 
 const PrivacyOptionTitleBox = styled.div`
@@ -132,17 +140,19 @@ const PrivacyOptionTitleBox = styled.div`
     justify-content: center;
     flex-direction: row;
     height: 16px;
+    grid-gap: 5px;
 `
 
 const PrivacyOptionTitle = styled.div`
     font-size: 13px;
     font-weight: bold;
+    color: ${(props) => props.theme.colors.darkerText};
 `
 
 const PrivacyOptionShortcut = styled.div`
-    font-size: 9px;
-    font-weight: bold;
-    padding-left: 5px;
+    font-size: 10px;
+    font-weight: 300;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const PrivacyOptionSubTitle = styled.div`
@@ -152,4 +162,5 @@ const PrivacyOptionSubTitle = styled.div`
     width: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
+    color: ${(props) => props.theme.colors.lighterText};
 `

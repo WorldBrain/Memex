@@ -10,7 +10,7 @@
 }
 
 :global .react-datepicker__close-icon::after {
-    background-color: #3eb995 !important;
+    background-color: #347ae2 !important;
     padding-left: 3px;
     top: 7px;
     padding-top: 2px;
@@ -20,6 +20,10 @@
 
 :global .react-datepicker__triangle {
     display: none !important;
+}
+
+:global .react-datepicker__month {
+    margin: 0px;
 }
 
 :global .react-datepicker {
@@ -38,30 +42,33 @@
 :global .react-datepicker__current-month {
     line-height: 24px !important;
     margin-bottom: 15px !important;
+    color: #292c38;
 }
 
 :global .react-datepicker__navigation {
-    background-repeat: no-repeat !important;
-    background-size: 12px !important;
-    background-position: center !important;
-    height: 20px !important;
-    width: 20px !important;
-    border-color: transparent !important;
-    display: flex;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: color7;
-    }
+    border: none;
 }
 
 :global .react-datepicker__navigation--previous {
-    background-image: url('/img/arrow.svg') !important;
+    mask-image: url('/img/chevron-down.svg') !important;
+    transform: rotate(90deg);
+    mask-repeat: no-repeat !important;
+    mask-size: 16px !important;
+    mask-position: center !important;
+    background-color: #96a0b5;
+    height: 20px !important;
+    width: 20px !important;
 }
 
 :global .react-datepicker__navigation--next {
-    background-image: url('/img/arrow.svg') !important;
-    transform: rotate(180deg);
+    mask-image: url('/img/chevron-down.svg') !important;
+    transform: rotate(-90deg);
+    mask-repeat: no-repeat !important;
+    mask-size: 16px !important;
+    mask-position: center !important;
+    background-color: #96a0b5;
+    height: 20px !important;
+    width: 20px !important;
 }
 
 :global .react-datepicker__day {
@@ -69,10 +76,22 @@
     width: 35px !important;
     line-height: 35px !important;
     border-radius: 50% !important;
+    color: #73778b;
+}
+
+:global .react-datepicker__day--disabled {
+    color: #96a0b5;
+    opacity: 0.7;
 }
 
 :global .react-datepicker__day-name {
-    font-weight: bold;
+    font-weight: 500;
+    color: #292c38;
+}
+
+:global .react-datepicker__day-names {
+    display: grid;
+    grid-auto-flow: column;
 }
 
 :global .react-datepicker__day:hover {
@@ -150,13 +169,13 @@
 
 :global .react-datepicker__day--selected {
     font-weight: bold;
-    background: color1;
+    background: #347ae2;
     color: white;
 }
 
 :global .react-datepicker__day--selected:hover {
     font-weight: bold;
-    background: color2;
+    background: #347ae2;
     color: white;
 }
 

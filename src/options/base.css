@@ -1,16 +1,26 @@
 @value colors: 'src/common-ui/colors.css';
 @value color4, color6 from colors;
 
-@import url('/fonts/Poppins/poppins.css');
+@import url('/fonts/Inter/inter.css');
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+}
 
 .root {
     background-color: white;
     display: flex;
     flex-direction: row;
+    margin: 0px;
 
     & * {
         box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 }
 

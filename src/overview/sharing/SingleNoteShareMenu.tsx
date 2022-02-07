@@ -41,6 +41,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     async componentDidMount() {
         const linkExists = await this.setRemoteLinkIfExists()
+
         if (!linkExists && this.props.shareImmediately) {
             await executeReactStateUITask<State, 'loadState'>(
                 this,

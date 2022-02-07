@@ -103,6 +103,7 @@ interface AnnotationsSidebarState {
     isMarkdownHelpShown?: boolean
     showAllNotesCopyPaster?: boolean
     showAllNotesShareMenu?: boolean
+    showSortDropDown?: boolean
 }
 
 class AnnotationsSidebar extends React.Component<
@@ -118,6 +119,7 @@ class AnnotationsSidebar extends React.Component<
         isMarkdownHelpShown: false,
         showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
+        showSortDropDown: false,
     }
 
     async componentDidMount() {
@@ -216,9 +218,67 @@ class AnnotationsSidebar extends React.Component<
         return annotationCreateLists
     }
 
-    private renderNewAnnotation(context?: string) {
+    private renderCopyPasterManager(annotationUrls) {
         return (
-            <NewAnnotationSection context={context}>
+            <HoverBox padding={'0px'}>
+                <PageNotesCopyPaster
+                    copyPaster={this.props.copyPaster}
+                    annotationUrls={annotationUrls}
+                    normalizedPageUrls={this.props.normalizedPageUrls}
+                    onClickOutside={() =>
+                        this.setState({ showAllNotesCopyPaster: false })
+                    }
+                />
+            </HoverBox>
+        )
+    }
+
+    private renderAllNotesCopyPaster() {
+        if (!this.state.showAllNotesCopyPaster) {
+            return null
+        }
+
+        const annotUrls = this.props.annotationUrls()
+        return (
+            <CopyPasterWrapperTopBar>
+                {this.renderCopyPasterManager(annotUrls)}
+            </CopyPasterWrapperTopBar>
+        )
+    }
+
+    private renderAllNotesShareMenu() {
+        if (!this.state.showAllNotesShareMenu) {
+            return null
+        }
+
+        return (
+            <ShareMenuWrapperTopBar>
+                <ClickAway
+                    onClickAway={() =>
+                        this.setState({ showAllNotesShareMenu: false })
+                    }
+                >
+                    <HoverBox padding={'0px'} width="340px">
+                        <AllNotesShareMenu
+                            contentSharingBG={this.props.contentSharing}
+                            annotationsBG={this.props.annotationsShareAll}
+                            normalizedPageUrl={this.props.normalizedPageUrl}
+                            copyLink={async (link) => {
+                                this.props.copyPageLink(link)
+                            }}
+                            postBulkShareHook={(shareState) =>
+                                this.props.postBulkShareHook(shareState)
+                            }
+                        />
+                    </HoverBox>
+                </ClickAway>
+            </ShareMenuWrapperTopBar>
+        )
+    }
+
+    private renderNewAnnotation() {
+        return (
+            <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
@@ -332,248 +392,292 @@ class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharedListNotes(
-        listId,
-        dropdownIcon,
-        sharedListStyleContext,
-        onClickTitle,
-        buttonOpenIsolated,
-        renderNotes,
-    ) {
-        const { followedListLoadState, followedLists } = this.props
-        const listData = followedLists.byId[listId]
+    // private renderSharedListNotes(
+    //     listId,
+    //     dropdownIcon,
+    //     sharedListStyleContext,
+    //     onClickTitle,
+    //     buttonOpenIsolated,
+    //     renderNotes,
+    // ) {
+    //     const { followedListLoadState, followedLists } = this.props
+    //     const listData = followedLists.byId[listId]
 
-        return (
-            <FollowedListNotesContainer bottom="10px" key={listId}>
-                {/* <React.Fragment key={listId}> */}
-                <FollowedListRow
-                    onClick={onClickTitle}
-                    bottom="5px"
-                    title={listData.name}
-                    context={sharedListStyleContext}
-                >
-                    {dropdownIcon}
-                    <FollowedListTitleContainer
-                        context={sharedListStyleContext}
-                    >
-                        <FollowedListTitle
-                            context={sharedListStyleContext}
-                            onClick={onClickTitle}
-                        >
-                            {listData.name}
-                        </FollowedListTitle>
-                        <FollowedListNoteCount left="10px" right="15px">
-                            {listData.sharedAnnotationReferences.length}
-                        </FollowedListNoteCount>
-                    </FollowedListTitleContainer>
-                    <FollowedListActionItems>
-                        {buttonOpenIsolated}
-                        <ButtonTooltip
-                            tooltipText="Go to collection"
-                            position="bottomLeft"
-                        >
-                            <FollowedListIconContainer
-                                onClick={(event) => {
-                                    event.stopPropagation()
-                                    this.props.openCollectionPage(listId)
-                                }}
-                            >
-                                <FollowedListActionIcon src={icons.goTo} />
-                            </FollowedListIconContainer>
-                        </ButtonTooltip>
-                    </FollowedListActionItems>
-                </FollowedListRow>
-                {renderNotes}
-            </FollowedListNotesContainer>
-        )
-    }
+    //     return (
+    //         <FollowedListNotesContainer bottom="10px" key={listId}>
+    //             {/* <React.Fragment key={listId}> */}
+    //             <FollowedListRow
+    //                 onClick={onClickTitle}
+    //                 bottom="5px"
+    //                 title={listData.name}
+    //                 context={sharedListStyleContext}
+    //             >
+    //                 {dropdownIcon}
+    //                 <FollowedListTitleContainer
+    //                     context={sharedListStyleContext}
+    //                 >
+    //                     <FollowedListTitle
+    //                         context={sharedListStyleContext}
+    //                         onClick={onClickTitle}
+    //                     >
+    //                         {listData.name}
+    //                     </FollowedListTitle>
+    //                     <FollowedListNoteCount left="10px" right="15px">
+    //                         {listData.sharedAnnotationReferences.length}
+    //                     </FollowedListNoteCount>
+    //                 </FollowedListTitleContainer>
+    //                 <FollowedListActionItems>
+    //                     {buttonOpenIsolated}
+    //                     <ButtonTooltip
+    //                         tooltipText="Go to collection"
+    //                         position="bottomLeft"
+    //                     >
+    //                         <FollowedListIconContainer
+    //                             onClick={(event) => {
+    //                                 event.stopPropagation()
+    //                                 this.props.openCollectionPage(listId)
+    //                             }}
+    //                         >
+    //                             <FollowedListActionIcon src={icons.goTo} />
+    //                         </FollowedListIconContainer>
+    //                     </ButtonTooltip>
+    //                 </FollowedListActionItems>
+    //             </FollowedListRow>
+    //             {renderNotes}
+    //         </FollowedListNotesContainer>
+    //     )
+    // }
 
-    private renderSharedListNotesNotIsolated(listId) {
+    // private renderSharedListNotesNotIsolated(listId) {
+    //     const { followedLists } = this.props
+
+    //     const listData = followedLists.byId[listId]
+
+    //     const dropdownIcon = (
+    //         <FollowedListIconContainer
+    //             onClick={(event) => {
+    //                 event.stopPropagation()
+    //                 this.props.expandFollowedListNotes(listId)
+    //             }}
+    //         >
+    //             <FollowedListDropdownIcon
+    //                 icon="triangle"
+    //                 height="12px"
+    //                 isExpanded={listData.isExpanded}
+    //                 marginLeft="0px"
+    //             />
+    //         </FollowedListIconContainer>
+    //     )
+    //     const sharedListStyleContext = null
+
+    //     const onClickTitle = (event) => {
+    //         event.stopPropagation()
+    //         this.props.toggleIsolatedListView(listId)
+    //     }
+
+    //     const buttonOpenIsolated = (
+    //         <ButtonTooltip
+    //             tooltipText="Add Highlights and Notes"
+    //             position="bottom"
+    //         >
+    //             <FollowedListIconContainer onClick={onClickTitle}>
+    //                 <FollowedListActionIcon src={icons.commentAdd} />
+    //             </FollowedListIconContainer>
+    //         </ButtonTooltip>
+    //     )
+    //     const renderNotes = (
+    //         <>
+    //             {listData.isExpanded &&
+    //                 this.renderNewAnnotation('isolatedView')}
+    //             {this.renderFollowedListNotes(listId)}
+    //         </>
+    //     )
+
+    //     return this.renderSharedListNotes(
+    //         listId,
+    //         dropdownIcon,
+    //         sharedListStyleContext,
+    //         onClickTitle,
+    //         buttonOpenIsolated,
+    //         renderNotes,
+    //     )
+    // }
+
+    // private renderSharedListNotesIsolated(listId) {
+    //     const sharedListStyleContext = 'isolatedView'
+
+    //     const renderNotes = (
+    //         <>
+    //             {this.renderNewAnnotation('isolatedView')}
+    //             {this.renderFollowedListNotes(listId)}
+    //         </>
+    //     )
+    //     return this.renderSharedListNotes(
+    //         listId,
+    //         null,
+    //         sharedListStyleContext,
+    //         null,
+    //         null,
+    //         renderNotes,
+    //     )
+    // }
+
+    // private renderIsolatedView(listId) {
+    //     const ContributorTooltip = (
+    //         <span>You can add highlights to this page.</span>
+    //     )
+
+    //     return (
+    //         <FollowedListNotesContainer bottom="10px">
+    //             <IsolatedViewTopBar>
+    //                 <BackButton
+    //                     onClick={(event) => {
+    //                         this.props.toggleIsolatedListView(listId)
+    //                     }}
+    //                 >
+    //                     <BackButtonArrow icon="triangle" height="12px" />{' '}
+    //                     {'Back'}
+    //                 </BackButton>
+    //                 {this.props.followedLists.byId[listId]?.isContributable ? (
+    //                     <ButtonTooltip
+    //                         tooltipText={ContributorTooltip}
+    //                         position="bottomLeft"
+    //                     >
+    //                         <ContributorBadge>
+    //                             <ContributorIcon src={icons.shared} />
+    //                             Contributor
+    //                         </ContributorBadge>
+    //                     </ButtonTooltip>
+    //                 ) : (
+    //                     <p>{'@ Commentor'}</p>
+    //                 )}
+    //             </IsolatedViewTopBar>
+    //             {this.state.showIsolatedViewNotif && (
+    //                 <IsolatedViewTutorial>
+    //                     <IsolatedViewText>
+    //                         While you are in this view, all annotations <br />{' '}
+    //                         and notes you make are added to this space.
+    //                     </IsolatedViewText>
+    //                     <IsolatedViewTutorialClose
+    //                         onClick={() => {
+    //                             this.setState({ showIsolatedViewNotif: false }),
+    //                                 setLocalStorage(
+    //                                     SHOW_ISOLATED_VIEW_KEY,
+    //                                     false,
+    //                                 )
+    //                         }}
+    //                     >
+    //                         <CloseIconStyled background={'white'} />
+    //                     </IsolatedViewTutorialClose>
+    //                 </IsolatedViewTutorial>
+    //             )}
+    //             {this.props.isExpandedSharedSpaces &&
+    //                 (this.props.followedListLoadState === 'running' ? (
+    //                     this.renderLoader()
+    //                 ) : this.props.followedListLoadState === 'error' ? (
+    //                     <FollowedListsMsgContainer>
+    //                         <FollowedListsMsgHead>
+    //                             Something went wrong
+    //                         </FollowedListsMsgHead>
+    //                         <FollowedListsMsg>
+    //                             Reload the page and if the problem persists{' '}
+    //                             <ExternalLink
+    //                                 label="contact
+    //                                 support"
+    //                                 href="mailto:support@worldbrain.io"
+    //                             />
+    //                             .
+    //                         </FollowedListsMsg>
+    //                     </FollowedListsMsgContainer>
+    //                 ) : (
+    //                     <>{this.renderSharedListNotesIsolated(listId)}</>
+    //                 ))}
+    //         </FollowedListNotesContainer>
+    //     )
+    // }
+
+    // private renderSharedNotesByList() {
+    //     const { followedListLoadState, followedLists } = this.props
+
+    //     // if (!followedLists.allIds.length) {
+    //     //     return null
+    //     // }
+
+    //     const sharedNotesByList = followedLists.allIds.map((listId) =>
+    //         this.renderSharedListNotesNotIsolated(listId),
+    //     )
+    //     return (
+    //         <FollowedListNotesContainer bottom="10px">
+    //             <FollowedListTitleContainer
+    //                 onClick={() =>
+    //                     this.props.expandSharedSpaces(followedLists.allIds)
+    //                 }
+    //                 left="5px"
+    //                 bottom="5px"
+    //             >
+    //                 <FollowedListSectionTitle>
+    //                     From Shared Spaces
+    //                 </FollowedListSectionTitle>
+
+    //                 {this.props.followedListLoadState ===
+    //                 'running' ? null : followedLists.allIds.length ? (
+    //                     <FollowedListDropdownIcon
+    //                         icon="triangle"
+    //                         height="12px"
+    //                         isExpanded={this.props.isExpandedSharedSpaces}
+    //                         marginLeft="5px"
+    //                         marginRight="5px"
+    //                     />
+    //                 ) : (
+    //                     <FollowedListNoteCount left="5px" right="15px">
+    //                         0
+    //                     </FollowedListNoteCount>
+    //                 )}
+    //             </FollowedListTitleContainer>
+    private renderSharedNotesByList() {
         const { followedLists } = this.props
 
-        const listData = followedLists.byId[listId]
-
-        const dropdownIcon = (
-            <FollowedListIconContainer
-                onClick={(event) => {
-                    event.stopPropagation()
-                    this.props.expandFollowedListNotes(listId)
-                }}
-            >
-                <FollowedListDropdownIcon
-                    icon="triangle"
-                    height="12px"
-                    isExpanded={listData.isExpanded}
-                    marginLeft="0px"
-                />
-            </FollowedListIconContainer>
-        )
-        const sharedListStyleContext = null
-
-        const onClickTitle = (event) => {
-            event.stopPropagation()
-            this.props.toggleIsolatedListView(listId)
-        }
-
-        const buttonOpenIsolated = (
-            <ButtonTooltip
-                tooltipText="Add Highlights and Notes"
-                position="bottom"
-            >
-                <FollowedListIconContainer onClick={onClickTitle}>
-                    <FollowedListActionIcon src={icons.commentAdd} />
-                </FollowedListIconContainer>
-            </ButtonTooltip>
-        )
-        const renderNotes = (
-            <>
-                {listData.isExpanded &&
-                    this.renderNewAnnotation('isolatedView')}
-                {this.renderFollowedListNotes(listId)}
-            </>
-        )
-
-        return this.renderSharedListNotes(
-            listId,
-            dropdownIcon,
-            sharedListStyleContext,
-            onClickTitle,
-            buttonOpenIsolated,
-            renderNotes,
-        )
-    }
-
-    private renderSharedListNotesIsolated(listId) {
-        const sharedListStyleContext = 'isolatedView'
-
-        const renderNotes = (
-            <>
-                {this.renderNewAnnotation('isolatedView')}
-                {this.renderFollowedListNotes(listId)}
-            </>
-        )
-        return this.renderSharedListNotes(
-            listId,
-            null,
-            sharedListStyleContext,
-            null,
-            null,
-            renderNotes,
-        )
-    }
-
-    private renderIsolatedView(listId) {
-        const ContributorTooltip = (
-            <span>You can add highlights to this page.</span>
-        )
-
-        return (
-            <FollowedListNotesContainer bottom="10px">
-                <IsolatedViewTopBar>
-                    <BackButton
-                        onClick={(event) => {
-                            this.props.toggleIsolatedListView(listId)
-                        }}
+        const sharedNotesByList = followedLists.allIds.map((listId) => {
+            const listData = followedLists.byId[listId]
+            return (
+                <FollowedListNotesContainer bottom="20px" top="0px">
+                    {/* <React.Fragment key={listId}> */}
+                    <FollowedListRow
+                        key={listId}
+                        onClick={() =>
+                            this.props.expandFollowedListNotes(listId)
+                        }
+                        title={listData.name}
                     >
-                        <BackButtonArrow icon="triangle" height="12px" />{' '}
-                        {'Back'}
-                    </BackButton>
-                    {this.props.followedLists.byId[listId]?.isContributable ? (
-                        <ButtonTooltip
-                            tooltipText={ContributorTooltip}
-                            position="bottomLeft"
-                        >
-                            <ContributorBadge>
-                                <ContributorIcon src={icons.shared} />
-                                Contributor
-                            </ContributorBadge>
-                        </ButtonTooltip>
-                    ) : (
-                        <p>{'@ Commentor'}</p>
-                    )}
-                </IsolatedViewTopBar>
-                {this.state.showIsolatedViewNotif && (
-                    <IsolatedViewTutorial>
-                        <IsolatedViewText>
-                            While you are in this view, all annotations <br />{' '}
-                            and notes you make are added to this space.
-                        </IsolatedViewText>
-                        <IsolatedViewTutorialClose
-                            onClick={() => {
-                                this.setState({ showIsolatedViewNotif: false }),
-                                    setLocalStorage(
-                                        SHOW_ISOLATED_VIEW_KEY,
-                                        false,
-                                    )
-                            }}
-                        >
-                            <CloseIconStyled background={'white'} />
-                        </IsolatedViewTutorialClose>
-                    </IsolatedViewTutorial>
-                )}
-                {this.props.isExpandedSharedSpaces &&
-                    (this.props.followedListLoadState === 'running' ? (
-                        this.renderLoader()
-                    ) : this.props.followedListLoadState === 'error' ? (
-                        <FollowedListsMsgContainer>
-                            <FollowedListsMsgHead>
-                                Something went wrong
-                            </FollowedListsMsgHead>
-                            <FollowedListsMsg>
-                                Reload the page and if the problem persists{' '}
-                                <ExternalLink
-                                    label="contact
-                                    support"
-                                    href="mailto:support@worldbrain.io"
+                        <FollowedListTitleContainer>
+                            <FollowedListTitle>
+                                {listData.name}
+                            </FollowedListTitle>
+                        </FollowedListTitleContainer>
+                        <ButtonContainer>
+                            <ButtonTooltip
+                                tooltipText="Go to Space"
+                                position="left"
+                            >
+                                <Icon
+                                    icon="goTo"
+                                    height="16px"
+                                    onClick={() =>
+                                        this.props.openCollectionPage(listId)
+                                    }
                                 />
-                                .
-                            </FollowedListsMsg>
-                        </FollowedListsMsgContainer>
-                    ) : (
-                        <>{this.renderSharedListNotesIsolated(listId)}</>
-                    ))}
-            </FollowedListNotesContainer>
-        )
-    }
-
-    private renderSharedNotesByList() {
-        const { followedListLoadState, followedLists } = this.props
-
-        // if (!followedLists.allIds.length) {
-        //     return null
-        // }
-
-        const sharedNotesByList = followedLists.allIds.map((listId) =>
-            this.renderSharedListNotesNotIsolated(listId),
-        )
+                            </ButtonTooltip>
+                            <FollowedListNoteCount active left="5px">
+                                {listData.sharedAnnotationReferences.length}
+                            </FollowedListNoteCount>
+                        </ButtonContainer>
+                    </FollowedListRow>
+                    {this.renderFollowedListNotes(listId)}
+                </FollowedListNotesContainer>
+            )
+        })
         return (
-            <FollowedListNotesContainer bottom="10px">
-                <FollowedListTitleContainer
-                    onClick={() =>
-                        this.props.expandSharedSpaces(followedLists.allIds)
-                    }
-                    left="5px"
-                    bottom="5px"
-                >
-                    <FollowedListSectionTitle>
-                        From Shared Spaces
-                    </FollowedListSectionTitle>
-
-                    {this.props.followedListLoadState ===
-                    'running' ? null : followedLists.allIds.length ? (
-                        <FollowedListDropdownIcon
-                            icon="triangle"
-                            height="12px"
-                            isExpanded={this.props.isExpandedSharedSpaces}
-                            marginLeft="5px"
-                            marginRight="5px"
-                        />
-                    ) : (
-                        <FollowedListNoteCount left="5px" right="15px">
-                            0
-                        </FollowedListNoteCount>
-                    )}
-                </FollowedListTitleContainer>
+            <SectionTitleContainer>
                 {this.props.isExpandedSharedSpaces &&
                     (this.props.followedListLoadState === 'running' ? (
                         this.renderLoader()
@@ -593,9 +697,38 @@ class AnnotationsSidebar extends React.Component<
                             </FollowedListsMsg>
                         </FollowedListsMsgContainer>
                     ) : (
-                        sharedNotesByList
+                        <>
+                            {this.props.followedLists.allIds.length > 0 ? (
+                                <AnnotationContainer>
+                                    {sharedNotesByList}
+                                </AnnotationContainer>
+                            ) : (
+                                <EmptyMessageContainer>
+                                    <SectionCircle>
+                                        <Icon
+                                            filePath={icons.peopleFine}
+                                            heightAndWidth="20px"
+                                            color="purple"
+                                            hoverOff
+                                        />
+                                    </SectionCircle>
+                                    <InfoText>
+                                        Create your first
+                                        <Link
+                                            onClick={() =>
+                                                window.open(
+                                                    'https://links.memex.garden/tutorials/collaborative-spaces',
+                                                )
+                                            }
+                                        >
+                                            collaborative Space
+                                        </Link>
+                                    </InfoText>
+                                </EmptyMessageContainer>
+                            )}
+                        </>
                     ))}
-            </FollowedListNotesContainer>
+            </SectionTitleContainer>
         )
     }
 
@@ -603,85 +736,89 @@ class AnnotationsSidebar extends React.Component<
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-        return this.props.isolatedView ? (
-            <AnnotationsSectionStyled>
-                {this.renderIsolatedView(this.props.isolatedView)}
-            </AnnotationsSectionStyled>
-        ) : (
+        // return this.props.isolatedView ? (
+        //     <AnnotationsSectionStyled>
+        //         {this.renderIsolatedView(this.props.isolatedView)}
+        //     </AnnotationsSectionStyled>
+        // ) : (
+        return (
             <React.Fragment>
-                <AnnotationsSectionStyled>
-                    {this.renderAnnotationsEditable()}
-                </AnnotationsSectionStyled>
-                <AnnotationsSectionStyled>
-                    {this.renderSharedNotesByList()}
-                </AnnotationsSectionStyled>
+                {this.props.isExpanded ? (
+                    <AnnotationsSectionStyled>
+                        {this.renderAnnotationsEditable()}
+                    </AnnotationsSectionStyled>
+                ) : (
+                    <AnnotationsSectionStyled>
+                        {this.renderSharedNotesByList()}
+                    </AnnotationsSectionStyled>
+                )}
             </React.Fragment>
         )
     }
 
-    private renderCopyPasterManager(annotationUrls) {
-        return (
-            <HoverBox>
-                <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
-                    annotationUrls={annotationUrls}
-                    normalizedPageUrls={this.props.normalizedPageUrls}
-                    onClickOutside={() =>
-                        this.setState({ showAllNotesCopyPaster: false })
-                    }
-                />
-            </HoverBox>
-        )
-    }
+    // private renderCopyPasterManager(annotationUrls) {
+    //     return (
+    //         <HoverBox>
+    //             <PageNotesCopyPaster
+    //                 copyPaster={this.props.copyPaster}
+    //                 annotationUrls={annotationUrls}
+    //                 normalizedPageUrls={this.props.normalizedPageUrls}
+    //                 onClickOutside={() =>
+    //                     this.setState({ showAllNotesCopyPaster: false })
+    //                 }
+    //             />
+    //         </HoverBox>
+    //     )
+    // }
 
-    private renderAllNotesCopyPaster() {
-        if (!this.state.showAllNotesCopyPaster) {
-            return null
-        }
+    // private renderAllNotesCopyPaster() {
+    //     if (!this.state.showAllNotesCopyPaster) {
+    //         return null
+    //     }
 
-        const annotUrls = this.props.annotationUrls()
-        return (
-            <CopyPasterWrapperTopBar>
-                {this.renderCopyPasterManager(annotUrls)}
-            </CopyPasterWrapperTopBar>
-        )
-    }
+    //     const annotUrls = this.props.annotationUrls()
+    //     return (
+    //         <CopyPasterWrapperTopBar>
+    //             {this.renderCopyPasterManager(annotUrls)}
+    //         </CopyPasterWrapperTopBar>
+    //     )
+    // }
 
-    private renderAllNotesShareMenu() {
-        if (!this.state.showAllNotesShareMenu) {
-            return null
-        }
+    // private renderAllNotesShareMenu() {
+    //     if (!this.state.showAllNotesShareMenu) {
+    //         return null
+    //     }
 
-        return (
-            <ShareMenuWrapperTopBar>
-                <ClickAway
-                    onClickAway={() =>
-                        this.setState({ showAllNotesShareMenu: false })
-                    }
-                >
-                    <HoverBox width="340px">
-                        <AllNotesShareMenu
-                            contentSharingBG={this.props.contentSharing}
-                            annotationsBG={this.props.annotationsShareAll}
-                            normalizedPageUrl={this.props.normalizedPageUrl}
-                            copyLink={async (link) => {
-                                this.props.copyPageLink(link)
-                            }}
-                            postBulkShareHook={(shareInfo) =>
-                                this.props.postBulkShareHook(shareInfo)
-                            }
-                        />
-                    </HoverBox>
-                </ClickAway>
-            </ShareMenuWrapperTopBar>
-        )
-    }
+    //     return (
+    //         <ShareMenuWrapperTopBar>
+    //             <ClickAway
+    //                 onClickAway={() =>
+    //                     this.setState({ showAllNotesShareMenu: false })
+    //                 }
+    //             >
+    //                 <HoverBox width="340px">
+    //                     <AllNotesShareMenu
+    //                         contentSharingBG={this.props.contentSharing}
+    //                         annotationsBG={this.props.annotationsShareAll}
+    //                         normalizedPageUrl={this.props.normalizedPageUrl}
+    //                         copyLink={async (link) => {
+    //                             this.props.copyPageLink(link)
+    //                         }}
+    //                         postBulkShareHook={(shareInfo) =>
+    //                             this.props.postBulkShareHook(shareInfo)
+    //                         }
+    //                     />
+    //                 </HoverBox>
+    //             </ClickAway>
+    //         </ShareMenuWrapperTopBar>
+    //     )
+    // }
 
     private renderAnnotationsEditable() {
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <>
+                <AnnotationBox>
                     <AnnotationEditable
                         key={i}
                         {...annot}
@@ -707,7 +844,7 @@ class AnnotationsSidebar extends React.Component<
                         }
                         ref={(ref) => (this.annotationEditRef = ref)}
                     />
-                </>
+                </AnnotationBox>
             )
         })
 
@@ -732,82 +869,230 @@ class AnnotationsSidebar extends React.Component<
             <FollowedListNotesContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
             >
+                {this.props.isExpanded && (
+                    <>
+                        {this.renderNewAnnotation()}
+
+                        {this.props.annotations.length > 0 ? (
+                            <AnnotationContainer>{annots}</AnnotationContainer>
+                        ) : (
+                            <EmptyMessageContainer>
+                                <SectionCircle>
+                                    <Icon
+                                        filePath={icons.commentEmpty}
+                                        heightAndWidth="20px"
+                                        color="purple"
+                                        hoverOff
+                                    />
+                                </SectionCircle>
+                                <InfoText>
+                                    Add a note or highlight sections of the page
+                                </InfoText>
+                            </EmptyMessageContainer>
+                        )}
+                    </>
+                )}
+            </FollowedListNotesContainer>
+        )
+    }
+
+    private renderTopBarSwitcher() {
+        const { followedLists } = this.props
+        return (
+            <TopBarContainer>
                 <FollowedListTitleContainerMyNotes left="5px">
                     <MyNotesClickableArea
                         onClick={
-                            !this.props.annotations.length
+                            this.props.isExpanded
                                 ? null
-                                : () => this.props.expandMyNotes()
+                                : () => {
+                                      this.props.expandMyNotes()
+                                      this.props.expandSharedSpaces(
+                                          followedLists.allIds,
+                                      )
+                                  }
                         }
                     >
-                        <FollowedListSectionTitle title={'My Notes'}>
-                            {'My Notes'}
-                        </FollowedListSectionTitle>
-                        {this.props.annotations.length > 0 && (
-                            <FollowedListDropdownIcon
-                                icon="triangle"
-                                height="12px"
-                                isExpanded={this.props.isExpanded}
-                                marginLeft="5px"
-                                marginRight="5px"
+                        <FollowedListSectionTitle
+                            active={this.props.isExpanded}
+                        >
+                            <Icon
+                                filePath={icons.personFine}
+                                heightAndWidth="18px"
+                                hoverOff
+                                color={this.props.isExpanded ? 'purple' : null}
                             />
-                        )}
+                            My Annotations
+                        </FollowedListSectionTitle>
                     </MyNotesClickableArea>
-                    <TopBarActionBtns>
-                        {this.renderAllNotesShareMenu()}
-                        {this.renderAllNotesCopyPaster()}
-                        <SortingDropdownMenuBtn
-                            onMenuItemClick={(sortingFn) =>
-                                this.props.onMenuItemClick(sortingFn)
+                </FollowedListTitleContainerMyNotes>
+                <FollowedListTitleContainer
+                    onClick={
+                        this.props.isExpandedSharedSpaces
+                            ? null
+                            : () => {
+                                  this.props.expandSharedSpaces(
+                                      followedLists.allIds,
+                                  )
+                                  this.props.expandMyNotes()
+                              }
+                    }
+                    left="5px"
+                >
+                    <FollowedListSectionTitle
+                        active={this.props.isExpandedSharedSpaces}
+                    >
+                        <Icon
+                            filePath={icons.peopleFine}
+                            heightAndWidth="18px"
+                            hoverOff
+                            color={
+                                this.props.isExpandedSharedSpaces
+                                    ? 'purple'
+                                    : null
                             }
                         />
-                        <ButtonTooltip
-                            tooltipText="Copy All Notes"
-                            position="bottomSidebar"
-                        >
-                            <ActionBtn
-                                onClick={() =>
-                                    this.setState({
-                                        showAllNotesCopyPaster: true,
-                                    })
-                                }
-                                isActive={this.state.showAllNotesCopyPaster}
-                            >
-                                <ActionIcon src={icons.copy} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                        <ButtonTooltip
-                            tooltipText="Share annotated Page"
-                            position="bottomRightEdge"
-                        >
-                            <ActionBtn
-                                onClick={() =>
-                                    this.setState({
-                                        showAllNotesShareMenu: true,
-                                    })
-                                }
-                                isActive={this.state.showAllNotesShareMenu}
-                            >
-                                <ActionIcon src={icons.link} />
-                            </ActionBtn>
-                        </ButtonTooltip>
-                    </TopBarActionBtns>
-                </FollowedListTitleContainerMyNotes>
-                {!this.props.annotations.length ? (
-                    <EmptyMessage />
-                ) : (
-                    this.props.isExpanded && annots
-                )}
-            </FollowedListNotesContainer>
+                        {/* //             <ButtonTooltip
+            //                 tooltipText="Copy All Notes"
+            //                 position="bottomSidebar"
+            //             >
+            //                 <ActionBtn
+            //                     onClick={() =>
+            //                         this.setState({
+            //                             showAllNotesCopyPaster: true,
+            //                         })
+            //                     }
+            //                     isActive={this.state.showAllNotesCopyPaster}
+            //                 >
+            //                     <ActionIcon src={icons.copy} />
+            //                 </ActionBtn>
+            //             </ButtonTooltip>
+            //             <ButtonTooltip
+            //                 tooltipText="Share annotated Page"
+            //                 position="bottomRightEdge"
+            //             >
+            //                 <ActionBtn
+            //                     onClick={() =>
+            //                         this.setState({
+            //                             showAllNotesShareMenu: true,
+            //                         })
+            //                     }
+            //                     isActive={this.state.showAllNotesShareMenu}
+            //                 >
+            //                     <ActionIcon src={icons.link} />
+            //                 </ActionBtn>
+            //             </ButtonTooltip>
+            //         </TopBarActionBtns>
+            //     </FollowedListTitleContainerMyNotes>
+            //     {!this.props.annotations.length ? (
+            //         <EmptyMessage />
+            //     ) : (
+            //         this.props.isExpanded && annots
+            //     )}
+            // </FollowedListNotesContainer> */}
+                        Shared Spaces
+                    </FollowedListSectionTitle>
+
+                    {this.props.followedListLoadState === 'running' ? (
+                        <LoadingBox>
+                            <LoadingIndicator size={'16px'} />{' '}
+                        </LoadingBox>
+                    ) : followedLists.allIds.length ? (
+                        <LoadingBox>
+                            <FollowedListNoteCount active={true} left="5px">
+                                {followedLists.allIds.length}
+                            </FollowedListNoteCount>
+                        </LoadingBox>
+                    ) : (
+                        <LoadingBox>
+                            <FollowedListNoteCount active={false} left="5px">
+                                0
+                            </FollowedListNoteCount>
+                        </LoadingBox>
+                    )}
+                </FollowedListTitleContainer>
+            </TopBarContainer>
+        )
+    }
+
+    private renderSortingMenuDropDown() {
+        if (!this.state.showSortDropDown) {
+            return null
+        }
+
+        return (
+            <HoverBox right={'-20px'} padding={'0px'} top={'30px'}>
+                <SortingDropdownMenuBtn
+                    onMenuItemClick={(sortingFn) =>
+                        this.props.onMenuItemClick(sortingFn)
+                    }
+                    onClickOutSide={() =>
+                        this.setState({ showSortDropDown: false })
+                    }
+                />
+            </HoverBox>
+        )
+    }
+
+    private renderTopBarActionButtons() {
+        return (
+            <TopBarActionBtns>
+                {this.renderAllNotesShareMenu()}
+                {this.renderAllNotesCopyPaster()}
+                <ButtonTooltip tooltipText="Sort Annotations" position="bottom">
+                    <Icon
+                        filePath={icons.sort}
+                        onClick={() =>
+                            this.setState({
+                                showSortDropDown: true,
+                            })
+                        }
+                        height="18px"
+                        width="20px"
+                    />
+                </ButtonTooltip>
+                {this.renderSortingMenuDropDown()}
+                <ButtonTooltip
+                    tooltipText={'Copy All Notes'}
+                    position="bottomSidebar"
+                >
+                    <Icon
+                        filePath={icons.copy}
+                        onClick={() =>
+                            this.setState({
+                                showAllNotesCopyPaster: true,
+                            })
+                        }
+                        heightAndWidth="16px"
+                    />
+                </ButtonTooltip>
+                <ButtonTooltip
+                    tooltipText="Share annotated Page"
+                    position="bottomRightEdge"
+                >
+                    <Icon
+                        onClick={() =>
+                            this.setState({
+                                showAllNotesShareMenu: true,
+                            })
+                        }
+                        heightAndWidth="14px"
+                        filePath={icons.link}
+                    />
+                </ButtonTooltip>
+            </TopBarActionBtns>
         )
     }
 
     render() {
         return (
             <>
-                {/* {this.renderSearchSection()} */}
                 <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
-                    {!this.props.isolatedView && this.renderNewAnnotation()}
+                    <TopBar>
+                        {this.renderTopBarSwitcher()}
+                        {this.props.isExpanded &&
+                            this.renderTopBarActionButtons()}
+                    </TopBar>
                     {this.renderResultsBody()}
                 </ResultBodyContainer>
             </>
@@ -820,17 +1105,71 @@ export default onClickOutside(AnnotationsSidebar)
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
-const EmptyMessage = () => (
-    <FollowedListsMsgContainer>
-        <FollowedListsMsgHead>
-            No notes or highlights on this page
-        </FollowedListsMsgHead>
-        <FollowedListsMsg>
-            Type in the text field above <br />
-            or highlight sections of the page
-        </FollowedListsMsg>
-    </FollowedListsMsgContainer>
-)
+const Link = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    padding-left: 4px;
+    cursor: pointer;
+`
+
+const LoadingBox = styled.div`
+    margin-left: 3px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+`
+
+const TopBar = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    width: 93%;
+    padding: 5px 15px 5px 10px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+`
+
+const TopBarContainer = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+`
+const EmptyMessageContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 20px 5px;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+`
+const AnnotationBox = styled.div`
+    padding: 0 2px;
+    width: fill-available;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 50px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+`
+
+const NoNoteImg = styled.img`
+    height: 80px;
+    width: 80px;
+    display: flex;
+    justify-self: center;
+`
 
 const ContributorBadge = styled.div`
     display: grid;
@@ -948,6 +1287,30 @@ const FollowedListNotesContainer = styled(Margin)`
     align-items: flex-start;
 `
 
+const SectionTitleContainer = styled(Margin)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 100%;
+`
+
+const AnnotationContainer = styled(Margin)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-bottom: 350px;
+    overflow: scroll;
+    height: fill-available;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+
 const FollowedNotesContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -966,14 +1329,19 @@ const FollowedListsMsgContainer = styled.div`
 const FollowedListsMsgHead = styled.span`
     font-weight: bold;
     text-align: center;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     padding-top: 10px;
     padding-bottom: 5px;
     font-size: 14px;
     line-height: 20px;
+    justify-content: center;
+    display: grid;
+    grid-auto-flow: row;
+    align-items: center;
+    grid-gap: 5px;
 `
 const FollowedListsMsg = styled.span`
-    color: ${(props) => props.theme.colors.darkgrey};
+    color: ${(props) => props.theme.colors.lighterText};
     text-align: center;
     font-size: 14px;
     line-height: 17px;
@@ -990,23 +1358,39 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 10px 5px 5px;
-    width: 415px;
-    cursor: ${(props) =>
-        props.context === 'isolatedView' ? 'default' : 'pointer'};
-    border-radius: 3px;
-
-    &:hover {
-        background: ${(props) =>
-            props.context === 'isolatedView' ? 'none' : '#d0d0d0'};
-    }
+    padding: 5px;
+    width: fill-available;
+    cursor: pointer;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    height: 40px;
+    padding: 5px 15px 5px 20px;
+    background: white;
+    margin: 5px 0px 5px 0px;
 `
 
-const FollowedListSectionTitle = styled(Margin)`
-    font-size: 16px;
-    color: #c0c0c0;
+const ButtonContainer = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+`
+
+const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
+    font-size: 13px;
+    color: ${(props) =>
+        props.active
+            ? props.theme.colors.darkerText
+            : props.theme.colors.normalText};
     justify-content: flex-start;
     width: max-content;
+    font-weight: 400;
+    flex-direction: row;
+    grid-gap: 2px;
+    align-items: center;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const FollowedListTitleContainer = styled(Margin)`
@@ -1025,8 +1409,8 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
     align-items: center;
     cursor: pointer;
     justify-content: space-between;
-    width: 420px;
-    z-index: 20;
+    width: fit-content;
+    z-index: 1;
 `
 
 const FollowedListTitle = styled.span<{ context: string }>`
@@ -1037,13 +1421,19 @@ const FollowedListTitle = styled.span<{ context: string }>`
     max-width: 295px;
     text-overflow: ellipsis;
     overflow-x: hidden;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.darkerText};
 `
 
-const FollowedListNoteCount = styled(Margin)`
+const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     border-radius: 30px;
-    background-color: ${(props) => props.theme.colors.grey};
+    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) =>
+        props.active
+            ? props.theme.colors.purple
+            : props.theme.colors.lightgrey};
+    color: ${(props) =>
+        props.active ? 'white' : props.theme.colors.normalText};
     width: 30px;
     font-size: 12px;
 `
@@ -1064,16 +1454,8 @@ const FollowedListIconContainer = styled.div`
 
 const FollowedListDropdownIcon = styled(Icon)<{
     isExpanded: boolean
-    marginLeft: string
 }>`
     transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
-    margin-left: ${(props) => (props.marginLeft ? props.marginLeft : 'none')};
-    margin-right: ${(props) =>
-        props.marginRight ? props.marginRight : 'none'};
-`
-
-const BackButtonArrow = styled(Icon)<{}>`
-    transform: rotate(90deg);
 `
 
 const CloseIconStyled = styled.div<{ background: string }>`
@@ -1105,7 +1487,7 @@ const CloseButtonStyled = styled.button`
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1145,19 +1527,17 @@ const annotationCardStyle = css`
     }
 `
 
-const NewAnnotationSection = styled.section<{
-    context: string
-}>`
-    font-family: sans-serif;
+const NewAnnotationSection = styled.section`
+    font-family: 'Inter', sans-serif;
     height: auto;
-    background: #f6f8fb;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    width: ${(props) => (props.context === 'isolatedView' ? '100%' : 'unset')};
-    padding: ${(props) =>
-        props.context === 'isolatedView' ? '0px' : '10px 10px 15px 10px'};
+    width: fill-available;
+    padding-bottom: 8px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 `
 
 const NewAnnotationSeparator = styled.div`
@@ -1168,13 +1548,14 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: sans-serif;
-    background: #f6f8fb;
+    font-family: 'Inter', sans-serif;
+    background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     padding: 5px 10px;
+    height: 100%;
 `
 
 const NewAnnotationBoxStyled = styled.div`
@@ -1292,10 +1673,8 @@ const ShareMenuWrapperTopBar = styled.div`
 `
 
 const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
-    height: fill-available;
-    overflow-y: scroll;
-    padding-bottom: 150px;
-    width: 450px;
+    height: 100vh;
+    width: fill-available;
     padding-right: ${(props) =>
         props.sidebarContext === 'dashboard' ? '0' : '20px'};
     position: absolute;

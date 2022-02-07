@@ -1,5 +1,4 @@
 import fromPairs from 'lodash/fromPairs'
-import debounce from 'lodash/debounce'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
     UILogic,
@@ -8,7 +7,7 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { browser } from 'webextension-polyfill-ts'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
@@ -34,6 +33,8 @@ import {
 } from 'src/sync-settings/util'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import { getLocalStorage } from 'src/util/storage'
+import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -83,6 +84,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationConversationEventHandlers<SidebarContainerState>(
                 this as any,
                 {
+                    getSharedListReference: () => null,
                     loadUserByReference: options.auth.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
@@ -144,7 +146,7 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationConversationInitialState(),
 
             isExpanded: true,
-            isExpandedSharedSpaces: true,
+            isExpandedSharedSpaces: false,
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
@@ -155,6 +157,7 @@ export class SidebarContainerLogic extends UILogic<
             listData: {},
             users: {},
 
+            isWidthLocked: false,
             isLocked: false,
             pageUrl: this.options.pageUrl,
             showState: this.options.initialState ?? 'hidden',
@@ -290,6 +293,18 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
+    adjustSidebarWidth = (changes) => {
+        let SidebarWidth = changes[SIDEBAR_WIDTH_STORAGE_KEY].newValue.replace(
+            'px',
+            '',
+        )
+        SidebarWidth = parseFloat(SidebarWidth)
+        let windowWidth = window.innerWidth
+        let width = (windowWidth - SidebarWidth - 40).toString()
+        width = width + 'px'
+        document.body.style.width = width
+    }
+
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
     }
@@ -298,6 +313,28 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isLocked: { $set: true } })
     unlock: EventHandler<'unlock'> = () =>
         this.emitMutation({ isLocked: { $set: false } })
+
+    lockWidth: EventHandler<'lockWidth'> = () => {
+        getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
+            let SidebarInitialAsInteger = parseFloat(
+                width.toString().replace('px', ''),
+            )
+            let WindowInitialWidth =
+                (window.innerWidth - SidebarInitialAsInteger - 40).toString() +
+                'px'
+            document.body.style.width = WindowInitialWidth
+        })
+
+        browser.storage.onChanged.addListener(this.adjustSidebarWidth)
+
+        this.emitMutation({ isWidthLocked: { $set: true } })
+    }
+
+    unlockWidth: EventHandler<'unlockWidth'> = () => {
+        document.body.style.width = window.innerWidth.toString() + 'px'
+        browser.storage.onChanged.removeListener(this.adjustSidebarWidth)
+        this.emitMutation({ isWidthLocked: { $set: false } })
+    }
 
     copyNoteLink: EventHandler<'copyNoteLink'> = async ({
         event: { link },

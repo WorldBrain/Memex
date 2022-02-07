@@ -3,6 +3,8 @@ import styled from 'styled-components'
 
 import Overlay, { Props as OverlayProps } from './Overlay'
 import { close as closeIcon } from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Omit<OverlayProps, 'onClick'> {
     ignoreClickOutside?: boolean
@@ -19,9 +21,13 @@ class Modal extends PureComponent<Props> {
                 {...props}
             >
                 {onClose && (
-                    <CloseButton onClick={onClose} data-annotation="sidebar">
-                        <CloseButtonImg src={closeIcon} />
-                    </CloseButton>
+                    <CloseContainer>
+                        <Icon
+                            filePath={icons.close}
+                            heightAndWidth="16px"
+                            onClick={onClose}
+                        />
+                    </CloseContainer>
                 )}
                 <Content>{this.props.children}</Content>
             </Overlay>
@@ -36,21 +42,14 @@ export const CloseButtonImg = styled.img`
     width: 100%;
 `
 
-export const CloseButton = styled.button`
+export const CloseContainer = styled.div`
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background-size: 14px;
-    width: 22px;
-    height: 22px;
-    border: none;
-    transition: all 200ms;
+    top: 15px;
+    right: 15px;
     cursor: pointer;
-    border-radius: 3px;
-
-    &:hover {
-        opacity: 0.4;
-    }
+    border: none;
+    outline: none;
+    background: none;
 `
 
 export const Content = styled.div`

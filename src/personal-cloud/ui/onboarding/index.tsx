@@ -18,6 +18,9 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SUPPORT_EMAIL } from 'src/constants'
 import checkBrowser from 'src/util/check-browser'
+import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props extends Dependencies {
     supportLink: string
@@ -47,14 +50,22 @@ export default class CloudOnboardingModal extends UIElement<
     private renderDataDumper() {
         if (!this.state.giveControlToDumper) {
             return (
-                <Container>
-                    <Header>
+                <SectionContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>
                         Locally back up your data before starting the migration
-                    </Header>
-                    <Text>
+                    </SectionTitle>
+                    <InfoText>
                         Create a backup dump of your data before starting the
                         sync.
-                    </Text>
+                    </InfoText>
                     <BtnBox>
                         <SecondaryAction
                             label="Backup existing data"
@@ -69,20 +80,7 @@ export default class CloudOnboardingModal extends UIElement<
                             }
                         />
                     </BtnBox>
-                    <Text dimmed>
-                        Don't want to use the cloud?{' '}
-                        <Text
-                            dimmed
-                            clickable
-                            onClick={() =>
-                                this.processEvent('migrateToOldVersion', null)
-                            }
-                        >
-                            <u>Migrate</u>
-                        </Text>{' '}
-                        to the last version of Memex.
-                    </Text>
-                </Container>
+                </SectionContainer>
             )
         }
 
@@ -121,11 +119,19 @@ export default class CloudOnboardingModal extends UIElement<
         }
         if (this.state.stage === 'old-version-backup') {
             return (
-                <Container>
-                    <Header>
+                <SectionContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.backup}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>
                         Create backup to migrate to offline-only version
-                    </Header>
-                    <Text>
+                    </SectionTitle>
+                    <InfoText>
                         <strong>Important:</strong>
                         <br />
                         Memex last version (
@@ -142,7 +148,7 @@ export default class CloudOnboardingModal extends UIElement<
                         <br />
                         Backup your data, install 2.20.0 and then restore your
                         data there.
-                    </Text>
+                    </InfoText>
                     <BtnBox>
                         <SecondaryAction
                             label="Go Back"
@@ -160,7 +166,7 @@ export default class CloudOnboardingModal extends UIElement<
                             }
                         />
                     </BtnBox>
-                </Container>
+                </SectionContainer>
             )
         }
         return (
@@ -188,3 +194,36 @@ export default class CloudOnboardingModal extends UIElement<
         )
     }
 }
+
+const SectionContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+    padding: 50px;
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 60px;
+    width: 60px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    margin-bottom: 40px;
+    font-weight: 500;
+`

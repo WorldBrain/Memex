@@ -50,7 +50,7 @@ import {
 } from '../../util/webextensionRPC'
 
 interface ContentInfo {
-    locators: Array<ContentLocator>
+    locators: ContentLocator[]
     primaryIdentifier: ContentIdentifier // this is the one we store in the DB
     aliasIdentifiers: ContentIdentifier[] // these are the ones of the other URLs pointing to the primaryNormalizedUrl
 }
@@ -91,12 +91,20 @@ export class PageIndexingBackground {
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,
         })
+
         this.remoteFunctions = {
-            initContentIdentifier: remoteFunctionWithExtraArgs(
-                this.initContentIdentifierRemote,
+            initContentIdentifier: remoteFunctionWithExtraArgs((info, params) =>
+                this.initContentIdentifier({
+                    ...params,
+                    tabId: params.tabId ?? info.tab?.id,
+                }),
             ),
             waitForContentIdentifier: remoteFunctionWithExtraArgs(
-                this.waitForContentIdentifierRemote,
+                (info, params) =>
+                    this.waitForContentIdentifier({
+                        ...params,
+                        tabId: params.tabId ?? info.tab?.id,
+                    }),
             ),
         }
     }
@@ -105,26 +113,8 @@ export class PageIndexingBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
-    initContentIdentifierRemote: PageIndexingInterface<
-        'provider'
-    >['initContentIdentifier']['function'] = async (info, params) => {
-        return this.initContentIdentifier({
-            ...params,
-            tabId: params.tabId ?? info.tab.id,
-        })
-    }
-
-    waitForContentIdentifierRemote: PageIndexingInterface<
-        'provider'
-    >['waitForContentIdentifier']['function'] = async (info, params) => {
-        return this.waitForContentIdentifier({
-            ...params,
-            tabId: params.tabId ?? info.tab.id,
-        })
-    }
-
     async initContentIdentifier(
-        params: InitContentIdentifierParams & { tabId?: number },
+        params: InitContentIdentifierParams,
     ): Promise<InitContentIdentifierReturns> {
         const resolvable =
             params.tabId &&
@@ -140,20 +130,24 @@ export class PageIndexingBackground {
             normalizedUrl: regularNormalizedUrl,
             fullUrl: params.locator.originalLocation,
         }
+
         if (!params.fingerprints.length) {
+            // This is where regular, non-PDF pages leave
             resolvable?.resolve?.(regularIdentifier)
             return regularIdentifier
         }
+
         let contentInfo = this.contentInfo[regularNormalizedUrl]
         let stored: {
             identifier: ContentIdentifier
             locators: ContentLocator[]
         }
+
         if (!contentInfo) {
             stored = await this.storage.getContentIdentifier({
-                regularNormalizedUrl,
                 fingerprints: params.fingerprints,
             })
+
             if (!stored) {
                 const generatedNormalizedUrl = `memex.cloud/ct/${this.options.generateServerId(
                     'personalContentMetadata',
@@ -168,6 +162,8 @@ export class PageIndexingBackground {
                     aliasIdentifiers: [regularIdentifier],
                 }
             } else {
+                // Stored content ID exists for these fingerprints, so attempt grabbing info
+                //   from cache using the stored ID, or seed it if miss
                 contentInfo = this.contentInfo[
                     stored.identifier.normalizedUrl
                 ] ?? {
@@ -180,12 +176,13 @@ export class PageIndexingBackground {
                 }
             }
         }
+
         this.contentInfo[regularNormalizedUrl] = contentInfo
         this.contentInfo[
             contentInfo.primaryIdentifier.normalizedUrl
         ] = contentInfo
-        const { primaryIdentifier } = contentInfo
 
+        // Keep track of the orig ID passed into this function, as an alias ID of the main content info
         if (
             !contentInfo.aliasIdentifiers.find(
                 (identifier) =>
@@ -195,6 +192,7 @@ export class PageIndexingBackground {
             contentInfo.aliasIdentifiers.push(regularIdentifier)
         }
 
+        // Keep track of new fingerprints as locators on the main content info
         let hasNewLocators = false
         for (const fingerprint of params.fingerprints) {
             if (
@@ -210,9 +208,8 @@ export class PageIndexingBackground {
             hasNewLocators = true
 
             const isFile = isFileUrl(params.locator.originalLocation)
-            const newLocator: ContentLocator = {
+            contentInfo.locators.push({
                 ...params.locator,
-                originalLocation: params.locator.originalLocation,
                 location: normalizeUrl(params.locator.originalLocation),
                 locationType: isFile
                     ? ContentLocatorType.Local
@@ -221,29 +218,52 @@ export class PageIndexingBackground {
                     ? LocationSchemeType.FilesystemPathV1
                     : LocationSchemeType.NormalizedUrlV1,
                 fingerprint: fingerprint.fingerprint,
-                format: params.locator.format,
                 fingerprintScheme: fingerprint.fingerprintScheme,
-                normalizedUrl: primaryIdentifier.normalizedUrl,
+                normalizedUrl: contentInfo.primaryIdentifier.normalizedUrl,
                 primary: true,
                 valid: true,
                 version: 0,
                 lastVisited: this.options.getNow(),
-            }
-            contentInfo.locators.push(newLocator)
+            })
         }
         if (stored && hasNewLocators) {
-            await this.storeLocators(primaryIdentifier)
+            await this.storeLocators(contentInfo.primaryIdentifier)
         }
 
-        resolvable?.resolve?.(primaryIdentifier)
-        return primaryIdentifier
+        resolvable?.resolve?.(contentInfo.primaryIdentifier)
+        return contentInfo.primaryIdentifier
     }
 
     waitForContentIdentifier = async (params: {
         tabId: number
         fullUrl: string
+        timeout?: number
     }): Promise<WaitForContentIdentifierReturns> => {
-        return this._resolvableForIdentifierTabPage(params)
+        // TODO: Try and simplify this logic. Essentially, it was easily possible to get into states where the resolvable would
+        //  never get resolved (tab where the content-script doesn't run, and thus doesn't call initContentIdentifier), so solving
+        //  that by throwing an error after a timeout.
+        let winner: 'resolvable' | 'timeout'
+
+        const resolvable = new Promise<ContentIdentifier>(async (resolve) => {
+            const identifier = await this._resolvableForIdentifierTabPage(
+                params,
+            )
+            winner = winner ?? 'resolvable'
+            resolve(identifier)
+        })
+
+        const timeout = new Promise<ContentIdentifier>((resolve) =>
+            setTimeout(() => {
+                winner = winner ?? 'timeout'
+                resolve()
+            }, params.timeout ?? 2500),
+        )
+
+        const contentIdentifier = await Promise.race([resolvable, timeout])
+        if (winner === 'timeout') {
+            throw new Error('Could not resolve identifier in time')
+        }
+        return contentIdentifier
     }
 
     getContentFingerprints(
@@ -383,7 +403,8 @@ export class PageIndexingBackground {
         const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
 
-        const contentIdentifier = this.getContentIdentifier(pageData.url)
+        const contentIdentifier = this.contentInfo[pageData.url]
+            ?.primaryIdentifier
         if (contentIdentifier) {
             pageData.fullUrl = contentIdentifier.fullUrl
             pageData.url = contentIdentifier.normalizedUrl
@@ -396,7 +417,10 @@ export class PageIndexingBackground {
         } else {
             await this.storage.createPage(pageData)
         }
-        await this.storeLocators(contentIdentifier)
+
+        if (contentIdentifier) {
+            await this.storeLocators(contentIdentifier)
+        }
 
         if (opts.addInboxEntryOnCreate && !existingPage) {
             await this.options.createInboxEntry(pageData.fullUrl)
@@ -407,15 +431,7 @@ export class PageIndexingBackground {
         }
     }
 
-    getContentIdentifier(normalizedUrl: string) {
-        return this.contentInfo[normalizedUrl]?.primaryIdentifier
-    }
-
     async storeLocators(identifier: ContentIdentifier) {
-        if (!identifier) {
-            return // there were no fingerprints, so there's no need to use locators
-        }
-
         const contentInfo = this.contentInfo[identifier.normalizedUrl]
         if (!contentInfo) {
             return
@@ -560,7 +576,7 @@ export class PageIndexingBackground {
         }
     }
 
-    async _findTabId(fullUrl: string) {
+    private async _findTabId(fullUrl: string) {
         let foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
             fullUrl,
         )
@@ -635,14 +651,14 @@ export class PageIndexingBackground {
 
     handleTabClose(event: { tabId: number }) {
         delete this.indexedTabPages[event.tabId]
-        delete this._resolvableForIdentifierTabPage[event.tabId]
+        delete this._identifiersForTabPages[event.tabId]
     }
 
     findLocatorsByNormalizedUrl(normalizedUrl: string) {
         return this.storage.findLocatorsByNormalizedUrl(normalizedUrl)
     }
 
-    _resolvableForIdentifierTabPage(params: {
+    private _resolvableForIdentifierTabPage(params: {
         tabId: number
         fullUrl: string
     }) {
@@ -657,7 +673,7 @@ export class PageIndexingBackground {
         return resolvable
     }
 
-    _getTime(time?: number | '$now') {
+    private _getTime(time?: number | '$now') {
         if (!time && time !== 0) {
             return
         }

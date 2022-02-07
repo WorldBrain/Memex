@@ -1,40 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
-import styles from './RemovedText.css'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import styled from 'styled-components'
 
-const RemovedText = props => {
+const RemovedText = (props) => {
     return (
-        <div
-            className={classNames(
-                styles.removed,
-                styles[`removed-${props.position}`],
-            )}
-        >
-            <p
-                className={classNames(
-                    styles.removedP,
-                    styles[`removedP-${props.position}`],
-                )}
-            >
-                You can always enable this feature again via the settings.
-            </p>
-            <a
-                onClick={props.undo}
-                className={classNames(
-                    styles.removedA,
-                    styles[`removedA-${props.position}`],
-                )}
-            >
-                UNDO
-            </a>
-        </div>
+        <RemoveContainer>
+            You can always enable this feature again via the settings.
+            <PrimaryAction onClick={props.undo} fontSize="10px" label="Undo" />
+        </RemoveContainer>
     )
 }
 
+const RemoveContainer = styled.div`
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
+    color: ${(props) => props.theme.colors.lighterText};
+    padding: 20px;
+    grid-gap: 15px;
+    font-size: 14px;
+    display: flex;
+`
+
 RemovedText.propTypes = {
     undo: PropTypes.func.isRequired,
-    position: PropTypes.string.isRequired,
+    // position: PropTypes.string.isRequired,
 }
 
 export default RemovedText

@@ -689,6 +689,7 @@ export function createBackgroundModules(options: {
             getTab: bindMethod(options.browserAPIs.tabs, 'get'),
             injectScriptInTab: (tabId, injection) =>
                 options.browserAPIs.tabs.executeScript(tabId, injection),
+            browserAPIs: options.browserAPIs,
         }),
         inPageUI: new InPageUIBackground({
             queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),

@@ -69,10 +69,14 @@ export type Props = RootState &
         SearchTypeSwitchProps,
         'onNotesSearchSwitch' | 'onPagesSearchSwitch'
     > & {
+        searchFilters?: any
+        searchResults?: any
+        searchQuery?: string
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
         areAllNotesShown: boolean
+        toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         searchCopyPasterProps: SearchCopyPasterProps
@@ -152,7 +156,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 mode={noteData.isEditing ? 'edit' : 'default'}
                 renderCopyPasterForAnnotation={() =>
                     noteData.isCopyPasterShown && (
-                        <HoverBox right="0" withRelativeContainer>
+                        <HoverBox
+                            padding={'0px'}
+                            right="0"
+                            withRelativeContainer
+                        >
                             <PageNotesCopyPaster
                                 annotationUrls={[noteId]}
                                 normalizedPageUrls={[pageId]}
@@ -165,7 +173,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderTagsPickerForAnnotation={() =>
                     noteData.isTagPickerShown && (
-                        <HoverBox right="0" withRelativeContainer>
+                        <HoverBox left="0" top="-40px" withRelativeContainer>
                             <TagPicker
                                 initialSelectedEntries={() => noteData.tags}
                                 onClickOutside={
@@ -213,7 +221,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
-                        <HoverBox width="350px" right="0" withRelativeContainer>
+                        <HoverBox
+                            padding={'0px'}
+                            width="350px"
+                            right="0"
+                            withRelativeContainer
+                        >
                             <SingleNoteShareMenu
                                 isShared={noteData.isShared}
                                 shareImmediately={
@@ -310,7 +323,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return (
             <PageNotesBox bottom="10px" left="10px">
                 <AnnotationCreate
-                    autoFocus={this.props.shouldFormsAutoFocus}
+                    autoFocus={false}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     lists={newNoteForm.lists}
@@ -321,16 +334,25 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <>
                         <Margin top="3px" />
                         <NoteTopBarBox
-                            rightSide={
+                            leftSide={
                                 <TopBarRightSideWrapper>
-                                    <SortingDropdownMenuBtn
-                                        onMenuItemClick={({ sortingFn }) =>
-                                            this.props.onPageNotesSortSelection(
-                                                day,
-                                                normalizedUrl,
-                                            )(sortingFn)
-                                        }
-                                    />
+                                    <ButtonTooltip
+                                        tooltipText="Sort Annotations"
+                                        position="bottom"
+                                    >
+                                        <Icon
+                                            filePath={icons.sort}
+                                            onClick={() =>
+                                                this.props.toggleSortMenuShown()
+                                            }
+                                            height="18px"
+                                            width="20px"
+                                        />
+                                    </ButtonTooltip>
+                                    {this.renderSortingMenuDropDown(
+                                        normalizedUrl,
+                                        day,
+                                    )}
                                 </TopBarRightSideWrapper>
                             }
                         />
@@ -341,6 +363,31 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     this.renderNoteResult(day, normalizedUrl),
                 )}
             </PageNotesBox>
+        )
+    }
+
+    private renderSortingMenuDropDown(normalizedUrl, day: number) {
+        if (!this.props.isSortMenuShown) {
+            return null
+        }
+
+        return (
+            <HoverBox
+                withRelativeContainer
+                left={'-30px'}
+                padding={'0px'}
+                top={'20px'}
+            >
+                <SortingDropdownMenuBtn
+                    onMenuItemClick={({ sortingFn }) =>
+                        this.props.onPageNotesSortSelection(
+                            day,
+                            normalizedUrl,
+                        )(sortingFn)
+                    }
+                    onClickOutSide={() => this.props.toggleSortMenuShown()}
+                />
+            </HoverBox>
         )
     }
 
@@ -386,48 +433,167 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 
     private renderNoResults() {
-        if (this.props.noResultsType === 'onboarding-msg') {
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            (this.props.searchQuery.length > 0 ||
+                this.props.searchFilters.tagsIncluded.length > 0 ||
+                this.props.searchFilters.domainsIncluded.length > 0 ||
+                this.props.searchFilters.dateTo > 0 ||
+                this.props.searchFilters.dateFrom > 0)
+        ) {
             return (
-                <NoResults title="You don't have anything saved yet">
-                    <OnboardingMsg
-                        goToImportRoute={this.props.goToImportRoute}
-                    />
-                </NoResults>
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="Nothing found for this query" />
+                </ResultsMessage>
             )
         }
 
-        if (this.props.noResultsType === 'mobile-list') {
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            this.props.searchQuery.length === 0 &&
+            !this.props.searchFilters.isDateFilterActive &&
+            !this.props.searchFilters.isTagFilterActive &&
+            !this.props.searchFilters.isDomainFilterActive
+        ) {
+            if (this.props.noResultsType === 'mobile-list-ad') {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.phone}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults title="Save & annotate from your mobile devices">
+                            <DismissibleResultsMessage
+                                onDismiss={this.props.onDismissMobileAd}
+                            >
+                                <MobileAppAd />
+                            </DismissibleResultsMessage>
+                        </NoResults>
+                    </ResultsMessage>
+                )
+            }
+
+            if (this.props.searchType === 'notes') {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.highlighterEmpty}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults
+                            title={
+                                <span>
+                                    Make your first highlight or annotation
+                                </span>
+                            }
+                        />
+                    </ResultsMessage>
+                )
+            } else {
+                return (
+                    <ResultsMessage>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.heartEmpty}
+                                heightAndWidth="24px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <NoResults
+                            title={
+                                <span>
+                                    Save your first website or{' '}
+                                    <ImportInfo
+                                        onClick={() =>
+                                            (window.location.hash = '#/import')
+                                        }
+                                    >
+                                        import your bookmarks.
+                                    </ImportInfo>
+                                </span>
+                            }
+                        ></NoResults>
+                    </ResultsMessage>
+                )
+            }
+        }
+
+        if (
+            this.props.noResultsType === 'mobile-list' &&
+            this.props.searchQuery.length === 0
+        ) {
             return (
-                <NoResults title="You don't have anything saved from the mobile app yet" />
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.phone}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="Save & annotate from your mobile devices"></NoResults>
+                </ResultsMessage>
             )
         }
 
         if (this.props.noResultsType === 'mobile-list-ad') {
             return (
-                <NoResults title="You don't have anything saved from the mobile app yet">
-                    <DismissibleResultsMessage
-                        onDismiss={this.props.onDismissMobileAd}
-                    >
-                        <MobileAppAd />
-                    </DismissibleResultsMessage>
-                </NoResults>
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.phone}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="Save & annotate from your mobile devices">
+                        <DismissibleResultsMessage
+                            onDismiss={this.props.onDismissMobileAd}
+                        >
+                            <MobileAppAd />
+                        </DismissibleResultsMessage>
+                    </NoResults>
+                </ResultsMessage>
             )
         }
 
         if (this.props.noResultsType === 'stop-words') {
             return (
-                <NoResults title="No Results">
-                    Search terms are too common, or have been filtered out to
-                    increase performance.
-                </NoResults>
+                <ResultsMessage>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="24px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <NoResults title="No Results">
+                        Search terms are too common <br />
+                        or have been filtered out to increase performance.
+                    </NoResults>
+                </ResultsMessage>
             )
         }
-
-        return (
-            <NoResults title="Nothing found for this query">
-                ¯\_(ツ)_/¯
-            </NoResults>
-        )
     }
 
     private renderResultsByDay() {
@@ -473,15 +639,15 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <>
-                <ButtonTooltip tooltipText="Share Space" position="bottom">
-                    <IconBox>
-                        <Icon
-                            filePath={icons.link}
-                            height="16px"
-                            color="primary"
-                            onClick={this.props.toggleListShareMenu}
-                        />
-                    </IconBox>
+                <ButtonTooltip
+                    tooltipText="Bulk-change privacy of annotations in this Space"
+                    position="bottom"
+                >
+                    <Icon
+                        filePath={icons.multiEdit}
+                        height="16px"
+                        onClick={this.props.toggleListShareMenu}
+                    />
                 </ButtonTooltip>
                 {this.props.isListShareMenuShown && (
                     <HoverBox
@@ -489,6 +655,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         top="20px"
                         right="-90px"
                         withRelativeContainer
+                        position="absolute"
+                        padding={'0px'}
                     >
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
@@ -534,10 +702,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
                             <RightSideButton>
+                                {this.renderListShareBtn()}
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
-                                {this.renderListShareBtn()}
                                 <ExpandAllNotes
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}
@@ -552,15 +720,25 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
+const ResultsMessage = styled.div`
+    padding-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 2px 15px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    padding: 0px 15px;
+    height: 40px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 1001;
-    position: fixed;
-    top: ${(props) => (props.isDisplayed === true ? '75px' : '45px')};
-    background: #f6f8fb;
+    margin-top: -6px;
+    position: sticky;
+    top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
+    background: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const IconBox = styled.div`
@@ -577,6 +755,10 @@ const IconBox = styled.div`
 
 const RightSideButton = styled.div`
     display: flex;
+    align-items: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 10px;
     align-items: center;
 `
 
@@ -597,12 +779,12 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid #e0e0e0;
+    border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     margin-bottom: -2px;
 `
 
@@ -653,4 +835,21 @@ const ShareBtn = styled.button`
 const IconImg = styled.img`
     height: 18px;
     width: 18px;
+`
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 60px;
+    width: 60px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const ImportInfo = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    margin-bottom: 40px;
+    font-weight: 500;
+    cursor: pointer;
 `

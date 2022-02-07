@@ -11,6 +11,7 @@ import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/consta
 import './datepicker-overrides.css'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import DatePickerInput from './datepicker-input'
+import styled from 'styled-components'
 
 const processEvent = remoteFunction('processEvent')
 const styles = require('./DateRangeSelection.css')
@@ -279,7 +280,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         } = this.props
 
         return (
-            <div className={styles.dateRangeDiv}>
+            <DateRangeDiv>
                 {/* <div className={styles.dateRangeSelection} id="date-picker">
                     <img src="/img/to-icon.png" className={styles.toIcon} />
                 </div> */}
@@ -290,7 +291,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                     )}
                 >
                     <div className={styles.dateTitleContainer}>
-                        <span className={styles.dateTitle}>From</span>
+                        <DateTitle className={styles.dateTitle}>From</DateTitle>
                         <DatePickerInput
                             autoFocus
                             value={this.state.startDateText || startDateText}
@@ -327,7 +328,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                 </div>
                 <div className={styles.pickerContainer}>
                     <div className={styles.dateTitleContainer}>
-                        <span className={styles.dateTitle}>To</span>
+                        <DateTitle className={styles.dateTitle}>To</DateTitle>
                         <DatePickerInput
                             value={this.state.endDateText || endDateText}
                             name="to"
@@ -352,7 +353,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                             dateFormat={FORMAT}
                             isClearable
                             selected={endDate && moment(endDate)}
-                            minDate={moment(startDate)}
+                            minDate={startDate && moment(startDate)}
                             maxDate={moment()}
                             disabledKeyboardNavigation
                             onChange={this.handleDateChange({
@@ -362,15 +363,22 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                         />
                     </div>
                 </div>
-                {/*                <div className={stylesPro.proTipBox}>
-                    <span className={stylesPro.emoji}>🤓</span>
-                    <span className={stylesPro.proTip}>PRO Tip: </span>
-                    <span className={stylesPro.noBold}>type </span>
-                    <span className={stylesPro.example}>e.g. "1 hour ago"</span>
-                </div> */}
-            </div>
+            </DateRangeDiv>
         )
     }
 }
+
+const DateRangeDiv = styled.div`
+    display: flex;
+    background: white;
+    align-items: flex-start;
+    border-radius: 12px;
+`
+
+const DateTitle = styled.span`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    font-weight: 400;
+`
 
 export default onClickOutside(DateRangeSelection)

@@ -3,6 +3,7 @@ import React from 'react'
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
 import { Checkbox } from '../../../common-ui/components'
+import styled from 'styled-components'
 
 import { SEARCH_INJECTION_DEFAULT } from 'src/search-injection/constants'
 import {
@@ -60,23 +61,40 @@ class SearchInjectionContainer extends React.Component {
     render() {
         return (
             <SearchInjection>
-                <Checkbox
-                    isChecked={this.state.injectionPreference.google}
-                    handleChange={this.bindToggleInjection('google')}
-                    id="si-google"
-                >
-                    Google
-                </Checkbox>
-                <Checkbox
-                    isChecked={this.state.injectionPreference.duckduckgo}
-                    handleChange={this.bindToggleInjection('duckduckgo')}
-                    id="si-ddg"
-                >
-                    DuckDuckGo
-                </Checkbox>
+                <CheckBoxRow>
+                    <Checkbox
+                        isChecked={this.state.injectionPreference.google}
+                        handleChange={this.bindToggleInjection('google')}
+                        id="si-google"
+                    >
+                        Google
+                    </Checkbox>
+                </CheckBoxRow>
+                <CheckBoxRow>
+                    <Checkbox
+                        isChecked={this.state.injectionPreference.duckduckgo}
+                        handleChange={this.bindToggleInjection('duckduckgo')}
+                        id="si-ddg"
+                    >
+                        DuckDuckGo
+                    </Checkbox>
+                </CheckBoxRow>
+                <CheckBoxRow>
+                    <Checkbox
+                        isChecked={this.state.injectionPreference.brave}
+                        handleChange={this.bindToggleInjection('brave')}
+                        id="si-brave"
+                    >
+                        Brave
+                    </Checkbox>
+                </CheckBoxRow>
             </SearchInjection>
         )
     }
 }
+
+const CheckBoxRow = styled.div`
+    height: 50px;
+`
 
 export default SearchInjectionContainer

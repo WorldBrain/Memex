@@ -10,6 +10,7 @@ import {
 } from 'src/copy-paster'
 import { SearchType } from '../types'
 import { BackgroundSearchParams } from 'src/search/background/types'
+import { Icon } from 'src/dashboard-refactor/styled-components'
 
 export interface Props {
     searchType: SearchType
@@ -32,16 +33,21 @@ export default function SearchCopyPaster(props: Props) {
 
     return (
         <>
-            <ButtonTooltip
-                tooltipText="Copy Search Results"
-                position="bottom"
-            >
-            <ActionBtn onClick={props.toggleCopyPaster}>
-                <ActionIcon src={icons.copy} />
-            </ActionBtn>
+            <ButtonTooltip tooltipText="Copy Search Results" position="bottom">
+                <Icon
+                    path={icons.copy}
+                    heightAndWidth="16px"
+                    onClick={props.toggleCopyPaster}
+                />
             </ButtonTooltip>
             {props.isCopyPasterShown && (
-                <HoverBox withRelativeContainer top="25px" left="-155px">
+                <HoverBox
+                    position={'absolute'}
+                    withRelativeContainer
+                    top="25px"
+                    left="-155px"
+                    padding={'0px'}
+                >
                     <CopyPaster
                         searchParams={props.searchParams}
                         onClickOutside={props.hideCopyPaster}

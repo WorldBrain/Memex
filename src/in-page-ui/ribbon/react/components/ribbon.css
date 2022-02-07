@@ -1,12 +1,12 @@
-@import url('/fonts/Poppins/poppins.css');
+@import url('/fonts/Inter/inter.css');
 
 :host * {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .extraPanel {
     all: initial;
-    font-family: sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
 }
 
@@ -32,8 +32,9 @@
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
     border-right: none; */
-    width: 8px;
+    width: 15px;
     height: 40vh;
+    margin-right: 5px;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
@@ -44,15 +45,18 @@
 
 .ribbonExpanded {
     align-items: flex-end;
+    width: 40px;
 }
 
 .ribbonSidebarOpen {
     box-shadow: none;
     background: transparent;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     height: 105vh;
     width: 40px;
+    border-left: 1px solid #eceff4;
+    align-items: flex-start;
 
     & .removeSidebar {
         visibility: hidden;
@@ -66,36 +70,34 @@
 
 .innerRibbon {
     position: absolute;
-    right: 10px;
     top: 40px;
+    width: 30px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 5px 0;
     display: none;
-    width: 30px;
-    background-color: #f6f8fb;
 }
 
 .innerRibbonExpanded {
     border-radius: 20px;
-    box-shadow: -1px 1px 7px 2px #13131321;
-    background: #f6f8fb;
+    background: white;
     display: flex;
+    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f0f0f0;
 }
 
 .innerRibbonSidebarOpen {
-    box-shadow: none;
-    right: 0px;
     height: 100%;
     top: 0px;
+    width: 44px;
     justify-content: flex-start;
-    padding-right: 16px;
-    padding-top: 45px;
-    width: 20px;
-    align-items: flex-end;
+    padding-top: 15px;
+    align-items: center;
     display: flex;
     background: transparent;
+    box-shadow: none;
+    border: none;
 }
 
 /* SECTIONS */

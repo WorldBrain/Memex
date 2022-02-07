@@ -20,7 +20,7 @@
 /* FONTs */
 
 .fontFamily {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 /* Tag Pill */
@@ -37,7 +37,7 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .tagPillSuggestions {
@@ -151,7 +151,7 @@
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     border-radius: 3px;
     border: none;
     padding: 10px 7px;

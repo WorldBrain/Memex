@@ -3,32 +3,33 @@ import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState } from '../types'
 
 const textStyles = `
-    font-family: ${fonts.primary.name};
+    font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
+    font-size: 14px;
     line-height: 15px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     cursor: text;
 `
 
 const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
-    padding-left: 8px;
-    padding-right: 8px;
-    background-color: ${colors.lightGrey};
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     border-radius: 3px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
-    margin: 5px 5px;
+    margin: 5px 15px;
 `
 
 const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
@@ -50,6 +51,7 @@ const Input = styled.input`
     ${textStyles}
     width: 100%;
     border: none;
+    color: ${(props) => props.theme.colors.normalText};
     background: inherit;
     &::placeholder {
         opacity: 0.6;
@@ -137,13 +139,13 @@ export default class ListsSidebarSearchBar extends PureComponent<
         } = this.props
         return (
             <OuterContainer isSidebarLocked={isSidebarLocked}>
-                <InnerContainer horizontal="8px">
+                <InnerContainer horizontal="15px">
                     {!!searchQuery ? (
                         <IconContainer>
                             <Margin right="5px">
-                                <StyledIcon
-                                    heightAndWidth="12px"
-                                    path="/img/cross_grey.svg"
+                                <Icon
+                                    heightAndWidth="14px"
+                                    path={icons.removeX}
                                     onClick={() => this.handleClearSearch()}
                                 />
                             </Margin>
@@ -153,16 +155,18 @@ export default class ListsSidebarSearchBar extends PureComponent<
                             <Margin right="5px">
                                 <Icon
                                     heightAndWidth="16px"
-                                    path="/img/searchIcon.svg"
+                                    path={icons.searchIcon}
+                                    hoverOff={true}
                                 />
                             </Margin>
                         </IconContainer>
                     )}
                     <Input
-                        placeholder="Search collections"
+                        placeholder="Search Spaces"
                         ref={this.inputRef}
                         onChange={this.handleInputChange}
                         value={searchQuery}
+                        autoFocus
                     />
                 </InnerContainer>
                 {!!this.props.searchQuery &&

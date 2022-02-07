@@ -1,11 +1,9 @@
 import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
-import { Layers, X as XIcon } from '@styled-icons/feather'
-import { StyledIconBase } from '@styled-icons/styled-icon'
+import { Layers } from '@styled-icons/feather'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { Icon } from 'src/dashboard-refactor/styled-components'
-import { opacify } from 'polished'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DisplayEntry } from '../types'
 
 export interface Props {
@@ -20,6 +18,7 @@ export interface Props {
     selected?: boolean
     focused?: boolean
     remote?: boolean
+    id?: string
 }
 
 class EntryRow extends React.Component<Props> {
@@ -63,40 +62,54 @@ class EntryRow extends React.Component<Props> {
             <Row
                 onClick={this.handleEntryPress}
                 onMouseOver={this.handleMouseOver}
-                onMouseOut={this.handleMouseOut}
+                onMouseLeave={this.handleMouseOut}
                 isFocused={focused}
             >
                 <NameWrapper>
                     {resultItem}
                     {remote && (
-                        <ButtonTooltip tooltipText={'shared'} position="bottom">
+                        <ButtonTooltip
+                            tooltipText={'Shared Space'}
+                            position="bottom"
+                        >
                             <Icon
-                                heightAndWidth="14px"
-                                path={icons.shared}
-                                faded
+                                heightAndWidth="12px"
+                                padding="6px"
+                                filePath={icons.link}
+                                hoverOff
                             />
                         </ButtonTooltip>
                     )}
                 </NameWrapper>
-                <IconStyleWrapper show={focused}>
-                    {selected && (
-                        <ButtonTooltip
-                            tooltipText={this.props.removeTooltipText ?? ''}
-                            position="left"
-                        >
-                            <XIcon size={20} onClick={this.handleEntryPress} />
-                        </ButtonTooltip>
+                <IconStyleWrapper>
+                    {focused && (
+                        <ButtonContainer>
+                            <ButtonTooltip
+                                tooltipText={
+                                    this.props.actOnAllTooltipText ?? ''
+                                }
+                                position="left"
+                            >
+                                <Icon
+                                    filePath={icons.multiEdit}
+                                    heightAndWidth="16px"
+                                    onClick={this.handleActOnAllPress}
+                                />
+                            </ButtonTooltip>
+                        </ButtonContainer>
                     )}
-                    {onPressActOnAll && (
-                        <ButtonTooltip
-                            tooltipText={this.props.actOnAllTooltipText ?? ''}
-                            position="left"
-                        >
-                            <ActOnAllTabsButton
-                                size={20}
-                                onClick={this.handleActOnAllPress}
-                            />
-                        </ButtonTooltip>
+                    {selected ? (
+                        <ButtonContainer>
+                            <IconImg src={icons.blueRoundCheck} />
+                        </ButtonContainer>
+                    ) : focused ? (
+                        <ButtonContainer>
+                            <IconImg src={icons.blueRoundCheck} faded={true} />
+                        </ButtonContainer>
+                    ) : (
+                        <ButtonContainer>
+                            <EmptyCircle />
+                        </ButtonContainer>
                     )}
                 </IconStyleWrapper>
             </Row>
@@ -108,35 +121,50 @@ export const ActOnAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
+const ButtonContainer = styled.div`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const IconImg = styled.img<{ faded? }>`
+    opacity: ${(props) => props.faded && '0.5'};
+    height: 20px;
+    width: 20px;
+`
+
+const EmptyCircle = styled.div`
+    height: 18px;
+    width: 18px;
+    border-radius: 18px;
+    border 2px solid ${(props) => props.theme.colors.lineGrey};
+`
+
 export const IconStyleWrapper = styled.div`
-    display: inline-flex;
-    ${StyledIconBase} {
-        stroke-width: 2px;
-        color: ${(props) =>
-            props.isFocused
-                ? props.theme.tag.hoverIcon
-                : opacify(0.5, props.theme.tag.icon)};
-        opacity: ${(props) => (props.show ? '1' : '0')};
-        transition: all 0.3s;
-        pointer-events: none;
-        padding: 2px;
-        border-radius: 3px;
-        &:hover {
-            color: ${(props) => props.theme.tag.iconHover};
-            background: ${(props) => props.theme.tag.iconHoverBg};
-        }
-    }
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
 `
 
 const Row = styled.div`
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.border};
     display: flex;
-    padding: 4px 20px 4px 18px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
+    height: 40px;
+    margin: 0px 10px;
     cursor: pointer;
-    background: ${(props) => props.isFocused && props.theme.border};
+    border-radius: 5px;
+    padding: 0 10px;
+    color: ${(props) => props.isFocused && props.theme.colors.normalText};
+    background: ${(props) =>
+        props.isFocused && props.theme.colors.backgroundColor};
+
+    &:last-child {
+        border-bottom: none;
+    }
 `
 
 const NameWrapper = styled.div`
@@ -144,6 +172,7 @@ const NameWrapper = styled.div`
     flex-direction: row;
     align-items: center;
     width: 80%;
+    font-size: 14px;
 `
 
 export default EntryRow

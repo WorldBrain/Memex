@@ -55,9 +55,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     {
                         execute: async ({ setup }) => {
                             // TODO: properly get this working in test env (currently waits forever)
-                            setup.backgroundModules.pages.waitForContentIdentifier = async (
+                            setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
-                            ) => a as any
+                            ) => a) as any
 
                             listId = await customLists(
                                 setup,
@@ -148,9 +148,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     {
                         execute: async ({ setup }) => {
                             // TODO: properly get this working in test env (currently waits forever)
-                            setup.backgroundModules.pages.waitForContentIdentifier = async (
+                            setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
-                            ) => a as any
+                            ) => a) as any
 
                             listId = await customLists(
                                 setup,

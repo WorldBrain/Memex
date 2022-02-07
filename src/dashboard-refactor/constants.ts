@@ -1,6 +1,6 @@
 export const sizeConstants = {
     header: {
-        heightPx: 45,
+        heightPx: 60,
     },
     searchBar: {
         heightPx: 50,
@@ -49,7 +49,7 @@ export const EXCLUDE_PATTERN = /^-(site:)?(?=\w+)/
  */
 export const TERM_CLEAN_PATTERN = /^-?(site:)?-?(?=\w+)/
 
-export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
+export const DATE_PICKER_DATE_FORMAT = 'DD. MMM YYYY'
 
 export const PAGE_SIZE = 10
 
@@ -78,7 +78,7 @@ export const STORAGE_KEYS = {
  */
 export const PAGE_SEARCH_DUMMY_DAY = -1
 
-export const NON_UNIQ_LIST_NAME_ERR_MSG = 'List name already taken.'
+export const NON_UNIQ_LIST_NAME_ERR_MSG = 'Space name already taken.'
 
 export const FILTER_PICKERS_LIMIT = 20
 

@@ -10,17 +10,14 @@ import DomainPickerLogic, {
     DomainPickerState,
 } from './logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
-import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import {
-    fontSizeNormal,
-    fontSizeSmall,
-} from 'src/common-ui/components/design-library/typography'
 import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,
@@ -108,9 +105,34 @@ class DomainPicker extends StatefulUIElement<
     )
 
     private renderEmptyDomain() {
+        if (this.state.query === '') {
+            return (
+                <EmptyDomainsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.globe}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>No Domains to filter</SectionTitle>
+                    <InfoText>Save your first page or annotation</InfoText>
+                </EmptyDomainsView>
+            )
+        }
+
         return (
             <EmptyDomainsView>
-                <strong>No domains found</strong>
+                <SectionCircle>
+                    <Icon
+                        filePath={icons.globe}
+                        heightAndWidth="16px"
+                        color="purple"
+                        hoverOff
+                    />
+                </SectionCircle>
+                <SectionTitle>No domains found for query</SectionTitle>
             </EmptyDomainsView>
         )
     }
@@ -167,6 +189,29 @@ class DomainPicker extends StatefulUIElement<
     }
 }
 
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 400;
+`
+
 const LoadingBox = styled.div`
     display: flex;
     align-items: center;
@@ -177,27 +222,26 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border-radius: 3px;
+    border-radius: 12px;
 `
 
 const EmptyDomainsView = styled.div`
-    color: ${(props) => props.theme.tag.text};
-    padding: 10px 15px;
-    font-weight: 400;
-    font-size: ${fontSizeNormal}px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
+    padding: 20px 15px;
 `
 
 const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
-    color: ${(props) => props.theme.tag.text};
+    color: ${(props) => props.theme.colors.normalText};
     padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
-    font-size: ${fontSizeSmall}px;
+    font-size: 14px;
     transition: all 0.1s;
     word-break: break-word;
 
