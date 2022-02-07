@@ -17,7 +17,6 @@ import ListsSidebarItem, {
 import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
-import { Rnd } from 'react-rnd'
 import { createGlobalStyle } from 'styled-components'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
