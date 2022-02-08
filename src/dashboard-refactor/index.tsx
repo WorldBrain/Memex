@@ -128,7 +128,7 @@ export class DashboardContainer extends StatefulUIElement<
         this.state.listsSidebar.listData[id]?.name ?? 'Missing list'
 
     private getListDetailsProps = (): ListDetailsProps | null => {
-        const { listsSidebar, searchResults } = this.state
+        const { listsSidebar } = this.state
 
         if (
             !listsSidebar.selectedListId ||
@@ -715,7 +715,21 @@ export class DashboardContainer extends StatefulUIElement<
                         const listId = await this.props.listsBG.createCustomList(
                             { name },
                         )
-                        this.processEvent('setPageLists', {
+                        this.processMutation({
+                            listsSidebar: {
+                                listData: {
+                                    $apply: (listData) => ({
+                                        ...listData,
+                                        [listId]: {
+                                            name,
+                                            id: listId,
+                                            isOwnedList: true,
+                                        },
+                                    }),
+                                },
+                            },
+                        })
+                        await this.processEvent('setPageLists', {
                             id: pageId,
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
@@ -836,10 +850,25 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
                         this.processEvent('setNoteLists', { ...args, noteId }),
+                    // TODO: put this logic into event handler (main issue is it needs to return new list ID)
                     createNewList: (noteId) => async (name) => {
                         const listId = await this.props.listsBG.createCustomList(
                             { name },
                         )
+                        this.processMutation({
+                            listsSidebar: {
+                                listData: {
+                                    $apply: (listData) => ({
+                                        ...listData,
+                                        [listId]: {
+                                            name,
+                                            id: listId,
+                                            isOwnedList: true,
+                                        },
+                                    }),
+                                },
+                            },
+                        })
                         this.processEvent('setNoteLists', {
                             noteId,
                             added: listId,
