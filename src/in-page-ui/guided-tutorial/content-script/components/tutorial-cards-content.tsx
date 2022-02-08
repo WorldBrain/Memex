@@ -49,6 +49,10 @@ const FinishHeader = styled.div`
     margin-bottom: 17px;
 `
 
+const SaveTextContainer = styled.div`
+    padding-left: 40px;
+`
+
 const OptionsList = styled.div`
     display: grid;
     grid-auto-flow: column;
@@ -304,12 +308,12 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '30px',
+        top: '120px',
         bottom: null,
         left: null,
-        right: '140px',
-        width: '400px',
-        height: '200px',
+        right: '60px',
+        width: '470px',
+        height: '220px',
     },
 
     {
@@ -383,11 +387,11 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '120px',
+        top: '40px',
         bottom: null,
         left: null,
-        right: '80px',
-        width: '470px',
+        right: '60px',
+        width: '540px',
         height: '220px',
     },
     {
@@ -409,6 +413,27 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </InfoText>
             </SaveTextContainer>
         ),
+    },
+
+    {
+        subtitle: (
+            <PinTitleContainer>
+                <PinTitleImage src={icons.pin} />
+                Pin Memex to your menu
+                <PinTutorialArrow />
+            </PinTitleContainer>
+        ),
+        text: (
+            <SaveTextContainer>
+                <p>Easy access to bookmarking, tagging & searching.</p>
+            </SaveTextContainer>
+        ),
+        top: '30px',
+        bottom: null,
+        left: null,
+        right: '140px',
+        width: '480px',
+        height: '170px',
     },
 
     {
