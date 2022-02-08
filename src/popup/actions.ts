@@ -59,7 +59,6 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 
 async function init() {
     const currentTab = await getCurrentTab()
-
     const tabUrl = currentTab?.url
 
     // If we can't get the tab data, then can't init action button states

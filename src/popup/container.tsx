@@ -90,10 +90,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         )
     }
 
-    private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
-    }
-
     async componentDidMount() {
         await super.componentDidMount()
         analytics.trackEvent({
@@ -102,6 +98,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         })
 
         await this.props.initState()
+        // this.setState({
+        //     documentStateLoaded: this.props.url.length > 0,
+        // })
     }
 
     processAnalyticsEvent = remoteFunction('processEvent')
@@ -427,6 +426,9 @@ const NoticeTitle = styled.div`
     color: ${(props) => props.theme.colors.primary};
     font-weight: bold;
     padding-bottom: 10px;
+    text-align: center;
+    padding: 0 10px;
+    margin-bottom: 20px;
 `
 
 const LoadingBox = styled.div`
@@ -458,6 +460,11 @@ const BlurredNotice = styled.div<{
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
     z-index: 20;
+    overflow-y: ${(props) =>
+        props.browser === 'firefox' && props.location === 'local'
+            ? 'hidden'
+            : 'scroll'};
+    background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: flex-start;
