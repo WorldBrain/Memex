@@ -156,12 +156,11 @@ const SaveBtn = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 0 3px 5px;
     margin-right: 5px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
-    border 1px solid #f0f0f0;
+    border 1px solid ${(props) => props.theme.colors.lightgrey};
     display: grid;
     grid-auto-flow: column;
 `

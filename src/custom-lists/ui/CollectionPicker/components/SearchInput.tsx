@@ -4,6 +4,10 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { browser } from 'webextension-polyfill-ts'
+
+const search = browser.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
@@ -46,12 +50,12 @@ export class PickerSearchInput extends React.Component<Props, State> {
     render() {
         return (
             <SearchBox isFocused={this.state.isFocused} id={'pickerSearchBox'}>
-                {this.props.before}
+                <Icon filePath={search} heightAndWidth="14px" hoverOff />
                 <SearchInput
                     placeholder={
                         this.props.showPlaceholder ?? true
                             ? this.props.searchInputPlaceholder
-                            : ''
+                            : 'Search Spaces'
                     }
                     defaultValue={this.props.value}
                     onChange={this.onChange}
@@ -78,17 +82,19 @@ const StyledSearchIcon = styled(SearchIcon)`
 
 const SearchBox = styled.div`
     align-items: center;
-    background-color: ${(props) => props.theme.inputBackground};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     border-radius: 3px;
-    color: ${(props) => props.theme.text};
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
-    padding: 3px 8px;
-    margin-left: 8px;
-    margin-right: 8px;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
     transition: border 0.1s;
     margin-bottom: 4px;
+    grid-gap: 5px;
+    min-height: 20px;
 `
 
 const SearchInput = styled(TextInputControlled)`
@@ -100,10 +106,11 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${(props) => props.theme.text};
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-size: ${fontSizeSmall}px;
-    min-height: 24px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-family: 'Inter'
+    font-size: 14px;
+    height: fill-available;
+    width: fill-available;
 
     &:focus {
         border: none;

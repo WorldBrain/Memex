@@ -193,7 +193,7 @@ class SpacePicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Add to Space"
+                    searchInputPlaceholder="Search Spaces"
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
@@ -281,6 +281,7 @@ const LoadingBox = styled.div`
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
     border-radius: 12px;
+    padding: 10px 0px;
 `
 
 const EmptyListsView = styled.div`

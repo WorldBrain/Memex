@@ -792,7 +792,7 @@ const CollectionContainer = styled.div`
 const SidebarContainerWithTopBar = styled.div`
     display: flex;
     align-items: flex-start;
-    height: 100 %;
+    height: 100%;
 `
 
 const GlobalStyle = createGlobalStyle<{
@@ -865,7 +865,7 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div`
-    height: 100 %;
+    height: 100%;
     overflow-x: visible;
     position: fixed;
     padding: 0px 0px 10px 0px;
@@ -898,7 +898,7 @@ const TopBarContainerStyled = styled.div`
     height: 34px;
     box-sizing: border-box;
     padding: 5px 15px 5px 5px;
-    width: 100 %;
+    width: 100%;
     margin-bottom: 2px;
     box-shadow: 0px 3px 5px-3px #c9c9c9;
 `
@@ -941,13 +941,13 @@ const ActionIcon = styled.img`
 `
 
 const SidebarLockIcon = styled.img`
-    height: 100 %;
+    height: 100%;
     width: auto;
 `
 
 const SidebarLockIconReverse = styled.img`
     width: auto;
-    height: 100 %;
+    height: 100%;
     transform: rotate(180deg);
     animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `

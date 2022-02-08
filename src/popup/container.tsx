@@ -399,9 +399,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 }
 
-const PopupContainerContainer = styled.div`
-    padding-bottom: 10px;
-`
+const PopupContainerContainer = styled.div``
 
 const ButtonContainer = styled.div`
     display: flex;

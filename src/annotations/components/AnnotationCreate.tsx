@@ -228,7 +228,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <div>
                 {this.state.isListPickerShown && (
-                    <HoverBox>
+                    <HoverBox padding={'0px'}>
                         <ClickAway onClickAway={() => setPickerShown(false)}>
                             {this.renderSharedCollectionsPicker()}
                         </ClickAway>
@@ -323,9 +323,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     {this.renderActionButtons()}
                                     {this.renderMarkdownHelpButton()}
                                 </SaveActionBar>
-                                <TagsActionBar>
-                                    {this.renderTagPicker()}
-                                </TagsActionBar>
                             </FooterContainer>
                         </>
                     )}
