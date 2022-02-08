@@ -13,7 +13,9 @@ import styled from 'styled-components'
 const styles = require('./CollectionsButton.css')
 const buttonStyles = require('../../components/Button.css')
 
-export interface OwnProps {}
+export interface OwnProps {
+    fetchCollections?: () => Promise<string[]>
+}
 
 interface StateProps {
     isDisabled: boolean
@@ -29,10 +31,18 @@ export type Props = OwnProps & StateProps & DispatchProps
 class CollectionsButton extends PureComponent<Props> {
     async componentDidMount() {
         await this.getKeyboardShortcutText()
+        const hasCollections = await this.props.fetchCollections()
+
+        if (hasCollections.length > 0) {
+            this.setState({
+                hasCollections: true,
+            })
+        }
     }
 
     state = {
         highlightInfo: undefined,
+        hasCollections: false,
     }
 
     private async getKeyboardShortcutText() {

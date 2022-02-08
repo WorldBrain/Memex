@@ -98,9 +98,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         })
 
         await this.props.initState()
-        // this.setState({
-        //     documentStateLoaded: this.props.url.length > 0,
-        // })
     }
 
     processAnalyticsEvent = remoteFunction('processEvent')
