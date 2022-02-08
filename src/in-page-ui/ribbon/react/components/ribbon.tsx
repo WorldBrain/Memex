@@ -668,7 +668,7 @@ const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
     display: flex;
     margin-bottom: 5px;
     justify-content: center;
-    margin-left: ${(props) => !props.isSidebarOpen && '-1px'};
+    margin-left: ${(props) => props.isSidebarOpen && '-2px'};
 `
 
 const InfoText = styled.div`

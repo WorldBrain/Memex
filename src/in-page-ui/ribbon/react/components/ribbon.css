@@ -34,7 +34,6 @@
     border-right: none; */
     width: 15px;
     height: 40vh;
-    margin-right: 5px;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
@@ -45,18 +44,20 @@
 
 .ribbonExpanded {
     align-items: flex-end;
-    width: 40px;
+    width: 44px;
+    margin-right: 15px;
 }
 
 .ribbonSidebarOpen {
     box-shadow: none;
-    background: transparent;
+    background: #f8fbff;
     display: flex;
     justify-content: center;
     height: 105vh;
     width: 40px;
     border-left: 1px solid #eceff4;
     align-items: flex-start;
+    margin-right: 5px;
 
     & .removeSidebar {
         visibility: hidden;
@@ -89,17 +90,15 @@
 
 .innerRibbonSidebarOpen {
     box-shadow: none;
-    right: 0px;
     height: 100%;
     top: 0px;
-    width: 44px;
+    width: 40px;
     justify-content: flex-start;
-    padding-right: 16px;
     padding-top: 45px;
-    align-items: flex-end;
     display: flex;
     background: transparent;
     border: none;
+    align-items: center;
 }
 
 /* SECTIONS */
