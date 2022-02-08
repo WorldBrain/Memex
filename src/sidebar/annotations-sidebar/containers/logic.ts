@@ -147,6 +147,7 @@ export class SidebarContainerLogic extends UILogic<
 
             isExpanded: true,
             isExpandedSharedSpaces: false,
+            sidebarWidth: '450px',
             loadState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',

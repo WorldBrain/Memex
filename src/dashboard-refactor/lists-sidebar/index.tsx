@@ -219,6 +219,7 @@ export default class ListsSidebar extends PureComponent<
             <Container
                 onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
             >
+                <GlobalStyle />
                 <PeekTrigger
                     onMouseEnter={this.props.peekState.setSidebarPeekState(
                         true,
@@ -242,6 +243,9 @@ export default class ListsSidebar extends PureComponent<
                         console.log('test'))
                     }
                     default={{ width: 200 }}
+                    resizeHandleClasses={{
+                        right: 'sidebarResizeHandleSidebar',
+                    }}
                     resizeGrid={[1, 0]}
                     dragAxis={'none'}
                     minWidth={'200px'}

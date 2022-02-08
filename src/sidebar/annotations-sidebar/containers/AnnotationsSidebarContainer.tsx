@@ -10,6 +10,7 @@ import {
     SidebarContainerOptions,
     INIT_FORM_STATE,
 } from './logic'
+import classNames from 'classnames'
 import type {
     SidebarContainerState,
     SidebarContainerEvents,
@@ -35,9 +36,13 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
+import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+
+import { createGlobalStyle } from 'styled-components'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -53,6 +58,8 @@ export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     private sidebarRef
+
+    private DraggableContainer
 
     constructor(props: P) {
         super(
@@ -482,7 +489,10 @@ export class AnnotationsSidebarContainer<
 
         return (
             <>
-                <TopBarActionBtns sidebarContext={this.props.sidebarContext}>
+                <TopBarActionBtns
+                    width={this.state.sidebarWidth}
+                    sidebarContext={this.props.sidebarContext}
+                >
                     <ButtonTooltip
                         tooltipText="Close (ESC)"
                         position="rightCentered"
@@ -550,145 +560,209 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
+        const style = {
+            height: '100%',
+            position: 'relative',
+        } as const
+
         return (
             <ThemeProvider theme={this.props.theme}>
-                <ContainerStyled className="ignore-react-onclickoutside">
-                    {this.renderTopBanner()}
-                    {this.renderTopBar()}
-                    <AnnotationsSidebar
-                        {...this.state}
-                        getListNameById={this.getListNameById}
-                        sidebarContext={this.props.sidebarContext}
-                        ref={(ref) => (this.sidebarRef = ref)}
-                        openCollectionPage={(remoteListId) =>
-                            window.open(
-                                getListShareUrl({ remoteListId }),
-                                '_blank',
-                            )
-                        }
-                        onMenuItemClick={({ sortingFn }) =>
-                            this.processEvent('sortAnnotations', {
-                                sortingFn,
-                            })
-                        }
-                        annotationUrls={() =>
-                            this.state.annotations.map((a) => a.url)
-                        }
-                        normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
-                        normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                        onClickOutsideCopyPaster={() =>
-                            this.processEvent(
-                                'resetCopyPasterAnnotationId',
-                                null,
-                            )
-                        }
-                        copyPaster={this.props.copyPaster}
-                        contentSharing={this.props.contentSharing}
-                        annotationsShareAll={this.props.annotations}
-                        copyPageLink={(link) => {
-                            this.processEvent('copyNoteLink', { link })
+                <GlobalStyle />
+                <ContainerStyled
+                    className={classNames('ignore-react-onclickoutside')}
+                >
+                    <Rnd
+                        ref={this.DraggableContainer}
+                        style={style}
+                        default={{
+                            x: 0,
+                            y: 0,
+                            width: 450,
+                            height: 'auto',
                         }}
-                        postBulkShareHook={(shareStates) =>
-                            this.processEvent(
-                                'updateAllAnnotationsShareInfo',
-                                shareStates,
-                            )
-                        }
-                        onCopyBtnClick={() => this.handleCopyAllNotesClick}
-                        onShareAllNotesClick={() =>
-                            this.handleCopyAllNotesClick
-                        }
-                        sharingAccess={this.state.annotationSharingAccess}
-                        needsWaypoint={!this.state.noResults}
-                        appendLoader={
-                            this.state.secondarySearchState === 'running'
-                        }
-                        annotationModes={
-                            this.state.annotationModes.pageAnnotations
-                        }
-                        setActiveAnnotationUrl={(annotationUrl) => () =>
-                            this.processEvent('setActiveAnnotationUrl', {
-                                annotationUrl,
-                            })}
-                        isAnnotationCreateShown={this.state.showCommentBox}
-                        annotationCreateProps={this.getCreateProps()}
-                        bindAnnotationFooterEventProps={(annot) =>
-                            this.bindAnnotationFooterEventProps(annot)
-                        }
-                        bindAnnotationEditProps={(annot) =>
-                            this.bindAnnotationEditProps(annot)
-                        }
-                        handleScrollPagination={() =>
-                            this.processEvent('paginateSearch', null)
-                        }
-                        isSearchLoading={
-                            this.state.primarySearchState === 'running' ||
-                            this.state.loadState === 'running'
-                        }
-                        onClickOutside={this.handleClickOutside}
-                        theme={this.props.theme}
-                        renderCopyPasterForAnnotation={
-                            this.renderCopyPasterManagerForAnnotation
-                        }
-                        renderShareMenuForAnnotation={
-                            this.renderShareMenuForAnnotation
-                        }
-                        renderTagsPickerForAnnotation={
-                            this.renderTagsPickerForAnnotation
-                        }
-                        // Not used yet but will be used for the "Add to collection" button
-                        renderListsPickerForAnnotation={
-                            this.renderListPickerForAnnotation
-                        }
-                        expandMyNotes={() =>
-                            this.processEvent('expandMyNotes', null)
-                        }
-                        expandSharedSpaces={(listIds) =>
-                            this.processEvent('expandSharedSpaces', {
-                                listIds,
-                            })
-                        }
-                        expandFollowedListNotes={(listId) =>
-                            this.processEvent('expandFollowedListNotes', {
-                                listId,
-                            })
-                        }
-                        toggleIsolatedListView={(listId) =>
-                            this.processEvent('toggleIsolatedListView', {
-                                listId,
-                            })
-                        }
-                        bindSharedAnnotationEventHandlers={(
-                            annotationReference,
-                        ) => ({
-                            onReplyBtnClick: () =>
-                                this.processEvent('toggleAnnotationReplies', {
+                        resizeHandleWrapperClass={'sidebarResizeHandle'}
+                        className="sidebar-draggable"
+                        resizeGrid={[1, 0]}
+                        dragAxis={'none'}
+                        minWidth={'340px'}
+                        maxWidth={'1000px'}
+                        disableDragging={true}
+                        enableResizing={{
+                            top: false,
+                            right: false,
+                            bottom: false,
+                            left: true,
+                            topRight: false,
+                            bottomRight: false,
+                            bottomLeft: false,
+                            topLeft: false,
+                        }}
+                        onResize={(e, direction, ref, delta, position) => {
+                            this.setState({ sidebarWidth: ref.style.width })
+                        }}
+                    >
+                        <SidebarContainerWithTopBar>
+                            {this.renderTopBar()}
+                            <AnnotationsSidebar
+                                {...this.state}
+                                getListNameById={(i) => 'dead code'}
+                                sidebarContext={this.props.sidebarContext}
+                                ref={(ref) => (this.sidebarRef = ref)}
+                                openCollectionPage={(remoteListId) =>
+                                    window.open(
+                                        getListShareUrl({ remoteListId }),
+                                        '_blank',
+                                    )
+                                }
+                                onMenuItemClick={({ sortingFn }) =>
+                                    this.processEvent('sortAnnotations', {
+                                        sortingFn,
+                                    })
+                                }
+                                annotationUrls={() =>
+                                    this.state.annotations.map((a) => a.url)
+                                }
+                                normalizedPageUrls={[
+                                    normalizeUrl(this.state.pageUrl),
+                                ]}
+                                normalizedPageUrl={normalizeUrl(
+                                    this.state.pageUrl,
+                                )}
+                                onClickOutsideCopyPaster={() =>
+                                    this.processEvent(
+                                        'resetCopyPasterAnnotationId',
+                                        null,
+                                    )
+                                }
+                                copyPaster={this.props.copyPaster}
+                                contentSharing={this.props.contentSharing}
+                                annotationsShareAll={this.props.annotations}
+                                copyPageLink={(link) => {
+                                    this.processEvent('copyNoteLink', { link })
+                                    console.log(link)
+                                }}
+                                postBulkShareHook={(shareInfo) =>
+                                    this.processEvent(
+                                        'updateAllAnnotationsShareInfo',
+                                        shareInfo,
+                                    )
+                                }
+                                onCopyBtnClick={() =>
+                                    this.handleCopyAllNotesClick
+                                }
+                                onShareAllNotesClick={() =>
+                                    this.handleCopyAllNotesClick
+                                }
+                                sharingAccess={
+                                    this.state.annotationSharingAccess
+                                }
+                                needsWaypoint={!this.state.noResults}
+                                appendLoader={
+                                    this.state.secondarySearchState ===
+                                    'running'
+                                }
+                                annotationModes={
+                                    this.state.annotationModes.pageAnnotations
+                                }
+                                setActiveAnnotationUrl={(annotationUrl) => () =>
+                                    this.processEvent(
+                                        'setActiveAnnotationUrl',
+                                        {
+                                            annotationUrl,
+                                        },
+                                    )}
+                                isAnnotationCreateShown={
+                                    this.state.showCommentBox
+                                }
+                                annotationCreateProps={this.getCreateProps()}
+                                bindAnnotationFooterEventProps={(annot) =>
+                                    this.bindAnnotationFooterEventProps(annot)
+                                }
+                                bindAnnotationEditProps={(annot) =>
+                                    this.bindAnnotationEditProps(annot)
+                                }
+                                handleScrollPagination={() =>
+                                    this.processEvent('paginateSearch', null)
+                                }
+                                isSearchLoading={
+                                    this.state.primarySearchState ===
+                                        'running' ||
+                                    this.state.loadState === 'running'
+                                }
+                                onClickOutside={this.handleClickOutside}
+                                theme={this.props.theme}
+                                renderCopyPasterForAnnotation={
+                                    this.renderCopyPasterManagerForAnnotation
+                                }
+                                renderShareMenuForAnnotation={
+                                    this.renderShareMenuForAnnotation
+                                }
+                                renderTagsPickerForAnnotation={
+                                    this.renderTagsPickerForAnnotation
+                                }
+                                expandMyNotes={() =>
+                                    this.processEvent('expandMyNotes', null)
+                                }
+                                expandSharedSpaces={(listIds) =>
+                                    this.processEvent('expandSharedSpaces', {
+                                        listIds,
+                                    })
+                                }
+                                expandFollowedListNotes={(listId) =>
+                                    this.processEvent(
+                                        'expandFollowedListNotes',
+                                        {
+                                            listId,
+                                        },
+                                    )
+                                }
+                                toggleIsolatedListView={(listId) =>
+                                    this.processEvent(
+                                        'toggleIsolatedListView',
+                                        {
+                                            listId,
+                                        },
+                                    )
+                                }
+                                bindSharedAnnotationEventHandlers={(
                                     annotationReference,
-                                }),
-                            onNewReplyInitiate: () =>
-                                this.processEvent(
-                                    'initiateNewReplyToAnnotation',
-                                    {
-                                        annotationReference,
-                                    },
-                                ),
-                            onNewReplyCancel: () =>
-                                this.processEvent(
-                                    'cancelNewReplyToAnnotation',
-                                    { annotationReference },
-                                ),
-                            onNewReplyConfirm: () =>
-                                this.processEvent(
-                                    'confirmNewReplyToAnnotation',
-                                    { annotationReference },
-                                ),
-                            onNewReplyEdit: ({ content }) =>
-                                this.processEvent('editNewReplyToAnnotation', {
-                                    annotationReference,
-                                    content,
-                                }),
-                        })}
-                    />
+                                ) => ({
+                                    onReplyBtnClick: () =>
+                                        this.processEvent(
+                                            'toggleAnnotationReplies',
+                                            {
+                                                annotationReference,
+                                            },
+                                        ),
+                                    onNewReplyInitiate: () =>
+                                        this.processEvent(
+                                            'initiateNewReplyToAnnotation',
+                                            {
+                                                annotationReference,
+                                            },
+                                        ),
+                                    onNewReplyCancel: () =>
+                                        this.processEvent(
+                                            'cancelNewReplyToAnnotation',
+                                            { annotationReference },
+                                        ),
+                                    onNewReplyConfirm: () =>
+                                        this.processEvent(
+                                            'confirmNewReplyToAnnotation',
+                                            { annotationReference },
+                                        ),
+                                    onNewReplyEdit: ({ content }) =>
+                                        this.processEvent(
+                                            'editNewReplyToAnnotation',
+                                            {
+                                                annotationReference,
+                                                content,
+                                            },
+                                        ),
+                                })}
+                            />
+                        </SidebarContainerWithTopBar>
+                    </Rnd>
                 </ContainerStyled>
                 {this.renderModals()}
             </ThemeProvider>
@@ -704,28 +778,63 @@ const CollectionContainer = styled.div`
     }
 `
 
+const SidebarContainerWithTopBar = styled.div`
+display: flex;
+align - items: flex - start;
+height: 100 %;
+`
+
+const GlobalStyle = createGlobalStyle`
+    .sidebar - draggable {
+        height: 100 % !important;
+    }
+
+    .sidebarResizeHandle {
+    width: 4px;
+    height: 100vh;
+    position: absolute;
+    top: 66px;
+
+        &:hover {
+        background: #5671cf30;
+    }
+}
+`
+
+const NoteTypesWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+`
+
 const ShareMenuWrapper = styled.div`
-    position: relative;
-    left: 105px;
-    z-index: 10;
+    position: absolute;
+    right: 320px;
+    z-index: 10000;
 `
 
 const ShareMenuWrapperTopBar = styled.div`
     position: fixed;
-    right: 345px;
+    right: 300px;
     z-index: 3;
 `
 
 const CopyPasterWrapperTopBar = styled.div`
     position: fixed;
-    right: 375px;
+    right: 300px;
     z-index: 3;
 `
 
 const CopyPasterWrapper = styled.div`
-    position: sticky;
-    left: 75px;
-    z-index: 5;
+    position: absolute;
+    right: 370px;
+    z-index: 10000;
+`
+
+const TagPickerWrapper = styled.div`
+    position: absolute;
+    right: 300px;
+    z-index: 10000;
 `
 
 const PickerWrapper = styled.div`
@@ -734,124 +843,123 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div`
-    height: 100%;
-    overflow-x: visible;
-    width: 450px;
-    position: fixed;
-    padding: 0px 0px 10px 0px;
+height: 100 %;
+overflow-x: visible;
+position: fixed;
+padding: 0px 0px 10px 0px;
 
-    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-    top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
-    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
+right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
+top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
+padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
-    z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: ${(props) => props.theme.colors.backgroundColor};
-    transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    font-family: 'Inter', sans-serif;
+z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
+background: ${(props) => props.theme.colors.backgroundColor};
+transition: all 0.1s cubic - bezier(0.65, 0.05, 0.36, 1) 0s;
+border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+font-family: 'Inter', sans-serif;
 
-    &::-webkit-scrollbar {
-        display: none;
-    }
+&:: -webkit-scrollbar {
+    display: none;
+}
 
-    scrollbar-width: none;
+scrollbar - width: none;
 `
 
 const TopBarContainerStyled = styled.div`
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: #f6f8fb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 34px;
-    box-sizing: border-box;
-    padding: 5px 15px 5px 5px;
-    width: 100%;
-    margin-bottom: 2px;
-    box-shadow: 0px 3px 5px -3px #c9c9c9;
+position: sticky;
+top: 0;
+z - index: 1000;
+background: #f6f8fb;
+display: flex;
+justify - content: space - between;
+align - items: center;
+height: 34px;
+box - sizing: border - box;
+padding: 5px 15px 5px 5px;
+width: 100 %;
+margin - bottom: 2px;
+box - shadow: 0px 3px 5px - 3px #c9c9c9;
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
-    display: grid;
-    justify-content: flex-start;
-    position: absolute;
-    align-items: center;
-    gap: 8px;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    border-radius: 0 0 0 5px;
-    padding: 5px 1px 5px 3px;
-    z-index: 10000;
-    right: 4px;
-    position: relative;
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+display: grid;
+justify - content: flex - start;
+margin - left: -25px;
+align - items: center;
+gap: 8px;
+background - color: ${(props) => props.theme.colors.backgroundColor};
+border - radius: 0 0 0 5px;
+padding: 5px 1px 5px 3px;
+z - index: 10000;
+right: 4px;
+position: relative;
+border - left: 1px solid ${(props) => props.theme.colors.lineGrey};
+border - bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const CloseBtn = styled.button`
-    cursor: pointer;
-    z-index: 2147483647;
-    line-height: normal;
-    background: transparent;
-    border: none;
-    outline: none;
-    width: 24px;
-    height: 24px;
-    padding: 4px;
-    display: flex;
-    justify-content: center;
-    border-radius: 3px;
-    align-items: center;
+cursor: pointer;
+z - index: 2147483647;
+line - height: normal;
+background: transparent;
+border: none;
+outline: none;
+width: 24px;
+height: 24px;
+padding: 4px;
+display: flex;
+justify - content: center;
+border - radius: 3px;
+align - items: center;
 `
 
 const ActionIcon = styled.img`
-    height: 90%;
+    height: 90 %;
     width: auto;
 `
 
 const SidebarLockIcon = styled.img`
-    height: 100%;
+    height: 100 %;
     width: auto;
 `
 
 const SidebarLockIconReverse = styled.img`
     width: auto;
-    height: 100%;
+    height: 100 %;
     transform: rotate(180deg);
-    animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
+    animation: 0.2s cubic - bezier(0.65, 0.05, 0.36, 1);
 `
 
 // TODO: inheirits from .nakedSquareButton
 const ActionBtn = styled.button`
-    border-radius: 3px;
-    padding: 2px;
-    width: 24px;
-    height: 24px;
-    padding: 3px;
-    border-radius: 3px;
-    background-repeat: no-repeat;
-    background-position: center;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+border - radius: 3px;
+padding: 2px;
+width: 24px;
+height: 24px;
+padding: 3px;
+border - radius: 3px;
+background - repeat: no - repeat;
+background - position: center;
+border: none;
+background - color: transparent;
+cursor: pointer;
+display: flex;
+align - items: center;
+justify - content: center;
 
     &:hover {
-        background-color: #e0e0e0;
-    }
+    background - color: #e0e0e0;
+}
 
     &:active {
-    }
+}
 
     &:focus {
-        outline: none;
-    }
+    outline: none;
+}
 
     &:disabled {
-        opacity: 0.4;
-        background-color: transparent;
-    }
+    opacity: 0.4;
+    background - color: transparent;
+}
 `

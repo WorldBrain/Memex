@@ -94,6 +94,7 @@ export interface AnnotationsSidebarProps
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext?: string
+    //postShareHook: (shareInfo) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1650,6 +1651,7 @@ const TopBarActionBtns = styled.div`
     display: flex;
     gap: 10px;
     height: 24px;
+    z-index: 10000;
 `
 
 const MyNotesClickableArea = styled.div`
@@ -1660,7 +1662,7 @@ const MyNotesClickableArea = styled.div`
 
 const CopyPasterWrapperTopBar = styled.div`
     position: relative;
-    right: 225px;
+    right: 200px;
     z-index: 10;
     top: 20px;
 `
@@ -1676,9 +1678,9 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: 100vh;
     width: fill-available;
     padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '20px'};
+        props.sidebarContext === 'dashboard' ? '0' : '0'};
     position: absolute;
-    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '20px')};
+    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '0')};
 
     &::-webkit-scrollbar {
         display: none;

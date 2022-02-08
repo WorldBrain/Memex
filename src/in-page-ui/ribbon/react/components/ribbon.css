@@ -88,15 +88,17 @@
 }
 
 .innerRibbonSidebarOpen {
+    box-shadow: none;
+    right: 0px;
     height: 100%;
     top: 0px;
     width: 44px;
     justify-content: flex-start;
-    padding-top: 15px;
-    align-items: center;
+    padding-right: 16px;
+    padding-top: 45px;
+    align-items: flex-end;
     display: flex;
     background: transparent;
-    box-shadow: none;
     border: none;
 }
 
