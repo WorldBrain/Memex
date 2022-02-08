@@ -1,6 +1,8 @@
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -13,6 +15,8 @@ export interface RibbonSubcomponentProps {
     search: RibbonSearchProps
     pausing: RibbonPausingProps
     activityIndicator: ActivityIndicatorProps
+    spacesBG: RemoteCollectionsInterface
+    contentSharingBG: ContentSharingInterface
 }
 
 export interface RibbonHighlightsProps {
@@ -76,8 +80,6 @@ export interface RibbonListsProps {
     listAllTabs: (value: number) => Promise<void>
     setShowListsPicker: (value: boolean) => void
     fetchInitialListSelections: () => Promise<number[]>
-    loadDefaultSuggestions: SpacePickerDependencies['loadDefaultSuggestions']
-    queryEntries: SpacePickerDependencies['queryEntries']
     selectEntry: SpacePickerDependencies['selectEntry']
     unselectEntry: SpacePickerDependencies['unselectEntry']
     createNewEntry: SpacePickerDependencies['createNewEntry']

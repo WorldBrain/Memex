@@ -65,8 +65,6 @@ export type NoteInteractionProps = Omit<
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
-    loadDefaultListSuggestions?: SpacePickerDependencies['loadDefaultSuggestions']
-    listQueryEntries?: SpacePickerDependencies['queryEntries']
 }
 
 // NOTE: Derived type - edit the original

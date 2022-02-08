@@ -99,6 +99,8 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                contentSharingBG={this.props.contentSharing}
+                spacesBG={this.props.customLists}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListNameById={(id) =>
@@ -196,26 +198,7 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.normalizedPageUrl,
                         }),
-                    queryEntries: async (query) => {
-                        const { customLists, contentSharing } = this.props
-                        const suggestions = await customLists.searchForListSuggestions(
-                            {
-                                query,
-                            },
-                        )
-                        const remoteListIds = await contentSharing.getRemoteListIds(
-                            {
-                                localListIds: suggestions.map((s) => s.id),
-                            },
-                        )
-                        return suggestions.map((sug) => ({
-                            localId: sug.id,
-                            name: sug.name,
-                            remoteId: remoteListIds[sug.id] ?? null,
-                            createdAt: sug.createdAt,
-                            focused: false,
-                        }))
-                    },
+
                     selectEntry: (id) =>
                         this.processEvent('updateLists', {
                             value: { added: id, deleted: null, selected: [] },
@@ -237,8 +220,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         })
                         return listId
                     },
-                    loadDefaultSuggestions: this.props.customLists
-                        .fetchInitialListSuggestions,
                 }}
                 search={{
                     ...this.state.search,

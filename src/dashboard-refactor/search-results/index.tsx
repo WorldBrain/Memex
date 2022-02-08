@@ -211,10 +211,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     })
                                 }
                                 createNewEntry={interactionProps.createNewList}
-                                queryEntries={interactionProps.listQueryEntries}
-                                loadDefaultSuggestions={
-                                    interactionProps.loadDefaultListSuggestions
-                                }
                             />
                         </HoverBox>
                     )
@@ -264,10 +260,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                     })
                                 }
                                 createNewEntry={interactionProps.createNewList}
-                                queryEntries={interactionProps.listQueryEntries}
-                                loadDefaultSuggestions={
-                                    interactionProps.loadDefaultListSuggestions
-                                }
                             />
                         </HoverBox>
                     )

@@ -508,37 +508,9 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
-    protected getShareCollectionPickerProps(): Pick<
-        SpacePickerDependencies,
-        'queryEntries' | 'loadDefaultSuggestions'
-    > {
-        return {
-            queryEntries: async (prefix) => {
-                const suggestions = await this.props.contentShareBG.suggestSharedLists(
-                    { prefix },
-                )
-                return suggestions.map((obj) => ({ ...obj, focused: false }))
-            },
-            loadDefaultSuggestions: async (args?: { limit? }) => {
-                const suggestions = await this.props.listsBG.fetchInitialListSuggestions(
-                    { limit: args?.limit },
-                )
-                const remoteIds = await this.props.contentShareBG.getRemoteListIds(
-                    { localListIds: suggestions.map((s) => s.localId) },
-                )
-                const sharedSuggestionLists = suggestions.filter(
-                    (defaultName) => remoteIds[defaultName.name] != null,
-                )
-                return sharedSuggestionLists
-            },
-        }
-    }
-
     private renderSearchResults() {
         const { searchResults, listsSidebar } = this.state
         const { searchFilters } = this.state
-
-        const shareCollectionPickerProps = this.getShareCollectionPickerProps()
 
         return (
             <SearchResultsContainer
@@ -817,10 +789,6 @@ export class DashboardContainer extends StatefulUIElement<
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
-                    listQueryEntries: (day, pageId) =>
-                        shareCollectionPickerProps.queryEntries,
-                    loadDefaultListSuggestions: (day, pageId) =>
-                        shareCollectionPickerProps.loadDefaultSuggestions,
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -868,10 +836,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
                         this.processEvent('setNoteLists', { ...args, noteId }),
-                    listQueryEntries: (noteId) =>
-                        shareCollectionPickerProps.queryEntries,
-                    loadDefaultListSuggestions: (noteId) =>
-                        shareCollectionPickerProps.loadDefaultSuggestions,
                     createNewList: (noteId) => async (name) => {
                         const listId = await this.props.listsBG.createCustomList(
                             { name },

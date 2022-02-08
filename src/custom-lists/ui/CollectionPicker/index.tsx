@@ -37,33 +37,10 @@ class SpacePicker extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         SpacePickerDependencies,
-        'queryEntries' | 'loadDefaultSuggestions' | 'createNewEntry'
+        'createNewEntry' | 'spacesBG' | 'contentSharingBG'
     > = {
-        queryEntries: async (query) => {
-            const suggestions = await collections.searchForListSuggestions({
-                query,
-            })
-            const remoteListIds = await contentSharing.getRemoteListIds({
-                localListIds: suggestions.map((s) => s.id),
-            })
-            return suggestions.map((s) => ({
-                localId: s.id,
-                name: s.name,
-                createdAt: s.createdAt,
-                focused: false,
-                remoteId: remoteListIds[s.id] ?? null,
-            }))
-        },
-        loadDefaultSuggestions: async () => {
-            const suggestions = await collections.fetchInitialListSuggestions()
-            const remoteListIds = await contentSharing.getRemoteListIds({
-                localListIds: suggestions.map((s) => s.localId as number),
-            })
-            return suggestions.map((s) => ({
-                ...s,
-                remoteId: remoteListIds[s.localId] ?? null,
-            }))
-        },
+        spacesBG: collections,
+        contentSharingBG: contentSharing,
         createNewEntry: async (name) =>
             collections.createCustomList({
                 name,

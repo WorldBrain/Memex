@@ -7,7 +7,6 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
-import TagHolder from 'src/tags/ui/tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -21,6 +20,8 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -40,8 +41,6 @@ export interface AnnotationCreateEventProps {
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
-    listQueryEntries?: SpacePickerDependencies['queryEntries']
-    loadDefaultListSuggestions?: SpacePickerDependencies['loadDefaultSuggestions']
     createNewList?: SpacePickerDependencies['createNewEntry']
     addPageToList?: SpacePickerDependencies['selectEntry']
     removePageFromList?: SpacePickerDependencies['unselectEntry']
@@ -57,6 +56,8 @@ export interface AnnotationCreateGeneralProps {
     hoverState: NoteResultHoverState
     contextLocation?: string
     isRibbonCommentBox?: boolean
+    spacesBG?: RemoteCollectionsInterface
+    contentSharingBG?: ContentSharingInterface
 }
 
 export interface Props
@@ -208,13 +209,13 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return (
             <CollectionPicker
-                loadDefaultSuggestions={this.props.loadDefaultListSuggestions}
-                queryEntries={this.props.listQueryEntries}
                 initialSelectedEntries={() => lists}
                 onEscapeKeyDown={() => setPickerShown(false)}
                 unselectEntry={this.props.removePageFromList}
                 createNewEntry={this.props.createNewList}
                 selectEntry={this.props.addPageToList}
+                contentSharingBG={this.props.contentSharingBG}
+                spacesBG={this.props.spacesBG}
             />
         )
     }

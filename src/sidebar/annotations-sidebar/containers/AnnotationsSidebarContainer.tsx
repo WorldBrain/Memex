@@ -220,28 +220,8 @@ export class AnnotationsSidebarContainer<
 
     protected getShareCollectionPickerProps(): SpacePickerDependencies {
         return {
-            queryEntries: async (prefix) => {
-                const suggestions = await this.props.contentSharing.suggestSharedLists(
-                    { prefix },
-                )
-
-                return suggestions.map((obj) => ({
-                    ...obj,
-                    focused: false,
-                }))
-            },
-            loadDefaultSuggestions: async (args) => {
-                const suggestions = await this.props.customLists.fetchInitialListSuggestions(
-                    { limit: args?.limit },
-                )
-                const remoteListIds = await this.props.contentSharing.getRemoteListIds(
-                    { localListIds: suggestions.map((list) => list.localId) },
-                )
-                const filteredSuggestions = suggestions.filter(
-                    (suggestion) => remoteListIds[suggestion.localId] != null,
-                )
-                return filteredSuggestions
-            },
+            spacesBG: this.props.customLists,
+            contentSharingBG: this.props.contentSharing,
             createNewEntry: async (name) =>
                 this.props.customLists.createCustomList({ name }),
             selectEntry: async (id) => {
@@ -260,7 +240,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        const collectionPickerProps = this.getShareCollectionPickerProps()
+        const spacePickerProps = this.getShareCollectionPickerProps()
         return {
             onCommentChange: (comment) =>
                 this.processEvent('changeNewPageCommentText', { comment }),
@@ -277,14 +257,13 @@ export class AnnotationsSidebarContainer<
                 this.props.tags.searchForTagSuggestions({ query }),
             loadDefaultTagSuggestions: this.props.tags
                 .fetchInitialTagSuggestions,
-            listQueryEntries: collectionPickerProps.queryEntries,
-            loadDefaultListSuggestions:
-                collectionPickerProps.loadDefaultSuggestions,
-            addPageToList: collectionPickerProps.selectEntry,
-            removePageFromList: collectionPickerProps.unselectEntry,
+            addPageToList: spacePickerProps.selectEntry,
+            removePageFromList: spacePickerProps.unselectEntry,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
+            contentSharingBG: spacePickerProps.contentSharingBG,
+            spacesBG: spacePickerProps.spacesBG,
             hoverState: null,
         }
     }
@@ -379,16 +358,10 @@ export class AnnotationsSidebarContainer<
         return (
             <CollectionPicker
                 initialSelectedEntries={() => annot.lists ?? []}
-                queryEntries={collectionPickerProps.queryEntries}
-                loadDefaultSuggestions={
-                    collectionPickerProps.loadDefaultSuggestions
-                }
                 onEscapeKeyDown={() =>
                     this.processEvent('resetListPickerAnnotationId', null)
                 }
-                createNewEntry={collectionPickerProps.createNewEntry}
-                unselectEntry={collectionPickerProps.unselectEntry}
-                selectEntry={collectionPickerProps.selectEntry}
+                {...collectionPickerProps}
             />
         )
     }

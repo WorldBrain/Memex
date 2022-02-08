@@ -1,4 +1,4 @@
-import React, { PureComponent, HTMLProps } from 'react'
+import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
@@ -270,8 +270,6 @@ export default class PageResultView extends PureComponent<Props> {
 
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
-
-        console.log(this.props.lists.includes(20201014, 0))
 
         return (
             <ItemBox

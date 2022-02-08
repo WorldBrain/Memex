@@ -44,13 +44,14 @@ const setupLogicHelper = async ({
     let generatedIds = 100
 
     const entryPickerLogic = new SpacePickerLogic({
-        queryEntries: queryEntries ?? (async () => []),
         createNewEntry: args.createNewEntry ?? (async (name) => generatedIds++),
         selectEntry: args.selectEntry ?? (async (id) => {}),
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
-        loadDefaultSuggestions: () => initialSuggestions ?? [],
         initialSelectedEntries: async () => initialSelectedEntries ?? [],
         actOnAllTabs: async (entry) => null,
+        contentSharingBG:
+            device.backgroundModules.contentSharing.remoteFunctions,
+        spacesBG: device.backgroundModules.customLists.remoteFunctions,
     })
 
     const testLogic = device.createElement(entryPickerLogic)

@@ -1,6 +1,8 @@
 import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -14,15 +16,13 @@ export interface SpacePickerDependencies {
     createNewEntry: (name: string) => Promise<number>
     selectEntry: (listId: number) => Promise<void>
     unselectEntry: (listId: number) => Promise<void>
-    queryEntries: (query: string) => Promise<SpaceDisplayEntry[]>
     actOnAllTabs?: (listId: number) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
-    loadDefaultSuggestions: (args?: {
-        limit?: number
-    }) => SpaceDisplayEntry[] | Promise<SpaceDisplayEntry[]>
     initialSelectedEntries?: () => number[] | Promise<number[]>
     children?: any
     onClickOutside?: React.MouseEventHandler
+    spacesBG: RemoteCollectionsInterface
+    contentSharingBG: ContentSharingInterface
 }
 
 export type SpacePickerEvent = UIEvent<{
@@ -96,10 +96,7 @@ export default class SpacePickerLogic extends UILogic<
             ? await this.dependencies.initialSelectedEntries()
             : []
 
-        const defaultSuggestions =
-            typeof this.dependencies.loadDefaultSuggestions === 'string'
-                ? this.dependencies.loadDefaultSuggestions
-                : await this.dependencies.loadDefaultSuggestions()
+        const defaultSuggestions = await this.loadDefaultSuggestions()
 
         this.defaultEntries = defaultSuggestions
 
@@ -111,6 +108,18 @@ export default class SpacePickerLogic extends UILogic<
                 selectedEntries: initialSelectedEntries,
             }),
         })
+    }
+
+    private async loadDefaultSuggestions(): Promise<SpaceDisplayEntry[]> {
+        const { spacesBG: collectionsBG, contentSharingBG } = this.dependencies
+        const suggestions = await collectionsBG.fetchInitialListSuggestions()
+        const remoteListIds = await contentSharingBG.getRemoteListIds({
+            localListIds: suggestions.map((s) => s.localId as number),
+        })
+        return suggestions.map((s) => ({
+            ...s,
+            remoteId: remoteListIds[s.localId] ?? null,
+        }))
     }
 
     setSearchInputRef: EventHandler<'setSearchInputRef'> = ({
@@ -171,7 +180,6 @@ export default class SpacePickerLogic extends UILogic<
 
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
         event: { query },
-        previousState,
     }) => {
         this.emitMutation({
             $apply: (state) => ({
@@ -191,24 +199,35 @@ export default class SpacePickerLogic extends UILogic<
                 }),
             })
         } else {
-            return this._query(query, previousState.selectedEntries)
+            return this.query(query)
         }
     }
 
     /**
      * Searches for the term via the `queryEntries` function provided to the component
      */
-    private _queryRemote = async (
-        term: string,
-        selectedEntries: Array<string | number>,
-    ) => {
+    private queryRemote = async (term: string) => {
+        const { spacesBG: collectionsBG, contentSharingBG } = this.dependencies
         this.emitMutation({
             $apply: (state) => ({ ...state, loadingQueryResults: true }),
         })
-        const displayEntries = await this.dependencies.queryEntries(
-            term.toLocaleLowerCase(),
-        )
-        displayEntries.sort()
+
+        const suggestions = await collectionsBG.searchForListSuggestions({
+            query: term.toLocaleLowerCase(),
+        })
+        const remoteListIds = await contentSharingBG.getRemoteListIds({
+            localListIds: suggestions.map((s) => s.id),
+        })
+        const displayEntries = suggestions
+            .map((s) => ({
+                localId: s.id,
+                name: s.name,
+                createdAt: s.createdAt,
+                focused: false,
+                remoteId: remoteListIds[s.id] ?? null,
+            }))
+            .sort()
+
         this.emitMutation({
             $apply: (state) => ({
                 ...state,
@@ -219,7 +238,7 @@ export default class SpacePickerLogic extends UILogic<
         this._setCreateEntryDisplay(displayEntries, displayEntries, term)
     }
 
-    private _query = debounce(this._queryRemote, 150, { leading: true })
+    private query = debounce(this.queryRemote, 150, { leading: true })
 
     /**
      * If the term provided does not exist in the entry list, then set the new entry state to the term.
