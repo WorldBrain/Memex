@@ -840,13 +840,10 @@ export class DashboardContainer extends StatefulUIElement<
                         const listId = await this.props.listsBG.createCustomList(
                             { name },
                         )
-                        this.processEvent('setPageLists', {
-                            id: noteId,
-                            fullPageUrl:
-                                searchResults.pageData.byId[noteId].fullUrl,
+                        this.processEvent('setNoteLists', {
+                            noteId,
                             added: listId,
                             deleted: null,
-                            skipPageIndexing: true,
                         })
                         return listId
                     },

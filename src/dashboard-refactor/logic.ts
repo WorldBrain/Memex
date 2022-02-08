@@ -42,6 +42,7 @@ import {
 } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
+import { PageList } from 'src/custom-lists/background/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1658,56 +1659,40 @@ export class DashboardLogic extends UILogic<State, Events> {
             tagsToBeDeleted: event.deleted ? [event.deleted] : [],
         })
     }
-    setNoteLists: EventHandler<'setNoteLists'> = async ({ event }) => {
-        const added = event.added
-            ? await this.options.listsBG.fetchListById({ id: event.added })
-            : null
-        const deleted = event.deleted
-            ? await this.options.listsBG.fetchListById({
-                  id: event.deleted,
-              })
-            : null
 
-        let listNames = null
-        if (added) {
-            const {
-                sharingState,
-            } = await this.options.contentShareBG.shareAnnotationToSomeLists({
+    setNoteLists: EventHandler<'setNoteLists'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { contentShareBG } = this.options
+        const noteData = previousState.searchResults.noteData.byId[event.noteId]
+
+        let listIds = noteData.lists
+        if (event.added != null) {
+            await contentShareBG.shareAnnotationToSomeLists({
                 annotationUrl: event.noteId,
-                localListIds: [added.id],
+                localListIds: [event.added],
             })
-            listNames = await Promise.all(
-                sharingState.localListIds.map(async (id) =>
-                    this.options.listsBG
-                        .fetchListById({ id })
-                        .then((list) => list.name),
-                ),
-            )
+            listIds = [...listIds, event.added]
         }
-        if (deleted) {
-            const {
-                sharingState,
-            } = await this.options.contentShareBG.unshareAnnotationFromSomeLists(
-                {
-                    annotationUrl: event.noteId,
-                    localListIds: [deleted.id],
-                },
-            )
-            listNames = await Promise.all(
-                sharingState.localListIds.map(async (id) =>
-                    this.options.listsBG
-                        .fetchListById({ id })
-                        .then((list) => list.name),
-                ),
-            )
+        if (event.deleted != null) {
+            await contentShareBG.unshareAnnotationFromSomeLists({
+                annotationUrl: event.noteId,
+                localListIds: [event.deleted],
+            })
+            const toRemove = listIds.findIndex((id) => id === event.deleted)
+            listIds = [
+                ...listIds.slice(0, toRemove),
+                ...listIds.slice(toRemove + 1),
+            ]
         }
+
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            lists: { $set: listNames ?? [] },
-                            // lists: { $apply: updatePickerValues(event) },
+                            lists: { $set: listIds },
                         },
                     },
                 },

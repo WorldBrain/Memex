@@ -1906,7 +1906,7 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[0].name])
+                ).toEqual([DATA.LISTS_1[0].id])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
@@ -1915,7 +1915,7 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[0].name, DATA.LISTS_1[1].name])
+                ).toEqual([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
@@ -1924,7 +1924,7 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[1].name])
+                ).toEqual([DATA.LISTS_1[1].id])
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
                     deleted: DATA.LISTS_1[1].id,
