@@ -129,8 +129,12 @@ export default class Ribbon extends Component<Props, State> {
             : source
     }
 
-    private hideTagPicker = () => this.props.tagging.setShowTagsPicker(false)
-    private hideListPicker = () => this.props.lists.setShowListsPicker(false)
+    private hideTagPicker = () => {
+        this.props.tagging.setShowTagsPicker(false)
+    }
+    private hideListPicker = () => {
+        this.props.lists.setShowListsPicker(false)
+    }
 
     private renderTagsPicker() {
         if (!this.props.tagging.showTagsPicker) {
