@@ -13,6 +13,7 @@ export interface Props {
     onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
+    id?: string
     name: string
     localId: number
     createdAt: number
@@ -60,6 +61,7 @@ class EntryRow extends React.Component<Props> {
 
     render() {
         const {
+            id,
             remoteId,
             selected,
             focused,
@@ -73,6 +75,7 @@ class EntryRow extends React.Component<Props> {
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}
                 isFocused={focused}
+                id={id}
             >
                 <NameWrapper>
                     {resultItem}

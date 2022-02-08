@@ -102,12 +102,8 @@ class SpacePicker extends StatefulUIElement<
     handleResultListFocus = (list: SpaceDisplayEntry, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-        const offsetTop = document.getElementById(
-            `ListKeyName-${list.name}-${index}`,
-        ).offsetTop
-        document.getElementById(
-            `ListKeyName-${list.name}-${index}`,
-        ).scrollTop = offsetTop
+        const el = document.getElementById(`ListKeyName-${list.localId}`)
+        el.scrollTop = el.offsetTop
     }
 
     handleNewListPress = () => {
@@ -133,6 +129,7 @@ class SpacePicker extends StatefulUIElement<
             }
             onFocus={this.handleResultListFocus}
             key={`ListKeyName-${list.localId}`}
+            id={`ListKeyName-${list.localId}`}
             index={index}
             name={list.name}
             selected={this.state.selectedEntries.includes(list.localId)}
