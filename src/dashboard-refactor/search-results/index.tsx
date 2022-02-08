@@ -794,7 +794,6 @@ const ResultsContainer = styled(Margin)`
     max-width: ${sizeConstants.searchResults.widthPx}px;
     margin-bottom: 100px;
     width: fill-available;
-    margin-top: 35px;
 `
 
 const TopBarRightSideWrapper = styled.div`
