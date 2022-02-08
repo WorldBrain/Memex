@@ -34,6 +34,7 @@ const GroupHeaderInnerDiv = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding-right: 5px;
 `
 
 const GroupTitle = styled.div`
@@ -42,7 +43,7 @@ const GroupTitle = styled.div`
     line-height: 18px;
     cursor: pointer;
 
-    width: max-content;
+    width: fill-available;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -56,6 +57,10 @@ const IconContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+
+    &:hover {
+        background: #f0f0f0;
+    }
 `
 
 const IconGroup = styled.div`

@@ -17,21 +17,21 @@ import ListsSidebarItem, {
 import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
+import { Rnd } from 'react-rnd'
 import { createGlobalStyle } from 'styled-components'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-const Sidebar = styled.div<{
+const Sidebar = styled(Rnd)<{
     locked: boolean
     peeking: boolean
 }>`
     display: flex;
     flex-direction: column;
     justify-content: start;
-    width: ${sizeConstants.listsSidebar.widthPx}px;
-    position: fixed;
     z-index: 3000;
+    width: 200px;
 
     ${(props) =>
         props.locked &&
@@ -62,7 +62,10 @@ const Sidebar = styled.div<{
         `}
 `
 
-const Container = styled.div``
+const Container = styled.div`
+    position: fixed;
+    z-index: 3000;
+`
 
 const PeekTrigger = styled.div`
     height: 100vh;
@@ -74,11 +77,12 @@ const PeekTrigger = styled.div`
 const TopGroup = styled.div`
     border-top: 1px solid ${colors.lightGrey};
 `
-const BottomGroup = styled.div`
+const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-y: scroll;
     overflow-x: visible;
     padding-bottom: 100px;
     height: fill-available;
+    width: ${(props) => props.sidebarWidth};
 
     &::-webkit-scrollbar {
       display: none;
@@ -163,7 +167,14 @@ export interface ListsSidebarProps {
     initDropReceivingState: (listId: number) => DropReceivingState
 }
 
-export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
+export interface State {
+    sidebarWidth: string
+}
+
+export default class ListsSidebar extends PureComponent<
+    ListsSidebarProps,
+    State
+> {
     private renderLists = (
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
@@ -178,6 +189,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 {...listObj}
             />
         ))
+
+    private SidebarContainer = React.createRef()
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
@@ -213,14 +226,42 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     onDragEnter={this.props.peekState.setSidebarPeekState(true)}
                 />
                 <Sidebar
+                    ref={this.SidebarContainer}
+                    style={style}
+                    size={{ height: isSidebarPeeking ? '90vh' : '100vh' }}
                     peeking={isSidebarPeeking}
+                    position={{
+                        x:
+                            isSidebarLocked &&
+                            `$sizeConstants.header.heightPxpx`,
+                    }}
                     locked={isSidebarLocked}
                     onMouseEnter={
                         isSidebarPeeking &&
-                        this.props.peekState.setSidebarPeekState(true)
+                        (this.props.peekState.setSidebarPeekState(true),
+                        console.log('test'))
                     }
+                    default={{ width: 200 }}
+                    resizeGrid={[1, 0]}
+                    dragAxis={'none'}
+                    minWidth={'200px'}
+                    maxWidth={'500px'}
+                    disableDragging={'true'}
+                    enableResizing={{
+                        top: false,
+                        right: true,
+                        bottom: false,
+                        left: false,
+                        topRight: false,
+                        bottomRight: false,
+                        bottomLeft: false,
+                        topLeft: false,
+                    }}
+                    onResize={(e, direction, ref, delta, position) => {
+                        this.setState({ sidebarWidth: ref.style.width })
+                    }}
                 >
-                    <BottomGroup>
+                    <BottomGroup sidebarWidth={this.state.sidebarWidth}>
                         <Margin vertical="10px">
                             <ListsSidebarGroup
                                 isExpanded
@@ -378,6 +419,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         ))}
                     </BottomGroup>
                 </Sidebar>
+                {/* </Rnd> */}
             </Container>
         )
     }
