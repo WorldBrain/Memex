@@ -1678,9 +1678,10 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: 100vh;
     width: fill-available;
     padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '0'};
+        props.sidebarContext === 'dashboard' ? '0' : '40px'};
     position: absolute;
-    right: ${(props) => (props.sidebarContext === 'dashboard' ? '0' : '0')};
+    margin-right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '0' : '-40px'};
 
     &::-webkit-scrollbar {
         display: none;
