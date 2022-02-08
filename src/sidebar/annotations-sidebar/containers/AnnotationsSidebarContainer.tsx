@@ -222,20 +222,32 @@ export class AnnotationsSidebarContainer<
         return {
             spacesBG: this.props.customLists,
             contentSharingBG: this.props.contentSharing,
-            createNewEntry: async (name) =>
-                this.props.customLists.createCustomList({ name }),
-            selectEntry: async (id) => {
-                this.props.customLists.insertPageToList({
-                    id,
-                    url: this.state.pageUrl,
+            createNewEntry: async (name) => {
+                const listId = await this.props.customLists.createCustomList({
+                    name,
                 })
-            },
-            unselectEntry: async (id) => {
-                this.props.customLists.removePageFromList({
-                    id,
-                    url: this.state.pageUrl,
+                this.processEvent('updateListsForAnnotation', {
+                    added: listId,
+                    deleted: null,
+                    annotationId: this.state.activeListPickerAnnotationId,
                 })
+                this.processMutation({
+                    listData: { [listId]: { $set: { name } } },
+                })
+                return listId
             },
+            selectEntry: async (listId) =>
+                this.processEvent('updateListsForAnnotation', {
+                    added: listId,
+                    deleted: null,
+                    annotationId: this.state.activeListPickerAnnotationId,
+                }),
+            unselectEntry: async (listId) =>
+                this.processEvent('updateListsForAnnotation', {
+                    added: null,
+                    deleted: listId,
+                    annotationId: this.state.activeListPickerAnnotationId,
+                }),
         }
     }
 
@@ -264,6 +276,7 @@ export class AnnotationsSidebarContainer<
             lists: this.state.commentBox.lists,
             contentSharingBG: spacePickerProps.contentSharingBG,
             spacesBG: spacePickerProps.spacesBG,
+            createNewList: spacePickerProps.createNewEntry,
             hoverState: null,
         }
     }

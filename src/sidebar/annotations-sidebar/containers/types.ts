@@ -213,10 +213,10 @@ export type SidebarContainerEvents = UIEvent<
             deleted?: string
             annotationUrl: string
         }
-        updateListsForPageResult: {
-            added?: number
-            deleted?: number
-            url: string
+        updateListsForAnnotation: {
+            added: number | null
+            deleted: number | null
+            annotationId: string
         }
         deleteEditCommentTag: { tag: string; annotationUrl: string }
 

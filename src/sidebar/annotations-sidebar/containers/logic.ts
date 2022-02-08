@@ -674,13 +674,44 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    updateListsForPageResult: EventHandler<
-        'updateListsForPageResult'
-    > = async ({ event }) => {
-        return this.options.customLists.updateListForPage({
-            added: event.added,
-            deleted: event.deleted,
-            url: event.url,
+    updateListsForAnnotation: EventHandler<
+        'updateListsForAnnotation'
+    > = async ({ event, previousState }) => {
+        const { contentSharing } = this.options
+
+        const idx = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationId,
+        )
+        if (idx === -1) {
+            return
+        }
+
+        let listIds = previousState.annotations[idx].lists
+        if (event.added != null) {
+            await contentSharing.shareAnnotationToSomeLists({
+                annotationUrl: event.annotationId,
+                localListIds: [event.added],
+            })
+            listIds = [...listIds, event.added]
+        }
+        if (event.deleted != null) {
+            await contentSharing.unshareAnnotationFromSomeLists({
+                annotationUrl: event.annotationId,
+                localListIds: [event.deleted],
+            })
+            const toRemove = listIds.findIndex((id) => id === event.deleted)
+            listIds = [
+                ...listIds.slice(0, toRemove),
+                ...listIds.slice(toRemove + 1),
+            ]
+        }
+
+        this.emitMutation({
+            annotations: {
+                [idx]: {
+                    lists: { $set: listIds },
+                },
+            },
         })
     }
 
