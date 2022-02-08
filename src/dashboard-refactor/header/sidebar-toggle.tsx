@@ -6,6 +6,7 @@ import { SidebarLockedState } from '../lists-sidebar/types'
 import { Icon } from '../styled-components'
 import { HoverState } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { ButtonTooltip } from 'src/common-ui/components'
 
 const arrowStyles = `
     left: 2px;
@@ -73,21 +74,36 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 onMouseEnter={onHoverEnter}
             >
                 {isHovered ? (
-                    <BtnBackground>
-                        {isSidebarLocked ? (
-                            <Icon
-                                path={icons.doubleArrow}
-                                rotation="0"
-                                heightAndWidth="20px"
-                            />
-                        ) : (
-                            <Icon
-                                path={icons.doubleArrow}
-                                rotation="180"
-                                heightAndWidth="20px"
-                            />
-                        )}
-                    </BtnBackground>
+                    <ButtonTooltip
+                        tooltipText={
+                            isSidebarLocked ? (
+                                <span>
+                                    Click to close sidebar.
+                                    <br />
+                                    Open by hovering on left side of screen
+                                </span>
+                            ) : (
+                                'Click to lock open sidebar'
+                            )
+                        }
+                        position={'right'}
+                    >
+                        <BtnBackground>
+                            {isSidebarLocked ? (
+                                <Icon
+                                    path={icons.doubleArrow}
+                                    rotation="0"
+                                    heightAndWidth="20px"
+                                />
+                            ) : (
+                                <Icon
+                                    path={icons.doubleArrow}
+                                    rotation="180"
+                                    heightAndWidth="20px"
+                                />
+                            )}
+                        </BtnBackground>
+                    </ButtonTooltip>
                 ) : (
                     <Icon path={icons.hamburger} heightAndWidth="20px" />
                 )}
