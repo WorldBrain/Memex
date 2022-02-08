@@ -789,9 +789,9 @@ const CollectionContainer = styled.div`
 `
 
 const SidebarContainerWithTopBar = styled.div`
-display: flex;
-align - items: flex - start;
-height: 100 %;
+    display: flex;
+    align-items: flex-start;
+    height: 100 %;
 `
 
 const GlobalStyle = createGlobalStyle<{
@@ -809,6 +809,10 @@ const GlobalStyle = createGlobalStyle<{
 
         &:hover {
         background: #5671cf30;
+    }
+
+    #outerContainer {
+        width: ${(props) => props.sidebarWidth};
     }
 
     #outerContainer {
@@ -860,74 +864,74 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div`
-height: 100 %;
-overflow-x: visible;
-position: fixed;
-padding: 0px 0px 10px 0px;
+    height: 100 %;
+    overflow-x: visible;
+    position: fixed;
+    padding: 0px 0px 10px 0px;
 
-right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
-padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
+    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
+    top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
+    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
-z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
-background: ${(props) => props.theme.colors.backgroundColor};
-transition: all 0.1s cubic - bezier(0.65, 0.05, 0.36, 1) 0s;
-border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-font-family: 'Inter', sans-serif;
+    z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
+    background: ${(props) => props.theme.colors.backgroundColor};
+    transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
+    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    font-family: 'Inter', sans-serif;
 
-&:: -webkit-scrollbar {
-    display: none;
-}
+    &:: -webkit-scrollbar {
+        display: none;
+    }
 
-scrollbar - width: none;
+    scrollbar-width: none;
 `
 
 const TopBarContainerStyled = styled.div`
-position: sticky;
-top: 0;
-z - index: 1000;
-background: #f6f8fb;
-display: flex;
-justify - content: space - between;
-align - items: center;
-height: 34px;
-box - sizing: border - box;
-padding: 5px 15px 5px 5px;
-width: 100 %;
-margin - bottom: 2px;
-box - shadow: 0px 3px 5px - 3px #c9c9c9;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #f6f8fb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 5px 15px 5px 5px;
+    width: 100 %;
+    margin-bottom: 2px;
+    box-shadow: 0px 3px 5px-3px #c9c9c9;
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
-display: grid;
-justify - content: flex - start;
-margin - left: -25px;
-align - items: center;
-gap: 8px;
-background - color: ${(props) => props.theme.colors.backgroundColor};
-border - radius: 0 0 0 5px;
-padding: 5px 1px 5px 3px;
-z - index: 10000;
-right: 4px;
-position: relative;
-border - left: 1px solid ${(props) => props.theme.colors.lineGrey};
-border - bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    display: grid;
+    justify-content: flex-start;
+    margin-left: -25px;
+    align-items: center;
+    gap: 8px;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 0 0 0 5px;
+    padding: 5px 1px 5px 3px;
+    z-index: 10000;
+    right: 4px;
+    position: relative;
+    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const CloseBtn = styled.button`
-cursor: pointer;
-z - index: 2147483647;
-line - height: normal;
-background: transparent;
-border: none;
-outline: none;
-width: 24px;
-height: 24px;
-padding: 4px;
-display: flex;
-justify - content: center;
-border - radius: 3px;
-align - items: center;
+    cursor: pointer;
+    z-index: 2147483647;
+    line-height: normal;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    display: flex;
+    justify-content: center;
+    border-radius: 3px;
+    align-items: center;
 `
 
 const ActionIcon = styled.img`
@@ -944,39 +948,39 @@ const SidebarLockIconReverse = styled.img`
     width: auto;
     height: 100 %;
     transform: rotate(180deg);
-    animation: 0.2s cubic - bezier(0.65, 0.05, 0.36, 1);
+    animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `
 
 // TODO: inheirits from .nakedSquareButton
 const ActionBtn = styled.button`
-border - radius: 3px;
-padding: 2px;
-width: 24px;
-height: 24px;
-padding: 3px;
-border - radius: 3px;
-background - repeat: no - repeat;
-background - position: center;
-border: none;
-background - color: transparent;
-cursor: pointer;
-display: flex;
-align - items: center;
-justify - content: center;
+    border-radius: 3px;
+    padding: 2px;
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+    border-radius: 3px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
-    background - color: #e0e0e0;
-}
+        background-color: #e0e0e0;
+    }
 
     &:active {
-}
+    }
 
     &:focus {
-    outline: none;
-}
+        outline: none;
+    }
 
     &:disabled {
-    opacity: 0.4;
-    background - color: transparent;
-}
+        opacity: 0.4;
+        background-color: transparent;
+    }
 `
