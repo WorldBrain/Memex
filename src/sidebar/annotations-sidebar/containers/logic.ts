@@ -7,7 +7,6 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
-import { browser } from 'webextension-polyfill-ts'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
