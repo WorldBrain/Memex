@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { windowWhen } from 'rxjs/operator/windowWhen'
 
 // card container (hold cycling logic)
 // card component (holds card content, isEndOfCycle, isStartOfCycle)
@@ -21,10 +22,14 @@ export interface Props {
 }
 export interface State {
     cardIndex: number
+    windowSize: number
 }
 
 export default class TutorialContainer extends React.Component<Props, State> {
-    state: State = { cardIndex: 0 }
+    state: State = {
+        cardIndex: 0,
+        windowSize: window.outerWidth,
+    }
 
     prevCard = (_) => {
         this.setState({
@@ -40,8 +45,21 @@ export default class TutorialContainer extends React.Component<Props, State> {
         })
     }
 
+    componentDidMount() {
+        window.addEventListener('resize', this.getScreenWidth)
+    }
+
+    // componentDidUnmount = () => {
+    //     window.removeEventListener('resize', this.getScreenWidth);
+    // }
+
+    getScreenWidth = () => {
+        this.setState({
+            windowSize: window.outerWidth,
+        })
+    }
+
     render() {
-        console.log(this.props.content.length)
         return (
             <TutorialCardContainer
                 top={
@@ -67,6 +85,7 @@ export default class TutorialContainer extends React.Component<Props, State> {
                     this.props.content[this.state.cardIndex].component.props
                         .height
                 }
+                screenWidth={this.state.windowSize}
             >
                 <CardBody>
                     {this.props.content[this.state.cardIndex].component}
@@ -113,10 +132,14 @@ const TutorialCardContainer = styled.div<{
     right: string
     width: string
     height: string
+    screenWidth: string
 }>`
     top: ${(props) => (props.top ? props.top : null)};
     bottom: ${(props) => (props.bottom ? props.bottom : null)};
-    left: ${(props) => (props.left ? props.left : null)};
+    left: ${(props) =>
+        props.left
+            ? (props.screenWidth - props.width.replace('px', '')) / 2 + 'px'
+            : null};
     right: ${(props) => (props.right ? props.right : null)};
     width: ${(props) => (props.width ? props.width : '300px')};
     height: ${(props) => (props.height ? props.height : '500px')};

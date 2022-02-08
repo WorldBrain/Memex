@@ -8,18 +8,17 @@ import { browser } from 'webextension-polyfill-ts'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 // tutorial step like in the mockup
-export type TutorialStepContent = Pick<
-    React.CSSProperties,
-    'top' | 'width' | 'bottom' | 'left' | 'right' | 'bottom' | 'height'
-> & {
-    subtitle: React.ReactChild
-    text: React.ReactChild
+export type TutorialStepContent = {
+    subtitle: JSX.Element | string | React.Component
     keyboardShortcut?: string
+    text: JSX.Element | string | React.Component
+    top?: string
+    bottom?: string
+    left?: string
+    right?: string
+    width?: string
+    height?: string
 }
-
-const SaveTextContainer = styled.div`
-    padding-left: 40px;
-`
 
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
@@ -49,6 +48,10 @@ const FinishHeader = styled.div`
     margin-bottom: 17px;
 `
 
+const SaveTextContainer = styled.div`
+    padding-left: 40px;
+`
+
 const OptionsList = styled.div`
     display: grid;
     grid-auto-flow: column;
@@ -57,10 +60,14 @@ const OptionsList = styled.div`
 `
 
 const OptionItem = styled.div`
-    font-size: 16px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-weight: 400;
-    text-align: left;
-    padding: 10px 0;
+    flex-direction: column;
+    text-align: center;
+    padding: 10px 10px;
     cursor: pointer;
     font-weight: bold;
     height: 140px;
@@ -304,7 +311,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '120px',
+        top: '60px',
         bottom: null,
         left: null,
         right: '60px',
@@ -383,13 +390,14 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
-        top: '40px',
+        top: '85px',
         bottom: null,
         left: null,
         right: '60px',
         width: '540px',
         height: '220px',
     },
+
     {
         subtitle: (
             <PinTitleContainer>
@@ -409,26 +417,11 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </InfoText>
             </SaveTextContainer>
         ),
-    },
-
-    {
-        subtitle: (
-            <PinTitleContainer>
-                <PinTitleImage src={icons.pin} />
-                Pin Memex to your menu
-                <PinTutorialArrow />
-            </PinTitleContainer>
-        ),
-        text: (
-            <SaveTextContainer>
-                <p>Easy access to bookmarking, tagging & searching.</p>
-            </SaveTextContainer>
-        ),
         top: '30px',
         bottom: null,
         left: null,
         right: '140px',
-        width: '480px',
+        width: '540px',
         height: '170px',
     },
 
