@@ -2,12 +2,12 @@ import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styles from 'src/dashboard-refactor/styles'
 import {
-    Icon,
     LoadingContainer,
     LoadingIndicator,
 } from 'src/dashboard-refactor/styled-components'
 import styled from 'styled-components'
 import { ThemeProvider } from 'styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import { TaskState } from 'ui-logic-core/lib/types'
 import { Props as ListsSidebarItemProps } from './sidebar-item-with-menu'
@@ -134,7 +134,7 @@ export default class ListsSidebarGroup extends PureComponent<
                                 {this.props.onAddBtnClick && (
                                     <Icon
                                         heightAndWidth="14px"
-                                        path={icons.plus}
+                                        filePath={icons.plus}
                                         color={'purple'}
                                         onClick={this.props.onAddBtnClick}
                                     />
@@ -142,10 +142,10 @@ export default class ListsSidebarGroup extends PureComponent<
                                 {this.props.onExpandBtnClick && (
                                     <Icon
                                         rotation={
-                                            this.props.isExpanded ? '0' : '-90'
+                                            this.props.isExpanded ? 0 : -90
                                         }
                                         heightAndWidth="16px"
-                                        path={icons.triangle}
+                                        filePath={icons.triangle}
                                         color={'iconColor'}
                                         onClick={this.props.onExpandBtnClick}
                                     />

@@ -198,11 +198,15 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowTutorial()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <QuickTutorial
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onClickOutside={() => this.props.toggleShowTutorial()}
-                    onSettingsClick={() => this.openOptionsTabRPC('settings')}
-                />
+                <div onMouseLeave={() => this.props.toggleShowTutorial()}>
+                    <QuickTutorial
+                        getKeyboardShortcutsState={getKeyboardShortcutsState}
+                        onClickOutside={() => this.props.toggleShowTutorial()}
+                        onSettingsClick={() =>
+                            this.openOptionsTabRPC('settings')
+                        }
+                    />
+                </div>
             </BlurredSidebarOverlay>
         )
     }
@@ -219,11 +223,15 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <ExtraButtonsPanel
                     closePanel={() => this.props.toggleShowExtraButtons()}
+                    onMouseLeave={() => this.props.toggleShowExtraButtons()}
                 >
                     <ExtraButtonRow
                         onClick={() => {
                             this.props.handleRibbonToggle()
-                            this.props.sidebar.closeSidebar()
+                            {
+                                this.props.isRibbonEnabled &&
+                                    this.props.sidebar.closeSidebar()
+                            }
                         }}
                     >
                         <Icon
@@ -254,7 +262,7 @@ export default class Ribbon extends Component<Props, State> {
                             heightAndWidth="16px"
                             hoverOff
                         />
-                        {this.props.isRibbonEnabled ? (
+                        {this.props.highlights.areHighlightsEnabled ? (
                             <InfoText>Hide Highlights</InfoText>
                         ) : (
                             <InfoText>Show Highlights</InfoText>
@@ -273,7 +281,7 @@ export default class Ribbon extends Component<Props, State> {
                             heightAndWidth="16px"
                             hoverOff
                         />
-                        {this.props.isRibbonEnabled ? (
+                        {this.props.tooltip.isTooltipEnabled ? (
                             <InfoText>Hide Highlighter Tooltip</InfoText>
                         ) : (
                             <InfoText>Show Highlighter Tooltip</InfoText>
