@@ -49,10 +49,6 @@ const FinishHeader = styled.div`
     margin-bottom: 17px;
 `
 
-const SaveTextContainer = styled.div`
-    padding-left: 40px;
-`
-
 const OptionsList = styled.div`
     display: grid;
     grid-auto-flow: column;
