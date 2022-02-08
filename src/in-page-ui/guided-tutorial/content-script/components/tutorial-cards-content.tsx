@@ -39,7 +39,7 @@ const SmallImages = styled.img`
     width: 16px;
     height: 16px;
     vertical-align: sub;
-    padding: 0 5px;
+    padding: 0 5px 1px 5px;
 `
 
 const FinishHeader = styled.div`
@@ -57,7 +57,8 @@ const OptionsList = styled.div`
 `
 
 const OptionItem = styled.div`
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 400;
     text-align: left;
     padding: 10px 0;
     cursor: pointer;
@@ -80,7 +81,7 @@ const OptionItemIcon = styled.div`
 const FinishContainer = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     padding-top: 20px;
 `
@@ -274,6 +275,7 @@ const RibbonTutorialArrow = styled.span`
 
 export const tutorialSteps: TutorialStepContent[] = [
     // Specific kind of card: Tutorial Step (e.g., not a final screen)
+
     {
         subtitle: (
             <>
@@ -302,7 +304,14 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
+        top: '30px',
+        bottom: null,
+        left: null,
+        right: '140px',
+        width: '400px',
+        height: '200px',
     },
+
     {
         subtitle: (
             <>
@@ -374,6 +383,12 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </ShortcutLabelContainer>
             </SaveTextContainer>
         ),
+        top: '120px',
+        bottom: null,
+        left: null,
+        right: '80px',
+        width: '470px',
+        height: '220px',
     },
     {
         subtitle: (
@@ -516,36 +531,17 @@ export const tutorialSteps: TutorialStepContent[] = [
     //     right: null,
     // },
 ]
-const tutorialEnd = {
-    // Final screen, we define its component inline
-    title: 'Done!',
-    component: (
-        <React.Fragment>
-            <FinishContainer>
-                <FinishHeader>Want more advanced workflows?</FinishHeader>
-                <OptionItem
-                    onClick={() =>
-                        window.open('https://tutorials.memex.garden')
-                    }
-                >
-                    🎓 Visit our tutorials
-                </OptionItem>
-                <OptionItem
-                    onClick={() =>
-                        window.open('https://links.memex.garden/onboarding')
-                    }
-                >
-                    ☎️ Book an onboarding call
-                </OptionItem>
-            </FinishContainer>
-        </React.Fragment>
-    ),
-}
 
 export type TutorialCardContent = {
     // Generic tutorial card content including title. May include a TutorialStepContent or just any react component
     title: string
     component: JSX.Element
+    top?: string
+    bottom?: string
+    left?: string
+    right?: string
+    width?: string
+    height?: string
 }
 
 export const tutorialContents: TutorialCardContent[] = [
@@ -556,6 +552,4 @@ export const tutorialContents: TutorialCardContent[] = [
             component: <TutorialStep cardIndex={i} {...step} />,
         }
     }),
-
-    tutorialEnd,
 ]

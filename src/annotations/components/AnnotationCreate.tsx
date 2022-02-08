@@ -359,6 +359,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     : 'initial'
                             }
                             height="430px"
+                            overflow="scroll"
                         >
                             <QuickTutorial
                                 markdownHelpOnTop={true}

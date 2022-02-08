@@ -103,6 +103,9 @@ export const blueRoundCheck = browser.runtime.getURL('/img/blueRoundCheck.svg')
 export const sharedProtected = browser.runtime.getURL(
     '/img/sharedprotected.svg',
 )
+
+export const arrowUp = browser.runtime.getURL('/img/arrow-up.svg')
+
 export const saveIcon = browser.runtime.getURL('/img/saveIcon.svg')
 export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
 export const peoplePlusFine = browser.runtime.getURL('/img/peoplePlusFine.svg')

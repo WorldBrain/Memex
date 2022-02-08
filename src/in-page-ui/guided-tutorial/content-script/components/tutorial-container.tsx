@@ -41,21 +41,33 @@ export default class TutorialContainer extends React.Component<Props, State> {
     }
 
     render() {
+        console.log(this.props.content.length)
         return (
-            <TutorialCardContainer>
-                <CardHeader>
-                    <ExitButton>
-                        <CloseButton
-                            onClick={this.props.destroyTutorial}
-                            // onClick={this.handleEvent({ type: 'onClose' })}
-                            src={icons.close}
-                        />
-                    </ExitButton>
-                    <MemexLogoContainer src={icons.logoHorizontal} />
-                    <TutorialTitle>
-                        {this.props.content[this.state.cardIndex].title}
-                    </TutorialTitle>
-                </CardHeader>
+            <TutorialCardContainer
+                top={
+                    this.props.content[this.state.cardIndex].component.props.top
+                }
+                bottom={
+                    this.props.content[this.state.cardIndex].component.props
+                        .bottom
+                }
+                left={
+                    this.props.content[this.state.cardIndex].component.props
+                        .left
+                }
+                right={
+                    this.props.content[this.state.cardIndex].component.props
+                        .right
+                }
+                width={
+                    this.props.content[this.state.cardIndex].component.props
+                        .width
+                }
+                height={
+                    this.props.content[this.state.cardIndex].component.props
+                        .height
+                }
+            >
                 <CardBody>
                     {this.props.content[this.state.cardIndex].component}
                 </CardBody>
@@ -94,13 +106,25 @@ const BackButton = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
 `
 
-const TutorialCardContainer = styled.div`
+const TutorialCardContainer = styled.div<{
+    top: string
+    bottom: string
+    left: string
+    right: string
+    width: string
+    height: string
+}>`
+    top: ${(props) => (props.top ? props.top : null)};
+    bottom: ${(props) => (props.bottom ? props.bottom : null)};
+    left: ${(props) => (props.left ? props.left : null)};
+    right: ${(props) => (props.right ? props.right : null)};
+    width: ${(props) => (props.width ? props.width : '300px')};
+    height: ${(props) => (props.height ? props.height : '500px')};
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: space-between;
     position: fixed;
-    left: 0px;
     background: #ffffff;
     border-radius: 12px;
     color: black !important;
@@ -117,10 +141,12 @@ const TutorialCardContainer = styled.div`
 
     @keyframes slideInFromLeft {
         0% {
-            transform: translateX(-100%);
+            transform: translateX(
+                ${(props) => (props.width ? props.width : '300px')}
+            );
         }
         100% {
-            transform: translateX(0);
+            transform: translateX(0%);
         }
     }
 `
@@ -146,6 +172,7 @@ const CardHeader = styled.div`
     flex-direction: column;
     justify-content: start;
     align-items: end;
+    width: 100%;
 `
 const CardBody = styled.div`
     display: flex;
@@ -153,7 +180,6 @@ const CardBody = styled.div`
     justify-content: start;
     align-items: stretch;
     flex-grow: 1;
-    padding: 40px 0 0 0;
 `
 const CardFooter = styled.div`
     display: flex;
