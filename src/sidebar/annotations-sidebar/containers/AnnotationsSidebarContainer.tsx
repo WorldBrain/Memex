@@ -467,7 +467,7 @@ export class AnnotationsSidebarContainer<
                             <Icon
                                 filePath={icons.doubleArrow}
                                 heightAndWidth="16px"
-                                rotation={'180'}
+                                rotation={180}
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>
