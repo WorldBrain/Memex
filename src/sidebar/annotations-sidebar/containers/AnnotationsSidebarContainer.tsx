@@ -41,7 +41,6 @@ import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { setLocalStorage } from 'src/util/storage'
 
 import { createGlobalStyle } from 'styled-components'
 import { setLocalStorage } from 'src/util/storage'
