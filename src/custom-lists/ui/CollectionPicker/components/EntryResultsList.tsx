@@ -9,6 +9,7 @@ interface Props {
     renderEntryRow: (list: SpaceDisplayEntry, index: number) => ReactNode
     emptyView?: ReactNode
     id: string
+    query: string
 }
 
 export default class EntryResultsList extends React.Component<Props> {

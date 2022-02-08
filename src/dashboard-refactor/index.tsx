@@ -446,7 +446,7 @@ export class DashboardContainer extends StatefulUIElement<
                 listsGroups={[
                     {
                         ...listsSidebar.localLists,
-                        title: 'My collections',
+                        title: 'My Spaces',
                         onAddBtnClick: () =>
                             this.processEvent('setAddListInputShown', {
                                 isShown: !listsSidebar.localLists
@@ -467,7 +467,7 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     {
                         ...listsSidebar.followedLists,
-                        title: 'Followed collections',
+                        title: 'Followed Spaces',
                         onExpandBtnClick: () =>
                             this.processEvent('setFollowedListsExpanded', {
                                 isExpanded: !listsSidebar.followedLists

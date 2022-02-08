@@ -85,7 +85,7 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                             listLength > 0 ? styles.commentActive : styles.tag
                         }
                         onClick={this.props.onListBtnClick}
-                        tooltipText="Edit Collections"
+                        tooltipText="Edit Spaces"
                         refHandler={this.props.setListButtonRef}
                     />
                     <ResultItemActionBtn

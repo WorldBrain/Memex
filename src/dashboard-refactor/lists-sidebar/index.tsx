@@ -299,7 +299,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             errorMessage={addListErrorMessage}
                                         />
                                     )}
-                                    {group.title === 'My collections' &&
+                                    {group.title === 'My Spaces' &&
                                     group.listsArray.length === 0 ? (
                                         !group.isAddInputShown &&
                                         (searchBarProps.searchQuery.length >
@@ -341,7 +341,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     ) : (
                                         <>
                                             {group.title ===
-                                                'Followed collections' &&
+                                                'Followed Spaces' &&
                                             group.listsArray.length === 0 ? (
                                                 <NoCollectionsMessage
                                                     onClick={() =>
