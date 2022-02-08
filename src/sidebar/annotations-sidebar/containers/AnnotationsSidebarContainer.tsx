@@ -43,7 +43,9 @@ import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/lo
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 
 import { createGlobalStyle } from 'styled-components'
-import { setLocalStorage } from 'src/util/storage'
+import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { Browser, browser } from 'webextension-polyfill-ts'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -90,10 +92,14 @@ export class AnnotationsSidebarContainer<
     }
 
     showSidebar() {
+        setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
         this.processEvent('show', null)
     }
 
     hideSidebar() {
+        if (this.state.isWidthLocked) {
+            setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
+        }
         this.processEvent('hide', null)
     }
 
@@ -106,6 +112,7 @@ export class AnnotationsSidebarContainer<
             null,
         )
     }
+
     setPageUrl = (pageUrl: string) => {
         this.processEvent('setPageUrl', { pageUrl })
     }

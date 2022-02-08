@@ -33,7 +33,8 @@ import {
 } from 'src/sync-settings/util'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { Browser, browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -210,6 +211,14 @@ export class SidebarContainerLogic extends UILogic<
             this.annotationSubscription,
         )
 
+        const SidebarInitialWidth = getLocalStorage(
+            SIDEBAR_WIDTH_STORAGE_KEY,
+        ).then((width) => {
+            if (!width) {
+                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
+            }
+        })
+
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
 
@@ -308,6 +317,14 @@ export class SidebarContainerLogic extends UILogic<
 
     show: EventHandler<'show'> = async () => {
         this.emitMutation({ showState: { $set: 'visible' } })
+    }
+
+    hide: EventHandler<'hide'> = () => {
+        this.emitMutation({
+            showState: { $set: 'hidden' },
+            activeAnnotationUrl: { $set: null },
+        })
+        document.body.style.width = window.innerWidth.toString() + 'px'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -508,13 +525,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             showAllNotesCopyPaster: { $set: false },
             activeCopyPasterAnnotationId: { $set: undefined },
-        })
-    }
-
-    hide: EventHandler<'hide'> = () => {
-        this.emitMutation({
-            showState: { $set: 'hidden' },
-            activeAnnotationUrl: { $set: null },
         })
     }
 
