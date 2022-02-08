@@ -18,6 +18,7 @@ export const SEARCH_ENGINES: {
         container: {
             above: 'center_col',
             side: 'rhs',
+            sideAlternative: 'rcnt',
         },
         containerType: 'id',
     },
@@ -28,6 +29,24 @@ export const SEARCH_ENGINES: {
             side: 'results--sidebar',
         },
         containerType: 'class',
+    },
+    brave: {
+        regex: /(http[s]?:\/\/)?(www.)?brave[.\w]+\/search\?.*/,
+        container: {
+            above: 'results',
+            side: 'side-right',
+            sideAlternative: 'rcnt',
+        },
+        containerType: 'id',
+    },
+    bing: {
+        regex: /(http[s]?:\/\/)?(www.)?bing[.\w]+\/search\?.*/,
+        container: {
+            above: 'b_results',
+            side: 'b_context',
+            sideAlternative: 'rcnt',
+        },
+        containerType: 'id',
     },
 }
 
@@ -53,4 +72,6 @@ export const __OLD_POSITION_KEY = 'RESULTS_POSITION_'
 export const SEARCH_INJECTION_DEFAULT = {
     google: true,
     duckduckgo: true,
+    brave: true,
+    bing: true,
 }

@@ -187,7 +187,11 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Sign Up'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
+                                    {this.state.error && (
+                                        <AuthErrorMessage>
+                                            {this.renderAuthError()}
+                                        </AuthErrorMessage>
+                                    )}
                                 </ConfirmContainer>
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
@@ -460,6 +464,19 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
     }
 }
 
+const AuthErrorMessage = styled.div`
+    background-color: ${(props) => props.theme.colors.warning};
+    font-size: 14px;
+    padding-left: 10px;
+    margin-top: 5px;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
 const SectionContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -657,15 +674,14 @@ const EmailPasswordLogin = styled.div`
 `
 
 const EmailPasswordError = styled.div`
-    color: red;
-    font-weight: bold;
+    color: white;
     text-align: center;
 `
 
 const AuthBox = styled(Margin)`
     display: flex;
     justify-content: center;
-    width: 100%;
+    width: 350px;
 `
 
 const Footer = styled.div`

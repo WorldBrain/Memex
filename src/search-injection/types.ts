@@ -1,10 +1,11 @@
-export type SearchEngineName = 'google' | 'duckduckgo'
+export type SearchEngineName = 'google' | 'duckduckgo' | 'brave' | 'bing'
 export interface SearchEngineInfo {
     regex: RegExp // Regular Expression to match the url
     container: {
         // Identifier of the containers to append elements
         above: string
         side: string
+        sideAlternative?: string
     }
     containerType: 'id' | 'class'
 }

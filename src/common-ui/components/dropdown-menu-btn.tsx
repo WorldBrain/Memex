@@ -29,6 +29,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     btnId?: string
     menuTitle?: string
     width?: string
+    onClickOutside?: React.MouseEventHandler
 }
 
 interface State {
@@ -111,56 +112,49 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
             </MenuItem>
         ))
 
-    private renderMenuBtn = () => {
-        const btn = (
-            <MenuBtn
-                isOpen={this.state.isOpen}
-                id={this.props.btnId}
-                onClick={this.toggleMenu}
-            >
-                {this.props.btnChildren}
-            </MenuBtn>
-        )
+    // private renderMenuBtn = () => {
+    //     const btn = (
+    //         <MenuBtn
+    //             isOpen={this.state.isOpen}
+    //             id={this.props.btnId}
+    //             onClick={this.toggleMenu}
+    //         >
+    //             {this.props.btnChildren}
+    //         </MenuBtn>
+    //     )
 
-        if (this.props.tooltipProps) {
-            return (
-                <ButtonTooltip {...this.props.tooltipProps}>
-                    {btn}
-                </ButtonTooltip>
-            )
-        }
+    //     if (this.props.tooltipProps) {
+    //         return (
+    //             <ButtonTooltip {...this.props.tooltipProps}>
+    //                 {btn}
+    //             </ButtonTooltip>
+    //         )
+    //     }
 
-        return btn
-    }
+    //     return btn
+    // }
 
     render() {
         return (
             <ThemeProvider theme={this.theme}>
-                <MenuContainer>
-                    {this.renderMenuBtn()}
-                    {this.isOpen && (
-                        <ClickAway onClickAway={this.toggleMenu}>
-                            <Menu
-                                onMouseEnter={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation
-                                }}
-                                width={this.props.width}
-                            >
-                                {this.props.menuTitle && (
-                                    <MenuTitle>
-                                        {this.props.menuTitle}
-                                    </MenuTitle>
-                                )}
-                                {this.props.children ?? this.renderMenuItems()}
-                            </Menu>
-                        </ClickAway>
-                    )}
-                </MenuContainer>
+                <ClickAway onClickAway={this.props.onClickOutside}>
+                    <Menu
+                        onMouseEnter={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation
+                        }}
+                        onMouseLeave={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation
+                        }}
+                        width={this.props.width}
+                    >
+                        {this.props.menuTitle && (
+                            <MenuTitle>{this.props.menuTitle}</MenuTitle>
+                        )}
+                        {this.props.children ?? this.renderMenuItems()}
+                    </Menu>
+                </ClickAway>
             </ThemeProvider>
         )
     }
@@ -240,16 +234,12 @@ const Menu = styled.ul`
     position: absolute;
     width: 150px;
     list-style: none;
-    padding: 5px 0;
     background: white;
     border-radius: 8px;
     box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
-    margin-top: 5px;
     flex-direction: column;
-    top: 30px;
-    left: 0px;
     z-index: 1100;
     padding: 10px;
 `

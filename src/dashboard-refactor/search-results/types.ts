@@ -168,6 +168,7 @@ export interface RootState {
     draggedPageId?: string
     noResultsType: NoResultsType
     isListShareMenuShown: boolean
+    isSortMenuShown: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
     isCloudUpgradeBannerShown: boolean
@@ -213,6 +214,7 @@ export type Events = UIEvent<{
     setSearchType: { searchType: SearchType }
     setAllNotesShown: { areShown: boolean }
     setListShareMenuShown: { isShown: boolean }
+    setSortMenuShown: { isShown: boolean }
     setSearchCopyPasterShown: { isShown: boolean }
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }

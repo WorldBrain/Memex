@@ -71,6 +71,7 @@ export type Props = RootState &
         toggleListShareMenu: () => void
         selectedListId?: number
         areAllNotesShown: boolean
+        toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
         searchCopyPasterProps: SearchCopyPasterProps
@@ -264,14 +265,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <NoteTopBarBox
                             leftSide={
                                 <TopBarRightSideWrapper>
-                                    <SortingDropdownMenuBtn
-                                        onMenuItemClick={({ sortingFn }) =>
-                                            this.props.onPageNotesSortSelection(
-                                                day,
-                                                normalizedUrl,
-                                            )(sortingFn)
-                                        }
-                                    />
+                                    <ButtonTooltip
+                                        tooltipText="Sort Annotations"
+                                        position="bottom"
+                                    >
+                                        <Icon
+                                            filePath={icons.sort}
+                                            onClick={() =>
+                                                this.props.toggleSortMenuShown()
+                                            }
+                                            height="18px"
+                                            width="20px"
+                                        />
+                                    </ButtonTooltip>
+                                    {this.renderSortingMenuDropDown(
+                                        normalizedUrl,
+                                        day,
+                                    )}
                                 </TopBarRightSideWrapper>
                             }
                         />
@@ -282,6 +292,31 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     this.renderNoteResult(day, normalizedUrl),
                 )}
             </PageNotesBox>
+        )
+    }
+
+    private renderSortingMenuDropDown(normalizedUrl, day: number) {
+        if (!this.props.isSortMenuShown) {
+            return null
+        }
+
+        return (
+            <HoverBox
+                withRelativeContainer
+                left={'-30px'}
+                padding={'0px'}
+                top={'20px'}
+            >
+                <SortingDropdownMenuBtn
+                    onMenuItemClick={({ sortingFn }) =>
+                        this.props.onPageNotesSortSelection(
+                            day,
+                            normalizedUrl,
+                        )(sortingFn)
+                    }
+                    onClickOutSide={() => this.props.toggleSortMenuShown()}
+                />
+            </HoverBox>
         )
     }
 

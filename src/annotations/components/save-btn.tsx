@@ -10,6 +10,7 @@ import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOpti
 import { getShareButtonData } from '../sharing-utils'
 import Mousetrap from 'mousetrap'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 export interface Props {
     isShared?: boolean
@@ -22,13 +23,14 @@ export interface Props {
 
 interface State {
     isPrivacyLevelShown: boolean
+    isShareMenuShown: boolean
 }
 
 export default class AnnotationSaveBtn extends React.PureComponent<
     Props,
     State
 > {
-    state: State = { isPrivacyLevelShown: false }
+    state: State = { isPrivacyLevelShown: false, isShareMenuShown: false }
     static MOD_KEY = getKeyName({ key: 'mod' })
 
     componentDidMount() {
@@ -63,6 +65,51 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         isProtected?: boolean,
     ) => this.props.onSave(shouldShare, isProtected)
 
+    private renderShareMenu() {
+        if (!this.state.isShareMenuShown) {
+            return null
+        }
+
+        return (
+            <HoverBox
+                withRelativeContainer
+                left={'0px'}
+                padding={'0px'}
+                top={'5px'}
+            >
+                <DropdownMenuBtn
+                    width={'340px'}
+                    onClickOutside={() =>
+                        this.setState({ isShareMenuShown: false })
+                    }
+                >
+                    <SharePrivacyOption
+                        hasProtectedOption
+                        icon="webLogo"
+                        title="Public"
+                        shortcut={`shift+${getKeyName({
+                            key: 'mod',
+                        })}+enter`}
+                        description="Auto-added to Spaces this page is shared to"
+                        onClick={this.saveWithShareIntent(true)}
+                        isSelected={this.props.isShared}
+                    />
+                    <SharePrivacyOption
+                        hasProtectedOption
+                        icon="person"
+                        title="Private"
+                        shortcut={`${getKeyName({
+                            key: 'mod',
+                        })}+enter`}
+                        description="Private to you, until shared (in bulk)"
+                        onClick={this.saveWithShareIntent(false)}
+                        isSelected={!this.props.isShared}
+                    />
+                </DropdownMenuBtn>
+            </HoverBox>
+        )
+    }
+
     render() {
         return (
             <>
@@ -91,46 +138,19 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         </SaveBtnText>
                     </ButtonTooltip>
                     <SaveBtnArrow horizontal="1px">
-                        <DropdownMenuBtn
-                            btnChildren={
-                                <Icon
-                                    filePath={icons.triangle}
-                                    heightAndWidth="12px"
-                                />
+                        <Icon
+                            onClick={() =>
+                                this.setState({
+                                    isShareMenuShown: !this.state
+                                        .isShareMenuShown,
+                                })
                             }
-                            isOpen={this.state.isPrivacyLevelShown}
-                            toggleOpen={() =>
-                                this.setState((state) => ({
-                                    isPrivacyLevelShown: !state.isPrivacyLevelShown,
-                                }))
-                            }
-                            width={'340px'}
-                        >
-                            <SharePrivacyOption
-                                hasProtectedOption
-                                icon="webLogo"
-                                title="Public"
-                                shortcut={`shift+${getKeyName({
-                                    key: 'mod',
-                                })}+enter`}
-                                description="Auto-added to Spaces this page is shared to"
-                                onClick={this.saveWithShareIntent(true)}
-                                isSelected={this.props.isShared}
-                            />
-                            <SharePrivacyOption
-                                hasProtectedOption
-                                icon="person"
-                                title="Private"
-                                shortcut={`${getKeyName({
-                                    key: 'mod',
-                                })}+enter`}
-                                description="Private to you, until shared (in bulk)"
-                                onClick={this.saveWithShareIntent(false)}
-                                isSelected={!this.props.isShared}
-                            />
-                        </DropdownMenuBtn>
+                            heightAndWidth="12px"
+                            filePath={icons.triangle}
+                        />
                     </SaveBtnArrow>
                 </SaveBtn>
+                {this.renderShareMenu()}
             </>
         )
     }

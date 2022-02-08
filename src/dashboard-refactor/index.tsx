@@ -509,6 +509,11 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                toggleSortMenuShown={() =>
+                    this.processEvent('setSortMenuShown', {
+                        isShown: !searchResults.isSortMenuShown,
+                    })
+                }
                 searchResults={searchResults.pageData}
                 searchFilters={searchFilters}
                 searchQuery={searchFilters.searchQuery}

@@ -16,9 +16,9 @@ const SearchInjection = ({ children }) => {
                     hoverOff
                 />
             </SectionCircle>
-            <SectionTitle>Google & DuckDuck Go Integration</SectionTitle>
+            <SectionTitle>Search Engine Integration</SectionTitle>
             <InfoText>
-                Show Memex results alongside your Google & DuckDuckGo queries
+                Show Memex results alongside your web search results
             </InfoText>
             {children}
         </Section>

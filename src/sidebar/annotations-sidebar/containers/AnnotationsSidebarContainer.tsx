@@ -404,7 +404,7 @@ export class AnnotationsSidebarContainer<
 
     private renderCopyPasterManager(annotationUrls: string[]) {
         return (
-            <HoverBox>
+            <HoverBox padding={'0px'}>
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
@@ -467,7 +467,7 @@ export class AnnotationsSidebarContainer<
                             <Icon
                                 filePath={icons.doubleArrow}
                                 heightAndWidth="16px"
-                                rotation={'180'}
+                                rotation={180}
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>

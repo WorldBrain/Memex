@@ -36,17 +36,10 @@ export const handleRender = async (
             'side'
 
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
-        if (!searchEngineObj) {
-            return false
-        }
-        const containerType = searchEngineObj.containerType
-        const containerIdentifier = searchEngineObj.container[position]
-        const container =
-            containerType === 'class'
-                ? document.getElementsByClassName(containerIdentifier)[0]
-                : document.getElementById(containerIdentifier)
+        // if (!searchEngineObj) {
+        //     return false
+        // }
 
-        // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')
         if (component) {
             component.parentNode.removeChild(component)
@@ -54,7 +47,133 @@ export const handleRender = async (
 
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
-        container.insertBefore(target, container.firstChild)
+
+        const containerType = searchEngineObj.containerType
+        const containerIdentifier = searchEngineObj.container[position]
+
+        if (searchEngine === 'google') {
+            const suggestionsContainer = document.getElementById(
+                searchEngineObj.container.side,
+            )
+            const containerWithSuggestions = document.getElementById(
+                searchEngineObj.container.sideAlternative,
+            )
+
+            if (position === 'side') {
+                if (!suggestionsContainer) {
+                    containerWithSuggestions.style.display = 'grid'
+                    containerWithSuggestions.style.gap = '130px'
+                    containerWithSuggestions.style.flexDirection = 'row'
+                    containerWithSuggestions.style.gridAutoFlow = 'column'
+                    containerWithSuggestions.style.justifyContent =
+                        'space-between'
+
+                    containerWithSuggestions.insertAdjacentElement(
+                        'beforeend',
+                        target,
+                    )
+                } else {
+                    suggestionsContainer.insertBefore(
+                        target,
+                        suggestionsContainer.firstChild,
+                    )
+                }
+            } else {
+                const containerAbove = document.getElementById(
+                    searchEngineObj.container.above,
+                )
+                containerAbove.insertBefore(target, containerAbove.firstChild)
+            }
+        }
+
+        if (searchEngine === 'brave') {
+            const suggestionsContainer = document.getElementById(
+                searchEngineObj.container.side,
+            )
+            const containerWithSuggestions = document.getElementById(
+                searchEngineObj.container.sideAlternative,
+            )
+
+            if (position === 'side') {
+                if (!suggestionsContainer) {
+                    containerWithSuggestions.style.display = 'grid'
+                    containerWithSuggestions.style.gap = '130px'
+                    containerWithSuggestions.style.flexDirection = 'row'
+                    containerWithSuggestions.style.gridAutoFlow = 'column'
+                    containerWithSuggestions.style.justifyContent =
+                        'space-between'
+
+                    containerWithSuggestions.insertAdjacentElement(
+                        'beforeend',
+                        target,
+                    )
+                } else {
+                    suggestionsContainer.insertBefore(
+                        target,
+                        suggestionsContainer.firstChild,
+                    )
+                }
+            } else {
+                const containerAbove = document.getElementById(
+                    searchEngineObj.container.above,
+                )
+                containerAbove.insertBefore(target, containerAbove.firstChild)
+            }
+        }
+
+        if (searchEngine === 'bing') {
+            const suggestionsContainer = document.getElementById(
+                searchEngineObj.container.side,
+            )
+            const containerWithSuggestions = document.getElementById(
+                searchEngineObj.container.sideAlternative,
+            )
+
+            if (position === 'side') {
+                if (!suggestionsContainer) {
+                    containerWithSuggestions.style.display = 'grid'
+                    containerWithSuggestions.style.gap = '130px'
+                    containerWithSuggestions.style.flexDirection = 'row'
+                    containerWithSuggestions.style.gridAutoFlow = 'column'
+                    containerWithSuggestions.style.justifyContent =
+                        'space-between'
+
+                    containerWithSuggestions.insertAdjacentElement(
+                        'beforeend',
+                        target,
+                    )
+                } else {
+                    suggestionsContainer.insertBefore(
+                        target,
+                        suggestionsContainer.firstChild,
+                    )
+                }
+            } else {
+                const containerAbove = document.getElementById(
+                    searchEngineObj.container.above,
+                )
+                containerAbove.insertBefore(target, containerAbove.firstChild)
+            }
+        }
+
+        if (searchEngine === 'duckduckgo') {
+            const container = document.getElementsByClassName(
+                containerIdentifier,
+            )[0]
+            container.insertBefore(target, container.firstChild)
+        }
+
+        // console.log(containerIdentifier)
+
+        // // If re-rendering remove the already present component
+        // const component = document.getElementById('memexResults')
+        // if (component) {
+        //     component.parentNode.removeChild(component)
+        // }
+
+        // const target = document.createElement('div')
+        // target.setAttribute('id', 'memexResults')
+        // container.insertBefore('beforeend', target)
 
         // Number of results to limit
         const limit = constants.LIMIT[position]

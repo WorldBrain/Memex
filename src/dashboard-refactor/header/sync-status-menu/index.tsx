@@ -114,6 +114,7 @@ const TextBlock = styled.div<{
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
     font-size: 14px;
+    height: 20px;
 `
 
 const HelpTextBlock = styled.span<{

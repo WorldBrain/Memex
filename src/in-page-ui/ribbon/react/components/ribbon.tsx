@@ -198,11 +198,15 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowTutorial()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <QuickTutorial
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onClickOutside={() => this.props.toggleShowTutorial()}
-                    onSettingsClick={() => this.openOptionsTabRPC('settings')}
-                />
+                <div onMouseLeave={() => this.props.toggleShowTutorial()}>
+                    <QuickTutorial
+                        getKeyboardShortcutsState={getKeyboardShortcutsState}
+                        onClickOutside={() => this.props.toggleShowTutorial()}
+                        onSettingsClick={() =>
+                            this.openOptionsTabRPC('settings')
+                        }
+                    />
+                </div>
             </BlurredSidebarOverlay>
         )
     }
@@ -219,11 +223,15 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <ExtraButtonsPanel
                     closePanel={() => this.props.toggleShowExtraButtons()}
+                    onMouseLeave={() => this.props.toggleShowExtraButtons()}
                 >
                     <ExtraButtonRow
                         onClick={() => {
                             this.props.handleRibbonToggle()
-                            this.props.sidebar.closeSidebar()
+                            {
+                                this.props.isRibbonEnabled &&
+                                    this.props.sidebar.closeSidebar()
+                            }
                         }}
                     >
                         <Icon
@@ -254,7 +262,7 @@ export default class Ribbon extends Component<Props, State> {
                             heightAndWidth="16px"
                             hoverOff
                         />
-                        {this.props.isRibbonEnabled ? (
+                        {this.props.highlights.areHighlightsEnabled ? (
                             <InfoText>Hide Highlights</InfoText>
                         ) : (
                             <InfoText>Show Highlights</InfoText>
@@ -273,7 +281,7 @@ export default class Ribbon extends Component<Props, State> {
                             heightAndWidth="16px"
                             hoverOff
                         />
-                        {this.props.isRibbonEnabled ? (
+                        {this.props.tooltip.isTooltipEnabled ? (
                             <InfoText>Hide Highlighter Tooltip</InfoText>
                         ) : (
                             <InfoText>Show Highlighter Tooltip</InfoText>
@@ -367,6 +375,7 @@ export default class Ribbon extends Component<Props, State> {
                                             this.openOverviewTabRPC()
                                         }
                                         heightAndWidth="18px"
+                                        color={'darkerIconColor'}
                                         filePath={icons.searchIcon}
                                     />
                                 </ButtonTooltip>
@@ -391,6 +400,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     e,
                                                 )
                                             }
+                                            color={'darkerIconColor'}
                                             heightAndWidth="18px"
                                             filePath={
                                                 this.props.commentBox
@@ -417,6 +427,7 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.bookmark.toggleBookmark()
                                         }
                                         heightAndWidth="18px"
+                                        color={'darkerIconColor'}
                                         filePath={
                                             this.props.bookmark.isBookmarked
                                                 ? icons.heartFull
@@ -480,6 +491,7 @@ export default class Ribbon extends Component<Props, State> {
                                             )
                                         }
                                         heightAndWidth="18px"
+                                        color={'darkerIconColor'}
                                         filePath={
                                             this.props.lists
                                                 .pageBelongsToList ||
@@ -501,6 +513,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     .showTagsPicker,
                                             )
                                         }
+                                        color={'darkerIconColor'}
                                         heightAndWidth="18px"
                                         filePath={
                                             this.props.tagging.pageHasTags ||
@@ -520,6 +533,7 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
+                                        color={'darkerIconColor'}
                                         heightAndWidth="18px"
                                         filePath={icons.settings}
                                     />
@@ -542,6 +556,7 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowTutorial()
                                         }
+                                        color={'darkerIconColor'}
                                         heightAndWidth="18px"
                                         filePath={icons.helpIcon}
                                     />
@@ -580,6 +595,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.props.handleRemoveRibbon()
                                             }
                                         }}
+                                        color={'darkerIconColor'}
                                         heightAndWidth="14px"
                                         filePath={icons.close}
                                         padding={'6px'}
