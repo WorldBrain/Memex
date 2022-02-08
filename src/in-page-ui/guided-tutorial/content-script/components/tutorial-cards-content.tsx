@@ -104,7 +104,6 @@ const PinTitleImage = styled(Icon)`
     width: 24px;
     height: 24px;
     vertical-align: sub;
-    padding: 0 15px 0 0;
 `
 
 const AnnotationTitleContainer = styled.div`
@@ -119,7 +118,7 @@ const AnnotationTitleBox = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    grid-gap: 10px;
+    grid-gap: 8px;
 `
 
 const FinishTitleBox = styled.div`
@@ -401,12 +400,14 @@ export const tutorialSteps: TutorialStepContent[] = [
     {
         subtitle: (
             <PinTitleContainer>
-                <PinTitleImage
-                    filePath={icons.pin}
-                    heightAndWidth="20px"
-                    hoverOff
-                />
-                <SectionTitle>Pin Memex to your menu</SectionTitle>
+                <AnnotationTitleBox>
+                    <PinTitleImage
+                        filePath={icons.pin}
+                        heightAndWidth="20px"
+                        hoverOff
+                    />
+                    <SectionTitle>Pin Memex to your menu</SectionTitle>
+                </AnnotationTitleBox>
                 <PinTutorialArrow />
             </PinTitleContainer>
         ),
