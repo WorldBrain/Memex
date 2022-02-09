@@ -175,6 +175,8 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <CollectionPicker
                         {...this.props.lists}
+                        spacesBG={this.props.spacesBG}
+                        contentSharingBG={this.props.contentSharingBG}
                         actOnAllTabs={this.props.lists.listAllTabs}
                         initialSelectedEntries={
                             this.props.lists.fetchInitialListSelections

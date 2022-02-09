@@ -103,7 +103,9 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('resultEntryFocus', { entry: list, index })
 
         const el = document.getElementById(`ListKeyName-${list.localId}`)
-        el.scrollTop = el.offsetTop
+        if (el != null) {
+            el.scrollTop = el.offsetTop
+        }
     }
 
     handleNewListPress = () => {
