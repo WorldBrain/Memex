@@ -11,7 +11,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
     lists: Array<{ id: number; name: string }>
     onListClick?: (tag: number) => void
-    renderListsPickerForAnnotation: () => JSX.Element
+    renderListsPickerForAnnotation?: () => JSX.Element
 }
 
 interface ButtonProps {

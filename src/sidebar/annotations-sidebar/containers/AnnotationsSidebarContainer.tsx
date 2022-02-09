@@ -617,7 +617,10 @@ export class AnnotationsSidebarContainer<
                             {this.renderTopBar()}
                             <AnnotationsSidebar
                                 {...this.state}
-                                getListNameById={(i) => 'dead code'}
+                                getListNameById={(id) =>
+                                    this.state.listData[id]?.name ??
+                                    'Missing list'
+                                }
                                 sidebarContext={this.props.sidebarContext}
                                 ref={(ref) => (this.sidebarRef = ref)}
                                 openCollectionPage={(remoteListId) =>
@@ -710,6 +713,9 @@ export class AnnotationsSidebarContainer<
                                 }
                                 renderTagsPickerForAnnotation={
                                     this.renderTagsPickerForAnnotation
+                                }
+                                renderListsPickerForAnnotation={
+                                    this.renderListPickerForAnnotation
                                 }
                                 expandMyNotes={() =>
                                     this.processEvent('expandMyNotes', null)

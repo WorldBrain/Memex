@@ -57,7 +57,7 @@ export interface AnnotationsSidebarProps
     renderCopyPasterForAnnotation: (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
     renderShareMenuForAnnotation: (id: string) => JSX.Element
-    renderListsPickerForAnnotation?: (id: string) => JSX.Element
+    renderListsPickerForAnnotation: (id: string) => JSX.Element
 
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void
@@ -743,17 +743,11 @@ class AnnotationsSidebar extends React.Component<
         //     </AnnotationsSectionStyled>
         // ) : (
         return (
-            <React.Fragment>
-                {this.props.isExpanded ? (
-                    <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
-                    </AnnotationsSectionStyled>
-                ) : (
-                    <AnnotationsSectionStyled>
-                        {this.renderSharedNotesByList()}
-                    </AnnotationsSectionStyled>
-                )}
-            </React.Fragment>
+            <AnnotationsSectionStyled>
+                {this.props.isExpanded
+                    ? this.renderAnnotationsEditable()
+                    : this.renderSharedNotesByList()}
+            </AnnotationsSectionStyled>
         )
     }
 
@@ -819,9 +813,8 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <AnnotationBox>
+                <AnnotationBox key={annot.url}>
                     <AnnotationEditable
-                        key={i}
                         {...annot}
                         {...this.props}
                         body={annot.body}
@@ -1087,16 +1080,13 @@ class AnnotationsSidebar extends React.Component<
 
     render() {
         return (
-            <>
-                <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
-                    <TopBar>
-                        {this.renderTopBarSwitcher()}
-                        {this.props.isExpanded &&
-                            this.renderTopBarActionButtons()}
-                    </TopBar>
-                    {this.renderResultsBody()}
-                </ResultBodyContainer>
-            </>
+            <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+                <TopBar>
+                    {this.renderTopBarSwitcher()}
+                    {this.props.isExpanded && this.renderTopBarActionButtons()}
+                </TopBar>
+                {this.renderResultsBody()}
+            </ResultBodyContainer>
         )
     }
 }

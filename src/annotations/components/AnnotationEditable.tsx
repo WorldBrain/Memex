@@ -514,10 +514,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     this.props.annotationFooterDependencies
                                         ?.onListIconClick
                                 }
-                                renderListsPickerForAnnotation={() =>
-                                    this.props.renderListsPickerForAnnotation(
-                                        this.props.url,
-                                    )
+                                renderListsPickerForAnnotation={
+                                    this.props.renderListsPickerForAnnotation &&
+                                    (() =>
+                                        this.props.renderListsPickerForAnnotation?.(
+                                            this.props.url,
+                                        ))
                                 }
                             />
 
