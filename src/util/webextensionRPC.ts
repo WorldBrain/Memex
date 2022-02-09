@@ -119,11 +119,17 @@ interface RPCOpts {
 export function runInBackground<T extends object>(): T {
     return new Proxy<T>({} as T, {
         get(target, property): (...args: any[]) => Promise<any> {
-            return async (...args) =>
-                rpcConnection.postMessageRequestToExtension(
+            return async (...args) => {
+                if (!rpcConnection) {
+                    throw new Error(
+                        `runInBackground: RPC connection has not been setup.\nfn name: ${property.toString()}\nargs: ${args}\n\nIf you are calling direct from content-script code, instead pass it down from the global content-script.\n`,
+                    )
+                }
+                return rpcConnection.postMessageRequestToExtension(
                     property.toString(),
                     args,
                 )
+            }
         },
     })
 }
