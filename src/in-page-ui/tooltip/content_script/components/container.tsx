@@ -139,7 +139,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         try {
             await this.props.createHighlight(e.shiftKey)
         } catch (err) {
-            // Can happen if a user accidently removes the text selection before clicking the button
+            throw err
         } finally {
             this.setState({ tooltipState: 'pristine' })
             this.props.inPageUI.hideTooltip()
