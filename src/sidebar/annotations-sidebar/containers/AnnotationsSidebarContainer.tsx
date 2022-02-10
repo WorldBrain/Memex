@@ -298,6 +298,42 @@ export class AnnotationsSidebarContainer<
         })
     }
 
+    private getSpacePickerProps = (annotation: Annotation) => ({
+        spacesBG: this.props.customLists,
+        contentSharingBG: this.props.contentSharing,
+        initialSelectedEntries: () => annotation?.lists ?? [],
+        onEscapeKeyDown: () =>
+            this.processEvent('resetListPickerAnnotationId', null),
+        createNewEntry: async (name) => {
+            const listId = await this.props.customLists.createCustomList({
+                name,
+            })
+            this.processEvent('updateListsForAnnotation', {
+                added: listId,
+                deleted: null,
+                annotationId: this.state.activeListPickerAnnotationId,
+            })
+            this.processMutation({
+                listData: {
+                    [listId]: { $set: { name } },
+                },
+            })
+            return listId
+        },
+        selectEntry: async (listId) =>
+            this.processEvent('updateListsForAnnotation', {
+                added: listId,
+                deleted: null,
+                annotationId: this.state.activeListPickerAnnotationId,
+            }),
+        unselectEntry: async (listId) =>
+            this.processEvent('updateListsForAnnotation', {
+                added: null,
+                deleted: listId,
+                annotationId: this.state.activeListPickerAnnotationId,
+            }),
+    })
+
     private renderCopyPasterManagerForAnnotation = (
         currentAnnotationId: string,
     ) => {
@@ -358,60 +394,15 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderListPickerContentForAnnotation = (
-        currentAnnotationId: string,
-    ) => {
-        const annot = this.props.annotationsCache.getAnnotationById(
-            currentAnnotationId,
-        )
-        return (
-            <CollectionPicker
-                spacesBG={this.props.customLists}
-                contentSharingBG={this.props.contentSharing}
-                initialSelectedEntries={() => annot.lists ?? []}
-                onEscapeKeyDown={() =>
-                    this.processEvent('resetListPickerAnnotationId', null)
-                }
-                createNewEntry={async (name) => {
-                    const listId = await this.props.customLists.createCustomList(
-                        {
-                            name,
-                        },
-                    )
-                    this.processEvent('updateListsForAnnotation', {
-                        added: listId,
-                        deleted: null,
-                        annotationId: this.state.activeListPickerAnnotationId,
-                    })
-                    this.processMutation({
-                        listData: { [listId]: { $set: { name } } },
-                    })
-                    return listId
-                }}
-                selectEntry={async (listId) =>
-                    this.processEvent('updateListsForAnnotation', {
-                        added: listId,
-                        deleted: null,
-                        annotationId: this.state.activeListPickerAnnotationId,
-                    })
-                }
-                unselectEntry={async (listId) =>
-                    this.processEvent('updateListsForAnnotation', {
-                        added: null,
-                        deleted: listId,
-                        annotationId: this.state.activeListPickerAnnotationId,
-                    })
-                }
-            />
-        )
-    }
-
     private renderListPickerForAnnotation = (currentAnnotationId: string) => {
         // TODO: may be used once tags and lists are unified
         // Not used yet but will be used for the "Add to collection" button
         if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
             return null
         }
+        const annot = this.props.annotationsCache.getAnnotationById(
+            currentAnnotationId,
+        )
         return (
             <PickerWrapper>
                 <HoverBox>
@@ -423,9 +414,9 @@ export class AnnotationsSidebarContainer<
                             )
                         }
                     >
-                        {this.renderListPickerContentForAnnotation(
-                            currentAnnotationId,
-                        )}
+                        <CollectionPicker
+                            {...this.getSpacePickerProps(annot)}
+                        />
                     </ClickAway>
                 </HoverBox>
             </PickerWrapper>
@@ -437,10 +428,9 @@ export class AnnotationsSidebarContainer<
             return null
         }
 
-        const currentAnnotation = this.state.annotations.find(
-            (annot) => annot.url === currentAnnotationId,
+        const currentAnnotation = this.props.annotationsCache.getAnnotationById(
+            currentAnnotationId,
         )
-
         return (
             <ShareMenuWrapper>
                 <HoverBox width="320px">
@@ -467,12 +457,10 @@ export class AnnotationsSidebarContainer<
                             closeShareMenu={() =>
                                 this.processEvent('resetShareMenuNoteId', null)
                             }
-                        />
-                        <CollectionContainer>
-                            {this.renderListPickerContentForAnnotation(
-                                currentAnnotationId,
+                            spacePickerProps={this.getSpacePickerProps(
+                                currentAnnotation,
                             )}
-                        </CollectionContainer>
+                        />
                     </ClickAway>
                 </HoverBox>
             </ShareMenuWrapper>

@@ -94,7 +94,7 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
-                    {focused && (
+                    {focused && onPressActOnAll && (
                         <ButtonContainer>
                             <ButtonTooltip
                                 tooltipText={

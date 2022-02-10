@@ -17,7 +17,7 @@ import {
     tags,
     collections,
 } from 'src/util/remote-functions-background'
-import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
+// import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { INIT_FORM_STATE } from 'src/sidebar/annotations-sidebar/containers/logic'
 import type {
     EditForm,
@@ -355,7 +355,7 @@ class AnnotationList extends Component<Props, State> {
         return (
             <div className={styles.hoverBoxWrapper}>
                 <HoverBox>
-                    <SingleNoteShareMenu
+                    {/* <SingleNoteShareMenu
                         contentSharingBG={this.props.contentSharing}
                         copyLink={async (link) => {
                             analytics.trackEvent({
@@ -383,7 +383,7 @@ class AnnotationList extends Component<Props, State> {
                         closeShareMenu={() =>
                             this.props.setActiveShareMenuNoteId?.(undefined)
                         }
-                    />
+                    /> */}
                 </HoverBox>
             </div>
         )

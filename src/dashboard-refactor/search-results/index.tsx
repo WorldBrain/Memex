@@ -237,29 +237,24 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 postShareHook={(state) =>
                                     interactionProps.updateShareInfo(state)
                                 }
-                            />
-                            <CollectionPicker
-                                initialSelectedEntries={
-                                    () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
-                                }
-                                onClickOutside={
-                                    interactionProps.onShareBtnClick
-                                }
-                                selectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                    })
-                                }
-                                unselectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                    })
-                                }
-                                createNewEntry={interactionProps.createNewList}
+                                spacePickerProps={{
+                                    initialSelectedEntries: () =>
+                                        noteData.lists ?? [],
+                                    selectEntry: (listId) =>
+                                        interactionProps.updateLists({
+                                            added: listId,
+                                            deleted: null,
+                                            selected: [],
+                                        }),
+                                    unselectEntry: (listId) =>
+                                        interactionProps.updateLists({
+                                            added: null,
+                                            deleted: listId,
+                                            selected: [],
+                                        }),
+                                    createNewEntry:
+                                        interactionProps.createNewList,
+                                }}
                             />
                         </HoverBox>
                     )

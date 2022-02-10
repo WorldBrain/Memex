@@ -248,7 +248,7 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
-    getAnnotationById: (id: string) => CachedAnnotation
+    getAnnotationById: (id: string) => CachedAnnotation | null
 
     annotations: CachedAnnotation[]
     readonly highlights: CachedAnnotation[]
@@ -279,7 +279,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 
     getAnnotationById = (id: string): CachedAnnotation =>
-        this.annotations.find((annot) => annot.url === id)
+        this.annotations.find((annot) => annot.url === id) ?? null
 
     load = async (url: string, args = {}) => {
         const annotations = await this.dependencies.backendOperations.load(
