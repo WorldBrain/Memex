@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
+import type { UIMutation } from 'ui-logic-core'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -44,8 +45,6 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
-import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
-// import GlobalFonts from '../../fonts/Inter/inter'
 
 export interface Props extends DashboardDependencies {}
 
@@ -155,6 +154,26 @@ export class DashboardContainer extends StatefulUIElement<
                       })
                 : undefined,
         }
+    }
+
+    // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
+    private async createNewListViaPicker(name: string): Promise<number> {
+        const listId = await this.props.listsBG.createCustomList({ name })
+        this.processMutation({
+            listsSidebar: {
+                listData: {
+                    $apply: (listData) => ({
+                        ...listData,
+                        [listId]: {
+                            name,
+                            id: listId,
+                            isOwnedList: true,
+                        },
+                    }),
+                },
+            },
+        })
+        return listId
     }
 
     private listsStateToProps = (
@@ -711,34 +730,8 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
-                    createNewList: (day, pageId) => async (name) => {
-                        const listId = await this.props.listsBG.createCustomList(
-                            { name },
-                        )
-                        this.processMutation({
-                            listsSidebar: {
-                                listData: {
-                                    $apply: (listData) => ({
-                                        ...listData,
-                                        [listId]: {
-                                            name,
-                                            id: listId,
-                                            isOwnedList: true,
-                                        },
-                                    }),
-                                },
-                            },
-                        })
-                        await this.processEvent('setPageLists', {
-                            id: pageId,
-                            fullPageUrl:
-                                searchResults.pageData.byId[pageId].fullUrl,
-                            added: listId,
-                            deleted: null,
-                            skipPageIndexing: true,
-                        })
-                        return listId
-                    },
+                    createNewList: (day, pageId) => async (name) =>
+                        this.createNewListViaPicker(name),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -775,14 +768,15 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             tags,
                         }),
+                    createNewList: (day, pageId) => async (name) =>
+                        this.createNewListViaPicker(name),
                     addPageToList: (day, pageId) => (listId) =>
                         this.processEvent('setPageNewNoteLists', {
                             day,
                             pageId,
                             lists: [
-                                ...this.state.searchResults.pageData.byId[
-                                    pageId
-                                ].lists,
+                                ...this.state.searchResults.results[day].pages
+                                    .byId[pageId].newNoteForm.lists,
                                 listId,
                             ],
                         }),
@@ -790,9 +784,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setPageNewNoteLists', {
                             day,
                             pageId,
-                            lists: this.state.searchResults.pageData.byId[
-                                pageId
-                            ].lists.filter((id) => id !== listId),
+                            lists: this.state.searchResults.results[
+                                day
+                            ].pages.byId[pageId].newNoteForm.lists.filter(
+                                (id) => id !== listId,
+                            ),
                         }),
                     onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
@@ -850,32 +846,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
                         this.processEvent('setNoteLists', { ...args, noteId }),
-                    // TODO: put this logic into event handler (main issue is it needs to return new list ID)
-                    createNewList: (noteId) => async (name) => {
-                        const listId = await this.props.listsBG.createCustomList(
-                            { name },
-                        )
-                        this.processMutation({
-                            listsSidebar: {
-                                listData: {
-                                    $apply: (listData) => ({
-                                        ...listData,
-                                        [listId]: {
-                                            name,
-                                            id: listId,
-                                            isOwnedList: true,
-                                        },
-                                    }),
-                                },
-                            },
-                        })
-                        this.processEvent('setNoteLists', {
-                            noteId,
-                            added: listId,
-                            deleted: null,
-                        })
-                        return listId
-                    },
+                    createNewList: (noteId) => async (name) =>
+                        this.createNewListViaPicker(name),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,

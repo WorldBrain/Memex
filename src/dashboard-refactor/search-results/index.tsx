@@ -310,7 +310,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         const boundAnnotCreateProps = bindFunctionalProps<
             typeof newNoteInteractionProps,
             AnnotationCreateEventProps
-        >(this.props.newNoteInteractionProps, day, normalizedUrl)
+        >(newNoteInteractionProps, day, normalizedUrl)
 
         return (
             <PageNotesBox bottom="10px" left="10px">
