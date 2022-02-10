@@ -233,41 +233,7 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected getShareCollectionPickerProps(): SpacePickerDependencies {
-        return {
-            spacesBG: this.props.customLists,
-            contentSharingBG: this.props.contentSharing,
-            createNewEntry: async (name) => {
-                const listId = await this.props.customLists.createCustomList({
-                    name,
-                })
-                this.processEvent('updateListsForAnnotation', {
-                    added: listId,
-                    deleted: null,
-                    annotationId: this.state.activeListPickerAnnotationId,
-                })
-                this.processMutation({
-                    listData: { [listId]: { $set: { name } } },
-                })
-                return listId
-            },
-            selectEntry: async (listId) =>
-                this.processEvent('updateListsForAnnotation', {
-                    added: listId,
-                    deleted: null,
-                    annotationId: this.state.activeListPickerAnnotationId,
-                }),
-            unselectEntry: async (listId) =>
-                this.processEvent('updateListsForAnnotation', {
-                    added: null,
-                    deleted: listId,
-                    annotationId: this.state.activeListPickerAnnotationId,
-                }),
-        }
-    }
-
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        const spacePickerProps = this.getShareCollectionPickerProps()
         return {
             onCommentChange: (comment) =>
                 this.processEvent('changeNewPageCommentText', { comment }),
@@ -279,19 +245,35 @@ export class AnnotationsSidebarContainer<
                     shouldShare,
                     isProtected,
                 }),
-            getListNameById: this.getListNameById,
             tagQueryEntries: (query) =>
                 this.props.tags.searchForTagSuggestions({ query }),
+            getListNameById: this.getListNameById,
+            contentSharingBG: this.props.contentSharing,
+            spacesBG: this.props.customLists,
             loadDefaultTagSuggestions: this.props.tags
                 .fetchInitialTagSuggestions,
-            addPageToList: spacePickerProps.selectEntry,
-            removePageFromList: spacePickerProps.unselectEntry,
+            createNewList: async (name) => {
+                const listId = await this.props.customLists.createCustomList({
+                    name,
+                })
+                this.processMutation({
+                    listData: { [listId]: { $set: { name } } },
+                })
+                return listId
+            },
+            addPageToList: (listId) =>
+                this.processEvent('updateNewPageCommentLists', {
+                    lists: [...this.state.commentBox.lists, listId],
+                }),
+            removePageFromList: (listId) =>
+                this.processEvent('updateNewPageCommentLists', {
+                    lists: this.state.commentBox.lists.filter(
+                        (id) => id !== listId,
+                    ),
+                }),
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
-            contentSharingBG: spacePickerProps.contentSharingBG,
-            spacesBG: spacePickerProps.spacesBG,
-            createNewList: spacePickerProps.createNewEntry,
             hoverState: null,
         }
     }
@@ -382,14 +364,44 @@ export class AnnotationsSidebarContainer<
         const annot = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
-        const collectionPickerProps = this.getShareCollectionPickerProps()
         return (
             <CollectionPicker
+                spacesBG={this.props.customLists}
+                contentSharingBG={this.props.contentSharing}
                 initialSelectedEntries={() => annot.lists ?? []}
                 onEscapeKeyDown={() =>
                     this.processEvent('resetListPickerAnnotationId', null)
                 }
-                {...collectionPickerProps}
+                createNewEntry={async (name) => {
+                    const listId = await this.props.customLists.createCustomList(
+                        {
+                            name,
+                        },
+                    )
+                    this.processEvent('updateListsForAnnotation', {
+                        added: listId,
+                        deleted: null,
+                        annotationId: this.state.activeListPickerAnnotationId,
+                    })
+                    this.processMutation({
+                        listData: { [listId]: { $set: { name } } },
+                    })
+                    return listId
+                }}
+                selectEntry={async (listId) =>
+                    this.processEvent('updateListsForAnnotation', {
+                        added: listId,
+                        deleted: null,
+                        annotationId: this.state.activeListPickerAnnotationId,
+                    })
+                }
+                unselectEntry={async (listId) =>
+                    this.processEvent('updateListsForAnnotation', {
+                        added: null,
+                        deleted: listId,
+                        annotationId: this.state.activeListPickerAnnotationId,
+                    })
+                }
             />
         )
     }

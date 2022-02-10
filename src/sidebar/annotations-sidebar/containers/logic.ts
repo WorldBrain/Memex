@@ -744,9 +744,9 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: { tags: { $set: event.tags } },
         })
     }
-    updateNewPageCommentLists: EventHandler<'updateNewPageCommentLists'> = ({
-        event,
-    }) => {
+    updateNewPageCommentLists: EventHandler<
+        'updateNewPageCommentLists'
+    > = async ({ event, previousState }) => {
         this.emitMutation({
             commentBox: { lists: { $set: event.lists } },
         })

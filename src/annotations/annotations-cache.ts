@@ -316,19 +316,12 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
 
         let annotAfterListUpdate = null
-        let remoteLists = []
         if (annotation.lists.length) {
+            // TODO: see if this is really needed - what cases don't shareOpts get passed in here?
             const sharingState = await this.dependencies.backendOperations.updateLists(
                 annotUrl,
                 annotation.lists,
             )
-            const newLists = await Promise.all(
-                sharingState.localListIds.map((id) =>
-                    this.dependencies.getListFromId(id),
-                ),
-            )
-            remoteLists = newLists.filter((list) => list.remoteId)
-            const newListNames = newLists.map((list) => list.name)
             const parsedPrivacyLevel = getAnnotationPrivacyState(
                 sharingState.privacyLevel,
             )
@@ -339,7 +332,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 isBulkShareProtected:
                     shareOpts?.isBulkShareProtected ??
                     parsedPrivacyLevel.protected,
-                lists: newListNames,
+                lists: annotation.lists,
             }
         }
 
