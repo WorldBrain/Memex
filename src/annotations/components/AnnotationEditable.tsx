@@ -371,23 +371,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                 image: icons.copy,
             },
             {
-                key: 'tag-note-btn',
-                isDisabled: true,
-                image:
-                    this.props.tags?.length > 0
-                        ? icons.tagFull
-                        : icons.tagEmpty,
-            },
-            // Collections button for annotations. To be added later.
-            // {
-            //     key: 'list-note-btn',
-            //     isDisabled: true,
-            //     image:
-            //         this.props.lists?.length > 0
-            //             ? icons.collectionsFull
-            //             : icons.collectionsEmpty,
-            // },
-            {
                 key: 'share-note-btn',
                 isDisabled: true,
                 image: shareIconData.icon,
