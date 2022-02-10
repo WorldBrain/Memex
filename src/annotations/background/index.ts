@@ -38,7 +38,6 @@ import { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
-import type ContentSharingBackground from 'src/content-sharing/background'
 
 interface TabArg {
     tab: Tabs.Tab

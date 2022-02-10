@@ -100,6 +100,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: '$url:pk' },
             },
+            findListEntriesByUrls: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$urls:pk' } },
+            },
             createAnnotationForList: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'createObject',
@@ -469,5 +474,26 @@ export default class AnnotationStorage extends StorageModule {
 
     findListEntriesByUrl({ url }: { url: string }): Promise<AnnotListEntry[]> {
         return this.operation('findListEntriesByUrl', { url })
+    }
+
+    async findListEntriesByUrls({
+        annotationUrls,
+    }: {
+        annotationUrls: string[]
+    }): Promise<{ [annotationUrl: string]: AnnotListEntry[] }> {
+        const listEntries: AnnotListEntry[] = await this.operation(
+            'findListEntriesByUrls',
+            { urls: annotationUrls },
+        )
+        const listEntriesByAnnot: {
+            [annotationUrl: string]: AnnotListEntry[]
+        } = {}
+
+        for (const entry of listEntries) {
+            const prev = listEntriesByAnnot[entry.url] ?? []
+            listEntriesByAnnot[entry.url] = [...prev, entry]
+        }
+
+        return listEntriesByAnnot
     }
 }
