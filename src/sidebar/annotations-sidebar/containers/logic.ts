@@ -206,7 +206,7 @@ export class SidebarContainerLogic extends UILogic<
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, pageUrl, customLists } = this.options
         annotationsCache.annotationChanges.addListener(
-            'newState',
+            'newStateIntent',
             this.annotationSubscription,
         )
 
@@ -245,10 +245,11 @@ export class SidebarContainerLogic extends UILogic<
 
     cleanup = () => {
         this.options.annotationsCache.annotationChanges.removeListener(
-            'newState',
+            'newStateIntent',
             this.annotationSubscription,
         )
     }
+
     private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
             annotations: {
@@ -682,8 +683,6 @@ export class SidebarContainerLogic extends UILogic<
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
     > = async ({ event, previousState }) => {
-        const { contentSharing, annotationsCache } = this.options
-
         const idx = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationId,
         )
@@ -693,18 +692,10 @@ export class SidebarContainerLogic extends UILogic<
 
         let listIds = previousState.annotations[idx].lists
         if (event.added != null) {
-            await contentSharing.shareAnnotationToSomeLists({
-                annotationUrl: event.annotationId,
-                localListIds: [event.added],
-            })
             listIds = [...listIds, event.added]
         }
 
         if (event.deleted != null) {
-            await contentSharing.unshareAnnotationFromSomeLists({
-                annotationUrl: event.annotationId,
-                localListIds: [event.deleted],
-            })
             const toRemove = listIds.findIndex((id) => id === event.deleted)
             listIds = [
                 ...listIds.slice(0, toRemove),
@@ -712,7 +703,7 @@ export class SidebarContainerLogic extends UILogic<
             ]
         }
 
-        await annotationsCache.update({
+        await this.options.annotationsCache.update({
             ...previousState.annotations[idx],
             lists: listIds,
         })

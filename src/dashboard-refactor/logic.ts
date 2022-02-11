@@ -1667,19 +1667,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { contentShareBG } = this.options
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
 
+        let remoteFn: () => Promise<any>
         let listIds = noteData.lists
         if (event.added != null) {
-            await contentShareBG.shareAnnotationToSomeLists({
-                annotationUrl: event.noteId,
-                localListIds: [event.added],
-            })
+            remoteFn = () =>
+                contentShareBG.shareAnnotationToSomeLists({
+                    annotationUrl: event.noteId,
+                    localListIds: [event.added],
+                })
             listIds = [...listIds, event.added]
         }
         if (event.deleted != null) {
-            await contentShareBG.unshareAnnotationFromSomeLists({
-                annotationUrl: event.noteId,
-                localListIds: [event.deleted],
-            })
+            remoteFn = () =>
+                contentShareBG.unshareAnnotationFromSomeLists({
+                    annotationUrl: event.noteId,
+                    localListIds: [event.deleted],
+                })
             const toRemove = listIds.findIndex((id) => id === event.deleted)
             listIds = [
                 ...listIds.slice(0, toRemove),
@@ -1687,17 +1690,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             ]
         }
 
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            lists: { $set: listIds },
-                        },
+        if (remoteFn) {
+            this.emitMutation({
+                searchResults: {
+                    noteData: {
+                        byId: { [event.noteId]: { lists: { $set: listIds } } },
                     },
                 },
-            },
-        })
+            })
+            await remoteFn()
+        }
     }
 
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({

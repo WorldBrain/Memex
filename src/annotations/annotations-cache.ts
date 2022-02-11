@@ -147,6 +147,7 @@ export const createAnnotationsCache = (
 interface AnnotationCacheChanges {
     rollback: (annotations: CachedAnnotation[]) => void
     newState: (annotation: CachedAnnotation[]) => void
+    newStateIntent: (annotation: CachedAnnotation[]) => void
     sorted: (annotations: CachedAnnotation[]) => void
     created: (annotation: CachedAnnotation) => void
     updated: (annotation: CachedAnnotation) => void
@@ -245,6 +246,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
+        this.annotationChanges.emit('newStateIntent', this.annotations)
         this.annotationChanges.emit('newState', this.annotations)
     }
 
@@ -255,6 +257,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this._annotations = this._annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('sorted', this._annotations)
+        this.annotationChanges.emit('newStateIntent', this.annotations)
         this.annotationChanges.emit('newState', this.annotations)
     }
 
@@ -267,30 +270,23 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         const annotUrl = await backendOperations.create(annotation, shareOpts)
 
-        if (annotation.tags.length) {
-            await backendOperations.updateTags(annotUrl, annotation.tags)
-        }
-
-        let annotAfterListUpdate = null
-        if (annotation.lists.length) {
-            await backendOperations.updateLists(annotUrl, annotation.lists)
-            annotAfterListUpdate = {
-                ...annotation,
-                lastEdited: new Date(),
-                isShared: shareOpts.shouldShare,
-                isBulkShareProtected: shareOpts.isBulkShareProtected,
-                lists: annotation.lists,
-            }
-        }
-
-        const nextAnnotation = annotAfterListUpdate ?? {
+        const nextAnnotation: CachedAnnotation = {
             ...annotation,
             createdWhen: new Date(),
             isShared: shareOpts?.shouldShare,
             isBulkShareProtected: shareOpts?.isBulkShareProtected,
         }
-
         this.annotations = [nextAnnotation, ...stateBeforeModifications]
+
+        this.annotationChanges.emit('newStateIntent', this.annotations)
+
+        if (annotation.tags.length) {
+            await backendOperations.updateTags(annotUrl, annotation.tags)
+        }
+
+        if (annotation.lists.length) {
+            await backendOperations.updateLists(annotUrl, annotation.lists)
+        }
 
         this.annotationChanges.emit('created', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
@@ -303,12 +299,25 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         shareOpts,
     ) => {
         const stateBeforeModifications = [...this._annotations]
-
         const resultIndex = stateBeforeModifications.findIndex(
             (existingAnnotation) => existingAnnotation.url === annotation.url,
         )
-
         const previousAnnotation = stateBeforeModifications[resultIndex]
+
+        const nextAnnotation: CachedAnnotation = {
+            ...annotation,
+            lastEdited: new Date(),
+            isShared: shareOpts?.shouldShare ?? previousAnnotation.isShared,
+            isBulkShareProtected:
+                shareOpts?.isBulkShareProtected ??
+                previousAnnotation.isBulkShareProtected,
+        }
+
+        this.annotationChanges.emit('newStateIntent', [
+            ...stateBeforeModifications.slice(0, resultIndex),
+            nextAnnotation,
+            ...stateBeforeModifications.slice(resultIndex + 1),
+        ])
 
         // Tags
         if (haveArraysChanged(previousAnnotation.tags ?? [], annotation.tags)) {
@@ -319,7 +328,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
 
         // Lists
-        let annotAfterListUpdate = null
         if (haveArraysChanged(previousAnnotation.lists, annotation.lists)) {
             const sharingState = await this.dependencies.backendOperations.updateLists(
                 annotation.url,
@@ -328,23 +336,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             const parsedPrivacyLevel = maybeGetAnnotationPrivacyState(
                 sharingState?.privacyLevel,
             )
-            annotAfterListUpdate = {
-                ...annotation,
-                lastEdited: new Date(),
-                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
-                isBulkShareProtected:
-                    shareOpts?.isBulkShareProtected ??
-                    parsedPrivacyLevel.protected,
-            }
-        }
-
-        const nextAnnotation = annotAfterListUpdate ?? {
-            ...annotation,
-            lastEdited: new Date(),
-            isShared: shareOpts?.shouldShare ?? previousAnnotation.isShared,
-            isBulkShareProtected:
-                shareOpts?.isBulkShareProtected ??
-                previousAnnotation.isBulkShareProtected,
+            nextAnnotation.isShared =
+                shareOpts?.shouldShare ?? parsedPrivacyLevel.public
+            nextAnnotation.isBulkShareProtected =
+                shareOpts?.isBulkShareProtected ?? parsedPrivacyLevel.protected
         }
 
         this.annotations = [
@@ -390,6 +385,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         ]
 
         this.annotationChanges.emit('deleted', annotation)
+        this.annotationChanges.emit('newStateIntent', this.annotations)
         this.annotationChanges.emit('newState', this.annotations)
 
         try {
