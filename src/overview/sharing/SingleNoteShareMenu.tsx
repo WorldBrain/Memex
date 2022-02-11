@@ -9,6 +9,7 @@ import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import styled from 'styled-components'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -192,8 +193,19 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         'alt+shift+enter': () => this.handleSetShared(true),
                     }}
                 />
+
+                <SectionTitle>Add to Spaces</SectionTitle>
                 <SpacePicker {...this.props.spacePickerProps} />
             </ClickAway>
         )
     }
 }
+
+const SectionTitle = styled.div`
+    font-size: 14px;
+    font-weight: normal;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding-left: 15px;
+    color: ${(props) => props.theme.colors.normalText};
+`

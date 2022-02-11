@@ -147,16 +147,20 @@ export default class Ribbon extends Component<Props, State> {
                     onOutsideClick={this.hideTagPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}
                 >
-                    <TagPicker
-                        {...this.props.tagging}
-                        onUpdateEntrySelection={this.props.tagging.updateTags}
-                        actOnAllTabs={this.props.tagging.tagAllTabs}
-                        initialSelectedEntries={
-                            this.props.tagging.fetchInitialTagSelections
-                        }
-                        onEscapeKeyDown={this.hideTagPicker}
-                        handleClickOutside={this.hideTagPicker}
-                    />
+                    <div onMouseLeave={this.hideTagPicker}>
+                        <TagPicker
+                            {...this.props.tagging}
+                            onUpdateEntrySelection={
+                                this.props.tagging.updateTags
+                            }
+                            actOnAllTabs={this.props.tagging.tagAllTabs}
+                            initialSelectedEntries={
+                                this.props.tagging.fetchInitialTagSelections
+                            }
+                            onEscapeKeyDown={this.hideTagPicker}
+                            handleClickOutside={this.hideTagPicker}
+                        />
+                    </div>
                 </BlurredSidebarOverlay>
             </HoverBox>
         )
@@ -168,22 +172,29 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <HoverBox position="absolute" top="140px" right="40px">
+            <HoverBox
+                padding="0px"
+                position="absolute"
+                top="140px"
+                right="40px"
+            >
                 <BlurredSidebarOverlay
                     onOutsideClick={this.hideListPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}
                 >
-                    <CollectionPicker
-                        {...this.props.lists}
-                        spacesBG={this.props.spacesBG}
-                        contentSharingBG={this.props.contentSharingBG}
-                        actOnAllTabs={this.props.lists.listAllTabs}
-                        initialSelectedEntries={
-                            this.props.lists.fetchInitialListSelections
-                        }
-                        onEscapeKeyDown={this.hideListPicker}
-                        handleClickOutside={this.hideListPicker}
-                    />
+                    <div onMouseLeave={this.hideListPicker}>
+                        <CollectionPicker
+                            {...this.props.lists}
+                            spacesBG={this.props.spacesBG}
+                            contentSharingBG={this.props.contentSharingBG}
+                            actOnAllTabs={this.props.lists.listAllTabs}
+                            initialSelectedEntries={
+                                this.props.lists.fetchInitialListSelections
+                            }
+                            onEscapeKeyDown={this.hideListPicker}
+                            handleClickOutside={this.hideListPicker}
+                        />
+                    </div>
                 </BlurredSidebarOverlay>
             </HoverBox>
         )
@@ -199,11 +210,16 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowTutorial()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <QuickTutorial
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onClickOutside={() => this.props.toggleShowTutorial()}
-                    onSettingsClick={() => this.openOptionsTabRPC('settings')}
-                />
+                {' '}
+                <div onMouseLeave={() => this.props.toggleShowTutorial()}>
+                    <QuickTutorial
+                        getKeyboardShortcutsState={getKeyboardShortcutsState}
+                        onClickOutside={() => this.props.toggleShowTutorial()}
+                        onSettingsClick={() =>
+                            this.openOptionsTabRPC('settings')
+                        }
+                    />
+                </div>
             </BlurredSidebarOverlay>
         )
     }
@@ -218,103 +234,107 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowExtraButtons()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <ExtraButtonsPanel
-                    closePanel={() => this.props.toggleShowExtraButtons()}
-                >
-                    <ExtraButtonRow
-                        onClick={() => {
-                            this.props.handleRibbonToggle()
-                            this.props.sidebar.closeSidebar()
-                        }}
+                <div onMouseLeave={() => this.props.toggleShowExtraButtons()}>
+                    <ExtraButtonsPanel
+                        closePanel={() => this.props.toggleShowExtraButtons()}
                     >
-                        <Icon
-                            filePath={
-                                this.props.isRibbonEnabled
-                                    ? icons.ribbonOn
-                                    : icons.ribbonOff
-                            }
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Disable Sidebar</InfoText>
-                        ) : (
-                            <InfoText>Enable Sidebar</InfoText>
-                        )}
-                    </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() => {
+                                this.props.handleRibbonToggle()
+                                this.props.sidebar.closeSidebar()
+                            }}
+                        >
+                            <Icon
+                                filePath={
+                                    this.props.isRibbonEnabled
+                                        ? icons.ribbonOn
+                                        : icons.ribbonOff
+                                }
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Disable Sidebar</InfoText>
+                            ) : (
+                                <InfoText>Enable Sidebar</InfoText>
+                            )}
+                        </ExtraButtonRow>
 
-                    <ExtraButtonRow
-                        onClick={this.props.highlights.handleHighlightsToggle}
-                    >
-                        <Icon
-                            filePath={
-                                this.props.highlights.areHighlightsEnabled
-                                    ? icons.highlighterFull
-                                    : icons.highlighterEmpty
+                        <ExtraButtonRow
+                            onClick={
+                                this.props.highlights.handleHighlightsToggle
                             }
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Hide Highlights</InfoText>
-                        ) : (
-                            <InfoText>Show Highlights</InfoText>
-                        )}
-                    </ExtraButtonRow>
+                        >
+                            <Icon
+                                filePath={
+                                    this.props.highlights.areHighlightsEnabled
+                                        ? icons.highlighterFull
+                                        : icons.highlighterEmpty
+                                }
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Hide Highlights</InfoText>
+                            ) : (
+                                <InfoText>Show Highlights</InfoText>
+                            )}
+                        </ExtraButtonRow>
 
-                    <ExtraButtonRow
-                        onClick={this.props.tooltip.handleTooltipToggle}
-                    >
-                        <Icon
-                            filePath={
-                                this.props.tooltip.isTooltipEnabled
-                                    ? icons.tooltipOn
-                                    : icons.tooltipOff
+                        <ExtraButtonRow
+                            onClick={this.props.tooltip.handleTooltipToggle}
+                        >
+                            <Icon
+                                filePath={
+                                    this.props.tooltip.isTooltipEnabled
+                                        ? icons.tooltipOn
+                                        : icons.tooltipOff
+                                }
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Hide Highlighter Tooltip</InfoText>
+                            ) : (
+                                <InfoText>Show Highlighter Tooltip</InfoText>
+                            )}
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                window.open('https://worldbrain.io/tutorials')
                             }
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Hide Highlighter Tooltip</InfoText>
-                        ) : (
-                            <InfoText>Show Highlighter Tooltip</InfoText>
-                        )}
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() =>
-                            window.open('https://worldbrain.io/tutorials')
-                        }
-                    >
-                        <Icon
-                            filePath={icons.helpIcon}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        <InfoText>Tutorials</InfoText>
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() => this.openOptionsTabRPC('settings')}
-                    >
-                        <Icon
-                            filePath={icons.settings}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        <InfoText>Settings</InfoText>
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() =>
-                            window.open('https://worldbrain.io/feedback')
-                        }
-                    >
-                        <Icon
-                            filePath={icons.sadFace}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        <InfoText>Feature Requests & Bugs</InfoText>
-                    </ExtraButtonRow>
-                </ExtraButtonsPanel>
+                        >
+                            <Icon
+                                filePath={icons.helpIcon}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Tutorials</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() => this.openOptionsTabRPC('settings')}
+                        >
+                            <Icon
+                                filePath={icons.settings}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Settings</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                window.open('https://worldbrain.io/feedback')
+                            }
+                        >
+                            <Icon
+                                filePath={icons.sadFace}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Feature Requests & Bugs</InfoText>
+                        </ExtraButtonRow>
+                    </ExtraButtonsPanel>
+                </div>
             </BlurredSidebarOverlay>
         )
     }

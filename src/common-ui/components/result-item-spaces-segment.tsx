@@ -41,16 +41,24 @@ export class AddSpacesButton extends React.Component<
                     }}
                 >
                     {this.props.hasNoLists ? (
-                        <ButtonBox>
+                        <EditIconContainerWithText>
                             <Icon
-                                filePath={icons.collectionsEmpty}
-                                height={'12px'}
-                                color={'subText'}
+                                filePath={icons.plus}
+                                height={'10px'}
+                                color={'purple'}
+                                hoverOff
                             />
                             Add to Space
-                        </ButtonBox>
+                        </EditIconContainerWithText>
                     ) : (
-                        <Icon icon={'plus'} height={'10px'} color={'subText'} />
+                        <EditIconContainer>
+                            <Icon
+                                filePath={icons.plus}
+                                height={'10px'}
+                                color={'purple'}
+                                hoverOff
+                            />
+                        </EditIconContainer>
                     )}
                 </AddSpacesButtonContainer>
                 {this.props.renderListsPickerForAnnotation && (
@@ -129,11 +137,14 @@ export default function ListsSegment({
 }
 
 const Container = styled.div`
-    display: inline-box;
+    display: grid;
+    grid-gap: 10px;
     align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #f0f0f0;
+    justify-content: flex-start;
     padding: 5px 15px;
+    height: 24px;
+    grid-auto-flow: column;
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const ButtonBox = styled.div`
@@ -145,27 +156,48 @@ const ButtonBox = styled.div`
     color: ${(props) => props.theme.colors.subText};
 `
 
+const EditIconContainer = styled.div`
+    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
+    height: 20px;
+    width: 20px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+`
+
+const EditIconContainerWithText = styled.div`
+    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
+    height: 20px;
+    width: fit-content;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 3px 0 1px;
+    grid-gap: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+    color: ${(props) => props.theme.colors.purple};
+
+    & * {
+        cursor: pointer;
+    }
+`
+
 const AddSpacesButtonContainer = styled.div`
     background-color: white;
-    padding: 2px 2px;
-    border-radius: 4px;
-    border: 1px solid #e0e0e0;
     font-size: 12px;
     font-weight: 400;
-    height: 24px;
-    min-width: 24px;
     justify-content: center;
-    color: #284150;
-    margin: 2px 4px 2px 0;
+    margin-right: 10px;
     display: flex;
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
-
-    &:hover {
-        background: #f0f0f0;
-    }
 `
 const ListsContainer = styled.div`
     display: flex;
@@ -173,21 +205,21 @@ const ListsContainer = styled.div`
 `
 
 const ListSpaceContainer = styled.div`
-    background-color: #83c9f4;
-
+    background-color: ${(props) => props.theme.colors.purple};
+    color: #fff;
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 400;
     height: auto;
-    color: #284150;
     margin: 2px 4px 2px 0;
     display: flex;
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 `
+
 const ListPillSettingButton = styled.button`
     cursor: pointer;
 `

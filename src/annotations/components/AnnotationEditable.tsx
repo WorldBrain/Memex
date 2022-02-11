@@ -520,9 +520,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {this.renderFooter()}
                             {this.props.renderTagsPickerForAnnotation && (
                                 <TagPickerWrapper>
-                                    {this.props.renderTagsPickerForAnnotation(
-                                        this.props.url,
-                                    )}
+                                    <HoverBox left="0px" padding={'px'}>
+                                        {this.props.renderTagsPickerForAnnotation(
+                                            this.props.url,
+                                        )}
+                                    </HoverBox>
                                 </TagPickerWrapper>
                             )}
                             {this.props.renderCopyPasterForAnnotation && (

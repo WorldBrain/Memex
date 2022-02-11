@@ -92,7 +92,7 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.isListPickerShown) {
             return (
                 <div onMouseLeave={this.props.onListPickerBtnClick}>
-                    <HoverBox withRelativeContainer>
+                    <HoverBox padding={'0px'} withRelativeContainer>
                         <CollectionPicker
                             selectEntry={(listId) =>
                                 this.props.onListPickerUpdate({
@@ -213,14 +213,14 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick: this.props.onShareBtnClick,
                     tooltipText: 'Share Page and Notes',
                 },
-                {
-                    key: 'list-page-btn',
-                    image: this.hasLists
-                        ? icons.collectionsFull
-                        : icons.collectionsEmpty,
-                    onClick: this.props.onListPickerBtnClick,
-                    tooltipText: 'Edit Spaces',
-                },
+                // {
+                //     key: 'list-page-btn',
+                //     image: this.hasLists
+                //         ? icons.collectionsFull
+                //         : icons.collectionsEmpty,
+                //     onClick: this.props.onListPickerBtnClick,
+                //     tooltipText: 'Edit Spaces',
+                // },
                 {
                     key: 'expand-notes-btn',
                     image: this.hasNotes
@@ -254,13 +254,13 @@ export default class PageResultView extends PureComponent<Props> {
                 isDisabled: true,
                 image: this.props.isShared ? icons.shared : icons.link,
             },
-            {
-                key: 'list-page-btn',
-                isDisabled: true,
-                image: this.hasLists
-                    ? icons.collectionsFull
-                    : icons.collectionsEmpty,
-            },
+            // {
+            //     key: 'list-page-btn',
+            //     isDisabled: true,
+            //     image: this.hasLists
+            //         ? icons.collectionsFull
+            //         : icons.collectionsEmpty,
+            // },
             {
                 key: 'expand-notes-btn',
                 image: this.hasNotes ? icons.commentFull : icons.commentEmpty,

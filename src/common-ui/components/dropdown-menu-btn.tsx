@@ -230,7 +230,7 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     width: 100%;
 `
 
-const Menu = styled.ul`
+const Menu = styled.div`
     position: absolute;
     width: max-content;
     list-style: none;
@@ -243,4 +243,5 @@ const Menu = styled.ul`
     top: 25px;
     left: -67px;
     z-index: 1000;
+    padding: 10px;
 `

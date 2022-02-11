@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { ButtonTooltip } from '.'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
@@ -21,6 +22,25 @@ export default function TagsSegment({
     if (!tags?.length) {
         return (
             <Container {...props}>
+                <WarningBox>
+                    <ButtonTooltip
+                        tooltipText={
+                            <span>
+                                Tags will soon be deprecated merged into Spaces
+                                <br />
+                                Click to learn more
+                            </span>
+                        }
+                        position={'bottom'}
+                    >
+                        <Icon
+                            filePath={icons.alertRound}
+                            color={'warning'}
+                            heightAndWidth="18px"
+                            onClick={() => window.open('')}
+                        />
+                    </ButtonTooltip>
+                </WarningBox>
                 <EditIconContainerWithText onClick={onEditBtnClick}>
                     <Icon
                         filePath={icons.plus}
@@ -37,7 +57,12 @@ export default function TagsSegment({
     return (
         <Container {...props}>
             <EditIconContainer onClick={onEditBtnClick}>
-                <EditIcon />
+                <Icon
+                    filePath={icons.plus}
+                    heightAndWidth="10px"
+                    color={'purple'}
+                    hoverOff
+                />
             </EditIconContainer>
             <TagsContainer>
                 {tags.slice(0).map((tag) => (
@@ -52,6 +77,10 @@ export default function TagsSegment({
         </Container>
     )
 }
+
+const WarningBox = styled.div`
+    z-index: 1;
+`
 
 const Container = styled.div`
     display: grid;
@@ -70,8 +99,8 @@ const TagsContainer = styled.div`
 `
 
 const TagPill = styled.div`
-    background-color: ${(props) => props.theme.colors.purple};
-    color: #fff;
+    background-color: ${(props) => props.theme.colors.backgroundHighlight};
+    color: ${(props) => props.theme.colors.normalText};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;

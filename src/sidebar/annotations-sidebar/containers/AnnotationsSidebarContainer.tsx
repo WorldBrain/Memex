@@ -360,7 +360,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <PickerWrapper>
-                <HoverBox left="-130px" top="-40px" position="absolute">
+                <HoverBox left="0px" top="-40px" position="absolute">
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent(
@@ -409,7 +409,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <PickerWrapper>
-                <HoverBox>
+                <HoverBox padding={'0px'}>
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent(
@@ -441,7 +441,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapper>
-                <HoverBox width="320px">
+                <HoverBox padding={'0px'} width="320px">
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent('resetShareMenuNoteId', null)
