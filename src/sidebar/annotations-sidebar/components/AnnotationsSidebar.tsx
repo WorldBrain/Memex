@@ -1672,7 +1672,8 @@ const ShareMenuWrapperTopBar = styled.div`
 `
 
 const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
-    height: 100vh;
+    height: fit-content;
+    overflow-x: hidden;
     width: fill-available;
     padding-right: ${(props) =>
         props.sidebarContext === 'dashboard' ? '0' : '40px'};

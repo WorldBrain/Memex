@@ -195,6 +195,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 />
 
                 <SectionTitle>Add to Spaces</SectionTitle>
+                <SectionSubTitle>
+                    Selection protected from bulk changes to privacy
+                </SectionSubTitle>
                 <SpacePicker {...this.props.spacePickerProps} />
             </ClickAway>
         )
@@ -208,4 +211,11 @@ const SectionTitle = styled.div`
     margin-bottom: 5px;
     padding-left: 15px;
     color: ${(props) => props.theme.colors.normalText};
+`
+
+const SectionSubTitle = styled.div`
+    font-size: 12px;
+    font-weight: 400;
+    padding-left: 15px;
+    color: ${(props) => props.theme.colors.lighterText};
 `

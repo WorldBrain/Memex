@@ -441,7 +441,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ShareMenuWrapper>
-                <HoverBox padding={'0px'} width="320px">
+                <HoverBox left="-40px" padding={'0px'} width="360px">
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent('resetShareMenuNoteId', null)
