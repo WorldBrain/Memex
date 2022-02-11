@@ -409,7 +409,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <PickerWrapper>
-                <HoverBox padding={'0px'}>
+                <HoverBox top="7px" padding={'0px'}>
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent(
