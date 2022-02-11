@@ -743,11 +743,17 @@ class AnnotationsSidebar extends React.Component<
         //     </AnnotationsSectionStyled>
         // ) : (
         return (
-            <AnnotationsSectionStyled>
-                {this.props.isExpanded
-                    ? this.renderAnnotationsEditable()
-                    : this.renderSharedNotesByList()}
-            </AnnotationsSectionStyled>
+            <React.Fragment>
+                {this.props.isExpanded ? (
+                    <AnnotationsSectionStyled>
+                        {this.renderAnnotationsEditable()}
+                    </AnnotationsSectionStyled>
+                ) : (
+                    <AnnotationsSectionStyled>
+                        {this.renderSharedNotesByList()}
+                    </AnnotationsSectionStyled>
+                )}
+            </React.Fragment>
         )
     }
 
@@ -1276,6 +1282,7 @@ const FollowedListNotesContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    height: 100%;
 `
 
 const SectionTitleContainer = styled(Margin)`
@@ -1291,9 +1298,9 @@ const AnnotationContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding-bottom: 350px;
+    padding-bottom: 500px;
     overflow: scroll;
-    height: fill-available;
+    height: 100%;
 
     scrollbar-width: none;
 
