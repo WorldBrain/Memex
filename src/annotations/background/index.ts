@@ -111,6 +111,7 @@ export default class DirectLinkingBackground {
                 this,
             ),
             getSharedAnnotations: this.getSharedAnnotations,
+            getListIdsForAnnotation: this.getListIdsForAnnotation,
         }
 
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
@@ -479,6 +480,17 @@ export default class DirectLinkingBackground {
                     ? JSON.parse(annotationsById[ref.id].selector)
                     : undefined,
         }))
+    }
+
+    getListIdsForAnnotation: AnnotationInterface<
+        'provider'
+    >['getListIdsForAnnotation'] = async (_, { annotationId }) => {
+        const listEntries = await this.annotationStorage.findListEntriesByUrl({
+            url: annotationId,
+        })
+        const listIds = new Set<number>()
+        listEntries.forEach((entry) => listIds.add(entry.listId))
+        return [...listIds]
     }
 
     async updateAnnotationBookmark(

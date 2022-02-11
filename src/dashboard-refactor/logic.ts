@@ -7,7 +7,7 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
-import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
@@ -1892,7 +1892,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             editNoteForm,
             ...noteData
         } = previousState.searchResults.noteData.byId[event.noteId]
-        const tagsHaveChanged = haveTagsChanged(
+        const tagsHaveChanged = haveArraysChanged(
             noteData.tags,
             editNoteForm.tags,
         )

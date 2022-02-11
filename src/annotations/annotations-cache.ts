@@ -9,7 +9,7 @@ import {
     AnnotationsSorter,
     sortByPagePosition,
 } from 'src/sidebar/annotations-sidebar/sorting'
-import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { haveArraysChanged } from 'src/util/have-tags-changed'
 import type {
     AnnotationSharingState,
     ContentSharingInterface,
@@ -23,7 +23,7 @@ import {
     PageList,
     RemoteCollectionsInterface,
 } from 'src/custom-lists/background/types'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import { maybeGetAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 export type CachedAnnotation = Annotation
 
@@ -108,82 +108,38 @@ export const createAnnotationsCache = (
                     url: annotationUrl,
                     tags,
                 }),
-
-            updateLists: async (annotationUrl, listNames) => {
-                const prevSharingState = await bgModules.contentSharing.getAnnotationSharingState(
-                    { annotationUrl },
-                )
-                const existingListIds = prevSharingState.localListIds ?? []
-                const existingLists = await Promise.all(
-                    existingListIds.map((id) =>
-                        bgModules.customLists
-                            .fetchListById({ id })
-                            .then((list) => list.id),
-                    ),
+            updateLists: async (annotationUrl, listIds) => {
+                const existingListIds = await bgModules.annotations.getListIdsForAnnotation(
+                    { annotationId: annotationUrl },
                 )
 
-                const existingListsSet = new Set(existingLists)
-                const newListsSet = new Set(listNames)
-
-                const namesToAdd = listNames.filter(
-                    (list) => !existingListsSet.has(list),
+                const listsToAdd = listIds.filter(
+                    (list) => !existingListIds.includes(list),
                 )
-                const toDelete = existingLists.filter(
-                    (list) => !newListsSet.has(list),
+                const listsToDelete = existingListIds.filter(
+                    (list) => !listIds.includes(list),
                 )
-                if (namesToAdd.length) {
-                    const existingListsToAdd = (
-                        await Promise.all(
-                            namesToAdd.map((id) =>
-                                bgModules.customLists.fetchListById({ id }),
-                            ),
-                        )
-                    ).filter((list) => list)
-                    // TODO: uncomment this when we're able to assign non-shared lists to annotations
-                    // Create non-existent lists
-                    // const existingListNamesToAdd = existingListsToAdd.map(
-                    //     (l) => l.name,
-                    // )
-                    // const createdIdsToAdd = await Promise.all(
-                    //     namesToAdd
-                    //         .filter((name) => !existingListNamesToAdd.includes(name))
-                    //         .map((name) =>
-                    //             bgModules.customLists.createCustomList({
-                    //                 name: name,
-                    //             }),
-                    //         ),
-                    // )
 
-                    const {
-                        sharingState,
-                    } = await bgModules.contentSharing.shareAnnotationToSomeLists(
+                let sharingState: AnnotationSharingState = {} as AnnotationSharingState
+                if (listsToAdd.length) {
+                    const result = await bgModules.contentSharing.shareAnnotationToSomeLists(
                         {
                             annotationUrl,
-                            localListIds: [
-                                ...existingListsToAdd.map((list) => list.id),
-                                // TODO: uncomment this when we're able to assign non-shared lists to annotations
-                                // ...createdIdsToAdd,
-                            ],
+                            localListIds: listsToAdd,
                         },
                     )
-                    return sharingState
+                    sharingState = result.sharingState
                 }
-                if (toDelete.length) {
-                    const toDeleteLists = await Promise.all(
-                        toDelete.map((id) =>
-                            bgModules.customLists.fetchListById({ id }),
-                        ),
-                    )
-                    const {
-                        sharingState,
-                    } = await bgModules.contentSharing.unshareAnnotationFromSomeLists(
+                if (listsToDelete.length) {
+                    const result = await bgModules.contentSharing.unshareAnnotationFromSomeLists(
                         {
                             annotationUrl,
-                            localListIds: toDeleteLists.map((list) => list.id),
+                            localListIds: listsToDelete,
                         },
                     )
-                    return sharingState
+                    sharingState = result.sharingState
                 }
+                return sharingState
             },
         },
     })
@@ -238,7 +194,7 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     create: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
-        shareOpts?: AnnotationShareOpts,
+        shareOpts: AnnotationShareOpts,
     ) => Promise<Annotation>
     update: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
@@ -317,21 +273,12 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         let annotAfterListUpdate = null
         if (annotation.lists.length) {
-            // TODO: see if this is really needed - what cases don't shareOpts get passed in here?
-            const sharingState = await this.dependencies.backendOperations.updateLists(
-                annotUrl,
-                annotation.lists,
-            )
-            const parsedPrivacyLevel = getAnnotationPrivacyState(
-                sharingState.privacyLevel,
-            )
+            await backendOperations.updateLists(annotUrl, annotation.lists)
             annotAfterListUpdate = {
                 ...annotation,
                 lastEdited: new Date(),
-                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
-                isBulkShareProtected:
-                    shareOpts?.isBulkShareProtected ??
-                    parsedPrivacyLevel.protected,
+                isShared: shareOpts.shouldShare,
+                isBulkShareProtected: shareOpts.isBulkShareProtected,
                 lists: annotation.lists,
             }
         }
@@ -348,47 +295,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('created', nextAnnotation)
         this.annotationChanges.emit('newState', this.annotations)
 
-        // try {
-        // } catch (e) {
-        //     this._annotations = stateBeforeModifications
-        //     this.annotationChanges.emit('rollback', stateBeforeModifications)
-        //     throw e
-        // }
         return nextAnnotation
-    }
-
-    private maybeUpdateLists = async (
-        annotation,
-        previousAnnotation,
-        shareOpts,
-    ) => {
-        // this is a function so we can get a return value while using only const
-        if (haveTagsChanged(previousAnnotation.lists ?? [], annotation.lists)) {
-            const sharingState = await this.dependencies.backendOperations.updateLists(
-                annotation.url,
-                annotation.lists,
-            )
-            const newLists = await Promise.all(
-                sharingState.localListIds.map((id) =>
-                    this.dependencies.getListFromId(id),
-                ),
-            )
-            const newListNames = newLists.map((list) => list.name)
-            const parsedPrivacyLevel = getAnnotationPrivacyState(
-                sharingState.privacyLevel,
-            )
-            const annotAfterListUpdate = {
-                ...annotation,
-                lastEdited: new Date(),
-                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
-                isBulkShareProtected:
-                    shareOpts?.isBulkShareProtected ??
-                    parsedPrivacyLevel.protected,
-                lists: newListNames,
-            }
-            return annotAfterListUpdate
-        }
-        return null
     }
 
     update: AnnotationsCacheInterface['update'] = async (
@@ -404,19 +311,33 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const previousAnnotation = stateBeforeModifications[resultIndex]
 
         // Tags
-        if (haveTagsChanged(previousAnnotation.tags ?? [], annotation.tags)) {
+        if (haveArraysChanged(previousAnnotation.tags ?? [], annotation.tags)) {
             await this.dependencies.backendOperations.updateTags(
                 annotation.url,
                 annotation.tags,
             )
         }
-        // Lists
 
-        const annotAfterListUpdate = await this.maybeUpdateLists(
-            annotation,
-            previousAnnotation,
-            shareOpts,
-        )
+        // Lists
+        let annotAfterListUpdate = null
+        if (haveArraysChanged(previousAnnotation.lists, annotation.lists)) {
+            const sharingState = await this.dependencies.backendOperations.updateLists(
+                annotation.url,
+                annotation.lists,
+            )
+            const parsedPrivacyLevel = maybeGetAnnotationPrivacyState(
+                sharingState?.privacyLevel,
+            )
+            annotAfterListUpdate = {
+                ...annotation,
+                lastEdited: new Date(),
+                isShared: shareOpts?.shouldShare ?? parsedPrivacyLevel.public,
+                isBulkShareProtected:
+                    shareOpts?.isBulkShareProtected ??
+                    parsedPrivacyLevel.protected,
+            }
+        }
+
         const nextAnnotation = annotAfterListUpdate ?? {
             ...annotation,
             lastEdited: new Date(),

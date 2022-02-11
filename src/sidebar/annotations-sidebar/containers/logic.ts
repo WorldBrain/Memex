@@ -682,7 +682,7 @@ export class SidebarContainerLogic extends UILogic<
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
     > = async ({ event, previousState }) => {
-        const { contentSharing } = this.options
+        const { contentSharing, annotationsCache } = this.options
 
         const idx = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationId,
@@ -699,6 +699,7 @@ export class SidebarContainerLogic extends UILogic<
             })
             listIds = [...listIds, event.added]
         }
+
         if (event.deleted != null) {
             await contentSharing.unshareAnnotationFromSomeLists({
                 annotationUrl: event.annotationId,
@@ -711,12 +712,9 @@ export class SidebarContainerLogic extends UILogic<
             ]
         }
 
-        this.emitMutation({
-            annotations: {
-                [idx]: {
-                    lists: { $set: listIds },
-                },
-            },
+        await annotationsCache.update({
+            ...previousState.annotations[idx],
+            lists: listIds,
         })
     }
 

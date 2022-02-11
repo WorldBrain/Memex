@@ -234,6 +234,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
+        const { tags, customLists, contentSharing } = this.props
         return {
             onCommentChange: (comment) =>
                 this.processEvent('changeNewPageCommentText', { comment }),
@@ -245,15 +246,9 @@ export class AnnotationsSidebarContainer<
                     shouldShare,
                     isProtected,
                 }),
-            tagQueryEntries: (query) =>
-                this.props.tags.searchForTagSuggestions({ query }),
-            getListNameById: this.getListNameById,
-            contentSharingBG: this.props.contentSharing,
-            spacesBG: this.props.customLists,
-            loadDefaultTagSuggestions: this.props.tags
-                .fetchInitialTagSuggestions,
+            tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
             createNewList: async (name) => {
-                const listId = await this.props.customLists.createCustomList({
+                const listId = await customLists.createCustomList({
                     name,
                 })
                 this.processMutation({
@@ -271,6 +266,10 @@ export class AnnotationsSidebarContainer<
                         (id) => id !== listId,
                     ),
                 }),
+            getListNameById: this.getListNameById,
+            contentSharingBG: contentSharing,
+            spacesBG: customLists,
+            loadDefaultTagSuggestions: tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
             tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
@@ -298,10 +297,12 @@ export class AnnotationsSidebarContainer<
         })
     }
 
-    private getSpacePickerProps = (annotation: Annotation) => ({
+    private getSpacePickerProps = (
+        annotation: Annotation,
+    ): SpacePickerDependencies => ({
         spacesBG: this.props.customLists,
         contentSharingBG: this.props.contentSharing,
-        initialSelectedEntries: () => annotation?.lists ?? [],
+        initialSelectedEntries: () => annotation.lists ?? [],
         onEscapeKeyDown: () =>
             this.processEvent('resetListPickerAnnotationId', null),
         createNewEntry: async (name) => {

@@ -76,8 +76,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
-    private annotCreateRef = React.createRef<AnnotationCreate>()
-
     static defaultProps: Pick<Props, 'hoverState' | 'tags'> = {
         tags: [],
         hoverState: null,
