@@ -262,18 +262,12 @@ export default class AnnotationStorage extends StorageModule {
             }
         }
 
-        if (
-            annotationsTagMap.size > 0 ||
-            annotationsBookmarkMap.size > 0 ||
-            annotationsListMap.size > 0
-        ) {
-            annotations.forEach((annotation) => {
-                annotation.tags = annotationsTagMap.get(annotation.url) ?? []
-                annotation.isBookmarked =
-                    annotationsBookmarkMap.get(annotation.url) ?? false
-                annotation.lists = annotationsListMap.get(annotation.url) ?? []
-            })
-        }
+        annotations.forEach((annotation) => {
+            annotation.tags = annotationsTagMap.get(annotation.url) ?? []
+            annotation.isBookmarked =
+                annotationsBookmarkMap.get(annotation.url) ?? false
+            annotation.lists = annotationsListMap.get(annotation.url) ?? []
+        })
 
         return annotations
     }

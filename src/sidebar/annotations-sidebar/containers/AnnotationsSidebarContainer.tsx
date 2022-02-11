@@ -311,7 +311,7 @@ export class AnnotationsSidebarContainer<
             this.processEvent('updateListsForAnnotation', {
                 added: listId,
                 deleted: null,
-                annotationId: this.state.activeListPickerAnnotationId,
+                annotationId: annotation.url,
             })
             this.processMutation({
                 listData: {
@@ -324,13 +324,13 @@ export class AnnotationsSidebarContainer<
             this.processEvent('updateListsForAnnotation', {
                 added: listId,
                 deleted: null,
-                annotationId: this.state.activeListPickerAnnotationId,
+                annotationId: annotation.url,
             }),
         unselectEntry: async (listId) =>
             this.processEvent('updateListsForAnnotation', {
                 added: null,
                 deleted: listId,
-                annotationId: this.state.activeListPickerAnnotationId,
+                annotationId: annotation.url,
             }),
     })
 
@@ -395,14 +395,17 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderListPickerForAnnotation = (currentAnnotationId: string) => {
-        // TODO: may be used once tags and lists are unified
-        // Not used yet but will be used for the "Add to collection" button
-        if (this.state.activeListPickerAnnotationId !== currentAnnotationId) {
-            return null
-        }
-        const annot = this.props.annotationsCache.getAnnotationById(
+        const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
+
+        if (
+            this.state.activeListPickerAnnotationId !== currentAnnotationId ||
+            currentAnnotation == null
+        ) {
+            return null
+        }
+
         return (
             <PickerWrapper>
                 <HoverBox>
@@ -415,7 +418,7 @@ export class AnnotationsSidebarContainer<
                         }
                     >
                         <CollectionPicker
-                            {...this.getSpacePickerProps(annot)}
+                            {...this.getSpacePickerProps(currentAnnotation)}
                         />
                     </ClickAway>
                 </HoverBox>
@@ -424,13 +427,17 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
-        if (this.state.activeShareMenuNoteId !== currentAnnotationId) {
-            return null
-        }
-
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
+
+        if (
+            this.state.activeShareMenuNoteId !== currentAnnotationId ||
+            currentAnnotation == null
+        ) {
+            return null
+        }
+
         return (
             <ShareMenuWrapper>
                 <HoverBox width="320px">
@@ -440,7 +447,7 @@ export class AnnotationsSidebarContainer<
                         }
                     >
                         <SingleNoteShareMenu
-                            isShared={currentAnnotation?.isShared}
+                            isShared={currentAnnotation.isShared}
                             shareImmediately={this.state.immediatelyShareNotes}
                             contentSharingBG={this.props.contentSharing}
                             annotationsBG={this.props.annotations}

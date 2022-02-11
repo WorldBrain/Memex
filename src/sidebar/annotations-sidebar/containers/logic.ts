@@ -624,11 +624,6 @@ export class SidebarContainerLogic extends UILogic<
                 isBulkShareProtected: event.isProtected,
             },
         )
-        console.log('saveNewPageComment', {
-            nextAnnotation,
-            annotationUrl,
-            commentBox,
-        })
         // check if annotation has lists with remoteId and reload them
         // for (const listName of nextAnnotation.lists) {
         //     const list = await this.options.customLists.fetchListByName({
