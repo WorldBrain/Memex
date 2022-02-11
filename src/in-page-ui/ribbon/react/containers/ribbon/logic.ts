@@ -296,17 +296,13 @@ export class RibbonContainerLogic extends UILogic<
             })
 
         const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
-        updateState(shouldBeBookmarked)
 
         try {
             if (shouldBeBookmarked) {
+                updateState(shouldBeBookmarked)
                 await this.dependencies.bookmarks.addPageBookmark({
                     fullUrl: postInitState.pageUrl,
                     tabId: this.dependencies.currentTab.id,
-                })
-            } else {
-                await this.dependencies.bookmarks.delPageBookmark({
-                    url: postInitState.pageUrl,
                 })
             }
         } catch (err) {
