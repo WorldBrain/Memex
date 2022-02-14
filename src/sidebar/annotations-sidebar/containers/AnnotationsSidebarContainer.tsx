@@ -309,11 +309,6 @@ export class AnnotationsSidebarContainer<
             const listId = await this.props.customLists.createCustomList({
                 name,
             })
-            this.processEvent('updateListsForAnnotation', {
-                added: listId,
-                deleted: null,
-                annotationId: annotation.url,
-            })
             this.processMutation({
                 listData: {
                     [listId]: { $set: { name } },
