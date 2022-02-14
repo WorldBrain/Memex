@@ -419,10 +419,7 @@ export default class ContentSharingBackground {
                 continue
             }
             if (!listEntries.includes(listId)) {
-                const pages = await this.storage.getPages({
-                    normalizedPageUrls: [annotation.pageUrl],
-                })
-                const page = pages[annotation.pageUrl]
+                const page = await this.storage.getPage(annotation.pageUrl)
                 if (!page) {
                     continue
                 }
