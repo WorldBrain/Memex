@@ -130,18 +130,9 @@ describe('Annotations search', () => {
             url: DATA.fullPageUrl2,
         })
         await contentSharingBg.shareAnnotationToSomeLists({
-            localListIds: [coll1Id, coll2Id],
-            annotationUrl: DATA.hybrid.object.url,
+            localListIds: [coll1Id],
+            annotationUrl: DATA.highlight.object.url,
         })
-        // TODO: delete below, replaced by the above
-        // await annotsStorage.insertAnnotToList({
-        //     listId: coll1Id,
-        //     url: DATA.hybrid.object.url,
-        // })
-        // await annotsStorage.insertAnnotToList({
-        //     listId: coll2Id,
-        //     url: DATA.highlight.object.url,
-        // })
 
         // Insert tags
         await annotsStorage.modifyTags(true)(
@@ -664,20 +655,8 @@ describe('Annotations search', () => {
     test('annotations on page search results should have lists attached', async () => {
         const { searchBg } = await setupTest()
 
-        const resA = await searchBg.searchAnnotations({ query: 'comment' })
-
-        expect(resA.docs[0].annotations[0].lists).toEqual([
-            DATA.coll1,
-            DATA.coll2,
-        ])
-        expect(resA.docs[0].annotations[1].lists).toEqual([])
-
-        const resB = await searchBg.searchAnnotations({ query: 'comment' })
-
-        expect(resB.docs[0].annotations[0].lists).toEqual([
-            DATA.coll1,
-            DATA.coll2,
-        ])
-        expect(resB.docs[0].annotations[1].lists).toEqual([])
+        const resA = await searchBg.searchAnnotations({ query: 'highlight' })
+        expect(resA.docs[0].annotations[0].lists).toEqual([coll1Id])
+        expect(resA.docs[0].annotations[1]).toBeUndefined()
     })
 })

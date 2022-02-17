@@ -23,7 +23,7 @@ import { AnnotationsListPlugin } from './annots-list'
 import { SocialSearchPlugin } from './social-search'
 import { SocialPage } from 'src/social-integration/types'
 import { SuggestPlugin, SuggestType } from '../plugins/suggest'
-import { Annotation } from 'src/annotations/types'
+import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import {
     List,
     ListEntry,
@@ -165,30 +165,21 @@ export default class SearchStorage extends StorageModule {
         const annotsToTags = new Map<string, string[]>()
 
         tags.forEach(({ name, url }) => {
-            const current = annotsToTags.get(url) || []
+            const current = annotsToTags.get(url) ?? []
             annotsToTags.set(url, [...current, name])
         })
 
-        const listEntries: ListEntry[] = await this.operation(
+        const listEntries: AnnotListEntry[] = await this.operation(
             'findAnnotListEntriesByUrl',
             {
                 annotUrls,
             },
         )
-
-        const lists = await Promise.all(
-            listEntries.map(async (listEntry) => {
-                const list = await this.operation('findListById', {
-                    id: listEntry.listId,
-                })
-                return { ...listEntry, ...list }
-            }),
-        )
         const annotsToLists = new Map<string, number[]>()
 
-        lists.forEach(({ id, url }) => {
-            const current = annotsToLists.get(url) || []
-            annotsToLists.set(url, [...current, id])
+        listEntries.forEach(({ listId, url }) => {
+            const current = annotsToLists.get(url) ?? []
+            annotsToLists.set(url, [...current, listId])
         })
 
         return { annotsToTags, annotsToLists, bmUrls }
@@ -289,8 +280,8 @@ export default class SearchStorage extends StorageModule {
 
         reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
             // Delete any annots containing excluded tags
-            const tags = annotsToTags.get(annot.url) || []
-            const lists = annotsToLists.get(annot.url) || []
+            const tags = annotsToTags.get(annot.url) ?? []
+            const lists = annotsToLists.get(annot.url) ?? []
 
             // Skip current annot if contains filtered tags
             if (
@@ -301,7 +292,7 @@ export default class SearchStorage extends StorageModule {
                 return
             }
 
-            const currentAnnots = clusteredResults[day][pageUrl] || []
+            const currentAnnots = clusteredResults[day][pageUrl] ?? []
             clusteredResults[day][pageUrl] = [
                 ...currentAnnots,
                 {
@@ -364,8 +355,8 @@ export default class SearchStorage extends StorageModule {
             docs: pages.map((page) => {
                 const annotations = results.get(page.pageId).map((annot) => ({
                     ...annotationsById.get(annot.url),
-                    tags: annotsToTags.get(annot.url) || [],
-                    lists: annotsToLists.get(annot.url) || [],
+                    tags: annotsToTags.get(annot.url) ?? [],
+                    lists: annotsToLists.get(annot.url) ?? [],
                     hasBookmark: bmUrls.has(annot.url),
                 }))
 
