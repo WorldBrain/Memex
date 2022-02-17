@@ -366,28 +366,30 @@ describe('Custom List Integrations', () => {
 
         test('fetch suggestions based on list names', async () => {
             const { customLists } = await setupTest()
+            const cutTimestamp = ({ createdAt, ...list }: typeof DATA.LIST_1) =>
+                list
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'go' }),
             ).toEqual([
-                expect.objectContaining(DATA.LIST_2),
-                expect.objectContaining(DATA.LIST_3),
+                expect.objectContaining(cutTimestamp(DATA.LIST_2)),
+                expect.objectContaining(cutTimestamp(DATA.LIST_3)),
             ])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'some' }),
             ).toEqual([
-                expect.objectContaining(DATA.LIST_1),
-                expect.objectContaining(DATA.LIST_3),
+                expect.objectContaining(cutTimestamp(DATA.LIST_1)),
+                expect.objectContaining(cutTimestamp(DATA.LIST_3)),
             ])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'ip' }),
-            ).toEqual([expect.objectContaining(DATA.LIST_1)])
+            ).toEqual([expect.objectContaining(cutTimestamp(DATA.LIST_1))])
 
             expect(
                 await customLists.searchForListSuggestions({ query: 'ipsum' }),
-            ).toEqual([expect.objectContaining(DATA.LIST_1)])
+            ).toEqual([expect.objectContaining(cutTimestamp(DATA.LIST_1))])
         })
 
         test('Case insensitive name search', async () => {
@@ -411,8 +413,8 @@ describe('Custom List Integrations', () => {
             expect(lists.length).toBe(2)
 
             expect(await customLists.fetchPageLists({ url })).toEqual([
-                DATA.LIST_1.name,
-                DATA.LIST_2.name,
+                DATA.LIST_2.id,
+                DATA.LIST_3.id,
             ])
         })
 

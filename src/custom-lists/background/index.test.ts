@@ -427,8 +427,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             hasBookmark: false,
                                             screenshot: undefined,
                                             lists: [
-                                                SPECIAL_LIST_NAMES.INBOX,
-                                                TEST_LIST_2,
+                                                SPECIAL_LIST_IDS.INBOX,
+                                                listId,
                                             ],
                                             title: DATA.PAGE_1.title,
                                             tags: [],
@@ -529,8 +529,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             hasBookmark: false,
                                             screenshot: undefined,
                                             lists: [
-                                                SPECIAL_LIST_NAMES.INBOX,
-                                                TEST_LIST_1,
+                                                SPECIAL_LIST_IDS.INBOX,
+                                                listId,
                                             ],
                                             tags: [],
                                             title: 'first page title',
