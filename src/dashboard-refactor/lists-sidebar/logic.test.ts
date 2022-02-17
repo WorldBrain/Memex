@@ -138,6 +138,23 @@ describe('Dashboard search results logic', () => {
     it("should be able set lists' edit state", async ({ device }) => {
         const { searchResults } = await setupTest(device)
 
+        await device.storageManager.collection('customLists').createObject({
+            id: 123,
+            name: 'test',
+        })
+        searchResults.processMutation({
+            listsSidebar: {
+                listData: {
+                    $set: {
+                        [123]: {
+                            name: 'test',
+                            id: 123,
+                        },
+                    },
+                },
+            },
+        })
+
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
             undefined,
         )
@@ -150,18 +167,16 @@ describe('Dashboard search results logic', () => {
             undefined,
         )
         await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+
+        await searchResults.processEvent('cancelListEdit', null)
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
             undefined,
         )
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
         )
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
-        await searchResults.processEvent('setEditingListId', { listId: 1 })
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(1)
     })
 
     it('should be able to edit lists', async ({ device }) => {
@@ -192,6 +207,9 @@ describe('Dashboard search results logic', () => {
         await searchResults.processEvent('setEditingListId', { listId })
         expect(searchResults.state.listsSidebar.editingListId).toEqual(listId)
 
+        await searchResults.processEvent('changeListName', {
+            value: nameUpdated,
+        })
         await searchResults.processEvent('confirmListEdit', {
             value: nameUpdated,
         })
