@@ -3,7 +3,7 @@ import type { SpaceDisplayEntry } from './logic'
 export const TEST_LISTS = [
     {
         id: 1,
-        name: 'List 1',
+        name: 'List 1 test',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2021-01-19'),
@@ -52,6 +52,15 @@ export const TEST_LIST_METADATA = [
         remoteId: 'remote-id-3',
     },
 ]
+
+export const TEST_LIST_SUGGESTIONS = TEST_LISTS.map((list) => ({
+    createdAt: list.createdAt.getTime(),
+    focused: false,
+    localId: list.id,
+    name: list.name,
+    remoteId:
+        TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ?? null,
+}))
 
 export const derivePickerEntries = (
     lists: typeof TEST_LISTS,

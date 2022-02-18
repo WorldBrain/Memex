@@ -286,11 +286,13 @@ export default class CustomListStorage extends StorageModule {
         name,
         isDeletable = true,
         isNestable = true,
+        createdAt = new Date(),
     }: {
         id: number
         name: string
         isDeletable?: boolean
         isNestable?: boolean
+        createdAt?: Date
     }): Promise<number> {
         const { object } = await this.operation('createList', {
             id,
@@ -298,7 +300,7 @@ export default class CustomListStorage extends StorageModule {
             isNestable,
             isDeletable,
             searchableName: name,
-            createdAt: new Date(),
+            createdAt,
         })
 
         return object.id

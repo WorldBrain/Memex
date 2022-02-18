@@ -187,8 +187,6 @@ export default class CustomListBackground {
             ...(await this.fetchCollaborativeListReferences()),
         ]
 
-        console.log(allListReferences)
-
         const uniqueListReferences = allListReferences.filter((listRef) => {
             if (seenListIds.has(listRef.id)) {
                 return false
@@ -202,16 +200,12 @@ export default class CustomListBackground {
             normalizedUrl: normalizedPageUrl,
         })
 
-        console.log(fingerprints)
-
         const sharedFingerprintsByList = fingerprints?.length
             ? await contentSharing.getNormalizedUrlsByFingerprints({
                   fingerprints,
                   listReferences: uniqueListReferences,
               })
             : {}
-
-        console.log(sharedFingerprintsByList)
 
         const annotListEntriesByList = new Map<
             string | number,
@@ -221,8 +215,6 @@ export default class CustomListBackground {
         const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForLists(
             { listReferences: uniqueListReferences },
         )
-
-        console.log(listEntriesByPageByList)
 
         for (const listReference of uniqueListReferences) {
             let normalizedUrlInList = normalizedPageUrl
@@ -250,8 +242,6 @@ export default class CustomListBackground {
                 type: 'shared-list-reference',
             })),
         )
-
-        console.log(sharedLists)
 
         return sharedLists.map((list) => ({
             id: list.reference.id as string,
@@ -422,15 +412,21 @@ export default class CustomListBackground {
     createCustomList = async ({
         name,
         id: _id,
+        createdAt,
     }: {
         name: string
         id?: number
+        createdAt?: Date
     }): Promise<number> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
         const id = _id ?? this.generateListId()
-        const inserted = await this.storage.insertCustomList({ id, name })
+        const inserted = await this.storage.insertCustomList({
+            id,
+            name,
+            createdAt,
+        })
         await this._updateListSuggestionsCache({ added: id })
 
         return inserted

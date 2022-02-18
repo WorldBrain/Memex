@@ -182,22 +182,12 @@ export default class SpacePickerLogic extends UILogic<
         event: { query },
     }) => {
         this.emitMutation({
-            $apply: (state) => ({
-                ...state,
-                query,
-                newEntryName: query,
-            }),
+            query: { $set: query },
+            newEntryName: { $set: query },
         })
 
         if (!query || query === '') {
-            this.emitMutation({
-                $apply: (state) => ({
-                    ...state,
-                    displayEntries: this.defaultEntries,
-                    newEntryName: '',
-                    query: '',
-                }),
-            })
+            this.emitMutation({ displayEntries: { $set: this.defaultEntries } })
         } else {
             return this.query(query)
         }
@@ -208,9 +198,7 @@ export default class SpacePickerLogic extends UILogic<
      */
     private queryRemote = async (term: string) => {
         const { spacesBG: collectionsBG, contentSharingBG } = this.dependencies
-        this.emitMutation({
-            $apply: (state) => ({ ...state, loadingQueryResults: true }),
-        })
+        this.emitMutation({ loadingQueryResults: { $set: true } })
 
         const suggestions = await collectionsBG.searchForListSuggestions({
             query: term.toLocaleLowerCase(),
@@ -229,11 +217,8 @@ export default class SpacePickerLogic extends UILogic<
             .sort()
 
         this.emitMutation({
-            $apply: (state) => ({
-                ...state,
-                loadingQueryResults: false,
-                displayEntries,
-            }),
+            loadingQueryResults: { $set: false },
+            displayEntries: { $set: displayEntries },
         })
         this._setCreateEntryDisplay(displayEntries, displayEntries, term)
     }
@@ -250,12 +235,7 @@ export default class SpacePickerLogic extends UILogic<
         term: string,
     ) => {
         if (this._isTermInEntryList(list, term)) {
-            this.emitMutation({
-                $apply: (state) => ({
-                    ...state,
-                    newEntryName: '',
-                }),
-            })
+            this.emitMutation({ newEntryName: { $set: '' } })
             // N.B. We update this focus index to this found entry, so that
             // enter keys will action it. But we don't emit that focus
             // to the user, because otherwise the style of the button changes
@@ -268,12 +248,7 @@ export default class SpacePickerLogic extends UILogic<
             } catch (e) {
                 return
             }
-            this.emitMutation({
-                $apply: (state) => ({
-                    ...state,
-                    newEntryName: entry,
-                }),
-            })
+            this.emitMutation({ newEntryName: { $set: entry } })
             this._updateFocus(-1, displayEntries)
         }
     }
@@ -292,13 +267,9 @@ export default class SpacePickerLogic extends UILogic<
             displayEntries[i].focused = focusIndex === i
         }
 
-        emit &&
-            this.emitMutation({
-                $apply: (state) => ({
-                    ...state,
-                    displayEntries,
-                }),
-            })
+        if (emit) {
+            this.emitMutation({ displayEntries: { $set: displayEntries } })
+        }
     }
 
     /**

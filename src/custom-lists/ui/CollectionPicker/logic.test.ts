@@ -6,10 +6,18 @@ import {
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import delay from 'src/util/delay'
 
-async function insertTestData({ storageManager }: UILogicTestDevice) {
+async function insertTestData({
+    storageManager,
+    backgroundModules,
+}: UILogicTestDevice) {
     for (const list of DATA.TEST_LISTS) {
-        await storageManager.collection('customLists').createObject(list)
+        await backgroundModules.customLists.createCustomList({
+            createdAt: list.createdAt,
+            name: list.name,
+            id: list.id,
+        })
     }
     for (const metadata of DATA.TEST_LIST_METADATA) {
         await storageManager
@@ -20,19 +28,17 @@ async function insertTestData({ storageManager }: UILogicTestDevice) {
 
 const setupLogicHelper = async ({
     device,
-    queryEntries,
-    initialSuggestions,
     initialSelectedEntries,
     skipTestData,
     url,
     ...args
 }: {
     device: UILogicTestDevice
-    queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
     createNewEntry?: (name: string) => Promise<number>
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
-    initialSuggestions?: SpaceDisplayEntry[]
+    queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
+
     initialSelectedEntries?: number[]
     skipTestData?: boolean
     url?: string
@@ -58,33 +64,12 @@ const setupLogicHelper = async ({
     return { testLogic, entryPickerLogic }
 }
 
-const formDisplayEntryState = (args: {
-    testDataIndex: number
-    isShared?: boolean
-    flags?: { selected: boolean; focused: boolean }
-}) => ({
-    name: DATA.TEST_LISTS[args.testDataIndex].name,
-    localId: DATA.TEST_LISTS[args.testDataIndex].id,
-    createdAt: DATA.TEST_LISTS[args.testDataIndex].createdAt.getTime(),
-    remoteId: args.isShared
-        ? DATA.TEST_LIST_METADATA[args.testDataIndex].remoteId
-        : null,
-    ...(args.flags ?? { selected: false, focused: false }),
-})
-
-describe('GenericPickerLogic', () => {
-    const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
-    })
+describe('SpacePickerLogic', () => {
+    const it = makeSingleDeviceUILogicTestFactory()
 
     it('should correctly load initial entries', async ({ device }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 2),
-        )
-
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
         })
 
         expect(testLogic.state.displayEntries).toEqual([])
@@ -92,16 +77,15 @@ describe('GenericPickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual(initialSuggestions)
+        expect(testLogic.state.displayEntries).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS,
+        )
         expect(testLogic.state.selectedEntries).toEqual([])
     })
 
     it('should correctly load initial entries and set as selected those that are in initial entries', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         const initialSelectedEntries = [
             DATA.TEST_LISTS[0].id,
             DATA.TEST_LISTS[2].id,
@@ -109,7 +93,6 @@ describe('GenericPickerLogic', () => {
 
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             initialSelectedEntries,
         })
 
@@ -124,7 +107,7 @@ describe('GenericPickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                displayEntries: initialSuggestions,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
                 selectedEntries: initialSelectedEntries,
             }),
         )
@@ -133,17 +116,11 @@ describe('GenericPickerLogic', () => {
     it('should correctly search for a entry when entry is already selected', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 4),
-        )
         const initialSelectedEntries = [DATA.TEST_LISTS[0].id]
-        const queryResult = DATA.derivePickerEntries([DATA.TEST_LISTS[0]])
 
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             initialSelectedEntries,
-            queryEntries: async () => queryResult,
         })
 
         await testLogic.init()
@@ -152,7 +129,7 @@ describe('GenericPickerLogic', () => {
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: 'test',
-                displayEntries: queryResult,
+                displayEntries: [DATA.TEST_LIST_SUGGESTIONS[0]],
                 selectedEntries: initialSelectedEntries,
             }),
         )
@@ -161,14 +138,10 @@ describe('GenericPickerLogic', () => {
     it('should correctly search for a entry when entry is not selected', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 4),
-        )
         const queryResult = DATA.derivePickerEntries([DATA.TEST_LISTS[0]])
 
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             queryEntries: async () => queryResult,
         })
 
@@ -187,32 +160,44 @@ describe('GenericPickerLogic', () => {
     it('should correctly search for a entry regardless of case', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 4),
-        )
-        const searchResult = DATA.derivePickerEntries([DATA.TEST_LISTS[0]])
-        let lastQuery: string
-
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
-            queryEntries: async (query: string) => {
-                lastQuery = query
-                return searchResult
-            },
         })
-        expect(lastQuery).toEqual(undefined)
-
         await testLogic.init()
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
+            }),
+        )
+
         await testLogic.processEvent('searchInputChanged', { query: 'Test' })
-
-        expect(lastQuery).toEqual('test')
-
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: 'Test',
                 newEntryName: 'Test',
-                displayEntries: searchResult,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS.slice(0, 1),
+            }),
+        )
+
+        await testLogic.processEvent('searchInputChanged', { query: '' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                newEntryName: '',
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
+            }),
+        )
+
+        await delay(150) // This exists to get passed the 150ms debounce on search input changes
+
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'test',
+                newEntryName: 'test',
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS.slice(0, 1),
             }),
         )
     })
@@ -220,29 +205,20 @@ describe('GenericPickerLogic', () => {
     it('should correctly navigate the search results by up and down arrows', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(DATA.TEST_LISTS)
-
-        const { testLogic } = await setupLogicHelper({
-            device,
-            initialSuggestions,
-            queryEntries: async (query: string) => initialSuggestions,
-        })
+        const { testLogic } = await setupLogicHelper({ device })
 
         await testLogic.init()
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                query: 'test',
-                newEntryName: 'test',
-                displayEntries: initialSuggestions,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
             }),
         )
 
         const expectStateToEqualWithFocus = (focusedEntryId: number) =>
             expect(testLogic.state).toEqual(
                 expect.objectContaining({
-                    displayEntries: initialSuggestions.map((entry) =>
+                    displayEntries: DATA.TEST_LIST_SUGGESTIONS.map((entry) =>
                         entry.localId === focusedEntryId
                             ? { ...entry, focused: true }
                             : entry,
@@ -300,13 +276,8 @@ describe('GenericPickerLogic', () => {
     it('should show default entries again after clearing the search query', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
-
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
         })
         const newEntryText = 'testwerwerwerwer'
 
@@ -316,7 +287,7 @@ describe('GenericPickerLogic', () => {
                     query: '',
                     newEntryName: '',
                     selectedEntries: [],
-                    displayEntries: initialSuggestions,
+                    displayEntries: DATA.TEST_LIST_SUGGESTIONS,
                 }),
             )
 
@@ -346,12 +317,8 @@ describe('GenericPickerLogic', () => {
     it('should correctly select existing entry for all tabs', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         const { testLogic, entryPickerLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
         })
 
         await testLogic.init()
@@ -359,26 +326,22 @@ describe('GenericPickerLogic', () => {
         expect(testLogic.state.selectedEntries).toEqual([])
 
         await testLogic.processEvent('resultEntryAllPress', {
-            entry: initialSuggestions[0],
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
         await entryPickerLogic.processingUpstreamOperation
 
         expect(testLogic.state.selectedEntries).toEqual([
-            initialSuggestions[0].localId,
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
         ])
     })
 
     it('should correctly select/unselect existing entry', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         let selectedEntryId = null
         let unselectedEntryId = null
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             unselectEntry: async (entryId) => {
                 unselectedEntryId = entryId
             },
@@ -394,44 +357,40 @@ describe('GenericPickerLogic', () => {
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: initialSuggestions[0],
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state.selectedEntries).toEqual([
-            initialSuggestions[0].localId,
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
         ])
-        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: initialSuggestions[0],
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state.selectedEntries).toEqual([])
-        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
-        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: initialSuggestions[0],
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state.selectedEntries).toEqual([
-            initialSuggestions[0].localId,
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
         ])
-        expect(selectedEntryId).toBe(initialSuggestions[0].localId)
-        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
     })
 
     it('should correctly unselect selected entries shown in the search input bar', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         let unselectedEntryId = null
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             unselectEntry: async (entryId) => {
                 unselectedEntryId = entryId
             },
@@ -444,27 +403,27 @@ describe('GenericPickerLogic', () => {
                 query: '',
                 newEntryName: '',
                 selectedEntries: [],
-                displayEntries: initialSuggestions,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
             }),
         )
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: initialSuggestions[0],
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: '',
                 newEntryName: '',
-                selectedEntries: [initialSuggestions[0].localId],
-                displayEntries: initialSuggestions,
+                selectedEntries: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
             }),
         )
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('selectedEntryPress', {
-            entry: initialSuggestions[0].localId,
+            entry: DATA.TEST_LIST_SUGGESTIONS[0].localId,
         })
 
         expect(testLogic.state).toEqual(
@@ -472,18 +431,15 @@ describe('GenericPickerLogic', () => {
                 query: '',
                 newEntryName: '',
                 selectedEntries: [],
-                displayEntries: initialSuggestions,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
             }),
         )
-        expect(unselectedEntryId).toBe(initialSuggestions[0].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
     })
 
     it('should show default entries again + new entry after selecting a new entry', async ({
         device,
     }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         const newEntryId = 1000
         const newEntryText = 'test'
 
@@ -491,7 +447,6 @@ describe('GenericPickerLogic', () => {
         let newEntryName = null
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             createNewEntry: async (entryName) => {
                 newEntryName = entryName
                 return newEntryId
@@ -503,12 +458,14 @@ describe('GenericPickerLogic', () => {
 
         await testLogic.init()
 
+        expect(testLogic.state.displayEntries).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS,
+        )
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: '',
                 newEntryName: '',
                 selectedEntries: [],
-                displayEntries: initialSuggestions,
             }),
         )
 
@@ -529,34 +486,30 @@ describe('GenericPickerLogic', () => {
 
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
+        expect(testLogic.state.displayEntries).toEqual([
+            ...DATA.TEST_LIST_SUGGESTIONS,
+            expect.objectContaining({
+                name: newEntryText,
+                localId: newEntryId,
+                focused: false,
+            }),
+        ])
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: '',
                 newEntryName: '',
                 selectedEntries: [newEntryId],
-                displayEntries: [
-                    ...initialSuggestions,
-                    expect.objectContaining({
-                        name: newEntryText,
-                        localId: newEntryId,
-                        focused: false,
-                    }),
-                ],
             }),
         )
     })
 
     it('should correctly add a new entry to all tabs', async ({ device }) => {
-        const initialSuggestions = DATA.derivePickerEntries(
-            DATA.TEST_LISTS.slice(0, 3),
-        )
         const newEntryId = 1000
         const newEntryText = 'test'
 
         let newEntryName = null
         const { testLogic } = await setupLogicHelper({
             device,
-            initialSuggestions,
             createNewEntry: async (entryName) => {
                 newEntryName = entryName
                 return newEntryId
@@ -570,7 +523,7 @@ describe('GenericPickerLogic', () => {
                 query: '',
                 newEntryName: '',
                 selectedEntries: [],
-                displayEntries: initialSuggestions,
+                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
             }),
         )
 
@@ -597,7 +550,7 @@ describe('GenericPickerLogic', () => {
                 newEntryName: '',
                 selectedEntries: [newEntryId],
                 displayEntries: [
-                    ...initialSuggestions,
+                    ...DATA.TEST_LIST_SUGGESTIONS,
                     expect.objectContaining({
                         name: newEntryText,
                         localId: newEntryId,
