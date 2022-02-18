@@ -88,6 +88,7 @@ const setupLogicHelper = async ({
     })
 
     const sidebar = device.createElement(sidebarLogic)
+
     await sidebar.init()
     return { sidebar, sidebarLogic, analytics, annotationsCache, emittedEvents }
 }
@@ -295,6 +296,7 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.editForms[annotation.url]).toEqual({
                 tags: [DATA.TAG_1, DATA.TAG_2],
+                lists: [],
                 commentText: editedComment,
                 isTagInputActive: false,
                 isBookmarked: false,
@@ -917,6 +919,7 @@ describe('SidebarContainerLogic', () => {
 
             await contentSharing.shareAnnotation({
                 annotationUrl: annotationUrl1,
+                shareToLists: true,
             })
             await contentSharing.setAnnotationPrivacyLevel({
                 annotation: annotationUrl2,
@@ -950,6 +953,8 @@ describe('SidebarContainerLogic', () => {
         }) => {
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
+            device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
+                false
             const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.followedListLoadState).toEqual('success')
@@ -961,6 +966,7 @@ describe('SidebarContainerLogic', () => {
                         {
                             ...list,
                             isExpanded: false,
+                            isContributable: false,
                             annotationsLoadState: 'pristine',
                             conversationsLoadState: 'pristine',
                         },
@@ -974,6 +980,8 @@ describe('SidebarContainerLogic', () => {
         }) => {
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
+            device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
+                false
             device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
                 DATA.ANNOTATION_THREADS
             device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>

@@ -936,18 +936,20 @@ export class SidebarContainerLogic extends UILogic<
                     ),
                 },
             )
-            const areListsContributable = fromPairs(
-                await Promise.all(
-                    followedLists.map(async (list) => {
-                        const canWrite = await contentSharing.canWriteToSharedListRemoteId(
-                            {
-                                remoteId: list.id,
-                            },
-                        )
-                        return [list.id, canWrite]
-                    }),
-                ),
-            )
+
+            // TODO: Make this work (if needed)
+            // const areListsContributable = fromPairs(
+            //     await Promise.all(
+            //         followedLists.map(async (list) => {
+            //             const canWrite = await contentSharing.canWriteToSharedListRemoteId(
+            //                 {
+            //                     remoteId: list.id,
+            //                 },
+            //             )
+            //             return [list.id, canWrite]
+            //         }),
+            //     ),
+            // )
 
             this.emitMutation({
                 followedLists: {
@@ -963,8 +965,7 @@ export class SidebarContainerLogic extends UILogic<
                                     isExpanded: false,
                                     annotationsLoadState: 'pristine',
                                     conversationsLoadState: 'pristine',
-                                    isContributable:
-                                        areListsContributable[list.id],
+                                    isContributable: false, // areListsContributable[list.id],
                                 },
                             ]),
                         ),
@@ -1114,7 +1115,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const shouldRemoveAnnotationHighlights = wasExpanded
 
-        this.afterToggleListView(
+        await this.afterToggleListView(
             previousState,
             mutation,
             annotationsLoadState,
