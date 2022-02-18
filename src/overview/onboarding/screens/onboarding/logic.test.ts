@@ -34,32 +34,32 @@ async function setupTest(
 describe('New install onboarding UI logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    it('should show login first, unless user already logged in', async ({
-        device,
-    }) => {
-        const { logic: logicA, _logic: _logicA } = await setupTest(device, {
-            isLoggedIn: false,
-        })
+    // it('should show login first, unless user already logged in', async ({
+    //     device,
+    // }) => {
+    //     const { logic: logicA, _logic: _logicA } = await setupTest(device, {
+    //         isLoggedIn: false,
+    //     })
 
-        expect(logicA.state.shouldShowLogin).toBe(true)
-        expect(logicA.state.loadState).toEqual('pristine')
-        await logicA.init()
-        expect(logicA.state.shouldShowLogin).toBe(true)
-        expect(logicA.state.loadState).toEqual('success')
+    //     expect(logicA.state.shouldShowLogin).toBe(true)
+    //     expect(logicA.state.loadState).toEqual('pristine')
+    //     await logicA.init()
+    //     expect(logicA.state.shouldShowLogin).toBe(true)
+    //     expect(logicA.state.loadState).toEqual('success')
 
-        const { logic: logicB, _logic: _logicB } = await setupTest(device, {
-            isLoggedIn: true,
-        })
+    //     const { logic: logicB, _logic: _logicB } = await setupTest(device, {
+    //         isLoggedIn: true,
+    //     })
 
-        expect(logicB.state.shouldShowLogin).toBe(true)
-        expect(logicB.state.loadState).toEqual('pristine')
-        await logicB.init()
-        expect(logicB.state.shouldShowLogin).toBe(false)
-        expect(logicB.state.loadState).toEqual('success')
+    //     expect(logicB.state.shouldShowLogin).toBe(true)
+    //     expect(logicB.state.loadState).toEqual('pristine')
+    //     await logicB.init()
+    //     expect(logicB.state.shouldShowLogin).toBe(false)
+    //     expect(logicB.state.loadState).toEqual('success')
 
-        await _logicA.syncPromise
-        await _logicB.syncPromise
-    })
+    //     await _logicA.syncPromise
+    //     await _logicB.syncPromise
+    // })
 
     it('should nav to dashboard upon finishing onboarding', async ({
         device,
@@ -87,7 +87,7 @@ describe('New install onboarding UI logic', () => {
         expect(await settingStore.get('isSetUp')).toBe(true)
     })
 
-    it('should skip sync and sync wait screen on existing user re-run', async ({
+    it('should skip straight to dashboard on existing user re-run', async ({
         device,
     }) => {
         let hasNavdToDashboard = false
@@ -105,18 +105,12 @@ describe('New install onboarding UI logic', () => {
 
         await logic.init()
 
-        expect(hasNavdToDashboard).toBe(false)
-        expect(_logic.isExistingUser).toBe(true)
-        expect(_logic.syncPromise).toBeUndefined()
-        expect(logic.state.shouldShowLogin).toBe(false)
-
-        await logic.processEvent('goToSyncStep', null)
-
         expect(hasNavdToDashboard).toBe(true)
-        expect(_logic.syncPromise).toBeUndefined()
+        expect(_logic.isExistingUser).toBe(true)
+        expect(_logic.syncPromise).not.toBeUndefined()
     })
 
-    it('should enable sync and auto-nav to dashboard from wait screen on sync finish', async ({
+    it('should enable sync and nav to dashboard on sync finish', async ({
         device,
     }) => {
         let hasNavdToDashboard = false
@@ -141,17 +135,7 @@ describe('New install onboarding UI logic', () => {
         )
         await logic.processEvent('onUserLogIn', { newSignUp: false })
 
-        expect(hasNavdToDashboard).toBe(false)
-        expect(_logic.syncPromise).not.toBeUndefined()
-
-        expect(logic.state.step).toBe('tutorial')
-        const syncStepPromise = logic.processEvent('goToSyncStep', null)
-        expect(logic.state.step).toBe('sync')
-
-        expect(hasNavdToDashboard).toBe(false)
-        await syncStepPromise
         expect(hasNavdToDashboard).toBe(true)
-
-        expect(logic.state.syncState).toBe('success')
+        expect(_logic.syncPromise).not.toBeUndefined()
     })
 })
