@@ -232,14 +232,13 @@ const makeNewShareState = (
     }: { isShared: boolean; isBulkShareProtected?: boolean },
 ): AnnotationSharingState => {
     const shareState = makeAnnotSharingState(note)
-    const newShareState = {
+    return {
         ...shareState,
         privacyLevel: newPrivacyLevel(shareState.privacyLevel, {
             isShared,
             isBulkShareProtected,
         }),
     }
-    return newShareState
 }
 
 export const makeNewShareStates = (
@@ -250,10 +249,9 @@ export const makeNewShareStates = (
     }: { isShared: boolean; isBulkShareProtected?: boolean },
 ): AnnotationSharingStates => {
     return objectMap(notesById, (v) => {
-        v.privacyLevel = makeNewShareState(v, {
+        return makeNewShareState(v, {
             isShared,
             isBulkShareProtected,
         })
-        return v
     })
 }

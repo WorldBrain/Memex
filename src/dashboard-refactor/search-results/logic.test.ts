@@ -522,9 +522,13 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .pageUrl === pageId,
             )
-            const notesById = objectFilter(
-                searchResults.state.searchResults.noteData.byId,
-                (v) => v.pageUrl === pageId,
+            const notesById = noteIds.reduce(
+                (acc, noteId) => ({
+                    ...acc,
+                    [noteId]:
+                        searchResults.state.searchResults.noteData.byId[noteId],
+                }),
+                {},
             )
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
@@ -623,7 +627,9 @@ describe('Dashboard search results logic', () => {
                 }),
             )
             for (const noteId of noteIds) {
-                expect(notesById[noteId]).toEqual(
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
@@ -639,7 +645,9 @@ describe('Dashboard search results logic', () => {
             )
 
             for (const noteId of noteIds) {
-                expect(notesById[noteId]).toEqual(
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
@@ -656,7 +664,9 @@ describe('Dashboard search results logic', () => {
             )
 
             for (const noteId of noteIds) {
-                expect(notesById[noteId]).toEqual(
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
@@ -674,7 +684,9 @@ describe('Dashboard search results logic', () => {
             )
 
             for (const noteId of noteIds) {
-                expect(notesById[noteId]).toEqual(
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
@@ -1817,7 +1829,6 @@ describe('Dashboard search results logic', () => {
                     hasLink: false,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     localListIds: [],
-                    // isShared: false,
                 })
 
                 expect(

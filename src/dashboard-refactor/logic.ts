@@ -824,26 +824,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
-    private updateShareInfoForNoteIdsFromShareState = (params: {
-        noteIds: string[]
+    private updateNotesShareInfoFromShareState = (params: {
         previousState: State
         shareStates: AnnotationSharingStates
     }) => {
         const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
-        for (const noteId of params.noteIds) {
+        for (const [noteId, shareState] of Object.entries(params.shareStates)) {
             const privacyState = getAnnotationPrivacyState(
-                params.shareStates[noteId].privacyLevel,
+                shareState.privacyLevel,
             )
             mutation.byId = {
                 ...(mutation.byId ?? {}),
                 [noteId]: {
-                    isShared: {
-                        $set: privacyState.public,
-                    },
-                    isBulkShareProtected: {
-                        $set: privacyState.protected,
-                    },
+                    isShared: { $set: privacyState.public },
+                    isBulkShareProtected: { $set: privacyState.protected },
                 },
             }
         }
@@ -854,31 +849,19 @@ export class DashboardLogic extends UILogic<State, Events> {
     updateAllPageResultNotesShareInfo: EventHandler<
         'updateAllPageResultNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateShareInfoForNoteIdsFromShareState({
+        this.updateNotesShareInfoFromShareState({
             previousState,
             shareStates: event,
-            noteIds: Object.keys(event),
-            // TODO: Remove before merging to develop. Commented just in case we need to go back
-            // noteIds: previousState.searchResults.noteData.allIds,
         })
     }
 
     updatePageNotesShareInfo: EventHandler<
         'updatePageNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateAllPageResultNotesShareInfo({
-            event: event.shareStates,
+        this.updateNotesShareInfoFromShareState({
             previousState,
+            shareStates: event.shareStates,
         })
-        // const { noteData } = previousState.searchResults
-
-        // this.updateShareInfoForNoteIdsFromShareState({
-        //     previousState,
-        //     shareStates: event,
-        //     noteIds: noteData.allIds.filter(
-        //         (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
-        //     ),
-        // })
     }
 
     removePageFromList: EventHandler<'removePageFromList'> = async ({
@@ -1707,8 +1690,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        // const prev = previousState.searchResults.noteData.byId[event.noteId]
-
         this.emitMutation({
             searchResults: {
                 noteData: {
@@ -1716,16 +1697,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.noteId]: {
                             isShared: {
                                 $set:
-                                    event[event.noteId].privacyLevel ==
+                                    event.privacyLevel ===
                                         AnnotationPrivacyLevels.SHARED ||
-                                    event[event.noteId].privacyLevel ==
+                                    event.privacyLevel ===
                                         AnnotationPrivacyLevels.SHARED_PROTECTED,
                             },
                             isBulkShareProtected: {
                                 $set:
-                                    event[event.noteId].privacyLevel ==
+                                    event.privacyLevel ===
                                         AnnotationPrivacyLevels.PROTECTED ||
-                                    event[event.noteId].privacyLevel ==
+                                    event.privacyLevel ===
                                         AnnotationPrivacyLevels.SHARED_PROTECTED,
                             },
                             // TODO: Remove before merging to develop. Commented just in case we need to go back
