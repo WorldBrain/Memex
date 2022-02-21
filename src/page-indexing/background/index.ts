@@ -445,7 +445,7 @@ export class PageIndexingBackground {
     private async processPageDataFromTab(
         props: PageCreationProps,
     ): Promise<PipelineRes | null> {
-        if (!props.tabId) {
+        if (props.tabId == null) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
@@ -609,7 +609,7 @@ export class PageIndexingBackground {
             }
         }
 
-        return props.tabId
+        return props.tabId != null
             ? this.processPageDataFromTab(props)
             : this.processPageDataFromUrl(props)
     }
