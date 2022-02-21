@@ -557,8 +557,10 @@ export class DashboardContainer extends StatefulUIElement<
                         listId: listsSidebar.selectedListId,
                     })
                 }
-                updateAllResultNotesShareInfo={(info) =>
-                    this.processEvent('updateAllPageResultNotesShareInfo', info)
+                updateAllResultNotesShareInfo={(shareStates) =>
+                    this.processEvent('updateAllPageResultNotesShareInfo', {
+                        shareStates,
+                    })
                 }
                 selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}

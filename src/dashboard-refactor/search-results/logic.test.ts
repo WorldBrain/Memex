@@ -622,9 +622,11 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                makeNewShareStates(notesById, {
-                    isShared: false,
-                }),
+                {
+                    shareStates: makeNewShareStates(notesById, {
+                        isShared: false,
+                    }),
+                },
             )
             for (const noteId of noteIds) {
                 expect(
@@ -639,9 +641,11 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                makeNewShareStates(notesById, {
-                    isShared: true,
-                }),
+                {
+                    shareStates: makeNewShareStates(notesById, {
+                        isShared: true,
+                    }),
+                },
             )
 
             for (const noteId of noteIds) {
@@ -657,10 +661,12 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                makeNewShareStates(notesById, {
-                    isShared: false,
-                    isBulkShareProtected: true,
-                }),
+                {
+                    shareStates: makeNewShareStates(notesById, {
+                        isShared: false,
+                        isBulkShareProtected: true,
+                    }),
+                },
             )
 
             for (const noteId of noteIds) {
@@ -677,10 +683,12 @@ describe('Dashboard search results logic', () => {
             // NOTE: Now that they're all protected, the next call shouldn't change anything
             await searchResults.processEvent(
                 'updateAllPageResultNotesShareInfo',
-                makeNewShareStates(notesById, {
-                    isShared: false,
-                    isBulkShareProtected: false,
-                }),
+                {
+                    shareStates: makeNewShareStates(notesById, {
+                        isShared: false,
+                        isBulkShareProtected: false,
+                    }),
+                },
             )
 
             for (const noteId of noteIds) {

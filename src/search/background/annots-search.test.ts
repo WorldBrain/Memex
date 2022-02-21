@@ -222,7 +222,7 @@ describe('Annotations search', () => {
                 query: 'highlight',
                 lists: [coll1Id],
             })
-            expect(countAnnots(resA)).toBe(1)
+            expect(countAnnots(resA)).toBe(2)
 
             const resB = await searchBg.searchAnnotations({
                 query: 'highlight',

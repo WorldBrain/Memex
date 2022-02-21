@@ -824,13 +824,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
-    private updateNotesShareInfoFromShareState = (params: {
+    private updateBulkNotesShareInfoFromShareState = (params: {
         previousState: State
         shareStates: AnnotationSharingStates
     }) => {
         const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
         for (const [noteId, shareState] of Object.entries(params.shareStates)) {
+            if (
+                params.previousState.searchResults.noteData.byId[noteId]
+                    ?.isBulkShareProtected
+            ) {
+                continue
+            }
+
             const privacyState = getAnnotationPrivacyState(
                 shareState.privacyLevel,
             )
@@ -849,16 +856,16 @@ export class DashboardLogic extends UILogic<State, Events> {
     updateAllPageResultNotesShareInfo: EventHandler<
         'updateAllPageResultNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateNotesShareInfoFromShareState({
+        this.updateBulkNotesShareInfoFromShareState({
             previousState,
-            shareStates: event,
+            shareStates: event.shareStates,
         })
     }
 
     updatePageNotesShareInfo: EventHandler<
         'updatePageNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateNotesShareInfoFromShareState({
+        this.updateBulkNotesShareInfoFromShareState({
             previousState,
             shareStates: event.shareStates,
         })

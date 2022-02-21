@@ -280,11 +280,7 @@ export type Events = UIEvent<{
     updatePageNotesShareInfo: PageEventArgs & {
         shareStates: AnnotationSharingStates
     }
-    // TODO: Remove before merging to develop. Commented just in case we need to go back
-    // updatePageNotesShareInfo: PageEventArgs & NoteShareInfo
-    updateAllPageResultNotesShareInfo: AnnotationSharingStates
-    // TODO: Remove before merging to develop. Commented just in case we need to go back
-    // updateAllPageResultNotesShareInfo: NoteShareInfo
+    updateAllPageResultNotesShareInfo: { shareStates: AnnotationSharingStates }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
