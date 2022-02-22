@@ -1332,7 +1332,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     })
                     newNoteListIds = toAddLists
                         .filter((list) =>
-                            sharingState['localListIds'].includes(list.id),
+                            sharingState.localListIds.includes(list.id),
                         )
                         .map((list) => list.id)
                 }

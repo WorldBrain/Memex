@@ -330,7 +330,7 @@ export default class PageResultView extends PureComponent<Props> {
                                                         event,
                                                     )
                                                 }}
-                                                renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                                renderSpacePicker={this.renderSpacePicker.bind(
                                                     this,
                                                 )}
                                             />
@@ -350,7 +350,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}
                                 onEditBtnClick={this.props.onListPickerBtnClick}
-                                renderListsPickerForAnnotation={this.renderSpacePicker.bind(
+                                renderSpacePicker={this.renderSpacePicker.bind(
                                     this,
                                 )}
                             />

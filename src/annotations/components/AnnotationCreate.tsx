@@ -302,7 +302,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
-                                renderListsPickerForAnnotation={this.renderCollectionsPicker.bind(
+                                renderSpacePicker={this.renderCollectionsPicker.bind(
                                     this,
                                 )}
                             />

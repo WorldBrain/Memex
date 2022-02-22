@@ -11,13 +11,13 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
     lists: Array<{ id: number; name: string }>
     onListClick?: (tag: number) => void
-    renderListsPickerForAnnotation?: () => JSX.Element
+    renderSpacePicker?: () => JSX.Element
 }
 
 interface ButtonProps {
     hasNoLists: boolean
     onEditBtnClick: React.MouseEventHandler
-    renderListsPickerForAnnotation: () => JSX.Element
+    renderSpacePicker?: () => JSX.Element
 }
 
 export class AddSpacesButton extends React.Component<
@@ -61,13 +61,13 @@ export class AddSpacesButton extends React.Component<
                         </EditIconContainer>
                     )}
                 </AddSpacesButtonContainer>
-                {this.props.renderListsPickerForAnnotation && (
+                {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
                         onClick={(e) => {
                             e.stopPropagation()
                         }}
                     >
-                        {this.props.renderListsPickerForAnnotation()}
+                        {this.props.renderSpacePicker()}
                     </SpacePickerWrapper>
                 )}
             </SpacePickerButtonWrapper>
@@ -91,7 +91,7 @@ export default function ListsSegment({
     onListClick,
     showEditBtn,
     onEditBtnClick,
-    renderListsPickerForAnnotation,
+    renderSpacePicker,
     ...props
 }: Props) {
     return (
@@ -100,9 +100,7 @@ export default function ListsSegment({
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
                     onEditBtnClick={onEditBtnClick}
-                    renderListsPickerForAnnotation={
-                        renderListsPickerForAnnotation
-                    }
+                    renderSpacePicker={renderSpacePicker}
                 />
                 {lists
                     .filter(
