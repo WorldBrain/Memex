@@ -95,6 +95,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: { $in: '$urls:array:pk' } },
             },
+            findListEntry: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObject',
+                args: { url: '$url:pk', listId: '$listId:pk' },
+            },
             findListEntriesByUrl: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'findObjects',
@@ -305,6 +310,13 @@ export default class AnnotationStorage extends StorageModule {
         })
 
         return [object.listId, object.url]
+    }
+
+    async ensureAnnotInList({ listId, url }: AnnotListEntry) {
+        const existing = await this.operation('findListEntry', { listId, url })
+        if (!existing) {
+            await this.insertAnnotToList({ listId, url })
+        }
     }
 
     async removeAnnotFromList({ listId, url }: AnnotListEntry) {

@@ -340,6 +340,7 @@ export class SharingTestHelper {
         options: {
             annotationsIds: number[]
             listIds: number[]
+            protectAnnotations?: boolean
             expectSharingStates: AnnotationSharingStates
             createdListEntries?: Array<{ pageId: number; listId: number }>
         },
@@ -351,6 +352,7 @@ export class SharingTestHelper {
             } = await setup.backgroundModules.contentSharing.shareAnnotationToSomeLists(
                 {
                     annotationUrl: this.annotations[annotationId].localId,
+                    protectAnnotation: options.protectAnnotations,
                     localListIds: options.listIds.map(
                         (id) => this.lists[id].localId,
                     ),
