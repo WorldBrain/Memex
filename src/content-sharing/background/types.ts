@@ -90,6 +90,7 @@ export interface ContentSharingInterface
     }>
     setAnnotationPrivacyLevel(params: {
         annotation: string
+        keepListsIfUnsharing?: boolean
         privacyLevel: AnnotationPrivacyLevels
     }): Promise<{
         remoteId?: number | string

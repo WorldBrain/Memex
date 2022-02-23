@@ -235,6 +235,7 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: {
             id: number
+            keepListsIfUnsharing?: boolean
             level: AnnotationPrivacyLevels
             expectedSharingState: AnnotationSharingState
         },
@@ -244,6 +245,7 @@ export class SharingTestHelper {
             sharingState,
         } = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
             {
+                keepListsIfUnsharing: options.keepListsIfUnsharing,
                 annotation: this.annotations[options.id].localId,
                 privacyLevel: options.level,
             },

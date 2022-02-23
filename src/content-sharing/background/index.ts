@@ -601,6 +601,22 @@ export default class ContentSharingBackground {
                     AnnotationPrivacyLevels.SHARED_PROTECTED,
                 shareToLists: true,
             })
+        } else if (params.keepListsIfUnsharing) {
+            const sharingState = await this.getAnnotationSharingState({
+                annotationUrl: params.annotation,
+            })
+            // await this.storage.setAnnotationsExcludedFromLists({
+            //     localIds: [params.annotation],
+            //     excludeFromLists: true,
+            // })
+
+            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+            await this.storage.setAnnotationPrivacyLevel({
+                annotation: params.annotation,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
+
+            return { sharingState }
         } else {
             const { sharingStates } = await this.unshareAnnotationsFromAllLists(
                 {
