@@ -1331,7 +1331,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             `should _not_ remove a note from lists when making a selective note private, when user chooses to keep lists`,
-            { skipConflictTests: true, skipSyncTests: true },
+            { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
 
@@ -1381,9 +1381,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
-                                // TODO: As soon as this happens, the translation layer upload triggers the deletion of
-                                //  the assoc sharedAnnotListEntries, which is not what we want here. Need to change the priv
-                                //  lvl AND keep the list entries
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     keepListsIfUnsharing: true,
@@ -1535,7 +1532,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             `should _not_ remove a note from lists when making a public note private, when user chooses to keep lists`,
-            { skipConflictTests: true, skipSyncTests: true },
+            { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
 
@@ -1587,6 +1584,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ],
                                     },
                                 )
+                                // These shouldn't yet exist locally as the note is public (and thus inherits lists from parent page)
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
 
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
@@ -1600,13 +1602,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 })
 
+                                // Now that the note is no longer public, those entries should exist
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
                                 await helper.assertSharedAnnotationMetadata(
                                     setup,
                                     {
                                         metadata: [
                                             {
                                                 annotationId: 1,
-                                                excludeFromLists: false,
+                                                excludeFromLists: true,
                                             },
                                         ],
                                     },

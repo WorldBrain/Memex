@@ -642,6 +642,28 @@ export class SharingTestHelper {
         )
     }
 
+    async assertAnnotationListEntries(
+        setup: BackgroundIntegrationTestSetup,
+        entries: Array<{
+            annotationId: number
+            listId: number
+        }>,
+    ) {
+        const ordered = await this._getStorage(
+            setup,
+            'local',
+            'annotListEntries',
+            'createdAt',
+        )
+        expect(ordered).toEqual(
+            entries.map((entry) => ({
+                createdAt: expect.any(Date),
+                listId: this.lists[entry.listId].localId,
+                url: this.annotations[entry.annotationId].localId,
+            })),
+        )
+    }
+
     async assertSharedPageInfo(
         setup: BackgroundIntegrationTestSetup,
         options: { pageIds: number[] },

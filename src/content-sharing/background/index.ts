@@ -599,10 +599,17 @@ export default class ContentSharingBackground {
             const sharingState = await this.getAnnotationSharingState({
                 annotationUrl: params.annotation,
             })
-            // await this.storage.setAnnotationsExcludedFromLists({
-            //     localIds: [params.annotation],
-            //     excludeFromLists: true,
-            // })
+
+            for (const listId of sharingState.localListIds) {
+                await this.options.annotations.ensureAnnotInList({
+                    listId,
+                    url: params.annotation,
+                })
+            }
+            await this.storage.setAnnotationsExcludedFromLists({
+                localIds: [params.annotation],
+                excludeFromLists: true,
+            })
 
             sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
             await this.storage.setAnnotationPrivacyLevel({
