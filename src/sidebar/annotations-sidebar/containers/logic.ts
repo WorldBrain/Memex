@@ -703,10 +703,13 @@ export class SidebarContainerLogic extends UILogic<
             ]
         }
 
-        await this.options.annotationsCache.update({
-            ...previousState.annotations[idx],
-            lists: listIds,
-        })
+        await this.options.annotationsCache.update(
+            {
+                ...previousState.annotations[idx],
+                lists: listIds,
+            },
+            { isBulkShareProtected: event.options?.protectAnnotation },
+        )
     }
 
     setEditCommentTagPicker: EventHandler<'setEditCommentTagPicker'> = ({

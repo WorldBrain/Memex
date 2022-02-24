@@ -1665,6 +1665,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 contentShareBG.shareAnnotationToSomeLists({
                     annotationUrl: event.noteId,
                     localListIds: [event.added],
+                    protectAnnotation: event.protectAnnotation,
                 })
             listIds = [...listIds, event.added]
         }

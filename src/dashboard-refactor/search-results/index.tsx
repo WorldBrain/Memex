@@ -196,11 +196,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 onClickOutside={
                                     interactionProps.onListPickerBtnClick
                                 }
-                                selectEntry={(listId) =>
+                                selectEntry={(listId, options) =>
                                     interactionProps.updateLists({
                                         added: listId,
                                         deleted: null,
                                         selected: [],
+                                        options,
                                     })
                                 }
                                 unselectEntry={(listId) =>
@@ -240,11 +241,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 spacePickerProps={{
                                     initialSelectedEntries: () =>
                                         noteData.lists ?? [],
-                                    selectEntry: (listId) =>
+                                    selectEntry: (listId, options) =>
                                         interactionProps.updateLists({
                                             added: listId,
                                             deleted: null,
                                             selected: [],
+                                            options,
                                         }),
                                     unselectEntry: (listId) =>
                                         interactionProps.updateLists({

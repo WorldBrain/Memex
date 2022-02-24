@@ -17,4 +17,5 @@ export type PickerUpdateHandler<T extends string | number = string> = (args: {
     selected: T[]
     added: T
     deleted: T
+    options?: { protectAnnotation?: boolean }
 }) => Promise<void>

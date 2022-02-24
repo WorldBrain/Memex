@@ -847,7 +847,11 @@ export class DashboardContainer extends StatefulUIElement<
                     updateTags: (noteId) => (args) =>
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) =>
-                        this.processEvent('setNoteLists', { ...args, noteId }),
+                        this.processEvent('setNoteLists', {
+                            ...args,
+                            noteId,
+                            protectAnnotation: args.options?.protectAnnotation,
+                        }),
                     createNewList: (noteId) => async (name) =>
                         this.createNewListViaPicker(name),
                     onTrashBtnClick: (noteId, day, pageId) => () =>

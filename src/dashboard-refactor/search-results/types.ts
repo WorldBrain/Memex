@@ -305,7 +305,11 @@ export type Events = UIEvent<{
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    setNoteLists: NoteEventArgs & { added?: number; deleted?: number }
+    setNoteLists: NoteEventArgs & {
+        added?: number
+        deleted?: number
+        protectAnnotation?: boolean
+    }
     updateNoteShareInfo: NoteEventArgs & AnnotationSharingState
     // updateNoteShareInfo: NoteEventArgs & NoteShareInfo
     /** NOTE: Does not mutate state */

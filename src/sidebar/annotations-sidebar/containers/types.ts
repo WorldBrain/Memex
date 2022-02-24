@@ -218,6 +218,7 @@ export type SidebarContainerEvents = UIEvent<
             added: number | null
             deleted: number | null
             annotationId: string
+            options?: { protectAnnotation?: boolean }
         }
         deleteEditCommentTag: { tag: string; annotationUrl: string }
 

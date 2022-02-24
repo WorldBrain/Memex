@@ -108,7 +108,7 @@ export const createAnnotationsCache = (
                     url: annotationUrl,
                     tags,
                 }),
-            updateLists: async (annotationUrl, listIds) => {
+            updateLists: async (annotationUrl, listIds, options) => {
                 const existingListIds = await bgModules.annotations.getListIdsForAnnotation(
                     { annotationId: annotationUrl },
                 )
@@ -126,6 +126,7 @@ export const createAnnotationsCache = (
                         {
                             annotationUrl,
                             localListIds: listsToAdd,
+                            protectAnnotation: options?.protectAnnotation,
                         },
                     )
                     sharingState = result.sharingState
@@ -183,6 +184,7 @@ export interface AnnotationsCacheDependencies {
         updateLists: (
             annotationUrl: CachedAnnotation['url'],
             lists: CachedAnnotation['lists'],
+            options?: { protectAnnotation?: boolean },
         ) => Promise<AnnotationSharingState>
         delete: (annotation: CachedAnnotation) => Promise<void>
     }
@@ -332,6 +334,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             const sharingState = await this.dependencies.backendOperations.updateLists(
                 annotation.url,
                 annotation.lists,
+                { protectAnnotation: shareOpts?.isBulkShareProtected },
             )
             const parsedPrivacyLevel = maybeGetAnnotationPrivacyState(
                 sharingState?.privacyLevel,
