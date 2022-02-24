@@ -2431,7 +2431,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should add a list, page + 2 public annotations, adding one to the list, with user choosing to keep it public, expecting other annot and the parent page to also be in list',
-            { skipConflictTests: true, skipSyncTests: true },
+            { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
 
@@ -2573,7 +2573,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should add a list, page + 2 public annotations, adding one to the list, with user choosing to make it protected, expecting other annot and the parent page to also be in list',
-            { skipConflictTests: true, skipSyncTests: true },
+            { skipConflictTests: true },
             () => {
                 const helper = new SharingTestHelper()
 
@@ -2668,7 +2668,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                 hasLink: true,
                                                 localListIds: [1],
                                                 privacyLevel:
-                                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                                    AnnotationPrivacyLevels.PROTECTED,
                                             },
                                         },
                                     },
@@ -2680,7 +2680,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             annotationId: 1,
                                             level:
-                                                AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                                AnnotationPrivacyLevels.PROTECTED,
                                             updated: true,
                                         },
                                         {

@@ -411,17 +411,11 @@ export default class ContentSharingBackground {
                 maybeGetAnnotationPrivacyState(privacyLevels[a.url])?.public,
         )
 
-        let needToSetPrivacyLevel = false
-        if (!getAnnotationPrivacyState(sharingState.privacyLevel).public) {
+        if (
+            !getAnnotationPrivacyState(sharingState.privacyLevel).public ||
+            options.protectAnnotation
+        ) {
             sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
-            needToSetPrivacyLevel = true
-        }
-        if (!!options.protectAnnotation) {
-            sharingState.privacyLevel = AnnotationPrivacyLevels.SHARED_PROTECTED
-            needToSetPrivacyLevel = true
-        }
-
-        if (needToSetPrivacyLevel) {
             await this.storage.setAnnotationPrivacyLevel({
                 annotation: options.annotationUrl,
                 privacyLevel: sharingState.privacyLevel,
