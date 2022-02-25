@@ -323,5 +323,6 @@ export type Events = UIEvent<{
     saveNoteEdit: NoteEventArgs & {
         shouldShare: boolean
         isProtected?: boolean
+        keepListsIfUnsharing?: boolean
     }
 }>

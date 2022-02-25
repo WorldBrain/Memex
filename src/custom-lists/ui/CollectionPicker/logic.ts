@@ -14,10 +14,7 @@ export interface SpaceDisplayEntry {
 
 export interface SpacePickerDependencies {
     createNewEntry: (name: string) => Promise<number>
-    selectEntry: (
-        listId: number,
-        options?: { protectAnnotation?: boolean },
-    ) => Promise<void>
+    selectEntry: (listId: number) => Promise<void>
     unselectEntry: (listId: number) => Promise<void>
     actOnAllTabs?: (listId: number) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>

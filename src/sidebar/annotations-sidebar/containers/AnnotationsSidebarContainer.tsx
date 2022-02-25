@@ -316,12 +316,12 @@ export class AnnotationsSidebarContainer<
             })
             return listId
         },
-        selectEntry: async (listId, options) =>
+        selectEntry: async (listId) =>
             this.processEvent('updateListsForAnnotation', {
                 added: listId,
                 deleted: null,
                 annotationId: annotation.url,
-                options,
+                // options,
             }),
         unselectEntry: async (listId) =>
             this.processEvent('updateListsForAnnotation', {

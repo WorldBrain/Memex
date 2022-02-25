@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
@@ -9,7 +10,8 @@ import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
-import styled from 'styled-components'
+import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
+import { SELECT_SPACE_ANNOT_MSG, PRIVATIZE_ANNOT_MSG } from './constants'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -27,7 +29,15 @@ export interface Props extends ShareMenuCommonProps {
         Partial<SpacePickerDependencies>,
         'contentSharingBG' | 'spacesBG'
     > &
-        Omit<SpacePickerDependencies, 'contentSharingBG' | 'spacesBG'>
+        Omit<
+            SpacePickerDependencies,
+            'contentSharingBG' | 'spacesBG' | 'selectEntry'
+        > & {
+            selectEntry: (
+                listId: number,
+                options?: { protectAnnotation?: boolean },
+            ) => Promise<void>
+        }
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
@@ -182,8 +192,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         const { confirmationMode } = this.state
         const text =
             confirmationMode.type === 'public-select-space'
-                ? 'Do you want to make this note protected?'
-                : 'Do you want to remove this note from the shared spaces?'
+                ? SELECT_SPACE_ANNOT_MSG
+                : PRIVATIZE_ANNOT_MSG
 
         const handleConfirmation = (affirmative: boolean) => () => {
             this.setState({ confirmationMode: null })
@@ -202,17 +212,10 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         }
 
         return (
-            <>
-                <SectionSubTitle>{text}</SectionSubTitle>
-                <ConfirmBtnRow>
-                    <ConfirmBtn onClick={handleConfirmation(true)}>
-                        Yes
-                    </ConfirmBtn>
-                    <ConfirmBtn onClick={handleConfirmation(false)}>
-                        No
-                    </ConfirmBtn>
-                </ConfirmBtnRow>
-            </>
+            <ConfirmDialog
+                titleText={text}
+                handleConfirmation={handleConfirmation}
+            />
         )
     }
 
@@ -280,13 +283,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
     }
 }
-
-const ConfirmBtn = styled.button``
-
-const ConfirmBtnRow = styled.div`
-    display: flex;
-    flex-direction: row;
-`
 
 const SectionTitle = styled.div`
     font-size: 14px;

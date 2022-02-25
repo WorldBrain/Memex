@@ -10,7 +10,7 @@ const styles = require('./ConfirmModal.css')
 
 export interface Props extends ModalProps {
     isShown: boolean
-    message: string
+    message?: string
     isLoading?: boolean
     submessage?: string
 }
@@ -33,12 +33,14 @@ class ConfirmModal extends PureComponent<Props> {
                             <Spinner />
                         </div>
                     )}
-                    <MessageContainer>
-                        <SectionTitle className={styles.messageBox}>
-                            {this.props.message}
-                        </SectionTitle>
-                        <InfoText>{this.props.submessage}</InfoText>
-                    </MessageContainer>
+                    {this.props.message && (
+                        <MessageContainer>
+                            <SectionTitle className={styles.messageBox}>
+                                {this.props.message}
+                            </SectionTitle>
+                            <InfoText>{this.props.submessage}</InfoText>
+                        </MessageContainer>
+                    )}
                 </div>
                 <div className={styles.btnBar} tabIndex={0}>
                     {this.props.children}

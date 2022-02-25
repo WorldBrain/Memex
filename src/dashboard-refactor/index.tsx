@@ -45,6 +45,12 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
+import ConfirmModal from 'src/common-ui/components/ConfirmModal'
+import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
+import {
+    PRIVATIZE_ANNOT_MSG,
+    SELECT_SPACE_ANNOT_MSG,
+} from 'src/overview/sharing/constants'
 
 export interface Props extends DashboardDependencies {}
 
@@ -812,12 +818,22 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => (shouldShare, isProtected) =>
-                        this.processEvent('saveNoteEdit', {
-                            noteId,
-                            shouldShare,
-                            isProtected,
-                        }),
+                    onEditConfirm: (noteId) => (shouldShare, isProtected) => {
+                        const prev = this.state.searchResults.noteData.byId[
+                            noteId
+                        ]
+                        const toMakeNonPublic = prev.isShared && !shouldShare
+                        return this.processEvent(
+                            toMakeNonPublic
+                                ? 'setPrivatizeNoteConfirmArgs'
+                                : 'saveNoteEdit',
+                            {
+                                noteId,
+                                shouldShare,
+                                isProtected,
+                            },
+                        )
+                    },
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
                     onTagPickerBtnClick: (noteId) => () =>
@@ -846,12 +862,23 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     updateTags: (noteId) => (args) =>
                         this.processEvent('setNoteTags', { ...args, noteId }),
-                    updateLists: (noteId) => (args) =>
-                        this.processEvent('setNoteLists', {
-                            ...args,
-                            noteId,
-                            protectAnnotation: args.options?.protectAnnotation,
-                        }),
+                    updateLists: (noteId) => (args) => {
+                        const {
+                            isShared,
+                        } = this.state.searchResults.noteData.byId[noteId]
+
+                        return this.processEvent(
+                            isShared && args.options?.showExternalConfirmations
+                                ? 'setSelectNoteSpaceConfirmArgs'
+                                : 'setNoteLists',
+                            {
+                                ...args,
+                                noteId,
+                                protectAnnotation:
+                                    args.options?.protectAnnotation,
+                            },
+                        )
+                    },
                     createNewList: (noteId) => async (name) =>
                         this.createNewListViaPicker(name),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
@@ -899,6 +926,46 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderModals() {
         const { modals: modalsState, listsSidebar } = this.state
+
+        if (modalsState.confirmPrivatizeNoteArgs) {
+            return (
+                <ConfirmModal
+                    isShown
+                    onClose={() =>
+                        this.processEvent('setPrivatizeNoteConfirmArgs', null)
+                    }
+                >
+                    <ConfirmDialog
+                        titleText={PRIVATIZE_ANNOT_MSG}
+                        handleConfirmation={(affirmative) => () =>
+                            this.processEvent('saveNoteEdit', {
+                                ...modalsState.confirmPrivatizeNoteArgs,
+                                keepListsIfUnsharing: affirmative,
+                            })}
+                    />
+                </ConfirmModal>
+            )
+        }
+
+        if (modalsState.confirmSelectNoteSpaceArgs) {
+            return (
+                <ConfirmModal
+                    isShown
+                    onClose={() =>
+                        this.processEvent('setSelectNoteSpaceConfirmArgs', null)
+                    }
+                >
+                    <ConfirmDialog
+                        titleText={SELECT_SPACE_ANNOT_MSG}
+                        handleConfirmation={(affirmative) => () =>
+                            this.processEvent('setNoteLists', {
+                                ...modalsState.confirmSelectNoteSpaceArgs,
+                                protectAnnotation: affirmative,
+                            })}
+                    />
+                </ConfirmModal>
+            )
+        }
 
         if (modalsState.deletingListId) {
             return (

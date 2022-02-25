@@ -129,6 +129,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showCloudOnboarding: false,
                 showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
+                confirmPrivatizeNoteArgs: null,
+                confirmSelectNoteSpaceArgs: null,
             },
             searchResults: {
                 results: {},
@@ -768,6 +770,22 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             modals: { deletingPageArgs: { $set: event } },
+        })
+    }
+
+    setPrivatizeNoteConfirmArgs: EventHandler<
+        'setPrivatizeNoteConfirmArgs'
+    > = async ({ event }) => {
+        this.emitMutation({
+            modals: { confirmPrivatizeNoteArgs: { $set: event } },
+        })
+    }
+
+    setSelectNoteSpaceConfirmArgs: EventHandler<
+        'setSelectNoteSpaceConfirmArgs'
+    > = async ({ event }) => {
+        this.emitMutation({
+            modals: { confirmSelectNoteSpaceArgs: { $set: event } },
         })
     }
 
@@ -1686,8 +1704,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 searchResults: {
                     noteData: {
-                        byId: { [event.noteId]: { lists: { $set: listIds } } },
+                        byId: {
+                            [event.noteId]: {
+                                lists: { $set: listIds },
+                                isShared: { $set: !event.protectAnnotation },
+                            },
+                        },
                     },
+                },
+                modals: {
+                    confirmSelectNoteSpaceArgs: { $set: null },
                 },
             })
             await remoteFn()
@@ -1808,6 +1834,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+            modals: {
+                confirmPrivatizeNoteArgs: { $set: null },
+                confirmSelectNoteSpaceArgs: { $set: null },
+            },
         })
     }
 
@@ -1899,27 +1929,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                await updateAnnotation({
-                    annotationData: {
-                        localId: event.noteId,
-                        comment: editNoteForm.inputValue,
-                    },
-                    shareOpts: {
-                        shouldShare: event.shouldShare,
-                        shouldCopyShareLink: event.shouldShare,
-                        isBulkShareProtected: event.isProtected,
-                    },
-                    annotationsBG: this.options.annotationsBG,
-                    contentSharingBG: this.options.contentShareBG,
-                })
-
-                if (tagsHaveChanged) {
-                    await this.options.annotationsBG.updateAnnotationTags({
-                        url: event.noteId,
-                        tags: editNoteForm.tags,
-                    })
-                }
-
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -1936,7 +1945,32 @@ export class DashboardLogic extends UILogic<State, Events> {
                             },
                         },
                     },
+                    modals: {
+                        confirmPrivatizeNoteArgs: { $set: null },
+                    },
                 })
+
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: editNoteForm.inputValue,
+                    },
+                    shareOpts: {
+                        shouldShare: event.shouldShare,
+                        shouldCopyShareLink: event.shouldShare,
+                        isBulkShareProtected: event.isProtected,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                    keepListsIfUnsharing: event.keepListsIfUnsharing,
+                })
+
+                if (tagsHaveChanged) {
+                    await this.options.annotationsBG.updateAnnotationTags({
+                        url: event.noteId,
+                        tags: editNoteForm.tags,
+                    })
+                }
             },
         )
     }

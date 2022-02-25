@@ -196,12 +196,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 onClickOutside={
                                     interactionProps.onListPickerBtnClick
                                 }
-                                selectEntry={(listId, options) =>
+                                selectEntry={(listId) =>
                                     interactionProps.updateLists({
                                         added: listId,
                                         deleted: null,
                                         selected: [],
-                                        options,
+                                        options: {
+                                            showExternalConfirmations: true,
+                                        },
                                     })
                                 }
                                 unselectEntry={(listId) =>
@@ -209,6 +211,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                         added: null,
                                         deleted: listId,
                                         selected: [],
+                                        options: {
+                                            showExternalConfirmations: true,
+                                        },
                                     })
                                 }
                                 createNewEntry={interactionProps.createNewList}
@@ -246,7 +251,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                             added: listId,
                                             deleted: null,
                                             selected: [],
-                                            options,
+                                            options: {
+                                                protectAnnotation:
+                                                    options.protectAnnotation,
+                                            },
                                         }),
                                     unselectEntry: (listId) =>
                                         interactionProps.updateLists({
