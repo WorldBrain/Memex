@@ -136,3 +136,10 @@ export const webMonetizationLogoConfirmed = browser.runtime.getURL(
 // import tagEmpty from '/img/tag_empty.svg'
 // import heartFull from '/img/heart_full.svg'
 // import heartEmpty from '/img/heart_empty.svg'
+
+export const coilIcon = null
+export const threadIcon = null
+export const newFeed = null
+export const checkedRound = null
+export const bell = null
+export const arrowDown = null
