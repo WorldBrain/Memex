@@ -93,7 +93,7 @@ export interface AnnotationsSidebarProps
     annotationsShareAll: any
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
-    sidebarContext?: string
+    sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
     //postShareHook: (shareInfo) => void
 }
 

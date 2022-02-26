@@ -64,6 +64,7 @@ const setupLogicHelper = async ({
 
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
+        sidebarContext: 'dashboard',
         pageUrl,
         auth: backgroundModules.auth.remoteFunctions,
         tags: backgroundModules.tags.remoteFunctions,

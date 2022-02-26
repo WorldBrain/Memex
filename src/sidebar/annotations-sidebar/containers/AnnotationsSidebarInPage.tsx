@@ -27,7 +27,11 @@ export interface Props extends ContainerProps {
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<
+        Props,
+        'isLockable' | 'theme' | 'sidebarContext'
+    > = {
+        sidebarContext: 'in-page',
         isLockable: true,
         theme: {
             rightOffsetPx: 0,

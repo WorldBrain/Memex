@@ -54,7 +54,6 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
 export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
-    sidebarContext?: string
 }
 
 export class AnnotationsSidebarContainer<
