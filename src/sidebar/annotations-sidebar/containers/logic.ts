@@ -194,6 +194,9 @@ export class SidebarContainerLogic extends UILogic<
             isListFilterActive: false,
             searchResultSkip: 0,
 
+            confirmPrivatizeNoteArgs: null,
+            confirmSelectNoteSpaceArgs: null,
+
             showLoginModal: false,
             showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
@@ -431,6 +434,8 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             activeShareMenuNoteId: { $set: undefined },
             immediatelyShareNotes: { $set: false },
+            confirmPrivatizeNoteArgs: { $set: null },
+            confirmSelectNoteSpaceArgs: { $set: null },
         })
     }
 
@@ -690,6 +695,8 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+
         let listIds = previousState.annotations[idx].lists
         if (event.added != null) {
             listIds = [...listIds, event.added]
@@ -835,6 +842,9 @@ export class SidebarContainerLogic extends UILogic<
                 [event.annotationUrl]: {
                     $set: { ...INIT_FORM_STATE },
                 },
+            },
+            confirmPrivatizeNoteArgs: {
+                $set: null,
             },
         })
     }
@@ -1265,6 +1275,18 @@ export class SidebarContainerLogic extends UILogic<
         'setAnnotationShareModalShown'
     > = ({ event }) => {
         this.emitMutation({ showAnnotationsShareModal: { $set: event.shown } })
+    }
+
+    setPrivatizeNoteConfirmArgs: EventHandler<
+        'setPrivatizeNoteConfirmArgs'
+    > = ({ event }) => {
+        this.emitMutation({ confirmPrivatizeNoteArgs: { $set: event } })
+    }
+
+    setSelectNoteSpaceConfirmArgs: EventHandler<
+        'setSelectNoteSpaceConfirmArgs'
+    > = ({ event }) => {
+        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: event } })
     }
 
     updateAllAnnotationsShareInfo: EventHandler<

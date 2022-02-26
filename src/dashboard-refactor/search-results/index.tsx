@@ -286,8 +286,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onListIconClick: interactionProps.onListPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
-                    onEditCancel: interactionProps.onEditCancel,
-                    onEditConfirm: interactionProps.onEditConfirm,
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
                 }}

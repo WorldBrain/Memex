@@ -29,9 +29,8 @@ import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
-import { MaybePromise } from 'src/util/types'
+import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import type { NoteShareInfo } from 'src/dashboard-refactor/search-results/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -178,120 +177,129 @@ export interface SidebarContainerState
     showDisplayNameSetupModal: boolean
     showAnnotationsShareModal: boolean
 
+    confirmPrivatizeNoteArgs: null | SidebarEvents['editAnnotation']
+    confirmSelectNoteSpaceArgs: null | SidebarEvents['updateListsForAnnotation']
+
     showAllNotesShareMenu: boolean
     activeShareMenuNoteId: string | undefined
     immediatelyShareNotes: boolean
 }
 
-export type SidebarContainerEvents = UIEvent<
-    AnnotationConversationEvent & {
-        show: null
-        hide: null
-        lock: null
-        unlock: null
-        lockWidth: null
-        unlockWidth: null
+interface SidebarEvents {
+    show: null
+    hide: null
+    lock: null
+    unlock: null
+    lockWidth: null
+    unlockWidth: null
 
-        sortAnnotations: { sortingFn: AnnotationsSorter }
+    sortAnnotations: { sortingFn: AnnotationsSorter }
 
-        expandMyNotes: null
-        expandSharedSpaces: { listIds: string[] }
+    expandMyNotes: null
+    expandSharedSpaces: { listIds: string[] }
 
-        // Adding a new page comment
-        addNewPageComment: { comment?: string; tags?: string[] }
-        changeNewPageCommentText: { comment: string }
-        cancelEdit: { annotationUrl: string }
-        changeEditCommentText: { annotationUrl: string; comment: string }
-        saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
-        cancelNewPageComment: null
-        updateNewPageCommentTags: { tags: string[] }
-        updateNewPageCommentLists: { lists: number[] }
+    // Adding a new page comment
+    addNewPageComment: { comment?: string; tags?: string[] }
+    changeNewPageCommentText: { comment: string }
+    cancelEdit: { annotationUrl: string }
+    changeEditCommentText: { annotationUrl: string; comment: string }
+    saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
+    cancelNewPageComment: null
+    updateNewPageCommentTags: { tags: string[] }
+    updateNewPageCommentLists: { lists: number[] }
 
-        setEditCommentTagPicker: { annotationUrl: string; active: boolean }
+    setEditCommentTagPicker: { annotationUrl: string; active: boolean }
 
-        updateTagsForEdit: {
-            added?: string
-            deleted?: string
-            annotationUrl: string
-        }
-        updateListsForAnnotation: {
-            added: number | null
-            deleted: number | null
-            annotationId: string
-            options?: { protectAnnotation?: boolean }
-        }
-        deleteEditCommentTag: { tag: string; annotationUrl: string }
-
-        receiveSharingAccessChange: {
-            sharingAccess: AnnotationSharingAccess
-        }
-
-        // Annotation boxes
-        goToAnnotationInNewTab: {
-            context: AnnotationEventContext
-            annotationUrl: string
-        }
-        setActiveAnnotationUrl: { annotationUrl: string }
-        setAnnotationEditMode: {
-            context: AnnotationEventContext
-            annotationUrl: string
-        }
-        editAnnotation: {
-            context: AnnotationEventContext
-            annotationUrl: string
-            shouldShare: boolean
-            isProtected?: boolean
-        }
-        deleteAnnotation: {
-            context: AnnotationEventContext
-            annotationUrl: string
-        }
-        shareAnnotation: {
-            context: AnnotationEventContext
-            annotationUrl: string
-            mouseEvent: React.MouseEvent
-        }
-        switchAnnotationMode: {
-            context: AnnotationEventContext
-            annotationUrl: string
-            mode: AnnotationMode
-        }
-
-        copyNoteLink: { link: string }
-        copyPageLink: { link: string }
-
-        setPageUrl: { pageUrl: string; rerenderHighlights?: boolean }
-
-        // Search
-        paginateSearch: null
-        setAnnotationsExpanded: { value: boolean }
-        fetchSuggestedTags: null
-        fetchSuggestedDomains: null
-
-        // Followed lists
-        loadFollowedLists: null
-        loadFollowedListNotes: { listId: string }
-        expandFollowedListNotes: { listId: string }
-        toggleIsolatedListView: { listId: string }
-
-        updateAnnotationShareInfo: {
-            annotationUrl: string
-        } & AnnotationSharingState
-        updateAllAnnotationsShareInfo: AnnotationSharingStates
-
-        setLoginModalShown: { shown: boolean }
-        setDisplayNameSetupModalShown: { shown: boolean }
-        setAnnotationShareModalShown: { shown: boolean }
-        setBetaFeatureNotifModalShown: { shown: boolean }
-
-        setAllNotesCopyPasterShown: { shown: boolean }
-        setCopyPasterAnnotationId: { id: string }
-        setTagPickerAnnotationId: { id: string }
-        setListPickerAnnotationId: { id: string }
-        resetTagPickerAnnotationId: null
-        resetCopyPasterAnnotationId: null
-        resetListPickerAnnotationId: null
-        setAllNotesShareMenuShown: { shown: boolean }
-        resetShareMenuNoteId: null
+    updateTagsForEdit: {
+        added?: string
+        deleted?: string
+        annotationUrl: string
     }
+    updateListsForAnnotation: {
+        added: number | null
+        deleted: number | null
+        annotationId: string
+        options?: { protectAnnotation?: boolean }
+    }
+    deleteEditCommentTag: { tag: string; annotationUrl: string }
+
+    receiveSharingAccessChange: {
+        sharingAccess: AnnotationSharingAccess
+    }
+
+    // Annotation boxes
+    goToAnnotationInNewTab: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    setActiveAnnotationUrl: { annotationUrl: string }
+    setAnnotationEditMode: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    editAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+        shouldShare: boolean
+        isProtected?: boolean
+        keepListsIfUnsharing?: boolean
+    }
+    deleteAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+    }
+    shareAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+        mouseEvent: React.MouseEvent
+    }
+    switchAnnotationMode: {
+        context: AnnotationEventContext
+        annotationUrl: string
+        mode: AnnotationMode
+    }
+
+    copyNoteLink: { link: string }
+    copyPageLink: { link: string }
+
+    setPageUrl: { pageUrl: string; rerenderHighlights?: boolean }
+
+    // Search
+    paginateSearch: null
+    setAnnotationsExpanded: { value: boolean }
+    fetchSuggestedTags: null
+    fetchSuggestedDomains: null
+
+    // Followed lists
+    loadFollowedLists: null
+    loadFollowedListNotes: { listId: string }
+    expandFollowedListNotes: { listId: string }
+    toggleIsolatedListView: { listId: string }
+
+    updateAnnotationShareInfo: {
+        annotationUrl: string
+    } & AnnotationSharingState
+    updateAllAnnotationsShareInfo: AnnotationSharingStates
+
+    setLoginModalShown: { shown: boolean }
+    setDisplayNameSetupModalShown: { shown: boolean }
+    setAnnotationShareModalShown: { shown: boolean }
+    setBetaFeatureNotifModalShown: { shown: boolean }
+
+    setPrivatizeNoteConfirmArgs: SidebarContainerState['confirmPrivatizeNoteArgs']
+    setSelectNoteSpaceConfirmArgs: SidebarContainerState['confirmSelectNoteSpaceArgs']
+
+    setAllNotesCopyPasterShown: { shown: boolean }
+    setCopyPasterAnnotationId: { id: string }
+    setTagPickerAnnotationId: { id: string }
+    setListPickerAnnotationId: { id: string }
+    resetTagPickerAnnotationId: null
+    resetCopyPasterAnnotationId: null
+    resetListPickerAnnotationId: null
+    setAllNotesShareMenuShown: { shown: boolean }
+    resetShareMenuNoteId: null
+}
+
+export type SidebarContainerEvents = UIEvent<
+    AnnotationConversationEvent & SidebarEvents
 >

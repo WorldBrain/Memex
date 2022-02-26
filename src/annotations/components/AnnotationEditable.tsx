@@ -401,6 +401,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             mode,
             isShared,
             isBulkShareProtected,
+            annotationEditDependencies: editDeps,
             annotationFooterDependencies: footerDeps,
         } = this.props
 
@@ -429,10 +430,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                 </ActionBtnStyled>
             )
         } else {
-            cancelBtnHandler = footerDeps.onEditCancel
+            cancelBtnHandler = editDeps.onEditCancel
             confirmBtn = (
                 <SaveBtn
-                    onSave={footerDeps.onEditConfirm}
+                    onSave={editDeps.onEditConfirm}
                     isProtected={isBulkShareProtected}
                     isShared={isShared}
                 />

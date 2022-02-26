@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import AnnotationsSidebar, {
@@ -16,7 +17,7 @@ import type {
     SidebarContainerEvents,
     AnnotationEventContext,
 } from './types'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { ButtonTooltip, ConfirmModal } from 'src/common-ui/components'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { Annotation } from 'src/annotations/types'
 import {
@@ -25,27 +26,26 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
-import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-
-import { createGlobalStyle } from 'styled-components'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { Browser, browser } from 'webextension-polyfill-ts'
+import { setLocalStorage } from 'src/util/storage'
+import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
+import {
+    PRIVATIZE_ANNOT_MSG,
+    SELECT_SPACE_ANNOT_MSG,
+} from 'src/overview/sharing/constants'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -163,17 +163,6 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
                 }),
-            onEditCancel: () =>
-                this.processEvent('cancelEdit', {
-                    annotationUrl: annotation.url,
-                }),
-            onEditConfirm: (shouldShare, isProtected) =>
-                this.processEvent('editAnnotation', {
-                    annotationUrl: annotation.url,
-                    shouldShare,
-                    isProtected,
-                    ...DEF_CONTEXT,
-                }),
             onShareClick: (mouseEvent) =>
                 this.processEvent('shareAnnotation', {
                     annotationUrl: annotation.url,
@@ -218,13 +207,22 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     comment,
                 }),
-            onEditConfirm: (shouldShare: boolean, isProtected?: boolean) =>
-                this.processEvent('editAnnotation', {
-                    annotationUrl: annotation.url,
-                    isProtected: isProtected ?? annotation.isBulkShareProtected,
-                    shouldShare,
-                    ...DEF_CONTEXT,
-                }),
+            onEditConfirm: (shouldShare, isProtected) => {
+                const showConfirmation =
+                    // this.props.sidebarContext !== 'dashboard' &&
+                    annotation.isShared && !shouldShare
+                return this.processEvent(
+                    showConfirmation
+                        ? 'setPrivatizeNoteConfirmArgs'
+                        : 'editAnnotation',
+                    {
+                        annotationUrl: annotation.url,
+                        shouldShare,
+                        isProtected,
+                        ...DEF_CONTEXT,
+                    },
+                )
+            },
             onEditCancel: () =>
                 this.processEvent('cancelEdit', {
                     annotationUrl: annotation.url,
@@ -298,37 +296,44 @@ export class AnnotationsSidebarContainer<
 
     private getSpacePickerProps = (
         annotation: Annotation,
-    ): SpacePickerDependencies => ({
-        spacesBG: this.props.customLists,
-        contentSharingBG: this.props.contentSharing,
-        initialSelectedEntries: () => annotation.lists ?? [],
-        onEscapeKeyDown: () =>
-            this.processEvent('resetListPickerAnnotationId', null),
-        createNewEntry: async (name) => {
-            const listId = await this.props.customLists.createCustomList({
-                name,
-            })
-            this.processMutation({
-                listData: {
-                    [listId]: { $set: { name } },
-                },
-            })
-            return listId
-        },
-        selectEntry: async (listId) =>
-            this.processEvent('updateListsForAnnotation', {
-                added: listId,
-                deleted: null,
-                annotationId: annotation.url,
-                // options,
-            }),
-        unselectEntry: async (listId) =>
-            this.processEvent('updateListsForAnnotation', {
-                added: null,
-                deleted: listId,
-                annotationId: annotation.url,
-            }),
-    })
+        showExternalConfirmations?: boolean,
+    ): SpacePickerDependencies => {
+        // This is to show confirmation modal if the annotation is public and the user is trying to add/remove it to a space
+        const updateListsEvent =
+            annotation.isShared && showExternalConfirmations
+                ? 'setSelectNoteSpaceConfirmArgs'
+                : 'updateListsForAnnotation'
+        return {
+            spacesBG: this.props.customLists,
+            contentSharingBG: this.props.contentSharing,
+            initialSelectedEntries: () => annotation.lists ?? [],
+            onEscapeKeyDown: () =>
+                this.processEvent('resetListPickerAnnotationId', null),
+            createNewEntry: async (name) => {
+                const listId = await this.props.customLists.createCustomList({
+                    name,
+                })
+                this.processMutation({
+                    listData: {
+                        [listId]: { $set: { name } },
+                    },
+                })
+                return listId
+            },
+            selectEntry: async (listId) =>
+                this.processEvent(updateListsEvent, {
+                    added: listId,
+                    deleted: null,
+                    annotationId: annotation.url,
+                }),
+            unselectEntry: async (listId) =>
+                this.processEvent(updateListsEvent, {
+                    added: null,
+                    deleted: listId,
+                    annotationId: annotation.url,
+                }),
+        }
+    }
 
     private renderCopyPasterManagerForAnnotation = (
         currentAnnotationId: string,
@@ -486,7 +491,61 @@ export class AnnotationsSidebarContainer<
     }
 
     protected renderModals() {
-        return null
+        const {
+            confirmPrivatizeNoteArgs,
+            confirmSelectNoteSpaceArgs,
+        } = this.state
+
+        return (
+            <>
+                {confirmPrivatizeNoteArgs && (
+                    <ConfirmModal
+                        isShown
+                        ignoreReactPortal={
+                            this.props.sidebarContext !== 'dashboard'
+                        }
+                        onClose={() =>
+                            this.processEvent(
+                                'setPrivatizeNoteConfirmArgs',
+                                null,
+                            )
+                        }
+                    >
+                        <ConfirmDialog
+                            titleText={PRIVATIZE_ANNOT_MSG}
+                            handleConfirmation={(affirmative) => () =>
+                                this.processEvent('editAnnotation', {
+                                    ...confirmPrivatizeNoteArgs,
+                                    keepListsIfUnsharing: affirmative,
+                                })}
+                        />
+                    </ConfirmModal>
+                )}
+                {confirmSelectNoteSpaceArgs && (
+                    <ConfirmModal
+                        isShown
+                        ignoreReactPortal={
+                            this.props.sidebarContext !== 'dashboard'
+                        }
+                        onClose={() =>
+                            this.processEvent(
+                                'setSelectNoteSpaceConfirmArgs',
+                                null,
+                            )
+                        }
+                    >
+                        <ConfirmDialog
+                            titleText={SELECT_SPACE_ANNOT_MSG}
+                            handleConfirmation={(affirmative) => () =>
+                                this.processEvent('updateListsForAnnotation', {
+                                    ...confirmSelectNoteSpaceArgs,
+                                    options: { protectAnnotation: affirmative },
+                                })}
+                        />
+                    </ConfirmModal>
+                )}
+            </>
+        )
     }
 
     protected renderTopBanner() {

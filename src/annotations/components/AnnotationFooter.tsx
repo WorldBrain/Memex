@@ -14,8 +14,6 @@ export interface AnnotationFooterEventProps {
     onDeleteConfirm: React.MouseEventHandler
     onDeleteCancel: React.MouseEventHandler
     onDeleteIconClick: React.MouseEventHandler
-    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
-    onEditCancel: React.MouseEventHandler
     onEditIconClick: React.MouseEventHandler
     onTagIconClick: React.MouseEventHandler
     onListIconClick: React.MouseEventHandler

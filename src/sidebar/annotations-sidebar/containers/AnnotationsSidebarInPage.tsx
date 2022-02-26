@@ -218,6 +218,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     protected renderModals() {
         return (
             <>
+                {super.renderModals()}
                 {this.state.showLoginModal && (
                     <LoginModal
                         routeToLoginBtn

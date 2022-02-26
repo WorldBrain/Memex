@@ -447,11 +447,6 @@ class AnnotationList extends Component<Props, State> {
                                 [annot.url]: 'edit',
                             },
                         }),
-                    onEditCancel: this.handleEditCancel(
-                        annot.url,
-                        annot.comment,
-                    ),
-                    onEditConfirm: this.handleEditAnnotation(annot.url),
                     onDeleteCancel: this.handleEditCancel(
                         annot.url,
                         annot.comment,
