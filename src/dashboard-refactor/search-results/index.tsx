@@ -37,7 +37,7 @@ import {
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -721,6 +721,7 @@ const Loader = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 300px;
 `
 
 const ResultsContainer = styled(Margin)`

@@ -9,7 +9,7 @@ import { StyleSheetManager, ThemeProvider } from 'styled-components'
 import Container from './components/container'
 import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 

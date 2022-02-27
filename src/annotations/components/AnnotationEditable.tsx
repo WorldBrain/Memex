@@ -18,7 +18,7 @@ import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
 import type { SidebarAnnotationTheme } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
@@ -319,7 +319,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 ]
             }
 
-            return []
+            return [{ node: <></> }]
         }
 
         if (hoverState === 'footer') {

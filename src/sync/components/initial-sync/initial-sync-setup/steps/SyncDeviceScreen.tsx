@@ -2,7 +2,7 @@ import React from 'react'
 import { ModalBox } from 'src/common-ui/components/design-library/ModalBox'
 import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import {
     CenterText,
     TypographyBodyBold,

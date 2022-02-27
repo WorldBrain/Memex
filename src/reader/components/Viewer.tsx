@@ -1,5 +1,5 @@
 import React from 'react'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import { readable } from 'src/util/remote-functions-background'

@@ -14,7 +14,7 @@ import {
     WhiteSpacer20,
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 interface Props {
     header?: string
