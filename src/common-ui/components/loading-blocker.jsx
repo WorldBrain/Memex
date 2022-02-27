@@ -1,7 +1,7 @@
 import React from 'react'
 // import PropTypes from 'prop-types'
 // import classNames from 'classnames'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import localStyles from './loading-blocker.css'
 
 export default function LoadingBlocker(props) {

@@ -23,7 +23,7 @@ import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { OVERVIEW_URL } from 'src/constants'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const search = browser.runtime.getURL('/img/search.svg')

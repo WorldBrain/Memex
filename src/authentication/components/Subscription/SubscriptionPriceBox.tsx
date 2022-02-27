@@ -8,7 +8,7 @@ import PricingTable, {
     PricingPrice,
     PricingBox,
 } from 'src/authentication/components/Subscription/pricing.style'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 interface Props {
     onClick?: (...params: any) => any

@@ -2,10 +2,9 @@ import React, { PureComponent } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import {
-    Icon,
-    LoadingIndicator,
-} from 'src/dashboard-refactor/styled-components'
+import { Icon } from 'src/dashboard-refactor/styled-components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+
 import Margin from 'src/dashboard-refactor/components/Margin'
 import {
     ListSource,
