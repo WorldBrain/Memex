@@ -6,7 +6,7 @@ import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export const subscriptionConfig = {
     site:

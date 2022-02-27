@@ -3,7 +3,7 @@ import {
     SubscriptionCheckoutOptions,
     UserPlan,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import {
     SubscriptionOptionsContainer,
     PricingGrid,

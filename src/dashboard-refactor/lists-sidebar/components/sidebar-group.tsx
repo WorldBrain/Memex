@@ -1,10 +1,7 @@
 import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styles from 'src/dashboard-refactor/styles'
-import {
-    LoadingContainer,
-    LoadingIndicator,
-} from 'src/dashboard-refactor/styled-components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import styled from 'styled-components'
 import { ThemeProvider } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -18,6 +15,13 @@ const { fonts } = styles
 const Container = styled.div`
     width: 100%;
     position: relative;
+`
+
+const LoadingContainer = styled.div`
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 const GroupHeaderContainer = styled.div`
@@ -99,7 +103,7 @@ export default class ListsSidebarGroup extends PureComponent<
         return (
             <Margin vertical="15px">
                 <LoadingContainer>
-                    <LoadingIndicator backgroundColor="#e1e1e1" />
+                    <LoadingIndicator size={20} />
                 </LoadingContainer>
             </Margin>
         )

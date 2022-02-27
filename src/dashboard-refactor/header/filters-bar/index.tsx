@@ -14,10 +14,9 @@ import { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import {
-    Icon,
-    LoadingIndicator,
-} from 'src/dashboard-refactor/styled-components'
+import { Icon } from 'src/dashboard-refactor/styled-components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { select } from '@storybook/addon-knobs'
 

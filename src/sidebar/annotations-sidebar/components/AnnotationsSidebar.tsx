@@ -7,7 +7,7 @@ import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conver
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 import { ButtonTooltip } from 'src/common-ui/components'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
@@ -613,7 +613,7 @@ class AnnotationsSidebar extends React.Component<
 
                     {this.props.followedListLoadState === 'running' ? (
                         <LoadingBox>
-                            <LoadingIndicator size={'16px'} />{' '}
+                            <LoadingIndicator size={16} />{' '}
                         </LoadingBox>
                     ) : followedLists.allIds.length ? (
                         <LoadingBox>

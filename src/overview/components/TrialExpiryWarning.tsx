@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 const styles = require('./TrialExpiryWarning.css')
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 interface Props {
     showPaymentWindow: () => void

@@ -8,7 +8,7 @@ import SharePrivacyOption, {
     Props as PrivacyOptionProps,
 } from './SharePrivacyOption'
 import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import Margin from 'src/dashboard-refactor/components/Margin'
