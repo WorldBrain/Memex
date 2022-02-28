@@ -438,7 +438,7 @@ class AnnotationList extends Component<Props, State> {
                         annot.url,
                         annot.comment,
                     ),
-                    onEditConfirm: this.handleEditAnnotation(annot.url),
+                    onEditConfirm: () => this.handleEditAnnotation(annot.url),
                 }}
                 annotationFooterDependencies={{
                     onEditIconClick: () =>

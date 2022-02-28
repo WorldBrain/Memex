@@ -433,7 +433,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             cancelBtnHandler = editDeps.onEditCancel
             confirmBtn = (
                 <SaveBtn
-                    onSave={editDeps.onEditConfirm}
+                    onSave={editDeps.onEditConfirm(false)}
                     isProtected={isBulkShareProtected}
                     isShared={isShared}
                 />

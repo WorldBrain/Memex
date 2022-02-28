@@ -818,11 +818,17 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => (shouldShare, isProtected) => {
+                    onEditConfirm: (noteId) => (showExternalConfirmations) => (
+                        shouldShare,
+                        isProtected,
+                    ) => {
                         const prev = this.state.searchResults.noteData.byId[
                             noteId
                         ]
-                        const toMakeNonPublic = prev.isShared && !shouldShare
+                        const toMakeNonPublic =
+                            showExternalConfirmations &&
+                            prev.isShared &&
+                            !shouldShare
                         return this.processEvent(
                             toMakeNonPublic
                                 ? 'setPrivatizeNoteConfirmArgs'

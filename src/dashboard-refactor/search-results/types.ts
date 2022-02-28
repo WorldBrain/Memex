@@ -60,7 +60,9 @@ export type NoteInteractionProps = Omit<
     updateTags: PickerUpdateHandler<string>
     updateLists: PickerUpdateHandler<number>
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
+    onEditConfirm: (
+        showExternalConfirmations?: boolean,
+    ) => (shouldShare: boolean, isProtected?: boolean) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler

@@ -11,7 +11,9 @@ interface State {
 }
 
 export interface AnnotationEditEventProps {
-    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
+    onEditConfirm: (
+        showExternalConfirmations?: boolean,
+    ) => (shouldShare: boolean, isProtected?: boolean) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
 }
@@ -38,7 +40,7 @@ class AnnotationEdit extends React.Component<Props> {
     private editor: MemexEditorInstance
 
     private saveEdit(shouldShare, isProtected) {
-        this.props.onEditConfirm(shouldShare, isProtected)
+        this.props.onEditConfirm(true)(shouldShare, isProtected)
         //AnnotationEditable.removeMarkdownHelp()
     }
 

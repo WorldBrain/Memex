@@ -207,10 +207,14 @@ export class AnnotationsSidebarContainer<
                     annotationUrl: annotation.url,
                     comment,
                 }),
-            onEditConfirm: (shouldShare, isProtected) => {
+            onEditConfirm: (showExternalConfirmations) => (
+                shouldShare,
+                isProtected,
+            ) => {
                 const showConfirmation =
-                    // this.props.sidebarContext !== 'dashboard' &&
-                    annotation.isShared && !shouldShare
+                    showExternalConfirmations &&
+                    annotation.isShared &&
+                    !shouldShare
                 return this.processEvent(
                     showConfirmation
                         ? 'setPrivatizeNoteConfirmArgs'
