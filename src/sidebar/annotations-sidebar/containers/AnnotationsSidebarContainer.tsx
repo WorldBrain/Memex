@@ -520,7 +520,7 @@ export class AnnotationsSidebarContainer<
                             handleConfirmation={(affirmative) => () =>
                                 this.processEvent('editAnnotation', {
                                     ...confirmPrivatizeNoteArgs,
-                                    keepListsIfUnsharing: affirmative,
+                                    keepListsIfUnsharing: !affirmative,
                                 })}
                         />
                     </ConfirmModal>

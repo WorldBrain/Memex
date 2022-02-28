@@ -95,7 +95,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         return this.props.onSave(
                             false,
                             confirmationMode.isBulkShareProtected,
-                            affirmative,
+                            !affirmative,
                         )
                     }
                 }}

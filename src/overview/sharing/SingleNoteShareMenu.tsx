@@ -206,7 +206,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             } else if (confirmationMode.type === 'public-to-private') {
                 this.handleUnshare({
                     isBulkShareProtected: confirmationMode.isBulkShareProtected,
-                    keepListsIfUnsharing: affirmative,
+                    keepListsIfUnsharing: !affirmative,
                 })
             }
         }

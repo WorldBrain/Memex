@@ -946,7 +946,7 @@ export class DashboardContainer extends StatefulUIElement<
                         handleConfirmation={(affirmative) => () =>
                             this.processEvent('saveNoteEdit', {
                                 ...modalsState.confirmPrivatizeNoteArgs,
-                                keepListsIfUnsharing: affirmative,
+                                keepListsIfUnsharing: !affirmative,
                             })}
                     />
                 </ConfirmModal>
