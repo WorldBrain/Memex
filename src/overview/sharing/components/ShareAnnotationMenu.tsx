@@ -82,7 +82,11 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         const { copyState } = this.state
 
         if (copyState === 'running' || this.props.isLoading) {
-            return <LoadingIndicator />
+            return (
+                <LoadingBox>
+                    <LoadingIndicator size={16} />
+                </LoadingBox>
+            )
         } else if (copyState === 'success') {
             return <LinkContent>Copied to Clipboard</LinkContent>
         } else {
@@ -101,7 +105,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                 <Menu>
                     {this.props.isLoading ? (
                         <LoadingBox>
-                            <LoadingIndicator />
+                            <LoadingIndicator size={30} />
                         </LoadingBox>
                     ) : (
                         <>
@@ -307,7 +311,7 @@ const LinkCopierBox = styled.div`
 const LoadingBox = styled.div`
     width: 100%;
     display: flex;
-    height: 60px;
+    height: 100px;
     align-items: center;
     justify-content: center;
 `
