@@ -12,7 +12,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
@@ -457,12 +457,22 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
 
     render() {
         return this.state.saveState === 'running' ? (
-            <LoadingIndicator />
+            <LoadingBox>
+                <LoadingIndicator />
+            </LoadingBox>
         ) : (
             <ContentBox>{this.renderAuthForm()}</ContentBox>
         )
     }
 }
+
+const LoadingBox = styled.div`
+    height: 100px;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
 
 const AuthErrorMessage = styled.div`
     background-color: ${(props) => props.theme.colors.warning};

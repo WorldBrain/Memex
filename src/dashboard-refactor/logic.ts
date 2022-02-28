@@ -2568,8 +2568,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })
-            this.options.annotationsBG
-            await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
     /* END - lists sidebar event handlers */

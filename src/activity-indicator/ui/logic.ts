@@ -69,7 +69,6 @@ export default class Logic extends UILogic<State, Events> {
         if (previousState.hasFeedActivity) {
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({ hasFeedActivity: { $set: false } })
-            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
 }

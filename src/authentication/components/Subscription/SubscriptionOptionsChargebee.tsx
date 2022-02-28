@@ -11,7 +11,7 @@ import {
     CenterText,
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { AuthContextInterface } from 'src/authentication/background/types'
 

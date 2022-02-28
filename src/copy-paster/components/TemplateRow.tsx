@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Template } from '../types'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const COPY_TIMEOUT = 2000

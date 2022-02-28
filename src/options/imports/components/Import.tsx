@@ -2,7 +2,7 @@ import React from 'react'
 
 import AdvSettings from './AdvSettingsContainer'
 import { IMPORT_TYPE } from '../constants'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-settings'
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -154,9 +154,6 @@ class Import extends React.PureComponent<Props> {
                         </div>
                         {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                             <div className={localStyles.loadingBlocker}>
-                                <p className={localStyles.loadingMsg}>
-                                    {loadingMsg}
-                                </p>
                                 <LoadingIndicator />
                             </div>
                         )}
