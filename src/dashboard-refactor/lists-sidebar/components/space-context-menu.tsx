@@ -374,7 +374,7 @@ export class SpaceContextMenu extends PureComponent<
             <>
                 {this.state.isLoading ? (
                     <LoadingContainer>
-                        <LoadingIndicator />
+                        <LoadingIndicator size={30} />
                     </LoadingContainer>
                 ) : (
                     <>
@@ -486,7 +486,7 @@ const MoreIconBackground = styled.div`
 
 const LoadingContainer = styled.div`
     display: flex;
-    height: 40px;
+    height: 126px;
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid #f0f0f0;
