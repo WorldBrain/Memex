@@ -11,34 +11,44 @@ import { getShareButtonData } from '../sharing-utils'
 import Mousetrap from 'mousetrap'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
+import { PRIVATIZE_ANNOT_MSG } from 'src/overview/sharing/constants'
 
 export interface Props {
     isShared?: boolean
     isProtected?: boolean
     onSave: (
         shouldShare: boolean,
-        isProtected?: boolean,
+        isProtected: boolean,
+        keepListsIfUnsharing?: boolean,
     ) => void | Promise<void>
     renderCollectionsPicker?: () => React.ReactNode
 }
 
 interface State {
-    isPrivacyLevelShown: boolean
     isShareMenuShown: boolean
+    confirmationMode: null | {
+        type: 'public-to-private'
+        isBulkShareProtected: boolean
+    }
 }
 
 export default class AnnotationSaveBtn extends React.PureComponent<
     Props,
     State
 > {
-    state: State = { isPrivacyLevelShown: false, isShareMenuShown: false }
     static MOD_KEY = getKeyName({ key: 'mod' })
+
+    state: State = {
+        confirmationMode: null,
+        isShareMenuShown: false,
+    }
 
     componentDidMount() {
         Mousetrap.bind('mod+shift+enter', () => this.props.onSave(true, false))
-        Mousetrap.bind('mod+enter', () => this.props.onSave(false, false))
+        Mousetrap.bind('mod+enter', () => this.handleSetPrivate(false))
         Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
-        Mousetrap.bind('alt+enter', () => this.props.onSave(false, true))
+        Mousetrap.bind('alt+enter', () => this.handleSetPrivate(true))
     }
 
     componentWillUnmount() {
@@ -48,14 +58,50 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         Mousetrap.unbind('alt+enter')
     }
 
+    private handleSetPrivate = async (isBulkShareProtected: boolean) => {
+        if (this.props.isShared) {
+            this.setState({
+                confirmationMode: {
+                    type: 'public-to-private',
+                    isBulkShareProtected,
+                },
+            })
+        } else {
+            return this.props.onSave(false, isBulkShareProtected)
+        }
+    }
+
     private get saveIcon(): string {
         return getShareButtonData(this.props.isShared, this.props.isProtected)
             .icon
     }
 
-    private saveWithShareIntent = (shouldShare: boolean) => (
-        isProtected?: boolean,
-    ) => this.props.onSave(shouldShare, isProtected)
+    private saveWithShareIntent = (
+        shouldShare: boolean,
+        keepListsIfUnsharing?: boolean,
+    ) => (isProtected?: boolean) =>
+        this.props.onSave(shouldShare, isProtected, keepListsIfUnsharing)
+
+    private renderConfirmationMode() {
+        const { confirmationMode } = this.state
+
+        return (
+            <ConfirmDialog
+                titleText={PRIVATIZE_ANNOT_MSG}
+                handleConfirmation={(affirmative: boolean) => () => {
+                    this.setState({ confirmationMode: null })
+
+                    if (confirmationMode.type === 'public-to-private') {
+                        return this.props.onSave(
+                            false,
+                            confirmationMode.isBulkShareProtected,
+                            affirmative,
+                        )
+                    }
+                }}
+            />
+        )
+    }
 
     private renderShareMenu() {
         if (!this.state.isShareMenuShown) {
@@ -72,31 +118,40 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                 <DropdownMenuBtn
                     width={'340px'}
                     onClickOutside={() =>
-                        this.setState({ isShareMenuShown: false })
+                        this.setState({
+                            confirmationMode: null,
+                            isShareMenuShown: false,
+                        })
                     }
                 >
-                    <SharePrivacyOption
-                        hasProtectedOption
-                        icon="webLogo"
-                        title="Public"
-                        shortcut={`shift+${getKeyName({
-                            key: 'mod',
-                        })}+enter`}
-                        description="Auto-added to Spaces this page is shared to"
-                        onClick={this.saveWithShareIntent(true)}
-                        isSelected={this.props.isShared}
-                    />
-                    <SharePrivacyOption
-                        hasProtectedOption
-                        icon="person"
-                        title="Private"
-                        shortcut={`${getKeyName({
-                            key: 'mod',
-                        })}+enter`}
-                        description="Private to you, until shared (in bulk)"
-                        onClick={this.saveWithShareIntent(false)}
-                        isSelected={!this.props.isShared}
-                    />
+                    {this.state.confirmationMode == null ? (
+                        <>
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="webLogo"
+                                title="Public"
+                                shortcut={`shift+${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
+                                description="Auto-added to Spaces this page is shared to"
+                                onClick={this.saveWithShareIntent(true)}
+                                isSelected={this.props.isShared}
+                            />
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="person"
+                                title="Private"
+                                shortcut={`${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
+                                description="Private to you, until shared (in bulk)"
+                                onClick={this.handleSetPrivate}
+                                isSelected={!this.props.isShared}
+                            />
+                        </>
+                    ) : (
+                        this.renderConfirmationMode()
+                    )}
                 </DropdownMenuBtn>
             </HoverBox>
         )

@@ -165,7 +165,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await p
     }
 
-    private handleSetPrivate = async (isBulkShareProtected?: boolean) => {
+    private handleSetPrivate = async (isBulkShareProtected: boolean) => {
         if (this.props.isShared) {
             this.setState({
                 confirmationMode: {
