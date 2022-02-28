@@ -56,7 +56,10 @@ export type NoteInteractionProps = Omit<
     CommonInteractionProps,
     'onNotesBtnClick'
 > & {
-    updateShareInfo: (info: AnnotationSharingState) => void
+    updateShareInfo: (
+        info: AnnotationSharingState,
+        opts?: { keepListsIfUnsharing?: boolean },
+    ) => void
     updateTags: PickerUpdateHandler<string>
     updateLists: PickerUpdateHandler<number>
     onEditCancel: React.MouseEventHandler
@@ -312,9 +315,8 @@ export type Events = UIEvent<{
         deleted?: number
         protectAnnotation?: boolean
     }
-    updateNoteShareInfo: NoteEventArgs & AnnotationSharingState
-    // updateNoteShareInfo: NoteEventArgs & NoteShareInfo
-    /** NOTE: Does not mutate state */
+    updateNoteShareInfo: NoteEventArgs &
+        AnnotationSharingState & { keepListsIfUnsharing?: boolean }
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null

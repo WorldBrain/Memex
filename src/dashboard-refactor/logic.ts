@@ -1724,33 +1724,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const noteData = previousState.searchResults.noteData.byId[event.noteId]
+
+        const shouldShare =
+            event.privacyLevel === AnnotationPrivacyLevels.SHARED ||
+            event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+        const shouldProtect =
+            event.privacyLevel === AnnotationPrivacyLevels.PROTECTED ||
+            event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShared: {
-                                $set:
-                                    event.privacyLevel ===
-                                        AnnotationPrivacyLevels.SHARED ||
-                                    event.privacyLevel ===
-                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                            isShared: { $set: shouldShare },
+                            isBulkShareProtected: { $set: shouldProtect },
+                            lists: {
+                                $set: maybeRemoveSharedLists({
+                                    listIds: noteData.lists,
+                                    listsState: previousState.listsSidebar,
+                                    keepListsIfUnsharing:
+                                        event.keepListsIfUnsharing,
+                                    willUnshare:
+                                        noteData.isShared && !shouldShare,
+                                }),
                             },
-                            isBulkShareProtected: {
-                                $set:
-                                    event.privacyLevel ===
-                                        AnnotationPrivacyLevels.PROTECTED ||
-                                    event.privacyLevel ===
-                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                            },
-                            // TODO: Remove before merging to develop. Commented just in case we need to go back
-                            // isShared: { $set: event.isShared },
-                            // isBulkShareProtected: {
-                            //     $set: !!(
-                            //         event.isProtected ??
-                            //         prev.isBulkShareProtected
-                            //     ),
-                            // },
                         },
                     },
                 },
@@ -1939,7 +1938,21 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     isShared: { $set: event.shouldShare },
                                     comment: { $set: editNoteForm.inputValue },
                                     isBulkShareProtected: {
-                                        $set: event.isProtected,
+                                        $set:
+                                            event.keepListsIfUnsharing ||
+                                            event.isProtected,
+                                    },
+                                    lists: {
+                                        $set: maybeRemoveSharedLists({
+                                            listIds: noteData.lists,
+                                            listsState:
+                                                previousState.listsSidebar,
+                                            keepListsIfUnsharing:
+                                                event.keepListsIfUnsharing,
+                                            willUnshare:
+                                                noteData.isShared &&
+                                                !event.shouldShare,
+                                        }),
                                     },
                                 },
                             },
@@ -2765,3 +2778,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
     /* END - sync status menu event handlers */
 }
+
+const maybeRemoveSharedLists = (args: {
+    listIds: number[]
+    willUnshare: boolean
+    keepListsIfUnsharing: boolean
+    listsState: State['listsSidebar']
+}) =>
+    args.willUnshare && !args.keepListsIfUnsharing
+        ? args.listIds.filter(
+              (listId) => args.listsState.listData[listId]?.remoteId == null,
+          )
+        : args.listIds

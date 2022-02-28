@@ -240,9 +240,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={(state) =>
-                                    interactionProps.updateShareInfo(state)
-                                }
+                                postShareHook={interactionProps.updateShareInfo}
                                 spacePickerProps={{
                                     initialSelectedEntries: () =>
                                         noteData.lists ?? [],

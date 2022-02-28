@@ -12,6 +12,7 @@ import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPick
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
 import { SELECT_SPACE_ANNOT_MSG, PRIVATIZE_ANNOT_MSG } from './constants'
+import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 interface State extends ShareMenuCommonState {
     showLink: boolean
@@ -25,6 +26,10 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
+    postShareHook?: (
+        state: AnnotationSharingState,
+        opts?: { keepListsIfUnsharing?: boolean },
+    ) => void
     spacePickerProps: Pick<
         Partial<SpacePickerDependencies>,
         'contentSharingBG' | 'spacesBG'
@@ -115,10 +120,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await this.props.copyLink(link)
 
         this.props.postShareHook?.(sharingState)
-        // this.props.postShareHook?.({
-        //     isShared: true,
-        //     isProtected: isBulkShareProtected,
-        // })
     }
 
     private handleSetShared = async (isBulkShareProtected?: boolean) => {
@@ -157,7 +158,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     }),
                 })
 
-                this.props.postShareHook?.(sharingState)
+                this.props.postShareHook?.(sharingState, {
+                    keepListsIfUnsharing: options.keepListsIfUnsharing,
+                })
             },
         )
 
