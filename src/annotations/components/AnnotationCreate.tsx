@@ -18,6 +18,7 @@ import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { browser } from 'webextension-polyfill-ts'
 
 interface State {
     isTagPickerShown: boolean
@@ -130,22 +131,39 @@ export class AnnotationCreate extends React.Component<Props, State>
         // If we don't have this, events will bubble up, out of the content script into the parent page!
         e.stopPropagation()
 
-        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.handleSave(true, false)
-        }
+        if (navigator.platform === 'MacIntel') {
+            if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+                return this.handleSave(true, false)
+            }
 
-        if (e.key === 'Enter' && e.shiftKey && e.altKey) {
-            return this.handleSave(true, true)
-        }
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.handleSave(true, true)
+            }
 
-        if (e.key === 'Enter' && e.altKey) {
-            return this.handleSave(false, true)
-        }
+            if (e.key === 'Enter' && e.altKey) {
+                return this.handleSave(false, true)
+            }
 
-        if (e.key === 'Enter' && e.metaKey) {
-            return this.handleSave(false, false)
-        }
+            if (e.key === 'Enter' && e.metaKey) {
+                return this.handleSave(false, false)
+            }
+        } else {
+            if (e.key === 'Enter' && e.shiftKey && e.ctrlKey) {
+                return this.handleSave(true, false)
+            }
 
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.handleSave(true, true)
+            }
+
+            if (e.key === 'Enter' && e.altKey) {
+                return this.handleSave(false, true)
+            }
+
+            if (e.key === 'Enter' && e.ctrlKey) {
+                return this.handleSave(false, false)
+            }
+        }
         // if (e.key === 'Tab' && !e.shiftKey) {
         //     e.preventDefault()
         //     insertTab({ el: this.textAreaRef.current })
