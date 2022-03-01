@@ -789,13 +789,21 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const immediateShare =
-            event.mouseEvent.metaKey && event.mouseEvent.altKey
-
-        this.emitMutation({
-            activeShareMenuNoteId: { $set: event.annotationUrl },
-            immediatelyShareNotes: { $set: !!immediateShare },
-        })
+        if (navigator.platform === 'MacIntel') {
+            const immediateShare =
+                event.mouseEvent.metaKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        } else {
+            const immediateShare =
+                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        }
 
         await this.setLastSharedAnnotationTimestamp()
     }
