@@ -18,7 +18,11 @@ import {
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
-import { updatePickerValues, stateToSearchParams } from './util'
+import {
+    updatePickerValues,
+    stateToSearchParams,
+    flattenNestedResults,
+} from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType, NoteShareInfo } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
@@ -808,38 +812,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchResults: { draggedPageId: { $set: undefined } },
         })
-    }
-
-    private updateShareInfoForNoteIds = (params: {
-        noteIds: string[]
-        previousState: State
-        info: NoteShareInfo
-    }) => {
-        const mutation: UIMutation<State['searchResults']['noteData']> = {}
-
-        for (const noteId of params.noteIds) {
-            const prev =
-                params.previousState.searchResults.noteData.byId[noteId]
-            if (prev?.isBulkShareProtected) {
-                continue
-            }
-
-            mutation.byId = {
-                ...(mutation.byId ?? {}),
-                [noteId]: {
-                    isShared: {
-                        $set: params.info.isShared,
-                    },
-                    isBulkShareProtected: {
-                        $set: !!(
-                            params.info.isProtected ?? prev.isBulkShareProtected
-                        ),
-                    },
-                },
-            }
-        }
-
-        this.emitMutation({ searchResults: { noteData: mutation } })
     }
 
     private updateBulkNotesShareInfoFromShareState = (params: {
@@ -1675,9 +1647,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { contentShareBG } = this.options
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
+        const pageData =
+            previousState.searchResults.pageData.byId[noteData.pageUrl]
 
         let remoteFn: () => Promise<any>
-        let listIds = noteData.lists
+
+        let noteListIds = noteData.lists
+        let pageListIds = pageData.lists
         if (event.added != null) {
             remoteFn = () =>
                 contentShareBG.shareAnnotationToSomeLists({
@@ -1685,36 +1661,75 @@ export class DashboardLogic extends UILogic<State, Events> {
                     localListIds: [event.added],
                     protectAnnotation: event.protectAnnotation,
                 })
-            listIds = [...listIds, event.added]
-        }
-        if (event.deleted != null) {
+            noteListIds = [...noteListIds, event.added]
+            pageListIds = [...pageListIds, event.added]
+        } else if (event.deleted != null) {
             remoteFn = () =>
                 contentShareBG.unshareAnnotationFromSomeLists({
                     annotationUrl: event.noteId,
                     localListIds: [event.deleted],
                 })
-            const toRemove = listIds.findIndex((id) => id === event.deleted)
-            listIds = [
-                ...listIds.slice(0, toRemove),
-                ...listIds.slice(toRemove + 1),
-            ]
+            noteListIds = noteListIds.filter((id) => id !== event.deleted)
+            pageListIds = pageListIds.filter((id) => id !== event.deleted)
+        }
+
+        const searchResultsMutation: UIMutation<State['searchResults']> = {
+            noteData: {
+                byId: {
+                    [event.noteId]: {
+                        lists: { $set: noteListIds },
+                        isShared: {
+                            $set: event.protectAnnotation
+                                ? false
+                                : noteData.isShared,
+                        },
+                        isBulkShareProtected: {
+                            $set:
+                                event.protectAnnotation ??
+                                noteData.isBulkShareProtected,
+                        },
+                    },
+                },
+            },
+        }
+
+        if (event.protectAnnotation === false) {
+            const otherNoteIds = flattenNestedResults(previousState).byId[
+                noteData.pageUrl
+            ].noteIds.user
+            const publicNoteIds = otherNoteIds.filter(
+                (noteId) =>
+                    previousState.searchResults.noteData.byId[noteId].isShared,
+            )
+
+            for (const noteId of publicNoteIds) {
+                let listIds =
+                    previousState.searchResults.noteData.byId[noteId].lists
+
+                if (event.added != null) {
+                    listIds = [...listIds, event.added]
+                } else if (event.deleted != null) {
+                    listIds = listIds.filter((id) => id !== event.deleted)
+                }
+
+                ;(searchResultsMutation.noteData as any).byId[noteId] = {
+                    lists: { $set: listIds },
+                }
+            }
+
+            searchResultsMutation.pageData = {
+                byId: {
+                    [noteData.pageUrl]: {
+                        lists: { $set: pageListIds },
+                    },
+                },
+            }
         }
 
         if (remoteFn) {
             this.emitMutation({
-                searchResults: {
-                    noteData: {
-                        byId: {
-                            [event.noteId]: {
-                                lists: { $set: listIds },
-                                isShared: { $set: !event.protectAnnotation },
-                            },
-                        },
-                    },
-                },
-                modals: {
-                    confirmSelectNoteSpaceArgs: { $set: null },
-                },
+                searchResults: searchResultsMutation,
+                modals: { confirmSelectNoteSpaceArgs: { $set: null } },
             })
             await remoteFn()
         }

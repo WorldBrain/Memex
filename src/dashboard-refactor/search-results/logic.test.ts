@@ -1915,7 +1915,7 @@ describe('Dashboard search results logic', () => {
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
-                        .editNoteForm.lists,
+                        .lists,
                 ).toEqual([])
 
                 await searchResults.processEvent('setNoteLists', {
@@ -1952,6 +1952,227 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
                 ).toEqual([])
+            })
+
+            it('should be able to add note to space, also adding parent page+other public annots', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[2])
+
+                const noteId = DATA.NOTE_2.url
+                const otherNoteIdA = DATA.NOTE_1.url
+                const otherNoteIdB = DATA.NOTE_3.url
+                const pageId = DATA.NOTE_2.pageUrl
+
+                searchResults.processMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [noteId]: {
+                                    isShared: { $set: true },
+                                    isBulkShareProtected: { $set: false },
+                                },
+                                [otherNoteIdA]: {
+                                    isShared: { $set: true },
+                                    isBulkShareProtected: { $set: false },
+                                },
+                                [otherNoteIdB]: {
+                                    isShared: { $set: true },
+                                    isBulkShareProtected: { $set: false },
+                                },
+                            },
+                        },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[0].id,
+                    protectAnnotation: false,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[1].id,
+                    protectAnnotation: true,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        isShared: false,
+                        isBulkShareProtected: true,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
+
+                // NOTE: the note is now protected, thus the `protectAnnotation` arg should be undefined (different behavior to `false`)
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[2].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            DATA.LISTS_1[2].id,
+                        ],
+                        isShared: false,
+                        isBulkShareProtected: true,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
             })
 
             it('should be able to set note edit comment value state', async ({
