@@ -319,7 +319,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                 ]
             }
 
-            return [{ node: <></> }]
+            return [
+                {
+                    key: 'share-note-btn',
+                    isDisabled: true,
+                    image: shareIconData.icon,
+                },
+            ]
         }
 
         if (hoverState === 'footer') {
@@ -843,6 +849,5 @@ const DeletionBox = styled.div`
     justify-content: space-between;
     align-items: center;
     border-top: 1px solid #f0f0f0;
-    padding: 5px;
-}
+    padding: 5px 15px 5px 15px;
 `

@@ -41,7 +41,7 @@ const Footer = ({
                         actionBtnClickHandler()
                     }}
                 >
-                    {actionBtnText}
+                    {actionBtnText}ss
                 </button>
             </ButtonTooltip>
             <button
