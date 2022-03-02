@@ -293,7 +293,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (!footerDeps) {
             return [
                 repliesLoadingState === 'running'
-                    ? { node: <LoadingIndicator /> }
+                    ? { node: <LoadingIndicator size={16} /> }
                     : {
                           key: 'replies-btn',
                           onClick: onReplyBtnClick,
