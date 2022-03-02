@@ -14,12 +14,18 @@ import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
 import { SELECT_SPACE_ANNOT_MSG, PRIVATIZE_ANNOT_MSG } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
+type SelectType = 'select' | 'unselect'
+
 interface State extends ShareMenuCommonState {
     showLink: boolean
     confirmationMode:
         | null
         | { type: 'public-to-private'; isBulkShareProtected: boolean }
-        | { type: 'public-select-space'; listId: number }
+        | {
+              type: 'public-select-space'
+              listId: number
+              selectType: SelectType
+          }
 }
 
 export interface Props extends ShareMenuCommonProps {
@@ -173,17 +179,27 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         }
     }
 
-    private handleSpacePickerSelection = async (listId: number) => {
+    private handleSpacePickerSelection = (
+        selectType: 'select' | 'unselect',
+    ) => async (listId: number) => {
+        const { selectEntry, unselectEntry } = this.props.spacePickerProps
         if (this.props.isShared) {
             this.setState({
-                confirmationMode: { type: 'public-select-space', listId },
+                confirmationMode: {
+                    type: 'public-select-space',
+                    listId,
+                    selectType,
+                },
             })
         } else {
-            return this.props.spacePickerProps.selectEntry(listId)
+            return selectType === 'select'
+                ? selectEntry(listId)
+                : unselectEntry(listId)
         }
     }
 
     private renderConfirmationMode() {
+        const { selectEntry, unselectEntry } = this.props.spacePickerProps
         const { confirmationMode } = this.state
         const text =
             confirmationMode.type === 'public-select-space'
@@ -194,12 +210,16 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this.setState({ confirmationMode: null })
 
             if (confirmationMode.type === 'public-select-space') {
-                this.props.spacePickerProps.selectEntry(
-                    confirmationMode.listId,
-                    { protectAnnotation: affirmative },
-                )
+                const fn =
+                    confirmationMode.selectType === 'select'
+                        ? selectEntry
+                        : unselectEntry
+
+                return fn(confirmationMode.listId, {
+                    protectAnnotation: affirmative,
+                })
             } else if (confirmationMode.type === 'public-to-private') {
-                this.handleUnshare({
+                return this.handleUnshare({
                     isBulkShareProtected: confirmationMode.isBulkShareProtected,
                     keepListsIfUnsharing: !affirmative,
                 })
@@ -268,7 +288,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         </SectionSubTitle>
                         <SpacePicker
                             {...this.props.spacePickerProps}
-                            selectEntry={this.handleSpacePickerSelection}
+                            selectEntry={this.handleSpacePickerSelection(
+                                'select',
+                            )}
+                            unselectEntry={this.handleSpacePickerSelection(
+                                'unselect',
+                            )}
                         />
                     </>
                 ) : (

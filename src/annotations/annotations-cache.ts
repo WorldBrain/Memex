@@ -446,12 +446,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         for (const i of annotIndices) {
             const annot = nextState[i]
+            const listIds = new Set(annot.lists)
 
             if (added != null) {
-                annot.lists = [...annot.lists, added]
+                listIds.add(added)
             } else if (deleted != null) {
-                annot.lists = annot.lists.filter((listId) => listId !== deleted)
+                listIds.delete(deleted)
             }
+            annot.lists = [...listIds]
         }
 
         this.annotationChanges.emit('newStateIntent', nextState)

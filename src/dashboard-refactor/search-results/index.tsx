@@ -249,16 +249,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                             added: listId,
                                             deleted: null,
                                             selected: [],
-                                            options: {
-                                                protectAnnotation:
-                                                    options.protectAnnotation,
-                                            },
+                                            options,
                                         }),
-                                    unselectEntry: (listId) =>
+                                    unselectEntry: (listId, options) =>
                                         interactionProps.updateLists({
                                             added: null,
                                             deleted: listId,
                                             selected: [],
+                                            options,
                                         }),
                                     createNewEntry:
                                         interactionProps.createNewList,

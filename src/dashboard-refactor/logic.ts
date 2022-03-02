@@ -1652,8 +1652,9 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         let remoteFn: () => Promise<any>
 
-        let noteListIds = noteData.lists
-        let pageListIds = pageData.lists
+        const noteListIds = new Set(noteData.lists)
+        const pageListIds = new Set(pageData.lists)
+
         if (event.added != null) {
             remoteFn = () =>
                 contentShareBG.shareAnnotationToSomeLists({
@@ -1661,23 +1662,25 @@ export class DashboardLogic extends UILogic<State, Events> {
                     localListIds: [event.added],
                     protectAnnotation: event.protectAnnotation,
                 })
-            noteListIds = [...noteListIds, event.added]
-            pageListIds = [...pageListIds, event.added]
+            noteListIds.add(event.added)
+            pageListIds.add(event.added)
         } else if (event.deleted != null) {
             remoteFn = () =>
                 contentShareBG.unshareAnnotationFromSomeLists({
                     annotationUrl: event.noteId,
                     localListIds: [event.deleted],
                 })
-            noteListIds = noteListIds.filter((id) => id !== event.deleted)
-            pageListIds = pageListIds.filter((id) => id !== event.deleted)
+            noteListIds.delete(event.deleted)
+            pageListIds.delete(event.deleted)
+        } else {
+            return
         }
 
         const searchResultsMutation: UIMutation<State['searchResults']> = {
             noteData: {
                 byId: {
                     [event.noteId]: {
-                        lists: { $set: noteListIds },
+                        lists: { $set: [...noteListIds] },
                         isShared: {
                             $set: event.protectAnnotation
                                 ? false
@@ -1703,24 +1706,25 @@ export class DashboardLogic extends UILogic<State, Events> {
             )
 
             for (const noteId of publicNoteIds) {
-                let listIds =
-                    previousState.searchResults.noteData.byId[noteId].lists
+                const listIds = new Set(
+                    previousState.searchResults.noteData.byId[noteId].lists,
+                )
 
                 if (event.added != null) {
-                    listIds = [...listIds, event.added]
+                    listIds.add(event.added)
                 } else if (event.deleted != null) {
-                    listIds = listIds.filter((id) => id !== event.deleted)
+                    listIds.delete(event.deleted)
                 }
 
                 ;(searchResultsMutation.noteData as any).byId[noteId] = {
-                    lists: { $set: listIds },
+                    lists: { $set: [...listIds] },
                 }
             }
 
             searchResultsMutation.pageData = {
                 byId: {
                     [noteData.pageUrl]: {
-                        lists: { $set: pageListIds },
+                        lists: { $set: [...pageListIds] },
                     },
                 },
             }
