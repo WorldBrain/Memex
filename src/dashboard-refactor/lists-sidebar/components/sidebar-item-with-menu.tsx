@@ -17,6 +17,7 @@ import SpaceContextMenuButton from './space-context-menu'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { progressPercent } from 'src/options/imports/selectors'
 
 export interface Props {
     className?: string
@@ -53,6 +54,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
+        e.stopPropagation()
         // Needed to push this op back on the event queue, so it fires after the previous
         //  list item's `onDropLeave` event
         setTimeout(() => this.props.dropReceivingState?.onDragEnter(), 0)
@@ -194,11 +196,11 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return (
                 <ListTitle
                     selectedState={this.props.selectedState}
-                    dropReceivingState={dropReceivingState}
-                    onDragLeave={dropReceivingState?.onDragLeave}
-                    onDragEnter={this.handleDragEnter}
-                    onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                    onDrop={this.handleDrop}
+                    // dropReceivingState={dropReceivingState}
+                    // onDragLeave={dropReceivingState?.onDragLeave}
+                    // onDragEnter={this.handleDragEnter}
+                    // onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
+                    // onDrop={this.handleDrop}
                     {...this.props}
                 >
                     {this.renderListIcon(this.props.listId)}
@@ -246,19 +248,14 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     //title={this.props.name}
                     onClick={this.handleSelection}
                     onDragEnter={this.handleDragEnter}
+                    onDragLeave={dropReceivingState?.onDragLeave}
+                    onDragOver={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }} // Needed to allow the `onDrop` event to fire
+                    onDrop={this.handleDrop}
                     {...this.props}
                 >
-                    {dropReceivingState?.isDraggedOver && (
-                        <DropZoneMask
-                            dropReceivingState={dropReceivingState}
-                            onDragLeave={dropReceivingState?.onDragLeave}
-                            onDragEnter={this.handleDragEnter}
-                            onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                            onDrop={this.handleDrop}
-                            onClick={this.handleSelection}
-                        />
-                    )}
-
                     <TitleBox {...this.props}> {this.renderTitle()}</TitleBox>
 
                     <IconBox
@@ -266,7 +263,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         newItemsCount={newItemsCount}
                         hasActivity={hasActivity}
                         // onClick={this.handleMoreActionClick}
-
                         right="10px"
                     >
                         {this.renderIcon()}
@@ -314,12 +310,16 @@ const IconBox = styled.div<Props>`
     justify-content: flex-end;
     padding-right: 10px;
     padding-left: 5px;
+    z-index: 1;
 `
 
 const DropZoneMask = styled.div`
     height: inherit;
     width: inherit;
     position: absolute;
+    background: red;
+    width: fill-available;
+    z-index: 2;
 `
 
 const TitleBox = styled.div<Props>`

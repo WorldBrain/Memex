@@ -96,6 +96,7 @@ const SearchBox = styled.div`
     margin-bottom: 4px;
     grid-gap: 5px;
     min-height: 20px;
+    height: 24px;
 `
 
 const SearchInput = styled(TextInputControlled)`

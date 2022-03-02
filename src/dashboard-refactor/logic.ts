@@ -2244,6 +2244,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
+        console.log('sdd')
         const { fullPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
         )
