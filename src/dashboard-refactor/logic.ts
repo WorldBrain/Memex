@@ -1646,26 +1646,47 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.showShareOnboardingIfNeeded()
         }
 
-        const immediateShare =
-            event.mouseEvent.metaKey && event.mouseEvent.altKey
-
-        this.emitMutation({
-            searchResults: {
-                noteData: {
-                    byId: {
-                        [event.noteId]: {
-                            shareMenuShowStatus: {
-                                $set: event.shouldShow
-                                    ? immediateShare
-                                        ? 'show-n-share'
-                                        : 'show'
-                                    : 'hide',
+        if (navigator.platform === 'MacIntel') {
+            const immediateShare =
+                event.mouseEvent.metaKey && event.mouseEvent.altKey
+            this.emitMutation({
+                searchResults: {
+                    noteData: {
+                        byId: {
+                            [event.noteId]: {
+                                shareMenuShowStatus: {
+                                    $set: event.shouldShow
+                                        ? immediateShare
+                                            ? 'show-n-share'
+                                            : 'show'
+                                        : 'hide',
+                                },
                             },
                         },
                     },
                 },
-            },
-        })
+            })
+        } else {
+            const immediateShare =
+                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
+            this.emitMutation({
+                searchResults: {
+                    noteData: {
+                        byId: {
+                            [event.noteId]: {
+                                shareMenuShowStatus: {
+                                    $set: event.shouldShow
+                                        ? immediateShare
+                                            ? 'show-n-share'
+                                            : 'show'
+                                        : 'hide',
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
     }
 
     private async showShareOnboardingIfNeeded(now = Date.now()) {
@@ -2223,6 +2244,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
+        console.log('sdd')
         const { fullPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
         )

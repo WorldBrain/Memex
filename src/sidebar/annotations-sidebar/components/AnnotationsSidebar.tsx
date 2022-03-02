@@ -303,6 +303,8 @@ class AnnotationsSidebar extends React.Component<
                     const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
                         sharedAnnotationRef,
                     )
+
+                    console.log(conversation)
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable
@@ -359,7 +361,7 @@ class AnnotationsSidebar extends React.Component<
         const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
-                <FollowedListNotesContainer bottom="20px" top="0px">
+                <FollowedListNotesContainer bottom="10px" top="0px">
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         key={listId}

@@ -126,14 +126,35 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 )
                             }
                         >
-                            {this.props.isShared ||
-                                (this.props.isProtected && (
+                            {this.props.isShared && this.props.isProtected && (
+                                <Icon
+                                    hoverOff
+                                    filePath={this.saveIcon}
+                                    heightAndWidth="14px"
+                                />
+                            )}{' '}
+                            {!this.props.isShared && this.props.isProtected && (
+                                <Icon
+                                    hoverOff
+                                    filePath={icons.lockFine}
+                                    heightAndWidth="14px"
+                                />
+                            )}{' '}
+                            {!this.props.isShared &&
+                                !this.props.isProtected && (
                                     <Icon
                                         hoverOff
-                                        filePath={this.saveIcon}
+                                        filePath={icons.personFine}
                                         heightAndWidth="14px"
                                     />
-                                ))}{' '}
+                                )}{' '}
+                            {this.props.isShared && !this.props.isProtected && (
+                                <Icon
+                                    hoverOff
+                                    filePath={icons.globe}
+                                    heightAndWidth="14px"
+                                />
+                            )}{' '}
                             Save
                         </SaveBtnText>
                     </ButtonTooltip>

@@ -187,12 +187,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Sign Up'}
                                         fontSize={'14px'}
                                     />
-                                    {this.state.error && (
-                                        <AuthErrorMessage>
-                                            {this.renderAuthError()}
-                                        </AuthErrorMessage>
-                                    )}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
@@ -288,8 +288,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Login'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
@@ -353,8 +357,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Login'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
