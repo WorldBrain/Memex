@@ -456,7 +456,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="5px" bottom="5px">
+                <AnnotationBox top="5px" bottom="2px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -506,7 +506,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                             )}
                         </AnnotationStyled>
                     </ItemBox>
-                </Margin>
+                </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <ClickAway
                         onClickAway={() =>
@@ -580,6 +580,11 @@ const EditNoteIconBox = styled.div`
     &:hover {
         background-color: #f0f0f0;
     }
+`
+
+const AnnotationBox = styled(Margin)`
+    width: 99%;
+    align-self: center;
 `
 
 const EditNoteIcon = styled.div`
