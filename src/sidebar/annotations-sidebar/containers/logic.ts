@@ -687,36 +687,15 @@ export class SidebarContainerLogic extends UILogic<
 
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
-    > = async ({ event, previousState }) => {
-        const idx = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationId,
-        )
-        if (idx === -1) {
-            return
-        }
-
+    > = async ({ event }) => {
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
-        let listIds = previousState.annotations[idx].lists
-        if (event.added != null) {
-            listIds = [...listIds, event.added]
-        }
-
-        if (event.deleted != null) {
-            const toRemove = listIds.findIndex((id) => id === event.deleted)
-            listIds = [
-                ...listIds.slice(0, toRemove),
-                ...listIds.slice(toRemove + 1),
-            ]
-        }
-
-        await this.options.annotationsCache.update(
-            {
-                ...previousState.annotations[idx],
-                lists: listIds,
-            },
-            { isBulkShareProtected: event.options?.protectAnnotation },
-        )
+        await this.options.annotationsCache.updateLists({
+            annotationId: event.annotationId,
+            options: event.options,
+            deleted: event.deleted,
+            added: event.added,
+        })
     }
 
     setEditCommentTagPicker: EventHandler<'setEditCommentTagPicker'> = ({

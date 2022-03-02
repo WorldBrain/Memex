@@ -208,6 +208,12 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
     getAnnotationById: (id: string) => CachedAnnotation | null
+    updateLists: (args: {
+        added: number | null
+        deleted: number | null
+        annotationId: string
+        options?: { protectAnnotation?: boolean }
+    }) => Promise<void>
 
     annotations: CachedAnnotation[]
     readonly highlights: CachedAnnotation[]
@@ -334,7 +340,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             const sharingState = await this.dependencies.backendOperations.updateLists(
                 annotation.url,
                 annotation.lists,
-                { protectAnnotation: shareOpts?.isBulkShareProtected },
             )
             const parsedPrivacyLevel = maybeGetAnnotationPrivacyState(
                 sharingState?.privacyLevel,
@@ -398,6 +403,80 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             this.annotationChanges.emit('rollback', stateBeforeModifications)
             throw e
         }
+    }
+
+    updateLists: AnnotationsCacheInterface['updateLists'] = async ({
+        annotationId,
+        added,
+        deleted,
+        options,
+    }) => {
+        const stateBeforeModifications = [...this._annotations]
+        const nextState = [...stateBeforeModifications]
+        const annotIndices = [
+            stateBeforeModifications.findIndex(
+                (existingAnnotation) => existingAnnotation.url === annotationId,
+            ),
+        ]
+        if (annotIndices[0] === -1) {
+            return
+        }
+
+        const previousAnnotation = stateBeforeModifications[annotIndices[0]]
+        const nextAnnotation = nextState[annotIndices[0]]
+        nextAnnotation.isShared = options?.protectAnnotation
+            ? false
+            : previousAnnotation.isShared
+        nextAnnotation.isBulkShareProtected =
+            options?.protectAnnotation ??
+            previousAnnotation.isBulkShareProtected
+
+        // If not choosing to protect the annot, all other public annots must also have their lists updated in the same way
+        if (options?.protectAnnotation === false) {
+            const publicAnnotIndices = nextState
+                .map((_, i) => i)
+                .filter(
+                    (i) =>
+                        nextState[i].isShared &&
+                        nextState[i].url !== annotationId,
+                )
+
+            annotIndices.push(...publicAnnotIndices)
+        }
+
+        for (const i of annotIndices) {
+            const annot = nextState[i]
+
+            if (added != null) {
+                annot.lists = [...annot.lists, added]
+            } else if (deleted != null) {
+                annot.lists = annot.lists.filter((listId) => listId !== deleted)
+            }
+        }
+
+        this.annotationChanges.emit('newStateIntent', nextState)
+
+        try {
+            const sharingState = await this.dependencies.backendOperations.updateLists(
+                annotationId,
+                nextAnnotation.lists,
+                { protectAnnotation: options?.protectAnnotation },
+            )
+
+            const parsedPrivacyLevel = maybeGetAnnotationPrivacyState(
+                sharingState?.privacyLevel,
+            )
+            nextAnnotation.isShared = parsedPrivacyLevel.public
+            nextAnnotation.isBulkShareProtected = parsedPrivacyLevel.protected
+
+            this.annotations = nextState
+        } catch (e) {
+            this._annotations = stateBeforeModifications
+            this.annotationChanges.emit('rollback', stateBeforeModifications)
+            throw e
+        }
+
+        this.annotationChanges.emit('newState', this.annotations)
     }
 }
 

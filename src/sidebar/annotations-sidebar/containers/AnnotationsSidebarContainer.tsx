@@ -324,17 +324,19 @@ export class AnnotationsSidebarContainer<
                 })
                 return listId
             },
-            selectEntry: async (listId) =>
+            selectEntry: async (listId, options) =>
                 this.processEvent(updateListsEvent, {
                     added: listId,
                     deleted: null,
                     annotationId: annotation.url,
+                    options,
                 }),
-            unselectEntry: async (listId) =>
+            unselectEntry: async (listId, options) =>
                 this.processEvent(updateListsEvent, {
                     added: null,
                     deleted: listId,
                     annotationId: annotation.url,
+                    options,
                 }),
         }
     }
@@ -423,7 +425,10 @@ export class AnnotationsSidebarContainer<
                         }
                     >
                         <CollectionPicker
-                            {...this.getSpacePickerProps(currentAnnotation)}
+                            {...this.getSpacePickerProps(
+                                currentAnnotation,
+                                true,
+                            )}
                         />
                     </ClickAway>
                 </HoverBox>

@@ -34,15 +34,7 @@ export interface Props extends ShareMenuCommonProps {
         Partial<SpacePickerDependencies>,
         'contentSharingBG' | 'spacesBG'
     > &
-        Omit<
-            SpacePickerDependencies,
-            'contentSharingBG' | 'spacesBG' | 'selectEntry'
-        > & {
-            selectEntry: (
-                listId: number,
-                options?: { protectAnnotation?: boolean },
-            ) => Promise<void>
-        }
+        Omit<SpacePickerDependencies, 'contentSharingBG' | 'spacesBG'>
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
