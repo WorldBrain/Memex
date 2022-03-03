@@ -26,18 +26,23 @@ export default function TagsSegment({
                     <ButtonTooltip
                         tooltipText={
                             <span>
-                                Tags will soon be deprecated merged into Spaces
+                                Tags will soon be deprecated & merged into
+                                Spaces
                                 <br />
                                 Click to learn more
                             </span>
                         }
-                        position={'bottom'}
+                        position={'right'}
                     >
                         <Icon
                             filePath={icons.alertRound}
                             color={'warning'}
                             heightAndWidth="18px"
-                            onClick={() => window.open('')}
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/announcements/tags-collections-unification',
+                                )
+                            }
                         />
                     </ButtonTooltip>
                 </WarningBox>

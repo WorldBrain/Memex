@@ -17,12 +17,14 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                 <TitleText>{titleText}</TitleText>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label="Yes"
+                        label="Remove shared Spaces"
                         onClick={handleConfirmation(true)}
+                        fontSize="12px"
                     />
                     <SecondaryAction
-                        label="No"
+                        label="Keep Shared Spaces"
                         onClick={handleConfirmation(false)}
+                        borderOff
                     />
                 </ConfirmBtnRow>
             </Container>
@@ -30,14 +32,25 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
     }
 }
 
-const TitleText = styled.h1``
+const TitleText = styled.div`
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.darkerText};
+    text-align: center;
+    font-weight: 800;
+    line-height: 26px;
+`
 
 const ConfirmBtnRow = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    grid-gap: 10px;
 `
 
 const Container = styled.div`
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    grid-gap: 20px;
 `

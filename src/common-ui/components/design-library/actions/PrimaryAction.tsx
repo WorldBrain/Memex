@@ -13,7 +13,7 @@ import { props } from 'lodash/fp'
 const StyledPrimaryAction = styled.div`
     padding: 8px 20px;
     height: 35px;
-    font-weight: normal;
+    font-weight: 400;
     overflow: visible;
     white-space: nowrap;
     display: flex;

@@ -11,7 +11,7 @@ import {
 
 const StyledSecondaryAction = styled.div`
     padding: 8px 20px;
-    border: 1px solid ${colorMidPurple};
+    border: ${(props) => !props.borderOff && `1px solid ${colorMidPurple}`};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
@@ -34,14 +34,17 @@ export const SecondaryAction = ({
     label,
     onClick,
     disabled,
+    borderOff,
 }: {
     label: React.ReactNode
     disabled?: boolean
     onClick: React.MouseEventHandler
+    borderOff?: boolean
 }) => (
     <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
+        borderOff={borderOff}
     >
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>
