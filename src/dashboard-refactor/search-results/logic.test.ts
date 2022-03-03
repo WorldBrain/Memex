@@ -2064,6 +2064,80 @@ describe('Dashboard search results logic', () => {
                 ).toEqual([])
             })
 
+            it('should set note to protected when adding/removing a list while note is private', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                })
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+
+                const noteIdA = DATA.NOTE_1.url
+                const noteIdB = DATA.NOTE_2.url
+
+                searchResults.processMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: { [noteIdB]: { isShared: { $set: true } } },
+                        },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                        lists: [],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdA,
+                    added: DATA.LISTS_1[0].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdB,
+                    added: DATA.LISTS_1[0].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
+            })
+
             it('should be able to add note to space, also adding parent page+other public annots', async ({
                 device,
             }) => {

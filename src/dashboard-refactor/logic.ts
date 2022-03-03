@@ -1710,7 +1710,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         isBulkShareProtected: {
                             $set:
                                 event.protectAnnotation ??
-                                noteData.isBulkShareProtected,
+                                (!noteData.isShared // If not shared, it needs to be protected upon list add/remove
+                                    ? true
+                                    : noteData.isBulkShareProtected),
                         },
                     },
                 },
