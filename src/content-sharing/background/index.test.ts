@@ -1502,7 +1502,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ],
                                     },
                                 )
-
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
                                 await helper.setAnnotationPrivacyLevel(setup, {
                                     id: 1,
                                     keepListsIfUnsharing: false,
@@ -1547,6 +1550,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
                                     [],
+                                )
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 3 }],
                                 )
                             },
                         },
