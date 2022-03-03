@@ -611,10 +611,10 @@ export default class ContentSharingBackground {
                 excludeFromLists: true,
             })
 
-            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+            sharingState.privacyLevel = AnnotationPrivacyLevels.PRIVATE
             await this.storage.setAnnotationPrivacyLevel({
                 annotation: params.annotation,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             })
 
             return { sharingState }

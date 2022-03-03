@@ -1957,9 +1957,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     isShared: { $set: event.shouldShare },
                                     comment: { $set: editNoteForm.inputValue },
                                     isBulkShareProtected: {
-                                        $set:
-                                            event.keepListsIfUnsharing ||
-                                            event.isProtected,
+                                        $set: event.isProtected,
                                     },
                                     lists: {
                                         $set: maybeRemoveSharedLists({
