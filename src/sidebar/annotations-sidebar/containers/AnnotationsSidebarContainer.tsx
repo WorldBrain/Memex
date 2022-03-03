@@ -253,7 +253,7 @@ export class AnnotationsSidebarContainer<
                     name,
                 })
                 this.processMutation({
-                    listData: { [listId]: { $set: { name } } },
+                    listData: { [listId]: { $set: { name, remoteId: null } } },
                 })
                 return listId
             },
@@ -319,7 +319,7 @@ export class AnnotationsSidebarContainer<
                 })
                 this.processMutation({
                     listData: {
-                        [listId]: { $set: { name } },
+                        [listId]: { $set: { name, remoteId: null } },
                     },
                 })
                 return listId
@@ -465,10 +465,12 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('copyNoteLink', { link })
                             }
                             annotationUrl={currentAnnotationId}
-                            postShareHook={(state) =>
+                            postShareHook={(state, opts) =>
                                 this.processEvent('updateAnnotationShareInfo', {
                                     annotationUrl: currentAnnotationId,
                                     ...state,
+                                    keepListsIfUnsharing:
+                                        opts?.keepListsIfUnsharing,
                                 })
                             }
                             closeShareMenu={() =>

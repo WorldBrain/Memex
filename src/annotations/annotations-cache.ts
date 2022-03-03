@@ -201,7 +201,10 @@ export interface AnnotationsCacheInterface {
     ) => Promise<Annotation>
     update: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
-        shareOpts?: AnnotationShareOpts,
+        shareOpts?: AnnotationShareOpts & {
+            skipBackendOps?: boolean
+            skipBackendListUpdateOp?: boolean
+        },
     ) => Promise<void>
     delete: (
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
@@ -328,7 +331,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         ])
 
         // Tags
-        if (haveArraysChanged(previousAnnotation.tags ?? [], annotation.tags)) {
+        if (
+            !shareOpts?.skipBackendOps &&
+            haveArraysChanged(previousAnnotation.tags ?? [], annotation.tags)
+        ) {
             await this.dependencies.backendOperations.updateTags(
                 annotation.url,
                 annotation.tags,
@@ -336,7 +342,11 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         }
 
         // Lists
-        if (haveArraysChanged(previousAnnotation.lists, annotation.lists)) {
+        if (
+            !shareOpts?.skipBackendOps &&
+            !shareOpts?.skipBackendListUpdateOp &&
+            haveArraysChanged(previousAnnotation.lists, annotation.lists)
+        ) {
             const sharingState = await this.dependencies.backendOperations.updateLists(
                 annotation.url,
                 annotation.lists,
@@ -367,7 +377,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 previousAnnotation.isBulkShareProtected !==
                     nextAnnotation.isBulkShareProtected
 
-            if (hasAnnotationChanged) {
+            if (!shareOpts?.skipBackendOps && hasAnnotationChanged) {
                 await this.dependencies.backendOperations.update(
                     nextAnnotation,
                     shareOpts,

@@ -207,7 +207,12 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { annotationsCache, pageUrl, customLists } = this.options
+        const {
+            pageUrl,
+            annotationsCache,
+            customLists: customListsBG,
+            contentSharing: contentSharingBG,
+        } = this.options
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
@@ -225,9 +230,18 @@ export class SidebarContainerLogic extends UILogic<
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
-            const lists = await customLists.fetchAllLists({})
+            const lists = await customListsBG.fetchAllLists({})
+            const listRemoteIds = await contentSharingBG.getRemoteListIds({
+                localListIds: lists.map((l) => l.id),
+            })
             const listData: SidebarContainerState['listData'] = {}
-            lists.forEach((l) => (listData[l.id] = { name: l.name }))
+            lists.forEach(
+                (l) =>
+                    (listData[l.id] = {
+                        name: l.name,
+                        remoteId: listRemoteIds[l.id] ?? null,
+                    }),
+            )
 
             this.emitMutation({ listData: { $set: listData } })
 
@@ -794,9 +808,20 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const comment = form.commentText.trim()
-        const existing = previousState.annotations.find(
+        const annotationIndex = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationUrl,
         )
+        if (annotationIndex === -1) {
+            return
+        }
+        const existing = previousState.annotations[annotationIndex]
+
+        const willUnshare = existing.isShared && !event.shouldShare
+        if (willUnshare && !event.keepListsIfUnsharing) {
+            existing.lists = existing.lists.filter(
+                (listId) => previousState.listData[listId]?.remoteId == null,
+            )
+        }
 
         await this.options.annotationsCache.update(
             {
@@ -808,6 +833,7 @@ export class SidebarContainerLogic extends UILogic<
                 shouldShare: event.shouldShare,
                 shouldCopyShareLink: event.shouldShare,
                 isBulkShareProtected: event.isProtected,
+                skipBackendListUpdateOp: true,
             },
         )
 
@@ -1289,23 +1315,29 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ annotations: { $set: nextAnnotations } })
     }
 
-    updateAnnotationShareInfo: EventHandler<'updateAnnotationShareInfo'> = ({
-        previousState,
-        event,
-    }) => {
+    updateAnnotationShareInfo: EventHandler<
+        'updateAnnotationShareInfo'
+    > = async ({ previousState, event }) => {
         const annotationIndex = previousState.annotations.findIndex(
             (a) => a.url === event.annotationUrl,
         )
+        if (annotationIndex === -1) {
+            return
+        }
         const privacyState = getAnnotationPrivacyState(event.privacyLevel)
-        this.emitMutation({
-            annotations: {
-                [annotationIndex]: {
-                    isShared: { $set: privacyState.public },
-                    isBulkShareProtected: {
-                        $apply: (prev) => privacyState.protected,
-                    },
-                },
-            },
+        const existing = previousState.annotations[annotationIndex]
+
+        const willUnshare = existing.isShared && !privacyState.public
+        if (willUnshare && !event.keepListsIfUnsharing) {
+            existing.lists = existing.lists.filter(
+                (listId) => previousState.listData[listId]?.remoteId == null,
+            )
+        }
+
+        await this.options.annotationsCache.update(existing, {
+            isBulkShareProtected: privacyState.protected,
+            shouldShare: privacyState.public,
+            skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
         })
     }
 

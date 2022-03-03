@@ -103,7 +103,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         })
 
         const {
-            remoteId,
             sharingState,
         } = await contentSharingBG.setAnnotationPrivacyLevel({
             annotation: annotationUrl,

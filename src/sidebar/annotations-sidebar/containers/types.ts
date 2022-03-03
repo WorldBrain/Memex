@@ -131,7 +131,7 @@ export interface SidebarContainerState
     sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
-    listData: { [listId: number]: { name: string } }
+    listData: { [listId: number]: { name: string; remoteId: string | null } }
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -278,6 +278,7 @@ interface SidebarEvents {
 
     updateAnnotationShareInfo: {
         annotationUrl: string
+        keepListsIfUnsharing?: boolean
     } & AnnotationSharingState
     updateAllAnnotationsShareInfo: AnnotationSharingStates
 
