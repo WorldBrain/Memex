@@ -748,9 +748,30 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageLists: EventHandler<'setPageLists'> = async ({ event }) => {
+    setPageLists: EventHandler<'setPageLists'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageNoteIds = flattenNestedResults(previousState).byId[event.id]
+            .noteIds.user
+        const publicNoteIds = pageNoteIds.filter(
+            (noteId) =>
+                previousState.searchResults.noteData.byId[noteId]?.isShared,
+        )
+
+        const mutation: UIMutation<State['searchResults']['noteData']> = {
+            byId: {},
+        }
+
+        for (const noteId of publicNoteIds) {
+            mutation.byId[noteId] = {
+                lists: { $apply: updatePickerValues(event) },
+            }
+        }
+
         this.emitMutation({
             searchResults: {
+                noteData: mutation,
                 pageData: {
                     byId: {
                         [event.id]: {
