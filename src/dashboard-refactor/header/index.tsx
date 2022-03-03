@@ -29,8 +29,8 @@ const Container = styled.div`
 `
 
 const SearchSection = styled(Margin)`
-    flex: 2;
     justify-content: flex-start !important;
+    max-width: 825px !important;
 
     & > div {
         justify-content: flex-start !important;
@@ -48,7 +48,8 @@ const SettingsSection = styled(Margin)`
     border-radius: 3px;
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
     }
 `
 
@@ -69,13 +70,21 @@ const SyncStatusHeaderBox = styled.div`
     padding: 4px 8px;
     border-radius: 3px;
     height: 24px;
+    grid-gap: 5px;
 
     & > div {
         width: auto;
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
+    }
+
+    @media screen and (max-width: 768px) {
+        padding: 4px 4px 4px 4px;
+        margin-left: 15px;
+        width: 20px;
     }
 `
 
@@ -89,6 +98,10 @@ const SyncStatusHeaderText = styled.span<{
     white-space: nowrap;
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
+
+    @media screen and (max-width: 768px) {
+        display: none;
+    }
 `
 
 const SidebarHeaderContainer = styled.div`
@@ -173,7 +186,7 @@ export default class Header extends PureComponent<HeaderProps> {
                         className={Header.SYNC_MENU_TOGGLE_BTN_CLASS}
                         onClick={syncStatusMenuProps.onToggleDisplayState}
                     >
-                        <Margin right="5px">
+                        <Margin>
                             <SyncStatusIcon color={syncStatusIconState} />
                         </Margin>
                         <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>

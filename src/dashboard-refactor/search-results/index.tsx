@@ -657,7 +657,7 @@ const ResultsMessage = styled.div`
 `
 
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 100%;
+    width: 96%;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     padding: 0px 15px;
     height: 40px;

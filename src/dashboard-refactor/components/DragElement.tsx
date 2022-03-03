@@ -14,7 +14,7 @@ export default (props: Props) => {
             isHoveringOverListItem={props.isHoveringOverListItem}
         >
             {' '}
-            Drop into Collection
+            Drop into Space
         </DragElement>
     )
 }

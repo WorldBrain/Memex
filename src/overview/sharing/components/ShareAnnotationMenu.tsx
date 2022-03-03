@@ -304,7 +304,7 @@ const LinkCopierBox = styled.div`
     align-items: center;
     cursor: pointer;
     margin: 5px 0;
-    background-color: ${(props) => props.theme.colors.lighterText};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker}70;
     border-radius: 5px;
 `
 
@@ -323,7 +323,8 @@ const LinkCopier = styled.button`
     align-items: center;
     border: 0;
     border-radius: 3px;
-    height: 30px;
+    height: 40px;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     padding: 0 10px;
     outline: none;
     cursor: pointer;

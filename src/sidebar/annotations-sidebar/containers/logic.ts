@@ -34,6 +34,7 @@ import {
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { Browser, browser } from 'webextension-polyfill-ts'
+import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -789,13 +790,21 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const immediateShare =
-            event.mouseEvent.metaKey && event.mouseEvent.altKey
-
-        this.emitMutation({
-            activeShareMenuNoteId: { $set: event.annotationUrl },
-            immediatelyShareNotes: { $set: !!immediateShare },
-        })
+        if (navigator.platform === 'MacIntel') {
+            const immediateShare =
+                event.mouseEvent.metaKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        } else {
+            const immediateShare =
+                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        }
 
         await this.setLastSharedAnnotationTimestamp()
     }
@@ -1033,6 +1042,15 @@ export class SidebarContainerLogic extends UILogic<
         const { sharedAnnotationReferences } = previousState.followedLists.byId[
             event.listId
         ]
+        this.emitMutation({
+            conversations: {
+                $merge: getInitialAnnotationConversationStates(
+                    sharedAnnotationReferences.map(({ id }) => ({
+                        linkId: id.toString(),
+                    })),
+                ),
+            },
+        })
 
         await executeUITask(
             this,

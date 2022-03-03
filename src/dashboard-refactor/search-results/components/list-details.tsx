@@ -50,7 +50,7 @@ export default class ListDetails extends PureComponent<Props> {
                                             >
                                                 <Icon
                                                     height="19px"
-                                                    filePath={icons.link}
+                                                    filePath={icons.peopleFine}
                                                     color="purple"
                                                     onClick={
                                                         this.props
