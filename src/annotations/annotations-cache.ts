@@ -142,6 +142,23 @@ export const createAnnotationsCache = (
                 }
                 return sharingState
             },
+            loadPageData: async (pageUrl) => {
+                const lists = await bgModules.customLists.fetchListIdsByUrl({
+                    url: pageUrl,
+                })
+                const remoteListIds = await bgModules.contentSharing.getRemoteListIds(
+                    { localListIds: lists },
+                )
+                return {
+                    url: pageUrl,
+                    sharedLists: lists.filter(
+                        (listId) => remoteListIds[listId],
+                    ),
+                    privateLists: lists.filter(
+                        (listId) => !remoteListIds[listId],
+                    ),
+                }
+            },
         },
     })
 
@@ -164,7 +181,7 @@ export type AnnotationCacheChangeEvents = TypedEventEmitter<
 export interface AnnotationsCacheDependencies {
     getListFromId: (id: number) => Promise<PageList>
     sortingFn: AnnotationsSorter
-    backendOperations?: {
+    backendOperations: {
         load: (
             pageUrl: string,
             args?: { limit?: number; skip?: number },
@@ -187,6 +204,13 @@ export interface AnnotationsCacheDependencies {
             options?: { protectAnnotation?: boolean },
         ) => Promise<AnnotationSharingState>
         delete: (annotation: CachedAnnotation) => Promise<void>
+        loadPageData: (
+            pageUrl: string,
+        ) => Promise<{
+            url: string
+            sharedLists: number[]
+            privateLists: number[]
+        }>
     }
 }
 
@@ -280,6 +304,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const stateBeforeModifications = this._annotations
 
         const annotUrl = await backendOperations.create(annotation, shareOpts)
+        // NOTE: we're separating the lists from the annotation to avoid confusing them with the lists we potentially need to inherit from the parent page (if annot is to be shared)
+        const baseLists = [...annotation.lists]
 
         const nextAnnotation: CachedAnnotation = {
             ...annotation,
@@ -287,6 +313,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             isShared: shareOpts?.shouldShare,
             isBulkShareProtected: shareOpts?.isBulkShareProtected,
         }
+
+        if (shareOpts?.shouldShare) {
+            const pageData = await backendOperations.loadPageData(
+                nextAnnotation.pageUrl,
+            )
+            nextAnnotation.lists.push(...pageData.sharedLists)
+        }
+
         this.annotations = [nextAnnotation, ...stateBeforeModifications]
 
         this.annotationChanges.emit('newStateIntent', this.annotations)
@@ -295,8 +329,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             await backendOperations.updateTags(annotUrl, annotation.tags)
         }
 
-        if (annotation.lists.length) {
-            await backendOperations.updateLists(annotUrl, annotation.lists)
+        if (baseLists.length) {
+            await backendOperations.updateLists(annotUrl, baseLists)
         }
 
         this.annotationChanges.emit('created', nextAnnotation)

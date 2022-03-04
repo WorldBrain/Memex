@@ -608,7 +608,6 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ annotationSharingAccess: { $set: sharingAccess } })
     }
 
-    // TODO (sidebar-refactor) reconcile this duplicate code with ribbon notes save
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
         event,
         previousState,
@@ -618,7 +617,6 @@ export class SidebarContainerLogic extends UILogic<
         if (comment.length === 0) {
             return
         }
-
         const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
 
         this.emitMutation({
@@ -635,8 +633,8 @@ export class SidebarContainerLogic extends UILogic<
                 url: annotationUrl,
                 pageUrl,
                 comment,
-                tags: commentBox.tags,
-                lists: commentBox.lists,
+                tags: [...commentBox.tags],
+                lists: [...commentBox.lists],
             },
             {
                 shouldShare: event.shouldShare,

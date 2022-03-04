@@ -16,6 +16,7 @@ import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
+import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 
 const setupLogicHelper = async ({
     device,
@@ -483,6 +484,71 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.tags).toEqual([])
             expect(sidebar.state.commentBox.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should be able to save a new comment, inheriting spaces from parent page, when save has share intent', async ({
+            device,
+        }) => {
+            const fullPageUrl = DATA.CURRENT_TAB_URL_1
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[0])
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[1])
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: DATA.LISTS_1[0].id,
+                    remoteId: 'test-share-1',
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[0].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[1].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl: fullPageUrl,
+                withAuth: true,
+            })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('changeNewPageCommentText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.lists).toEqual([])
+            expect(sidebar.state.annotations).toEqual([])
+
+            await sidebar.processEvent('saveNewPageComment', {
+                shouldShare: true,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    tags: [],
+                    comment: DATA.COMMENT_1,
+                    lists: [DATA.LISTS_1[0].id],
+                }),
+            ])
+            expect(sidebar.state.commentBox).toEqual(
+                expect.objectContaining({
+                    tags: [],
+                    lists: [],
+                    commentText: '',
+                    isBookmarked: false,
+                }),
+            )
         })
 
         it('should block save a new comment with login modal if logged out + share intent set', async ({

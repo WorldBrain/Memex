@@ -40,6 +40,7 @@ export interface SaveAnnotationReturnValue {
     savePromise: Promise<string>
 }
 
+// TODO: Allow this function to return the generated annotation URL before the Promise resolves
 export async function createAnnotation({
     annotationData,
     annotationsBG,

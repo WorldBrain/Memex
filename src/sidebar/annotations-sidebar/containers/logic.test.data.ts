@@ -32,6 +32,12 @@ export const CREATOR_1: UserPublicDetails = {
     profile: { avatarURL: 'https://worldbrain.io/test.jpg' },
 }
 
+export const LISTS_1 = [
+    { id: 1, name: 'test 1' },
+    { id: 2, name: 'test 2' },
+    { id: 3, name: 'test 3' },
+]
+
 export const SHARED_ANNOTATIONS: Array<
     SharedAnnotation & {
         reference: SharedAnnotationReference
