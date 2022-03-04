@@ -1366,6 +1366,115 @@ describe('Dashboard search results logic', () => {
                 ).toEqual([latestNoteId])
             })
 
+            it('should be able to save new note, inheriting shared spaces from parent page, when save has share intent', async ({
+                device,
+            }) => {
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+                await device.storageManager
+                    .collection('sharedListMetadata')
+                    .createObject({
+                        localId: DATA.LISTS_1[0].id,
+                        remoteId: 'test-share-1',
+                    })
+
+                const { searchResults } = await setupTest(device, {
+                    withAuth: true,
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                })
+
+                await searchResults.init()
+
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_1.normalizedUrl // Page should be in shared lists already
+                const newNoteComment = 'test'
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm,
+                ).toEqual(utils.getInitialFormState())
+
+                await searchResults.processEvent('setPageNewNoteCommentValue', {
+                    day,
+                    pageId,
+                    value: newNoteComment,
+                })
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].newNoteForm.inputValue,
+                ).toEqual(newNoteComment)
+
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('pristine')
+                const saveNoteP = searchResults.processEvent(
+                    'savePageNewNote',
+                    {
+                        day,
+                        pageId,
+                        fullPageUrl: 'https://' + pageId,
+                        shouldShare: true,
+                    },
+                )
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('running')
+                await saveNoteP
+                expect(
+                    searchResults.state.searchResults.newNoteCreateState,
+                ).toEqual('success')
+
+                const latestNoteId =
+                    searchResults.state.searchResults.noteData.allIds[
+                        searchResults.state.searchResults.noteData.allIds
+                            .length - 1
+                    ]
+
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        newNoteForm: utils.getInitialFormState(),
+                        noteIds: expect.objectContaining({
+                            user: expect.arrayContaining([latestNoteId]),
+                        }),
+                    }),
+                )
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        latestNoteId
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        url: latestNoteId,
+                        comment: newNoteComment,
+                        tags: [],
+                        lists: [DATA.LISTS_1[0].id],
+                        isShared: true,
+                        isEditing: false,
+                        isBulkShareProtected: false,
+                        editNoteForm: {
+                            ...utils.getInitialFormState(),
+                            inputValue: newNoteComment,
+                        },
+                    }),
+                )
+
+                expect(
+                    searchResults.state.searchResults.noteData.allIds,
+                ).toEqual(expect.arrayContaining([latestNoteId]))
+            })
+
             it('should block new note save with login modal if logged out + save has share intent', async ({
                 device,
             }) => {

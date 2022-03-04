@@ -7,26 +7,35 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { ListData } from './lists-sidebar/types'
 
+interface TestMetadata {
+    tags?: string[]
+    lists?: number[]
+}
+
 const pageDataToSearchRes = (
     page: PageData,
-    notes: NoteData[] = [],
+    metadata?: TestMetadata & {
+        notes?: Array<{ note: NoteData; metadata?: TestMetadata }>
+    },
 ): AnnotPage => ({
     url: page.normalizedUrl,
     fullUrl: page.fullUrl,
     title: page.fullTitle,
     hasBookmark: false,
-    annotations: notes.map((note) => noteDataToSearchRes(note, page)),
-    annotsCount: notes.length,
+    annotations:
+        metadata?.notes?.map(({ note, metadata }) =>
+            noteDataToSearchRes(note, page, metadata),
+        ) ?? [],
+    annotsCount: metadata?.notes?.length ?? 0,
     displayTime: page.displayTime,
-    lists: [],
-    tags: [],
+    lists: metadata?.lists ?? [],
+    tags: metadata?.tags ?? [],
 })
 
 const noteDataToSearchRes = (
     note: NoteData,
     page: PageData,
-    tags: string[] = [],
-    lists: number[] = [],
+    metadata?: TestMetadata,
 ): Annotation => ({
     createdWhen: new Date(note.displayTime),
     lastEdited: note.isEdited ? new Date(note.displayTime) : undefined,
@@ -36,8 +45,8 @@ const noteDataToSearchRes = (
     comment: note.comment,
     body: note.highlight,
     url: note.url,
-    tags,
-    lists,
+    lists: metadata?.lists ?? [],
+    tags: metadata?.tags ?? [],
 })
 
 export const DAY_1 = new Date('2020-11-26').getTime()
@@ -135,20 +144,48 @@ export const NOTE_5: NoteData = {
     lists: [],
 }
 
+export const LISTS_1: ListData[] = [
+    { id: 1, name: 'test 1' },
+    { id: 2, name: 'test 2' },
+    { id: 3, name: 'test 3' },
+]
+
+export const TAG_1 = 'test 1'
+export const TAG_2 = 'test 2'
+export const TAG_3 = 'test 3'
+
 export const PAGE_SEARCH_RESULT_1: StandardSearchResponse = {
     docs: [
-        pageDataToSearchRes(PAGE_1, []),
-        pageDataToSearchRes(PAGE_2, []),
-        pageDataToSearchRes(PAGE_3, []),
+        pageDataToSearchRes(PAGE_1),
+        pageDataToSearchRes(PAGE_2),
+        pageDataToSearchRes(PAGE_3),
     ],
     resultsExhausted: false,
 }
 
 export const PAGE_SEARCH_RESULT_2: StandardSearchResponse = {
     docs: [
-        pageDataToSearchRes(PAGE_1, [NOTE_1, NOTE_2, NOTE_3]),
-        pageDataToSearchRes(PAGE_2, []),
-        pageDataToSearchRes(PAGE_3, [NOTE_4, NOTE_5]),
+        pageDataToSearchRes(PAGE_1, {
+            notes: [{ note: NOTE_1 }, { note: NOTE_2 }, { note: NOTE_3 }],
+        }),
+        pageDataToSearchRes(PAGE_2),
+        pageDataToSearchRes(PAGE_3, {
+            notes: [{ note: NOTE_4 }, { note: NOTE_5 }],
+        }),
+    ],
+    resultsExhausted: false,
+}
+
+export const PAGE_SEARCH_RESULT_3: StandardSearchResponse = {
+    docs: [
+        pageDataToSearchRes(PAGE_1, {
+            notes: [{ note: NOTE_1 }, { note: NOTE_2 }, { note: NOTE_3 }],
+            lists: [LISTS_1[0].id, LISTS_1[1].id],
+        }),
+        pageDataToSearchRes(PAGE_2),
+        pageDataToSearchRes(PAGE_3, {
+            notes: [{ note: NOTE_4 }, { note: NOTE_5 }],
+        }),
     ],
     resultsExhausted: false,
 }
@@ -157,9 +194,9 @@ export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [
-        pageDataToSearchRes(PAGE_1, []),
-        pageDataToSearchRes(PAGE_2, []),
-        pageDataToSearchRes(PAGE_3, []),
+        pageDataToSearchRes(PAGE_1),
+        pageDataToSearchRes(PAGE_2),
+        pageDataToSearchRes(PAGE_3),
     ],
     annotsByDay: {
         [DAY_1]: {
@@ -174,9 +211,13 @@ export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [
-        pageDataToSearchRes(PAGE_1, [NOTE_1, NOTE_2, NOTE_3]),
-        pageDataToSearchRes(PAGE_2, []),
-        pageDataToSearchRes(PAGE_3, [NOTE_4, NOTE_5]),
+        pageDataToSearchRes(PAGE_1, {
+            notes: [{ note: NOTE_1 }, { note: NOTE_2 }, { note: NOTE_3 }],
+        }),
+        pageDataToSearchRes(PAGE_2),
+        pageDataToSearchRes(PAGE_3, {
+            notes: [{ note: NOTE_4 }, { note: NOTE_5 }],
+        }),
     ],
     annotsByDay: {
         [DAY_1]: {
@@ -198,13 +239,3 @@ export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
         },
     },
 }
-
-export const LISTS_1: ListData[] = [
-    { id: 1, name: 'test 1' },
-    { id: 2, name: 'test 2' },
-    { id: 3, name: 'test 3' },
-]
-
-export const TAG_1 = 'test 1'
-export const TAG_2 = 'test 2'
-export const TAG_3 = 'test 3'

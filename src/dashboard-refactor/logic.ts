@@ -1288,7 +1288,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { annotationsBG, contentShareBG, listsBG } = this.options
+        const { annotationsBG, contentShareBG } = this.options
+        const pageData = previousState.searchResults.pageData.byId[event.pageId]
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1327,25 +1328,30 @@ export class DashboardLogic extends UILogic<State, Events> {
                         tags: formState.tags,
                     })
                 }
-                let newNoteListIds: number[] = []
+                const newNoteListIds: number[] = []
                 if (formState.lists.length) {
-                    const toAddLists = await Promise.all(
-                        formState.lists.map((id) =>
-                            listsBG.fetchListById({ id }),
-                        ),
-                    )
-
                     const {
                         sharingState,
                     } = await contentShareBG.shareAnnotationToSomeLists({
                         annotationUrl: newNoteId,
-                        localListIds: toAddLists.map((list) => list.id),
+                        localListIds: formState.lists,
                     })
-                    newNoteListIds = toAddLists
-                        .filter((list) =>
-                            sharingState.localListIds.includes(list.id),
-                        )
-                        .map((list) => list.id)
+                    newNoteListIds.push(
+                        ...formState.lists.filter((listId) =>
+                            sharingState.localListIds.includes(listId),
+                        ),
+                    )
+                }
+
+                // Inherit display lists from parent page's shared lists
+                if (event.shouldShare) {
+                    newNoteListIds.push(
+                        ...pageData.lists.filter(
+                            (listId) =>
+                                previousState.listsSidebar.listData[listId]
+                                    ?.remoteId != null,
+                        ),
+                    )
                 }
 
                 this.emitMutation({
