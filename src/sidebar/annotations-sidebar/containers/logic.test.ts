@@ -709,31 +709,26 @@ describe('SidebarContainerLogic', () => {
         it('should be able to update annotation sharing info', async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
             const id1 = 'test1'
             const id2 = 'test2'
 
-            sidebar.processMutation({
-                annotations: { $set: [{ url: id1 }, { url: id2 }] as any },
-            })
-            const sharingState1: AnnotationSharingState = {
-                hasLink: false,
-                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                localListIds: [],
-            }
+            // TODO: Properly set up data here
+            annotationsCache.annotations = [{ url: id1 }, { url: id2 }] as any
 
-            sidebar.processEvent('updateAnnotationShareInfo', {
+            await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 hasLink: false,
                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 localListIds: [],
-                // isShared: false,
             })
             expect(sidebar.state.annotations).toEqual([
                 { url: id1, isShared: false, isBulkShareProtected: false },
                 { url: id2 },
             ])
-            sidebar.processEvent('updateAnnotationShareInfo', {
+            await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 hasLink: false,
                 privacyLevel: AnnotationPrivacyLevels.SHARED,
@@ -743,7 +738,7 @@ describe('SidebarContainerLogic', () => {
                 { url: id1, isShared: true, isBulkShareProtected: false },
                 { url: id2 },
             ])
-            sidebar.processEvent('updateAnnotationShareInfo', {
+            await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id1,
                 hasLink: false,
                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
@@ -754,7 +749,7 @@ describe('SidebarContainerLogic', () => {
                 { url: id1, isShared: false, isBulkShareProtected: false },
                 { url: id2 },
             ])
-            sidebar.processEvent('updateAnnotationShareInfo', {
+            await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
                 hasLink: false,
                 privacyLevel: AnnotationPrivacyLevels.SHARED,
@@ -765,7 +760,7 @@ describe('SidebarContainerLogic', () => {
                 { url: id1, isShared: false, isBulkShareProtected: false },
                 { url: id2, isShared: true, isBulkShareProtected: false },
             ])
-            sidebar.processEvent('updateAnnotationShareInfo', {
+            await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: id2,
                 hasLink: false,
                 privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
