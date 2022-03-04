@@ -11,11 +11,11 @@ import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
-import {
+import type {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -315,8 +315,10 @@ export type Events = UIEvent<{
         deleted?: number
         protectAnnotation?: boolean
     }
-    updateNoteShareInfo: NoteEventArgs &
-        AnnotationSharingState & { keepListsIfUnsharing?: boolean }
+    updateNoteShareInfo: NoteEventArgs & {
+        privacyLevel: AnnotationPrivacyLevels
+        keepListsIfUnsharing?: boolean
+    }
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null

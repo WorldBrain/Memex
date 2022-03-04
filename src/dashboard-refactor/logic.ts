@@ -1773,6 +1773,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
+        const pageData =
+            previousState.searchResults.pageData.byId[noteData.pageUrl]
 
         const shouldShare =
             event.privacyLevel === AnnotationPrivacyLevels.SHARED ||
@@ -1780,6 +1782,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         const shouldProtect =
             event.privacyLevel === AnnotationPrivacyLevels.PROTECTED ||
             event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+        const willShare = !noteData.isShared && shouldShare
+
+        let lists: number[]
+        if (willShare) {
+            lists = pageData.lists.filter(
+                (listId) =>
+                    previousState.listsSidebar.listData[listId]?.remoteId !=
+                    null,
+            )
+        } else {
+            lists = maybeRemoveSharedLists({
+                listIds: noteData.lists,
+                listsState: previousState.listsSidebar,
+                keepListsIfUnsharing: event.keepListsIfUnsharing,
+                willUnshare: noteData.isShared && !shouldShare,
+            })
+        }
 
         this.emitMutation({
             searchResults: {
@@ -1788,16 +1807,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.noteId]: {
                             isShared: { $set: shouldShare },
                             isBulkShareProtected: { $set: shouldProtect },
-                            lists: {
-                                $set: maybeRemoveSharedLists({
-                                    listIds: noteData.lists,
-                                    listsState: previousState.listsSidebar,
-                                    keepListsIfUnsharing:
-                                        event.keepListsIfUnsharing,
-                                    willUnshare:
-                                        noteData.isShared && !shouldShare,
-                                }),
-                            },
+                            lists: { $set: lists },
                         },
                     },
                 },

@@ -2053,9 +2053,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    hasLink: false,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    localListIds: [],
                 })
 
                 expect(
@@ -2069,10 +2067,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    hasLink: false,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
-                    localListIds: [],
-                    // isShared: true,
                 })
 
                 expect(
@@ -2086,11 +2081,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    hasLink: false,
                     privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-                    localListIds: [],
-                    // isShared: false,
-                    // isProtected: true,
                 })
 
                 expect(
@@ -2104,11 +2095,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
-                    hasLink: false,
                     privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    localListIds: [],
-                    // isShared: true,
-                    // isProtected: true,
                 })
 
                 expect(
@@ -2120,6 +2107,55 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
             })
+
+            it('should be able to update note share info, inheriting shared lists from parent page on share', async ({
+                device,
+            }) => {
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+                await device.storageManager
+                    .collection('sharedListMetadata')
+                    .createObject({
+                        localId: DATA.LISTS_1[0].id,
+                        remoteId: 'test-share-1',
+                    })
+
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                })
+                await searchResults.init()
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                        lists: [],
+                    }),
+                )
+
+                await searchResults.processEvent('updateNoteShareInfo', {
+                    noteId,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [DATA.LISTS_1[0].id],
+                    }),
+                )
+            })
+
             it('should be able to set note list state', async ({ device }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),

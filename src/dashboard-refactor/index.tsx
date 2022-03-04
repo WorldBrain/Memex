@@ -909,7 +909,7 @@ export class DashboardContainer extends StatefulUIElement<
                     updateShareInfo: (noteId) => (state, opts) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            ...state,
+                            privacyLevel: state.privacyLevel,
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
                 }}
