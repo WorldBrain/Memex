@@ -50,7 +50,11 @@ import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
     PRIVATIZE_ANNOT_MSG,
     SELECT_SPACE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
     SELECT_SPACE_ANNOT_SUBTITLE,
+    SELECT_SPACE_NEGATIVE_LABEL,
+    SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 
 export interface Props extends DashboardDependencies {}
@@ -945,6 +949,8 @@ export class DashboardContainer extends StatefulUIElement<
                 >
                     <ConfirmDialog
                         titleText={PRIVATIZE_ANNOT_MSG}
+                        negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
+                        affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
                         handleConfirmation={(affirmative) => () =>
                             this.processEvent('saveNoteEdit', {
                                 ...modalsState.confirmPrivatizeNoteArgs,
@@ -966,8 +972,8 @@ export class DashboardContainer extends StatefulUIElement<
                     <ConfirmDialog
                         titleText={SELECT_SPACE_ANNOT_MSG}
                         subTitleText={SELECT_SPACE_ANNOT_SUBTITLE}
-                        primaryButtonText="Protect Selection"
-                        secondaryButtonText="Keep Public Status"
+                        affirmativeLabel={SELECT_SPACE_AFFIRM_LABEL}
+                        negativeLabel={SELECT_SPACE_NEGATIVE_LABEL}
                         handleConfirmation={(affirmative) => () =>
                             this.processEvent('setNoteLists', {
                                 ...modalsState.confirmSelectNoteSpaceArgs,

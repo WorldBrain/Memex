@@ -7,8 +7,8 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 export interface Props {
     titleText: React.ReactChild
     subTitleText?: React.ReactChild
-    primaryButtonText?: string
-    secondaryButtonText?: string
+    negativeLabel?: React.ReactChild
+    affirmativeLabel?: React.ReactChild
     handleConfirmation: (affirmative: boolean) => React.MouseEventHandler
 }
 
@@ -16,10 +16,10 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
     render() {
         const {
             titleText,
-            subTitleText,
-            primaryButtonText,
-            secondaryButtonText,
             handleConfirmation,
+            affirmativeLabel,
+            negativeLabel,
+            subTitleText,
         } = this.props
         return (
             <Container>
@@ -29,12 +29,12 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                 </TextContainer>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label={primaryButtonText}
+                        label={affirmativeLabel ?? 'Yes'}
                         onClick={handleConfirmation(true)}
                         fontSize="12px"
                     />
                     <SecondaryAction
-                        label={secondaryButtonText}
+                        label={negativeLabel ?? 'No'}
                         onClick={handleConfirmation(false)}
                         borderOff
                     />

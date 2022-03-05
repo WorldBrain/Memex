@@ -46,6 +46,10 @@ import {
     PRIVATIZE_ANNOT_MSG,
     SELECT_SPACE_ANNOT_MSG,
     SELECT_SPACE_ANNOT_SUBTITLE,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    SELECT_SPACE_NEGATIVE_LABEL,
+    SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -469,7 +473,7 @@ export class AnnotationsSidebarContainer<
                             postShareHook={(state, opts) =>
                                 this.processEvent('updateAnnotationShareInfo', {
                                     annotationUrl: currentAnnotationId,
-                                    ...state,
+                                    privacyLevel: state.privacyLevel,
                                     keepListsIfUnsharing:
                                         opts?.keepListsIfUnsharing,
                                 })
@@ -525,8 +529,8 @@ export class AnnotationsSidebarContainer<
                     >
                         <ConfirmDialog
                             titleText={PRIVATIZE_ANNOT_MSG}
-                            primaryButtonText="Remove shared Spaces"
-                            secondaryButtonText="Keep Shared Spaces"
+                            negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
+                            affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
                             handleConfirmation={(affirmative) => () =>
                                 this.processEvent('editAnnotation', {
                                     ...confirmPrivatizeNoteArgs,
@@ -551,8 +555,8 @@ export class AnnotationsSidebarContainer<
                         <ConfirmDialog
                             titleText={SELECT_SPACE_ANNOT_MSG}
                             subTitleText={SELECT_SPACE_ANNOT_SUBTITLE}
-                            primaryButtonText="Protect Selection"
-                            secondaryButtonText="Keep Public Status"
+                            affirmativeLabel={SELECT_SPACE_AFFIRM_LABEL}
+                            negativeLabel={SELECT_SPACE_NEGATIVE_LABEL}
                             handleConfirmation={(affirmative) => () =>
                                 this.processEvent('updateListsForAnnotation', {
                                     ...confirmSelectNoteSpaceArgs,
