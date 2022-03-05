@@ -343,6 +343,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         annotation,
         shareOpts,
     ) => {
+        const { backendOperations } = this.dependencies
         const stateBeforeModifications = [...this._annotations]
         const resultIndex = stateBeforeModifications.findIndex(
             (existingAnnotation) => existingAnnotation.url === annotation.url,
@@ -358,6 +359,13 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
                 previousAnnotation.isBulkShareProtected,
         }
 
+        if (!previousAnnotation.isShared && shareOpts?.shouldShare) {
+            const pageData = await backendOperations.loadPageData(
+                nextAnnotation.pageUrl,
+            )
+            nextAnnotation.lists = pageData.sharedLists
+        }
+
         this.annotationChanges.emit('newStateIntent', [
             ...stateBeforeModifications.slice(0, resultIndex),
             nextAnnotation,
@@ -369,10 +377,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             !shareOpts?.skipBackendOps &&
             haveArraysChanged(previousAnnotation.tags ?? [], annotation.tags)
         ) {
-            await this.dependencies.backendOperations.updateTags(
-                annotation.url,
-                annotation.tags,
-            )
+            await backendOperations.updateTags(annotation.url, annotation.tags)
         }
 
         // Lists
@@ -381,7 +386,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             !shareOpts?.skipBackendListUpdateOp &&
             haveArraysChanged(previousAnnotation.lists, annotation.lists)
         ) {
-            const sharingState = await this.dependencies.backendOperations.updateLists(
+            const sharingState = await backendOperations.updateLists(
                 annotation.url,
                 annotation.lists,
             )
@@ -405,17 +410,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         try {
             const hasAnnotationChanged =
-                previousAnnotation.comment.trim() !==
-                    nextAnnotation.comment.trim() ||
+                previousAnnotation.comment?.trim() !==
+                    nextAnnotation.comment?.trim() ||
                 previousAnnotation.isShared !== nextAnnotation.isShared ||
                 previousAnnotation.isBulkShareProtected !==
                     nextAnnotation.isBulkShareProtected
 
             if (!shareOpts?.skipBackendOps && hasAnnotationChanged) {
-                await this.dependencies.backendOperations.update(
-                    nextAnnotation,
-                    shareOpts,
-                )
+                await backendOperations.update(nextAnnotation, shareOpts)
             }
         } catch (e) {
             this._annotations = stateBeforeModifications

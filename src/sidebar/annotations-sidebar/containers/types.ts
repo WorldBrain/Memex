@@ -13,7 +13,6 @@ import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import type { SidebarTheme } from '../types'
 import type {
-    AnnotationSharingState,
     AnnotationSharingStates,
     ContentSharingInterface,
 } from 'src/content-sharing/background/types'
@@ -31,6 +30,7 @@ import type { NormalizedState } from 'src/common-ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -279,7 +279,8 @@ interface SidebarEvents {
     updateAnnotationShareInfo: {
         annotationUrl: string
         keepListsIfUnsharing?: boolean
-    } & AnnotationSharingState
+        privacyLevel: AnnotationPrivacyLevels
+    }
     updateAllAnnotationsShareInfo: AnnotationSharingStates
 
     setLoginModalShown: { shown: boolean }
