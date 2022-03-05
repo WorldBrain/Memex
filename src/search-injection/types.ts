@@ -6,6 +6,7 @@ export interface SearchEngineInfo {
         above: string
         side: string
         sideAlternative?: string
+        centerCol?: string
     }
     containerType: 'id' | 'class'
 }

@@ -59,8 +59,23 @@ export const handleRender = async (
                 searchEngineObj.container.sideAlternative,
             )
 
+            const containerWithImages = document.getElementsByClassName(
+                'pvresd',
+            )
+
+            const centerCol = document.getElementById(
+                searchEngineObj.container.centerCol,
+            )
+
+            console.log('test', suggestionsContainer)
+            console.log('test2', containerWithImages)
+
             if (position === 'side') {
-                if (!suggestionsContainer) {
+                if (
+                    suggestionsContainer === null &&
+                    containerWithImages.length === 0
+                ) {
+                    console.log('test3')
                     containerWithSuggestions.style.display = 'grid'
                     containerWithSuggestions.style.gap = '130px'
                     containerWithSuggestions.style.flexDirection = 'row'
@@ -72,7 +87,23 @@ export const handleRender = async (
                         'beforeend',
                         target,
                     )
-                } else {
+                }
+                if (containerWithImages.length > 0) {
+                    console.log('test4')
+                    const element = document.createElement('div')
+                    containerWithSuggestions.appendChild(element)
+                    element.appendChild(centerCol)
+                    element.style.display = 'flex'
+                    element.style.gap = '40px'
+                    containerWithSuggestions.style.display = 'grid'
+                    containerWithSuggestions.style.flexDirection = 'colum'
+                    containerWithSuggestions.style.justifyContent =
+                        'space-between'
+
+                    element.insertAdjacentElement('beforeend', target)
+                }
+                if (suggestionsContainer !== null) {
+                    console.log('test4')
                     suggestionsContainer.insertBefore(
                         target,
                         suggestionsContainer.firstChild,
@@ -82,6 +113,7 @@ export const handleRender = async (
                 const containerAbove = document.getElementById(
                     searchEngineObj.container.above,
                 )
+                console.log('test5')
                 containerAbove.insertBefore(target, containerAbove.firstChild)
             }
         }

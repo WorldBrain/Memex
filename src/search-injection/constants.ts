@@ -19,6 +19,7 @@ export const SEARCH_ENGINES: {
             above: 'center_col',
             side: 'rhs',
             sideAlternative: 'rcnt',
+            centerCol: 'center_col',
         },
         containerType: 'id',
     },
