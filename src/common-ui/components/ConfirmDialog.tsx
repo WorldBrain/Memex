@@ -6,23 +6,35 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 
 export interface Props {
     titleText: React.ReactChild
+    subTitleText?: React.ReactChild
+    primaryButtonText?: string
+    secondaryButtonText?: string
     handleConfirmation: (affirmative: boolean) => React.MouseEventHandler
 }
 
 export default class ConfirmDialog extends React.PureComponent<Props> {
     render() {
-        const { titleText, handleConfirmation } = this.props
+        const {
+            titleText,
+            subTitleText,
+            primaryButtonText,
+            secondaryButtonText,
+            handleConfirmation,
+        } = this.props
         return (
             <Container>
-                <TitleText>{titleText}</TitleText>
+                <TextContainer>
+                    <TitleText>{titleText}</TitleText>
+                    <SubTitleText>{subTitleText}</SubTitleText>
+                </TextContainer>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label="Remove shared Spaces"
+                        label={primaryButtonText}
                         onClick={handleConfirmation(true)}
                         fontSize="12px"
                     />
                     <SecondaryAction
-                        label="Keep Shared Spaces"
+                        label={secondaryButtonText}
                         onClick={handleConfirmation(false)}
                         borderOff
                     />
@@ -32,12 +44,30 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
     }
 }
 
+const TextContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+`
+
 const TitleText = styled.div`
     font-size: 16px;
     color: ${(props) => props.theme.colors.darkerText};
     text-align: center;
     font-weight: 800;
+    line-height: 20px;
+`
+
+const SubTitleText = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.lighterText};
+    text-align: center;
+    font-weight: 300;
     line-height: 26px;
+    white-space: break-spaces;
+    text-align: center;
 `
 
 const ConfirmBtnRow = styled.div`
@@ -53,4 +83,5 @@ const Container = styled.div`
     justify-content: center;
     padding: 30px 20px;
     grid-gap: 20px;
+    max-width: 500px;
 `

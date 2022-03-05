@@ -45,6 +45,7 @@ import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
     PRIVATIZE_ANNOT_MSG,
     SELECT_SPACE_ANNOT_MSG,
+    SELECT_SPACE_ANNOT_SUBTITLE,
 } from 'src/overview/sharing/constants'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
@@ -524,6 +525,8 @@ export class AnnotationsSidebarContainer<
                     >
                         <ConfirmDialog
                             titleText={PRIVATIZE_ANNOT_MSG}
+                            primaryButtonText="Remove shared Spaces"
+                            secondaryButtonText="Keep Shared Spaces"
                             handleConfirmation={(affirmative) => () =>
                                 this.processEvent('editAnnotation', {
                                     ...confirmPrivatizeNoteArgs,
@@ -547,6 +550,9 @@ export class AnnotationsSidebarContainer<
                     >
                         <ConfirmDialog
                             titleText={SELECT_SPACE_ANNOT_MSG}
+                            subTitleText={SELECT_SPACE_ANNOT_SUBTITLE}
+                            primaryButtonText="Protect Selection"
+                            secondaryButtonText="Keep Public Status"
                             handleConfirmation={(affirmative) => () =>
                                 this.processEvent('updateListsForAnnotation', {
                                     ...confirmSelectNoteSpaceArgs,

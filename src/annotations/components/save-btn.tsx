@@ -88,6 +88,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <ConfirmDialog
                 titleText={PRIVATIZE_ANNOT_MSG}
+                primaryButtonText="Remove shared Spaces"
+                secondaryButtonText="Keep Shared Spaces"
                 handleConfirmation={(affirmative: boolean) => () => {
                     this.setState({ confirmationMode: null })
 
