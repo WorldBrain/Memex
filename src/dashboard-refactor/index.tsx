@@ -50,6 +50,8 @@ import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
     PRIVATIZE_ANNOT_MSG,
     SELECT_SPACE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 
 export interface Props extends DashboardDependencies {}
@@ -944,6 +946,8 @@ export class DashboardContainer extends StatefulUIElement<
                 >
                     <ConfirmDialog
                         titleText={PRIVATIZE_ANNOT_MSG}
+                        negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
+                        affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
                         handleConfirmation={(affirmative) => () =>
                             this.processEvent('saveNoteEdit', {
                                 ...modalsState.confirmPrivatizeNoteArgs,

@@ -12,7 +12,11 @@ import Mousetrap from 'mousetrap'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
-import { PRIVATIZE_ANNOT_MSG } from 'src/overview/sharing/constants'
+import {
+    PRIVATIZE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+} from 'src/overview/sharing/constants'
 
 export interface Props {
     isShared?: boolean
@@ -88,6 +92,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <ConfirmDialog
                 titleText={PRIVATIZE_ANNOT_MSG}
+                negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
+                affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
                 handleConfirmation={(affirmative: boolean) => () => {
                     this.setState({ confirmationMode: null })
 

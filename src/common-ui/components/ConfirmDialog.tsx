@@ -6,23 +6,30 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 
 export interface Props {
     titleText: React.ReactChild
+    negativeLabel?: React.ReactChild
+    affirmativeLabel?: React.ReactChild
     handleConfirmation: (affirmative: boolean) => React.MouseEventHandler
 }
 
 export default class ConfirmDialog extends React.PureComponent<Props> {
     render() {
-        const { titleText, handleConfirmation } = this.props
+        const {
+            titleText,
+            handleConfirmation,
+            affirmativeLabel,
+            negativeLabel,
+        } = this.props
         return (
             <Container>
                 <TitleText>{titleText}</TitleText>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label="Remove shared Spaces"
+                        label={affirmativeLabel ?? 'Yes'}
                         onClick={handleConfirmation(true)}
                         fontSize="12px"
                     />
                     <SecondaryAction
-                        label="Keep Shared Spaces"
+                        label={negativeLabel ?? 'No'}
                         onClick={handleConfirmation(false)}
                         borderOff
                     />

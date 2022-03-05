@@ -11,7 +11,12 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
-import { SELECT_SPACE_ANNOT_MSG, PRIVATIZE_ANNOT_MSG } from './constants'
+import {
+    SELECT_SPACE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+} from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 type SelectType = 'select' | 'unselect'
@@ -204,6 +209,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             confirmationMode.type === 'public-select-space'
                 ? SELECT_SPACE_ANNOT_MSG
                 : PRIVATIZE_ANNOT_MSG
+        const affirmativeLabel =
+            confirmationMode.type === 'public-select-space'
+                ? undefined
+                : PRIVATIZE_ANNOT_AFFIRM_LABEL
+        const negativeLabel =
+            confirmationMode.type === 'public-select-space'
+                ? undefined
+                : PRIVATIZE_ANNOT_NEGATIVE_LABEL
 
         const handleConfirmation = (affirmative: boolean) => () => {
             this.setState({ confirmationMode: null })
@@ -228,6 +241,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return (
             <ConfirmDialog
                 titleText={text}
+                negativeLabel={negativeLabel}
+                affirmativeLabel={affirmativeLabel}
                 handleConfirmation={handleConfirmation}
             />
         )
