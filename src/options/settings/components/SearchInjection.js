@@ -18,7 +18,7 @@ const SearchInjection = ({ children }) => {
             </SectionCircle>
             <SectionTitle>Search Engine Integration</SectionTitle>
             <InfoText>
-                Show Memex results alongside your Google & DuckDuckGo queries
+                Show Memex results alongside your web search results
             </InfoText>
             {children}
         </Section>

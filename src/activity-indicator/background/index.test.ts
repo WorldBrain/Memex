@@ -124,7 +124,6 @@ describe('Activity indicator background tests', () => {
             pageCreatorReference: userAReference,
             userReference: userBReference,
             reply: { content: 'TEST' },
-            sharedListReference: null,
         })
 
         // Login as other user so that reply activity gets assoc. with them (they are the replier)

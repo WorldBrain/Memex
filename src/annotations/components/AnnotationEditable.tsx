@@ -18,7 +18,7 @@ import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
 import type { SidebarAnnotationTheme } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
@@ -307,7 +307,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (!footerDeps) {
             return [
                 repliesLoadingState === 'running'
-                    ? { node: <LoadingIndicator /> }
+                    ? { node: <LoadingIndicator size={16} /> }
                     : {
                           key: 'replies-btn',
                           onClick: onReplyBtnClick,
@@ -333,7 +333,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                 ]
             }
 
-            return []
+            return [
+                {
+                    key: 'share-note-btn',
+                    isDisabled: true,
+                    image: shareIconData.icon,
+                },
+            ]
         }
 
         if (hoverState === 'footer') {
@@ -470,7 +476,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <Margin top="5px" bottom="5px">
+                <AnnotationBox top="5px" bottom="2px">
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -544,7 +550,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                             )}
                         </AnnotationStyled>
                     </ItemBox>
-                </Margin>
+                </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <ClickAway
                         onClickAway={() =>
@@ -619,6 +625,11 @@ const EditNoteIconBox = styled.div`
     &:hover {
         background-color: #f0f0f0;
     }
+`
+
+const AnnotationBox = styled(Margin)`
+    width: 99%;
+    align-self: center;
 `
 
 const EditNoteIcon = styled.div`
@@ -888,6 +899,5 @@ const DeletionBox = styled.div`
     justify-content: space-between;
     align-items: center;
     border-top: 1px solid #f0f0f0;
-    padding: 5px;
-}
+    padding: 5px 15px 5px 15px;
 `

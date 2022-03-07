@@ -88,6 +88,15 @@ class SearchInjectionContainer extends React.Component {
                         Brave
                     </Checkbox>
                 </CheckBoxRow>
+                <CheckBoxRow>
+                    <Checkbox
+                        isChecked={this.state.injectionPreference.bing}
+                        handleChange={this.bindToggleInjection('bing')}
+                        id="si-bing"
+                    >
+                        Bing
+                    </Checkbox>
+                </CheckBoxRow>
             </SearchInjection>
         )
     }

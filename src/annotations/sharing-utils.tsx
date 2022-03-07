@@ -16,10 +16,10 @@ export function getShareButtonData(
             ),
         }
     } else if (isShared && !isBulkShareProtected) {
-        return { icon: icons.webLogo, label: 'Public' }
+        return { icon: icons.globe, label: 'Public' }
     } else if (isBulkShareProtected && !isShared) {
         return {
-            icon: icons.lock,
+            icon: icons.lockFine,
             label: (
                 <span>
                     Private
@@ -28,5 +28,5 @@ export function getShareButtonData(
             ),
         }
     }
-    return { icon: icons.link, label: 'Share' }
+    return { icon: icons.personFine, label: 'Share' }
 }

@@ -74,13 +74,15 @@ const TagItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 18px;
-    font-size: 14px;
-    font-weight: 500;
+    height: 20px;
+    font-size: 12px;
+    font-weight: 400;
 `
 
 const TagBox = styled.div`
     margin-top: 5px;
+    display: flex;
+    grid-gap: 5px;
 `
 
 const Title = styled.div`

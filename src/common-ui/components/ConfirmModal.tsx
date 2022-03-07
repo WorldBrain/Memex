@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
 import Modal, { Props as ModalProps } from './Modal'
-import Spinner from './LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import styled from 'styled-components'
 
@@ -30,7 +30,7 @@ class ConfirmModal extends PureComponent<Props> {
                 >
                     {this.props.isLoading && (
                         <div className={styles.loadingSpinnerBox}>
-                            <Spinner />
+                            <LoadingIndicator />
                         </div>
                     )}
                     {this.props.message && (

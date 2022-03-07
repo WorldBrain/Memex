@@ -7,7 +7,7 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import SharePrivacyOption, {
     Props as PrivacyOptionProps,
 } from './SharePrivacyOption'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -81,7 +81,11 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         const { copyState } = this.state
 
         if (copyState === 'running' || this.props.isLoading) {
-            return <LoadingIndicator />
+            return (
+                <LoadingBox>
+                    <LoadingIndicator size={16} />
+                </LoadingBox>
+            )
         } else if (copyState === 'success') {
             return <LinkContent>Copied to Clipboard</LinkContent>
         } else {
@@ -99,7 +103,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             <Menu>
                 {this.props.isLoading ? (
                     <LoadingBox>
-                        <LoadingIndicator />
+                        <LoadingIndicator size={30} />
                     </LoadingBox>
                 ) : (
                     <>
@@ -298,14 +302,14 @@ const LinkCopierBox = styled.div`
     align-items: center;
     cursor: pointer;
     margin: 5px 0;
-    background-color: ${(props) => props.theme.colors.lighterText};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker}70;
     border-radius: 5px;
 `
 
 const LoadingBox = styled.div`
     width: 100%;
     display: flex;
-    height: 60px;
+    height: 100px;
     align-items: center;
     justify-content: center;
 `
@@ -317,7 +321,8 @@ const LinkCopier = styled.button`
     align-items: center;
     border: 0;
     border-radius: 3px;
-    height: 30px;
+    height: 40px;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     padding: 0 10px;
     outline: none;
     cursor: pointer;

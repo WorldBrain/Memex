@@ -125,23 +125,24 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             STAGES.annotation.annotationCreated,
         )
 
+        this.props.inPageUI.hideTooltip()
         // quick hack, to prevent the tooltip from popping again
-        setTimeout(() => {
-            this.setState({
-                tooltipState: 'pristine',
-            })
-            this.props.inPageUI.hideTooltip()
-        }, 400)
+        // setTimeout(() => {
+        //     this.setState({
+        //         tooltipState: 'pristine',
+        //     })
+        //     this.props.inPageUI.hideTooltip()
+        // }, 100)
     }
 
     private createHighlight: React.MouseEventHandler = async (e) => {
-        this.setState({ tooltipState: 'running' })
+        // this.setState({ tooltipState: 'running' })
         try {
             await this.props.createHighlight(e.shiftKey)
         } catch (err) {
             throw err
         } finally {
-            this.setState({ tooltipState: 'pristine' })
+            // this.setState({ tooltipState: 'pristine' })
             this.props.inPageUI.hideTooltip()
         }
     }

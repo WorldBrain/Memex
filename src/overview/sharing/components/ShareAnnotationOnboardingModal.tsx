@@ -36,7 +36,7 @@ const ShareIconContainer = styled.div`
 `
 
 const ShareIconFull = styled.div`
-    background-image: url(${icons.webLogo});
+    background-image: url(${icons.globe});
     background-position: center center;
     background-repeat: no-repeat;
     width: 30px;

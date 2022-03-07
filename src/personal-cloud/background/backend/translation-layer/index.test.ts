@@ -16,6 +16,7 @@ import {
     DataChangeType,
     DataUsageAction,
     ContentLocatorFormat,
+    PersonalDeviceType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     PersonalCloudUpdateBatch,
@@ -343,6 +344,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
                         .personalCloud.deviceId,
+                clientDeviceType: PersonalDeviceType.DesktopBrowser,
             })
             for (const update of batch) {
                 if (update.type !== PersonalCloudUpdateType.Overwrite) {

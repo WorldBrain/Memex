@@ -510,17 +510,19 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                 ]}
                 initDropReceivingState={(listId) => ({
-                    onDragEnter: () =>
-                        this.processEvent('setDragOverListId', { listId }),
+                    onDragEnter: () => {
+                        this.processEvent('setDragOverListId', { listId })
+                    },
                     onDragLeave: () =>
                         this.processEvent('setDragOverListId', {
                             listId: undefined,
                         }),
-                    onDrop: (dataTransfer: DataTransfer) =>
+                    onDrop: (dataTransfer: DataTransfer) => {
                         this.processEvent('dropPageOnListItem', {
                             listId,
                             dataTransfer,
-                        }),
+                        })
+                    },
                     isDraggedOver: listId === listsSidebar.dragOverListId,
                     wasPageDropped:
                         listsSidebar.listData[listId]?.wasPageDropped,

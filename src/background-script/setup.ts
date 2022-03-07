@@ -507,6 +507,7 @@ export function createBackgroundModules(options: {
                 setLastUpdateSeenTime: (lastSeen) =>
                     personalCloudSettingStore.set('lastSeen', lastSeen),
                 getDeviceId: async () => personalCloud.deviceId!,
+                getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {

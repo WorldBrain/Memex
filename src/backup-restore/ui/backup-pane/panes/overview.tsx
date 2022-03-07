@@ -13,7 +13,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import { DumpPane } from './dump-pane'

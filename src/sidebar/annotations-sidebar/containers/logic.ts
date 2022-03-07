@@ -30,11 +30,11 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { Browser, browser } from 'webextension-polyfill-ts'
+import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -84,7 +84,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationConversationEventHandlers<SidebarContainerState>(
                 this as any,
                 {
-                    getSharedListReference: () => null,
                     loadUserByReference: options.auth.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
@@ -871,13 +870,21 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const immediateShare =
-            event.mouseEvent.metaKey && event.mouseEvent.altKey
-
-        this.emitMutation({
-            activeShareMenuNoteId: { $set: event.annotationUrl },
-            immediatelyShareNotes: { $set: !!immediateShare },
-        })
+        if (navigator.platform === 'MacIntel') {
+            const immediateShare =
+                event.mouseEvent.metaKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        } else {
+            const immediateShare =
+                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
+            this.emitMutation({
+                activeShareMenuNoteId: { $set: event.annotationUrl },
+                immediatelyShareNotes: { $set: !!immediateShare },
+            })
+        }
 
         await this.setLastSharedAnnotationTimestamp()
     }
@@ -1188,6 +1195,15 @@ export class SidebarContainerLogic extends UILogic<
         const { sharedAnnotationReferences } = previousState.followedLists.byId[
             event.listId
         ]
+        this.emitMutation({
+            conversations: {
+                $merge: getInitialAnnotationConversationStates(
+                    sharedAnnotationReferences.map(({ id }) => ({
+                        linkId: id.toString(),
+                    })),
+                ),
+            },
+        })
 
         await executeUITask(
             this,

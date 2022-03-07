@@ -6,7 +6,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 
 const Container = styled.div<StyleProps>`
     display: flex;
-    padding: 15px 15px;
+    padding: 15px 25px;
     justify-content: space-between;
     align-items: center;
     background: #ffa3a3;
@@ -22,16 +22,19 @@ const ContentBox = styled.div<StyleProps>`
     padding-bottom: ${(props) => (props.direction === 'column' ? '15px' : '0')};
     text-align: ${(props) =>
         props.direction === 'column' ? 'center' : 'unset'};
+    grid-gap: 3px;
 `
 
 const Title = styled.div<StyleProps>`
-    font-weight: bold;
+    font-weight: 600;
     font-size: 14px;
+    color: ${(props) => props.theme.colors.darkerText};
     padding-bottom: ${(props) => (props.direction === 'column' ? '5px' : '0')};
 `
 
 const Description = styled.div`
-    font-size: 12px;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.darkerText};
 `
 
 const ButtonBox = styled.div`
@@ -54,11 +57,10 @@ export interface Props extends StyleProps {
 const CloudUpgradeBanner = ({ onGetStartedClick, ...props }: Props) => (
     <Container {...props}>
         <ContentBox {...props}>
-            <Title {...props}>
-                Memex now supports multi-device sync & automatic cloud backup
-            </Title>
+            <Title {...props}>Migrate to the new cloud</Title>
             <Description>
-                Sync between an unlimited amount of devices for free
+                Enjoy auto-backups, multi-device syncing, sharing and
+                collaboration.
             </Description>
         </ContentBox>
         <ButtonBox>

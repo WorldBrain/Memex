@@ -312,7 +312,12 @@ export async function main(
     const loadContentScript = createContentScriptLoader({
         loadRemotely: params.loadRemotely,
     })
-    if (shouldIncludeSearchInjection(window.location.hostname)) {
+    if (
+        shouldIncludeSearchInjection(
+            window.location.hostname,
+            window.location.href,
+        )
+    ) {
         await contentScriptRegistry.registerSearchInjectionScript(
             searchInjectionMain,
         )

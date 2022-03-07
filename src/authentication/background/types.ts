@@ -19,6 +19,7 @@ export interface AuthRemoteFunctionsInterface {
     signOut(): void
     refreshUserInfo(): Promise<void>
     sendPasswordResetEmailProcess: (email) => Promise<void>
+    changeEmailProcess: (email) => Promise<void>
 
     getUserProfile(): Promise<{ displayName?: string } | null>
     getUserByReference(reference: UserReference): Promise<User | null>

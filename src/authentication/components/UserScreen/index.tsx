@@ -16,6 +16,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
 import { auth } from 'firebase-admin'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -126,8 +127,37 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             />
                         </Section>
                     </div>
+                ) : this.state.authDialogMode === 'ConfirmResetPassword' ? (
+                    <Section>
+                        <UserScreenContainer>
+                            <SectionCircle>
+                                <Icon
+                                    filePath={icons.mail}
+                                    heightAndWidth="24px"
+                                    color="purple"
+                                    hoverOff
+                                />
+                            </SectionCircle>
+                            <SectionTitle>Check your Emails</SectionTitle>
+                            <InfoText>Don't forget the spam folder!</InfoText>
+                        </UserScreenContainer>
+                        <PrimaryAction
+                            label={'Go Back'}
+                            onClick={() => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode: 'login',
+                                })
+                            }}
+                        />
+                    </Section>
                 ) : (
-                    <AccountInfo refreshUser={this.props.refreshUser} />
+                    <AccountInfo
+                        setAuthMode={(mode) => {
+                            this.processEvent('setAuthDialogMode', {
+                                mode: mode,
+                            })
+                        }}
+                    />
                 )}
             </>
         )

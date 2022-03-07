@@ -13,13 +13,14 @@ export interface Props {
     refreshUserInfoOnInit?: boolean
     authBG: AuthRemoteFunctionsInterface
     onSaveComplete?: React.MouseEventHandler
+    email: string
 }
 
 interface State {
     loadState: TaskState
     saveState: TaskState
-    displayNameInput: string
-    displayName: string
+    emailInput: string
+    email: string
 }
 
 const Container = styled.div`
@@ -52,12 +53,17 @@ const TextInput = styled.input`
     }
 `
 
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 12px;
-    opacity: 0.7;
+const WarningText = styled.div`
+    background-color: ${(props) => props.theme.colors.warning};
+    font-size: 14px;
     padding-left: 10px;
     margin-top: 5px;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 const InputBox = styled.div`
@@ -67,32 +73,25 @@ const InputBox = styled.div`
     width: fill-available;
 `
 
-const LoadingBlock = styled.div`
-    width: 100%;
-    justify-content: flex-start;
-    padding-left: 15px;
-    align-items: center;
-    display: flex;
-`
-
 export default class DisplayNameSetup extends PureComponent<Props, State> {
     state: State = {
-        loadState: 'running',
+        loadState: 'pristine',
         saveState: 'pristine',
-        displayNameInput: '',
-        displayName: '',
+        emailInput: this.props.email,
+        email: this.props.email,
     }
 
     async componentDidMount() {
         const { authBG, refreshUserInfoOnInit } = this.props
         this.setState({ loadState: 'running' })
+        const user = await this.props.authBG.getCurrentUser()
 
         try {
             const profile = await authBG.getUserProfile()
             this.setState({
                 loadState: 'success',
-                displayNameInput: profile?.displayName ?? '',
-                displayName: profile?.displayName ?? '',
+                emailInput: user.email ?? '',
+                email: user.email ?? '',
             })
         } catch (e) {
             this.setState({ loadState: 'error' })
@@ -105,19 +104,20 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
     }
 
     private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-        const displayNameInput = (e.target as HTMLInputElement).value
-        this.setState({ displayNameInput, saveState: 'pristine' })
+        const emailInput = (e.target as HTMLInputElement).value
+        this.setState({ emailInput, saveState: 'pristine' })
     }
 
     private confirmSave: React.MouseEventHandler = async (e) => {
-        const displayName = this.state.displayNameInput.trim()
-        if (!displayName.length || displayName === this.state.displayName) {
+        const user = this.props.authBG.getCurrentUser()
+        const email = this.state.emailInput.trim()
+        if (!email.length || email === this.state.email) {
             return
         }
 
         this.setState({ saveState: 'running' })
         try {
-            await this.props.authBG.updateUserProfile({ displayName })
+            await this.props.authBG.changeEmailProcess(email)
             this.setState({ saveState: 'success' })
             this.props.onSaveComplete?.(e)
         } catch (err) {
@@ -142,34 +142,29 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
                 <InputBox>
                     <TextInputContainer>
                         <Icon
-                            filePath={icons.smileFace}
+                            filePath={icons.mail}
                             heightAndWidth="20px"
                             hoverOff
                         />
-                        {this.state.loadState === 'running' ? (
-                            <LoadingBlock>
-                                <LoadingIndicator size={16} />
-                            </LoadingBlock>
-                        ) : (
-                            <TextInput
-                                value={this.state.displayNameInput}
-                                onChange={this.changeInput}
-                                disabled={this.state.saveState === 'running'}
-                                placeholder={'Add Display Name'}
-                            />
-                        )}
+                        <TextInput
+                            value={this.state.emailInput}
+                            onChange={this.changeInput}
+                            disabled={this.state.saveState === 'running'}
+                            placeholder={'Add Display Name'}
+                        />
                     </TextInputContainer>
-                    {this.state.displayName !== this.state.displayNameInput && (
+                    {this.state.email !== this.state.emailInput && (
                         <PrimaryAction
                             label={this.renderBtnLabel()}
                             onClick={this.confirmSave}
                         />
                     )}
                 </InputBox>
-                <InfoText>
-                    Display name shown on shared Spaces, page links and
-                    annotations
-                </InfoText>
+                {this.state.saveState === 'error' && (
+                    <WarningText>
+                        Log out and login again, then change your email.
+                    </WarningText>
+                )}
             </Container>
         )
     }

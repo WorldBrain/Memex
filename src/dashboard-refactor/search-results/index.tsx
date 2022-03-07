@@ -37,7 +37,7 @@ import {
 } from 'src/annotations/components/AnnotationCreate'
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import TagPicker from 'src/tags/ui/TagPicker'
@@ -720,7 +720,7 @@ const ResultsMessage = styled.div`
 `
 
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 100%;
+    width: 96%;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     padding: 0px 15px;
     height: 40px;
@@ -784,6 +784,7 @@ const Loader = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 300px;
 `
 
 const ResultsContainer = styled(Margin)`

@@ -47,20 +47,38 @@ class AnnotationEdit extends React.Component<Props> {
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         e.stopPropagation()
 
-        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.saveEdit(true, false)
-        }
+        if (navigator.platform === 'MacIntel') {
+            if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+                return this.saveEdit(true, false)
+            }
 
-        if (e.key === 'Enter' && e.shiftKey && e.altKey) {
-            return this.saveEdit(true, true)
-        }
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.saveEdit(true, true)
+            }
 
-        if (e.key === 'Enter' && e.altKey) {
-            return this.saveEdit(false, true)
-        }
+            if (e.key === 'Enter' && e.altKey) {
+                return this.saveEdit(false, true)
+            }
 
-        if (e.key === 'Enter' && e.metaKey) {
-            return this.saveEdit(false, false)
+            if (e.key === 'Enter' && e.metaKey) {
+                return this.saveEdit(false, false)
+            }
+        } else {
+            if (e.key === 'Enter' && e.shiftKey && e.ctrlKey) {
+                return this.saveEdit(true, false)
+            }
+
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.saveEdit(true, true)
+            }
+
+            if (e.key === 'Enter' && e.altKey) {
+                return this.saveEdit(false, true)
+            }
+
+            if (e.key === 'Enter' && e.ctrlKey) {
+                return this.saveEdit(false, false)
+            }
         }
 
         if (e.key === 'Escape') {

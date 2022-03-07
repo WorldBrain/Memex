@@ -12,7 +12,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
@@ -187,8 +187,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Sign Up'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
@@ -284,8 +288,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Login'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
@@ -349,8 +357,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Login'}
                                         fontSize={'14px'}
                                     />
-                                    {this.renderAuthError()}
                                 </ConfirmContainer>
+                                {this.state.error && (
+                                    <AuthErrorMessage>
+                                        {this.renderAuthError()}
+                                    </AuthErrorMessage>
+                                )}
                                 {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
@@ -453,12 +465,35 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
 
     render() {
         return this.state.saveState === 'running' ? (
-            <LoadingIndicator />
+            <LoadingBox>
+                <LoadingIndicator />
+            </LoadingBox>
         ) : (
             <ContentBox>{this.renderAuthForm()}</ContentBox>
         )
     }
 }
+
+const LoadingBox = styled.div`
+    height: 100px;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const AuthErrorMessage = styled.div`
+    background-color: ${(props) => props.theme.colors.warning};
+    font-size: 14px;
+    padding-left: 10px;
+    margin-top: 5px;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const SectionContainer = styled.div`
     display: flex;
@@ -657,15 +692,14 @@ const EmailPasswordLogin = styled.div`
 `
 
 const EmailPasswordError = styled.div`
-    color: red;
-    font-weight: bold;
+    color: white;
     text-align: center;
 `
 
 const AuthBox = styled(Margin)`
     display: flex;
     justify-content: center;
-    width: 100%;
+    width: 350px;
 `
 
 const Footer = styled.div`

@@ -10,10 +10,7 @@ import {
 import type CustomListStorage from 'src/custom-lists/background/storage'
 import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
-import {
-    AnnotationPrivacyLevels,
-    AnnotationPrivacyState,
-} from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import type ActivityStreamsBackground from 'src/activity-streams/background'

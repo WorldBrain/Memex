@@ -9,7 +9,7 @@ import cx from 'classnames'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { AnnotationInterface } from 'src/annotations/background/types'
 import AnnotationList from './annotation-list'
-import { LoadingIndicator } from 'src/common-ui/components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
@@ -141,9 +141,7 @@ class ResultItem extends PureComponent<Props> {
                 })}
             >
                 <div className={styles.resultBoxItem}>
-                    {this.props.isDeleting && (
-                        <LoadingIndicator className={styles.deletingSpinner} />
-                    )}
+                    {this.props.isDeleting && <LoadingIndicator />}
                     {this.props.tagManager}
                     {this.props.listManager}
                     {this.props.copyPasterManager}

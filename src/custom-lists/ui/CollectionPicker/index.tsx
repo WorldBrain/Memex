@@ -11,8 +11,8 @@ import ListPickerLogic, {
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import EntryResultsList from './components/EntryResultsList'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,

@@ -9,7 +9,7 @@ import { StyleSheetManager, ThemeProvider } from 'styled-components'
 import Container from './components/container'
 import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 
@@ -44,8 +44,6 @@ export const handleRender = async (
         if (component) {
             component.parentNode.removeChild(component)
         }
-
-        console.log('searchEngine', searchEngine)
 
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
@@ -92,7 +90,41 @@ export const handleRender = async (
             const suggestionsContainer = document.getElementById(
                 searchEngineObj.container.side,
             )
-            console.log(suggestionsContainer)
+            const containerWithSuggestions = document.getElementById(
+                searchEngineObj.container.sideAlternative,
+            )
+
+            if (position === 'side') {
+                if (!suggestionsContainer) {
+                    containerWithSuggestions.style.display = 'grid'
+                    containerWithSuggestions.style.gap = '130px'
+                    containerWithSuggestions.style.flexDirection = 'row'
+                    containerWithSuggestions.style.gridAutoFlow = 'column'
+                    containerWithSuggestions.style.justifyContent =
+                        'space-between'
+
+                    containerWithSuggestions.insertAdjacentElement(
+                        'beforeend',
+                        target,
+                    )
+                } else {
+                    suggestionsContainer.insertBefore(
+                        target,
+                        suggestionsContainer.firstChild,
+                    )
+                }
+            } else {
+                const containerAbove = document.getElementById(
+                    searchEngineObj.container.above,
+                )
+                containerAbove.insertBefore(target, containerAbove.firstChild)
+            }
+        }
+
+        if (searchEngine === 'bing') {
+            const suggestionsContainer = document.getElementById(
+                searchEngineObj.container.side,
+            )
             const containerWithSuggestions = document.getElementById(
                 searchEngineObj.container.sideAlternative,
             )

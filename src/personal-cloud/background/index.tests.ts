@@ -19,6 +19,7 @@ import {
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
+import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -303,6 +304,7 @@ export async function setupSyncBackgroundTest(
             getDeviceId: async () =>
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
+            clientDeviceType: PersonalDeviceType.DesktopBrowser,
         })
 
         const setup: BackgroundIntegrationTestSetup = await setupBackgroundIntegrationTest(

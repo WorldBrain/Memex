@@ -1873,7 +1873,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         const immediateShare =
-            event.mouseEvent.metaKey && event.mouseEvent.altKey
+            (navigator.platform === 'MacIntel'
+                ? event.mouseEvent.metaKey
+                : event.mouseEvent.ctrlKey) && event.mouseEvent.altKey
 
         this.emitMutation({
             searchResults: {
@@ -2473,6 +2475,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
+        console.log('sdd')
         const { fullPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
         )
@@ -2798,8 +2801,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })
-            this.options.annotationsBG
-            await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
     /* END - lists sidebar event handlers */

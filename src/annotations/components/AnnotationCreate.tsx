@@ -146,22 +146,39 @@ export class AnnotationCreate extends React.Component<Props, State>
         // If we don't have this, events will bubble up, out of the content script into the parent page!
         e.stopPropagation()
 
-        if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
-            return this.handleSave(true, false)
-        }
+        if (navigator.platform === 'MacIntel') {
+            if (e.key === 'Enter' && e.shiftKey && e.metaKey) {
+                return this.handleSave(true, false)
+            }
 
-        if (e.key === 'Enter' && e.shiftKey && e.altKey) {
-            return this.handleSave(true, true)
-        }
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.handleSave(true, true)
+            }
 
-        if (e.key === 'Enter' && e.altKey) {
-            return this.handleSave(false, true)
-        }
+            if (e.key === 'Enter' && e.altKey) {
+                return this.handleSave(false, true)
+            }
 
-        if (e.key === 'Enter' && e.metaKey) {
-            return this.handleSave(false, false)
-        }
+            if (e.key === 'Enter' && e.metaKey) {
+                return this.handleSave(false, false)
+            }
+        } else {
+            if (e.key === 'Enter' && e.shiftKey && e.ctrlKey) {
+                return this.handleSave(true, false)
+            }
 
+            if (e.key === 'Enter' && e.shiftKey && e.altKey) {
+                return this.handleSave(true, true)
+            }
+
+            if (e.key === 'Enter' && e.altKey) {
+                return this.handleSave(false, true)
+            }
+
+            if (e.key === 'Enter' && e.ctrlKey) {
+                return this.handleSave(false, false)
+            }
+        }
         // if (e.key === 'Tab' && !e.shiftKey) {
         //     e.preventDefault()
         //     insertTab({ el: this.textAreaRef.current })
@@ -288,7 +305,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         setEditorInstanceRef={(editor) =>
                             (this.editor = editor)
                         }
-                        autoFocus={this.props.autoFocus}
+                        // autoFocus={this.props.autoFocus}
                         placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                         isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />
@@ -378,6 +395,7 @@ const FooterContainer = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 5px 15px 5px 15px;
+    z-index: 1001;
 `
 
 const SaveActionBar = styled.div`
