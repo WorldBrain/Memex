@@ -1,4 +1,7 @@
-import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import type {
+    PickerUpdateHandler,
+    PickerUpdateHandlerArgs,
+} from 'src/common-ui/GenericPicker/types'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -76,7 +79,9 @@ export interface RibbonListsProps {
     pageBelongsToList: boolean
     showListsPicker: boolean
     listData: { [listId: number]: { name: string } }
-    updateLists: PickerUpdateHandler<number>
+    updateLists: (
+        args: PickerUpdateHandlerArgs<number> & { skipPageIndexing?: boolean },
+    ) => Promise<void>
     listAllTabs: (value: number) => Promise<void>
     setShowListsPicker: (value: boolean) => void
     fetchInitialListSelections: () => Promise<number[]>

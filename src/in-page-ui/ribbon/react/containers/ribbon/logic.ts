@@ -499,11 +499,16 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        await this.dependencies.annotationsCache.updatePublicAnnotationLists({
+            added: event.value.added,
+            deleted: event.value.deleted,
+        })
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
             url: previousState.pageUrl,
             tabId: this.dependencies.currentTab.id,
+            skipPageIndexing: event.value.skipPageIndexing,
         })
     }
 

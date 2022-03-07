@@ -159,6 +159,25 @@ export const createAnnotationsCache = (
                     ),
                 }
             },
+            loadListData: async () => {
+                const lists = await bgModules.customLists.fetchAllLists({})
+                const remoteListIds = await bgModules.contentSharing.getRemoteListIds(
+                    {
+                        localListIds: lists.map((l) => l.id),
+                    },
+                )
+
+                return lists.reduce(
+                    (acc, l) => ({
+                        ...acc,
+                        [l.id]: {
+                            name: l.name,
+                            remoteId: remoteListIds[l.id] ?? null,
+                        },
+                    }),
+                    {},
+                )
+            },
         },
     })
 
@@ -172,6 +191,11 @@ interface AnnotationCacheChanges {
     deleted: (annotation: CachedAnnotation) => void
     load: (annotation: CachedAnnotation[]) => void
     noteAddedToRemote: (annotation: CachedAnnotation[]) => void
+}
+
+interface ModifiedList {
+    added: number | null
+    deleted: number | null
 }
 
 export type AnnotationCacheChangeEvents = TypedEventEmitter<
@@ -211,6 +235,9 @@ export interface AnnotationsCacheDependencies {
             sharedLists: number[]
             privateLists: number[]
         }>
+        loadListData: () => Promise<{
+            [listId: number]: { name: string; remoteId: string | null }
+        }>
     }
 }
 
@@ -235,12 +262,14 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     sort: (sortingFn?: AnnotationsSorter) => void
     getAnnotationById: (id: string) => CachedAnnotation | null
-    updateLists: (args: {
-        added: number | null
-        deleted: number | null
-        annotationId: string
-        options?: { protectAnnotation?: boolean }
-    }) => Promise<void>
+    updateLists: (
+        args: ModifiedList & {
+            annotationId: string
+            options?: { protectAnnotation?: boolean }
+        },
+    ) => Promise<void>
+    /** NOTE: This is a state-only operation. No backend side-effects should occur. */
+    updatePublicAnnotationLists: (args: ModifiedList) => Promise<void>
 
     annotations: CachedAnnotation[]
     readonly highlights: CachedAnnotation[]
@@ -249,8 +278,50 @@ export interface AnnotationsCacheInterface {
 }
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
+    private listData: {
+        [listId: number]: { name: string; remoteId: string | null }
+    } = {}
     private _annotations: CachedAnnotation[] = []
     public annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
+
+    private static updateAnnotationLists(
+        args: ModifiedList & {
+            listIds: number[]
+        },
+    ): number[] {
+        const listIds = new Set(args.listIds)
+        if (args.added != null) {
+            listIds.add(args.added)
+        } else if (args.deleted != null) {
+            listIds.delete(args.deleted)
+        }
+        return [...listIds]
+    }
+
+    private static updatePublicAnnotationLists(
+        args: ModifiedList & {
+            state: Annotation[]
+            baseAnnotIndex?: number
+        },
+    ): Annotation[] {
+        const publicAnnotIndices = args.state
+            .map((_, i) => i)
+            .filter(
+                (i) =>
+                    args.state[i].isShared && i !== (args.baseAnnotIndex ?? -1),
+            )
+
+        for (const i of publicAnnotIndices) {
+            const annot = args.state[i]
+            annot.lists = AnnotationsCache.updateAnnotationLists({
+                listIds: annot.lists,
+                deleted: args.deleted,
+                added: args.added,
+            })
+        }
+
+        return args.state
+    }
 
     constructor(private dependencies: AnnotationsCacheDependencies) {}
 
@@ -274,11 +345,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotations.find((annot) => annot.url === id) ?? null
 
     load = async (url: string, args = {}) => {
-        const annotations = await this.dependencies.backendOperations.load(
-            url,
-            args,
-        )
+        const { backendOperations } = this.dependencies
+        const annotations = await backendOperations.load(url, args)
 
+        this.listData = await backendOperations.loadListData()
         this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
         this.annotationChanges.emit('newStateIntent', this.annotations)
@@ -458,18 +528,16 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         options,
     }) => {
         const stateBeforeModifications = [...this._annotations]
-        const nextState = [...stateBeforeModifications]
-        const annotIndices = [
-            stateBeforeModifications.findIndex(
-                (existingAnnotation) => existingAnnotation.url === annotationId,
-            ),
-        ]
-        if (annotIndices[0] === -1) {
+        let nextState = [...stateBeforeModifications]
+        const annotationIndex = stateBeforeModifications.findIndex(
+            (existingAnnotation) => existingAnnotation.url === annotationId,
+        )
+        if (annotationIndex === -1) {
             return
         }
 
-        const previousAnnotation = stateBeforeModifications[annotIndices[0]]
-        const nextAnnotation = nextState[annotIndices[0]]
+        const previousAnnotation = stateBeforeModifications[annotationIndex]
+        const nextAnnotation = nextState[annotationIndex]
         nextAnnotation.isShared = options?.protectAnnotation
             ? false
             : previousAnnotation.isShared
@@ -477,29 +545,23 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             options?.protectAnnotation ??
             previousAnnotation.isBulkShareProtected
 
+        nextAnnotation.lists = AnnotationsCache.updateAnnotationLists({
+            added,
+            deleted,
+            listIds: nextAnnotation.lists,
+        })
+
         // If not choosing to protect the annot, all other public annots must also have their lists updated in the same way
-        if (options?.protectAnnotation === false) {
-            const publicAnnotIndices = nextState
-                .map((_, i) => i)
-                .filter(
-                    (i) =>
-                        nextState[i].isShared &&
-                        nextState[i].url !== annotationId,
-                )
-
-            annotIndices.push(...publicAnnotIndices)
-        }
-
-        for (const i of annotIndices) {
-            const annot = nextState[i]
-            const listIds = new Set(annot.lists)
-
-            if (added != null) {
-                listIds.add(added)
-            } else if (deleted != null) {
-                listIds.delete(deleted)
-            }
-            annot.lists = [...listIds]
+        if (
+            options?.protectAnnotation === false &&
+            this.isModifiedListShared({ added, deleted })
+        ) {
+            nextState = AnnotationsCache.updatePublicAnnotationLists({
+                added,
+                deleted,
+                state: nextState,
+                baseAnnotIndex: annotationIndex,
+            })
         }
 
         this.annotationChanges.emit('newStateIntent', nextState)
@@ -526,6 +588,30 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this.annotationChanges.emit('newState', this.annotations)
     }
+
+    updatePublicAnnotationLists: AnnotationsCacheInterface['updatePublicAnnotationLists'] = async ({
+        added,
+        deleted,
+    }) => {
+        let state = [...this._annotations]
+
+        if (this.isModifiedListShared({ added, deleted })) {
+            state = AnnotationsCache.updatePublicAnnotationLists({
+                state,
+                added,
+                deleted,
+            })
+        }
+
+        this.annotationChanges.emit('newStateIntent', state)
+        this.annotationChanges.emit('newState', state)
+    }
+
+    private isModifiedListShared = ({
+        added,
+        deleted,
+    }: ModifiedList): boolean =>
+        this.listData[added ?? deleted]?.remoteId != null
 }
 
 function formatAnnotations(
