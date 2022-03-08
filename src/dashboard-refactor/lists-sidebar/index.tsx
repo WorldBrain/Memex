@@ -239,8 +239,7 @@ export default class ListsSidebar extends PureComponent<
                     locked={isSidebarLocked}
                     onMouseEnter={
                         isSidebarPeeking &&
-                        (this.props.peekState.setSidebarPeekState(true),
-                        console.log('test'))
+                        this.props.peekState.setSidebarPeekState(true)
                     }
                     default={{ width: 200 }}
                     resizeHandleClasses={{

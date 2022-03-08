@@ -816,6 +816,67 @@ describe('Dashboard search results logic', () => {
 
     describe('nested page result state mutations', () => {
         describe('page search results', () => {
+            it('should set shared lists of parent page as lists for all public annotations of that page, when setting search results', async ({
+                device,
+            }) => {
+                for (const listData of DATA.LISTS_1) {
+                    await device.storageManager
+                        .collection('customLists')
+                        .createObject({
+                            id: listData.id,
+                            name: listData.name,
+                        })
+                    if (listData.remoteId) {
+                        await device.storageManager
+                            .collection('sharedListMetadata')
+                            .createObject({
+                                localId: listData.id,
+                                remoteId: listData.remoteId,
+                            })
+                    }
+                }
+                DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[0].isShared = true
+                DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[2].isShared = true
+
+                const { searchResults } = await setupTest(device)
+
+                const day = PAGE_SEARCH_DUMMY_DAY
+                const pageId = DATA.PAGE_1.normalizedUrl
+                // Doing it in this order, rather than passing in the data seeder to the setupTest fn, as
+                //   the init fn needs to be called first to set up the list data state
+                await searchResults.init()
+                await setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3)(
+                    searchResults,
+                    device,
+                )
+
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId]
+                        .lists,
+                ).toEqual([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
+                expect(searchResults.state.listsSidebar.listData).toEqual({
+                    [DATA.LISTS_1[0].id]: expect.objectContaining(
+                        DATA.LISTS_1[0],
+                    ),
+                    [DATA.LISTS_1[1].id]: expect.objectContaining(
+                        DATA.LISTS_1[1],
+                    ),
+                    [DATA.LISTS_1[2].id]: expect.objectContaining(
+                        DATA.LISTS_1[2],
+                    ),
+                })
+
+                for (const noteId of searchResults.state.searchResults.results[
+                    day
+                ].pages.byId[pageId].noteIds.user) {
+                    const note =
+                        searchResults.state.searchResults.noteData.byId[noteId]
+                    expect(note.lists).toEqual(
+                        note.isShared ? [DATA.LISTS_1[1].id] : [],
+                    )
+                }
+            })
+
             it('should be able to show and hide copy paster', async ({
                 device,
             }) => {

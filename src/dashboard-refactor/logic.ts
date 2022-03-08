@@ -222,8 +222,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
+            const localListsResult = await this.loadLocalListsData(nextState)
+            nextState = localListsResult.nextState
             await Promise.all([
-                this.loadListsData(nextState),
+                this.loadRemoteListsData(localListsResult.remoteToLocalIdDict),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
@@ -340,10 +342,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async loadListsData(previousState: State) {
+    private async loadLocalListsData(previousState: State) {
         const { listsBG, contentShareBG } = this.options
 
         const remoteToLocalIdDict: { [remoteId: string]: number } = {}
+        const mutation: UIMutation<State> = {}
 
         await executeUITask(
             this,
@@ -389,17 +392,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: { $merge: listData },
-                        localLists: {
-                            allListIds: { $set: listIds },
-                            filteredListIds: { $set: listIds },
-                        },
+                mutation.listsSidebar = {
+                    listData: { $merge: listData },
+                    localLists: {
+                        allListIds: { $set: listIds },
+                        filteredListIds: { $set: listIds },
                     },
-                })
+                }
+                this.emitMutation(mutation)
             },
         )
+
+        return {
+            nextState: this.withMutation(previousState, mutation),
+            remoteToLocalIdDict,
+        }
+    }
+
+    private async loadRemoteListsData(remoteToLocalIdDict: {
+        [remoteId: string]: number
+    }) {
+        const { listsBG } = this.options
 
         await executeUITask(
             this,
@@ -463,6 +476,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         300,
     )
 
+    private inheritParentPageSharedListsForSharedNotes(
+        noteData: State['searchResults']['noteData'],
+        pageData: State['searchResults']['pageData'],
+        listData: State['listsSidebar']['listData'],
+    ): State['searchResults']['noteData'] {
+        for (const noteId of noteData.allIds) {
+            const note = noteData.byId[noteId]
+            if (!note) {
+                continue
+            }
+
+            if (note.isShared) {
+                const parentPageSharedLists = pageData.byId[
+                    note.pageUrl
+                ].lists.filter((listId) => listData[listId]?.remoteId != null)
+                note.lists = parentPageSharedLists
+            }
+        }
+        return noteData
+    }
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
@@ -486,7 +519,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const searchState = this.withMutation(previousState, {
                     searchFilters: skipMutation,
                 })
-                const {
+                let {
                     noteData,
                     pageData,
                     results,
@@ -496,6 +529,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(searchState)
                         : await this.searchNotes(searchState)
+
+                noteData = this.inheritParentPageSharedListsForSharedNotes(
+                    noteData,
+                    pageData,
+                    previousState.listsSidebar.listData,
+                )
 
                 let noResultsType: NoResultsType = null
                 if (
@@ -704,26 +743,42 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - modal event handlers */
 
     /* START - search result event handlers */
-    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
+    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({
+        event,
+        previousState,
+    }) => {
         const state = utils.pageSearchResultToState(event.result)
+        const noteData = this.inheritParentPageSharedListsForSharedNotes(
+            state.noteData,
+            state.pageData,
+            previousState.listsSidebar.listData,
+        )
+
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
-                noteData: { $set: state.noteData },
                 pageData: { $set: state.pageData },
+                noteData: { $set: noteData },
             },
         })
     }
 
     setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
         event,
+        previousState,
     }) => {
         const state = utils.annotationSearchResultToState(event.result)
+        const noteData = this.inheritParentPageSharedListsForSharedNotes(
+            state.noteData,
+            state.pageData,
+            previousState.listsSidebar.listData,
+        )
+
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
-                noteData: { $set: state.noteData },
                 pageData: { $set: state.pageData },
+                noteData: { $set: noteData },
             },
         })
     }

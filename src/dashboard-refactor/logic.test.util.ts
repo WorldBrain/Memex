@@ -31,16 +31,40 @@ type DataSeederCreator<
 export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     result = DATA.PAGE_SEARCH_RESULT_1,
 ) => async (logic, { storageManager }) => {
+    let idCounter = 0
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
             title: page.title,
+        })
+        await storageManager.collection('visits').createObject({
+            url: page.url,
+            time: Date.now(),
         })
 
         for (const annot of page.annotations) {
             await storageManager.collection('annotations').createObject({
                 ...annot,
             })
+            if (annot.isShared) {
+                await storageManager
+                    .collection('sharedAnnotationMetadata')
+                    .createObject({
+                        localId: annot.url,
+                        remoteId: annot.url,
+                        excludeFromLists: false,
+                    })
+                await storageManager
+                    .collection('annotationPrivacyLevels')
+                    .createObject({
+                        id: idCounter++,
+                        annotation: annot.url,
+                        createdWhen: new Date(),
+                        privacyLevel: annot.isBulkShareProtected
+                            ? AnnotationPrivacyLevels.SHARED_PROTECTED
+                            : AnnotationPrivacyLevels.SHARED,
+                    })
+            }
         }
 
         for (const tag of page.tags) {
@@ -57,7 +81,7 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
             })
         }
     }
-    logic.processEvent('setPageSearchResult', { result })
+    await logic.processEvent('setPageSearchResult', { result })
 }
 
 export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> = (
