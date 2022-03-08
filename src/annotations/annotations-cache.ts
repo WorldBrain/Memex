@@ -347,6 +347,13 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     load = async (url: string, args = {}) => {
         const { backendOperations } = this.dependencies
         const annotations = await backendOperations.load(url, args)
+        const { sharedLists } = await backendOperations.loadPageData(url)
+
+        for (const annotation of annotations) {
+            if (annotation.isShared) {
+                annotation.lists = sharedLists
+            }
+        }
 
         this.listData = await backendOperations.loadListData()
         this.annotations = annotations.sort(this.dependencies.sortingFn)
