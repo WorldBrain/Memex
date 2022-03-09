@@ -818,9 +818,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             byId: {},
         }
 
-        for (const noteId of publicNoteIds) {
-            mutation.byId[noteId] = {
-                lists: { $apply: updatePickerValues(event) },
+        const isListShared =
+            previousState.listsSidebar.listData[event.added ?? event.deleted]
+                ?.remoteId != null
+
+        if (isListShared) {
+            for (const noteId of publicNoteIds) {
+                mutation.byId[noteId] = {
+                    lists: { $apply: updatePickerValues(event) },
+                }
             }
         }
 

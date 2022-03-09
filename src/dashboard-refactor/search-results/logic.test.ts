@@ -277,7 +277,25 @@ describe('Dashboard search results logic', () => {
         it('should be able to set page lists, also setting them on public annotations of that page', async ({
             device,
         }) => {
+            for (const listData of DATA.LISTS_1) {
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject({
+                        id: listData.id,
+                        name: listData.name,
+                    })
+                if (listData.remoteId) {
+                    await device.storageManager
+                        .collection('sharedListMetadata')
+                        .createObject({
+                            localId: listData.id,
+                            remoteId: listData.remoteId,
+                        })
+                }
+            }
+
             const { searchResults } = await setupTest(device, {
+                runInitLogic: true,
                 seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
             })
             searchResults.processMutation({
@@ -290,11 +308,28 @@ describe('Dashboard search results logic', () => {
                     },
                 },
             })
+
             const pageId = DATA.PAGE_1.normalizedUrl
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([])
+            expect(searchResults.state.searchResults.noteData.byId).toEqual(
+                expect.objectContaining({
+                    [DATA.NOTE_1.url]: expect.objectContaining({
+                        isShared: true,
+                        lists: [],
+                    }),
+                    [DATA.NOTE_2.url]: expect.objectContaining({
+                        isShared: false,
+                        lists: [],
+                    }),
+                    [DATA.NOTE_3.url]: expect.objectContaining({
+                        isShared: true,
+                        lists: [],
+                    }),
+                }),
+            )
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
@@ -316,7 +351,7 @@ describe('Dashboard search results logic', () => {
                 expect.objectContaining({
                     [DATA.NOTE_1.url]: expect.objectContaining({
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [DATA.LISTS_1[1].id],
                     }),
                     [DATA.NOTE_2.url]: expect.objectContaining({
                         isShared: false,
@@ -324,7 +359,7 @@ describe('Dashboard search results logic', () => {
                     }),
                     [DATA.NOTE_3.url]: expect.objectContaining({
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [DATA.LISTS_1[1].id],
                     }),
                 }),
             )
@@ -370,7 +405,7 @@ describe('Dashboard search results logic', () => {
                 expect.objectContaining({
                     [DATA.NOTE_1.url]: expect.objectContaining({
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
+                        lists: [DATA.LISTS_1[1].id],
                     }),
                     [DATA.NOTE_2.url]: expect.objectContaining({
                         isShared: false,
@@ -378,7 +413,34 @@ describe('Dashboard search results logic', () => {
                     }),
                     [DATA.NOTE_3.url]: expect.objectContaining({
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
+                        lists: [DATA.LISTS_1[1].id],
+                    }),
+                }),
+            )
+
+            await searchResults.processEvent('setPageLists', {
+                id: pageId,
+                fullPageUrl: 'https://' + pageId,
+                deleted: DATA.LISTS_1[1].id,
+                skipPageIndexing: true,
+            })
+
+            expect(
+                searchResults.state.searchResults.pageData.byId[pageId].lists,
+            ).toEqual([DATA.LISTS_1[2].id])
+            expect(searchResults.state.searchResults.noteData.byId).toEqual(
+                expect.objectContaining({
+                    [DATA.NOTE_1.url]: expect.objectContaining({
+                        isShared: true,
+                        lists: [],
+                    }),
+                    [DATA.NOTE_2.url]: expect.objectContaining({
+                        isShared: false,
+                        lists: [],
+                    }),
+                    [DATA.NOTE_3.url]: expect.objectContaining({
+                        isShared: true,
+                        lists: [],
                     }),
                 }),
             )
