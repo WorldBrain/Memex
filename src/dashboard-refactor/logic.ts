@@ -1650,6 +1650,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
         const pageData =
             previousState.searchResults.pageData.byId[noteData.pageUrl]
+        const isSharedList =
+            previousState.listsSidebar.listData[event.added ?? event.deleted]
+                ?.remoteId != null
 
         let remoteFn: () => Promise<any>
 
@@ -1699,7 +1702,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         }
 
-        if (event.protectAnnotation === false) {
+        if (isSharedList && event.protectAnnotation === false) {
             const otherNoteIds = flattenNestedResults(previousState).byId[
                 noteData.pageUrl
             ].noteIds.user

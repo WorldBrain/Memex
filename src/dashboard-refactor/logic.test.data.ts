@@ -147,7 +147,7 @@ export const NOTE_5: NoteData = {
 export const LISTS_1: ListData[] = [
     { id: 1, name: 'test 1' },
     { id: 2, name: 'test 2', remoteId: 'shared list 2' },
-    { id: 3, name: 'test 3' },
+    { id: 3, name: 'test 3', remoteId: 'shared list 2' },
 ]
 
 export const TAG_1 = 'test 1'

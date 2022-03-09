@@ -2143,22 +2143,31 @@ describe('Dashboard search results logic', () => {
                 )
             })
 
-            it('should be able to add note to space, also adding parent page+other public annots', async ({
+            it('should be able to add public note to shared space, also adding parent page+other public annots', async ({
                 device,
             }) => {
+                for (const listData of DATA.LISTS_1) {
+                    await device.storageManager
+                        .collection('customLists')
+                        .createObject({ id: listData.id, name: listData.name })
+
+                    if (listData.remoteId) {
+                        await device.storageManager
+                            .collection('sharedListMetadata')
+                            .createObject({
+                                localId: listData.id,
+                                remoteId: listData.remoteId,
+                            })
+                    }
+                }
                 const { searchResults } = await setupTest(device, {
+                    runInitLogic: true,
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[2])
 
+                const privateListIdA = DATA.LISTS_1[0].id
+                const publicListIdA = DATA.LISTS_1[1].id
+                const publicListIdB = DATA.LISTS_1[2].id
                 const noteId = DATA.NOTE_2.url
                 const otherNoteIdA = DATA.NOTE_1.url
                 const otherNoteIdB = DATA.NOTE_3.url
@@ -2226,7 +2235,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: publicListIdA,
                     protectAnnotation: false,
                 })
 
@@ -2234,7 +2243,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [publicListIdA],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2245,7 +2254,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [publicListIdA],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2256,7 +2265,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [publicListIdA],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2265,13 +2274,104 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [publicListIdA],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: privateListIdA,
+                    protectAnnotation: false,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [publicListIdA, privateListIdA],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [publicListIdA],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [publicListIdA],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [publicListIdA],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    deleted: publicListIdA,
+                    protectAnnotation: false,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [privateListIdA],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdA
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[
+                        otherNoteIdB
+                    ],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                        isShared: true,
+                        isBulkShareProtected: false,
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageId],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [],
+                    }),
+                )
+
+                // Now let's protect the annotation, so other's aren't affected
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: publicListIdA,
                     protectAnnotation: true,
                 })
 
@@ -2279,7 +2379,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [privateListIdA, publicListIdA],
                         isShared: false,
                         isBulkShareProtected: true,
                     }),
@@ -2290,7 +2390,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2301,7 +2401,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2310,25 +2410,21 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                     }),
                 )
 
-                // NOTE: the note is now protected, thus the `protectAnnotation` arg should be undefined (different behavior to `false`)
+                // The note is now protected, thus the `protectAnnotation` arg should be undefined (different behavior to `false`) - handled in UI call
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[2].id,
+                    added: publicListIdB,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
-                            DATA.LISTS_1[2].id,
-                        ],
+                        lists: [privateListIdA, publicListIdA, publicListIdB],
                         isShared: false,
                         isBulkShareProtected: true,
                     }),
@@ -2339,7 +2435,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2350,7 +2446,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2359,7 +2455,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [],
                     }),
                 )
             })
