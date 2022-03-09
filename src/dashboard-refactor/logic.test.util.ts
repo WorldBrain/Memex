@@ -124,6 +124,7 @@ export async function setupTest(
     device: UILogicTestDevice,
     args: {
         withAuth?: boolean
+        runInitLogic?: boolean
         mockDocument?: any
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
@@ -193,6 +194,9 @@ export async function setupTest(
 
     const searchResults = device.createElement<RootState, Events>(logic)
 
+    if (args.runInitLogic) {
+        await searchResults.init()
+    }
     if (args.seedData) {
         await args.seedData(searchResults, device)
     }

@@ -706,4 +706,60 @@ describe('Dashboard search results logic', () => {
             }),
         )
     })
+
+    it('should be able to share a list, adding it to all public annotations of any pages that are already a part of it', async ({
+        device,
+    }) => {
+        for (const listData of DATA.LISTS_1) {
+            await device.storageManager.collection('customLists').createObject({
+                id: listData.id,
+                name: listData.name,
+            })
+        }
+        DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[0].isShared = true
+        DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[2].isShared = true
+
+        const listId = DATA.LISTS_1[1].id
+        const { searchResults } = await setupTest(device, {
+            seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+            runInitLogic: true,
+        })
+
+        expect(
+            searchResults.state.listsSidebar.listData[listId].remoteId,
+        ).toBeUndefined()
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_1.url]
+                .lists,
+        ).toEqual([])
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_2.url]
+                .lists,
+        ).toEqual([])
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_3.url]
+                .lists,
+        ).toEqual([])
+
+        await searchResults.processEvent('shareList', {
+            listId,
+            remoteId: DATA.LISTS_1[1].remoteId,
+        })
+
+        expect(searchResults.state.listsSidebar.listData[listId].remoteId).toBe(
+            DATA.LISTS_1[1].remoteId,
+        )
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_1.url]
+                .lists,
+        ).toEqual([listId])
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_2.url]
+                .lists,
+        ).toEqual([])
+        expect(
+            searchResults.state.searchResults.noteData.byId[DATA.NOTE_3.url]
+                .lists,
+        ).toEqual([listId])
+    })
 })

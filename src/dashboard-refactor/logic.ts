@@ -2530,7 +2530,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
-        console.log('sdd')
         const { fullPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
         )
@@ -2571,6 +2570,48 @@ export class DashboardLogic extends UILogic<State, Events> {
             2000,
         )
     }
+
+    shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const pageIds = previousState.searchResults.pageData.allIds.filter(
+            (pageId) =>
+                previousState.searchResults.pageData.byId[
+                    pageId
+                ].lists.includes(event.listId),
+        )
+        const noteIds: string[] = []
+        const flattenedResults = flattenNestedResults(previousState)
+        for (const pageId of pageIds) {
+            noteIds.push(
+                ...flattenedResults.byId[pageId].noteIds.user.filter(
+                    (noteId) =>
+                        previousState.searchResults.noteData.byId[noteId]
+                            .isShared,
+                ),
+            )
+        }
+
+        const mutation: UIMutation<State['searchResults']['noteData']> = {
+            byId: {},
+        }
+
+        for (const noteId of noteIds) {
+            mutation.byId[noteId] = { lists: { $push: [event.listId] } }
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                listData: {
+                    [event.listId]: {
+                        remoteId: { $set: event.remoteId },
+                    },
+                },
+            },
+            searchResults: {
+                noteData: mutation,
+            },
+        })
+    }
+
     changeListName: EventHandler<'changeListName'> = async ({
         event,
         previousState,

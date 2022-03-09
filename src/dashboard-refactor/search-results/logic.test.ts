@@ -838,17 +838,13 @@ describe('Dashboard search results logic', () => {
                 DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[0].isShared = true
                 DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[2].isShared = true
 
-                const { searchResults } = await setupTest(device)
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                    runInitLogic: true,
+                })
 
                 const day = PAGE_SEARCH_DUMMY_DAY
                 const pageId = DATA.PAGE_1.normalizedUrl
-                // Doing it in this order, rather than passing in the data seeder to the setupTest fn, as
-                //   the init fn needs to be called first to set up the list data state
-                await searchResults.init()
-                await setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3)(
-                    searchResults,
-                    device,
-                )
 
                 expect(
                     searchResults.state.searchResults.pageData.byId[pageId]
