@@ -552,6 +552,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                listData={listsSidebar.listData}
                 getListNameById={this.getListNameById}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {

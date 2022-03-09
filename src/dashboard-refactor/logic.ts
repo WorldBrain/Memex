@@ -475,27 +475,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.search({ previousState, event: { paginate } }),
         300,
     )
-
-    private inheritParentPageSharedListsForSharedNotes(
-        noteData: State['searchResults']['noteData'],
-        pageData: State['searchResults']['pageData'],
-        listData: State['listsSidebar']['listData'],
-    ): State['searchResults']['noteData'] {
-        for (const noteId of noteData.allIds) {
-            const note = noteData.byId[noteId]
-            if (!note) {
-                continue
-            }
-
-            if (note.isShared) {
-                const parentPageSharedLists = pageData.byId[
-                    note.pageUrl
-                ].lists.filter((listId) => listData[listId]?.remoteId != null)
-                note.lists = parentPageSharedLists
-            }
-        }
-        return noteData
-    }
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
@@ -529,12 +508,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(searchState)
                         : await this.searchNotes(searchState)
-
-                noteData = this.inheritParentPageSharedListsForSharedNotes(
-                    noteData,
-                    pageData,
-                    previousState.listsSidebar.listData,
-                )
 
                 let noResultsType: NoResultsType = null
                 if (
@@ -743,42 +716,26 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - modal event handlers */
 
     /* START - search result event handlers */
-    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({
-        event,
-        previousState,
-    }) => {
+    setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
         const state = utils.pageSearchResultToState(event.result)
-        const noteData = this.inheritParentPageSharedListsForSharedNotes(
-            state.noteData,
-            state.pageData,
-            previousState.listsSidebar.listData,
-        )
-
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
                 pageData: { $set: state.pageData },
-                noteData: { $set: noteData },
+                noteData: { $set: state.noteData },
             },
         })
     }
 
     setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
         event,
-        previousState,
     }) => {
         const state = utils.annotationSearchResultToState(event.result)
-        const noteData = this.inheritParentPageSharedListsForSharedNotes(
-            state.noteData,
-            state.pageData,
-            previousState.listsSidebar.listData,
-        )
-
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
                 pageData: { $set: state.pageData },
-                noteData: { $set: noteData },
+                noteData: { $set: state.noteData },
             },
         })
     }
@@ -803,36 +760,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageLists: EventHandler<'setPageLists'> = async ({
-        event,
-        previousState,
-    }) => {
-        const pageNoteIds = flattenNestedResults(previousState).byId[event.id]
-            .noteIds.user
-        const publicNoteIds = pageNoteIds.filter(
-            (noteId) =>
-                previousState.searchResults.noteData.byId[noteId]?.isShared,
-        )
-
-        const mutation: UIMutation<State['searchResults']['noteData']> = {
-            byId: {},
-        }
-
-        const isListShared =
-            previousState.listsSidebar.listData[event.added ?? event.deleted]
-                ?.remoteId != null
-
-        if (isListShared) {
-            for (const noteId of publicNoteIds) {
-                mutation.byId[noteId] = {
-                    lists: { $apply: updatePickerValues(event) },
-                }
-            }
-        }
-
+    setPageLists: EventHandler<'setPageLists'> = async ({ event }) => {
         this.emitMutation({
             searchResults: {
-                noteData: mutation,
                 pageData: {
                     byId: {
                         [event.id]: {
@@ -1391,28 +1321,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
                 const newNoteListIds: number[] = []
                 if (formState.lists.length) {
-                    const {
-                        sharingState,
-                    } = await contentShareBG.shareAnnotationToSomeLists({
+                    await contentShareBG.shareAnnotationToSomeLists({
                         annotationUrl: newNoteId,
                         localListIds: formState.lists,
                     })
-                    newNoteListIds.push(
-                        ...formState.lists.filter((listId) =>
-                            sharingState.localListIds.includes(listId),
-                        ),
-                    )
-                }
-
-                // Inherit display lists from parent page's shared lists
-                if (event.shouldShare) {
-                    newNoteListIds.push(
-                        ...pageData.lists.filter(
-                            (listId) =>
-                                previousState.listsSidebar.listData[listId]
-                                    ?.remoteId != null,
-                        ),
-                    )
+                    newNoteListIds.push(...formState.lists)
                 }
 
                 this.emitMutation({
@@ -1843,22 +1756,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         const shouldProtect =
             event.privacyLevel === AnnotationPrivacyLevels.PROTECTED ||
             event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
-        const willShare = !noteData.isShared && shouldShare
 
-        let lists: number[]
-        if (willShare) {
-            lists = pageData.lists.filter(
-                (listId) =>
-                    previousState.listsSidebar.listData[listId]?.remoteId !=
-                    null,
-            )
-        } else {
-            lists = maybeRemoveSharedLists({
-                listIds: noteData.lists,
-                listsState: previousState.listsSidebar,
-                keepListsIfUnsharing: event.keepListsIfUnsharing,
-                willUnshare: noteData.isShared && !shouldShare,
-            })
+        const willUnshare = noteData.isShared && !shouldShare
+        let lists = noteData.lists
+        if (willUnshare) {
+            lists = event.keepListsIfUnsharing
+                ? pageData.lists.filter(
+                      (listId) =>
+                          previousState.listsSidebar.listData[listId]
+                              ?.remoteId != null,
+                  )
+                : []
         }
 
         this.emitMutation({
@@ -2034,6 +1942,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             editNoteForm,
             ...noteData
         } = previousState.searchResults.noteData.byId[event.noteId]
+        const pageData =
+            previousState.searchResults.pageData.byId[noteData.pageUrl]
         const tagsHaveChanged = haveArraysChanged(
             noteData.tags,
             editNoteForm.tags,
@@ -2049,6 +1959,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
+                const willUnshare = noteData.isShared && !event.shouldShare
+                let lists = noteData.lists
+                if (willUnshare) {
+                    lists = event.keepListsIfUnsharing
+                        ? pageData.lists.filter(
+                              (listId) =>
+                                  previousState.listsSidebar.listData[listId]
+                                      ?.remoteId != null,
+                          )
+                        : []
+                }
+
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -2061,18 +1983,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     isBulkShareProtected: {
                                         $set: event.isProtected,
                                     },
-                                    lists: {
-                                        $set: maybeRemoveSharedLists({
-                                            listIds: noteData.lists,
-                                            listsState:
-                                                previousState.listsSidebar,
-                                            keepListsIfUnsharing:
-                                                event.keepListsIfUnsharing,
-                                            willUnshare:
-                                                noteData.isShared &&
-                                                !event.shouldShare,
-                                        }),
-                                    },
+                                    lists: { $set: lists },
                                 },
                             },
                         },
@@ -2578,32 +2489,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
-        const pageIds = previousState.searchResults.pageData.allIds.filter(
-            (pageId) =>
-                previousState.searchResults.pageData.byId[
-                    pageId
-                ].lists.includes(event.listId),
-        )
-        const noteIds: string[] = []
-        const flattenedResults = flattenNestedResults(previousState)
-        for (const pageId of pageIds) {
-            noteIds.push(
-                ...flattenedResults.byId[pageId].noteIds.user.filter(
-                    (noteId) =>
-                        previousState.searchResults.noteData.byId[noteId]
-                            .isShared,
-                ),
-            )
-        }
-
-        const mutation: UIMutation<State['searchResults']['noteData']> = {
-            byId: {},
-        }
-
-        for (const noteId of noteIds) {
-            mutation.byId[noteId] = { lists: { $push: [event.listId] } }
-        }
-
         this.emitMutation({
             listsSidebar: {
                 listData: {
@@ -2611,9 +2496,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         remoteId: { $set: event.remoteId },
                     },
                 },
-            },
-            searchResults: {
-                noteData: mutation,
             },
         })
     }
@@ -2937,15 +2819,3 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
     /* END - sync status menu event handlers */
 }
-
-const maybeRemoveSharedLists = (args: {
-    listIds: number[]
-    willUnshare: boolean
-    keepListsIfUnsharing: boolean
-    listsState: State['listsSidebar']
-}) =>
-    args.willUnshare && !args.keepListsIfUnsharing
-        ? args.listIds.filter(
-              (listId) => args.listsState.listData[listId]?.remoteId == null,
-          )
-        : args.listIds

@@ -2,7 +2,7 @@ import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 
-describe('Dashboard search results logic', () => {
+describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should be able to set sidebar locked state', async ({ device }) => {
@@ -707,7 +707,7 @@ describe('Dashboard search results logic', () => {
         )
     })
 
-    it('should be able to share a list, adding it to all public annotations of any pages that are already a part of it', async ({
+    it('should be able to share a list, setting its remoteId state', async ({
         device,
     }) => {
         for (const listData of DATA.LISTS_1) {
@@ -716,8 +716,6 @@ describe('Dashboard search results logic', () => {
                 name: listData.name,
             })
         }
-        DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[0].isShared = true
-        DATA.PAGE_SEARCH_RESULT_3.docs[0].annotations[2].isShared = true
 
         const listId = DATA.LISTS_1[1].id
         const { searchResults } = await setupTest(device, {
@@ -728,18 +726,6 @@ describe('Dashboard search results logic', () => {
         expect(
             searchResults.state.listsSidebar.listData[listId].remoteId,
         ).toBeUndefined()
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_1.url]
-                .lists,
-        ).toEqual([])
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_2.url]
-                .lists,
-        ).toEqual([])
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_3.url]
-                .lists,
-        ).toEqual([])
 
         await searchResults.processEvent('shareList', {
             listId,
@@ -749,17 +735,5 @@ describe('Dashboard search results logic', () => {
         expect(searchResults.state.listsSidebar.listData[listId].remoteId).toBe(
             DATA.LISTS_1[1].remoteId,
         )
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_1.url]
-                .lists,
-        ).toEqual([listId])
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_2.url]
-                .lists,
-        ).toEqual([])
-        expect(
-            searchResults.state.searchResults.noteData.byId[DATA.NOTE_3.url]
-                .lists,
-        ).toEqual([listId])
     })
 })

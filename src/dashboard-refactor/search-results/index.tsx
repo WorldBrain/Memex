@@ -14,8 +14,8 @@ import type {
     PageInteractionProps,
     PagePickerAugdProps,
     NoResultsType,
-    NoteShareInfo,
 } from './types'
+import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
@@ -56,10 +56,7 @@ import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import {
-    AnnotationSharingState,
-    AnnotationSharingStates,
-} from 'src/content-sharing/background/types'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -72,6 +69,7 @@ export type Props = RootState &
         searchFilters?: any
         searchResults?: any
         searchQuery?: string
+        listData: ListSidebarState['listData']
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
@@ -124,6 +122,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     private renderNoteResult = (day: number, pageId: string) => (
         noteId: string,
     ) => {
+        const pageData = this.props.pageData.byId[pageId]
         const noteData = this.props.noteData.byId[noteId]
 
         const interactionProps = bindFunctionalProps<
@@ -138,7 +137,20 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
-                lists={noteData.lists}
+                lists={
+                    noteData.isShared
+                        ? [
+                              ...new Set([
+                                  ...pageData.lists.filter(
+                                      (listId) =>
+                                          this.props.listData[listId]
+                                              ?.remoteId != null,
+                                  ),
+                                  ...noteData.lists,
+                              ]),
+                          ]
+                        : noteData.lists
+                }
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
