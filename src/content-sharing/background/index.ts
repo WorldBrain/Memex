@@ -524,11 +524,15 @@ export default class ContentSharingBackground {
                 })
             }
         }
-        await this.storage.setAnnotationPrivacyLevel({
-            annotation: options.annotationUrl,
-            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
-        })
-        sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+
+        if (!privacyState.public || options.protectAnnotation) {
+            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+            await this.storage.setAnnotationPrivacyLevel({
+                annotation: options.annotationUrl,
+                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+            })
+        }
+
         return { sharingState }
     }
 

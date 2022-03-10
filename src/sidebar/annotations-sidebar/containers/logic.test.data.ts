@@ -36,7 +36,21 @@ export const ANNOT_2: Annotation = {
     lastEdited: new Date('2022-04-03'),
     createdWhen: new Date('2022-04-03'),
     selector: {
-        descriptor: { content: { type: 'TextPositionSelector' } },
+        descriptor: { content: [{ type: 'TextPositionSelector', start: 0 }] },
+    } as any,
+    tags: [],
+    lists: [],
+}
+
+export const ANNOT_3: Annotation = {
+    url: normalizeUrl(CURRENT_TAB_URL_1) + '/#125',
+    pageUrl: normalizeUrl(CURRENT_TAB_URL_1),
+    pageTitle: CURRENT_TAB_TITLE_2 + ' next',
+    body: 'another test highlight',
+    lastEdited: new Date('2022-04-09'),
+    createdWhen: new Date('2022-04-09'),
+    selector: {
+        descriptor: { content: [{ type: 'TextPositionSelector', start: 1 }] },
     } as any,
     tags: [],
     lists: [],
