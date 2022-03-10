@@ -695,6 +695,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             AnnotationPrivacyLevels.SHARED,
                                     },
                                 })
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    keepListsIfUnsharing: true,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        localListIds: [1, 2],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
                                     [
@@ -702,21 +715,23 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         { annotationId: 1, listId: 2 },
                                     ],
                                 )
+                                // The private annot should be made protected on list removal
                                 await helper.unshareAnnotationsFromSomeLists(
                                     setup,
                                     {
                                         annotationsIds: [1],
-                                        listIds: [2],
+                                        listIds: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                hasLink: true,
+                                                localListIds: [2],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
-                                                hasLink: true,
                                             },
                                         },
                                     },
                                 )
+
                                 await helper.assertAnnotationPrivacyLevels(
                                     setup,
                                     [
@@ -733,7 +748,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedAnnotationEntries(
                                     setup,
-                                    [{ annotationId: 1, listId: 1 }],
+                                    [{ annotationId: 1, listId: 2 }],
                                 )
                             },
                         },
