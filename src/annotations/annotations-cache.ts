@@ -354,7 +354,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         for (const annotation of annotations) {
             if (annotation.isShared) {
-                annotation.lists = [...sharedLists, ...annotation.lists]
+                annotation.lists = Array.from(
+                    new Set([...sharedLists, ...annotation.lists]),
+                )
             }
         }
 

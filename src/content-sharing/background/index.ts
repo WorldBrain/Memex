@@ -210,7 +210,8 @@ export default class ContentSharingBackground {
             const annotation = await this.options.annotations.getAnnotationByPk(
                 options.annotationUrl,
             )
-            sharingState.localListIds = await this.options.customLists.fetchListIdsByUrl(
+
+            sharingState.localListIds = await this.fetchSharedListIdsForPage(
                 annotation.pageUrl,
             )
         } else {
@@ -696,10 +697,7 @@ export default class ContentSharingBackground {
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
     ) => {
-        const {
-            annotations: annotationsBG,
-            customLists: customListsBG,
-        } = this.options
+        const { annotations: annotationsBG } = this.options
 
         const privacyLevel = await this.storage.findAnnotationPrivacyLevel({
             annotation: params.annotationUrl,
@@ -716,22 +714,26 @@ export default class ContentSharingBackground {
             privacyState.public
                 ? annotationsBG.getAnnotationByPk(params.annotationUrl)
                 : Promise.resolve(null),
-            privacyState.public
-                ? Promise.resolve(null)
-                : annotationsBG.findListEntriesByUrl({
-                      url: params.annotationUrl,
-                  }),
+            annotationsBG.findListEntriesByUrl({
+                url: params.annotationUrl,
+            }),
             this.storage.getRemoteAnnotationId({
                 localId: params.annotationUrl,
             }),
         ])
 
-        const localListIds = privacyState.public
-            ? await customListsBG.fetchListIdsByUrl(annotation.pageUrl)
-            : annotationEntries.map((entry) => entry.listId)
+        const localListIds = new Set<number>()
+        annotationEntries.forEach((entry) => localListIds.add(entry.listId))
+
+        if (privacyState.public) {
+            const pageListIds = await this.fetchSharedListIdsForPage(
+                annotation.pageUrl,
+            )
+            pageListIds.forEach((listId) => localListIds.add(listId))
+        }
 
         return {
-            localListIds,
+            localListIds: [...localListIds],
             hasLink: !!remoteId,
             remoteId: remoteId ?? undefined,
             privacyLevel:
@@ -799,16 +801,23 @@ export default class ContentSharingBackground {
 
             // If not null, we've already processed another annotation with the same pageUrl
             if (localListIds == null) {
-                localListIds = await customListsBG.fetchListIdsByUrl(
+                localListIds = await this.fetchSharedListIdsForPage(
                     annotation.pageUrl,
                 )
                 localListIdsByPageUrl.set(annotation.pageUrl, localListIds)
             }
 
+            const localListIdsSet = new Set([
+                ...(annotationEntries[annotation.url]?.map(
+                    (entry) => entry.listId,
+                ) ?? []),
+                ...localListIds,
+            ])
+
             states[annotation.url] = {
                 remoteId: remoteIds[annotation.url],
                 hasLink: !!remoteIds[annotation.url],
-                localListIds,
+                localListIds: [...localListIdsSet],
                 privacyLevel:
                     privacyLevels[annotation.url]?.privacyLevel ??
                     AnnotationPrivacyLevels.PRIVATE,
@@ -885,4 +894,16 @@ export default class ContentSharingBackground {
             source: 'sync' | 'local'
         },
     ) {}
+
+    private async fetchSharedListIdsForPage(
+        pageUrl: string,
+    ): Promise<number[]> {
+        const pageListIds = await this.options.customLists.fetchListIdsByUrl(
+            pageUrl,
+        )
+        const remoteListIds = await this.storage.getRemoteListIds({
+            localIds: pageListIds,
+        })
+        return pageListIds.filter((listId) => remoteListIds[listId] != null)
+    }
 }
