@@ -37,6 +37,7 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
+    listData: { [listId: number]: { remoteId?: string } }
     postShareHook?: (
         state: AnnotationSharingState,
         opts?: { keepListsIfUnsharing?: boolean },
@@ -187,7 +188,11 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         selectType: 'select' | 'unselect',
     ) => async (listId: number) => {
         const { selectEntry, unselectEntry } = this.props.spacePickerProps
-        if (this.props.isShared) {
+
+        if (
+            this.props.isShared &&
+            this.props.listData[listId]?.remoteId != null
+        ) {
             this.setState({
                 confirmationMode: {
                     type: 'public-select-space',

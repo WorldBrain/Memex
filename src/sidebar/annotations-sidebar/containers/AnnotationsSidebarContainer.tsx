@@ -307,9 +307,11 @@ export class AnnotationsSidebarContainer<
         annotation: Annotation,
         showExternalConfirmations?: boolean,
     ): SpacePickerDependencies => {
-        // This is to show confirmation modal if the annotation is public and the user is trying to add/remove it to a space
-        const updateListsEvent =
-            annotation.isShared && showExternalConfirmations
+        // This is to show confirmation modal if the annotation is public and the user is trying to add/remove it to a shared space
+        const getUpdateListsEvent = (listId: number) =>
+            annotation.isShared &&
+            this.state.listData[listId]?.remoteId != null &&
+            showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
                 : 'updateListsForAnnotation'
         return {
@@ -330,14 +332,14 @@ export class AnnotationsSidebarContainer<
                 return listId
             },
             selectEntry: async (listId, options) =>
-                this.processEvent(updateListsEvent, {
+                this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
                     deleted: null,
                     annotationId: annotation.url,
                     options,
                 }),
             unselectEntry: async (listId, options) =>
-                this.processEvent(updateListsEvent, {
+                this.processEvent(getUpdateListsEvent(listId), {
                     added: null,
                     deleted: listId,
                     annotationId: annotation.url,
@@ -462,6 +464,7 @@ export class AnnotationsSidebarContainer<
                         }
                     >
                         <SingleNoteShareMenu
+                            listData={this.state.listData}
                             isShared={currentAnnotation.isShared}
                             shareImmediately={this.state.immediatelyShareNotes}
                             contentSharingBG={this.props.contentSharing}

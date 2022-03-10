@@ -242,6 +242,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             withRelativeContainer
                         >
                             <SingleNoteShareMenu
+                                listData={this.props.listData}
                                 isShared={noteData.isShared}
                                 shareImmediately={
                                     noteData.shareMenuShowStatus ===

@@ -884,11 +884,17 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteTags', { ...args, noteId }),
                     updateLists: (noteId) => (args) => {
                         const {
-                            isShared,
+                            isShared: isAnnotShared,
                         } = this.state.searchResults.noteData.byId[noteId]
+                        const isListShared =
+                            this.state.listsSidebar.listData[
+                                args.added ?? args.deleted
+                            ]?.remoteId != null
 
                         return this.processEvent(
-                            isShared && args.options?.showExternalConfirmations
+                            isAnnotShared &&
+                                isListShared &&
+                                args.options?.showExternalConfirmations
                                 ? 'setSelectNoteSpaceConfirmArgs'
                                 : 'setNoteLists',
                             {
