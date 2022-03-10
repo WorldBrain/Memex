@@ -468,11 +468,25 @@ export default class ContentSharingBackground {
         }
 
         const page = await this.storage.getPage(annotation.pageUrl)
+        const remoteListIds = await this.storage.getRemoteListIds({
+            localIds: options.localListIds,
+        })
 
         for (const listId of options.localListIds) {
             if (sharingState.localListIds.includes(listId)) {
                 continue
             }
+
+            // If list is private, only add current annotation to it
+            if (remoteListIds[listId] == null) {
+                await annotationsBG.ensureAnnotInList({
+                    listId,
+                    url: options.annotationUrl,
+                })
+                sharingState.localListIds.push(listId)
+                continue
+            }
+
             if (!pageListEntries.includes(listId) && page != null) {
                 await customListsBG.insertPageToList({
                     listId,
