@@ -432,26 +432,14 @@ export default class ContentSharingBackground {
             annotationsBG.getAnnotationByPk(options.annotationUrl),
             this.getAnnotationSharingState(options),
         ])
+        const privacyState = getAnnotationPrivacyState(
+            sharingState.privacyLevel,
+        )
         const pageListEntries = await customListsBG.fetchListIdsByUrl(
             annotation.pageUrl,
         )
 
-        let otherPublicPageAnnotations = await annotationsBG.listAnnotationsByPageUrl(
-            { pageUrl: annotation.pageUrl },
-        )
-        const privacyLevels = await this.findAnnotationPrivacyLevels({
-            annotationUrls: otherPublicPageAnnotations.map((a) => a.url),
-        })
-        otherPublicPageAnnotations = otherPublicPageAnnotations.filter(
-            (a) =>
-                a.url !== options.annotationUrl &&
-                maybeGetAnnotationPrivacyState(privacyLevels[a.url])?.public,
-        )
-
-        if (
-            !getAnnotationPrivacyState(sharingState.privacyLevel).public ||
-            options.protectAnnotation
-        ) {
+        if (!privacyState.public || options.protectAnnotation) {
             sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
             await this.storage.setAnnotationPrivacyLevel({
                 annotation: options.annotationUrl,
@@ -488,21 +476,21 @@ export default class ContentSharingBackground {
                 continue
             }
 
-            if (!pageListEntries.includes(listId) && page != null) {
+            if (
+                privacyState.public &&
+                !pageListEntries.includes(listId) &&
+                page != null
+            ) {
                 await customListsBG.insertPageToList({
                     listId,
                     pageUrl: annotation.pageUrl,
                     fullUrl: page.originalUrl,
                 })
             }
-            await annotationsBG.insertAnnotToList({
-                listId,
-                url: options.annotationUrl,
-            })
-            for (const annot of otherPublicPageAnnotations) {
-                await annotationsBG.ensureAnnotInList({
+            if (!privacyState.public) {
+                await annotationsBG.insertAnnotToList({
                     listId,
-                    url: annot.url,
+                    url: options.annotationUrl,
                 })
             }
 

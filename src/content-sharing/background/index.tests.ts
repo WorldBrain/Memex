@@ -344,7 +344,7 @@ export class SharingTestHelper {
             listIds: number[]
             protectAnnotations?: boolean
             expectSharingStates: AnnotationSharingStates
-            createdListEntries?: Array<{ pageId: number; listId: number }>
+            createdPageListEntries?: Array<{ pageId: number; listId: number }>
         },
     ) {
         const sharingStates: AnnotationSharingStates = {}
@@ -363,7 +363,7 @@ export class SharingTestHelper {
             sharingStates[this.annotations[annotationId].localId] = sharingState
             this.annotations[annotationId].remoteId = sharingState.remoteId
         }
-        for (const entry of options.createdListEntries ?? []) {
+        for (const entry of options.createdPageListEntries ?? []) {
             const pageUrl = this.pages[entry.pageId].normalizedUrl
             const listEntries = await setup.backgroundModules.customLists.storage.fetchListPagesById(
                 {
@@ -589,7 +589,7 @@ export class SharingTestHelper {
         )
     }
 
-    async assertSharedAnnotationEntries(
+    async assertSharedAnnotationListEntries(
         setup: BackgroundIntegrationTestSetup,
         entries: Array<{ annotationId: number; listId: number }>,
     ) {
@@ -638,6 +638,29 @@ export class SharingTestHelper {
                 updatedWhen: level.updated && expect.any(Date),
                 annotation: this.annotations[level.annotationId].localId,
                 privacyLevel: level.level,
+            })),
+        )
+    }
+
+    async assertPageListEntries(
+        setup: BackgroundIntegrationTestSetup,
+        entries: Array<{
+            pageId: number
+            listId: number
+        }>,
+    ) {
+        const ordered = await this._getStorage(
+            setup,
+            'local',
+            'pageListEntries',
+            'createdAt',
+        )
+        expect(ordered).toEqual(
+            entries.map((entry) => ({
+                createdAt: expect.any(Date),
+                listId: this.lists[entry.listId].localId,
+                pageUrl: this.pages[entry.pageId].normalizedUrl,
+                fullUrl: this.pages[entry.pageId].fullUrl,
             })),
         )
     }
