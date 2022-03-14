@@ -343,7 +343,7 @@ export class SharingTestHelper {
             annotationsIds: number[]
             listIds: number[]
             protectAnnotations?: boolean
-            expectSharingStates: AnnotationSharingStates
+            expectedSharingStates: AnnotationSharingStates
             createdPageListEntries?: Array<{ pageId: number; listId: number }>
         },
     ) {
@@ -387,7 +387,7 @@ export class SharingTestHelper {
 
         this._expectAnnotationSharingStates(
             sharingStates,
-            options.expectSharingStates,
+            options.expectedSharingStates,
         )
     }
 

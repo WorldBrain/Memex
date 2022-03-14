@@ -502,30 +502,29 @@ export default class ContentSharingBackground {
     unshareAnnotationFromSomeLists: ContentSharingInterface['unshareAnnotationFromSomeLists'] = async (
         options,
     ) => {
-        const sharingState = await this.getAnnotationSharingState({
+        let sharingState = await this.getAnnotationSharingState({
             annotationUrl: options.annotationUrl,
         })
         sharingState.localListIds = sharingState.localListIds.filter(
             (id) => !options.localListIds.includes(id),
         )
 
+        if (!sharingState.localListIds.length) {
+            const unshareResult = await this.unshareAnnotation({
+                annotationUrl: options.annotationUrl,
+            })
+            sharingState = unshareResult.sharingState
+        }
+
         const privacyState = getAnnotationPrivacyState(
             sharingState.privacyLevel,
         )
-        if (privacyState.public) {
-            for (const listId of sharingState.localListIds) {
-                await this.options.annotations.insertAnnotToList({
-                    listId,
-                    url: options.annotationUrl,
-                })
-            }
-        } else {
-            for (const listId of options.localListIds) {
-                await this.options.annotations.removeAnnotFromList({
-                    listId,
-                    url: options.annotationUrl,
-                })
-            }
+
+        for (const listId of options.localListIds) {
+            await this.options.annotations.removeAnnotFromList({
+                listId,
+                url: options.annotationUrl,
+            })
         }
 
         if (!privacyState.public || options.protectAnnotation) {
