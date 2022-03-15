@@ -132,11 +132,11 @@ export const createAnnotationsCache = (
                     )
                     sharingState = result.sharingState
                 }
-                if (listsToDelete.length) {
-                    const result = await bgModules.contentSharing.unshareAnnotationFromSomeLists(
+                for (const localListId of listsToDelete) {
+                    const result = await bgModules.contentSharing.unshareAnnotationFromList(
                         {
+                            localListId,
                             annotationUrl,
-                            localListIds: listsToDelete,
                             protectAnnotation: options?.protectAnnotation,
                         },
                     )

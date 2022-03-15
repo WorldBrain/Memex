@@ -64,7 +64,7 @@ export default class ContentSharingBackground {
             shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
             unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
             shareAnnotationToSomeLists: this.shareAnnotationToSomeLists,
-            unshareAnnotationFromSomeLists: this.unshareAnnotationFromSomeLists,
+            unshareAnnotationFromList: this.unshareAnnotationFromList,
             unshareAnnotations: this.unshareAnnotations,
             ensureRemotePageId: this.ensureRemotePageId,
             getRemoteAnnotationLink: this.getRemoteAnnotationLink,
@@ -496,33 +496,37 @@ export default class ContentSharingBackground {
         return { sharingState }
     }
 
-    unshareAnnotationFromSomeLists: ContentSharingInterface['unshareAnnotationFromSomeLists'] = async (
+    unshareAnnotationFromList: ContentSharingInterface['unshareAnnotationFromList'] = async (
         options,
     ) => {
         let sharingState = await this.getAnnotationSharingState({
             annotationUrl: options.annotationUrl,
         })
         sharingState.localListIds = sharingState.localListIds.filter(
-            (id) => !options.localListIds.includes(id),
+            (id) => id !== options.localListId,
         )
 
-        if (!sharingState.localListIds.length) {
-            const unshareResult = await this.unshareAnnotation({
-                annotationUrl: options.annotationUrl,
+        const remoteListId = await this.storage.getRemoteListId({
+            localId: options.localListId,
+        })
+
+        if (!sharingState.localListIds.length && remoteListId != null) {
+            await this.storage.deleteAnnotationMetadata({
+                localIds: [options.annotationUrl],
             })
-            sharingState = unshareResult.sharingState
+            delete sharingState.remoteId
+            sharingState.hasLink = false
+            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
         }
 
         const privacyState = getAnnotationPrivacyState(
             sharingState.privacyLevel,
         )
 
-        for (const listId of options.localListIds) {
-            await this.options.annotations.removeAnnotFromList({
-                listId,
-                url: options.annotationUrl,
-            })
-        }
+        await this.options.annotations.removeAnnotFromList({
+            listId: options.localListId,
+            url: options.annotationUrl,
+        })
 
         if (!privacyState.public || options.protectAnnotation) {
             sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED

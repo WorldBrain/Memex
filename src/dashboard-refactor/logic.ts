@@ -1670,9 +1670,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             pageListIds.add(event.added)
         } else if (event.deleted != null) {
             remoteFn = () =>
-                contentShareBG.unshareAnnotationFromSomeLists({
+                contentShareBG.unshareAnnotationFromList({
                     annotationUrl: event.noteId,
-                    localListIds: [event.deleted],
+                    localListId: event.deleted,
                 })
             noteListIds.delete(event.deleted)
             pageListIds.delete(event.deleted)

@@ -413,11 +413,11 @@ export class SharingTestHelper {
         )
     }
 
-    async unshareAnnotationsFromSomeLists(
+    async unshareAnnotationsFromList(
         setup: BackgroundIntegrationTestSetup,
         options: {
             annotationsIds: number[]
-            listIds: number[]
+            listId: number
             expectedSharingStates: AnnotationSharingStates
         },
     ) {
@@ -425,12 +425,10 @@ export class SharingTestHelper {
         for (const annotationId of options.annotationsIds) {
             const {
                 sharingState,
-            } = await setup.backgroundModules.contentSharing.unshareAnnotationFromSomeLists(
+            } = await setup.backgroundModules.contentSharing.unshareAnnotationFromList(
                 {
                     annotationUrl: this.annotations[annotationId].localId,
-                    localListIds: options.listIds.map(
-                        (id) => this.lists[id].localId,
-                    ),
+                    localListId: this.lists[options.listId].localId,
                 },
             )
             sharingStates[this.annotations[annotationId].localId] = sharingState

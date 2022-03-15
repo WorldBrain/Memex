@@ -37,9 +37,9 @@ export interface ContentSharingInterface
         localListIds: number[]
         protectAnnotation?: boolean
     }): Promise<{ sharingState: AnnotationSharingState }>
-    unshareAnnotationFromSomeLists(options: {
+    unshareAnnotationFromList(options: {
         annotationUrl: string
-        localListIds: number[]
+        localListId: number
         protectAnnotation?: boolean
     }): Promise<{ sharingState: AnnotationSharingState }>
     unshareAnnotations(options: {
