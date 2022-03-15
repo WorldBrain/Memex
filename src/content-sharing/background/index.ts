@@ -435,9 +435,6 @@ export default class ContentSharingBackground {
         const privacyState = getAnnotationPrivacyState(
             sharingState.privacyLevel,
         )
-        const pageListEntries = await customListsBG.fetchListIdsByUrl(
-            annotation.pageUrl,
-        )
 
         if (!privacyState.public || options.protectAnnotation) {
             sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
@@ -460,6 +457,9 @@ export default class ContentSharingBackground {
         const remoteListIds = await this.storage.getRemoteListIds({
             localIds: options.localListIds,
         })
+        const pageListEntries = await customListsBG.fetchListIdsByUrl(
+            annotation.pageUrl,
+        )
 
         for (const listId of options.localListIds) {
             if (sharingState.localListIds.includes(listId)) {
@@ -476,17 +476,14 @@ export default class ContentSharingBackground {
                 continue
             }
 
-            if (
-                privacyState.public &&
-                !pageListEntries.includes(listId) &&
-                page != null
-            ) {
+            if (!pageListEntries.includes(listId) && page != null) {
                 await customListsBG.insertPageToList({
                     listId,
                     pageUrl: annotation.pageUrl,
                     fullUrl: page.originalUrl,
                 })
             }
+
             if (!privacyState.public) {
                 await annotationsBG.insertAnnotToList({
                     listId,
