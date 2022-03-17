@@ -325,7 +325,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -380,7 +381,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PROTECTED,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PROTECTED,
                                     },
@@ -392,13 +394,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listIds: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: true,
                                             },
                                             2: {
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: true,
@@ -472,7 +476,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listIds: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: true,
@@ -484,7 +489,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -547,7 +553,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PROTECTED,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PROTECTED,
                                     },
@@ -568,7 +575,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [],
+                                                sharedListIds: [],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: false,
@@ -619,7 +627,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -631,7 +640,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     keepListsIfUnsharing: true,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -651,7 +661,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingStates: {
                                         1: {
                                             hasLink: true,
-                                            localListIds: [2],
+                                            sharedListIds: [2],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.PROTECTED,
                                         },
@@ -712,7 +723,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -721,7 +733,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ids: [1],
                                     expectedSharingStates: {
                                         1: {
-                                            localListIds: [],
+                                            sharedListIds: [],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.PRIVATE,
                                             hasLink: true,
@@ -783,7 +796,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         AnnotationPrivacyLevels.SHARED_PROTECTED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED_PROTECTED,
                                     },
@@ -792,7 +806,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ids: [1],
                                     expectedSharingStates: {
                                         1: {
-                                            localListIds: [1, 2],
+                                            sharedListIds: [1, 2],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                                             hasLink: true,
@@ -855,7 +870,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1],
+                                        sharedListIds: [1],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -867,7 +883,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listIds: [2],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1, 2],
+                                                sharedListIds: [1, 2],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                                 hasLink: true,
@@ -938,7 +955,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1],
+                                        sharedListIds: [1],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -1007,7 +1025,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -1019,7 +1038,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listIds: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: true,
@@ -1089,7 +1109,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -1102,7 +1123,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         listIds: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                                 hasLink: true,
@@ -1116,7 +1138,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     keepListsIfUnsharing: false,
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                         hasLink: true,
@@ -1192,7 +1215,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -1228,7 +1252,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -1319,7 +1344,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -1333,7 +1359,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1, 2, 3],
+                                                sharedListIds: [1, 2],
+                                                privateListIds: [3],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -1362,7 +1389,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [3],
+                                        sharedListIds: [],
+                                        privateListIds: [3],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -1439,7 +1467,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1],
+                                        sharedListIds: [1],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1459,7 +1488,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         ids: [1],
                                         expectedSharingStates: {
                                             1: {
-                                                localListIds: [],
+                                                sharedListIds: [],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PRIVATE,
                                                 hasLink: true,
@@ -1533,7 +1563,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1],
+                                        sharedListIds: [1],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1542,7 +1573,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.shareAnnotation(setup, {
                                     id: 2,
                                     expectedSharingState: {
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                         hasLink: true,
@@ -1615,7 +1647,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
                                     expectedSharingState: {
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                         hasLink: true,
@@ -1672,7 +1705,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1],
+                                        sharedListIds: [1],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1753,7 +1787,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1796,7 +1831,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingState: {
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         hasLink: false,
                                     },
                                 })
@@ -1856,7 +1892,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -1952,7 +1989,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     shareToLists: true,
                                     expectedSharingState: {
-                                        localListIds: [1, 2],
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                         hasLink: true,
@@ -2179,7 +2217,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2190,7 +2229,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2201,7 +2241,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -2248,7 +2289,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -2321,7 +2363,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2332,7 +2375,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2343,7 +2387,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -2390,7 +2435,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                             },
@@ -2464,7 +2510,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2475,7 +2522,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2522,7 +2570,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [],
+                                                privateListIds: [1],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -2594,7 +2643,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2605,7 +2655,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2651,7 +2702,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [],
+                                                privateListIds: [1],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -2721,7 +2773,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2732,7 +2785,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2781,7 +2835,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -2859,7 +2914,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -2870,7 +2926,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -2919,7 +2976,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 // PRIVATE should change to PROTECTED upon list share
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
@@ -2999,7 +3057,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.PRIVATE,
                                     expectedSharingState: {
                                         hasLink: false,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.PRIVATE,
                                     },
@@ -3010,7 +3069,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -3021,7 +3081,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -3075,14 +3136,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 // PRIVATE should change to PROTECTED upon list share
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
                                             },
                                             2: {
                                                 hasLink: true,
-                                                localListIds: [1],
+                                                sharedListIds: [1],
+                                                privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -3142,7 +3205,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingStates: {
                                         2: {
                                             hasLink: false,
-                                            localListIds: [],
+                                            sharedListIds: [],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.PROTECTED,
                                         },
@@ -3201,7 +3265,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingStates: {
                                         1: {
                                             hasLink: false,
-                                            localListIds: [],
+                                            sharedListIds: [],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.PROTECTED,
                                         },
@@ -3286,7 +3351,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -3297,7 +3363,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        localListIds: [],
+                                        sharedListIds: [],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
                                     },
@@ -3344,7 +3411,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                localListIds: [1, 2],
+                                                sharedListIds: [],
+                                                privateListIds: [1, 2],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.SHARED,
                                             },
@@ -3393,7 +3461,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingStates: {
                                         1: {
                                             hasLink: true,
-                                            localListIds: [1],
+                                            sharedListIds: [],
+                                            privateListIds: [1],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.SHARED,
                                         },
@@ -3438,7 +3507,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expectedSharingStates: {
                                         1: {
                                             hasLink: true,
-                                            localListIds: [],
+                                            sharedListIds: [],
+                                            privateListIds: [],
                                             privacyLevel:
                                                 AnnotationPrivacyLevels.SHARED,
                                         },
@@ -3515,7 +3585,8 @@ function makeShareAnnotationTest(options: {
                             level: AnnotationPrivacyLevels.PROTECTED,
                             expectedSharingState: {
                                 hasLink: false,
-                                localListIds: [],
+                                sharedListIds: [],
+                                privateListIds: [],
                                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                             },
                         })
@@ -3525,7 +3596,8 @@ function makeShareAnnotationTest(options: {
                         await helper.shareAnnotation(setup, {
                             id: 1,
                             expectedSharingState: {
-                                localListIds: [],
+                                sharedListIds: [],
+                                privateListIds: [],
                                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
@@ -3533,7 +3605,8 @@ function makeShareAnnotationTest(options: {
                         await helper.shareAnnotation(setup, {
                             id: 2,
                             expectedSharingState: {
-                                localListIds: [],
+                                sharedListIds: [],
+                                privateListIds: [],
                                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
@@ -3543,7 +3616,8 @@ function makeShareAnnotationTest(options: {
                             await helper.shareAnnotation(setup, {
                                 id: 2,
                                 expectedSharingState: {
-                                    localListIds: [],
+                                    sharedListIds: [],
+                                    privateListIds: [],
                                     privacyLevel:
                                         AnnotationPrivacyLevels.PRIVATE,
                                     hasLink: true,
@@ -3555,19 +3629,22 @@ function makeShareAnnotationTest(options: {
                     ) {
                         const expectedSharingStates = {
                             1: {
-                                localListIds: [],
+                                sharedListIds: [],
+                                privateListIds: [],
                                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                                 hasLink: true,
                             },
                             2: !options.testProtectedBulkShare
                                 ? {
-                                      localListIds: [],
+                                      sharedListIds: [],
+                                      privateListIds: [],
                                       privacyLevel:
                                           AnnotationPrivacyLevels.PRIVATE,
                                       hasLink: true,
                                   }
                                 : {
-                                      localListIds: [],
+                                      sharedListIds: [],
+                                      privateListIds: [],
                                       privacyLevel:
                                           AnnotationPrivacyLevels.PROTECTED,
                                       hasLink: false,
@@ -3645,7 +3722,8 @@ function makeShareAnnotationTest(options: {
 
                     const expectedSharingStatesPostAllLists = () => ({
                         1: {
-                            localListIds: [1],
+                            sharedListIds: [1],
+                            privateListIds: [],
                             privacyLevel: AnnotationPrivacyLevels.SHARED,
                             hasLink: true,
                         },

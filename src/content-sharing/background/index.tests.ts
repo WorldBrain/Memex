@@ -727,7 +727,10 @@ export class SharingTestHelper {
     }
 
     _prepareAnnotationStateForExpect(state: AnnotationSharingState) {
-        state.localListIds = state.localListIds.map(
+        state.privateListIds = state.privateListIds.map(
+            (id) => this.lists[id].localId as any,
+        )
+        state.sharedListIds = state.sharedListIds.map(
             (id) => this.lists[id].localId as any,
         )
         if (state.hasLink) {

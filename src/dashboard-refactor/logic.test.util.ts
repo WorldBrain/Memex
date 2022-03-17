@@ -216,18 +216,6 @@ const getPrivacyLevel = (isShared, isBulkShareProtected) => {
     }
 }
 
-const makeAnnotSharingState = (noteData): AnnotationSharingState => {
-    return {
-        hasLink: noteData.isShared ? true : false,
-        remoteId: noteData.isShared ? '1' : null,
-        privacyLevel: getPrivacyLevel(
-            noteData.isShared,
-            noteData.isBulkShareProtected,
-        ),
-        localListIds: noteData.lists ?? [],
-    }
-}
-
 const newPrivacyLevel = (
     oldPrivacyLevel: AnnotationPrivacyLevels,
     {
@@ -259,10 +247,16 @@ const makeNewShareState = (
         isBulkShareProtected,
     }: { isShared: boolean; isBulkShareProtected?: boolean },
 ): AnnotationSharingState => {
-    const shareState = makeAnnotSharingState(note)
+    const privacyLevel = getPrivacyLevel(
+        note.isShared,
+        note.isBulkShareProtected,
+    )
     return {
-        ...shareState,
-        privacyLevel: newPrivacyLevel(shareState.privacyLevel, {
+        hasLink: note.isShared ? true : false,
+        remoteId: note.isShared ? '1' : null,
+        sharedListIds: [], // TODO: maybe fill this in, if needed (it looks like only privacyLevel is used)
+        privateListIds: note.lists ?? [],
+        privacyLevel: newPrivacyLevel(privacyLevel, {
             isShared,
             isBulkShareProtected,
         }),

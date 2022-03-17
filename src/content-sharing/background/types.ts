@@ -128,7 +128,8 @@ export interface AnnotationSharingState {
     hasLink: boolean
     remoteId?: string | number
     privacyLevel: AnnotationPrivacyLevels
-    localListIds: number[]
+    privateListIds: number[]
+    sharedListIds: number[]
 }
 
 export interface AnnotationSharingStates {
