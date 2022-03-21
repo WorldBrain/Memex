@@ -3570,8 +3570,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     share: true,
                                 })
+
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
                                 await helper.createPage(setup, {
                                     id: 1,
+                                    listId: 2,
                                 })
                                 await helper.createAnnotation(setup, {
                                     id: 1,
@@ -3591,7 +3597,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        sharedListIds: [],
+                                        sharedListIds: [2],
                                         privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
@@ -3627,12 +3633,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [2],
                                 })
-                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    [],
+                                    [{ annotationId: 2, listId: 2 }],
                                 )
-                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
                                 await helper.assertAnnotationListEntries(
                                     setup,
                                     [],
@@ -3646,7 +3656,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         listIds: [1],
                                         annotationsIds: [1],
-                                        createdPageListEntries: [], // TODO: confirm this needs to be here
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
@@ -3694,13 +3706,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ids: [1, 2],
                                 })
                                 await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
                                     { pageId: 1, listId: 1 },
-                                ]) // TODO: confirm this needs to be here
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    [{ annotationId: 1, listId: 1 }],
+                                    [
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
                                 )
-                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
                                 await helper.assertAnnotationListEntries(
                                     setup,
                                     [{ annotationId: 1, listId: 1 }],
@@ -3807,7 +3827,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         listIds: [1],
                                         annotationsIds: [1],
-                                        createdPageListEntries: [], // TODO: confirm this needs to be here
+                                        createdPageListEntries: [],
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: false,
@@ -3901,12 +3921,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.assertSharedListEntries(setup, [
                                     { pageId: 1, listId: 1 },
-                                ]) // TODO: confirm this needs to be here
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    [{ annotationId: 1, listId: 1 }],
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
                                 )
-                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
                                 await helper.assertAnnotationListEntries(
                                     setup,
                                     [{ annotationId: 1, listId: 1 }],
@@ -3937,8 +3962,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: 1,
                                     share: true,
                                 })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
                                 await helper.createPage(setup, {
                                     id: 1,
+                                    listId: 2,
                                 })
                                 await helper.createAnnotation(setup, {
                                     id: 1,
@@ -3946,7 +3976,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        sharedListIds: [],
+                                        sharedListIds: [2],
                                         privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
@@ -3958,7 +3988,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     level: AnnotationPrivacyLevels.SHARED,
                                     expectedSharingState: {
                                         hasLink: true,
-                                        sharedListIds: [],
+                                        sharedListIds: [2],
                                         privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
@@ -3998,12 +4028,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [1, 2],
                                 })
-                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    [],
+                                    [
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 2, listId: 2 },
+                                    ],
                                 )
-                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
                                 await helper.assertAnnotationListEntries(
                                     setup,
                                     [],
@@ -4017,12 +4054,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         listIds: [1],
                                         annotationsIds: [1],
-                                        createdPageListEntries: [], // TODO: confirm this needs to be here
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
                                         protectAnnotations: true,
                                         expectedSharingStates: {
                                             1: {
                                                 hasLink: true,
-                                                sharedListIds: [1],
+                                                sharedListIds: [2, 1],
                                                 privateListIds: [],
                                                 privacyLevel:
                                                     AnnotationPrivacyLevels.PROTECTED,
@@ -4066,16 +4105,28 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ids: [1, 2],
                                 })
                                 await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
                                     { pageId: 1, listId: 1 },
-                                ]) // TODO: confirm this needs to be here
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    [{ annotationId: 1, listId: 1 }],
+                                    [
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
                                 )
-                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
                                 await helper.assertAnnotationListEntries(
                                     setup,
-                                    [{ annotationId: 1, listId: 1 }],
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
                                 await helper.assertSharedPageInfo(setup, {
                                     pageIds: [1],
@@ -4246,7 +4297,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedListEntries(setup, [
                                     { pageId: 1, listId: 1 },
                                     { pageId: 1, listId: 2 },
-                                ]) // TODO: confirm this needs to be here
+                                ])
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
                                     [
@@ -4629,6 +4680,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                     {
                                         metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
                                             {
                                                 annotationId: 2,
                                                 excludeFromLists: false,
