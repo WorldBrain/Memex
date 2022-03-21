@@ -514,7 +514,12 @@ export default class ContentSharingBackground {
     unshareAnnotationFromList: ContentSharingInterface['unshareAnnotationFromList'] = async (
         options,
     ) => {
-        let sharingState = await this.getAnnotationSharingState({
+        const {
+            annotations: annotationsBG,
+            customLists: customListsBG,
+        } = this.options
+
+        const sharingState = await this.getAnnotationSharingState({
             annotationUrl: options.annotationUrl,
         })
 
@@ -526,33 +531,66 @@ export default class ContentSharingBackground {
             excludeList,
         )
 
-        const remoteListId = await this.storage.getRemoteListId({
-            localId: options.localListId,
-        })
-
-        if (!sharingState.sharedListIds.length && remoteListId != null) {
-            await this.storage.deleteAnnotationMetadata({
-                localIds: [options.annotationUrl],
-            })
-            delete sharingState.remoteId
-            sharingState.hasLink = false
-            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
-        }
-
         const privacyState = getAnnotationPrivacyState(
             sharingState.privacyLevel,
         )
 
-        await this.options.annotations.removeAnnotFromList({
-            listId: options.localListId,
-            url: options.annotationUrl,
+        const remoteListId = await this.storage.getRemoteListId({
+            localId: options.localListId,
         })
 
-        if (!privacyState.public || options.protectAnnotation) {
-            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
-            await this.storage.setAnnotationPrivacyLevel({
-                annotation: options.annotationUrl,
-                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+        if (!privacyState.public || remoteListId == null) {
+            await annotationsBG.removeAnnotFromList({
+                listId: options.localListId,
+                url: options.annotationUrl,
+            })
+
+            return { sharingState }
+        }
+
+        const annotation = await annotationsBG.getAnnotationByPk(
+            options.annotationUrl,
+        )
+
+        // If annot is public, and user doesn't want to protect it, we remove the parent page from the list
+        if (!options.protectAnnotation) {
+            await customListsBG.removePageFromList({
+                listId: options.localListId,
+                pageUrl: annotation.pageUrl,
+            })
+
+            return { sharingState }
+        }
+
+        // If we get here, we're making a public annotation "selectively shared"
+        sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+        await this.storage.setAnnotationPrivacyLevel({
+            annotation: options.annotationUrl,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+        })
+        await this.storage.setAnnotationsExcludedFromLists({
+            localIds: [options.annotationUrl],
+            excludeFromLists: true,
+        })
+
+        const pageListEntryIds = await customListsBG.fetchListIdsByUrl(
+            annotation.pageUrl,
+        )
+        const remoteListIds = await this.storage.getRemoteListIds({
+            localIds: pageListEntryIds,
+        })
+
+        for (const listId of pageListEntryIds) {
+            if (
+                listId === options.localListId ||
+                remoteListIds[listId] == null
+            ) {
+                continue
+            }
+
+            await annotationsBG.ensureAnnotInList({
+                listId,
+                url: options.annotationUrl,
             })
         }
 
