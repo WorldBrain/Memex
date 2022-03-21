@@ -40,7 +40,6 @@ export interface ContentSharingInterface
     unshareAnnotationFromList(options: {
         annotationUrl: string
         localListId: number
-        protectAnnotation?: boolean
     }): Promise<{ sharingState: AnnotationSharingState }>
     unshareAnnotations(options: {
         annotationUrls: string[]

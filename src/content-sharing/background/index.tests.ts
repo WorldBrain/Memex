@@ -418,7 +418,6 @@ export class SharingTestHelper {
         options: {
             annotationsIds: number[]
             listId: number
-            protectAnnotations?: boolean
             expectedSharingStates: AnnotationSharingStates
         },
     ) {
@@ -430,7 +429,6 @@ export class SharingTestHelper {
                 {
                     annotationUrl: this.annotations[annotationId].localId,
                     localListId: this.lists[options.listId].localId,
-                    protectAnnotation: options.protectAnnotations,
                 },
             )
             sharingStates[this.annotations[annotationId].localId] = sharingState

@@ -552,16 +552,6 @@ export default class ContentSharingBackground {
             options.annotationUrl,
         )
 
-        // If annot is public, and user doesn't want to protect it, we remove the parent page from the list
-        if (!options.protectAnnotation) {
-            await customListsBG.removePageFromList({
-                listId: options.localListId,
-                pageUrl: annotation.pageUrl,
-            })
-
-            return { sharingState }
-        }
-
         // If we get here, we're making a public annotation "selectively shared"
         sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
         await this.storage.setAnnotationPrivacyLevel({
