@@ -2474,8 +2474,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
                                     [
-                                        { annotationId: 1, listId: 1 },
                                         { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
                                     ],
                                 )
                             },
@@ -3676,12 +3676,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         metadata: [
                                             {
-                                                annotationId: 2,
-                                                excludeFromLists: false,
-                                            },
-                                            {
                                                 annotationId: 1,
                                                 excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
                                             },
                                         ],
                                     },
@@ -3713,8 +3713,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                     [
                                         { annotationId: 2, listId: 2 },
-                                        { annotationId: 1, listId: 1 },
                                         { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
                                     ],
                                 )
                                 await helper.assertPageListEntries(setup, [
@@ -4111,10 +4111,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertSharedAnnotationListEntries(
                                     setup,
                                     [
-                                        { annotationId: 1, listId: 2 },
-                                        { annotationId: 2, listId: 2 },
-                                        { annotationId: 1, listId: 1 },
                                         { annotationId: 2, listId: 1 },
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
                                     ],
                                 )
                                 await helper.assertPageListEntries(setup, [
@@ -4124,8 +4124,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.assertAnnotationListEntries(
                                     setup,
                                     [
-                                        { annotationId: 1, listId: 1 },
                                         { annotationId: 1, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
                                     ],
                                 )
                                 await helper.assertSharedPageInfo(setup, {
