@@ -4,7 +4,13 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
-    shareList(options: { listId: number }): Promise<{ remoteListId: string }>
+    shareList(options: {
+        listId: number
+    }): Promise<{
+        remoteListId: string
+        /** Holds the sharing states of all list member annotations that change to being selectively shared upon list share. */
+        annotationSharingStates: AnnotationSharingStates
+    }>
     shareAnnotation(options: {
         annotationUrl: string
         remoteAnnotationId?: string

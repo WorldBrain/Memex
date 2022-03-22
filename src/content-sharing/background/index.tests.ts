@@ -38,6 +38,14 @@ export class SharingTestHelper {
         }
     } = {}
 
+    private createAnnotationLocalIdToTestIdMap(): Map<string, number> {
+        const idMap = new Map<string, number>()
+        for (const [id, annotation] of Object.entries(this.annotations)) {
+            idMap.set(annotation.localId, Number(id))
+        }
+        return idMap
+    }
+
     async createList(
         setup: BackgroundIntegrationTestSetup,
         options: { id: number; share?: boolean },
@@ -85,11 +93,25 @@ export class SharingTestHelper {
     ) {
         const {
             remoteListId,
+            annotationSharingStates,
         } = await setup.backgroundModules.contentSharing.shareList({
             listId: this.lists[options.id].localId,
         })
         expect(remoteListId).toBeDefined()
         this.lists[options.id].remoteId = remoteListId
+
+        const idMap = this.createAnnotationLocalIdToTestIdMap()
+
+        for (const [localAnnotId, sharingState] of Object.entries(
+            annotationSharingStates,
+        )) {
+            const testId = idMap.get(localAnnotId)
+            if (testId == null) {
+                continue
+            }
+            this.annotations[testId].remoteId = sharingState.remoteId
+            this.annotations[testId].privacyLevel = sharingState.privacyLevel
+        }
     }
 
     async createPage(
@@ -511,10 +533,12 @@ export class SharingTestHelper {
                 id: expect.anything(),
                 creator: TEST_USER.id,
                 sharedList: convertRemoteId(this.lists[entry.listId].remoteId),
-                createdWhen: this.entries[entry.listId][entry.pageId]
-                    .createdWhen,
-                updatedWhen: this.entries[entry.listId][entry.pageId]
-                    .createdWhen,
+                createdWhen:
+                    this.entries[entry.listId][entry.pageId]?.createdWhen ??
+                    expect.any(Number),
+                updatedWhen:
+                    this.entries[entry.listId][entry.pageId]?.createdWhen ??
+                    expect.any(Number),
                 originalUrl: this.pages[entry.pageId].fullUrl,
                 normalizedUrl: this.pages[entry.pageId].normalizedUrl,
                 entryTitle: this.pages[entry.pageId].title,

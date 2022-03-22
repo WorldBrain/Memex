@@ -159,7 +159,10 @@ export default class ContentSharingBackground {
             localId: options.listId,
         })
         if (existingRemoteId) {
-            return { remoteListId: existingRemoteId }
+            return {
+                remoteListId: existingRemoteId,
+                annotationSharingStates: {},
+            }
         }
 
         const localList = await this.options.customLists.fetchListById(
@@ -179,14 +182,104 @@ export default class ContentSharingBackground {
             remoteId: remoteListId,
         })
 
-        this.options.analytics.trackEvent({
+        await this.options.analytics.trackEvent({
             category: 'ContentSharing',
             action: 'shareList',
         })
 
+        const annotationSharingStates = await this.selectivelySharePrivateListAnnotations(
+            options.listId,
+        )
+
         return {
             remoteListId,
+            annotationSharingStates,
         }
+    }
+
+    private async selectivelySharePrivateListAnnotations(
+        listId: number,
+    ): Promise<AnnotationSharingStates> {
+        const {
+            annotations: annotationsBG,
+            customLists: customListsBG,
+        } = this.options
+
+        const annotationEntries = await annotationsBG.findListEntriesByList({
+            listId,
+        })
+        const sharingStates = await this.getAnnotationSharingStates({
+            annotationUrls: annotationEntries.map((e) => e.url),
+        })
+        const privateAnnotationIds = annotationEntries
+            .map((e) => e.url)
+            .filter((url) =>
+                [
+                    AnnotationPrivacyLevels.PRIVATE,
+                    AnnotationPrivacyLevels.PROTECTED,
+                ].includes(sharingStates[url]?.privacyLevel),
+            )
+
+        await this.storage.storeAnnotationMetadata(
+            privateAnnotationIds.map((localId) => {
+                const remoteId = this.generateRemoteAnnotationId()
+                sharingStates[localId].hasLink = true
+                sharingStates[localId].remoteId = remoteId
+                sharingStates[localId].privacyLevel =
+                    AnnotationPrivacyLevels.PROTECTED
+
+                return {
+                    localId,
+                    excludeFromLists: true,
+                    remoteId,
+                }
+            }),
+        )
+
+        await this.storage.setAnnotationPrivacyLevelBulk({
+            annotations: privateAnnotationIds,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+        })
+
+        const processedPageUrls = new Set<string>()
+        for (const annotationId of privateAnnotationIds) {
+            // NOTE: These 2 calls are not ideal (re-creating the list entry), though doing it to trigger a shared list entry
+            //  creation on the server-side. Ideally it would trigger from one of the other data changes here.
+            await annotationsBG.removeAnnotFromList({
+                listId,
+                url: annotationId,
+            })
+            await annotationsBG.insertAnnotToList({
+                listId,
+                url: annotationId,
+            })
+
+            const { pageUrl } = await annotationsBG.getAnnotationByPk(
+                annotationId,
+            )
+
+            if (processedPageUrls.has(pageUrl)) {
+                continue
+            }
+            processedPageUrls.add(pageUrl)
+
+            const existingPageListEntry = await customListsBG.fetchListEntry(
+                listId,
+                pageUrl,
+            )
+
+            if (!existingPageListEntry) {
+                const page = await this.storage.getPage(pageUrl)
+
+                await customListsBG.insertPageToList({
+                    fullUrl: page.originalUrl,
+                    pageUrl,
+                    listId,
+                })
+            }
+        }
+
+        return sharingStates
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
@@ -425,15 +518,6 @@ export default class ContentSharingBackground {
             sharingState.privacyLevel,
         )
 
-        // In these cases we are making the annotation "selectively shared"
-        if (!privacyState.public || options.protectAnnotation) {
-            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
-            await this.storage.setAnnotationPrivacyLevel({
-                annotation: options.annotationUrl,
-                privacyLevel: sharingState.privacyLevel,
-            })
-        }
-
         const pageListEntryIds = await customListsBG.fetchListIdsByUrl(
             annotation.pageUrl,
         )
@@ -442,6 +526,24 @@ export default class ContentSharingBackground {
                 ...new Set([...pageListEntryIds, ...options.localListIds]),
             ],
         })
+
+        // We can skip a few writes if all of the lists to add to are private
+        const processPrivateListsOnly = options.localListIds.reduce(
+            (prev, curr) => remoteListIds[curr] == null && prev,
+            true,
+        )
+
+        // In these cases we are making the annotation "selectively shared"
+        if (
+            !processPrivateListsOnly &&
+            (!privacyState.public || options.protectAnnotation)
+        ) {
+            sharingState.privacyLevel = AnnotationPrivacyLevels.PROTECTED
+            await this.storage.setAnnotationPrivacyLevel({
+                annotation: options.annotationUrl,
+                privacyLevel: sharingState.privacyLevel,
+            })
+        }
 
         // If making a public annotation "selectively shared", we need to ensure parent page lists are inherited
         if (privacyState.public && options.protectAnnotation) {
@@ -461,7 +563,7 @@ export default class ContentSharingBackground {
             }
         }
 
-        if (!sharingState.remoteId) {
+        if (!processPrivateListsOnly && !sharingState.remoteId) {
             const { remoteId } = await this.shareAnnotation({
                 annotationUrl: options.annotationUrl,
                 shareToLists: privacyState.public,

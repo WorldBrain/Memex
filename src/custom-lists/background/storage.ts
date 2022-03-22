@@ -95,6 +95,11 @@ export default class CustomListStorage extends StorageModule {
                         pageUrl: '$url:string',
                     },
                 },
+                findListEntry: {
+                    collection: CustomListStorage.LIST_ENTRIES_COLL,
+                    operation: 'findObject',
+                    args: { pageUrl: '$pageUrl:string', listId: '$listId:int' },
+                },
                 findListByNameIgnoreCase: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'findObject',
@@ -238,6 +243,13 @@ export default class CustomListStorage extends StorageModule {
             pages.map((p) => p.fullUrl),
             pages.length > 0,
         )
+    }
+
+    async fetchListEntry(
+        listId: number,
+        pageUrl: string,
+    ): Promise<PageListEntry | null> {
+        return this.operation('findListEntry', { listId, pageUrl })
     }
 
     async fetchListPagesById({
