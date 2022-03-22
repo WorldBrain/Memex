@@ -450,9 +450,8 @@ export function anchor(root, selectors) {
                 ({ index, offset, textContent }) => {
                     const start = position.start - offset
                     const end = position.end - offset
-                    const length = end - start
 
-                    checkQuote(textContent.substr(start, length))
+                    checkQuote(textContent.slice(start, end))
 
                     return anchorByPosition(index, start, end)
                 },

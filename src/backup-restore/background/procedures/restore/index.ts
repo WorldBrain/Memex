@@ -359,7 +359,7 @@ export class BackupRestoreProcedure {
 
     _blobFromPngString(s: string) {
         const prefix = 'data:'
-        if (s.substr(0, prefix.length) !== prefix) {
+        if (s.slice(0, prefix.length) !== prefix) {
             s = 'data:image/png;base64,' + s
         }
         return decodeBlob(s, {

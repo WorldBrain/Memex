@@ -209,7 +209,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         const { hover, source } = this.props
 
         // Make first letter capital
-        const sourceType = source.charAt(0).toUpperCase() + source.substr(1)
+        const sourceType = source.charAt(0).toUpperCase() + source.slice(1)
 
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
