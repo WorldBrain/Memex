@@ -13,6 +13,8 @@ export interface ContentSharingInterface
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
         queueInteraction?: ContentSharingQueueInteraction
+        /** Set this to skip DB potentially unneeded lookups (likely only relevant in ContentSharingBG class). */
+        sharingState?: AnnotationSharingState
     }): Promise<{
         remoteId: number | string
         sharingState: AnnotationSharingState
