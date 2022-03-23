@@ -127,6 +127,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         }))
     }
 
+    private get hasSharedLists(): boolean {
+        return this.displayLists.some((list) => list.isShared)
+    }
+
     private get creationInfo() {
         // TODO: Figure out why these dates are so unpredictable and fix it
         const handleDateData = (date: string | number | Date): number =>
@@ -325,7 +329,11 @@ export default class AnnotationEditable extends React.Component<Props> {
             ]
         }
 
-        const shareIconData = getShareButtonData(isShared, isBulkShareProtected)
+        const shareIconData = getShareButtonData(
+            isShared,
+            isBulkShareProtected,
+            this.hasSharedLists,
+        )
 
         if (hoverState === null) {
             if (isShared || isBulkShareProtected) {
@@ -445,6 +453,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             confirmBtn = (
                 <SaveBtn
                     onSave={editDeps.onEditConfirm(false)}
+                    hasSharedLists={this.hasSharedLists}
                     isProtected={isBulkShareProtected}
                     isShared={isShared}
                 />

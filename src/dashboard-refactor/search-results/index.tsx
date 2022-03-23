@@ -331,6 +331,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
                     lists={newNoteForm.lists}
+                    getListDetailsById={this.props.getListDetailsById}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />

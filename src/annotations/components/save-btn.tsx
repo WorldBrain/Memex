@@ -21,6 +21,7 @@ import {
 export interface Props {
     isShared?: boolean
     isProtected?: boolean
+    hasSharedLists?: boolean
     onSave: (
         shouldShare: boolean,
         isProtected: boolean,
@@ -76,8 +77,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 
     private get saveIcon(): string {
-        return getShareButtonData(this.props.isShared, this.props.isProtected)
-            .icon
+        return getShareButtonData(
+            this.props.isShared,
+            this.props.isProtected,
+            this.props.hasSharedLists,
+        ).icon
     }
 
     private saveWithShareIntent = (

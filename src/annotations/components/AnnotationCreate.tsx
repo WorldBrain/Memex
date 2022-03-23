@@ -107,6 +107,10 @@ export class AnnotationCreate extends React.Component<Props, State>
         }))
     }
 
+    private get hasSharedLists(): boolean {
+        return this.displayLists.some((list) => list.isShared)
+    }
+
     focus() {
         const inputLen = this.props.comment.length
         // this.textAreaRef.current.focus()
@@ -221,7 +225,8 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return <div>{tagPicker}</div>
     }
-    private renderSharedCollectionsPicker() {
+
+    private renderSharedCollectionsPicker = () => {
         const { lists } = this.props
 
         const setPickerShown = (isListPickerShown: boolean) =>
@@ -239,9 +244,9 @@ export class AnnotationCreate extends React.Component<Props, State>
             />
         )
     }
-    private renderCollectionsPicker() {
+
+    private renderCollectionsPicker = () => {
         // Not used yet but will be used for the "Add to collection" button
-        const { lists } = this.props
         const setPickerShown = (isListPickerShown: boolean) =>
             this.setState({ isListPickerShown })
 
@@ -280,8 +285,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <Flex>
                     <SaveBtn
                         onSave={this.handleSave}
-                        renderCollectionsPicker={() =>
-                            this.renderSharedCollectionsPicker()
+                        hasSharedLists={this.hasSharedLists}
+                        renderCollectionsPicker={
+                            this.renderSharedCollectionsPicker
                         }
                     />
                     <ButtonTooltip tooltipText="esc" position="bottom">
@@ -324,9 +330,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
-                                renderSpacePicker={this.renderCollectionsPicker.bind(
-                                    this,
-                                )}
+                                renderSpacePicker={this.renderCollectionsPicker}
                             />
                             <TagsSegment
                                 tags={this.props.tags}
