@@ -103,9 +103,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 spacesBG={this.props.customLists}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
-                getListNameById={(id) =>
-                    this.state.lists.listData[id]?.name ?? 'Missing list'
-                }
+                getListDetailsById={(id) => ({
+                    name: this.state.lists.listData[id]?.name ?? 'Missing list',
+                    isShared: this.state.lists.listData[id]?.remoteId != null,
+                })}
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}

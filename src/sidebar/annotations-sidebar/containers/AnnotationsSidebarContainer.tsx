@@ -18,8 +18,8 @@ import type {
     AnnotationEventContext,
 } from './types'
 import { ButtonTooltip, ConfirmModal } from 'src/common-ui/components'
-import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
-import { Annotation } from 'src/annotations/types'
+import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
 import {
     AnnotationEditEventProps,
     AnnotationEditGeneralProps,
@@ -32,12 +32,12 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
 import TagPicker from 'src/tags/ui/TagPicker'
-import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
+import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { setLocalStorage } from 'src/util/storage'
@@ -81,8 +81,10 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private getListNameById = (listId: number): string =>
-        this.state.listData[listId]?.name ?? 'Missing list'
+    private getListDetailsById: ListDetailsGetter = (listId) => ({
+        name: this.state.listData[listId]?.name ?? 'Missing list',
+        isShared: this.state.listData[listId]?.remoteId != null,
+    })
 
     toggleSidebarShowForPageId(pageId: string) {
         const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
@@ -272,7 +274,7 @@ export class AnnotationsSidebarContainer<
                         (id) => id !== listId,
                     ),
                 }),
-            getListNameById: this.getListNameById,
+            getListDetailsById: this.getListDetailsById,
             contentSharingBG: contentSharing,
             spacesBG: customLists,
             loadDefaultTagSuggestions: tags.fetchInitialTagSuggestions,
@@ -702,10 +704,7 @@ export class AnnotationsSidebarContainer<
                             {this.renderTopBar()}
                             <AnnotationsSidebar
                                 {...this.state}
-                                getListNameById={(id) =>
-                                    this.state.listData[id]?.name ??
-                                    'Missing list'
-                                }
+                                getListDetailsById={this.getListDetailsById}
                                 sidebarContext={this.props.sidebarContext}
                                 ref={(ref) => (this.sidebarRef = ref)}
                                 openCollectionPage={(remoteListId) =>

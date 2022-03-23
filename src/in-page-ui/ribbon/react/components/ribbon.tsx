@@ -25,6 +25,7 @@ import { FeedActivityDot } from 'src/activity-indicator/ui'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 const styles = require('./ribbon.css')
 
@@ -36,7 +37,7 @@ export interface Props extends RibbonSubcomponentProps {
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     showTutorial: boolean
-    getListNameById: (id: number) => string
+    getListDetailsById: ListDetailsGetter
     toggleShowExtraButtons: () => void
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
@@ -487,8 +488,8 @@ export default class Ribbon extends Component<Props, State> {
                                             }
                                             tags={this.props.commentBox.tags}
                                             lists={this.props.commentBox.lists}
-                                            getListNameById={
-                                                this.props.getListNameById
+                                            getListDetailsById={
+                                                this.props.getListDetailsById
                                             }
                                             createNewList={
                                                 this.props.lists.createNewEntry

@@ -57,6 +57,7 @@ import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -103,7 +104,7 @@ export type Props = RootState &
             day: number,
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
-        getListNameById: (id: number) => string
+        getListDetailsById: ListDetailsGetter
         paginateSearch(): Promise<void>
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
@@ -154,7 +155,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
-                getListNameById={this.props.getListNameById}
+                getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
@@ -415,7 +416,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageResult
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
-                    getListNameById={this.props.getListNameById}
+                    getListDetailsById={this.props.getListDetailsById}
                     onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,

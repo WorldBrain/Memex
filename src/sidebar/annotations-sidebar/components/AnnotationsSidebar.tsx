@@ -14,7 +14,7 @@ import AnnotationCreate, {
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
-import type { Annotation } from 'src/annotations/types'
+import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
 import type { AnnotationMode, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -42,7 +42,7 @@ export interface AnnotationsSidebarProps
     annotationModes: { [url: string]: AnnotationMode }
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
-    getListNameById: (id: number) => string
+    getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
         sharedAnnotationReference: SharedAnnotationReference,
@@ -375,7 +375,9 @@ class AnnotationsSidebar extends React.Component<
                                     conversation?.thread != null ||
                                     conversation?.replies.length > 0
                                 }
-                                getListNameById={this.props.getListNameById}
+                                getListDetailsById={
+                                    this.props.getListDetailsById
+                                }
                             />
                             <ConversationReplies
                                 {...eventHandlers}

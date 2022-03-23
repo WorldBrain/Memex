@@ -22,6 +22,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { ListDetailsGetter } from '../types'
 
 interface State {
     isTagPickerShown: boolean
@@ -34,7 +35,7 @@ export interface AnnotationCreateEventProps {
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
-    getListNameById: (id: number) => string
+    getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler
     onListsHover?: React.MouseEventHandler
     annotationFooterDependencies?: AnnotationFooterEventProps
@@ -95,10 +96,14 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
 
-    private get displayLists(): Array<{ id: number; name: string }> {
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
         return this.props.lists.map((id) => ({
             id,
-            name: this.props.getListNameById(id),
+            ...this.props.getListDetailsById(id),
         }))
     }
 

@@ -56,6 +56,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 export interface Props extends DashboardDependencies {}
 
@@ -134,8 +135,10 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 
-    private getListNameById = (id: number): string =>
-        this.state.listsSidebar.listData[id]?.name ?? 'Missing list'
+    private getListDetailsById: ListDetailsGetter = (id) => ({
+        name: this.state.listsSidebar.listData[id]?.name ?? 'Missing list',
+        isShared: this.state.listsSidebar.listData[id]?.remoteId != null,
+    })
 
     private getListDetailsProps = (): ListDetailsProps | null => {
         const { listsSidebar } = this.state
@@ -553,7 +556,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <SearchResultsContainer
                 listData={listsSidebar.listData}
-                getListNameById={this.getListNameById}
+                getListDetailsById={this.getListDetailsById}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {
                         isShown: !searchResults.isSortMenuShown,
@@ -772,7 +775,8 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                 }}
                 newNoteInteractionProps={{
-                    getListNameById: (day, pageId) => this.getListNameById,
+                    getListDetailsById: (day, pageId) =>
+                        this.getListDetailsById,
                     onCancel: (day, pageId) => () =>
                         this.processEvent('cancelPageNewNote', {
                             day,

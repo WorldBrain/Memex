@@ -105,3 +105,7 @@ export type TextTruncator = (
 ) => { text: string; isTooLong: boolean }
 
 export type SelectionIndices = [number, number]
+
+export type ListDetailsGetter = (
+    id: number,
+) => { name: string; isShared: boolean }

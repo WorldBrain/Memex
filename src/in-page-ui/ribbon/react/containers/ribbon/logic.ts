@@ -154,8 +154,17 @@ export class RibbonContainerLogic extends UILogic<
             const url = await this.dependencies.getPageUrl()
 
             const lists = await this.dependencies.customLists.fetchAllLists({})
+            const remoteIds = await this.dependencies.contentSharing.getRemoteListIds(
+                { localListIds: lists.map((l) => l.id) },
+            )
             const listData: componentTypes.RibbonListsProps['listData'] = {}
-            lists.forEach((l) => (listData[l.id] = { name: l.name }))
+            lists.forEach(
+                (l) =>
+                    (listData[l.id] = {
+                        name: l.name,
+                        remoteId: remoteIds[l.id] ?? null,
+                    }),
+            )
 
             this.emitMutation({
                 pageUrl: { $set: url },

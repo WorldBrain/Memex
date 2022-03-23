@@ -16,7 +16,7 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
-import type { SidebarAnnotationTheme } from '../types'
+import type { SidebarAnnotationTheme, ListDetailsGetter } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
@@ -67,7 +67,7 @@ export interface AnnotationProps {
     }
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
-    getListNameById: (id: number) => string
+    getListDetailsById: ListDetailsGetter
     onTagClick?: (tag: string) => void
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderListsPickerForAnnotation?: (id: string) => JSX.Element
@@ -116,10 +116,14 @@ export default class AnnotationEditable extends React.Component<Props> {
         this.textAreaHeight()
     }
 
-    private get displayLists(): Array<{ id: number; name: string }> {
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
         return this.props.lists.map((id) => ({
             id,
-            name: this.props.getListNameById(id),
+            ...this.props.getListDetailsById(id),
         }))
     }
 
@@ -302,6 +306,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             hoverState,
             hasReplies,
             isShared,
+            lists,
         } = this.props
 
         if (!footerDeps) {

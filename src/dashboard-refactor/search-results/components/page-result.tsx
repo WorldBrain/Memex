@@ -26,13 +26,14 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import ListsSegment, {
     AddSpacesButton,
 } from 'src/common-ui/components/result-item-spaces-segment'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 export interface Props
     extends PageData,
         PageResult,
         PageInteractionProps,
         PagePickerProps {
-    getListNameById: (id: number) => string
+    getListDetailsById: ListDetailsGetter
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     filteredbyListID: number
@@ -80,10 +81,14 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.lists.length > 0
     }
 
-    private get displayLists(): Array<{ id: number; name: string }> {
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
         return this.props.lists.map((id) => ({
             id,
-            name: this.props.getListNameById(id),
+            ...this.props.getListDetailsById(id),
         }))
     }
 
