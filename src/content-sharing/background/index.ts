@@ -488,16 +488,17 @@ export default class ContentSharingBackground {
             privacyLevel,
         })
 
-        // TODO: Confirm this isn't actually needed anymore (private list entries should exist regardless of annot public/private/selectively-shared state)
-        // // As the annotation will be going from public (implicit list entries, following parent page) to private (explicit list entries),
-        // //  we need to ensure the remaining, non-shared lists entries exist in the DB
-        // for (const annotationUrl of options.annotationUrls) {
-        //     for (const listId of sharingStates[annotationUrl]?.privateListIds ?? []) {
-        //         await annotationsBG.ensureAnnotInList({
-        //             listId, url: annotationUrl
-        //         })
-        //     }
-        // }
+        // As the annotation will be going from public (implicit list entries, following parent page) to private (explicit list entries),
+        //  we need to ensure the remaining, non-shared lists entries exist in the DB
+        for (const annotationUrl of options.annotationUrls) {
+            for (const listId of sharingStates[annotationUrl]?.privateListIds ??
+                []) {
+                await annotationsBG.ensureAnnotInList({
+                    listId,
+                    url: annotationUrl,
+                })
+            }
+        }
 
         return { sharingStates }
     }

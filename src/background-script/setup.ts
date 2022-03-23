@@ -285,6 +285,18 @@ export function createBackgroundModules(options: {
             (await options.getServerStorage()).storageModules.activityStreams,
     })
 
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        pages,
+        analytics,
+        getServerStorage,
+        preAnnotationDelete: async (params) => {
+            await contentSharing.deleteAnnotationShare(params)
+        },
+    })
+
     const customLists = new CustomListBackground({
         analytics,
         storageManager,
@@ -296,6 +308,9 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
         getServerStorage,
         services: options.services,
+        removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
+            directLinking,
+        ),
     })
 
     const auth =
@@ -349,17 +364,7 @@ export function createBackgroundModules(options: {
         })
     }
     const userMessages = options.userMessageService
-    const directLinking = new DirectLinkingBackground({
-        browserAPIs: options.browserAPIs,
-        storageManager,
-        socialBg: social,
-        pages,
-        analytics,
-        getServerStorage,
-        preAnnotationDelete: async (params) => {
-            await contentSharing.deleteAnnotationShare(params)
-        },
-    })
+
     const contentSharing = new ContentSharingBackground({
         backend:
             options.contentSharingBackend ??

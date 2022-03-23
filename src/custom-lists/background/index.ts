@@ -45,6 +45,11 @@ export default class CustomListBackground {
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
             services: Pick<Services, 'auth'>
+            // TODO: the fact this needs to be passed down tells me this ideally should be done at a higher level (content sharing BG?)
+            removeChildAnnotationsFromList: (
+                normalizedPageUrl: string,
+                listId: number,
+            ) => Promise<void>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
             >
@@ -512,9 +517,11 @@ export default class CustomListBackground {
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {
-        internalAnalytics.processEvent({
+        await internalAnalytics.processEvent({
             type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
         })
+
+        await this.options.removeChildAnnotationsFromList(url, id)
 
         return this.storage.removePageFromList({
             listId: id,

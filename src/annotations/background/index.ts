@@ -251,6 +251,21 @@ export default class DirectLinkingBackground {
         }
     }
 
+    async removeChildAnnotationsFromList(
+        normalizedPageUrl: string,
+        listId: number,
+    ): Promise<void> {
+        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
+            { pageUrl: normalizedPageUrl },
+        )
+
+        await Promise.all(
+            annotations.map(({ url }) =>
+                this.annotationStorage.removeAnnotFromList({ listId, url }),
+            ),
+        )
+    }
+
     followAnnotationRequest({ tab }: TabArg) {
         this.requests.followAnnotationRequest(tab.id)
     }
