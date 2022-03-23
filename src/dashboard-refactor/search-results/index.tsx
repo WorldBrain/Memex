@@ -264,12 +264,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                             selected: [],
                                             options,
                                         }),
-                                    unselectEntry: (listId, options) =>
+                                    unselectEntry: (listId) =>
                                         interactionProps.updateLists({
                                             added: null,
                                             deleted: listId,
                                             selected: [],
-                                            options,
                                         }),
                                     createNewEntry:
                                         interactionProps.createNewList,

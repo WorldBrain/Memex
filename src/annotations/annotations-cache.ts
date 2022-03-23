@@ -137,7 +137,6 @@ export const createAnnotationsCache = (
                         {
                             localListId,
                             annotationUrl,
-                            protectAnnotation: options?.protectAnnotation,
                         },
                     )
                     sharingState = result.sharingState

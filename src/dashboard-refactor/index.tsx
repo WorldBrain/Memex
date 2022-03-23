@@ -894,6 +894,7 @@ export class DashboardContainer extends StatefulUIElement<
                         return this.processEvent(
                             isAnnotShared &&
                                 isListShared &&
+                                args.deleted == null &&
                                 args.options?.showExternalConfirmations
                                 ? 'setSelectNoteSpaceConfirmArgs'
                                 : 'setNoteLists',
