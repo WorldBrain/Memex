@@ -2229,7 +2229,6 @@ describe('Dashboard search results logic', () => {
                         remoteId: 'my-shared-list-1',
                     })
 
-                const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
 
                 await searchResults.init()
@@ -2242,15 +2241,6 @@ describe('Dashboard search results logic', () => {
                     },
                 })
 
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteIdA],
-                ).toEqual(
-                    expect.objectContaining({
-                        isBulkShareProtected: false,
-                        isShared: false,
-                        lists: [],
-                    }),
-                )
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteIdB],
                 ).toEqual(
@@ -2302,6 +2292,226 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: true,
                         isShared: false,
                         lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[2].id],
+                    }),
+                )
+            })
+
+            it('should remove shared list from page, auto-removing it from all children annotations, regardless of share state', async ({
+                device,
+            }) => {
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                })
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[2])
+                await device.storageManager
+                    .collection('sharedListMetadata')
+                    .createObject({
+                        localId: DATA.LISTS_1[0].id,
+                        remoteId: 'my-shared-list-0',
+                    })
+                await device.storageManager
+                    .collection('sharedListMetadata')
+                    .createObject({
+                        localId: DATA.LISTS_1[1].id,
+                        remoteId: 'my-shared-list-1',
+                    })
+
+                const pageIdA = DATA.PAGE_1.normalizedUrl
+                const noteIdA = DATA.NOTE_1.url
+                const noteIdB = DATA.NOTE_2.url
+
+                await searchResults.init()
+
+                searchResults.processMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [noteIdA]: {
+                                    isShared: { $set: true },
+                                },
+                                [noteIdB]: {
+                                    isBulkShareProtected: { $set: true },
+                                },
+                            },
+                        },
+                    },
+                })
+
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdA,
+                    added: DATA.LISTS_1[0].id,
+                    protectAnnotation: false,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdA,
+                    added: DATA.LISTS_1[1].id,
+                    protectAnnotation: false,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdA,
+                    added: DATA.LISTS_1[2].id,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdB,
+                    added: DATA.LISTS_1[0].id,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdB,
+                    added: DATA.LISTS_1[1].id,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId: noteIdB,
+                    added: DATA.LISTS_1[2].id,
+                })
+                await searchResults.processEvent('setPageLists', {
+                    id: pageIdA,
+                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    added: DATA.LISTS_1[2].id, // This list is private, so manually adding it to the page here
+                })
+
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            DATA.LISTS_1[2].id,
+                        ],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            DATA.LISTS_1[2].id,
+                        ],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            DATA.LISTS_1[2].id,
+                        ],
+                    }),
+                )
+
+                await searchResults.processEvent('setPageLists', {
+                    id: pageIdA,
+                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    deleted: DATA.LISTS_1[2].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            // This should still be here as it's private - removing from page shouldn't affect children annots
+                            DATA.LISTS_1[2].id,
+                        ],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [
+                            DATA.LISTS_1[0].id,
+                            DATA.LISTS_1[1].id,
+                            // This should still be here as it's private - removing from page shouldn't affect children annots
+                            DATA.LISTS_1[2].id,
+                        ],
+                    }),
+                )
+
+                await searchResults.processEvent('setPageLists', {
+                    id: pageIdA,
+                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    deleted: DATA.LISTS_1[0].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.pageData.byId[pageIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        lists: [DATA.LISTS_1[1].id],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdA],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: true,
+                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
+                    }),
+                )
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteIdB],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
                     }),
                 )
             })

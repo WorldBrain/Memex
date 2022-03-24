@@ -760,9 +760,34 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageLists: EventHandler<'setPageLists'> = async ({ event }) => {
+    setPageLists: EventHandler<'setPageLists'> = async ({
+        event,
+        previousState,
+    }) => {
+        const removingSharedList =
+            previousState.listsSidebar.listData[event.added ?? event.deleted]
+                ?.remoteId != null && event.added == null
+
+        const noteDataMutation: UIMutation<
+            State['searchResults']['noteData']['byId']
+        > = {}
+
+        // If we're removing a shared list, we also need to make sure it gets removed from children annots
+        if (removingSharedList) {
+            const childrenNoteIds = flattenNestedResults(previousState).byId[
+                event.id
+            ].noteIds.user
+
+            for (const noteId of childrenNoteIds) {
+                noteDataMutation[noteId] = {
+                    lists: { $apply: updatePickerValues(event) },
+                }
+            }
+        }
+
         this.emitMutation({
             searchResults: {
+                noteData: { byId: noteDataMutation },
                 pageData: {
                     byId: {
                         [event.id]: {
