@@ -343,7 +343,6 @@ class AnnotationsSidebar extends React.Component<
                         sharedAnnotationRef,
                     )
 
-                    console.log(conversation)
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable

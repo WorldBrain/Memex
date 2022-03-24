@@ -1706,16 +1706,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         const isSharedListBeingRemovedFromSharedAnnot =
-            noteData.isShared && event.added == null && isSharedList
+            isSharedList && noteData.isShared && event.added == null
 
         const searchResultsMutation: UIMutation<State['searchResults']> = {
             noteData: {
                 byId: {
                     [event.noteId]: {
                         lists: {
-                            $set: isSharedListBeingRemovedFromSharedAnnot
-                                ? [...new Set([...pageListIds, ...noteListIds])]
-                                : [...noteListIds],
+                            $set:
+                                event.protectAnnotation ||
+                                isSharedListBeingRemovedFromSharedAnnot
+                                    ? [
+                                          ...new Set([
+                                              ...pageListIds,
+                                              ...noteListIds,
+                                          ]),
+                                      ]
+                                    : [...noteListIds],
                         },
                         isShared: {
                             $set:
@@ -1737,13 +1744,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         }
 
-        if (isSharedList && event.protectAnnotation === false) {
+        if (isSharedList && event.deleted == null) {
             const otherNoteIds = flattenNestedResults(previousState).byId[
                 noteData.pageUrl
             ].noteIds.user
             const publicNoteIds = otherNoteIds.filter(
                 (noteId) =>
-                    previousState.searchResults.noteData.byId[noteId].isShared,
+                    previousState.searchResults.noteData.byId[noteId]
+                        .isShared && noteId !== event.noteId,
             )
 
             for (const noteId of publicNoteIds) {
@@ -1758,6 +1766,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
 
                 ;(searchResultsMutation.noteData as any).byId[noteId] = {
+                    ...(searchResultsMutation.noteData as any).byId[noteId],
                     lists: { $set: [...listIds] },
                 }
             }

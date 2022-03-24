@@ -309,7 +309,7 @@ export class AnnotationsSidebarContainer<
         annotation: Annotation,
         showExternalConfirmations?: boolean,
     ): SpacePickerDependencies => {
-        // This is to show confirmation modal if the annotation is public and the user is trying to add/remove it to a shared space
+        // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
             annotation.isShared &&
             this.state.listData[listId]?.remoteId != null &&

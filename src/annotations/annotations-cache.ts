@@ -564,11 +564,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             listIds: nextAnnotation.lists,
         })
 
-        // If not choosing to protect the annot, all other public annots must also have their lists updated in the same way
-        if (
-            (options?.protectAnnotation === false || added == null) &&
-            this.isModifiedListShared({ added, deleted })
-        ) {
+        if (this.isModifiedListShared({ added, deleted }) && deleted == null) {
             nextState = AnnotationsCache.updatePublicAnnotationLists({
                 added,
                 deleted,
