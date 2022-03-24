@@ -1814,6 +1814,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                               ?.remoteId != null,
                   )
                 : []
+        } else if (event.privacyLevel === AnnotationPrivacyLevels.PRIVATE) {
+            // If the note is being made private, we need to remove all shared lists (private remain)
+            lists = noteData.lists.filter(
+                (listId) =>
+                    previousState.listsSidebar.listData[listId]?.remoteId ==
+                    null,
+            )
         }
 
         this.emitMutation({
