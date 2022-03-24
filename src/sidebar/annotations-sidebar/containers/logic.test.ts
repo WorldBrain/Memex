@@ -1165,19 +1165,19 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
 
+            // Removing public list from public annot should result in it being selectively shared (protected + unshared)
             await sidebar.processEvent('updateListsForAnnotation', {
                 annotationId: publicAnnotIdA,
                 added: null,
                 deleted: publicListIdA,
-                options: { protectAnnotation: false },
             })
 
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     url: publicAnnotIdA,
                     lists: [privateListIdA],
-                    isShared: true,
-                    isBulkShareProtected: false,
+                    isShared: false,
+                    isBulkShareProtected: true,
                 }),
                 expect.objectContaining({
                     url: publicAnnotIdB,
@@ -1193,9 +1193,9 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
 
-            // Now let's protect the annotation, so other's aren't affected
+            // Now let's protect the annotation, so others aren't affected
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                annotationId: publicAnnotIdB,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: true },
@@ -1204,15 +1204,15 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     url: publicAnnotIdA,
-                    lists: [privateListIdA, publicListIdA],
+                    lists: [privateListIdA],
                     isShared: false,
                     isBulkShareProtected: true,
                 }),
                 expect.objectContaining({
                     url: publicAnnotIdB,
-                    lists: [],
-                    isShared: true,
-                    isBulkShareProtected: false,
+                    lists: [publicListIdA],
+                    isShared: false,
+                    isBulkShareProtected: true,
                 }),
                 expect.objectContaining({
                     url: privateAnnotId,
@@ -1224,7 +1224,7 @@ describe('SidebarContainerLogic', () => {
 
             // The note is now protected, thus the `protectAnnotation` arg should be undefined (different behavior to `false`) - handled in UI call
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                annotationId: publicAnnotIdB,
                 added: publicListIdB,
                 deleted: null,
             })
@@ -1232,15 +1232,15 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     url: publicAnnotIdA,
-                    lists: [privateListIdA, publicListIdA, publicListIdB],
+                    lists: [privateListIdA],
                     isShared: false,
                     isBulkShareProtected: true,
                 }),
                 expect.objectContaining({
                     url: publicAnnotIdB,
-                    lists: [],
-                    isShared: true,
-                    isBulkShareProtected: false,
+                    lists: [publicListIdA, publicListIdB],
+                    isShared: false,
+                    isBulkShareProtected: true,
                 }),
                 expect.objectContaining({
                     url: privateAnnotId,

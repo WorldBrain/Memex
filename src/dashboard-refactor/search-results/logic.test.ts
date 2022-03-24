@@ -1425,6 +1425,12 @@ describe('Dashboard search results logic', () => {
                     })
                     const pageId = DATA.PAGE_1.normalizedUrl
                     const list = DATA.LISTS_1[0]
+                    await device.storageManager
+                        .collection('customLists')
+                        .createObject({
+                            id: list.id,
+                            name: list.name,
+                        })
 
                     await searchResults.processEvent('setPageLists', {
                         id: pageId,
@@ -1770,6 +1776,7 @@ describe('Dashboard search results logic', () => {
                     noteId,
                     shouldShow: true,
                     mouseEvent: {} as any,
+                    platform: 'MacIntel',
                 })
 
                 expect(
@@ -1781,6 +1788,7 @@ describe('Dashboard search results logic', () => {
                     noteId,
                     shouldShow: false,
                     mouseEvent: {} as any,
+                    platform: 'MacIntel',
                 })
 
                 expect(
@@ -1803,10 +1811,37 @@ describe('Dashboard search results logic', () => {
                         .shareMenuShowStatus,
                 ).toEqual('hide')
 
+                // First simulate a Mac (different expected shortcut)
                 await searchResults.processEvent('setNoteShareMenuShown', {
                     noteId,
                     shouldShow: true,
                     mouseEvent: { altKey: true, metaKey: true } as any,
+                    platform: 'MacIntel',
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .shareMenuShowStatus,
+                ).toEqual('show-n-share')
+
+                await searchResults.processEvent('setNoteShareMenuShown', {
+                    noteId,
+                    shouldShow: false,
+                    mouseEvent: {} as any,
+                    platform: 'MacIntel',
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId]
+                        .shareMenuShowStatus,
+                ).toEqual('hide')
+
+                // Then simulate a non-Mac
+                await searchResults.processEvent('setNoteShareMenuShown', {
+                    noteId,
+                    shouldShow: true,
+                    mouseEvent: { altKey: true, ctrlKey: true } as any,
+                    platform: 'not-mac',
                 })
 
                 expect(

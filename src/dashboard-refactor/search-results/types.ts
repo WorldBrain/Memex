@@ -306,6 +306,7 @@ export type Events = UIEvent<{
     setNoteShareMenuShown: NoteEventArgs & {
         shouldShow: boolean
         mouseEvent: React.MouseEvent
+        platform: string
     }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }

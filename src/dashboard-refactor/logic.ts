@@ -1845,7 +1845,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         const immediateShare =
-            (navigator.platform === 'MacIntel'
+            (event.platform === 'MacIntel'
                 ? event.mouseEvent.metaKey
                 : event.mouseEvent.ctrlKey) && event.mouseEvent.altKey
 

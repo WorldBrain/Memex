@@ -927,6 +927,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteShareMenuShown', {
                             mouseEvent,
                             noteId,
+                            platform: navigator.platform,
                             shouldShow:
                                 searchResults.noteData.byId[noteId]
                                     .shareMenuShowStatus === 'hide',
