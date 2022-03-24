@@ -133,25 +133,24 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         const dummyEvent = {} as any
 
+        const listsToDisplay = noteData.isShared
+            ? [
+                  ...new Set([
+                      ...pageData.lists.filter(
+                          (listId) =>
+                              this.props.listData[listId]?.remoteId != null,
+                      ),
+                      ...noteData.lists,
+                  ]),
+              ]
+            : noteData.lists
+
         return (
             <AnnotationEditable
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
-                lists={
-                    noteData.isShared
-                        ? [
-                              ...new Set([
-                                  ...pageData.lists.filter(
-                                      (listId) =>
-                                          this.props.listData[listId]
-                                              ?.remoteId != null,
-                                  ),
-                                  ...noteData.lists,
-                              ]),
-                          ]
-                        : noteData.lists
-                }
+                lists={listsToDisplay}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
@@ -203,9 +202,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     noteData.isListPickerShown && (
                         <HoverBox withRelativeContainer>
                             <CollectionPicker
-                                initialSelectedEntries={
-                                    () => noteData.lists ?? [] // defaulting to [] because existing notes don't have a list prop
-                                }
+                                initialSelectedEntries={() => listsToDisplay}
                                 onClickOutside={
                                     interactionProps.onListPickerBtnClick
                                 }
@@ -257,7 +254,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 postShareHook={interactionProps.updateShareInfo}
                                 spacePickerProps={{
                                     initialSelectedEntries: () =>
-                                        noteData.lists ?? [],
+                                        listsToDisplay,
                                     selectEntry: (listId, options) =>
                                         interactionProps.updateLists({
                                             added: listId,

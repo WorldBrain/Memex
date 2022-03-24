@@ -191,7 +191,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         if (
             this.props.isShared &&
-            this.props.listData[listId]?.remoteId != null
+            this.props.listData[listId]?.remoteId != null &&
+            selectType === 'select'
         ) {
             this.setState({
                 confirmationMode: {

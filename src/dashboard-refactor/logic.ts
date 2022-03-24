@@ -1680,20 +1680,30 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const isSharedListBeingRemovedFromSharedAnnot =
+            noteData.isShared && event.added == null && isSharedList
+
         const searchResultsMutation: UIMutation<State['searchResults']> = {
             noteData: {
                 byId: {
                     [event.noteId]: {
-                        lists: { $set: [...noteListIds] },
+                        lists: {
+                            $set: isSharedListBeingRemovedFromSharedAnnot
+                                ? [...new Set([...pageListIds, ...noteListIds])]
+                                : [...noteListIds],
+                        },
                         isShared: {
-                            $set: event.protectAnnotation
-                                ? false
-                                : noteData.isShared,
+                            $set:
+                                event.protectAnnotation ??
+                                isSharedListBeingRemovedFromSharedAnnot
+                                    ? false
+                                    : noteData.isShared,
                         },
                         isBulkShareProtected: {
                             $set:
                                 event.protectAnnotation ??
-                                (!noteData.isShared // If not shared, it needs to be protected upon list add/remove
+                                ((!noteData.isShared && isSharedList) || // If annot not shared (but list is), it needs to be protected upon list add/remove
+                                isSharedListBeingRemovedFromSharedAnnot
                                     ? true
                                     : noteData.isBulkShareProtected),
                         },
