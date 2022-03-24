@@ -1804,18 +1804,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             event.privacyLevel === AnnotationPrivacyLevels.PROTECTED ||
             event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
 
-        const willUnshare = noteData.isShared && !shouldShare
+        const willUnshare =
+            (noteData.isShared && !shouldShare) ||
+            event.privacyLevel === AnnotationPrivacyLevels.PRIVATE
+
         let lists = noteData.lists
-        if (willUnshare) {
-            lists = event.keepListsIfUnsharing
-                ? pageData.lists.filter(
-                      (listId) =>
-                          previousState.listsSidebar.listData[listId]
-                              ?.remoteId != null,
-                  )
-                : []
-        } else if (event.privacyLevel === AnnotationPrivacyLevels.PRIVATE) {
-            // If the note is being made private, we need to remove all shared lists (private remain)
+
+        // If the note is being made private, we need to remove all shared lists (private remain)
+        if (willUnshare && !event.keepListsIfUnsharing) {
             lists = noteData.lists.filter(
                 (listId) =>
                     previousState.listsSidebar.listData[listId]?.remoteId ==
@@ -1829,7 +1825,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isShared: { $set: shouldShare },
-                            isBulkShareProtected: { $set: shouldProtect },
+                            isBulkShareProtected: {
+                                $set:
+                                    shouldProtect ||
+                                    !!event.keepListsIfUnsharing,
+                            },
                             lists: { $set: lists },
                         },
                     },

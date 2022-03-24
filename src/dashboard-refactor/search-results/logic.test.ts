@@ -1959,16 +1959,19 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
                     added: DATA.LISTS_1[0].id,
-                    protectAnnotation: false,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[1].id,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        isBulkShareProtected: false,
+                        isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
                     }),
                 )
 
@@ -1983,7 +1986,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
                     }),
                 )
 
@@ -1997,31 +2000,15 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        isBulkShareProtected: false,
+                        isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
                     }),
                 )
 
                 await searchResults.processEvent('updateNoteShareInfo', {
                     noteId,
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
-                })
-
-                expect(
-                    searchResults.state.searchResults.noteData.byId[noteId],
-                ).toEqual(
-                    expect.objectContaining({
-                        isBulkShareProtected: false,
-                        isShared: true,
-                        lists: [DATA.LISTS_1[0].id],
-                    }),
-                )
-
-                await searchResults.processEvent('setNoteLists', {
-                    noteId,
-                    added: DATA.LISTS_1[1].id,
-                    protectAnnotation: false,
                 })
 
                 expect(
@@ -2046,7 +2033,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [],
+                        lists: [DATA.LISTS_1[1].id], // Private list should remain
                     }),
                 )
             })
