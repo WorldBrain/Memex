@@ -13,7 +13,11 @@ interface State {
 export interface AnnotationEditEventProps {
     onEditConfirm: (
         showExternalConfirmations?: boolean,
-    ) => (shouldShare: boolean, isProtected?: boolean) => void
+    ) => (
+        shouldShare: boolean,
+        isProtected: boolean,
+        keepListsIfUnsharing?: boolean,
+    ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
 }

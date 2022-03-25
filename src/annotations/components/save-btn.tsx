@@ -98,7 +98,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                 titleText={PRIVATIZE_ANNOT_MSG}
                 negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
                 affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
-                handleConfirmation={(affirmative: boolean) => () => {
+                handleConfirmation={(affirmative) => () => {
                     this.setState({ confirmationMode: null })
 
                     if (confirmationMode.type === 'public-to-private') {

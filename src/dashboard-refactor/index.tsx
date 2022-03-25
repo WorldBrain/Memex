@@ -839,6 +839,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onEditConfirm: (noteId) => (showExternalConfirmations) => (
                         shouldShare,
                         isProtected,
+                        keepListsIfUnsharing,
                     ) => {
                         const prev = this.state.searchResults.noteData.byId[
                             noteId
@@ -855,6 +856,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 noteId,
                                 shouldShare,
                                 isProtected,
+                                keepListsIfUnsharing,
                             },
                         )
                     },

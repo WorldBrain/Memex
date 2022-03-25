@@ -65,7 +65,11 @@ export type NoteInteractionProps = Omit<
     onEditCancel: React.MouseEventHandler
     onEditConfirm: (
         showExternalConfirmations?: boolean,
-    ) => (shouldShare: boolean, isProtected?: boolean) => void
+    ) => (
+        shouldShare: boolean,
+        isProtected: boolean,
+        keepListsIfUnsharing?: boolean,
+    ) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler

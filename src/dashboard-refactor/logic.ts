@@ -1,6 +1,6 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
@@ -24,7 +24,7 @@ import {
     flattenNestedResults,
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { NoResultsType, NoteShareInfo } from './search-results/types'
+import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
@@ -41,13 +41,9 @@ import {
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
-import {
-    AnnotationSharingState,
-    AnnotationSharingStates,
-} from 'src/content-sharing/background/types'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
-import { PageList } from 'src/custom-lists/background/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1789,27 +1785,47 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    private getAnnotListsAfterShareStateChange(params: {
+        previousState: State
+        noteId: string
+        incomingPrivacyState: AnnotationPrivacyState
+        keepListsIfUnsharing?: boolean
+    }) {
+        const existing =
+            params.previousState.searchResults.noteData.byId[params.noteId]
+        const pageData =
+            params.previousState.searchResults.pageData.byId[existing.pageUrl]
+
+        const willUnshare =
+            !params.incomingPrivacyState.public &&
+            (existing.isShared || !params.incomingPrivacyState.protected)
+
+        // If the note is being made private, we need to remove all shared lists (private remain)
+        if (willUnshare && !params.keepListsIfUnsharing) {
+            return existing.lists.filter(
+                (listId) =>
+                    params.previousState.listsSidebar.listData[listId]
+                        ?.remoteId == null,
+            )
+        } else if (willUnshare && params.keepListsIfUnsharing) {
+            return [...new Set([...pageData.lists, ...existing.lists])]
+        }
+
+        return existing.lists
+    }
+
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
         event,
         previousState,
     }) => {
         const privacyState = getAnnotationPrivacyState(event.privacyLevel)
-        const existing = previousState.searchResults.noteData.byId[event.noteId]
 
-        const willUnshare =
-            !privacyState.public &&
-            (existing.isShared || !privacyState.protected)
-
-        let lists = existing.lists
-
-        // If the note is being made private, we need to remove all shared lists (private remain)
-        if (willUnshare && !event.keepListsIfUnsharing) {
-            lists = existing.lists.filter(
-                (listId) =>
-                    previousState.listsSidebar.listData[listId]?.remoteId ==
-                    null,
-            )
-        }
+        const lists = this.getAnnotListsAfterShareStateChange({
+            previousState,
+            noteId: event.noteId,
+            incomingPrivacyState: privacyState,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+        })
 
         this.emitMutation({
             searchResults: {
@@ -1986,12 +2002,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const {
             editNoteForm,
-            ...noteData
+            ...existing
         } = previousState.searchResults.noteData.byId[event.noteId]
-        const pageData =
-            previousState.searchResults.pageData.byId[noteData.pageUrl]
         const tagsHaveChanged = haveArraysChanged(
-            noteData.tags,
+            existing.tags,
             editNoteForm.tags,
         )
 
@@ -2005,17 +2019,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                const willUnshare = noteData.isShared && !event.shouldShare
-                let lists = noteData.lists
-                if (willUnshare) {
-                    lists = event.keepListsIfUnsharing
-                        ? pageData.lists.filter(
-                              (listId) =>
-                                  previousState.listsSidebar.listData[listId]
-                                      ?.remoteId != null,
-                          )
-                        : []
-                }
+                const lists = this.getAnnotListsAfterShareStateChange({
+                    previousState,
+                    noteId: event.noteId,
+                    keepListsIfUnsharing: event.keepListsIfUnsharing,
+                    incomingPrivacyState: {
+                        public: event.shouldShare,
+                        protected: !!event.isProtected,
+                    },
+                })
 
                 this.emitMutation({
                     searchResults: {
@@ -2027,7 +2039,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     isShared: { $set: event.shouldShare },
                                     comment: { $set: editNoteForm.inputValue },
                                     isBulkShareProtected: {
-                                        $set: event.isProtected,
+                                        $set:
+                                            event.isProtected ||
+                                            !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
                                 },
