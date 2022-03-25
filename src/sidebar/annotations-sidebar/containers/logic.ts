@@ -1374,9 +1374,17 @@ export class SidebarContainerLogic extends UILogic<
         const willUnshare =
             !params.incomingPrivacyState.public &&
             (existing.isShared || !params.incomingPrivacyState.protected)
+        const selectivelySharedToPrivateProtected =
+            !existing.isShared &&
+            existing.isBulkShareProtected &&
+            !params.incomingPrivacyState.public &&
+            params.incomingPrivacyState.protected
 
         // If the note is being made private, we need to remove all shared lists (private remain)
-        if (willUnshare && !params.keepListsIfUnsharing) {
+        if (
+            (willUnshare && !params.keepListsIfUnsharing) ||
+            selectivelySharedToPrivateProtected
+        ) {
             return existing.lists.filter(
                 (listId) =>
                     params.previousState.listData[listId]?.remoteId == null,
