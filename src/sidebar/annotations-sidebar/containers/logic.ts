@@ -1341,7 +1341,11 @@ export class SidebarContainerLogic extends UILogic<
         const privacyState = getAnnotationPrivacyState(event.privacyLevel)
         const existing = previousState.annotations[annotationIndex]
 
-        const willUnshare = existing.isShared && !privacyState.public
+        const willUnshare =
+            !privacyState.public &&
+            (existing.isShared || !privacyState.protected)
+
+        // If the note is being made private, we need to remove all shared lists (private remain)
         if (willUnshare && !event.keepListsIfUnsharing) {
             existing.lists = existing.lists.filter(
                 (listId) => previousState.listData[listId]?.remoteId == null,
@@ -1349,7 +1353,8 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await this.options.annotationsCache.update(existing, {
-            isBulkShareProtected: privacyState.protected,
+            isBulkShareProtected:
+                privacyState.protected || !!event.keepListsIfUnsharing,
             shouldShare: privacyState.public,
             skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
         })

@@ -1793,26 +1793,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const noteData = previousState.searchResults.noteData.byId[event.noteId]
-        const pageData =
-            previousState.searchResults.pageData.byId[noteData.pageUrl]
-
-        const shouldShare =
-            event.privacyLevel === AnnotationPrivacyLevels.SHARED ||
-            event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
-        const shouldProtect =
-            event.privacyLevel === AnnotationPrivacyLevels.PROTECTED ||
-            event.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+        const privacyState = getAnnotationPrivacyState(event.privacyLevel)
+        const existing = previousState.searchResults.noteData.byId[event.noteId]
 
         const willUnshare =
-            (noteData.isShared && !shouldShare) ||
-            event.privacyLevel === AnnotationPrivacyLevels.PRIVATE
+            !privacyState.public &&
+            (existing.isShared || !privacyState.protected)
 
-        let lists = noteData.lists
+        let lists = existing.lists
 
         // If the note is being made private, we need to remove all shared lists (private remain)
         if (willUnshare && !event.keepListsIfUnsharing) {
-            lists = noteData.lists.filter(
+            lists = existing.lists.filter(
                 (listId) =>
                     previousState.listsSidebar.listData[listId]?.remoteId ==
                     null,
@@ -1824,10 +1816,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShared: { $set: shouldShare },
+                            isShared: { $set: privacyState.public },
                             isBulkShareProtected: {
                                 $set:
-                                    shouldProtect ||
+                                    privacyState.protected ||
                                     !!event.keepListsIfUnsharing,
                             },
                             lists: { $set: lists },

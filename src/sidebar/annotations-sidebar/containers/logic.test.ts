@@ -964,7 +964,7 @@ describe('SidebarContainerLogic', () => {
                 expect.objectContaining({
                     url: annotId,
                     isShared: false,
-                    isBulkShareProtected: false,
+                    isBulkShareProtected: true,
                     lists: [DATA.LISTS_1[0].id],
                 }),
             ])
@@ -972,7 +972,6 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('updateAnnotationShareInfo', {
                 annotationUrl: annotId,
                 privacyLevel: AnnotationPrivacyLevels.SHARED,
-                keepListsIfUnsharing: true,
             })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
@@ -1020,6 +1019,152 @@ describe('SidebarContainerLogic', () => {
                     isShared: false,
                     isBulkShareProtected: false,
                     lists: [DATA.LISTS_1[1].id],
+                }),
+            ])
+        })
+
+        it('should be able to make a selectively shared annotation private, removing any shared lists without touching sibling annots', async ({
+            device,
+        }) => {
+            const fullPageUrl = DATA.CURRENT_TAB_URL_1
+            await device.storageManager
+                .collection('annotations')
+                .createObject(DATA.ANNOT_1)
+            await device.storageManager
+                .collection('annotations')
+                .createObject(DATA.ANNOT_2)
+            await device.storageManager
+                .collection('annotations')
+                .createObject(DATA.ANNOT_3)
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject({
+                    id: 0,
+                    annotation: DATA.ANNOT_1.url,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    createdWhen: new Date(),
+                })
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject({
+                    id: 1,
+                    annotation: DATA.ANNOT_2.url,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    createdWhen: new Date(),
+                })
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[0])
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[1])
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[2])
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: DATA.LISTS_1[1].id,
+                    remoteId: 'test-share-1',
+                })
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: DATA.LISTS_1[2].id,
+                    remoteId: 'test-share-2',
+                })
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl: normalizeUrl(fullPageUrl),
+            })
+            await sidebar.init()
+
+            const privateListIdA = DATA.LISTS_1[0].id
+            const publicListIdA = DATA.LISTS_1[1].id
+            const publicListIdB = DATA.LISTS_1[2].id
+            const publicAnnotIdA = DATA.ANNOT_1.url
+            const publicAnnotIdB = DATA.ANNOT_2.url
+            const privateAnnotId = DATA.ANNOT_3.url
+
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: publicAnnotIdA,
+                    lists: [],
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: publicAnnotIdB,
+                    lists: [],
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: privateAnnotId,
+                    lists: [],
+                    isShared: false,
+                    isBulkShareProtected: false,
+                }),
+            ])
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: publicAnnotIdA,
+                added: privateListIdA, // This list is private - doesn't affect things
+                deleted: null,
+            })
+            // Make note selectively shared, by choosing to protect it upon shared list add
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: publicAnnotIdA,
+                added: publicListIdA,
+                deleted: null,
+                options: { protectAnnotation: true },
+            })
+
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: publicAnnotIdA,
+                    lists: [privateListIdA, publicListIdA],
+                    isShared: false,
+                    isBulkShareProtected: true,
+                }),
+                expect.objectContaining({
+                    url: publicAnnotIdB,
+                    lists: [publicListIdA],
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: privateAnnotId,
+                    lists: [],
+                    isShared: false,
+                    isBulkShareProtected: false,
+                }),
+            ])
+
+            await sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: publicAnnotIdA,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            })
+
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: publicAnnotIdA,
+                    lists: [privateListIdA],
+                    isShared: false,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: publicAnnotIdB,
+                    lists: [publicListIdA],
+                    isShared: true,
+                    isBulkShareProtected: false,
+                }),
+                expect.objectContaining({
+                    url: privateAnnotId,
+                    lists: [],
+                    isShared: false,
+                    isBulkShareProtected: false,
                 }),
             ])
         })
