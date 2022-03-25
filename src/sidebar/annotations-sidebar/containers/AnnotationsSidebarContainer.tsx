@@ -217,6 +217,7 @@ export class AnnotationsSidebarContainer<
             onEditConfirm: (showExternalConfirmations) => (
                 shouldShare,
                 isProtected,
+                keepListsIfUnsharing,
             ) => {
                 const showConfirmation =
                     showExternalConfirmations &&
@@ -230,6 +231,7 @@ export class AnnotationsSidebarContainer<
                         annotationUrl: annotation.url,
                         shouldShare,
                         isProtected,
+                        keepListsIfUnsharing,
                         ...DEF_CONTEXT,
                     },
                 )

@@ -35,6 +35,7 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
+import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -813,26 +814,15 @@ export class SidebarContainerLogic extends UILogic<
         }
         const existing = previousState.annotations[annotationIndex]
 
-        const willUnshare = existing.isShared && !event.shouldShare
-        if (willUnshare && !event.keepListsIfUnsharing) {
-            existing.lists = existing.lists.filter(
-                (listId) => previousState.listData[listId]?.remoteId == null,
-            )
-        }
-
-        await this.options.annotationsCache.update(
-            {
-                ...existing,
-                comment,
-                tags: form.tags,
+        existing.lists = this.getAnnotListsAfterShareStateChange({
+            previousState,
+            annotationIndex,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+            incomingPrivacyState: {
+                public: event.shouldShare,
+                protected: !!event.isProtected,
             },
-            {
-                shouldShare: event.shouldShare,
-                shouldCopyShareLink: event.shouldShare,
-                isBulkShareProtected: event.isProtected,
-                skipBackendListUpdateOp: true,
-            },
-        )
+        })
 
         this.emitMutation({
             annotationModes: {
@@ -849,6 +839,22 @@ export class SidebarContainerLogic extends UILogic<
                 $set: null,
             },
         })
+
+        await this.options.annotationsCache.update(
+            {
+                ...existing,
+                comment,
+                tags: form.tags,
+            },
+            {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected:
+                    event.isProtected || !!event.keepListsIfUnsharing,
+                skipBackendListUpdateOp: true,
+                keepListsIfUnsharing: event.keepListsIfUnsharing,
+            },
+        )
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
@@ -1341,16 +1347,12 @@ export class SidebarContainerLogic extends UILogic<
         const privacyState = getAnnotationPrivacyState(event.privacyLevel)
         const existing = previousState.annotations[annotationIndex]
 
-        const willUnshare =
-            !privacyState.public &&
-            (existing.isShared || !privacyState.protected)
-
-        // If the note is being made private, we need to remove all shared lists (private remain)
-        if (willUnshare && !event.keepListsIfUnsharing) {
-            existing.lists = existing.lists.filter(
-                (listId) => previousState.listData[listId]?.remoteId == null,
-            )
-        }
+        existing.lists = this.getAnnotListsAfterShareStateChange({
+            previousState,
+            annotationIndex,
+            incomingPrivacyState: privacyState,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+        })
 
         await this.options.annotationsCache.update(existing, {
             isBulkShareProtected:
@@ -1358,6 +1360,30 @@ export class SidebarContainerLogic extends UILogic<
             shouldShare: privacyState.public,
             skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
         })
+    }
+
+    private getAnnotListsAfterShareStateChange(params: {
+        previousState: SidebarContainerState
+        annotationIndex: number
+        incomingPrivacyState: AnnotationPrivacyState
+        keepListsIfUnsharing?: boolean
+    }) {
+        const existing =
+            params.previousState.annotations[params.annotationIndex]
+
+        const willUnshare =
+            !params.incomingPrivacyState.public &&
+            (existing.isShared || !params.incomingPrivacyState.protected)
+
+        // If the note is being made private, we need to remove all shared lists (private remain)
+        if (willUnshare && !params.keepListsIfUnsharing) {
+            return existing.lists.filter(
+                (listId) =>
+                    params.previousState.listData[listId]?.remoteId == null,
+            )
+        }
+
+        return existing.lists
     }
 
     private async setLastSharedAnnotationTimestamp(now = Date.now()) {

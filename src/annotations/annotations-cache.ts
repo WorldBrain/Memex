@@ -94,6 +94,7 @@ export const createAnnotationsCache = (
                     annotationsBG: bgModules.annotations,
                     contentSharingBG: bgModules.contentSharing,
                     skipPageIndexing: options.skipPageIndexing,
+                    keepListsIfUnsharing: shareOpts.keepListsIfUnsharing,
                     annotationData: {
                         comment: annotation.comment,
                         localId: annotation.url,
@@ -217,7 +218,9 @@ export interface AnnotationsCacheDependencies {
         ) => Promise<string>
         update: (
             annotation: CachedAnnotation,
-            shareOpts?: AnnotationShareOpts,
+            shareOpts?: AnnotationShareOpts & {
+                keepListsIfUnsharing?: boolean
+            },
         ) => Promise<void>
         updateTags: (
             annotationUrl: CachedAnnotation['url'],
@@ -257,6 +260,7 @@ export interface AnnotationsCacheInterface {
         shareOpts?: AnnotationShareOpts & {
             skipBackendOps?: boolean
             skipBackendListUpdateOp?: boolean
+            keepListsIfUnsharing?: boolean
         },
     ) => Promise<void>
     delete: (

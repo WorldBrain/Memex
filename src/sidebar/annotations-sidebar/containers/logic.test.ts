@@ -99,10 +99,9 @@ describe('SidebarContainerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
         includePostSyncProcessor: true,
     })
+    const context = 'pageAnnotations'
 
     describe('page annotation results', () => {
-        const context = 'pageAnnotations'
-
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
@@ -1012,6 +1011,148 @@ describe('SidebarContainerLogic', () => {
                 annotationUrl: annotId,
                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                 keepListsIfUnsharing: false,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: false,
+                    isBulkShareProtected: false,
+                    lists: [DATA.LISTS_1[1].id],
+                }),
+            ])
+        })
+
+        it('should be able to update annotation sharing info via edit save btn, inheriting shared lists from parent page on share, filtering out shared lists on unshare (if requested)', async ({
+            device,
+        }) => {
+            const fullPageUrl = DATA.CURRENT_TAB_URL_1
+            await device.storageManager
+                .collection('annotations')
+                .createObject(DATA.ANNOT_1)
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[0])
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[1])
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: DATA.LISTS_1[0].id,
+                    remoteId: 'test-share-1',
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[0].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[1].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl: fullPageUrl,
+                withAuth: true,
+            })
+            const annotId = DATA.ANNOT_1.url
+
+            await sidebar.init()
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                shouldShare: false,
+                context,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: false,
+                    isBulkShareProtected: false,
+                    lists: [],
+                }),
+            ])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                shouldShare: true,
+                context,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: true,
+                    isBulkShareProtected: false,
+                    lists: [DATA.LISTS_1[0].id], // NOTE: second list isn't shared, so shouldn't show up here
+                }),
+            ])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                shouldShare: false,
+                keepListsIfUnsharing: true,
+                context,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                    lists: [DATA.LISTS_1[0].id],
+                }),
+            ])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                shouldShare: true,
+                context,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: true,
+                    isBulkShareProtected: false,
+                    lists: [DATA.LISTS_1[0].id],
+                }),
+            ])
+
+            // NOTE: This exists as a bit of a hack, as in the UI we'd use the SingleNoteShareMenu comp which would ensure
+            //  the correct DB ops happen in the BG, which won't work here where we are only using the sidebar UI logic
+            //  which doesn't interact with the BG. `editAnnotation` will eventually trigger a DB check to see if the annot is shared or not
+            await device.storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject({
+                    annotation: annotId,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    createdWhen: Date.now(),
+                })
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: annotId,
+                added: DATA.LISTS_1[1].id,
+                deleted: null,
+                options: { protectAnnotation: false },
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: true,
+                    isBulkShareProtected: false,
+                    lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                }),
+            ])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                shouldShare: false,
+                keepListsIfUnsharing: false,
+                context,
             })
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
