@@ -211,14 +211,42 @@ export default class ContentSharingBackground {
         const sharingStates = await this.getAnnotationSharingStates({
             annotationUrls: annotationEntries.map((e) => e.url),
         })
-        const privateAnnotationIds = annotationEntries
-            .map((e) => e.url)
-            .filter((url) =>
-                [
-                    AnnotationPrivacyLevels.PRIVATE,
-                    AnnotationPrivacyLevels.PROTECTED,
-                ].includes(sharingStates[url]?.privacyLevel),
+
+        const annotationIds = new Set<string>(
+            annotationEntries.map((e) => e.url),
+        )
+
+        // Ensure that all parent pages for annotations have a list entry
+        const annotationsData = await annotationsBG.getAnnotations([
+            ...annotationIds,
+        ])
+        const annotationParentPageIds = new Set<string>([
+            ...annotationsData.map((a) => a.pageUrl),
+        ])
+        const parentPages = await this.storage.getPages({
+            normalizedPageUrls: [...annotationParentPageIds],
+        })
+        for (const page of parentPages) {
+            const existingPageListEntry = await customListsBG.fetchListEntry(
+                listId,
+                page.normalizedUrl,
             )
+
+            if (!existingPageListEntry) {
+                await customListsBG.insertPageToList({
+                    pageUrl: page.normalizedUrl,
+                    fullUrl: page.originalUrl,
+                    listId,
+                })
+            }
+        }
+
+        const privateAnnotationIds = [...annotationIds].filter((url) =>
+            [
+                AnnotationPrivacyLevels.PRIVATE,
+                AnnotationPrivacyLevels.PROTECTED,
+            ].includes(sharingStates[url]?.privacyLevel),
+        )
 
         await this.storage.storeAnnotationMetadata(
             privateAnnotationIds.map((localId) => {
@@ -241,7 +269,6 @@ export default class ContentSharingBackground {
             privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         })
 
-        const processedPageUrls = new Set<string>()
         for (const annotationId of privateAnnotationIds) {
             // NOTE: These 2 calls are not ideal (re-creating the list entry), though doing it to trigger a shared list entry
             //  creation on the server-side. Ideally it would trigger from one of the other data changes here.
@@ -253,30 +280,6 @@ export default class ContentSharingBackground {
                 listId,
                 url: annotationId,
             })
-
-            const { pageUrl } = await annotationsBG.getAnnotationByPk(
-                annotationId,
-            )
-
-            if (processedPageUrls.has(pageUrl)) {
-                continue
-            }
-            processedPageUrls.add(pageUrl)
-
-            const existingPageListEntry = await customListsBG.fetchListEntry(
-                listId,
-                pageUrl,
-            )
-
-            if (!existingPageListEntry) {
-                const page = await this.storage.getPage(pageUrl)
-
-                await customListsBG.insertPageToList({
-                    fullUrl: page.originalUrl,
-                    pageUrl,
-                    listId,
-                })
-            }
         }
 
         return sharingStates
@@ -424,11 +427,8 @@ export default class ContentSharingBackground {
             id: userId,
         }
 
-        const page = (
-            await this.storage.getPages({
-                normalizedPageUrls: [normalizedPageUrl],
-            })
-        )[normalizedPageUrl]
+        const page = await this.storage.getPage(normalizedPageUrl)
+
         const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
