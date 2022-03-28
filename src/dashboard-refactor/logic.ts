@@ -2557,7 +2557,47 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const memberAnnotParentPageIds = new Set<string>()
+        const memberPrivateAnnotIds = new Set<string>()
+        for (const noteData of Object.values(
+            previousState.searchResults.noteData.byId,
+        )) {
+            if (noteData.lists.includes(event.listId)) {
+                memberAnnotParentPageIds.add(noteData.pageUrl)
+
+                if (!noteData.isShared && !noteData.isBulkShareProtected) {
+                    memberPrivateAnnotIds.add(noteData.url)
+                }
+            }
+        }
+
+        const mutation: UIMutation<State['searchResults']> = {
+            pageData: { byId: {} },
+            noteData: { byId: {} },
+        }
+
+        for (const pageId of memberAnnotParentPageIds) {
+            mutation.pageData = {
+                ...mutation.pageData,
+                byId: {
+                    ...(mutation.pageData as any).byId,
+                    [pageId]: { lists: { $push: [event.listId] } },
+                },
+            }
+        }
+
+        for (const noteId of memberPrivateAnnotIds) {
+            mutation.noteData = {
+                ...mutation.noteData,
+                byId: {
+                    ...(mutation.noteData as any).byId,
+                    [noteId]: { isBulkShareProtected: { $set: true } },
+                },
+            }
+        }
+
         this.emitMutation({
+            searchResults: mutation,
             listsSidebar: {
                 listData: {
                     [event.listId]: {
