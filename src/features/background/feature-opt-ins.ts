@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 
 export type UserFeatureOptIn =

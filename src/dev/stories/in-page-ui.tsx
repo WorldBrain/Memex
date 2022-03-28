@@ -13,7 +13,7 @@
 //
 // async function createDependencies() {
 //     const background = await setupBackgroundIntegrationTest()
-//     window['background'] = background
+//     globalThis['background'] = background
 //
 //     await background.backgroundModules.directLinking.annotationStorage.createAnnotation(
 //         {

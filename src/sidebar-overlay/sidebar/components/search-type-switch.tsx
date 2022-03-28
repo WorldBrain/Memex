@@ -9,7 +9,7 @@ import {
 import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 

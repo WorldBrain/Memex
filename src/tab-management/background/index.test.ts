@@ -1,4 +1,4 @@
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs } from 'webextension-polyfill'
 
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 

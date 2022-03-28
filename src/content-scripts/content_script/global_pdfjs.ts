@@ -5,12 +5,12 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { GetContentFingerprints } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { Browser, browser } from 'webextension-polyfill-ts'
+import browser, { Browser } from 'webextension-polyfill'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from 'src/sidebar/annotations-sidebar/constants'
 
 const waitForDocument = async () => {
     while (true) {
-        const pdfApplication = (window as any)['PDFViewerApplication']
+        const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const pdfViewer = pdfApplication?.pdfViewer
         const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
             pdfViewer?.pdfDocument

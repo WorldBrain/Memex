@@ -1,7 +1,7 @@
 import React, { KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import styled from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'

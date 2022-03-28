@@ -22,7 +22,7 @@ import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
 import TabManagementBackground from './tab-management/background'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
 import { TabManager } from './tab-management/background/tab-manager'
@@ -69,7 +69,7 @@ export async function main() {
     }
 
     function setOmniboxMessage(text) {
-        window['browser'].omnibox.setDefaultSuggestion({
+        globalThis['browser'].omnibox.setDefaultSuggestion({
             description: text,
         })
     }
@@ -184,17 +184,17 @@ export async function main() {
 
         switch (disposition) {
             case 'currentTab':
-                window['browser'].tabs.update({
+                globalThis['browser'].tabs.update({
                     url,
                 })
                 break
             case 'newForegroundTab':
-                window['browser'].tabs.create({
+                globalThis['browser'].tabs.create({
                     url,
                 })
                 break
             case 'newBackgroundTab':
-                window['browser'].tabs.create({
+                globalThis['browser'].tabs.create({
                     url,
                     active: false,
                 })
@@ -204,10 +204,10 @@ export async function main() {
         }
     }
 
-    window['browser'].omnibox.onInputChanged.addListener(
+    globalThis['browser'].omnibox.onInputChanged.addListener(
         debounce(500)(makeSuggestion),
     )
-    window['browser'].omnibox.onInputEntered.addListener(acceptInput)
+    globalThis['browser'].omnibox.onInputEntered.addListener(acceptInput)
 }
 
 main()

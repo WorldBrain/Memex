@@ -1,7 +1,7 @@
 /*
 DOM manipulation helper functions
 */
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'

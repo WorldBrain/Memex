@@ -6,7 +6,7 @@ import {
     FLOWS,
 } from './constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 /**
  * Returns the stage of the onboarding if present, else sets it to unvisited and

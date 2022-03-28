@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import moment from 'moment'
 import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 import { remoteFunction } from 'src/util/webextensionRPC'

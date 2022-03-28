@@ -34,7 +34,7 @@ export const removeSiteFromBlacklist = createAction(
 export const initBlacklist = () => async (dispatch) => {
     dispatch(setIsLoading(true))
     try {
-        const { [STORAGE_KEY]: blacklist } = await window[
+        const { [STORAGE_KEY]: blacklist } = await globalThis[
             'browser'
         ].storage.local.get({
             [STORAGE_KEY]: '[]',
@@ -71,7 +71,7 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
     dispatch(setModalShow(true))
     try {
-        await window['browser'].storage.local.set({
+        await globalThis['browser'].storage.local.set({
             [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
         })
         const count = await getMatchingPageCount(expression)
@@ -103,7 +103,7 @@ export const removeFromBlacklist = (index) => async (dispatch, getState) => {
         ...oldBlacklist.slice(index + 1),
     ]
 
-    await window['browser'].storage.local.set({
+    await globalThis['browser'].storage.local.set({
         [STORAGE_KEY]: JSON.stringify(newBlacklist),
     })
 

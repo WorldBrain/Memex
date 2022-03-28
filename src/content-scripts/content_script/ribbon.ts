@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 import { ContentScriptRegistry, RibbonScriptMain } from './types'
@@ -55,5 +55,5 @@ export const main: RibbonScriptMain = async (options) => {
     }
 }
 
-const registry = window['contentScriptRegistry'] as ContentScriptRegistry
+const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
 registry.registerRibbonScript(main)

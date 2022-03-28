@@ -117,7 +117,7 @@ export const searchAnnotations: () => Thunk = () => async (
     const state = getState()
     let { url } = selectors.page(state)
 
-    url = url ? url : window.location.href
+    url = url ? url : globalThis.location.href
 
     if (selectors.pageType(state) !== 'page') {
         dispatch(setIsLoading(false))

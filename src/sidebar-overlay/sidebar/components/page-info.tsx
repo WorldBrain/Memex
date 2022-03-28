@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Page } from '../types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 
 const styles = require('./page-info.css')

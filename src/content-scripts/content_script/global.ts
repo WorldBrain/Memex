@@ -254,7 +254,7 @@ export async function main(
         },
     }
 
-    window['contentScriptRegistry'] = contentScriptRegistry
+    globalThis['contentScriptRegistry'] = contentScriptRegistry
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.

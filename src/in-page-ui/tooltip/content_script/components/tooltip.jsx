@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import ButtonTooltip from '../../../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import styled from 'styled-components'
 
 const close = browser.runtime.getURL('/img/close.svg')

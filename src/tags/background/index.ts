@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Tabs, Storage } from 'webextension-polyfill-ts'
+import { Tabs, Storage } from 'webextension-polyfill'
 
 import TagStorage from './storage'
 import { maybeIndexTabs } from 'src/page-indexing/utils'

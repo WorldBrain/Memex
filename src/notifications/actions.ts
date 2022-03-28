@@ -1,5 +1,5 @@
 import { createAction } from 'redux-act'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { remoteFunction } from '../util/webextensionRPC'
 import * as selectors from './selectors'
@@ -84,10 +84,12 @@ export const getReadNotifications = async ({ notificationsSkip }) => {
 
     return {
         ...readNotifications,
-        notifications: readNotifications['notifications'].map(notification => ({
-            ...notification,
-            isRead: true,
-        })),
+        notifications: readNotifications['notifications'].map(
+            (notification) => ({
+                ...notification,
+                isRead: true,
+            }),
+        ),
     }
 }
 
@@ -99,7 +101,7 @@ export const getUnreadNotifications = async () => {
     // dispatch(setLoading(false))
 }
 
-export const handleReadNotif = notification => async (dispatch, getState) => {
+export const handleReadNotif = (notification) => async (dispatch, getState) => {
     await readNotification(notification.id)
     const notificationsList = selectors.notificationsList(getState())
 
@@ -131,10 +133,12 @@ export const handleMoreResult = () => async (dispatch, getState) => {
 
     readNotifications = {
         ...readNotifications,
-        notifications: readNotifications['notifications'].map(notification => ({
-            ...notification,
-            isRead: true,
-        })),
+        notifications: readNotifications['notifications'].map(
+            (notification) => ({
+                ...notification,
+                isRead: true,
+            }),
+        ),
     }
 
     processEvent({

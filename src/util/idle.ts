@@ -1,4 +1,4 @@
-import { browser, Idle } from 'webextension-polyfill-ts'
+import browser, { Idle } from 'webextension-polyfill'
 
 import * as Raven from 'src/util/raven'
 

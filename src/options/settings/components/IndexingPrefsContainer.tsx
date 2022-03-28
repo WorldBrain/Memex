@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { browser, Storage } from 'webextension-polyfill-ts'
+import browser, { Storage } from 'webextension-polyfill'
 
 import * as acts from '../actions'
 import * as selectors from '../selectors'

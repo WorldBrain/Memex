@@ -1,4 +1,4 @@
-import { Alarms } from 'webextension-polyfill-ts'
+import { Alarms } from 'webextension-polyfill'
 
 import { JobScheduler } from './job-scheduler'
 import { JobDefinition, PrimedJob } from './types'

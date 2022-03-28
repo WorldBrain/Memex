@@ -1,4 +1,4 @@
-import { Browser, browser } from 'webextension-polyfill-ts'
+import browser, { Browser } from 'webextension-polyfill'
 import { BackupStatusType } from 'src/backup-restore/types'
 
 export interface LocalStorageTypes {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { storiesOf } from '@storybook/react'
 import { ThemeProvider } from 'styled-components'
 

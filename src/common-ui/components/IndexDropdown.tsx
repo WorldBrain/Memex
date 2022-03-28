@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 const styles = require('./IndexDropdown.css')
 
 const searchImg = browser.runtime.getURL('/img/search.svg')

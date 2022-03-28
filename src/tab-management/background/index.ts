@@ -1,4 +1,4 @@
-import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill'
 
 import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'

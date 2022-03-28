@@ -5,7 +5,7 @@ import type {
     Commands,
     Storage,
     Tabs,
-} from 'webextension-polyfill-ts'
+} from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'

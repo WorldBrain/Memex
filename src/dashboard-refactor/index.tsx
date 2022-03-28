@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
 import type { UIMutation } from 'ui-logic-core'

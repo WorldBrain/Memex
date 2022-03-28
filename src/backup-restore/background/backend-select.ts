@@ -1,7 +1,7 @@
 import * as driveBackup from './backend/google-drive'
 import * as localBackup from './backend/simple-http'
 import * as backup from '.'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { BackupBackend } from './backend/types'
 
 export class BackendSelect {

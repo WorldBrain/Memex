@@ -5,7 +5,7 @@ import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 const settings = browser.runtime.getURL('/img/settings.svg')
 const compress = browser.runtime.getURL('/img/compress-alt.svg')

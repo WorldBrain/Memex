@@ -1,4 +1,4 @@
-import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
+import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'

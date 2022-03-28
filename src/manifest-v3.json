@@ -17,6 +17,18 @@
             "id": "info@worldbrain.io"
         }
     },
+    "options_page": "./options.html#/settings",
+    "action": {
+        "default_popup": "./popup.html",
+        "default_icon": {
+            "16": "./img/worldbrain-logo-narrow-bw-16.png",
+            "48": "./img/worldbrain-logo-narrow-bw-48.png",
+            "128": "./img/worldbrain-logo-narrow-bw.png"
+        }
+    },
+    "omnibox": {
+        "keyword": "m"
+    },
     "permissions": [
         "<all_urls>",
         "alarms",

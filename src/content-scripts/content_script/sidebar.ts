@@ -5,7 +5,7 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
@@ -55,5 +55,5 @@ export const main: SidebarScriptMain = async (dependencies) => {
     }
 }
 
-const registry = window['contentScriptRegistry'] as ContentScriptRegistry
+const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
 registry.registerSidebarScript(main)

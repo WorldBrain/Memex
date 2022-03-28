@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'

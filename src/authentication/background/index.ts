@@ -157,7 +157,9 @@ export class AuthBackground {
     }
 
     setupRequestInterceptor() {
-        setupRequestInterceptors({ webRequest: window['browser'].webRequest })
+        setupRequestInterceptors({
+            webRequest: globalThis['browser'].webRequest,
+        })
     }
 
     _scheduleSubscriptionCheck = (

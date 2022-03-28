@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill'
 import {
     normalizeUrl,
     isFullUrl,

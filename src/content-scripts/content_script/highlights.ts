@@ -51,5 +51,5 @@ const hideHighlights = (options: HighlightDependencies) => {
     options.highlightRenderer.removeHighlights()
 }
 
-// const registry = window['contentScriptRegistry'] as ContentScriptRegistry
+// const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
 // registry.registerHighlightingScript(main)

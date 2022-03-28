@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { browser, Storage } from 'webextension-polyfill-ts'
+import browser, { Storage } from 'webextension-polyfill'
 
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
 import { STORAGE_KEYS } from './constants'
@@ -14,7 +14,7 @@ export const updateLastActive = () =>
     })
 
 export async function shouldTrack(defTracking = false): Promise<boolean> {
-    const isDoNotTrackEnabled = window.navigator.doNotTrack
+    const isDoNotTrackEnabled = globalThis.navigator.doNotTrack
 
     if (isDoNotTrackEnabled) {
         return false

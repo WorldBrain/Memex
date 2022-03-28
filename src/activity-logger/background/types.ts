@@ -1,4 +1,4 @@
-import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
+import { WebNavigation, Tabs } from 'webextension-polyfill'
 import { SearchIndex } from 'src/search'
 import { TabState } from 'src/tab-management/background/types'
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'

@@ -33,8 +33,8 @@ import {
 } from 'src/sync-settings/util'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import browser from 'webextension-polyfill'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 
@@ -50,7 +50,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
 
 type EventHandler<
     EventName extends keyof SidebarContainerEvents
-> = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
+    > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
 const buildConversationId: ConversationIdBuilder = (
     baseId,
@@ -79,7 +79,7 @@ export const createEditFormsForAnnotations = (annots: Annotation[]) => {
 export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
-> {
+    > {
     syncSettings: SyncSettingsStore<'contentSharing'>
 
     constructor(private options: SidebarLogicOptions) {
@@ -446,7 +446,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
+    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({ }) => {
         this.emitMutation({
             activeShareMenuNoteId: { $set: undefined },
             immediatelyShareNotes: { $set: false },
@@ -822,14 +822,14 @@ export class SidebarContainerLogic extends UILogic<
         existing.lists = event.mainBtnPressed
             ? existing.lists
             : this.getAnnotListsAfterShareStateChange({
-                  previousState,
-                  annotationIndex,
-                  keepListsIfUnsharing: event.keepListsIfUnsharing,
-                  incomingPrivacyState: {
-                      public: event.shouldShare,
-                      protected: !!event.isProtected,
-                  },
-              })
+                previousState,
+                annotationIndex,
+                keepListsIfUnsharing: event.keepListsIfUnsharing,
+                incomingPrivacyState: {
+                    public: event.shouldShare,
+                    protected: !!event.isProtected,
+                },
+            })
 
         this.emitMutation({
             annotationModes: {
@@ -952,13 +952,13 @@ export class SidebarContainerLogic extends UILogic<
 
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
         incoming,
-    ) => {}
+    ) => { }
 
-    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => {}
+    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => { }
 
     fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
         incoming,
-    ) => {}
+    ) => { }
 
     loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
         previousState,
@@ -1343,10 +1343,10 @@ export class SidebarContainerLogic extends UILogic<
                 event[annotation.url] == null
                     ? annotation
                     : {
-                          ...annotation,
-                          isShared: privacyState.public,
-                          isBulkShareProtected: privacyState.protected,
-                      }
+                        ...annotation,
+                        isShared: privacyState.public,
+                        isBulkShareProtected: privacyState.protected,
+                    }
             return nextAnnotation
         })
 

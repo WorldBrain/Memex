@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import * as PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 import { PDF_RAW_TEXT_SIZE_LIMIT } from './constants'

@@ -1,4 +1,4 @@
-import type { Tabs, Runtime, Extension } from 'webextension-polyfill-ts'
+import type { Tabs, Runtime, Extension } from 'webextension-polyfill'
 import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import {
     UILogic,

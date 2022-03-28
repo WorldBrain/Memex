@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import responseToDataUrl from 'response-to-data-url'
 
 export async function fetchFavIcon(url: string): Promise<string> {

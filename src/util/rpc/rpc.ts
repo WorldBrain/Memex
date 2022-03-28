@@ -2,7 +2,7 @@ import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { serializeError, deserializeError, ErrorObject } from 'serialize-error'
 import uuid from 'uuid/v1'
 import type { Events } from 'webextension-polyfill-ts/src/generated/events'
-import { Runtime, browser } from 'webextension-polyfill-ts'
+import browser, { Runtime } from 'webextension-polyfill'
 import { filterTabUrl } from 'src/util/uri-utils'
 import { sleepPromise } from '../promises'
 import { RpcError } from '../webextensionRPC'
@@ -141,7 +141,7 @@ export class PortBasedRPCManager {
     }
 
     log = (msg: string, obj?: any) => {
-        if (this.options.debug === true || window['memex-rpc-debug']) {
+        if (this.options.debug === true || globalThis['memex-rpc-debug']) {
             console['log'](msg, obj ?? {})
         }
     }

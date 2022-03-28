@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import * as AllRaven from 'raven-js'
 import createRavenMiddleware from 'raven-for-redux'
 

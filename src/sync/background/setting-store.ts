@@ -1,4 +1,4 @@
-import { Browser } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill'
 import { MemexSyncSettingsStore } from '@worldbrain/memex-common/lib/sync/settings'
 import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
 import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'

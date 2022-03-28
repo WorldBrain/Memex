@@ -12,7 +12,7 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
-                window['browser'].tabs.sendMessage(parseInt(tabId, 10), {
+                globalThis['browser'].tabs.sendMessage(parseInt(tabId, 10), {
                     type: this.eventName,
                     event: { type: eventType, ...(event || {}) },
                 })
@@ -25,7 +25,7 @@ export class ProcedureUiCommunication {
 
     connect(events: EventEmitter, handler = null) {
         for (const eventName of ['info', 'fail', 'success']) {
-            events.on(eventName, event => {
+            events.on(eventName, (event) => {
                 if (!handler) {
                     this.sendEvent(eventName, event)
                 } else {

@@ -1,4 +1,4 @@
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs } from 'webextension-polyfill'
 
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import initPauser, { getState as getPauseState } from './pause-logging'
