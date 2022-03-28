@@ -1367,7 +1367,7 @@ export class SidebarContainerLogic extends UILogic<
         annotationIndex: number
         incomingPrivacyState: AnnotationPrivacyState
         keepListsIfUnsharing?: boolean
-    }) {
+    }): number[] {
         const existing =
             params.previousState.annotations[params.annotationIndex]
 
@@ -1389,6 +1389,18 @@ export class SidebarContainerLogic extends UILogic<
                 (listId) =>
                     params.previousState.listData[listId]?.remoteId == null,
             )
+        }
+        if (!existing.isShared && params.incomingPrivacyState.public) {
+            const privateLists = params.previousState.annotations[
+                params.annotationIndex
+            ].lists.filter(
+                (listId) =>
+                    params.previousState.listData[listId]?.remoteId == null,
+            )
+            return [
+                ...this.options.annotationsCache.parentPageSharedListIds,
+                ...privateLists,
+            ]
         }
 
         return existing.lists

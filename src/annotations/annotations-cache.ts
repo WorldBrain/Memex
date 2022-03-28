@@ -280,6 +280,7 @@ export interface AnnotationsCacheInterface {
     annotations: CachedAnnotation[]
     readonly highlights: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
+    readonly parentPageSharedListIds: Set<number>
     isEmpty: boolean
 }
 
@@ -288,7 +289,8 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         [listId: number]: { name: string; remoteId: string | null }
     } = {}
     private _annotations: CachedAnnotation[] = []
-    public annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
+    public parentPageSharedListIds: AnnotationsCacheInterface['parentPageSharedListIds'] = new Set()
+    public readonly annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
 
     private static updateAnnotationLists(
         args: ModifiedList & {
@@ -354,6 +356,9 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const { backendOperations } = this.dependencies
         const annotations = await backendOperations.load(url, args)
         const { sharedLists } = await backendOperations.loadPageData(url)
+        sharedLists.forEach((listId) =>
+            this.parentPageSharedListIds.add(listId),
+        )
 
         for (const annotation of annotations) {
             if (annotation.isShared) {
@@ -442,13 +447,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             isBulkShareProtected:
                 shareOpts?.isBulkShareProtected ??
                 previousAnnotation.isBulkShareProtected,
-        }
-
-        if (!previousAnnotation.isShared && shareOpts?.shouldShare) {
-            const pageData = await backendOperations.loadPageData(
-                nextAnnotation.pageUrl,
-            )
-            nextAnnotation.lists = pageData.sharedLists
         }
 
         this.annotationChanges.emit('newStateIntent', [
@@ -568,13 +566,18 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             listIds: nextAnnotation.lists,
         })
 
-        if (this.isModifiedListShared({ added, deleted }) && deleted == null) {
-            nextState = AnnotationsCache.updatePublicAnnotationLists({
-                added,
-                deleted,
-                state: nextState,
-                baseAnnotIndex: annotationIndex,
-            })
+        if (this.isModifiedListShared({ added, deleted })) {
+            if (added === null) {
+                this.parentPageSharedListIds.delete(deleted)
+            } else if (deleted == null) {
+                this.parentPageSharedListIds.add(added)
+                nextState = AnnotationsCache.updatePublicAnnotationLists({
+                    added,
+                    deleted,
+                    state: nextState,
+                    baseAnnotIndex: annotationIndex,
+                })
+            }
         }
 
         this.annotationChanges.emit('newStateIntent', nextState)
