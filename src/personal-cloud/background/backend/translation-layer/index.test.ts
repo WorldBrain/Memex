@@ -333,14 +333,21 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         serverStorage,
         testDownload: async (
             expected: PersonalCloudUpdateBatch,
-            downloadOptions?: { skip?: number; deviceIndex?: number },
+            downloadOptions?: {
+                skip?: number
+                deviceIndex?: number
+                clientSchemaVersion?: Date
+            },
         ) => {
+            const clientSchemaVersion =
+                downloadOptions?.clientSchemaVersion ??
+                STORAGE_VERSIONS[26].version
             const { batch } = await downloadClientUpdates({
                 getNow,
                 startTime: 0,
-                storageManager: serverStorage.storageManager,
+                clientSchemaVersion,
                 userId: TEST_USER.id,
-                clientSchemaVersion: STORAGE_VERSIONS[24].version,
+                storageManager: serverStorage.storageManager,
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
                         .personalCloud.deviceId,
@@ -387,7 +394,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
 }
 
 describe('Personal cloud translation layer', () => {
-    describe(`from local schema version 24`, () => {
+    describe(`from local schema version 26`, () => {
         it('should not download updates uploaded from the same device', async () => {
             const {
                 setups,
