@@ -4,11 +4,14 @@ import initLoaderRules from './loaders'
 import initPlugins from './plugins'
 import initMinimizers from './minimizers'
 import { externalTsModules } from './external'
+import { buildingManifestV3 } from './util'
 
 export const extensions = ['.ts', '.tsx', '.js', '.jsx']
 
 export const entry = {
-    background: './src/background.ts',
+    background: buildingManifestV3
+        ? './src/background-mv3.ts'
+        : './src/background.ts',
     popup: './src/popup/index.tsx',
     content_script: './src/content-scripts/content_script/global_webpage.ts',
     content_script_pdfjs:

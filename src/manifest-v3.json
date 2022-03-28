@@ -1,0 +1,35 @@
+{
+    "name": "Memex",
+    "short_name": "Memex",
+    "version": "0.3.3",
+    "description": "Search, annotate and organize what you've read online.",
+    "manifest_version": 3,
+    "icons": {
+        "16": "./img/worldbrain-logo-narrow-bw-16.png",
+        "48": "./img/worldbrain-logo-narrow-bw-48.png",
+        "128": "./img/worldbrain-logo-narrow-bw.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "applications": {
+        "gecko": {
+            "id": "info@worldbrain.io"
+        }
+    },
+    "permissions": [
+        "<all_urls>",
+        "alarms",
+        "idle",
+        "bookmarks",
+        "history",
+        "contextMenus",
+        "tabs",
+        "webNavigation",
+        "notifications",
+        "unlimitedStorage",
+        "storage",
+        "webRequest",
+        "declarativeNetRequest"
+    ]
+}
