@@ -1123,7 +1123,11 @@ const TopBar = styled.div`
     justify-content: space-between;
     align-items: center;
     height: 40px;
+    position: sticky;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    top: 0px;
     width: 93%;
+    z-index: 1000;
     padding: 5px 15px 5px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 `
@@ -1687,6 +1691,8 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     &::-webkit-scrollbar {
         display: none;
     }
+    height: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '100%' : '100vh'};
 
     scrollbar-width: none;
 `
