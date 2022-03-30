@@ -126,10 +126,14 @@ export class SidebarContainerLogic extends UILogic<
                             ...params,
                             sharedAnnotationReference: annotationReference,
                         }),
-                    getRepliesByAnnotation: async ({ annotationReference }) =>
+                    getRepliesByAnnotation: async ({
+                        annotationReference,
+                        sharedListReference,
+                    }) =>
                         options.contentConversationsBG.getRepliesBySharedAnnotation(
                             {
                                 sharedAnnotationReference: annotationReference,
+                                sharedListReference,
                             },
                         ),
                 },
@@ -1207,6 +1211,7 @@ export class SidebarContainerLogic extends UILogic<
                     sharedAnnotationReferences.map(({ id }) => ({
                         linkId: id.toString(),
                     })),
+                    event.listId,
                 ),
             },
         })
@@ -1288,9 +1293,17 @@ export class SidebarContainerLogic extends UILogic<
             () =>
                 detectAnnotationConversationThreads(this as any, {
                     annotationReferences: sharedAnnotationReferences,
-                    getThreadsForAnnotations: ({ annotationReferences }) =>
+                    sharedListReference: {
+                        type: 'shared-list-reference',
+                        id: event.listId,
+                    },
+                    getThreadsForAnnotations: ({
+                        annotationReferences,
+                        sharedListReference,
+                    }) =>
                         contentConversationsBG.getThreadsForSharedAnnotations({
                             sharedAnnotationReferences: annotationReferences,
+                            sharedListReference,
                         }),
                 }),
         )

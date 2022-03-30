@@ -829,12 +829,14 @@ export class AnnotationsSidebarContainer<
                                 }
                                 bindSharedAnnotationEventHandlers={(
                                     annotationReference,
+                                    sharedListReference,
                                 ) => ({
                                     onReplyBtnClick: () =>
                                         this.processEvent(
                                             'toggleAnnotationReplies',
                                             {
                                                 annotationReference,
+                                                sharedListReference,
                                             },
                                         ),
                                     onNewReplyInitiate: () =>
@@ -847,18 +849,25 @@ export class AnnotationsSidebarContainer<
                                     onNewReplyCancel: () =>
                                         this.processEvent(
                                             'cancelNewReplyToAnnotation',
-                                            { annotationReference },
+                                            {
+                                                annotationReference,
+                                                sharedListReference,
+                                            },
                                         ),
                                     onNewReplyConfirm: () =>
                                         this.processEvent(
                                             'confirmNewReplyToAnnotation',
-                                            { annotationReference },
+                                            {
+                                                annotationReference,
+                                                sharedListReference,
+                                            },
                                         ),
                                     onNewReplyEdit: ({ content }) =>
                                         this.processEvent(
                                             'editNewReplyToAnnotation',
                                             {
                                                 annotationReference,
+                                                sharedListReference,
                                                 content,
                                             },
                                         ),

@@ -14,9 +14,11 @@ export interface ContentConversationsInterface
     extends Pick<ContentConversationsServiceInterface, 'submitReply'> {
     getRepliesBySharedAnnotation(params: {
         sharedAnnotationReference: SharedAnnotationReference
+        sharedListReference: SharedListReference | null
     }): Promise<PreparedAnnotationReply[]>
     getThreadsForSharedAnnotations(params: {
         sharedAnnotationReferences: SharedAnnotationReference[]
+        sharedListReference: SharedListReference | null
     }): Promise<PreparedThread[]>
     getOrCreateThread(params: {
         normalizedPageUrl: string

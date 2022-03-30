@@ -4,7 +4,10 @@ import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type {
+    SharedAnnotationReference,
+    SharedListReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -46,6 +49,7 @@ export interface AnnotationsSidebarProps
 
     bindSharedAnnotationEventHandlers: (
         sharedAnnotationReference: SharedAnnotationReference,
+        sharedListReference: SharedListReference,
     ) => {
         onReplyBtnClick: React.MouseEventHandler
     } & NewReplyEventHandlers
@@ -334,13 +338,17 @@ class AnnotationsSidebar extends React.Component<
         return (
             <FollowedNotesContainer>
                 {annotationsData.map((data) => {
-                    const conversation = this.props.conversations[data.id]
+                    const conversationId = `${list.id}-${data.id}`
+                    const conversation = this.props.conversations[
+                        conversationId
+                    ]
                     const sharedAnnotationRef: SharedAnnotationReference = {
                         id: data.id,
                         type: 'shared-annotation-reference',
                     }
                     const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
                         sharedAnnotationRef,
+                        { type: 'shared-list-reference', id: listId },
                     )
 
                     return (
@@ -702,7 +710,7 @@ class AnnotationsSidebar extends React.Component<
                         </FollowedListsMsgContainer>
                     ) : (
                         <>
-                            {this.props.followedLists.allIds.length > 0 ? (
+                            {followedLists.allIds.length > 0 ? (
                                 <AnnotationContainer>
                                     {sharedNotesByList}
                                 </AnnotationContainer>
