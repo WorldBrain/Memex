@@ -6,7 +6,6 @@ import {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
-import { PreparedThread } from '@worldbrain/memex-common/lib/content-conversations/storage/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export const PAGE_URL_1 = 'https://test.com'
@@ -129,15 +128,5 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
             SHARED_ANNOTATIONS[0].reference,
             SHARED_ANNOTATIONS[2].reference,
         ],
-    },
-]
-
-export const ANNOTATION_THREADS: PreparedThread[] = [
-    {
-        sharedAnnotation: SHARED_ANNOTATIONS[0].reference,
-        thread: {
-            normalizedPageUrl: SHARED_ANNOTATIONS[0].normalizedPageUrl,
-            updatedWhen: 1231231,
-        },
     },
 ]
