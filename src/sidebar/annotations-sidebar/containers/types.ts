@@ -31,6 +31,7 @@ import type { ContentConversationsInterface } from 'src/content-conversations/ba
 import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -55,7 +56,7 @@ export interface SidebarContainerDependencies {
     syncSettingsBG: RemoteSyncSettingsInterface
     auth: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
-    theme?: Partial<SidebarTheme>
+    theme?: MemexTheme & Partial<SidebarTheme>
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
