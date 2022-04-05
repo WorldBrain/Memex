@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { Margin as Test } from 'styled-components-spacing'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
@@ -934,7 +933,7 @@ class AnnotationsSidebar extends React.Component<
                                 hoverOff
                                 color={this.props.isExpanded ? 'purple' : null}
                             />
-                            <Test horizontal="medium">My Annotations</Test>
+                            My Annotations
                         </FollowedListSectionTitle>
                     </MyNotesClickableArea>
                 </FollowedListTitleContainerMyNotes>
