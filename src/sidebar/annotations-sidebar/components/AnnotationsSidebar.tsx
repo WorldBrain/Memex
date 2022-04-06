@@ -338,7 +338,7 @@ class AnnotationsSidebar extends React.Component<
         return (
             <FollowedNotesContainer>
                 {annotationsData.map((data) => {
-                    const conversationId = `${list.id}-${data.id}`
+                    const conversationId = `${list.id}:${data.id}`
                     const conversation = this.props.conversations[
                         conversationId
                     ]

@@ -844,6 +844,7 @@ export class AnnotationsSidebarContainer<
                                             'initiateNewReplyToAnnotation',
                                             {
                                                 annotationReference,
+                                                sharedListReference,
                                             },
                                         ),
                                     onNewReplyCancel: () =>

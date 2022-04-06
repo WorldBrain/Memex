@@ -12,6 +12,7 @@ import {
     annotationConversationEventHandlers,
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
+import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
 import { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
@@ -51,6 +52,14 @@ type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
+const buildConversationId: ConversationIdBuilder = (
+    baseId,
+    sharedListReference,
+) =>
+    sharedListReference == null
+        ? baseId.toString()
+        : `${sharedListReference.id}:${baseId}`
+
 export const INIT_FORM_STATE: EditForm = {
     isBookmarked: false,
     isTagInputActive: false,
@@ -85,6 +94,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationConversationEventHandlers<SidebarContainerState>(
                 this as any,
                 {
+                    buildConversationId,
                     loadUserByReference: options.auth.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
@@ -1211,7 +1221,7 @@ export class SidebarContainerLogic extends UILogic<
                     sharedAnnotationReferences.map(({ id }) => ({
                         linkId: id.toString(),
                     })),
-                    event.listId,
+                    (annotationId) => `${event.listId}:${annotationId}`,
                 ),
             },
         })
@@ -1292,6 +1302,7 @@ export class SidebarContainerLogic extends UILogic<
             }),
             () =>
                 detectAnnotationConversationThreads(this as any, {
+                    buildConversationId,
                     annotationReferences: sharedAnnotationReferences,
                     sharedListReference: {
                         type: 'shared-list-reference',
