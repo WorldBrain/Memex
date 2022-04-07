@@ -387,7 +387,7 @@ class AnnotationsSidebar extends React.Component<
                                 }
                             />
                             <ConversationReplies
-                                {...eventHandlers}
+                                newReplyEventHandlers={eventHandlers}
                                 conversation={conversation}
                                 annotation={{
                                     body: data.body,
