@@ -78,6 +78,7 @@ export class AddSpacesButton extends React.Component<
 const SpacePickerButtonWrapper = styled.div`
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 `
 
 const SpacePickerWrapper = styled.div`
@@ -95,7 +96,7 @@ export default function ListsSegment({
     ...props
 }: Props) {
     return (
-        <Container {...props}>
+        <Container onClick={onEditBtnClick} {...props}>
             <ListsContainer>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
@@ -164,6 +165,10 @@ const EditIconContainer = styled.div`
     justify-content: center;
     align-items: center;
     cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const EditIconContainerWithText = styled.div`
@@ -193,7 +198,7 @@ const AddSpacesButtonContainer = styled.div`
     justify-content: center;
     margin-right: 10px;
     display: flex;
-    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
+    cursor: pointer;
     align-items: center;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
@@ -213,7 +218,7 @@ const ListSpaceContainer = styled.div`
     height: auto;
     margin: 2px 4px 2px 0;
     display: flex;
-    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
+    cursor: pointer;
     align-items: center;
     white-space: nowrap;
     font-family: 'Inter', sans-serif;
