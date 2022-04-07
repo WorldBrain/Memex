@@ -509,35 +509,41 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {/* lists */}
                             {/* Collections button for annotations. To be added later. */}
 
-                            <ListsSegment
-                                lists={this.displayLists}
-                                onMouseEnter={this.props.onListsHover}
-                                showEditBtn={this.props.hoverState === 'lists'}
-                                onListClick={undefined}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onListIconClick
-                                }
-                                renderSpacePicker={
-                                    this.props.renderListsPickerForAnnotation &&
-                                    (() =>
-                                        this.props.renderListsPickerForAnnotation?.(
+                            {this.props.renderListsPickerForAnnotation && (
+                                <ListsSegment
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'lists'
+                                    }
+                                    onListClick={undefined}
+                                    onEditBtnClick={
+                                        this.props.annotationFooterDependencies
+                                            ?.onListIconClick
+                                    }
+                                    renderSpacePicker={() =>
+                                        this.props.renderListsPickerForAnnotation(
                                             this.props.url,
-                                        ))
-                                }
-                            />
+                                        )
+                                    }
+                                />
+                            )}
 
                             {/* tags */}
-                            <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onTagClick={this.props.onTagClick}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onTagIconClick
-                                }
-                            />
+                            {this.props.renderTagsPickerForAnnotation && (
+                                <TagsSegment
+                                    tags={this.props.tags}
+                                    onMouseEnter={this.props.onTagsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'tags'
+                                    }
+                                    onTagClick={this.props.onTagClick}
+                                    onEditBtnClick={
+                                        this.props.annotationFooterDependencies
+                                            ?.onTagIconClick
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                             {this.props.renderTagsPickerForAnnotation && (
                                 <TagPickerWrapper>
