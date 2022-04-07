@@ -652,7 +652,10 @@ class AnnotationsSidebar extends React.Component<
         const sharedNotesByList = followedLists.allIds.map((listId) => {
             const listData = followedLists.byId[listId]
             return (
-                <FollowedListNotesContainer bottom="10px" top="0px">
+                <FollowedListNotesContainer
+                    bottom={listData.isExpanded ? '20px' : '5px'}
+                    top="0px"
+                >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         key={listId}
@@ -1305,7 +1308,6 @@ const SectionTitleContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: 100%;
 `
 
 const AnnotationContainer = styled(Margin)`
@@ -1379,7 +1381,10 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     height: 40px;
     padding: 5px 15px 5px 20px;
     background: white;
-    margin: 5px 0px 5px 0px;
+
+    &:first-child {
+        margin: 5px 0px 0px 0px;
+    }
 `
 
 const ButtonContainer = styled.div`
