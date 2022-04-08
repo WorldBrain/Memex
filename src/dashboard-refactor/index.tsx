@@ -655,19 +655,18 @@ export class DashboardContainer extends StatefulUIElement<
                     onNotesBtnClick: (day, pageId) => (e) => {
                         const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
-                            this.notesSidebarRef.current.toggleSidebarShowForPageId(
-                                pageData.fullUrl,
-                            )
+                            this.processEvent('setPageNotesShown', {
+                                day,
+                                pageId,
+                                areShown: !searchResults.results[day].pages
+                                    .byId[pageId].areNotesShown,
+                            })
                             return
                         }
 
-                        this.processEvent('setPageNotesShown', {
-                            day,
-                            pageId,
-                            areShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].areNotesShown,
-                        })
+                        this.notesSidebarRef.current.toggleSidebarShowForPageId(
+                            pageData.fullUrl,
+                        )
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {

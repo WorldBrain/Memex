@@ -236,7 +236,7 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             <strong>Add/View Notes</strong>
                             <br />
-                            shift+click to open in sidebar
+                            shift+click to open inline
                         </span>
                     ),
                 },
