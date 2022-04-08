@@ -16,7 +16,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
 
 interface ButtonProps {
     hasNoLists: boolean
-    onEditBtnClick: React.MouseEventHandler
+    onEditBtnClick?: React.MouseEventHandler
     renderSpacePicker?: () => JSX.Element
 }
 
@@ -48,7 +48,7 @@ export class AddSpacesButton extends React.Component<
                                 color={'purple'}
                                 hoverOff
                             />
-                            Add to Space
+                            Add to Spaces
                         </EditIconContainerWithText>
                     ) : (
                         <EditIconContainer>
@@ -100,7 +100,7 @@ export default function ListsSegment({
             <ListsContainer>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
-                    onEditBtnClick={onEditBtnClick}
+                    // onEditBtnClick={onEditBtnClick}
                     renderSpacePicker={renderSpacePicker}
                 />
                 {lists
@@ -145,6 +145,7 @@ const Container = styled.div`
     height: fit-content;
     grid-auto-flow: column;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    pointer-events: auto;
 `
 
 const ButtonBox = styled.div`
