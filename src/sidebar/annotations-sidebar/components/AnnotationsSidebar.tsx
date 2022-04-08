@@ -350,6 +350,9 @@ class AnnotationsSidebar extends React.Component<
                         sharedAnnotationRef,
                         { type: 'shared-list-reference', id: listId },
                     )
+                    const hasReplies =
+                        conversation?.thread != null ||
+                        conversation?.replies.length > 0
 
                     return (
                         <React.Fragment key={data.id}>
@@ -378,10 +381,7 @@ class AnnotationsSidebar extends React.Component<
                                 repliesLoadingState={
                                     list.conversationsLoadState
                                 }
-                                hasReplies={
-                                    conversation?.thread != null ||
-                                    conversation?.replies.length > 0
-                                }
+                                hasReplies={hasReplies}
                                 getListDetailsById={
                                     this.props.getListDetailsById
                                 }
@@ -389,6 +389,7 @@ class AnnotationsSidebar extends React.Component<
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
                                 conversation={conversation}
+                                hasReplies={hasReplies}
                                 annotation={{
                                     body: data.body,
                                     linkId: data.id,
