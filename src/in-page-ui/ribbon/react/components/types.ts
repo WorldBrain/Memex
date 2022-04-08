@@ -78,7 +78,6 @@ export interface ListEntryArgs {
 export interface RibbonListsProps {
     pageBelongsToList: boolean
     showListsPicker: boolean
-    listData: { [listId: number]: { name: string; remoteId: string | null } }
     updateLists: (
         args: PickerUpdateHandlerArgs<number> & { skipPageIndexing?: boolean },
     ) => Promise<void>

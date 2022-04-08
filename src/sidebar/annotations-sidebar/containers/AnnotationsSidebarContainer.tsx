@@ -65,7 +65,6 @@ export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     private sidebarRef
-
     private DraggableContainer
 
     constructor(props: P) {
@@ -81,10 +80,25 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private getListDetailsById: ListDetailsGetter = (listId) => ({
-        name: this.state.listData[listId]?.name ?? 'Missing list',
-        isShared: this.state.listData[listId]?.remoteId != null,
-    })
+    private createNewList = async (name: string) => {
+        const listId = await this.props.customLists.createCustomList({
+            name,
+        })
+        this.props.annotationsCache.addNewListData({
+            name,
+            id: listId,
+            remoteId: null,
+        })
+        return listId
+    }
+
+    private getListDetailsById: ListDetailsGetter = (listId) => {
+        const { annotationsCache } = this.props
+        return {
+            name: annotationsCache.listData[listId]?.name ?? 'Missing list',
+            isShared: annotationsCache.listData[listId]?.remoteId != null,
+        }
+    }
 
     toggleSidebarShowForPageId(pageId: string) {
         const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
@@ -257,15 +271,6 @@ export class AnnotationsSidebarContainer<
                     isProtected,
                 }),
             tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
-            createNewList: async (name) => {
-                const listId = await customLists.createCustomList({
-                    name,
-                })
-                this.processMutation({
-                    listData: { [listId]: { $set: { name, remoteId: null } } },
-                })
-                return listId
-            },
             addPageToList: (listId) =>
                 this.processEvent('updateNewPageCommentLists', {
                     lists: [...this.state.commentBox.lists, listId],
@@ -277,6 +282,7 @@ export class AnnotationsSidebarContainer<
                     ),
                 }),
             getListDetailsById: this.getListDetailsById,
+            createNewList: this.createNewList,
             contentSharingBG: contentSharing,
             spacesBG: customLists,
             loadDefaultTagSuggestions: tags.fetchInitialTagSuggestions,
@@ -311,30 +317,21 @@ export class AnnotationsSidebarContainer<
         annotation: Annotation,
         showExternalConfirmations?: boolean,
     ): SpacePickerDependencies => {
+        const { annotationsCache, customLists, contentSharing } = this.props
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
             annotation.isShared &&
-            this.state.listData[listId]?.remoteId != null &&
+            annotationsCache.listData[listId]?.remoteId != null &&
             showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
                 : 'updateListsForAnnotation'
         return {
-            spacesBG: this.props.customLists,
-            contentSharingBG: this.props.contentSharing,
+            spacesBG: customLists,
+            contentSharingBG: contentSharing,
+            createNewEntry: this.createNewList,
             initialSelectedEntries: () => annotation.lists ?? [],
             onEscapeKeyDown: () =>
                 this.processEvent('resetListPickerAnnotationId', null),
-            createNewEntry: async (name) => {
-                const listId = await this.props.customLists.createCustomList({
-                    name,
-                })
-                this.processMutation({
-                    listData: {
-                        [listId]: { $set: { name, remoteId: null } },
-                    },
-                })
-                return listId
-            },
             selectEntry: async (listId, options) =>
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
@@ -467,7 +464,7 @@ export class AnnotationsSidebarContainer<
                         }
                     >
                         <SingleNoteShareMenu
-                            listData={this.state.listData}
+                            listData={this.props.annotationsCache.listData}
                             isShared={currentAnnotation.isShared}
                             shareImmediately={this.state.immediatelyShareNotes}
                             contentSharingBG={this.props.contentSharing}

@@ -132,8 +132,6 @@ export interface SidebarContainerState
     sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
-    listData: { [listId: number]: { name: string; remoteId: string | null } }
-
     annotationSharingAccess: AnnotationSharingAccess
 
     showAllNotesCopyPaster: boolean

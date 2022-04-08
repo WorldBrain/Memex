@@ -169,7 +169,6 @@ export class SidebarContainerLogic extends UILogic<
 
             followedLists: initNormalizedState(),
             followedAnnotations: {},
-            listData: {},
             users: {},
 
             isWidthLocked: false,
@@ -221,44 +220,23 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const {
-            pageUrl,
-            annotationsCache,
-            customLists: customListsBG,
-            contentSharing: contentSharingBG,
-        } = this.options
+        const { pageUrl, annotationsCache } = this.options
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
         )
 
-        const SidebarInitialWidth = getLocalStorage(
+        const sidebarInitialWidth = await getLocalStorage(
             SIDEBAR_WIDTH_STORAGE_KEY,
-        ).then((width) => {
-            if (!width) {
-                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
-            }
-        })
+        )
+        if (sidebarInitialWidth == null) {
+            await setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
+        }
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
-            const lists = await customListsBG.fetchAllLists({})
-            const listRemoteIds = await contentSharingBG.getRemoteListIds({
-                localListIds: lists.map((l) => l.id),
-            })
-            const listData: SidebarContainerState['listData'] = {}
-            lists.forEach(
-                (l) =>
-                    (listData[l.id] = {
-                        name: l.name,
-                        remoteId: listRemoteIds[l.id] ?? null,
-                    }),
-            )
-
-            this.emitMutation({ listData: { $set: listData } })
-
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl) {
                 await annotationsCache.load(pageUrl)
@@ -1392,6 +1370,7 @@ export class SidebarContainerLogic extends UILogic<
         incomingPrivacyState: AnnotationPrivacyState
         keepListsIfUnsharing?: boolean
     }): number[] {
+        const { annotationsCache } = this.options
         const existing =
             params.previousState.annotations[params.annotationIndex]
 
@@ -1410,19 +1389,17 @@ export class SidebarContainerLogic extends UILogic<
             selectivelySharedToPrivateProtected
         ) {
             return existing.lists.filter(
-                (listId) =>
-                    params.previousState.listData[listId]?.remoteId == null,
+                (listId) => annotationsCache.listData[listId]?.remoteId == null,
             )
         }
         if (!existing.isShared && params.incomingPrivacyState.public) {
             const privateLists = params.previousState.annotations[
                 params.annotationIndex
             ].lists.filter(
-                (listId) =>
-                    params.previousState.listData[listId]?.remoteId == null,
+                (listId) => annotationsCache.listData[listId]?.remoteId == null,
             )
             return [
-                ...this.options.annotationsCache.parentPageSharedListIds,
+                ...annotationsCache.parentPageSharedListIds,
                 ...privateLists,
             ]
         }

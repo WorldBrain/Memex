@@ -276,8 +276,14 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     /** NOTE: This is a state-only operation. No backend side-effects should occur. */
     updatePublicAnnotationLists: (args: ModifiedList) => Promise<void>
+    addNewListData: (list: {
+        name: string
+        id: number
+        remoteId: string | null
+    }) => void
 
     annotations: CachedAnnotation[]
+    listData: { [listData: number]: { name: string; remoteId: string | null } }
     readonly highlights: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
     readonly parentPageSharedListIds: Set<number>
@@ -285,12 +291,10 @@ export interface AnnotationsCacheInterface {
 }
 
 export class AnnotationsCache implements AnnotationsCacheInterface {
-    private listData: {
-        [listId: number]: { name: string; remoteId: string | null }
-    } = {}
     private _annotations: CachedAnnotation[] = []
     public parentPageSharedListIds: AnnotationsCacheInterface['parentPageSharedListIds'] = new Set()
     public readonly annotationChanges = new EventEmitter() as AnnotationCacheChangeEvents
+    public listData: AnnotationsCacheInterface['listData'] = {}
 
     private static updateAnnotationLists(
         args: ModifiedList & {
@@ -623,6 +627,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         this.annotationChanges.emit('newState', state)
 
         this.annotations = state
+    }
+
+    addNewListData: AnnotationsCacheInterface['addNewListData'] = (list) => {
+        this.listData[list.id] = { name: list.name, remoteId: list.remoteId }
     }
 
     private isModifiedListShared = ({

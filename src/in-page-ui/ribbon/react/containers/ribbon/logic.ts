@@ -137,7 +137,6 @@ export class RibbonContainerLogic extends UILogic<
             lists: {
                 showListsPicker: false,
                 pageBelongsToList: false,
-                listData: {},
             },
             search: {
                 showSearchBox: false,
@@ -152,26 +151,7 @@ export class RibbonContainerLogic extends UILogic<
     init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             const url = await this.dependencies.getPageUrl()
-
-            const lists = await this.dependencies.customLists.fetchAllLists({})
-            const remoteIds = await this.dependencies.contentSharing.getRemoteListIds(
-                { localListIds: lists.map((l) => l.id) },
-            )
-            const listData: componentTypes.RibbonListsProps['listData'] = {}
-            lists.forEach(
-                (l) =>
-                    (listData[l.id] = {
-                        name: l.name,
-                        remoteId: remoteIds[l.id] ?? null,
-                    }),
-            )
-
-            this.emitMutation({
-                pageUrl: { $set: url },
-                lists: {
-                    listData: { $set: listData },
-                },
-            })
+            this.emitMutation({ pageUrl: { $set: url } })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
