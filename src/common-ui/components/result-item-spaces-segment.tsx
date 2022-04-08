@@ -109,7 +109,6 @@ export default function ListsSegment({
                     )
                     .slice(0)
                     .map((space) => {
-                        console.log(space)
                         return (
                             <ListSpaceContainer
                                 key={space.id}
