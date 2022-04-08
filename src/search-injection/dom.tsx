@@ -52,15 +52,27 @@ export const handleRender = async (
         const containerIdentifier = searchEngineObj.container[position]
 
         if (searchEngine === 'google') {
+            const searchList = document.getElementById(
+                searchEngineObj.container.searchList,
+            )
             const suggestionsContainer = document.getElementById(
                 searchEngineObj.container.side,
+            )
+            const featurePreview = document.getElementById(
+                searchEngineObj.container.featurePreview,
             )
             const containerWithSuggestions = document.getElementById(
                 searchEngineObj.container.sideAlternative,
             )
 
             if (position === 'side') {
-                if (!suggestionsContainer) {
+                if (featurePreview && !suggestionsContainer) {
+                    searchList.style.display = 'grid'
+                    searchList.style.gap = '130px'
+                    searchList.style.flexDirection = 'row'
+                    searchList.style.gridAutoFlow = 'column'
+                    searchList.insertAdjacentElement('beforeend', target)
+                } else if (!suggestionsContainer) {
                     containerWithSuggestions.style.display = 'grid'
                     containerWithSuggestions.style.gap = '130px'
                     containerWithSuggestions.style.flexDirection = 'row'

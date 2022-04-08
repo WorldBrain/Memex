@@ -19,6 +19,8 @@ export const SEARCH_ENGINES: {
             above: 'center_col',
             side: 'rhs',
             sideAlternative: 'rcnt',
+            featurePreview: 'Odp5De',
+            searchList: 'search',
         },
         containerType: 'id',
     },
