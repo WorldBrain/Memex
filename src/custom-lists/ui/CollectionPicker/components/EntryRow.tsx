@@ -87,8 +87,9 @@ class EntryRow extends React.Component<Props> {
                             <Icon
                                 heightAndWidth="12px"
                                 padding="6px"
-                                filePath={icons.link}
+                                icon={'people'}
                                 hoverOff
+                                color="lighterText"
                             />
                         </ButtonTooltip>
                     )}

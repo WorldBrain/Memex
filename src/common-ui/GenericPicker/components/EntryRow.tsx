@@ -66,7 +66,6 @@ class EntryRow extends React.Component<Props> {
                 isFocused={focused}
             >
                 <NameWrapper>
-                    {resultItem}
                     {remote && (
                         <ButtonTooltip
                             tooltipText={'Shared Space'}
@@ -75,11 +74,12 @@ class EntryRow extends React.Component<Props> {
                             <Icon
                                 heightAndWidth="12px"
                                 padding="6px"
-                                filePath={icons.link}
+                                filePath={icons.people}
                                 hoverOff
                             />
                         </ButtonTooltip>
                     )}
+                    {resultItem}
                 </NameWrapper>
                 <IconStyleWrapper>
                     {focused && (
@@ -139,7 +139,7 @@ const EmptyCircle = styled.div`
     height: 18px;
     width: 18px;
     border-radius: 18px;
-    border 2px solid ${(props) => props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 export const IconStyleWrapper = styled.div`
