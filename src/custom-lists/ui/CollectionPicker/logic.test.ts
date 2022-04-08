@@ -487,12 +487,12 @@ describe('SpacePickerLogic', () => {
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
         expect(testLogic.state.displayEntries).toEqual([
-            ...DATA.TEST_LIST_SUGGESTIONS,
             expect.objectContaining({
                 name: newEntryText,
                 localId: newEntryId,
                 focused: false,
             }),
+            ...DATA.TEST_LIST_SUGGESTIONS,
         ])
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -550,12 +550,12 @@ describe('SpacePickerLogic', () => {
                 newEntryName: '',
                 selectedEntries: [newEntryId],
                 displayEntries: [
-                    ...DATA.TEST_LIST_SUGGESTIONS,
                     expect.objectContaining({
                         name: newEntryText,
                         localId: newEntryId,
                         focused: false,
                     }),
+                    ...DATA.TEST_LIST_SUGGESTIONS,
                 ],
             }),
         )

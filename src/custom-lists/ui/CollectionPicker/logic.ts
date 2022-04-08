@@ -354,15 +354,20 @@ export default class SpacePickerLogic extends UILogic<
 
     private async createAndDisplayNewList(name: string): Promise<number> {
         const newId = await this.dependencies.createNewEntry(name)
+        const newEntry: SpaceDisplayEntry = {
+            name,
+            localId: newId,
+            focused: false,
+            remoteId: null,
+            createdAt: Date.now(),
+        }
+        this.defaultEntries.unshift(newEntry)
         this.emitMutation({
             query: { $set: '' },
             newEntryName: { $set: '' },
             selectedEntries: { $push: [newId] },
             displayEntries: {
-                $set: [
-                    ...this.defaultEntries,
-                    { localId: newId, focused: false, name },
-                ],
+                $set: [...this.defaultEntries],
             },
         } as UIMutation<SpacePickerState>)
         return newId
