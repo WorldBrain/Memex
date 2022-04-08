@@ -14,8 +14,8 @@ import type {
     PageInteractionProps,
     PagePickerAugdProps,
     NoResultsType,
-    NoteShareInfo,
 } from './types'
+import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
@@ -55,6 +55,9 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -67,6 +70,7 @@ export type Props = RootState &
         searchFilters?: any
         searchResults?: any
         searchQuery?: string
+        listData: ListSidebarState['listData']
         goToImportRoute: () => void
         toggleListShareMenu: () => void
         selectedListId?: number
@@ -100,11 +104,13 @@ export type Props = RootState &
             day: number,
             pageId: string,
         ): (sorter: AnnotationsSorter) => void
+        getListDetailsById: ListDetailsGetter
         paginateSearch(): Promise<void>
         onPageLinkCopy(link: string): Promise<void>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
-        updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
+        // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
+        updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
     }
 
 export default class SearchResultsContainer extends PureComponent<Props> {
@@ -117,6 +123,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     private renderNoteResult = (day: number, pageId: string) => (
         noteId: string,
     ) => {
+        const pageData = this.props.pageData.byId[pageId]
         const noteData = this.props.noteData.byId[noteId]
 
         const interactionProps = bindFunctionalProps<
@@ -126,14 +133,28 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         const dummyEvent = {} as any
 
+        const listsToDisplay = noteData.isShared
+            ? [
+                  ...new Set([
+                      ...pageData.lists.filter(
+                          (listId) =>
+                              this.props.listData[listId]?.remoteId != null,
+                      ),
+                      ...noteData.lists,
+                  ]),
+              ]
+            : noteData.lists
+
         return (
             <AnnotationEditable
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
+                lists={listsToDisplay}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
+                getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
                 onTagClick={this.props.filterSearchByTag}
@@ -177,6 +198,39 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
+                renderListsPickerForAnnotation={() =>
+                    noteData.isListPickerShown && (
+                        <HoverBox withRelativeContainer>
+                            <CollectionPicker
+                                initialSelectedEntries={() => listsToDisplay}
+                                onClickOutside={
+                                    interactionProps.onListPickerBtnClick
+                                }
+                                selectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: listId,
+                                        deleted: null,
+                                        selected: [],
+                                        options: {
+                                            showExternalConfirmations: true,
+                                        },
+                                    })
+                                }
+                                unselectEntry={(listId) =>
+                                    interactionProps.updateLists({
+                                        added: null,
+                                        deleted: listId,
+                                        selected: [],
+                                        options: {
+                                            showExternalConfirmations: true,
+                                        },
+                                    })
+                                }
+                                createNewEntry={interactionProps.createNewList}
+                            />
+                        </HoverBox>
+                    )
+                }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
                         <HoverBox
@@ -186,6 +240,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             withRelativeContainer
                         >
                             <SingleNoteShareMenu
+                                listData={this.props.listData}
                                 isShared={noteData.isShared}
                                 shareImmediately={
                                     noteData.shareMenuShowStatus ===
@@ -196,9 +251,26 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 closeShareMenu={
                                     interactionProps.onShareBtnClick
                                 }
-                                postShareHook={(shareInfo) =>
-                                    interactionProps.updateShareInfo(shareInfo)
-                                }
+                                postShareHook={interactionProps.updateShareInfo}
+                                spacePickerProps={{
+                                    initialSelectedEntries: () =>
+                                        listsToDisplay,
+                                    selectEntry: (listId, options) =>
+                                        interactionProps.updateLists({
+                                            added: listId,
+                                            deleted: null,
+                                            selected: [],
+                                            options,
+                                        }),
+                                    unselectEntry: (listId) =>
+                                        interactionProps.updateLists({
+                                            added: null,
+                                            deleted: listId,
+                                            selected: [],
+                                        }),
+                                    createNewEntry:
+                                        interactionProps.createNewList,
+                                }}
                             />
                         </HoverBox>
                     )
@@ -217,10 +289,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
+                    onListIconClick: interactionProps.onListPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
-                    onEditCancel: interactionProps.onEditCancel,
-                    onEditConfirm: interactionProps.onEditConfirm,
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
                 }}
@@ -248,7 +319,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         const boundAnnotCreateProps = bindFunctionalProps<
             typeof newNoteInteractionProps,
             AnnotationCreateEventProps
-        >(this.props.newNoteInteractionProps, day, normalizedUrl)
+        >(newNoteInteractionProps, day, normalizedUrl)
 
         return (
             <PageNotesBox bottom="10px" left="10px">
@@ -256,6 +327,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     autoFocus={false}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
+                    lists={newNoteForm.lists}
+                    getListDetailsById={this.props.getListDetailsById}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />
@@ -341,12 +414,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageResult
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
+                    getListDetailsById={this.props.getListDetailsById}
                     onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
-                        postShareHook: (shareInfo) =>
+                        postBulkShareHook: (shareInfo) =>
                             interactionProps.updatePageNotesShareInfo(
                                 shareInfo,
                             ),
@@ -592,9 +666,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
-                            postShareHook={(shareInfo) =>
+                            postBulkShareHook={(shareState) =>
                                 this.props.updateAllResultNotesShareInfo(
-                                    shareInfo,
+                                    shareState,
                                 )
                             }
                         />

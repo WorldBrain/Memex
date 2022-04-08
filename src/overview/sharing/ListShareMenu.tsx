@@ -131,30 +131,28 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 await this.setRemoteLinkIfExists()
             }
 
-            await this.props.contentSharingBG.shareAnnotations({
+            const {
+                sharingStates,
+            } = await this.props.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
                 shareToLists: true,
             })
             success = true
+            this.props.postBulkShareHook?.(sharingStates)
         } catch (err) {}
-
-        this.props.postShareHook?.({
-            isShared: true,
-        })
     }
 
     private unshareAllAnnotations = async () => {
         let success = false
         try {
-            await this.props.contentSharingBG.unshareAnnotations({
+            const {
+                sharingStates,
+            } = await this.props.contentSharingBG.unshareAnnotations({
                 annotationUrls: this.annotationUrls,
             })
             success = true
+            this.props.postBulkShareHook?.(sharingStates)
         } catch (err) {}
-
-        this.props.postShareHook?.({
-            isShared: false,
-        })
     }
 
     private handleSetShared = async () => {

@@ -119,6 +119,9 @@ export interface DashboardModalsState {
     deletingListId?: number
     deletingPageArgs?: PageEventArgs
     deletingNoteArgs?: NoteDataEventArgs
+
+    confirmPrivatizeNoteArgs: null | SearchResultEvents['saveNoteEdit']
+    confirmSelectNoteSpaceArgs: null | SearchResultEvents['setNoteLists']
 }
 
 export type DashboardModalsEvents = UIEvent<{
@@ -133,6 +136,9 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+
+    setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
+    setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']
 }>
 
 export type ListSource = 'local-lists' | 'followed-lists'

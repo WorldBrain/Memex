@@ -2,7 +2,7 @@ import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 
-describe('Dashboard search results logic', () => {
+describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     it('should be able to set sidebar locked state', async ({ device }) => {
@@ -138,6 +138,23 @@ describe('Dashboard search results logic', () => {
     it("should be able set lists' edit state", async ({ device }) => {
         const { searchResults } = await setupTest(device)
 
+        await device.storageManager.collection('customLists').createObject({
+            id: 123,
+            name: 'test',
+        })
+        searchResults.processMutation({
+            listsSidebar: {
+                listData: {
+                    $set: {
+                        [123]: {
+                            name: 'test',
+                            id: 123,
+                        },
+                    },
+                },
+            },
+        })
+
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
             undefined,
         )
@@ -150,18 +167,16 @@ describe('Dashboard search results logic', () => {
             undefined,
         )
         await searchResults.processEvent('setEditingListId', { listId: 123 })
+        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+
+        await searchResults.processEvent('cancelListEdit', null)
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
             undefined,
         )
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
         )
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
-        await searchResults.processEvent('setEditingListId', { listId: 1 })
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(1)
     })
 
     it('should be able to edit lists', async ({ device }) => {
@@ -192,6 +207,9 @@ describe('Dashboard search results logic', () => {
         await searchResults.processEvent('setEditingListId', { listId })
         expect(searchResults.state.listsSidebar.editingListId).toEqual(listId)
 
+        await searchResults.processEvent('changeListName', {
+            value: nameUpdated,
+        })
         await searchResults.processEvent('confirmListEdit', {
             value: nameUpdated,
         })
@@ -686,6 +704,36 @@ describe('Dashboard search results logic', () => {
                 fullUrl: page.fullUrl,
                 listId,
             }),
+        )
+    })
+
+    it('should be able to share a list, setting its remoteId state', async ({
+        device,
+    }) => {
+        for (const listData of DATA.LISTS_1) {
+            await device.storageManager.collection('customLists').createObject({
+                id: listData.id,
+                name: listData.name,
+            })
+        }
+
+        const listId = DATA.LISTS_1[1].id
+        const { searchResults } = await setupTest(device, {
+            seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+            runInitLogic: true,
+        })
+
+        expect(
+            searchResults.state.listsSidebar.listData[listId].remoteId,
+        ).toBeUndefined()
+
+        await searchResults.processEvent('shareList', {
+            listId,
+            remoteId: DATA.LISTS_1[1].remoteId,
+        })
+
+        expect(searchResults.state.listsSidebar.listData[listId].remoteId).toBe(
+            DATA.LISTS_1[1].remoteId,
         )
     })
 })

@@ -16,7 +16,7 @@ import AnnotationEdit, {
 } from 'src/annotations/components/AnnotationEdit'
 import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
-import type { SidebarAnnotationTheme } from '../types'
+import type { SidebarAnnotationTheme, ListDetailsGetter } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
@@ -28,6 +28,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface HighlightProps extends AnnotationProps {
@@ -41,6 +42,7 @@ export interface NoteProps extends AnnotationProps {
 
 export interface AnnotationProps {
     tags: string[]
+    lists: number[]
     createdWhen: Date | number
     mode: AnnotationMode
     hoverState: NoteResultHoverState
@@ -65,8 +67,10 @@ export interface AnnotationProps {
     }
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
+    getListDetailsById: ListDetailsGetter
     onTagClick?: (tag: string) => void
     renderTagsPickerForAnnotation?: (id: string) => JSX.Element
+    renderListsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
 }
@@ -76,6 +80,7 @@ export interface AnnotationEditableEventProps {
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onTagsHover?: React.MouseEventHandler
+    onListsHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
 }
 
@@ -90,8 +95,12 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
-    static defaultProps: Pick<Props, 'mode' | 'hoverState' | 'tags'> = {
+    static defaultProps: Pick<
+        Props,
+        'mode' | 'hoverState' | 'tags' | 'lists'
+    > = {
         tags: [],
+        lists: [],
         mode: 'default',
         hoverState: null,
     }
@@ -105,6 +114,21 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     componentDidMount() {
         this.textAreaHeight()
+    }
+
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
+        return this.props.lists.map((id) => ({
+            id,
+            ...this.props.getListDetailsById(id),
+        }))
+    }
+
+    private get hasSharedLists(): boolean {
+        return this.displayLists.some((list) => list.isShared)
     }
 
     private get creationInfo() {
@@ -174,14 +198,20 @@ export default class AnnotationEditable extends React.Component<Props> {
                     )}
                     {footerDeps?.onEditIconClick && (
                         <ButtonTooltip
-                            tooltipText="Add/Edit Note"
-                            position="left"
+                            tooltipText={
+                                <span>
+                                    <strong>Add/Edit Note</strong>
+                                    <br />
+                                    or double-click card
+                                </span>
+                            }
+                            position="leftBig"
                         >
                             <HighlightAction>
                                 <Icon
                                     onClick={footerDeps.onEditIconClick}
-                                    filePath={icons.plus}
-                                    heightAndWidth={'14px'}
+                                    icon={'edit'}
+                                    heightAndWidth={'20px'}
                                     padding={'5px'}
                                 />
                             </HighlightAction>
@@ -242,8 +272,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {...annotationEditDependencies}
                     rows={2}
                     editorHeight={this.state.editorHeight}
-                    isShared={this.props.isShared}
-                    isBulkShareProtected={this.props.isBulkShareProtected}
                 />
             )
         }
@@ -288,6 +316,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             hoverState,
             hasReplies,
             isShared,
+            lists,
         } = this.props
 
         if (!footerDeps) {
@@ -306,7 +335,11 @@ export default class AnnotationEditable extends React.Component<Props> {
             ]
         }
 
-        const shareIconData = getShareButtonData(isShared, isBulkShareProtected)
+        const shareIconData = getShareButtonData(
+            isShared,
+            isBulkShareProtected,
+            this.hasSharedLists,
+        )
 
         if (hoverState === null) {
             if (isShared || isBulkShareProtected) {
@@ -393,6 +426,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             mode,
             isShared,
             isBulkShareProtected,
+            annotationEditDependencies: editDeps,
             annotationFooterDependencies: footerDeps,
         } = this.props
 
@@ -421,10 +455,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                 </ActionBtnStyled>
             )
         } else {
-            cancelBtnHandler = footerDeps.onEditCancel
+            cancelBtnHandler = editDeps.onEditCancel
             confirmBtn = (
                 <SaveBtn
-                    onSave={footerDeps.onEditConfirm}
+                    onSave={editDeps.onEditConfirm(false)}
+                    hasSharedLists={this.hasSharedLists}
                     isProtected={isBulkShareProtected}
                     isShared={isShared}
                 />
@@ -443,7 +478,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 Cancel
                             </CancelBtnStyled>
                         </ButtonTooltip>
-                        {confirmBtn}
+                        <ButtonTooltip
+                            tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                            position="bottom"
+                        >
+                            {confirmBtn}
+                        </ButtonTooltip>
                     </BtnContainerStyled>
                     {this.renderMarkdownHelpButton()}
                 </SaveActionBar>
@@ -472,22 +512,52 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onTagClick={this.props.onTagClick}
-                                onEditBtnClick={
-                                    this.props.annotationFooterDependencies
-                                        ?.onTagIconClick
-                                }
-                            />
+                            {/* lists */}
+                            {/* Collections button for annotations. To be added later. */}
+
+                            {this.props.renderListsPickerForAnnotation && (
+                                <ListsSegment
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'lists'
+                                    }
+                                    onListClick={undefined}
+                                    onEditBtnClick={
+                                        this.props.annotationFooterDependencies
+                                            ?.onListIconClick
+                                    }
+                                    renderSpacePicker={() =>
+                                        this.props.renderListsPickerForAnnotation(
+                                            this.props.url,
+                                        )
+                                    }
+                                />
+                            )}
+
+                            {/* tags */}
+                            {this.props.renderTagsPickerForAnnotation && (
+                                <TagsSegment
+                                    tags={this.props.tags}
+                                    onMouseEnter={this.props.onTagsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'tags'
+                                    }
+                                    onTagClick={this.props.onTagClick}
+                                    onEditBtnClick={
+                                        this.props.annotationFooterDependencies
+                                            ?.onTagIconClick
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                             {this.props.renderTagsPickerForAnnotation && (
                                 <TagPickerWrapper>
-                                    {this.props.renderTagsPickerForAnnotation(
-                                        this.props.url,
-                                    )}
+                                    <HoverBox left="0px" padding={'px'}>
+                                        {this.props.renderTagsPickerForAnnotation(
+                                            this.props.url,
+                                        )}
+                                    </HoverBox>
                                 </TagPickerWrapper>
                             )}
                             {this.props.renderCopyPasterForAnnotation && (
@@ -572,8 +642,9 @@ const EditNoteIconBox = styled.div`
     border: none;
     outline: none;
     background: white;
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
+    padding: 4px;
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 

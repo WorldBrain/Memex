@@ -1,6 +1,7 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 
+import { theme } from 'src/common-ui/components/design-library/theme'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import {
     SharedInPageUIEvents,
@@ -27,9 +28,14 @@ export interface Props extends ContainerProps {
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
-    static defaultProps: Partial<Props> = {
+    static defaultProps: Pick<
+        Props,
+        'isLockable' | 'theme' | 'sidebarContext'
+    > = {
+        sidebarContext: 'in-page',
         isLockable: true,
         theme: {
+            ...theme,
             rightOffsetPx: 0,
             canClickAnnotations: true,
             paddingRight: 40,
@@ -214,6 +220,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     protected renderModals() {
         return (
             <>
+                {super.renderModals()}
                 {this.state.showLoginModal && (
                     <LoginModal
                         routeToLoginBtn
@@ -269,6 +276,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return (
             <UpdateNotifBanner
                 theme={{
+                    ...theme,
                     position: 'fixed',
                     width: 'fill-available',
                     iconSize: '20px',

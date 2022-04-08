@@ -1,4 +1,7 @@
-export function haveTagsChanged(before: string[], after: string[]): boolean {
+export function haveArraysChanged<T extends string | number>(
+    before: T[],
+    after: T[],
+): boolean {
     if (before.length !== after.length) {
         return true
     }

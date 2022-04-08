@@ -13,8 +13,16 @@ export interface DisplayEntry {
     focused: boolean
 }
 
-export type PickerUpdateHandler = (args: {
-    selected: string[]
-    added: string
-    deleted: string
-}) => Promise<void>
+export interface PickerUpdateHandlerArgs<T extends string | number = string> {
+    selected: T[]
+    added: T
+    deleted: T
+    options?: {
+        protectAnnotation?: boolean
+        showExternalConfirmations?: boolean
+    }
+}
+
+export type PickerUpdateHandler<T extends string | number = string> = (
+    args: PickerUpdateHandlerArgs<T>,
+) => Promise<void>

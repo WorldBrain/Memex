@@ -1,4 +1,3 @@
-import orderBy from 'lodash/orderBy'
 import expect from 'expect'
 import type StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
@@ -17,16 +16,8 @@ import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
 import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
-import { setupSyncBackgroundTest } from 'src/personal-cloud/background/index.tests'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { LocationSchemeType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-
-const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
-const expectedIdType = isFBEmu ? String : Number
-
-function convertRemoteId(id: string) {
-    return isFBEmu ? id : parseInt(id, 10)
-}
+import { SharingTestHelper } from './index.tests'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -49,7 +40,7 @@ interface TestData {
 
 async function setupTest(options: {
     setup: BackgroundIntegrationTestContext['setup']
-    testData: TestData
+    testData?: TestData
     createTestList?: boolean
 }) {
     const { setup, testData } = options
@@ -113,98 +104,36 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share a new list with its entries',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    shareTestList,
-                                    personalCloud,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-
-                                const localListEntries = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'pageListEntries',
-                                    {
-                                        sort: [['createdAt', 'desc']],
-                                    },
-                                )
-
-                                await shareTestList()
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: 'My shared list',
-                                    }),
-                                ])
-                                expect(
-                                    orderBy(
-                                        await serverStorage.storageManager.operation(
-                                            'findObjects',
-                                            'sharedListEntry',
-                                            {},
-                                        ),
-                                        ['createdWhen'],
-                                        ['desc'],
-                                    ),
-                                ).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        sharedList: convertRemoteId(
-                                            testData.remoteListId,
-                                        ),
-                                        createdWhen: localListEntries[0].createdAt.getTime(),
-                                        updatedWhen: expect.any(Number),
-                                        originalUrl: 'https://www.eggs.com/foo',
-                                        normalizedUrl: 'eggs.com/foo',
-                                        entryTitle: 'Eggs.com title',
-                                    },
-                                    {
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        sharedList: convertRemoteId(
-                                            testData.remoteListId,
-                                        ),
-                                        createdWhen: localListEntries[1].createdAt.getTime(),
-                                        updatedWhen: expect.any(Number),
-                                        originalUrl: 'https://www.spam.com/foo',
-                                        normalizedUrl: 'spam.com/foo',
-                                        entryTitle: 'Spam.com title',
-                                    },
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 1,
+                                })
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                    { listId: 1, pageId: 2 },
                                 ])
                             },
                             postCheck: async ({ setup }) => {
-                                const listMetadata = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'sharedListMetadata',
-                                    {},
-                                )
-                                expect(listMetadata).toEqual([
-                                    {
-                                        localId: testData.localListId,
-                                        remoteId: testData.remoteListId,
-                                    },
-                                ])
+                                await helper.assertSharedListMetadata(setup, {
+                                    ids: [1],
+                                })
                             },
                         },
                     ],
@@ -215,66 +144,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should share new entries to an already shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                // Add new entry
-                                await setup.backgroundModules.pages.addPage({
-                                    pageDoc: {
-                                        url: 'https://www.fish.com/cheese',
-                                        content: {
-                                            title: 'Fish.com title',
-                                        },
-                                    },
-                                    visits: [],
-                                    rejectNoContent: false,
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 1,
                                 })
-                                await setup.backgroundModules.customLists.insertPageToList(
-                                    {
-                                        id: testData.localListId,
-                                        url: 'https://www.fish.com/cheese',
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    orderBy(
-                                        await serverStorage.storageManager.operation(
-                                            'findObjects',
-                                            'sharedListEntry',
-                                            {},
-                                        ),
-                                        ['createdWhen'],
-                                        ['asc'],
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        normalizedUrl: 'spam.com/foo',
-                                        entryTitle: 'Spam.com title',
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedUrl: 'eggs.com/foo',
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedUrl: 'fish.com/cheese',
-                                        entryTitle: 'Fish.com title',
-                                    }),
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                    { listId: 1, pageId: 2 },
                                 ])
                             },
                         },
@@ -286,75 +179,36 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should sync the title when changing the title of an already shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, { id: 1 })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                const updatedTitle =
-                                    'My shared list (updated title)'
-                                await setup.backgroundModules.customLists.updateList(
-                                    {
-                                        id: testData.localListId,
-                                        oldName: data.LIST_DATA.name,
-                                        newName: updatedTitle,
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: updatedTitle,
-                                    }),
-                                ])
+                                await helper.shareList(setup, { id: 1 })
+                                await helper.editListTitle(setup, {
+                                    id: 1,
+                                    title: 'updated title',
+                                })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
 
                                 // It should not fail when trying to update other fields than the title of the list
-                                await setup.storageManager.operation(
-                                    'updateObject',
-                                    'customLists',
-                                    { id: testData.localListId },
-                                    { searchableName: 'something' },
-                                )
-                                await personalCloud.waitForSync()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedList',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        id: expect.anything(),
-                                        creator: TEST_USER.id,
-                                        createdWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        title: updatedTitle,
-                                    }),
-                                ])
+                                await helper.updateListData(setup, {
+                                    id: 1,
+                                    updates: { searchableName: 'something' },
+                                })
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1],
+                                })
                             },
                         },
                     ],
@@ -365,44 +219,27 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should delete list entries of an already shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-                                testData.remoteListId = await shareTestList()
-
-                                await setup.backgroundModules.customLists.removePageFromList(
-                                    {
-                                        id: testData.localListId,
-                                        url: 'https://www.spam.com/foo',
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                expect(
-                                    await serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListEntry',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        entryTitle: 'Eggs.com title',
-                                    }),
-                                ])
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.removePageFromList(setup, {
+                                    pageId: 1,
+                                    listId: 1,
+                                })
+                                await helper.assertSharedListEntries(setup, [])
                             },
                         },
                     ],
@@ -456,99 +293,54 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }),
         ),
         backgroundIntegrationTest(
-            'should unshare annotations from lists',
+            'should share a private note across all shared lists the page is in when made public',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                    directLinking,
-                                } = await setupTest({
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
                                     setup,
-                                    testData,
-                                    createTestList: true,
-                                })
-                                testData.remoteListId = await shareTestList()
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
-                                    shareToLists: true,
-                                })
-                                await personalCloud.waitForSync()
-
-                                const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
-                                    {
-                                        localIds: [annotationUrl],
-                                    },
-                                )
-
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                    )
-
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        sharedAnnotation: convertRemoteId(
-                                            remoteAnnotationIds[
-                                                annotationUrl
-                                            ] as string,
-                                        ),
-                                    }),
-                                ])
-                                await contentSharing.unshareAnnotationsFromLists(
-                                    {
-                                        annotationUrls: [annotationUrl],
-                                    },
-                                )
-                                await personalCloud.waitForSync()
-
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                    ),
-                                ).toEqual([])
-                                expect(
-                                    await getShared('sharedAnnotation'),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        id: convertRemoteId(
-                                            remoteAnnotationIds[
-                                                annotationUrl
-                                            ] as string,
-                                        ),
-                                    }),
-                                ])
-                                expect(
-                                    await setup.storageManager
-                                        .collection('sharedAnnotationMetadata')
-                                        .findObjects({}),
-                                ).toEqual([
-                                    {
-                                        localId: annotationUrl,
-                                        remoteId: expect.anything(),
-                                        excludeFromLists: true,
-                                    },
-                                ])
                             },
                         },
                     ],
@@ -556,158 +348,1176 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share already shared annotations adding a page to another shared list',
+            'should share a private and a private protected note to one list when manually added to a list, making it protected',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
-                let firstLocalListId: number
-                let secondLocalListId: number
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    getShared,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-
-                                firstLocalListId = await data.createContentSharingTestList(
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
+                                })
+                                await helper.shareAnnotationsToSomeLists(
                                     setup,
-                                )
-                                secondLocalListId = await setup.backgroundModules.customLists.createCustomList(
                                     {
-                                        name: 'Second list',
+                                        annotationsIds: [1, 2],
+                                        listIds: [1],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: true,
+                                            },
+                                            2: {
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: true,
+                                            },
+                                        },
                                     },
                                 )
-                                for (const localListId of [
-                                    firstLocalListId,
-                                    secondLocalListId,
-                                ]) {
-                                    await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                }
-                                const remoteListIds = await Promise.all(
-                                    [firstLocalListId, secondLocalListId].map(
-                                        (localId) =>
-                                            contentSharing.storage.getRemoteListId(
-                                                {
-                                                    localId,
-                                                },
-                                            ),
-                                    ),
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    ],
                                 )
-
-                                const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_2_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl: firstAnnotationUrl,
-                                    shareToLists: true,
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
                                 })
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl: secondAnnotationUrl,
-                                })
-                                await personalCloud.waitForSync()
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should share a note across the lists it's not yet in when making it public, ignoring lists it's already added to and removing protected state`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
 
-                                const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
                                     {
-                                        localIds: [
-                                            firstAnnotationUrl,
-                                            secondAnnotationUrl,
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: true,
+                                            },
+                                        },
+                                    },
+                                )
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should not share private protected notes across all lists when sharing all notes`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    ],
+                                )
+                                await helper.shareAnnotations(
+                                    setup,
+                                    [{ id: 1, expectNotShared: true }],
+                                    {
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: false,
+                                            },
+                                        },
+                                    },
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should remove public non-protected notes from all lists when making all page notes private, not unsharing the notes themselves`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.unshareAnnotations(setup, {
+                                    ids: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            sharedListIds: [],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            hasLink: true,
+                                        },
+                                    },
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should not unshare public protected notes when unsharing all page notes`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level:
+                                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                    },
+                                })
+                                await helper.unshareAnnotations(setup, {
+                                    ids: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            sharedListIds: [1, 2],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                            hasLink: true,
+                                        },
+                                    },
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should share a page and note to a new list when adding a note to a list the page is not shared in`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [2],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [1, 2],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                                hasLink: true,
+                                            },
+                                        },
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 2 },
                                         ],
                                     },
                                 )
-                                await setup.backgroundModules.customLists.insertPageToList(
-                                    {
-                                        id: secondLocalListId,
-                                        ...data.ENTRY_1_DATA,
-                                    },
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
                                 )
-                                await personalCloud.waitForSync()
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should share a public note to a new list when adding the page it's on to a new shared list`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
 
-                                const sharedAnnotations = await getShared(
-                                    'sharedAnnotation',
-                                    { skipOrdering: true },
-                                )
-                                expect(
-                                    sharedAnnotations.sort(sortByField('id')),
-                                ).toEqual([
-                                    {
-                                        id:
-                                            convertRemoteId(
-                                                remoteAnnotationIds[
-                                                    firstAnnotationUrl
-                                                ] as string,
-                                            ) ||
-                                            remoteAnnotationIds[
-                                                firstAnnotationUrl
-                                            ],
-                                        creator: TEST_USER.id,
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        comment:
-                                            data.ANNOTATION_1_1_DATA.comment,
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                        selector: JSON.stringify(
-                                            data.ANNOTATION_1_1_DATA.selector,
-                                        ),
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
                                     },
-                                    expect.objectContaining({
-                                        body: data.ANNOTATION_1_2_DATA.body,
-                                    }),
-                                ])
-                                const sharedAnnotationListEntries = await getShared(
-                                    'sharedAnnotationListEntry',
-                                    { skipOrdering: true },
+                                })
+                                await helper.addPageToList(setup, {
+                                    pageId: 1,
+                                    listId: 2,
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
                                 )
-                                const sharedAnnotationId =
-                                    convertRemoteId(
-                                        remoteAnnotationIds[
-                                            firstAnnotationUrl
-                                        ] as string,
-                                    ) || remoteAnnotationIds[firstAnnotationUrl]
-                                expect(
-                                    sharedAnnotationListEntries.sort(
-                                        sortByField('sharedList'),
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        sharedList: convertRemoteId(
-                                            remoteListIds[0],
-                                        ),
-                                        sharedAnnotation: sharedAnnotationId,
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        sharedList: convertRemoteId(
-                                            remoteListIds[1],
-                                        ),
-                                        sharedAnnotation: sharedAnnotationId,
-                                    }),
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
                                 ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should not share a selective not to a new list when adding its page to a new list`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: true,
+                                            },
+                                        },
+                                    },
+                                )
+                                await helper.addPageToList(setup, {
+                                    pageId: 1,
+                                    listId: 2,
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should remove a note from all lists when making a selective note private, not unsharing the note itself`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                                hasLink: true,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    keepListsIfUnsharing: false,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                        hasLink: true,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should _not_ remove a note from lists when making a public note private, when user chooses to keep lists`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                // These shouldn't yet exist locally as the note is public (and thus inherits lists from parent page)
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    keepListsIfUnsharing: true,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
+                                })
+
+                                // Now that the note is no longer public, those entries should exist
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            `should remove a note from all shared lists when making a public note private, not unsharing the note itself`,
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 3,
+                                    share: false,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2, 3],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [3],
+                                        protectAnnotations: false,
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1, 2],
+                                                privateListIds: [3],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 3 }],
+                                )
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    keepListsIfUnsharing: false,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [3],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 3 }],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should unshare public annotations from lists',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+
+                                await helper.unshareAnnotationsFromAllLists(
+                                    setup,
+                                    {
+                                        ids: [1],
+                                        expectedSharingStates: {
+                                            1: {
+                                                sharedListIds: [],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PRIVATE,
+                                                hasLink: true,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should share already public annotations adding a page to another shared list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 2,
+                                })
+
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 2,
+                                    expectedSharingState: {
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+
+                                await helper.addPageToList(setup, {
+                                    pageId: 1,
+                                    listId: 2,
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                    ],
+                                )
                             },
                         },
                     ],
@@ -718,57 +1528,46 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should update the body of a shared annotation',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    shareTestList,
-                                    directLinking,
-                                } = await setupTest({
-                                    setup,
-                                    testData,
-                                    createTestList: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-                                testData.remoteListId = await shareTestList()
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
                                 })
-                                await personalCloud.waitForSync()
-
-                                await setup.backgroundModules.directLinking.editAnnotation(
-                                    null,
-                                    annotationUrl,
-                                    'Updated comment',
-                                )
-                                await personalCloud.waitForSync()
-
-                                const serverStorage = await setup.getServerStorage()
-                                const getShared = (collection: string) =>
-                                    serverStorage.storageManager.operation(
-                                        'findObjects',
-                                        collection,
-                                        {},
-                                    )
-                                const sharedAnnotations = await getShared(
-                                    'sharedAnnotation',
-                                )
-                                expect(sharedAnnotations).toEqual([
-                                    expect.objectContaining({
-                                        comment: 'Updated comment',
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                    }),
-                                ])
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    expectedSharingState: {
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.editAnnotationComment(setup, {
+                                    id: 1,
+                                    comment: 'Updated comment',
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
                             },
                         },
                     ],
@@ -776,153 +1575,80 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should share already shared annotations when sharing a list containing already shared pages',
+            'should share already public annotations when sharing a list containing already shared pages',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
-                let firstLocalListId: number
-                let secondLocalListId: number
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    getShared,
-                                } = await setupTest({ setup, testData })
-                                firstLocalListId = await data.createContentSharingTestList(
-                                    setup,
-                                )
-                                secondLocalListId = await setup.backgroundModules.customLists.createCustomList(
-                                    {
-                                        name: 'Second list',
-                                    },
-                                )
-                                await contentSharing.shareList({
-                                    listId: firstLocalListId,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-                                await personalCloud.waitForSync()
-
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
+                                await helper.createList(setup, {
+                                    id: 2,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                    listId: 2,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
                                     shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
+                                    },
                                 })
-                                await personalCloud.waitForSync()
-
-                                await setup.backgroundModules.customLists.insertPageToList(
-                                    {
-                                        id: secondLocalListId,
-                                        ...data.ENTRY_1_DATA,
-                                    },
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
                                 )
-                                await contentSharing.shareList({
-                                    listId: secondLocalListId,
+
+                                await helper.addPageToList(setup, {
+                                    pageId: 1,
+                                    listId: 2,
                                 })
-
-                                await personalCloud.waitForSync()
-                                const remoteListIds = await Promise.all(
-                                    [firstLocalListId, secondLocalListId].map(
-                                        (localId) =>
-                                            contentSharing.storage.getRemoteListId(
-                                                {
-                                                    localId,
-                                                },
-                                            ),
-                                    ),
+                                await helper.shareList(setup, { id: 2 })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
-                                const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
-                                    {
-                                        localIds: [annotationUrl],
-                                    },
+                                await helper.assertSharedLists(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
                                 )
-
-                                const sharedAnnotations = await getShared(
-                                    'sharedAnnotation',
-                                    { skipOrdering: true },
-                                )
-                                expect(
-                                    sharedAnnotations.sort(sortByField('id')),
-                                ).toEqual([
-                                    {
-                                        id:
-                                            convertRemoteId(
-                                                remoteAnnotationIds[
-                                                    annotationUrl
-                                                ] as string,
-                                            ) ||
-                                            remoteAnnotationIds[annotationUrl],
-                                        creator: TEST_USER.id,
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        comment:
-                                            data.ANNOTATION_1_1_DATA.comment,
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                        selector: JSON.stringify(
-                                            data.ANNOTATION_1_1_DATA.selector,
-                                        ),
-                                    },
-                                ])
-                                const sharedAnnotationListEntries = await getShared(
-                                    'sharedAnnotationListEntry',
-                                    { skipOrdering: true },
-                                )
-                                const sharedAnnotationId =
-                                    convertRemoteId(
-                                        remoteAnnotationIds[
-                                            annotationUrl
-                                        ] as string,
-                                    ) || remoteAnnotationIds[annotationUrl]
-                                expect(
-                                    sharedAnnotationListEntries.sort(
-                                        sortByField('sharedList'),
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        sharedList: convertRemoteId(
-                                            remoteListIds[0],
-                                        ),
-                                        sharedAnnotation: sharedAnnotationId,
-                                    }),
-                                    expect.objectContaining({
-                                        normalizedPageUrl: normalizeUrl(
-                                            data.ANNOTATION_1_1_DATA.pageUrl,
-                                        ),
-                                        sharedList: convertRemoteId(
-                                            remoteListIds[1],
-                                        ),
-                                        sharedAnnotation: sharedAnnotationId,
-                                    }),
-                                ])
-
-                                expect(
-                                    await contentSharing.getAllRemoteLists(),
-                                ).toEqual([
-                                    {
-                                        localId: firstLocalListId,
-                                        remoteId: remoteListIds[0],
-                                        name: 'My shared list',
-                                    },
-                                    {
-                                        localId: secondLocalListId,
-                                        remoteId: remoteListIds[1],
-                                        name: 'Second list',
-                                    },
-                                ])
                             },
                         },
                     ],
@@ -930,115 +1656,108 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should unshare an annotation',
+            'should unshare an annotation completely with its link',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
-                let localListIds: number[]
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    directLinking,
-                                    contentSharing,
-                                    personalCloud,
-                                    getShared,
-                                } = await setupTest({ setup, testData })
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [],
+                                })
 
-                                localListIds = [
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                    ),
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                        { dontIndexPages: true },
-                                    ),
-                                ]
-                                for (const localListId of localListIds) {
-                                    await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                }
-                                await personalCloud.waitForSync()
-
-                                const annotationUrl = await directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
 
-                                expect(
-                                    await setup.storageManager.operation(
-                                        'findObjects',
-                                        'sharedAnnotationMetadata',
-                                        {},
-                                    ),
-                                ).toEqual([])
-
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
-                                    shareToLists: true,
-                                })
-
-                                expect(
-                                    await setup.storageManager.operation(
-                                        'findObjects',
-                                        'sharedAnnotationMetadata',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        localId: annotationUrl,
-                                        remoteId: expect.any(String),
-                                        excludeFromLists: false,
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.unshareAnnotation(setup, {
+                                    id: 1,
+                                    expectedSharingState: {
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        hasLink: false,
                                     },
-                                ])
-
-                                await personalCloud.waitForSync()
-
-                                expect(
-                                    await getShared('sharedAnnotation', {
-                                        skipOrdering: true,
-                                    }),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                    }),
-                                ])
-                                expect(
-                                    (
-                                        await getShared(
-                                            'sharedAnnotationListEntry',
-                                            { skipOrdering: true },
-                                        )
-                                    ).sort(sortByField('sharedList')),
-                                ).toEqual([
-                                    expect.objectContaining({}),
-                                    expect.objectContaining({}),
-                                ])
-
-                                await contentSharing.setAnnotationPrivacyLevel({
-                                    annotation: annotationUrl,
-                                    privacyLevel:
-                                        AnnotationPrivacyLevels.PRIVATE,
                                 })
-
-                                await personalCloud.waitForSync()
-
-                                expect(
-                                    await getShared('sharedAnnotation', {
-                                        skipOrdering: true,
-                                    }),
-                                ).toEqual([])
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                        { skipOrdering: true },
-                                    ),
-                                ).toEqual([])
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
                             },
                         },
                     ],
@@ -1049,96 +1768,93 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotations when removing a page from a shared list',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
-                let localListIds: number[]
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    getShared,
-                                } = await setupTest({ setup, testData })
-
-                                localListIds = [
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                    ),
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                        { dontIndexPages: true },
-                                    ),
-                                ]
-                                for (const localListId of localListIds) {
-                                    await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                }
-                                await personalCloud.waitForSync()
-
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
-                                    shareToLists: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-
-                                await personalCloud.waitForSync()
-
-                                expect(
-                                    await getShared('sharedAnnotation', {
-                                        skipOrdering: true,
-                                    }),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                    }),
-                                ])
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                        { skipOrdering: true },
-                                    ),
-                                ).toEqual([
-                                    expect.objectContaining({}),
-                                    expect.objectContaining({}),
-                                ])
-
-                                await setup.backgroundModules.customLists.removePageFromList(
-                                    {
-                                        id: localListIds[0],
-                                        url: data.PAGE_1_DATA.pageDoc.url,
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                        hasLink: true,
                                     },
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
-                                await personalCloud.waitForSync()
+                                // await personalCloud.waitForSync()
 
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                        { skipOrdering: true },
-                                    ),
-                                ).toEqual([expect.objectContaining({})])
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([expect.objectContaining({})])
 
-                                await setup.backgroundModules.customLists.removePageFromList(
-                                    {
-                                        id: localListIds[1],
-                                        url: data.PAGE_1_DATA.pageDoc.url,
-                                    },
+                                await helper.removePageFromList(setup, {
+                                    pageId: 1,
+                                    listId: 1,
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 2 }],
                                 )
-                                await personalCloud.waitForSync()
 
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                        { skipOrdering: true },
-                                    ),
-                                ).toEqual([])
+                                await helper.removePageFromList(setup, {
+                                    pageId: 1,
+                                    listId: 2,
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                // expect(
+                                //     await getShared(
+                                //         'sharedAnnotationListEntry',
+                                //         { skipOrdering: true },
+                                //     ),
+                                // ).toEqual([])
                             },
                         },
                     ],
@@ -1149,133 +1865,64 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should unshare annotation and remove list entries when removed locally',
             { skipConflictTests: true },
             () => {
-                const testData: TestData = {}
-                let localListIds: number[]
+                const helper = new SharingTestHelper()
 
                 return {
                     setup: setupPreTest,
                     steps: [
                         {
                             execute: async ({ setup }) => {
-                                const {
-                                    contentSharing,
-                                    personalCloud,
-                                    getShared,
-                                    getLocal,
-                                } = await setupTest({ setup, testData })
-
-                                localListIds = [
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                    ),
-                                    await data.createContentSharingTestList(
-                                        setup,
-                                        { dontIndexPages: true },
-                                    ),
-                                ]
-                                for (const localListId of localListIds) {
-                                    await contentSharing.shareList({
-                                        listId: localListId,
-                                    })
-                                }
-                                await personalCloud.waitForSync()
-
-                                expect(await getLocal('annotations')).toEqual(
-                                    [],
-                                )
-                                expect(
-                                    await getLocal('sharedAnnotationMetadata'),
-                                ).toEqual([])
-                                expect(
-                                    await getLocal('annotationPrivacyLevels'),
-                                ).toEqual([])
-
-                                const annotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                                    {} as any,
-                                    data.ANNOTATION_1_1_DATA,
-                                    { skipPageIndexing: true },
-                                )
-                                await contentSharing.shareAnnotation({
-                                    annotationUrl,
-                                    shareToLists: true,
+                                await setupTest({ setup })
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
                                 })
-
-                                await personalCloud.waitForSync()
-
-                                expect(await getLocal('annotations')).toEqual([
-                                    expect.objectContaining({
-                                        url: annotationUrl,
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                        comment:
-                                            data.ANNOTATION_1_1_DATA.comment,
-                                    }),
-                                ])
-                                expect(
-                                    await getLocal('sharedAnnotationMetadata'),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        localId: annotationUrl,
-                                        excludeFromLists: false,
-                                    }),
-                                ])
-                                expect(
-                                    await getLocal('annotationPrivacyLevels'),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        annotation: annotationUrl,
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                })
+                                await helper.shareAnnotation(setup, {
+                                    id: 1,
+                                    shareToLists: true,
+                                    expectedSharingState: {
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
                                         privacyLevel:
                                             AnnotationPrivacyLevels.SHARED,
-                                    }),
-                                ])
-
-                                expect(
-                                    await getShared('sharedAnnotation', {
-                                        skipOrdering: true,
-                                    }),
-                                ).toEqual([
-                                    expect.objectContaining({
-                                        body: data.ANNOTATION_1_1_DATA.body,
-                                    }),
-                                ])
-                                expect(
-                                    (
-                                        await getShared(
-                                            'sharedAnnotationListEntry',
-                                            { skipOrdering: true },
-                                        )
-                                    ).sort(sortByField('sharedList')),
-                                ).toEqual([
-                                    expect.objectContaining({}),
-                                    expect.objectContaining({}),
-                                ])
-
-                                await setup.backgroundModules.directLinking.deleteAnnotation(
-                                    null,
-                                    annotationUrl,
+                                        hasLink: true,
+                                    },
+                                })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
                                 )
-                                await personalCloud.waitForSync()
 
-                                expect(await getLocal('annotations')).toEqual(
+                                await helper.deleteAnnotation(setup, { id: 1 })
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [],
+                                })
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
                                     [],
                                 )
-                                expect(
-                                    await getLocal('sharedAnnotationMetadata'),
-                                ).toEqual([])
-                                expect(
-                                    await getLocal('annotationPrivacyLevels'),
-                                ).toEqual([])
-
-                                expect(
-                                    await getShared('sharedAnnotation', {
-                                        skipOrdering: true,
-                                    }),
-                                ).toEqual([])
-                                expect(
-                                    await getShared(
-                                        'sharedAnnotationListEntry',
-                                        { skipOrdering: true },
-                                    ),
-                                ).toEqual([])
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [],
+                                )
                             },
                         },
                     ],
@@ -1308,12 +1955,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     identifier,
                                     fingerprints,
                                 } = await indexTestFingerprintedPdf(setup, {
+                                    expectedServerId: 1338,
                                     tabId,
                                 })
                                 await setup.backgroundModules.customLists.insertPageToList(
                                     {
                                         id: testData.localListId,
-                                        url: identifier.fullUrl,
+                                        contentIdentifier: identifier,
                                         tabId,
                                     },
                                 )
@@ -1329,9 +1977,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: isFBEmu
-                                            ? testData.remoteListId
-                                            : maybeInt(testData.remoteListId),
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[0].fingerprintScheme,
@@ -1341,9 +1989,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: TEST_USER.id,
-                                        sharedList: isFBEmu
-                                            ? testData.remoteListId
-                                            : maybeInt(testData.remoteListId),
+                                        sharedList: maybeInt(
+                                            testData.remoteListId,
+                                        ),
                                         normalizedUrl: identifier.normalizedUrl,
                                         fingerprintScheme:
                                             fingerprints[1].fingerprintScheme,
@@ -1366,6 +2014,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             'should add a list to local lists and store its metadata when the user joined a new list',
             { skipConflictTests: true, skipSyncTests: true },
             () => {
+                const helper = new SharingTestHelper()
                 const testData: TestData = {}
 
                 return {
@@ -1408,110 +2057,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.integrateAllUpdates()
                                 await personalCloud.waitForSync()
 
-                                const personalLists = await serverStorage.storageManager.operation(
-                                    'findObjects',
-                                    'personalList',
-                                    {},
-                                )
                                 const customLists = await setup.storageManager.operation(
                                     'findObjects',
                                     'customLists',
                                     {},
                                 )
-                                expect(personalLists).toEqual([
-                                    expect.objectContaining({
-                                        name: 'Test list',
-                                    }),
-                                ])
-                                expect(customLists).toEqual([
-                                    expect.objectContaining({
-                                        name: 'Test list',
-                                    }),
-                                ])
-                                expect(
-                                    await setup.storageManager.operation(
-                                        'findObjects',
-                                        'sharedListMetadata',
-                                        {},
-                                    ),
-                                ).toEqual([
-                                    {
-                                        localId: customLists[0].id,
-                                        remoteId: listReference.id.toString(),
-                                    },
-                                ])
-                            },
-                        },
-                    ],
-                }
-            },
-        ),
-        backgroundIntegrationTest(
-            'should NOT add dupe lists to local lists when the user joins a list they already joined before',
-            { skipConflictTests: true, skipSyncTests: true },
-            () => {
-                const testData: TestData = {}
-
-                return {
-                    setup: setupPreTest,
-                    steps: [
-                        {
-                            execute: async ({ setup }) => {
-                                const { personalCloud } = await setupTest({
-                                    setup,
-                                    testData,
-                                })
-
-                                const serverStorage = await setup.getServerStorage()
-                                const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
-                                    {
-                                        listData: {
-                                            title: 'Test list',
-                                        },
-                                        userReference: {
-                                            type: 'user-reference',
-                                            id: 'someone-else',
-                                        },
-                                    },
-                                )
-                                const {
-                                    keyString,
-                                } = await serverStorage.storageModules.contentSharing.createListKey(
-                                    {
-                                        key: { roleID: SharedListRoleID.Admin },
-                                        listReference,
-                                    },
-                                )
-                                const joinList = () =>
-                                    setup.backgroundModules.contentSharing.options.backend.processListKey(
-                                        {
-                                            keyString,
-                                            listId: listReference.id,
-                                        },
-                                    )
-
-                                await joinList()
-                                await joinList()
-                                await joinList()
-
-                                await personalCloud.integrateAllUpdates()
-                                await personalCloud.waitForSync()
-
-                                const personalLists = await serverStorage.storageManager.operation(
-                                    'findObjects',
-                                    'personalList',
-                                    {},
-                                )
-                                const customLists = await setup.storageManager.operation(
-                                    'findObjects',
-                                    'customLists',
-                                    {},
-                                )
-                                expect(personalLists).toEqual([
-                                    expect.objectContaining({
-                                        name: 'Test list',
-                                    }),
-                                ])
                                 expect(customLists).toEqual([
                                     expect.objectContaining({
                                         name: 'Test list',
@@ -1545,6 +2095,2977 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             { skipConflictTests: true, skipSyncTests: true },
             () => makeAnnotationFromWebUiTest({ ownPage: false }),
         ),
+        backgroundIntegrationTest(
+            'should add a list, page + 2 public annotations, adding one to the list, with user choosing to keep it public, expecting other annot and the parent page to also be in list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 3,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        createdPageListEntries: [
+                                            { listId: 1, pageId: 1 },
+                                        ],
+                                        protectAnnotations: false, // This is the important part
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should add a list, page + 2 public annotations, adding one to the list, with user choosing to make it protected, expecting other annot and the parent page to also be in list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 3,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1],
+                                        annotationsIds: [1],
+                                        createdPageListEntries: [
+                                            { listId: 1, pageId: 1 },
+                                        ],
+                                        protectAnnotations: true, // This is the important part
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should add public annot to a private list, expecting sibling annots+parent page _not_ to be added to that list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: false,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        createdPageListEntries: [],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [],
+                                                privateListIds: [1],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should add public annot to a private list which parent page is already in, expecting annot list entry to still be added',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: false,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        createdPageListEntries: [],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [],
+                                                privateListIds: [1],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should add public annot to a public list, expecting list entry to be created for parent page, but not for any public annotations',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        createdPageListEntries: [
+                                            { listId: 1, pageId: 1 },
+                                        ],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should add private annot to a public list, expecting local list entries to be created for annotation + parent page, but not any sibling public annotations',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1],
+                                        listIds: [1],
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                // PRIVATE should change to PROTECTED upon list share
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            "should remove private annot from a public list it's in, expecting local list entry to be deleted for annotation",
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 3,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [2, 3],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        annotationsIds: [1, 2],
+                                        listIds: [1],
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                // PRIVATE should change to PROTECTED upon list share
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                            2: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2, 3],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 3, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    annotationsIds: [2],
+                                    listId: 1,
+                                    expectedSharingStates: {
+                                        2: {
+                                            hasLink: true,
+                                            sharedListIds: [],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2, 3],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 3, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    annotationsIds: [1],
+                                    listId: 1,
+                                    expectedSharingStates: {
+                                        1: {
+                                            hasLink: true,
+                                            sharedListIds: [],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 3,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2, 3],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 3, listId: 1 }],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            "should remove public annot from private lists it's in",
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: false,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: false,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1, 2],
+                                        annotationsIds: [1],
+                                        createdPageListEntries: [],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [],
+                                                privateListIds: [1, 2],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    listId: 2,
+                                    annotationsIds: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            hasLink: true,
+                                            sharedListIds: [],
+                                            privateListIds: [1],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    listId: 1,
+                                    annotationsIds: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            hasLink: true,
+                                            sharedListIds: [],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should remove a shared list from a page, resulting in it also being removed from any child annotations, regardless of share state',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 2,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1],
+                                        annotationsIds: [1],
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+
+                                await helper.removePageFromList(setup, {
+                                    pageId: 1,
+                                    listId: 1,
+                                })
+
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 2, listId: 2 }],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        // Annotation state transition tests:
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from private to selectively shared state, via being added to a shared list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 2,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 2, listId: 2 }],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1],
+                                        annotationsIds: [1],
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from private to selectively shared state, via being part of a private list that becomes shared',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: false,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 2,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: false,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 2,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [2],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1],
+                                        annotationsIds: [1, 2],
+                                        createdPageListEntries: [],
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: false,
+                                                sharedListIds: [],
+                                                privateListIds: [1],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PRIVATE,
+                                            },
+                                            2: {
+                                                hasLink: true,
+                                                sharedListIds: [],
+                                                privateListIds: [1],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.SHARED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [2],
+                                })
+                                await helper.assertSharedListEntries(setup, [])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertPageListEntries(setup, [])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [2],
+                                })
+
+                                await helper.shareList(setup, { id: 1 })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 2, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 2, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [2, 1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            "should be able to transition an annotation from public to selectively shared state, via being added to a shared list AND user choosing to 'protect' it",
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 2,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 2, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.shareAnnotationsToSomeLists(
+                                    setup,
+                                    {
+                                        listIds: [1],
+                                        annotationsIds: [1],
+                                        createdPageListEntries: [
+                                            { pageId: 1, listId: 1 },
+                                        ],
+                                        protectAnnotations: true,
+                                        expectedSharingStates: {
+                                            1: {
+                                                hasLink: true,
+                                                sharedListIds: [2, 1],
+                                                privateListIds: [],
+                                                privacyLevel:
+                                                    AnnotationPrivacyLevels.PROTECTED,
+                                            },
+                                        },
+                                    },
+                                )
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 2 },
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from public to selectively shared state, via being removed from a shared list',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 2, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    listId: 2,
+                                    annotationsIds: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            hasLink: true,
+                                            sharedListIds: [1],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from public to selectively shared state, via being set private AND user choosing to keep lists',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                // This transitions the annotation's state to "selectively shared"
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    keepListsIfUnsharing: true,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from selectively shared to private state, via being set private',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listId: 1,
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { listId: 1, pageId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                // This transitions the annotation's state to "selectively shared"
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    keepListsIfUnsharing: true,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PROTECTED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.PRIVATE,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.PRIVATE,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PRIVATE,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 2, listId: 1 }],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to transition an annotation from selectively shared to public state, via being set public',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                await helper.createList(setup, {
+                                    id: 1,
+                                    share: true,
+                                })
+                                await helper.createList(setup, {
+                                    id: 2,
+                                    share: true,
+                                })
+                                await helper.createPage(setup, {
+                                    id: 1,
+                                    listIds: [1, 2],
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 1,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+                                await helper.createAnnotation(setup, {
+                                    id: 2,
+                                    pageId: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.unshareAnnotationsFromList(setup, {
+                                    listId: 2,
+                                    annotationsIds: [1],
+                                    expectedSharingStates: {
+                                        1: {
+                                            hasLink: true,
+                                            sharedListIds: [1],
+                                            privateListIds: [],
+                                            privacyLevel:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                        },
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: true,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.PROTECTED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 2, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 1, listId: 1 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [{ annotationId: 1, listId: 1 }],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+
+                                await helper.setAnnotationPrivacyLevel(setup, {
+                                    id: 1,
+                                    level: AnnotationPrivacyLevels.SHARED,
+                                    expectedSharingState: {
+                                        hasLink: true,
+                                        sharedListIds: [1, 2],
+                                        privateListIds: [],
+                                        privacyLevel:
+                                            AnnotationPrivacyLevels.SHARED,
+                                    },
+                                })
+
+                                await helper.assertSharedAnnotationMetadata(
+                                    setup,
+                                    {
+                                        metadata: [
+                                            {
+                                                annotationId: 1,
+                                                excludeFromLists: false,
+                                            },
+                                            {
+                                                annotationId: 2,
+                                                excludeFromLists: false,
+                                            },
+                                        ],
+                                    },
+                                )
+                                await helper.assertAnnotationPrivacyLevels(
+                                    setup,
+                                    [
+                                        {
+                                            annotationId: 1,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                            updated: true,
+                                        },
+                                        {
+                                            annotationId: 2,
+                                            level:
+                                                AnnotationPrivacyLevels.SHARED,
+                                        },
+                                    ],
+                                )
+                                await helper.assertSharedAnnotations(setup, {
+                                    ids: [1, 2],
+                                })
+                                await helper.assertSharedListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertSharedAnnotationListEntries(
+                                    setup,
+                                    [
+                                        { annotationId: 1, listId: 1 },
+                                        { annotationId: 1, listId: 2 },
+                                        { annotationId: 2, listId: 1 },
+                                        { annotationId: 2, listId: 2 },
+                                    ],
+                                )
+                                await helper.assertPageListEntries(setup, [
+                                    { pageId: 1, listId: 1 },
+                                    { pageId: 1, listId: 2 },
+                                ])
+                                await helper.assertAnnotationListEntries(
+                                    setup,
+                                    [],
+                                )
+                                await helper.assertSharedPageInfo(setup, {
+                                    pageIds: [1],
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
     { includePostSyncProcessor: true },
 )
@@ -1554,216 +5075,196 @@ function makeShareAnnotationTest(options: {
     testDuplicateSharing: boolean
     testProtectedBulkShare?: boolean
 }): BackgroundIntegrationTestInstance {
-    let localListId: number
+    const helper = new SharingTestHelper()
 
     return {
-        setup: async ({ setup }) => {},
         steps: [
             {
                 execute: async ({ setup }) => {
-                    const {
-                        contentSharing,
-                        personalCloud,
-                    } = setup.backgroundModules
+                    const { personalCloud } = setup.backgroundModules
                     setup.authService.setUser(TEST_USER)
                     personalCloud.actionQueue.forceQueueSkip = true
                     await personalCloud.setup()
 
-                    localListId = await data.createContentSharingTestList(setup)
-                    await contentSharing.shareList({
-                        listId: localListId,
-                    })
-                    const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                        {} as any,
-                        data.ANNOTATION_1_1_DATA,
-                        { skipPageIndexing: true },
-                    )
-                    const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
-                        {} as any,
-                        data.ANNOTATION_1_2_DATA,
-                        { skipPageIndexing: true },
-                    )
+                    await helper.createList(setup, { id: 1 })
+                    await helper.createPage(setup, { id: 1, listId: 1 })
+                    await helper.createPage(setup, { id: 2, listId: 1 })
+                    await helper.shareList(setup, { id: 1 })
+                    await helper.createAnnotation(setup, { id: 1, pageId: 1 })
+                    await helper.createAnnotation(setup, { id: 2, pageId: 1 })
 
                     if (options.testProtectedBulkShare) {
-                        await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
-                            {
-                                annotation: secondAnnotationUrl,
-                                privacyLevel:
-                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        await helper.setAnnotationPrivacyLevel(setup, {
+                            id: 2,
+                            level: AnnotationPrivacyLevels.PROTECTED,
+                            expectedSharingState: {
+                                hasLink: false,
+                                sharedListIds: [],
+                                privateListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                             },
-                        )
+                        })
                     }
 
                     if (options.annotationSharingMethod === 'shareAnnotation') {
-                        await contentSharing.shareAnnotation({
-                            annotationUrl: firstAnnotationUrl,
+                        await helper.shareAnnotation(setup, {
+                            id: 1,
+                            expectedSharingState: {
+                                sharedListIds: [],
+                                privateListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                                hasLink: true,
+                            },
                         })
-                        await contentSharing.shareAnnotation({
-                            annotationUrl: secondAnnotationUrl,
+                        await helper.shareAnnotation(setup, {
+                            id: 2,
+                            expectedSharingState: {
+                                sharedListIds: [],
+                                privateListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                                hasLink: true,
+                            },
                         })
 
                         if (options.testDuplicateSharing) {
-                            await contentSharing.shareAnnotation({
-                                annotationUrl: secondAnnotationUrl,
+                            await helper.shareAnnotation(setup, {
+                                id: 2,
+                                expectedSharingState: {
+                                    sharedListIds: [],
+                                    privateListIds: [],
+                                    privacyLevel:
+                                        AnnotationPrivacyLevels.PRIVATE,
+                                    hasLink: true,
+                                },
                             })
                         }
                     } else if (
                         options.annotationSharingMethod === 'shareAnnotations'
                     ) {
-                        await contentSharing.shareAnnotations({
-                            annotationUrls: [
-                                firstAnnotationUrl,
-                                secondAnnotationUrl,
+                        const expectedSharingStates = {
+                            1: {
+                                sharedListIds: [],
+                                privateListIds: [],
+                                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                                hasLink: true,
+                            },
+                            2: !options.testProtectedBulkShare
+                                ? {
+                                      sharedListIds: [],
+                                      privateListIds: [],
+                                      privacyLevel:
+                                          AnnotationPrivacyLevels.PRIVATE,
+                                      hasLink: true,
+                                  }
+                                : {
+                                      sharedListIds: [],
+                                      privateListIds: [],
+                                      privacyLevel:
+                                          AnnotationPrivacyLevels.PROTECTED,
+                                      hasLink: false,
+                                  },
+                        }
+                        await helper.shareAnnotations(
+                            setup,
+                            [
+                                { id: 1 },
+                                {
+                                    id: 2,
+                                    expectNotShared:
+                                        options.testProtectedBulkShare,
+                                },
                             ],
-                        })
+                            {
+                                expectedSharingStates,
+                            },
+                        )
                         if (options.testDuplicateSharing) {
-                            await contentSharing.shareAnnotations({
-                                annotationUrls: [
-                                    firstAnnotationUrl,
-                                    secondAnnotationUrl,
+                            await helper.shareAnnotations(
+                                setup,
+                                [
+                                    { id: 1 },
+                                    {
+                                        id: 2,
+                                        expectNotShared:
+                                            options.testProtectedBulkShare,
+                                    },
                                 ],
-                            })
+                                { expectedSharingStates },
+                            )
                         }
                     }
-                    await personalCloud.waitForSync()
-
-                    const sharedAnnotationMetadataPre = await setup.storageManager.operation(
-                        'findObjects',
-                        'sharedAnnotationMetadata',
-                        {},
-                    )
-                    expect(sharedAnnotationMetadataPre[0]).toEqual({
-                        localId: firstAnnotationUrl,
-                        remoteId: expect.anything(),
-                        excludeFromLists: true,
+                    await helper.assertSharedAnnotationMetadata(setup, {
+                        metadata: [
+                            { annotationId: 1, excludeFromLists: true },
+                            ...(!options.testProtectedBulkShare
+                                ? [{ annotationId: 2, excludeFromLists: true }]
+                                : []),
+                        ],
                     })
-                    expect(sharedAnnotationMetadataPre[1]).toEqual(
+                    await helper.assertAnnotationPrivacyLevels(
+                        setup,
                         options.testProtectedBulkShare
-                            ? undefined
-                            : {
-                                  localId: secondAnnotationUrl,
-                                  remoteId: expect.anything(),
-                                  excludeFromLists: true,
-                              },
+                            ? [
+                                  {
+                                      annotationId: 2,
+                                      level: AnnotationPrivacyLevels.PROTECTED,
+                                  },
+                                  {
+                                      annotationId: 1,
+                                      level: AnnotationPrivacyLevels.PRIVATE,
+                                  },
+                              ]
+                            : [
+                                  {
+                                      annotationId: 1,
+                                      level: AnnotationPrivacyLevels.PRIVATE,
+                                  },
+                                  {
+                                      annotationId: 2,
+                                      level: AnnotationPrivacyLevels.PRIVATE,
+                                  },
+                              ],
                     )
-                    const remoteAnnotationIds = await contentSharing.storage.getRemoteAnnotationIds(
-                        {
-                            localIds: [firstAnnotationUrl, secondAnnotationUrl],
+                    await helper.assertSharedAnnotations(setup, {
+                        ids: [
+                            1,
+                            ...(!options.testProtectedBulkShare ? [2] : []),
+                        ],
+                    })
+
+                    await helper.assertSharedAnnotationListEntries(setup, [])
+
+                    const expectedSharingStatesPostAllLists = () => ({
+                        1: {
+                            sharedListIds: [1],
+                            privateListIds: [],
+                            privacyLevel: AnnotationPrivacyLevels.SHARED,
+                            hasLink: true,
                         },
-                    )
-                    expect(remoteAnnotationIds[firstAnnotationUrl]).toEqual(
-                        sharedAnnotationMetadataPre[0].remoteId,
-                    )
-                    expect(remoteAnnotationIds[secondAnnotationUrl]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : sharedAnnotationMetadataPre[1].remoteId,
-                    )
-
-                    const serverStorage = await setup.getServerStorage()
-                    const getShared = (collection: string) =>
-                        serverStorage.storageManager.operation(
-                            'findObjects',
-                            collection,
-                            {},
-                        )
-                    const sharedAnnotations = await getShared(
-                        'sharedAnnotation',
-                    )
-                    expect(sharedAnnotations[0]).toEqual({
-                        id:
-                            convertRemoteId(
-                                remoteAnnotationIds[
-                                    firstAnnotationUrl
-                                ] as string,
-                            ) || remoteAnnotationIds[firstAnnotationUrl],
-                        creator: TEST_USER.id,
-                        normalizedPageUrl: normalizeUrl(
-                            data.ANNOTATION_1_1_DATA.pageUrl,
-                        ),
-                        createdWhen: expect.any(Number),
-                        uploadedWhen: expect.any(Number),
-                        updatedWhen: expect.any(Number),
-                        comment: data.ANNOTATION_1_1_DATA.comment,
-                        body: data.ANNOTATION_1_1_DATA.body,
-                        selector: JSON.stringify(
-                            data.ANNOTATION_1_1_DATA.selector,
-                        ),
                     })
-                    expect(sharedAnnotations[1]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : expect.objectContaining({
-                                  body: data.ANNOTATION_1_2_DATA.body,
-                              }),
-                    )
-                    expect(
-                        await getShared('sharedAnnotationListEntry'),
-                    ).toEqual([])
-
-                    await contentSharing.shareAnnotationsToLists({
-                        annotationUrls: [firstAnnotationUrl],
+                    await helper.shareAnnotationsToAllLists(setup, {
+                        ids: [1],
+                        expectedSharingStates: expectedSharingStatesPostAllLists(),
                     })
                     if (options.testDuplicateSharing) {
-                        await contentSharing.shareAnnotationsToLists({
-                            annotationUrls: [firstAnnotationUrl],
+                        await helper.shareAnnotationsToAllLists(setup, {
+                            ids: [1],
+                            expectedSharingStates: expectedSharingStatesPostAllLists(),
                         })
                     }
-                    await personalCloud.waitForSync()
 
-                    expect(
-                        await getShared('sharedAnnotationListEntry'),
-                    ).toEqual([
-                        {
-                            id: expect.anything(),
-                            creator: TEST_USER.id,
-                            normalizedPageUrl: normalizeUrl(
-                                data.ANNOTATION_1_1_DATA.pageUrl,
-                            ),
-                            createdWhen: expect.any(Number),
-                            uploadedWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                            sharedList: expect.any(expectedIdType),
-                            sharedAnnotation:
-                                convertRemoteId(
-                                    remoteAnnotationIds[
-                                        firstAnnotationUrl
-                                    ] as string,
-                                ) || remoteAnnotationIds[firstAnnotationUrl],
-                        },
+                    await helper.assertSharedAnnotationListEntries(setup, [
+                        { annotationId: 1, listId: 1 },
                     ])
-                    expect(await getShared('sharedPageInfo')).toEqual([
-                        {
-                            id: expect.anything(),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                            creator: TEST_USER.id,
-                            fullTitle: data.PAGE_1_DATA.pageDoc.content.title,
-                            normalizedUrl: normalizeUrl(
-                                data.ANNOTATION_1_1_DATA.pageUrl,
-                            ),
-                            originalUrl: data.ENTRY_1_DATA.url,
-                        },
-                    ])
-                    const sharedAnnotationMetadataPost = await setup.storageManager.operation(
-                        'findObjects',
-                        'sharedAnnotationMetadata',
-                        {},
-                    )
-                    expect(sharedAnnotationMetadataPost[0]).toEqual({
-                        localId: firstAnnotationUrl,
-                        remoteId: expect.anything(),
-                        excludeFromLists: false,
+                    await helper.assertSharedPageInfo(setup, { pageIds: [1] })
+                    await helper.assertSharedAnnotationMetadata(setup, {
+                        metadata: [
+                            { annotationId: 1, excludeFromLists: false },
+                            ...(!options.testProtectedBulkShare
+                                ? [{ annotationId: 2, excludeFromLists: true }]
+                                : []),
+                        ],
                     })
-                    expect(sharedAnnotationMetadataPost[1]).toEqual(
-                        options.testProtectedBulkShare
-                            ? undefined
-                            : {
-                                  localId: secondAnnotationUrl,
-                                  remoteId: expect.anything(),
-                                  excludeFromLists: true,
-                              },
-                    )
                 },
             },
         ],
@@ -1773,6 +5274,7 @@ function makeShareAnnotationTest(options: {
 function makeAnnotationFromWebUiTest(options: {
     ownPage: boolean
 }): BackgroundIntegrationTestInstance {
+    const helper = new SharingTestHelper()
     const testData: TestData = {}
     let storageHooksChangeWatcher: StorageHooksChangeWatcher
 

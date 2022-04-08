@@ -16,7 +16,6 @@ describe('Page indexing background', () => {
         const {
             identifier,
             contentSize,
-            fingerprints,
         } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         await setup.backgroundModules.bookmarks.addBookmark({
@@ -32,7 +31,7 @@ describe('Page indexing background', () => {
             location: normalizeUrl(url),
             locationScheme: LocationSchemeType.FilesystemPathV1,
             locationType: ContentLocatorType.Local,
-            normalizedUrl: `memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`,
+            normalizedUrl: 'memex.cloud/ct/1337.pdf',
             originalLocation: url,
             primary: true,
             valid: true,
@@ -45,13 +44,13 @@ describe('Page indexing background', () => {
         ).toEqual([
             {
                 id: 1,
-                fingerprint: fingerprints[0].fingerprint,
+                fingerprint: 'goldfinger',
                 ...common,
             },
             {
                 id: 2,
                 contentSize,
-                fingerprint: fingerprints[1].fingerprint,
+                fingerprint: 'billfingers',
                 ...common,
             },
         ])
@@ -88,7 +87,6 @@ describe('Page indexing background', () => {
         const {
             identifier,
             contentSize,
-            fingerprints,
         } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
         await setup.backgroundModules.bookmarks.addBookmark({
@@ -104,7 +102,7 @@ describe('Page indexing background', () => {
             location: normalizeUrl(url),
             locationScheme: LocationSchemeType.NormalizedUrlV1,
             locationType: ContentLocatorType.Remote,
-            normalizedUrl: `memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`,
+            normalizedUrl: 'memex.cloud/ct/1337.pdf',
             originalLocation: url,
             primary: true,
             valid: true,
@@ -117,13 +115,13 @@ describe('Page indexing background', () => {
         ).toEqual([
             {
                 id: 1,
-                fingerprint: fingerprints[0].fingerprint,
+                fingerprint: 'goldfinger',
                 ...common,
             },
             {
                 id: 2,
                 contentSize,
-                fingerprint: fingerprints[1].fingerprint,
+                fingerprint: 'billfingers',
                 ...common,
             },
         ])

@@ -12,6 +12,7 @@ export interface Props {
     height?: string
     overflow?: string
     padding?: string
+    onMouseLeave?: () => void
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -23,7 +24,10 @@ export class HoverBox extends React.Component<Props> {
         }
 
         return (
-            <HoverBoxContainer {...this.props}>
+            <HoverBoxContainer
+                onMouseLeave={this.props.onMouseLeave}
+                {...this.props}
+            >
                 <HoverBoxDiv {...this.props}>{this.props.children}</HoverBoxDiv>
             </HoverBoxContainer>
         )

@@ -1,7 +1,7 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 
-import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
+import type { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
 export const INITIAL_STATE: GenericPickerState = {
     query: '',

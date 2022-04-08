@@ -237,14 +237,8 @@ describe('Dashboard Refactor misc logic', () => {
         await logicD.cleanup()
     })
 
-    it('should get feed activity status during init logic', async ({
-        device,
-    }) => {
-        let activitiesMarkedAsSeen = false
+    it('should get feed activity status upon click', async ({ device }) => {
         let feedUrlOpened = false
-        device.backgroundModules.activityIndicator.remoteFunctions.markActivitiesAsSeen = async () => {
-            activitiesMarkedAsSeen = true
-        }
 
         const { searchResults } = await setupTest(device, {
             withAuth: true,
@@ -255,13 +249,19 @@ describe('Dashboard Refactor misc logic', () => {
         searchResults.processMutation({
             listsSidebar: { hasFeedActivity: { $set: true } },
         })
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, true)
+
         expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(true)
         expect(feedUrlOpened).toBe(false)
-        expect(activitiesMarkedAsSeen).toBe(false)
+        expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
+            true,
+        )
         await searchResults.processEvent('clickFeedActivityIndicator', null)
         expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
         expect(feedUrlOpened).toBe(true)
-        expect(activitiesMarkedAsSeen).toBe(true)
+        expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
+            false,
+        )
     })
 
     it('should hide banner and set cloud enabled flag on migration finish', async ({

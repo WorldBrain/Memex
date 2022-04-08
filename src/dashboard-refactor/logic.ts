@@ -1,24 +1,30 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
-import { haveTagsChanged } from 'src/util/have-tags-changed'
+import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
     NON_UNIQ_LIST_NAME_ERR_MSG,
     MISSING_PDF_QUERY_PARAM,
+    EMPTY_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
-import { updatePickerValues, stateToSearchParams } from './util'
+import {
+    updatePickerValues,
+    stateToSearchParams,
+    flattenNestedResults,
+} from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { NoResultsType, NoteShareInfo } from './search-results/types'
+import { NoResultsType } from './search-results/types'
 import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
@@ -35,6 +41,8 @@ import {
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
+import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
@@ -121,6 +129,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showCloudOnboarding: false,
                 showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
+                confirmPrivatizeNoteArgs: null,
+                confirmSelectNoteSpaceArgs: null,
             },
             searchResults: {
                 results: {},
@@ -208,8 +218,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
+            const localListsResult = await this.loadLocalListsData(nextState)
+            nextState = localListsResult.nextState
             await Promise.all([
-                this.loadListsData(nextState),
+                this.loadRemoteListsData(localListsResult.remoteToLocalIdDict),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
@@ -326,10 +338,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async loadListsData(previousState: State) {
+    private async loadLocalListsData(previousState: State) {
         const { listsBG, contentShareBG } = this.options
 
         const remoteToLocalIdDict: { [remoteId: string]: number } = {}
+        const mutation: UIMutation<State> = {}
 
         await executeUITask(
             this,
@@ -375,17 +388,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                 }
 
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: { $merge: listData },
-                        localLists: {
-                            allListIds: { $set: listIds },
-                            filteredListIds: { $set: listIds },
-                        },
+                mutation.listsSidebar = {
+                    listData: { $merge: listData },
+                    localLists: {
+                        allListIds: { $set: listIds },
+                        filteredListIds: { $set: listIds },
                     },
-                })
+                }
+                this.emitMutation(mutation)
             },
         )
+
+        return {
+            nextState: this.withMutation(previousState, mutation),
+            remoteToLocalIdDict,
+        }
+    }
+
+    private async loadRemoteListsData(remoteToLocalIdDict: {
+        [remoteId: string]: number
+    }) {
+        const { listsBG } = this.options
 
         await executeUITask(
             this,
@@ -448,7 +471,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.search({ previousState, event: { paginate } }),
         300,
     )
-
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
@@ -472,7 +494,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const searchState = this.withMutation(previousState, {
                     searchFilters: skipMutation,
                 })
-                const {
+                let {
                     noteData,
                     pageData,
                     results,
@@ -695,8 +717,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
-                noteData: { $set: state.noteData },
                 pageData: { $set: state.pageData },
+                noteData: { $set: state.noteData },
             },
         })
     }
@@ -708,8 +730,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
-                noteData: { $set: state.noteData },
                 pageData: { $set: state.pageData },
+                noteData: { $set: state.noteData },
             },
         })
     }
@@ -731,13 +753,37 @@ export class DashboardLogic extends UILogic<State, Events> {
             url: event.fullPageUrl,
             deleted: event.deleted,
             added: event.added,
-            skipPageIndexing: true,
         })
     }
 
-    setPageLists: EventHandler<'setPageLists'> = async ({ event }) => {
+    setPageLists: EventHandler<'setPageLists'> = async ({
+        event,
+        previousState,
+    }) => {
+        const removingSharedList =
+            previousState.listsSidebar.listData[event.added ?? event.deleted]
+                ?.remoteId != null && event.added == null
+
+        const noteDataMutation: UIMutation<
+            State['searchResults']['noteData']['byId']
+        > = {}
+
+        // If we're removing a shared list, we also need to make sure it gets removed from children annots
+        if (removingSharedList) {
+            const childrenNoteIds = flattenNestedResults(previousState).byId[
+                event.id
+            ].noteIds.user
+
+            for (const noteId of childrenNoteIds) {
+                noteDataMutation[noteId] = {
+                    lists: { $apply: updatePickerValues(event) },
+                }
+            }
+        }
+
         this.emitMutation({
             searchResults: {
+                noteData: { byId: noteDataMutation },
                 pageData: {
                     byId: {
                         [event.id]: {
@@ -764,6 +810,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPrivatizeNoteConfirmArgs: EventHandler<
+        'setPrivatizeNoteConfirmArgs'
+    > = async ({ event }) => {
+        this.emitMutation({
+            modals: { confirmPrivatizeNoteArgs: { $set: event } },
+        })
+    }
+
+    setSelectNoteSpaceConfirmArgs: EventHandler<
+        'setSelectNoteSpaceConfirmArgs'
+    > = async ({ event }) => {
+        this.emitMutation({
+            modals: { confirmSelectNoteSpaceArgs: { $set: event } },
+        })
+    }
+
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
@@ -785,31 +847,28 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private updateShareInfoForNoteIds = (params: {
-        noteIds: string[]
+    private updateBulkNotesShareInfoFromShareState = (params: {
         previousState: State
-        info: NoteShareInfo
+        shareStates: AnnotationSharingStates
     }) => {
         const mutation: UIMutation<State['searchResults']['noteData']> = {}
 
-        for (const noteId of params.noteIds) {
-            const prev =
+        for (const [noteId, shareState] of Object.entries(params.shareStates)) {
+            if (
                 params.previousState.searchResults.noteData.byId[noteId]
-            if (prev?.isBulkShareProtected) {
+                    ?.isBulkShareProtected
+            ) {
                 continue
             }
 
+            const privacyState = getAnnotationPrivacyState(
+                shareState.privacyLevel,
+            )
             mutation.byId = {
                 ...(mutation.byId ?? {}),
                 [noteId]: {
-                    isShared: {
-                        $set: params.info.isShared,
-                    },
-                    isBulkShareProtected: {
-                        $set: !!(
-                            params.info.isProtected ?? prev.isBulkShareProtected
-                        ),
-                    },
+                    isShared: { $set: privacyState.public },
+                    isBulkShareProtected: { $set: privacyState.protected },
                 },
             }
         }
@@ -820,24 +879,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     updateAllPageResultNotesShareInfo: EventHandler<
         'updateAllPageResultNotesShareInfo'
     > = async ({ event, previousState }) => {
-        this.updateShareInfoForNoteIds({
+        this.updateBulkNotesShareInfoFromShareState({
             previousState,
-            info: event,
-            noteIds: previousState.searchResults.noteData.allIds,
+            shareStates: event.shareStates,
         })
     }
 
     updatePageNotesShareInfo: EventHandler<
         'updatePageNotesShareInfo'
     > = async ({ event, previousState }) => {
-        const { noteData } = previousState.searchResults
-
-        this.updateShareInfoForNoteIds({
+        this.updateBulkNotesShareInfoFromShareState({
             previousState,
-            info: event,
-            noteIds: noteData.allIds.filter(
-                (noteId) => noteData.byId[noteId].pageUrl === event.pageId,
-            ),
+            shareStates: event.shareStates,
         })
     }
 
@@ -1181,6 +1234,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setPageNewNoteLists: EventHandler<'setPageNewNoteLists'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    newNoteForm: {
+                                        lists: { $set: event.lists },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
     setPageNewNoteCommentValue: EventHandler<'setPageNewNoteCommentValue'> = ({
         event,
     }) => {
@@ -1228,6 +1301,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { annotationsBG, contentShareBG } = this.options
+        const pageData = previousState.searchResults.pageData.byId[event.pageId]
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1266,6 +1340,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                         tags: formState.tags,
                     })
                 }
+                const newNoteListIds: number[] = []
+                if (formState.lists.length) {
+                    await contentShareBG.shareAnnotationToSomeLists({
+                        annotationUrl: newNoteId,
+                        localListIds: formState.lists,
+                    })
+                    newNoteListIds.push(...formState.lists)
+                }
 
                 this.emitMutation({
                     searchResults: {
@@ -1279,6 +1361,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
+                                        lists: newNoteListIds,
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
@@ -1514,6 +1597,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isListPickerShown: { $set: event.isShown },
+                        },
+                    },
+                },
+            },
+        })
+    }
 
     setNoteCopyPasterShown: EventHandler<'setNoteCopyPasterShown'> = ({
         event,
@@ -1565,23 +1663,190 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setNoteLists: EventHandler<'setNoteLists'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { contentShareBG } = this.options
+        const noteData = previousState.searchResults.noteData.byId[event.noteId]
+        const pageData =
+            previousState.searchResults.pageData.byId[noteData.pageUrl]
+        const isSharedList =
+            previousState.listsSidebar.listData[event.added ?? event.deleted]
+                ?.remoteId != null
+
+        let remoteFn: () => Promise<any>
+
+        const noteListIds = new Set(noteData.lists)
+        const pageListIds = new Set(pageData.lists)
+
+        if (event.added != null) {
+            remoteFn = () =>
+                contentShareBG.shareAnnotationToSomeLists({
+                    annotationUrl: event.noteId,
+                    localListIds: [event.added],
+                    protectAnnotation: event.protectAnnotation,
+                })
+            noteListIds.add(event.added)
+            pageListIds.add(event.added)
+        } else if (event.deleted != null) {
+            remoteFn = () =>
+                contentShareBG.unshareAnnotationFromList({
+                    annotationUrl: event.noteId,
+                    localListId: event.deleted,
+                })
+            noteListIds.delete(event.deleted)
+            pageListIds.delete(event.deleted)
+        } else {
+            return
+        }
+
+        const isSharedListBeingRemovedFromSharedAnnot =
+            isSharedList && noteData.isShared && event.added == null
+
+        const searchResultsMutation: UIMutation<State['searchResults']> = {
+            noteData: {
+                byId: {
+                    [event.noteId]: {
+                        lists: {
+                            $set:
+                                event.protectAnnotation ||
+                                isSharedListBeingRemovedFromSharedAnnot
+                                    ? [
+                                          ...new Set([
+                                              ...pageListIds,
+                                              ...noteListIds,
+                                          ]),
+                                      ]
+                                    : [...noteListIds],
+                        },
+                        isShared: {
+                            $set:
+                                event.protectAnnotation ??
+                                isSharedListBeingRemovedFromSharedAnnot
+                                    ? false
+                                    : noteData.isShared,
+                        },
+                        isBulkShareProtected: {
+                            $set:
+                                event.protectAnnotation ??
+                                ((!noteData.isShared && isSharedList) || // If annot not shared (but list is), it needs to be protected upon list add/remove
+                                isSharedListBeingRemovedFromSharedAnnot
+                                    ? true
+                                    : noteData.isBulkShareProtected),
+                        },
+                    },
+                },
+            },
+        }
+
+        if (isSharedList && event.deleted == null) {
+            const otherNoteIds = flattenNestedResults(previousState).byId[
+                noteData.pageUrl
+            ].noteIds.user
+            const publicNoteIds = otherNoteIds.filter(
+                (noteId) =>
+                    previousState.searchResults.noteData.byId[noteId]
+                        .isShared && noteId !== event.noteId,
+            )
+
+            for (const noteId of publicNoteIds) {
+                const listIds = new Set(
+                    previousState.searchResults.noteData.byId[noteId].lists,
+                )
+
+                if (event.added != null) {
+                    listIds.add(event.added)
+                } else if (event.deleted != null) {
+                    listIds.delete(event.deleted)
+                }
+
+                ;(searchResultsMutation.noteData as any).byId[noteId] = {
+                    ...(searchResultsMutation.noteData as any).byId[noteId],
+                    lists: { $set: [...listIds] },
+                }
+            }
+
+            searchResultsMutation.pageData = {
+                byId: {
+                    [noteData.pageUrl]: {
+                        lists: { $set: [...pageListIds] },
+                    },
+                },
+            }
+        }
+
+        if (remoteFn) {
+            this.emitMutation({
+                searchResults: searchResultsMutation,
+                modals: { confirmSelectNoteSpaceArgs: { $set: null } },
+            })
+            await remoteFn()
+        }
+    }
+
+    private getAnnotListsAfterShareStateChange(params: {
+        previousState: State
+        noteId: string
+        incomingPrivacyState: AnnotationPrivacyState
+        keepListsIfUnsharing?: boolean
+    }) {
+        const existing =
+            params.previousState.searchResults.noteData.byId[params.noteId]
+        const pageData =
+            params.previousState.searchResults.pageData.byId[existing.pageUrl]
+
+        const willUnshare =
+            !params.incomingPrivacyState.public &&
+            (existing.isShared || !params.incomingPrivacyState.protected)
+        const selectivelySharedToPrivateProtected =
+            !existing.isShared &&
+            existing.isBulkShareProtected &&
+            !params.incomingPrivacyState.public &&
+            params.incomingPrivacyState.protected
+
+        // If the note is being made private, we need to remove all shared lists (private remain)
+        if (
+            (willUnshare && !params.keepListsIfUnsharing) ||
+            selectivelySharedToPrivateProtected
+        ) {
+            return existing.lists.filter(
+                (listId) =>
+                    params.previousState.listsSidebar.listData[listId]
+                        ?.remoteId == null,
+            )
+        } else if (willUnshare && params.keepListsIfUnsharing) {
+            return [...new Set([...pageData.lists, ...existing.lists])]
+        }
+
+        return existing.lists
+    }
+
     updateNoteShareInfo: EventHandler<'updateNoteShareInfo'> = async ({
         event,
         previousState,
     }) => {
-        const prev = previousState.searchResults.noteData.byId[event.noteId]
+        const privacyState = getAnnotationPrivacyState(event.privacyLevel)
+
+        const lists = this.getAnnotListsAfterShareStateChange({
+            previousState,
+            noteId: event.noteId,
+            incomingPrivacyState: privacyState,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+        })
+
         this.emitMutation({
             searchResults: {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isShared: { $set: event.isShared },
+                            isShared: { $set: privacyState.public },
                             isBulkShareProtected: {
-                                $set: !!(
-                                    event.isProtected ??
-                                    prev.isBulkShareProtected
-                                ),
+                                $set:
+                                    privacyState.protected ||
+                                    !!event.keepListsIfUnsharing,
                             },
+                            lists: { $set: lists },
                         },
                     },
                 },
@@ -1646,47 +1911,32 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.showShareOnboardingIfNeeded()
         }
 
-        if (navigator.platform === 'MacIntel') {
-            const immediateShare =
-                event.mouseEvent.metaKey && event.mouseEvent.altKey
-            this.emitMutation({
-                searchResults: {
-                    noteData: {
-                        byId: {
-                            [event.noteId]: {
-                                shareMenuShowStatus: {
-                                    $set: event.shouldShow
-                                        ? immediateShare
-                                            ? 'show-n-share'
-                                            : 'show'
-                                        : 'hide',
-                                },
+        const immediateShare =
+            (event.platform === 'MacIntel'
+                ? event.mouseEvent.metaKey
+                : event.mouseEvent.ctrlKey) && event.mouseEvent.altKey
+
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            shareMenuShowStatus: {
+                                $set: event.shouldShow
+                                    ? immediateShare
+                                        ? 'show-n-share'
+                                        : 'show'
+                                    : 'hide',
                             },
                         },
                     },
                 },
-            })
-        } else {
-            const immediateShare =
-                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
-            this.emitMutation({
-                searchResults: {
-                    noteData: {
-                        byId: {
-                            [event.noteId]: {
-                                shareMenuShowStatus: {
-                                    $set: event.shouldShow
-                                        ? immediateShare
-                                            ? 'show-n-share'
-                                            : 'show'
-                                        : 'hide',
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-        }
+            },
+            modals: {
+                confirmPrivatizeNoteArgs: { $set: null },
+                confirmSelectNoteSpaceArgs: { $set: null },
+            },
+        })
     }
 
     private async showShareOnboardingIfNeeded(now = Date.now()) {
@@ -1728,9 +1978,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { comment, tags } = previousState.searchResults.noteData.byId[
-            event.noteId
-        ]
+        const {
+            comment,
+            tags,
+            lists,
+        } = previousState.searchResults.noteData.byId[event.noteId]
 
         this.emitMutation({
             searchResults: {
@@ -1740,8 +1992,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                             isEditing: { $set: false },
                             editNoteForm: {
                                 isTagPickerShown: { $set: false },
+                                isListPickerShown: { $set: false },
                                 inputValue: { $set: comment ?? '' },
                                 tags: { $set: tags ?? [] },
+                                lists: { $set: lists ?? [] },
                             },
                         },
                     },
@@ -1756,10 +2010,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const {
             editNoteForm,
-            ...noteData
+            ...existing
         } = previousState.searchResults.noteData.byId[event.noteId]
-        const tagsHaveChanged = haveTagsChanged(
-            noteData.tags,
+        const tagsHaveChanged = haveArraysChanged(
+            existing.tags,
             editNoteForm.tags,
         )
 
@@ -1773,6 +2027,40 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
+                const lists = this.getAnnotListsAfterShareStateChange({
+                    previousState,
+                    noteId: event.noteId,
+                    keepListsIfUnsharing: event.keepListsIfUnsharing,
+                    incomingPrivacyState: {
+                        public: event.shouldShare,
+                        protected: !!event.isProtected,
+                    },
+                })
+
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    isEditing: { $set: false },
+                                    tags: { $set: editNoteForm.tags },
+                                    isShared: { $set: event.shouldShare },
+                                    comment: { $set: editNoteForm.inputValue },
+                                    isBulkShareProtected: {
+                                        $set:
+                                            event.isProtected ||
+                                            !!event.keepListsIfUnsharing,
+                                    },
+                                    lists: { $set: lists },
+                                },
+                            },
+                        },
+                    },
+                    modals: {
+                        confirmPrivatizeNoteArgs: { $set: null },
+                    },
+                })
+
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
@@ -1785,6 +2073,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,
+                    keepListsIfUnsharing: event.keepListsIfUnsharing,
                 })
 
                 if (tagsHaveChanged) {
@@ -1793,24 +2082,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         tags: editNoteForm.tags,
                     })
                 }
-
-                this.emitMutation({
-                    searchResults: {
-                        noteData: {
-                            byId: {
-                                [event.noteId]: {
-                                    isEditing: { $set: false },
-                                    tags: { $set: editNoteForm.tags },
-                                    isShared: { $set: event.shouldShare },
-                                    comment: { $set: editNoteForm.inputValue },
-                                    isBulkShareProtected: {
-                                        $set: event.isProtected,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                })
             },
         )
     }
@@ -2244,7 +2515,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
-        console.log('sdd')
         const { fullPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
         )
@@ -2285,6 +2555,59 @@ export class DashboardLogic extends UILogic<State, Events> {
             2000,
         )
     }
+
+    shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const memberAnnotParentPageIds = new Set<string>()
+        const memberPrivateAnnotIds = new Set<string>()
+        for (const noteData of Object.values(
+            previousState.searchResults.noteData.byId,
+        )) {
+            if (noteData.lists.includes(event.listId)) {
+                memberAnnotParentPageIds.add(noteData.pageUrl)
+
+                if (!noteData.isShared && !noteData.isBulkShareProtected) {
+                    memberPrivateAnnotIds.add(noteData.url)
+                }
+            }
+        }
+
+        const mutation: UIMutation<State['searchResults']> = {
+            pageData: { byId: {} },
+            noteData: { byId: {} },
+        }
+
+        for (const pageId of memberAnnotParentPageIds) {
+            mutation.pageData = {
+                ...mutation.pageData,
+                byId: {
+                    ...(mutation.pageData as any).byId,
+                    [pageId]: { lists: { $push: [event.listId] } },
+                },
+            }
+        }
+
+        for (const noteId of memberPrivateAnnotIds) {
+            mutation.noteData = {
+                ...mutation.noteData,
+                byId: {
+                    ...(mutation.noteData as any).byId,
+                    [noteId]: { isBulkShareProtected: { $set: true } },
+                },
+            }
+        }
+
+        this.emitMutation({
+            searchResults: mutation,
+            listsSidebar: {
+                listData: {
+                    [event.listId]: {
+                        remoteId: { $set: event.remoteId },
+                    },
+                },
+            },
+        })
+    }
+
     changeListName: EventHandler<'changeListName'> = async ({
         event,
         previousState,
@@ -2294,20 +2617,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (!listId) {
             throw new Error('No list ID is set for editing')
         }
-        const oldName = previousState.listsSidebar.listData[listId].name
+        const oldName = previousState.listsSidebar.listData[listId]?.name ?? ''
         const newName = event.value.trim()
 
-        if (!newName.length) {
+        if (newName === oldName) {
+            return
+        } else if (!newName.length) {
             this.emitMutation({
                 listsSidebar: {
                     editListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                        $set: EMPTY_LIST_NAME_ERR_MSG,
                     },
                 },
             })
-            return
-        } else if (newName === oldName) {
-            return
         } else if (
             !isListNameUnique(newName, previousState.listsSidebar, {
                 listIdToSkip: listId,
@@ -2320,32 +2642,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             })
-            return
         } else {
-            await executeUITask(
-                this,
-                (taskState) => ({
-                    listsSidebar: { listEditState: { $set: taskState } },
-                }),
-                async () => {
-                    console.log('changeListName about to change state', {
-                        event,
-                        previousState,
-                        oldName,
-                        newName,
-                    })
-                    this.emitMutation({
-                        listsSidebar: {
-                            editListErrorMessage: {
-                                $set: null,
-                            },
-                            listData: {
-                                [listId]: { name: { $set: newName } },
-                            },
-                        },
-                    })
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: { $set: null },
+                    listData: {
+                        [listId]: { name: { $set: newName } },
+                    },
                 },
-            )
+            })
         }
     }
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
@@ -2390,7 +2695,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             })
-            return
         } else {
             await executeUITask(
                 this,
@@ -2425,7 +2729,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelListEdit: EventHandler<'cancelListEdit'> = async ({
         previousState,
     }) => {
-        console.log('cancelListEdit', { previousState })
         const { editingListId: listId } = previousState.listsSidebar
 
         if (!listId) {

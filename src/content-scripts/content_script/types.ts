@@ -18,7 +18,10 @@ export interface ContentScriptRegistry {
 }
 
 export type SidebarScriptMain = (
-    dependencies: Omit<SidebarContainerDependencies, 'pageUrl'>,
+    dependencies: Omit<
+        SidebarContainerDependencies,
+        'pageUrl' | 'sidebarContext'
+    >,
 ) => Promise<void>
 
 export type RibbonScriptMain = (

@@ -54,9 +54,16 @@ async function insertTestData({
     const coll1Id = await customLists.createCustomList({
         name: DATA.coll1,
     })
+    const coll2Id = await customLists.createCustomList({
+        name: DATA.coll2,
+    })
     await customLists.createCustomList({ name: DATA.coll2 })
-    const res = await annotationStorage.insertAnnotToList({
+    await annotationStorage.insertAnnotToList({
         listId: coll1Id,
+        url: DATA.hybrid.url,
+    })
+    await annotationStorage.insertAnnotToList({
+        listId: coll2Id,
         url: DATA.hybrid.url,
     })
 
@@ -94,6 +101,16 @@ describe('Annotations storage', () => {
             expect(tags).not.toBeNull()
             expect(tags.length).toBe(2)
             assertTag(tags[0], DATA.tag1)
+        })
+
+        test('fetch list entries for an annotation', async () => {
+            const { annotationStorage } = await setupTest()
+
+            const url = DATA.hybrid.url
+            const lists = await annotationStorage.findListEntriesByUrl({ url })
+            expect(lists).toBeDefined()
+            expect(lists).not.toBeNull()
+            expect(lists.length).toBe(2)
         })
 
         test('fetch privacy level for an annotation', async () => {
@@ -380,7 +397,7 @@ describe('Annotations storage', () => {
                     url,
                 })
 
-                expect(before.length).toBe(1)
+                expect(before.length).toBe(2)
                 await annotationStorage.deleteListEntriesByUrl({ url })
                 const after = await annotationStorage.findListEntriesByUrl({
                     url,

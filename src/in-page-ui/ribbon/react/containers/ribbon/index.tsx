@@ -99,8 +99,20 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                contentSharingBG={this.props.contentSharing}
+                spacesBG={this.props.customLists}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
+                getListDetailsById={(id) => {
+                    const { annotationsCache } = this.props
+                    return {
+                        name:
+                            annotationsCache.listData[id]?.name ??
+                            'Missing list',
+                        isShared:
+                            annotationsCache.listData[id]?.remoteId != null,
+                    }
+                }}
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
@@ -110,7 +122,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
                 isExpanded={this.props.state === 'visible'}
-                hasAnnotations={this.state.hasAnnotations}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
@@ -155,6 +166,8 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('changeComment', { value }),
                     updateCommentBoxTags: (value) =>
                         this.processEvent('updateCommentBoxTags', { value }),
+                    updateCommentBoxLists: (value) =>
+                        this.processEvent('updateCommentBoxLists', { value }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,
@@ -192,15 +205,32 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.normalizedPageUrl,
                         }),
-                    queryEntries: (query) =>
-                        this.props.customLists.searchForListSuggestions({
-                            query,
+
+                    selectEntry: (id) =>
+                        this.processEvent('updateLists', {
+                            value: { added: id, deleted: null, selected: [] },
                         }),
-                    loadDefaultSuggestions: this.props.customLists
-                        .fetchInitialListSuggestions,
-                    loadRemoteListNames: async () => {
-                        const remoteLists = await this.props.contentSharing.getAllRemoteLists()
-                        return remoteLists.map((list) => list.name)
+                    unselectEntry: (id) =>
+                        this.processEvent('updateLists', {
+                            value: { added: null, deleted: id, selected: [] },
+                        }),
+                    createNewEntry: async (name) => {
+                        const listId = await this.props.customLists.createCustomList(
+                            { name },
+                        )
+                        this.props.annotationsCache.addNewListData({
+                            name,
+                            id: listId,
+                            remoteId: null,
+                        })
+                        await this.processEvent('updateLists', {
+                            value: {
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                            },
+                        })
+                        return listId
                     },
                 }}
                 search={{

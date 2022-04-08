@@ -17,6 +17,10 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import {
+    List,
+    ListEntry,
+} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -91,10 +95,25 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: { $in: '$urls:array:pk' } },
             },
+            findListEntry: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObject',
+                args: { url: '$url:pk', listId: '$listId:pk' },
+            },
             findListEntriesByUrl: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'findObjects',
                 args: { url: '$url:pk' },
+            },
+            findListEntriesByUrls: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$urls:pk' } },
+            },
+            findListEntriesByList: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { listId: '$listId:pk' },
             },
             createAnnotationForList: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
@@ -163,10 +182,20 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { url: { $in: '$annotationUrls:string[]' } },
             },
+            listAnnotationListsForAnnotations: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: { $in: '$annotationUrls:string[]' } },
+            },
             listAnnotationBookmarksForAnnotations: {
                 collection: AnnotationStorage.BMS_COLL,
                 operation: 'findObjects',
                 args: { url: { $in: '$annotationUrls:string[]' } },
+            },
+            findListById: {
+                collection: AnnotationStorage.LISTS_COLL,
+                operation: 'findObject',
+                args: { id: '$id:pk' },
             },
         },
     })
@@ -178,10 +207,12 @@ export default class AnnotationStorage extends StorageModule {
     async listAnnotationsByPageUrl({
         pageUrl,
         withTags,
+        withLists,
         withBookmarks,
     }: {
         pageUrl: string
         withTags?: boolean
+        withLists?: boolean
         withBookmarks?: boolean
     }) {
         pageUrl = normalizeUrl(pageUrl)
@@ -195,6 +226,7 @@ export default class AnnotationStorage extends StorageModule {
         const annotationUrls = annotations.map((annotation) => annotation.url)
         let annotationsBookmarkMap = new Map<string, boolean>()
         let annotationsTagMap = new Map<string, string[]>()
+        let annotationsListMap = new Map<string, number[]>()
 
         if (withBookmarks !== false) {
             annotationsBookmarkMap = new Map(
@@ -222,13 +254,30 @@ export default class AnnotationStorage extends StorageModule {
             }
         }
 
-        if (annotationsTagMap.size > 0 || annotationsBookmarkMap.size > 0) {
-            annotations.forEach((annotation) => {
-                annotation.tags = annotationsTagMap.get(annotation.url) ?? []
-                annotation.isBookmarked =
-                    annotationsBookmarkMap.get(annotation.url) ?? false
-            })
+        if (withLists !== false) {
+            const annotationLists: AnnotListEntry[] = await this.operation(
+                'listAnnotationListsForAnnotations',
+                {
+                    annotationUrls,
+                },
+            )
+
+            annotationsListMap = new Map()
+            for (const list of annotationLists) {
+                const prev = annotationsListMap.get(list.url) ?? []
+                const customList: List = await this.operation('findListById', {
+                    id: list.listId,
+                })
+                annotationsListMap.set(list.url, [...prev, customList.id])
+            }
         }
+
+        annotations.forEach((annotation) => {
+            annotation.tags = annotationsTagMap.get(annotation.url) ?? []
+            annotation.isBookmarked =
+                annotationsBookmarkMap.get(annotation.url) ?? false
+            annotation.lists = annotationsListMap.get(annotation.url) ?? []
+        })
 
         return annotations
     }
@@ -266,6 +315,13 @@ export default class AnnotationStorage extends StorageModule {
         })
 
         return [object.listId, object.url]
+    }
+
+    async ensureAnnotInList({ listId, url }: AnnotListEntry) {
+        const existing = await this.operation('findListEntry', { listId, url })
+        if (!existing) {
+            await this.insertAnnotToList({ listId, url })
+        }
     }
 
     async removeAnnotFromList({ listId, url }: AnnotListEntry) {
@@ -340,7 +396,7 @@ export default class AnnotationStorage extends StorageModule {
         comment,
         selector,
         createdWhen = new Date(),
-    }: Omit<Annotation, 'tags'>) {
+    }: Omit<Annotation, 'tags' | 'lists'>) {
         if (!body?.length && !comment?.length) {
             throw new Error(
                 'Failed create annotation attempt - no highlight or comment supplied',
@@ -429,5 +485,36 @@ export default class AnnotationStorage extends StorageModule {
 
     findListEntriesByUrl({ url }: { url: string }): Promise<AnnotListEntry[]> {
         return this.operation('findListEntriesByUrl', { url })
+    }
+
+    async findListEntriesByList(args: {
+        listId: number
+    }): Promise<AnnotListEntry[]> {
+        const listEntries: AnnotListEntry[] = await this.operation(
+            'findListEntriesByList',
+            { listId: args.listId },
+        )
+        return listEntries
+    }
+
+    async findListEntriesByUrls({
+        annotationUrls,
+    }: {
+        annotationUrls: string[]
+    }): Promise<{ [annotationUrl: string]: AnnotListEntry[] }> {
+        const listEntries: AnnotListEntry[] = await this.operation(
+            'findListEntriesByUrls',
+            { urls: annotationUrls },
+        )
+        const listEntriesByAnnot: {
+            [annotationUrl: string]: AnnotListEntry[]
+        } = {}
+
+        for (const entry of listEntries) {
+            const prev = listEntriesByAnnot[entry.url] ?? []
+            listEntriesByAnnot[entry.url] = [...prev, entry]
+        }
+
+        return listEntriesByAnnot
     }
 }

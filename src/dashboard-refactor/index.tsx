@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { browser } from 'webextension-polyfill-ts'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
+import type { UIMutation } from 'ui-logic-core'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -44,7 +45,18 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
-// import GlobalFonts from '../../fonts/Inter/inter'
+import ConfirmModal from 'src/common-ui/components/ConfirmModal'
+import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
+import {
+    PRIVATIZE_ANNOT_MSG,
+    SELECT_SPACE_ANNOT_MSG,
+    PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    PRIVATIZE_ANNOT_AFFIRM_LABEL,
+    SELECT_SPACE_ANNOT_SUBTITLE,
+    SELECT_SPACE_NEGATIVE_LABEL,
+    SELECT_SPACE_AFFIRM_LABEL,
+} from 'src/overview/sharing/constants'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 export interface Props extends DashboardDependencies {}
 
@@ -116,14 +128,20 @@ export class DashboardContainer extends StatefulUIElement<
             {
                 contentSharing: props.contentShareBG,
                 annotations: props.annotationsBG,
+                customLists: props.listsBG,
                 tags: props.tagsBG,
             },
             { skipPageIndexing: true },
         )
     }
 
+    private getListDetailsById: ListDetailsGetter = (id) => ({
+        name: this.state.listsSidebar.listData[id]?.name ?? 'Missing list',
+        isShared: this.state.listsSidebar.listData[id]?.remoteId != null,
+    })
+
     private getListDetailsProps = (): ListDetailsProps | null => {
-        const { listsSidebar, searchResults } = this.state
+        const { listsSidebar } = this.state
 
         if (
             !listsSidebar.selectedListId ||
@@ -150,6 +168,26 @@ export class DashboardContainer extends StatefulUIElement<
                       })
                 : undefined,
         }
+    }
+
+    // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
+    private async createNewListViaPicker(name: string): Promise<number> {
+        const listId = await this.props.listsBG.createCustomList({ name })
+        this.processMutation({
+            listsSidebar: {
+                listData: {
+                    $apply: (listData) => ({
+                        ...listData,
+                        [listId]: {
+                            name,
+                            id: listId,
+                            isOwnedList: true,
+                        },
+                    }),
+                },
+            },
+        })
+        return listId
     }
 
     private listsStateToProps = (
@@ -211,10 +249,16 @@ export class DashboardContainer extends StatefulUIElement<
                 ...this.props.services,
                 contentSharing: this.props.contentShareBG,
             },
-            shareList: shareListAndAllEntries(
-                this.props.contentShareBG,
-                listId,
-            ),
+            shareList: async () => {
+                const {
+                    remoteListId,
+                } = await this.props.contentShareBG.shareList({ listId })
+                await this.processEvent('shareList', {
+                    listId,
+                    remoteId: remoteListId,
+                })
+                return { listId: remoteListId }
+            },
         }))
     }
 
@@ -511,6 +555,8 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                listData={listsSidebar.listData}
+                getListDetailsById={this.getListDetailsById}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {
                         isShown: !searchResults.isSortMenuShown,
@@ -534,8 +580,10 @@ export class DashboardContainer extends StatefulUIElement<
                         listId: listsSidebar.selectedListId,
                     })
                 }
-                updateAllResultNotesShareInfo={(info) =>
-                    this.processEvent('updateAllPageResultNotesShareInfo', info)
+                updateAllResultNotesShareInfo={(shareStates) =>
+                    this.processEvent('updateAllPageResultNotesShareInfo', {
+                        shareStates,
+                    })
                 }
                 selectedListId={listsSidebar.selectedListId}
                 listDetailsProps={this.getListDetailsProps()}
@@ -607,19 +655,18 @@ export class DashboardContainer extends StatefulUIElement<
                     onNotesBtnClick: (day, pageId) => (e) => {
                         const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
-                            this.notesSidebarRef.current.toggleSidebarShowForPageId(
-                                pageData.fullUrl,
-                            )
+                            this.processEvent('setPageNotesShown', {
+                                day,
+                                pageId,
+                                areShown: !searchResults.results[day].pages
+                                    .byId[pageId].areNotesShown,
+                            })
                             return
                         }
 
-                        this.processEvent('setPageNotesShown', {
-                            day,
-                            pageId,
-                            areShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].areNotesShown,
-                        })
+                        this.notesSidebarRef.current.toggleSidebarShowForPageId(
+                            pageData.fullUrl,
+                        )
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
@@ -676,6 +723,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: 'tags',
                         }),
+                    onListsHover: (day, pageId) => () =>
+                        this.processEvent('setPageHover', {
+                            day,
+                            pageId,
+                            hover: 'lists',
+                        }),
                     onUnhover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
@@ -695,12 +748,14 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onPageDrop: (day, pageId) => () =>
                         this.processEvent('dropPage', { day, pageId }),
-                    updatePageNotesShareInfo: (day, pageId) => (info) =>
+                    updatePageNotesShareInfo: (day, pageId) => (shareStates) =>
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
                             pageId,
-                            ...info,
+                            shareStates,
                         }),
+                    createNewList: (day, pageId) => async (name) =>
+                        this.createNewListViaPicker(name),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -719,6 +774,8 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                 }}
                 newNoteInteractionProps={{
+                    getListDetailsById: (day, pageId) =>
+                        this.getListDetailsById,
                     onCancel: (day, pageId) => () =>
                         this.processEvent('cancelPageNewNote', {
                             day,
@@ -735,6 +792,28 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                             tags,
+                        }),
+                    createNewList: (day, pageId) => async (name) =>
+                        this.createNewListViaPicker(name),
+                    addPageToList: (day, pageId) => (listId) =>
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists: [
+                                ...this.state.searchResults.results[day].pages
+                                    .byId[pageId].newNoteForm.lists,
+                                listId,
+                            ],
+                        }),
+                    removePageFromList: (day, pageId) => (listId) =>
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists: this.state.searchResults.results[
+                                day
+                            ].pages.byId[pageId].newNoteForm.lists.filter(
+                                (id) => id !== listId,
+                            ),
                         }),
                     onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
@@ -756,12 +835,30 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelNoteEdit', {
                             noteId,
                         }),
-                    onEditConfirm: (noteId) => (shouldShare, isProtected) =>
-                        this.processEvent('saveNoteEdit', {
-                            noteId,
-                            shouldShare,
-                            isProtected,
-                        }),
+                    onEditConfirm: (noteId) => (showExternalConfirmations) => (
+                        shouldShare,
+                        isProtected,
+                        keepListsIfUnsharing,
+                    ) => {
+                        const prev = this.state.searchResults.noteData.byId[
+                            noteId
+                        ]
+                        const toMakeNonPublic =
+                            showExternalConfirmations &&
+                            prev.isShared &&
+                            !shouldShare
+                        return this.processEvent(
+                            toMakeNonPublic
+                                ? 'setPrivatizeNoteConfirmArgs'
+                                : 'saveNoteEdit',
+                            {
+                                noteId,
+                                shouldShare,
+                                isProtected,
+                                keepListsIfUnsharing,
+                            },
+                        )
+                    },
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
                     onTagPickerBtnClick: (noteId) => () =>
@@ -769,6 +866,12 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
+                        }),
+                    onListPickerBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            isShown: !searchResults.noteData.byId[noteId]
+                                .isListPickerShown,
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
@@ -784,6 +887,32 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     updateTags: (noteId) => (args) =>
                         this.processEvent('setNoteTags', { ...args, noteId }),
+                    updateLists: (noteId) => (args) => {
+                        const {
+                            isShared: isAnnotShared,
+                        } = this.state.searchResults.noteData.byId[noteId]
+                        const isListShared =
+                            this.state.listsSidebar.listData[
+                                args.added ?? args.deleted
+                            ]?.remoteId != null
+
+                        return this.processEvent(
+                            isAnnotShared &&
+                                isListShared &&
+                                args.deleted == null &&
+                                args.options?.showExternalConfirmations
+                                ? 'setSelectNoteSpaceConfirmArgs'
+                                : 'setNoteLists',
+                            {
+                                ...args,
+                                noteId,
+                                protectAnnotation:
+                                    args.options?.protectAnnotation,
+                            },
+                        )
+                    },
+                    createNewList: (noteId) => async (name) =>
+                        this.createNewListViaPicker(name),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
@@ -799,14 +928,16 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setNoteShareMenuShown', {
                             mouseEvent,
                             noteId,
+                            platform: navigator.platform,
                             shouldShow:
                                 searchResults.noteData.byId[noteId]
                                     .shareMenuShowStatus === 'hide',
                         }),
-                    updateShareInfo: (noteId) => (info) =>
+                    updateShareInfo: (noteId) => (state, opts) =>
                         this.processEvent('updateNoteShareInfo', {
                             noteId,
-                            ...info,
+                            privacyLevel: state.privacyLevel,
+                            keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
                 }}
                 searchCopyPasterProps={{
@@ -829,6 +960,51 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderModals() {
         const { modals: modalsState, listsSidebar } = this.state
+
+        if (modalsState.confirmPrivatizeNoteArgs) {
+            return (
+                <ConfirmModal
+                    isShown
+                    onClose={() =>
+                        this.processEvent('setPrivatizeNoteConfirmArgs', null)
+                    }
+                >
+                    <ConfirmDialog
+                        titleText={PRIVATIZE_ANNOT_MSG}
+                        negativeLabel={PRIVATIZE_ANNOT_NEGATIVE_LABEL}
+                        affirmativeLabel={PRIVATIZE_ANNOT_AFFIRM_LABEL}
+                        handleConfirmation={(affirmative) => () =>
+                            this.processEvent('saveNoteEdit', {
+                                ...modalsState.confirmPrivatizeNoteArgs,
+                                keepListsIfUnsharing: !affirmative,
+                            })}
+                    />
+                </ConfirmModal>
+            )
+        }
+
+        if (modalsState.confirmSelectNoteSpaceArgs) {
+            return (
+                <ConfirmModal
+                    isShown
+                    onClose={() =>
+                        this.processEvent('setSelectNoteSpaceConfirmArgs', null)
+                    }
+                >
+                    <ConfirmDialog
+                        titleText={SELECT_SPACE_ANNOT_MSG}
+                        subTitleText={SELECT_SPACE_ANNOT_SUBTITLE}
+                        affirmativeLabel={SELECT_SPACE_AFFIRM_LABEL}
+                        negativeLabel={SELECT_SPACE_NEGATIVE_LABEL}
+                        handleConfirmation={(affirmative) => () =>
+                            this.processEvent('setNoteLists', {
+                                ...modalsState.confirmSelectNoteSpaceArgs,
+                                protectAnnotation: affirmative,
+                            })}
+                    />
+                </ConfirmModal>
+            )
+        }
 
         if (modalsState.deletingListId) {
             return (

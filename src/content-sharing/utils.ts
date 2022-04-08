@@ -1,3 +1,5 @@
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+
 function getBaseUrl() {
     if (process.env.NODE_ENV === 'production') {
         return `https://memex.social`

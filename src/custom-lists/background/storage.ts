@@ -72,6 +72,11 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObject',
                     args: { id: '$id:pk' },
                 },
+                findListsByIds: {
+                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                    operation: 'findObjects',
+                    args: { id: { $in: '$ids:array' } },
+                },
                 findListEntriesByListId: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'findObjects',
@@ -89,6 +94,11 @@ export default class CustomListStorage extends StorageModule {
                         listId: { $in: '$listIds:array' },
                         pageUrl: '$url:string',
                     },
+                },
+                findListEntry: {
+                    collection: CustomListStorage.LIST_ENTRIES_COLL,
+                    operation: 'findObject',
+                    args: { pageUrl: '$pageUrl:string', listId: '$listId:int' },
                 },
                 findListByNameIgnoreCase: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -211,16 +221,12 @@ export default class CustomListStorage extends StorageModule {
         return prepared
     }
 
-    async fetchListById(id: number | string): Promise<PageList | null> {
-        // This exists like this as I made a mistake where joined lists will be created with a string ID,
-        //  while all others will have a number ID :/
-        const foundByString = await this.operation('findListById', {
-            id: id.toString(),
-        })
-        if (foundByString != null) {
-            return foundByString
-        }
-        return this.operation('findListById', { id: Number(id) })
+    async fetchListById(id: number): Promise<PageList | null> {
+        return this.operation('findListById', { id })
+    }
+
+    async fetchListByIds(ids: number[]): Promise<PageList[]> {
+        return this.operation('findListsByIds', { ids })
     }
 
     async fetchListWithPagesById(id: number) {
@@ -237,6 +243,13 @@ export default class CustomListStorage extends StorageModule {
             pages.map((p) => p.fullUrl),
             pages.length > 0,
         )
+    }
+
+    async fetchListEntry(
+        listId: number,
+        pageUrl: string,
+    ): Promise<PageListEntry | null> {
+        return this.operation('findListEntry', { listId, pageUrl })
     }
 
     async fetchListPagesById({
@@ -285,11 +298,13 @@ export default class CustomListStorage extends StorageModule {
         name,
         isDeletable = true,
         isNestable = true,
+        createdAt = new Date(),
     }: {
         id: number
         name: string
         isDeletable?: boolean
         isNestable?: boolean
+        createdAt?: Date
     }): Promise<number> {
         const { object } = await this.operation('createList', {
             id,
@@ -297,7 +312,7 @@ export default class CustomListStorage extends StorageModule {
             isNestable,
             isDeletable,
             searchableName: name,
-            createdAt: new Date(),
+            createdAt,
         })
 
         return object.id
@@ -380,9 +395,12 @@ export default class CustomListStorage extends StorageModule {
             },
         )
 
-        const suggestedLists = await this.operation('findListsIncluding', {
-            includedIds: suggestions.map(({ pk }) => pk),
-        })
+        const suggestedLists: PageList[] = await this.operation(
+            'findListsIncluding',
+            {
+                includedIds: suggestions.map(({ pk }) => pk),
+            },
+        )
 
         return suggestedLists.filter(CustomListStorage.filterOutSpecialLists)
     }

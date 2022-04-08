@@ -219,6 +219,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                     DATA.HIGHLIGHT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -230,7 +231,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [SPECIAL_LIST_NAMES.INBOX],
+                                        lists: [SPECIAL_LIST_IDS.INBOX],
                                         title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -298,6 +299,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -309,7 +311,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [SPECIAL_LIST_NAMES.INBOX],
+                                        lists: [SPECIAL_LIST_IDS.INBOX],
                                         title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -432,6 +434,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -508,6 +511,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -524,7 +528,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: 'lorem.com',
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [SPECIAL_LIST_NAMES.INBOX],
+                                        lists: [SPECIAL_LIST_IDS.INBOX],
                                         title: DATA.PAGE_1.title,
                                         url: 'lorem.com',
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -628,6 +632,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -644,7 +649,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         pageId: DATA.PAGE_1.url,
                                         screenshot: undefined,
                                         tags: [],
-                                        lists: [SPECIAL_LIST_NAMES.INBOX],
+                                        lists: [SPECIAL_LIST_IDS.INBOX],
                                         title: DATA.PAGE_1.title,
                                         url: DATA.PAGE_1.url,
                                         fullUrl: DATA.PAGE_1.fullUrl,
@@ -687,13 +692,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
                             })
-                            await directLinking(setup).insertAnnotToList(
-                                {},
-                                {
-                                    listId,
-                                    url: annotUrl,
-                                },
-                            )
+                            // await directLinking(setup).insertAnnotToList(
+                            //     {},
+                            //     {
+                            //         listId,
+                            //         url: annotUrl,
+                            //     },
+                            // )
                         },
                         expectedStorageChanges: {
                             annotBookmarks: (): StorageCollectionDiff => ({
@@ -714,16 +719,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     },
                                 },
                             }),
-                            annotListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${annotUrl}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        listId,
-                                        url: annotUrl,
-                                        createdAt: expect.any(Date),
-                                    },
-                                },
-                            }),
+                            // annotListEntries: (): StorageCollectionDiff => ({
+                            //     [`[${listId},"${annotUrl}"]`]: {
+                            //         type: 'create',
+                            //         object: {
+                            //             listId,
+                            //             url: annotUrl,
+                            //             createdAt: expect.any(Date),
+                            //         },
+                            //     },
+                            // }),
                             customLists: (): StorageCollectionDiff => ({
                                 [listId]: {
                                     type: 'create',
@@ -763,11 +768,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                     type: 'delete',
                                 },
                             }),
-                            annotListEntries: (): StorageCollectionDiff => ({
-                                [`[${listId},"${annotUrl}"]`]: {
-                                    type: 'delete',
-                                },
-                            }),
+                            // annotListEntries: (): StorageCollectionDiff => ({
+                            //     [`[${listId},"${annotUrl}"]`]: {
+                            //         type: 'delete',
+                            //     },
+                            // }),
                         },
                         postCheck: async ({ setup }) => {
                             expect(
@@ -776,9 +781,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             expect(
                                 await findAllObjects('annotBookmarks', setup),
                             ).toEqual([])
-                            expect(
-                                await findAllObjects('annotListEntries', setup),
-                            ).toEqual([])
+                            // expect(
+                            //     await findAllObjects('annotListEntries', setup),
+                            // ).toEqual([])
                             expect(await findAllObjects('tags', setup)).toEqual(
                                 [],
                             )
@@ -998,6 +1003,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -1193,6 +1199,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_1],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -1226,6 +1233,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [DATA.TAG_2],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -1396,6 +1404,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },
@@ -1429,6 +1438,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_2.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
+                                                lists: [],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },

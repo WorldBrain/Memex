@@ -10,17 +10,12 @@ import DomainPickerLogic, {
     DomainPickerState,
 } from './logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
-import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import {
-    fontSizeNormal,
-    fontSizeSmall,
-} from 'src/common-ui/components/design-library/typography'
-import { EntrySelectedList } from 'src/custom-lists/ui/CollectionPicker/components/EntrySelectedList'
+import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
@@ -31,6 +26,17 @@ class DomainPicker extends StatefulUIElement<
 > {
     constructor(props: DomainPickerDependencies) {
         super(props, new DomainPickerLogic(props))
+    }
+
+    private get selectedDisplayEntries(): string[] {
+        return this.state.selectedEntries
+            .map(
+                (_entry) =>
+                    this.state.displayEntries.find(
+                        (entry) => entry.name === _entry,
+                    )?.name,
+            )
+            .filter((entry) => entry != null)
     }
 
     searchInputPlaceholder =
@@ -153,7 +159,7 @@ class DomainPicker extends StatefulUIElement<
                     before={
                         <EntrySelectedList
                             dataAttributeName="domain-name"
-                            entriesSelected={this.state.selectedEntries}
+                            entriesSelected={this.selectedDisplayEntries}
                             onPress={this.handleSelectedDomainPress}
                         />
                     }

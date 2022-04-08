@@ -6,6 +6,9 @@ export interface SearchEngineInfo {
         above: string
         side: string
         sideAlternative?: string
+        featurePreview?: string
+        searchList?: string
+        productPlacement?: string
     }
     containerType: 'id' | 'class'
 }

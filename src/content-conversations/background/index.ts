@@ -19,22 +19,26 @@ export default class ContentConversationsBackground {
                 options.services.contentConversations.submitReply(params),
             getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
+                sharedListReference,
             }) => {
                 const {
                     contentConversations,
                 } = await this.options.getServerStorage()
                 return contentConversations.getThreadsForAnnotations({
                     annotationReferences: sharedAnnotationReferences,
+                    sharedListReference,
                 })
             },
             getRepliesBySharedAnnotation: async ({
                 sharedAnnotationReference,
+                sharedListReference,
             }) => {
                 const {
                     contentConversations,
                 } = await this.options.getServerStorage()
                 return contentConversations.getRepliesByAnnotation({
                     annotationReference: sharedAnnotationReference,
+                    sharedListReference,
                 })
             },
             getOrCreateThread: async ({

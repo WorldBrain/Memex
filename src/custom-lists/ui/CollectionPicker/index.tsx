@@ -1,23 +1,23 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
-    ListPickerDependencies,
-    ListPickerEvent,
-    ListPickerState,
+    SpacePickerDependencies,
+    SpacePickerEvent,
+    SpacePickerState,
+    SpaceDisplayEntry,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
-import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
-import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import { PickerSearchInput } from './components/SearchInput'
+import AddNewEntry from './components/AddNewEntry'
+import EntryResultsList from './components/EntryResultsList'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
     ActOnAllTabsButton,
-} from 'src/common-ui/GenericPicker/components/EntryRow'
-import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
+} from './components/EntryRow'
+import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -30,49 +30,45 @@ import {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-class ListPicker extends StatefulUIElement<
-    ListPickerDependencies,
-    ListPickerState,
-    ListPickerEvent
+class SpacePicker extends StatefulUIElement<
+    SpacePickerDependencies,
+    SpacePickerState,
+    SpacePickerEvent
 > {
-    static defaultProps: Partial<ListPickerDependencies> = {
-        queryEntries: (query) =>
-            collections.searchForListSuggestions({ query }),
-        loadDefaultSuggestions: collections.fetchInitialListSuggestions,
-        loadRemoteListNames: async () => {
-            const remoteLists = await contentSharing.getAllRemoteLists()
-            return remoteLists.map((list) => list.name)
-        },
+    static defaultProps: Pick<
+        SpacePickerDependencies,
+        'createNewEntry' | 'spacesBG' | 'contentSharingBG'
+    > = {
+        spacesBG: collections,
+        contentSharingBG: contentSharing,
+        createNewEntry: async (name) =>
+            collections.createCustomList({
+                name,
+            }),
     }
 
-    constructor(props: ListPickerDependencies) {
+    constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
     }
 
-    searchInputPlaceholder =
-        this.props.searchInputPlaceholder ?? 'Search Spaces'
-    removeToolTipText = this.props.removeToolTipText ?? 'Remove from list'
-
-    componentDidUpdate(
-        prevProps: ListPickerDependencies,
-        prevState: ListPickerState,
-    ) {
-        if (prevProps.query !== this.props.query) {
-            this.processEvent('searchInputChanged', { query: this.props.query })
-        }
-
-        const prev = prevState.selectedEntries
-        const curr = this.state.selectedEntries
-
-        if (prev.length !== curr.length || !isEqual(prev, curr)) {
-            this.props.onSelectedEntriesChange?.({
-                selectedEntries: this.state.selectedEntries,
-            })
-        }
+    private get shouldShowAddNewEntry(): boolean {
+        const { newEntryName, displayEntries } = this.state
+        const input = newEntryName.trim()
+        return input !== '' && !displayEntries.find((e) => e.name === input)
     }
 
-    private isListRemote = (name: string): boolean =>
-        this.state.remoteLists.has(name)
+    private get selectedDisplayEntries(): Array<{
+        localId: number
+        name: string
+    }> {
+        return this.state.selectedEntries
+            .map((entryId) =>
+                this.state.displayEntries.find(
+                    (entry) => entry.localId === entryId,
+                ),
+            )
+            .filter((entry) => entry != null)
+    }
 
     handleClickOutside = (e) => {
         if (this.props.onClickOutside) {
@@ -84,34 +80,32 @@ class ListPicker extends StatefulUIElement<
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
 
-    handleSearchInputChanged = (query: string) => {
-        this.props.onSearchInputChange?.({ query })
-        return this.processEvent('searchInputChanged', { query })
-    }
+    handleSearchInputChanged = (query: string) =>
+        this.processEvent('searchInputChanged', { query })
 
-    handleSelectedListPress = (list: string) =>
+    handleSelectedListPress = (list: number) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: DisplayEntry) =>
+    handleResultListPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryPress', { entry: list })
 
-    handleResultListAllPress = (list: DisplayEntry) =>
+    handleResultListAllPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
 
-    handleNewListAllPress = () =>
+    handleNewListAllPress: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
         this.processEvent('newEntryAllPress', {
             entry: this.state.newEntryName,
         })
+    }
 
-    handleResultListFocus = (list: DisplayEntry, index?: number) => {
+    handleResultListFocus = (list: SpaceDisplayEntry, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-        const offsetTop = document.getElementById(
-            `ListKeyName-${list.name}-${index}`,
-        ).offsetTop
-        document.getElementById(
-            `ListKeyName-${list.name}-${index}`,
-        ).scrollTop = offsetTop
+        const el = document.getElementById(`ListKeyName-${list.localId}`)
+        if (el != null) {
+            el.scrollTop = el.offsetTop
+        }
     }
 
     handleNewListPress = () => {
@@ -125,25 +119,28 @@ class ListPicker extends StatefulUIElement<
         this.processEvent('keyPress', { key })
     }
 
-    renderListRow = (list: DisplayEntry, index: number) => (
+    renderListRow = (list: SpaceDisplayEntry, index: number) => (
         <EntryRow
+            createdAt={list.createdAt}
             onPress={this.handleResultListPress}
             onPressActOnAll={
                 this.props.actOnAllTabs
-                    ? (t) => this.handleResultListAllPress(t)
+                    ? (t) =>
+                          this.handleResultListAllPress(t as SpaceDisplayEntry)
                     : undefined
             }
             onFocus={this.handleResultListFocus}
-            id={`ID-${list.name}-${index}`}
-            key={`ListKeyName-${list.name}-${index}`}
+            key={`ListKeyName-${list.localId}`}
+            id={`ListKeyName-${list.localId}`}
             index={index}
             name={list.name}
-            selected={list.selected}
+            selected={this.state.selectedEntries.includes(list.localId)}
+            localId={list.localId}
             focused={list.focused}
-            remote={this.isListRemote(list.name)}
+            remoteId={list.remoteId}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText={this.removeToolTipText}
-            actOnAllTooltipText="Add all tabs in window to list"
+            removeTooltipText="Remove from Space"
+            actOnAllTooltipText="Add all tabs in window to Space"
         />
     )
 
@@ -151,7 +148,7 @@ class ListPicker extends StatefulUIElement<
         this.props.actOnAllTabs && (
             <IconStyleWrapper show>
                 <ButtonTooltip
-                    tooltipText="List all tabs in window"
+                    tooltipText="Add all tabs in window to Space"
                     position="left"
                 >
                     <Icon
@@ -190,7 +187,7 @@ class ListPicker extends StatefulUIElement<
         if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
-                    <LoadingIndicator />
+                    <LoadingIndicator size={25} />
                 </LoadingBox>
             )
         }
@@ -198,7 +195,7 @@ class ListPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder={this.searchInputPlaceholder}
+                    searchInputPlaceholder="Search Spaces"
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
@@ -207,8 +204,7 @@ class ListPicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            dataAttributeName="list-name"
-                            entriesSelected={this.state.selectedEntries}
+                            entries={this.selectedDisplayEntries}
                             onPress={this.handleSelectedListPress}
                         />
                     }
@@ -220,14 +216,14 @@ class ListPicker extends StatefulUIElement<
                     emptyView={this.renderEmptyList()}
                     id="listResults"
                 />
-                {this.state.newEntryName !== '' && (
+                {this.shouldShowAddNewEntry && (
                     <AddNewEntry
                         resultItem={
                             <ListResultItem>
                                 {this.state.newEntryName}
                             </ListResultItem>
                         }
-                        onPress={() => this.handleNewListPress()}
+                        onPress={this.handleNewListPress}
                     >
                         {this.renderNewListAllTabsButton()}
                     </AddNewEntry>
@@ -280,13 +276,14 @@ const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 150px;
     width: 100%;
 `
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
     border-radius: 12px;
+    padding: 10px 0px;
 `
 
 const EmptyListsView = styled.div`
@@ -298,4 +295,4 @@ const EmptyListsView = styled.div`
     padding: 20px 15px;
 `
 
-export default onClickOutside(ListPicker)
+export default onClickOutside(SpacePicker)

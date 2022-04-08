@@ -11,27 +11,36 @@ import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
 import type { NormalizedState } from 'src/common-ui/types'
+import type {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick: React.MouseEventHandler
+    onListPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
+    createNewList: (name: string) => Promise<number>
 }
 
 export type PageInteractionProps = Omit<
     CommonInteractionProps,
     'onReplyBtnClick' | 'onEditBtnClick' | 'onCommentChange'
 > & {
-    updatePageNotesShareInfo: (info: NoteShareInfo) => void
+    updatePageNotesShareInfo: (shareStates: AnnotationSharingStates) => void
+    // TODO: Remove before merging to develop. Commented just in case we need to go back
+    // updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
     onMainContentHover: React.MouseEventHandler
     onFooterHover: React.MouseEventHandler
     onTagsHover: React.MouseEventHandler
+    onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
 }
 
@@ -45,12 +54,22 @@ export type PageInteractionAugdProps = {
 
 export type NoteInteractionProps = Omit<
     CommonInteractionProps,
-    'onNotesBtnClick' | 'onListPickerBtnClick'
+    'onNotesBtnClick'
 > & {
-    updateShareInfo: (info: NoteShareInfo) => void
-    updateTags: PickerUpdateHandler
+    updateShareInfo: (
+        info: AnnotationSharingState,
+        opts?: { keepListsIfUnsharing?: boolean },
+    ) => void
+    updateTags: PickerUpdateHandler<string>
+    updateLists: PickerUpdateHandler<number>
     onEditCancel: React.MouseEventHandler
-    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
+    onEditConfirm: (
+        showExternalConfirmations?: boolean,
+    ) => (
+        shouldShare: boolean,
+        isProtected: boolean,
+        keepListsIfUnsharing?: boolean,
+    ) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
@@ -67,8 +86,8 @@ export type NoteInteractionAugdProps = {
 }
 
 export interface PagePickerProps {
-    onListPickerUpdate: PickerUpdateHandler
-    onTagPickerUpdate: PickerUpdateHandler
+    onListPickerUpdate: PickerUpdateHandler<number>
+    onTagPickerUpdate: PickerUpdateHandler<string>
 }
 
 // NOTE: Derived type - edit the original
@@ -85,14 +104,17 @@ export type NotesType = 'search' | 'user' | 'followed'
 
 export interface NoteFormState {
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     inputValue: string
     tags: string[]
+    lists: number[]
 }
 
 export interface NoteData {
     url: string
     pageUrl: string
     tags: string[]
+    lists: number[]
     comment?: string
     highlight?: string
     isEdited?: boolean
@@ -108,7 +130,7 @@ export type PageData = Pick<
     'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
 > & {
     normalizedUrl: string
-    lists: string[]
+    lists: number[]
     displayTime: number
     hasNotes: boolean
     type: 'pdf' | 'page'
@@ -124,7 +146,12 @@ export type NoResultsType =
     | 'stop-words'
     | 'no-results'
     | null
-export type ResultHoverState = 'main-content' | 'footer' | 'tags' | null
+export type ResultHoverState =
+    | 'main-content'
+    | 'footer'
+    | 'tags'
+    | 'lists'
+    | null
 export interface NoteShareInfo {
     isShared: boolean
     isProtected?: boolean
@@ -134,6 +161,7 @@ export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
     editNoteForm: NoteFormState
@@ -239,8 +267,8 @@ export type Events = UIEvent<{
     setPageLists: {
         id: string
         fullPageUrl: string
-        added?: string
-        deleted?: string
+        added?: number
+        deleted?: number
         skipPageIndexing?: boolean
     }
     confirmPageDelete: null
@@ -258,13 +286,16 @@ export type Events = UIEvent<{
     removePageFromList: PageEventArgs
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
-    updatePageNotesShareInfo: PageEventArgs & NoteShareInfo
-    updateAllPageResultNotesShareInfo: NoteShareInfo
+    updatePageNotesShareInfo: PageEventArgs & {
+        shareStates: AnnotationSharingStates
+    }
+    updateAllPageResultNotesShareInfo: { shareStates: AnnotationSharingStates }
 
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
+    setPageNewNoteLists: PageEventArgs & { lists: number[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
@@ -275,15 +306,24 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteListPickerShown: NoteEventArgs & { isShown: boolean }
     setNoteShareMenuShown: NoteEventArgs & {
         shouldShow: boolean
         mouseEvent: React.MouseEvent
+        platform: string
     }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
-    updateNoteShareInfo: NoteEventArgs & NoteShareInfo
-    /** NOTE: Does not mutate state */
+    setNoteLists: NoteEventArgs & {
+        added?: number
+        deleted?: number
+        protectAnnotation?: boolean
+    }
+    updateNoteShareInfo: NoteEventArgs & {
+        privacyLevel: AnnotationPrivacyLevels
+        keepListsIfUnsharing?: boolean
+    }
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
@@ -294,5 +334,6 @@ export type Events = UIEvent<{
     saveNoteEdit: NoteEventArgs & {
         shouldShare: boolean
         isProtected?: boolean
+        keepListsIfUnsharing?: boolean
     }
 }>

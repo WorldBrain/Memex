@@ -104,22 +104,22 @@ const EditableListTitle = styled.input`
 `
 
 const ErrMsg = styled.div`
-color: red;
-width: 100 %;
-text - align: center;
-margin - top: -5px;
-margin - bottom: 5px;
+    color: red;
+    width: 100%;
+    text-align: center;
+    margin-top: -5px;
+    margin-bottom: 5px;
 `
 
 const Container = styled.div<Props>`
-height: 40px;
-width: fill - available;
-display: flex;
-flex - direction: column;
-justify - content: center;
-align - items: flex - start;
-background - color: transparent;
-padding: 10px;
-margin - bottom: 5px;
-margin - top: 5px;
+    height: 40px;
+    width: fill-available;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: transparent;
+    padding: 10px;
+    margin-bottom: 5px;
+    margin-top: 5px;
 `

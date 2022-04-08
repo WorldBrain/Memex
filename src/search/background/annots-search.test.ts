@@ -44,6 +44,7 @@ describe('Annotations search', () => {
     }: BackgroundIntegrationTestSetup) {
         const annotsStorage = backgroundModules.directLinking.annotationStorage
         const customListsBg = backgroundModules.customLists
+        const contentSharingBg = backgroundModules.contentSharing
         fetchPageDataProcessor.mockPage = {
             url: DATA.highlight.object.pageUrl,
             hostname: normalizeUrl(DATA.highlight.object.pageUrl),
@@ -128,13 +129,9 @@ describe('Annotations search', () => {
             id: coll1Id,
             url: DATA.fullPageUrl2,
         })
-        await annotsStorage.insertAnnotToList({
-            listId: coll1Id,
-            url: DATA.hybrid.object.url,
-        })
-        await annotsStorage.insertAnnotToList({
-            listId: coll2Id,
-            url: DATA.highlight.object.url,
+        await contentSharingBg.shareAnnotationToSomeLists({
+            localListIds: [coll1Id],
+            annotationUrl: DATA.highlight.object.url,
         })
 
         // Insert tags
@@ -653,5 +650,13 @@ describe('Annotations search', () => {
 
         expect(resB.docs[0].annotations[0].tags).toEqual([DATA.tag1, DATA.tag2])
         expect(resB.docs[0].annotations[1].tags).toEqual([])
+    })
+
+    test('annotations on page search results should have lists attached', async () => {
+        const { searchBg } = await setupTest()
+
+        const resA = await searchBg.searchAnnotations({ query: 'highlight' })
+        expect(resA.docs[0].annotations[0].lists).toEqual([coll1Id])
+        expect(resA.docs[0].annotations[1]).toBeUndefined()
     })
 })

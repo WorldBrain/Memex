@@ -47,7 +47,6 @@ export interface RibbonContainerState {
     lists: ValuesOf<componentTypes.RibbonListsProps>
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
-    hasAnnotations: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -93,6 +92,7 @@ export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     showCommentBox: false,
     isCommentSaved: false,
     tags: [],
+    lists: [],
 }
 
 export class RibbonContainerLogic extends UILogic<
@@ -135,7 +135,6 @@ export class RibbonContainerLogic extends UILogic<
                 pageHasTags: false,
             },
             lists: {
-                lists: [],
                 showListsPicker: false,
                 pageBelongsToList: false,
             },
@@ -146,16 +145,13 @@ export class RibbonContainerLogic extends UILogic<
             pausing: {
                 isPaused: false,
             },
-            hasAnnotations: false,
         }
     }
 
     init: EventHandler<'init'> = async (incoming) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             const url = await this.dependencies.getPageUrl()
-            this.emitMutation({
-                pageUrl: { $set: url },
-            })
+            this.emitMutation({ pageUrl: { $set: url } })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
@@ -168,9 +164,6 @@ export class RibbonContainerLogic extends UILogic<
         const lists = await this.dependencies.customLists.fetchPageLists({
             url,
         })
-        const annotations = await this.dependencies.annotations.getAllAnnotationsByUrl(
-            { url },
-        )
 
         this.emitMutation({
             pageUrl: { $set: url },
@@ -203,20 +196,11 @@ export class RibbonContainerLogic extends UILogic<
                 pageHasTags: {
                     $set: tags.length > 0,
                 },
-                tags: {
-                    $set: tags,
-                },
             },
             lists: {
                 pageBelongsToList: {
                     $set: lists.length > 0,
                 },
-                lists: {
-                    $set: lists,
-                },
-            },
-            hasAnnotations: {
-                $set: annotations.length > 0,
             },
         })
     }
@@ -373,6 +357,7 @@ export class RibbonContainerLogic extends UILogic<
                 comment,
                 url: annotationUrl,
                 tags: commentBox.tags,
+                lists: commentBox.lists,
             },
             {
                 shouldShare,
@@ -405,6 +390,12 @@ export class RibbonContainerLogic extends UILogic<
         event,
     }) => {
         this.emitMutation({ commentBox: { tags: { $set: event.value } } })
+    }
+
+    updateCommentBoxLists: EventHandler<'updateCommentBoxLists'> = ({
+        event,
+    }) => {
+        this.emitMutation({ commentBox: { lists: { $set: event.value } } })
     }
 
     //
@@ -448,7 +439,7 @@ export class RibbonContainerLogic extends UILogic<
         const backendResult =
             context === 'commentBox'
                 ? Promise.resolve()
-                : this.dependencies.tags.updateTagForPageInCurrentTab({
+                : this.dependencies.tags.updateTagForPage({
                       added: event.value.added,
                       deleted: event.value.deleted,
                       url: previousState.pageUrl,
@@ -460,33 +451,22 @@ export class RibbonContainerLogic extends UILogic<
         if (event.value.added) {
             tagsStateUpdater = (tags) => {
                 const tag = event.value.added
-
                 return tags.includes(tag) ? tags : [...tags, tag]
             }
         }
 
         if (event.value.deleted) {
-            console.log(event)
             tagsStateUpdater = (tags) => {
                 const index = tags.indexOf(event.value.deleted)
                 if (index === -1) {
                     return tags
                 }
 
-                const newTags = [
-                    ...tags.slice(0, index),
-                    ...tags.slice(index + 1),
-                ]
-
-                return newTags
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
             }
         }
-
         this.emitMutation({
-            [context]: {
-                tags: { $apply: tagsStateUpdater },
-                pageHasTags: { $set: event.value.selected.length > 0 },
-            },
+            [context]: { tags: { $apply: tagsStateUpdater } },
         })
 
         return backendResult
@@ -508,49 +488,22 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        let listsStateUpdater: (lists: string[]) => string[]
-
-        if (event.value.added) {
-            listsStateUpdater = (lists) => {
-                const list = event.value.added
-                return lists.includes(list) ? lists : [...lists, list]
-            }
-        }
-
-        if (event.value.deleted) {
-            listsStateUpdater = (lists) => {
-                const index = lists.indexOf(event.value.deleted)
-                if (index === -1) {
-                    return lists
-                }
-
-                const NewLists = [
-                    ...lists.slice(0, index),
-                    ...lists.slice(index + 1),
-                ]
-
-                return NewLists
-            }
-        }
-
-        this.emitMutation({
-            ['lists']: {
-                lists: { $apply: listsStateUpdater },
-                pageBelongsToList: { $set: event.value.selected.length > 0 },
-            },
+        await this.dependencies.annotationsCache.updatePublicAnnotationLists({
+            added: event.value.added,
+            deleted: event.value.deleted,
         })
-
-        return this.dependencies.customLists.updateListForPageInCurrentTab({
+        return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
             url: previousState.pageUrl,
             tabId: this.dependencies.currentTab.id,
+            skipPageIndexing: event.value.skipPageIndexing,
         })
     }
 
     listAllTabs: EventHandler<'listAllTabs'> = ({ event }) => {
         return this.dependencies.customLists.addOpenTabsToList({
-            name: event.value,
+            listId: event.value,
         })
     }
 

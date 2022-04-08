@@ -1,11 +1,5 @@
 import styled from 'styled-components'
 import React from 'react'
-import {
-    colorGrey3,
-    colorGrey4,
-    colorGrey9,
-} from 'src/common-ui/components/design-library/colors'
-import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
@@ -21,8 +15,8 @@ export const BackContainer = (props: Props) => (
             <IconBox>
                 <Icon
                     filePath={icons.arrowRight}
-                    heightAndWidth="16px"
                     onClick={props.onClick}
+                    heightAndWidth="16px"
                 />
             </IconBox>
         </IconBoxBox>

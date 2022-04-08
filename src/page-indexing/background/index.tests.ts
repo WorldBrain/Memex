@@ -11,6 +11,7 @@ import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 export async function indexTestFingerprintedPdf(
     setup: BackgroundIntegrationTestSetup,
     options?: {
+        expectedServerId?: number | string
         fullUrl?: string
         tabId?: number
     },
@@ -42,9 +43,10 @@ export async function indexTestFingerprintedPdf(
             fingerprints,
         },
     )
+    const expectedServerId = options?.expectedServerId ?? 1337
     expect(identifier).toEqual({
-        normalizedUrl: `memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`,
-        fullUrl: `https://memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`,
+        normalizedUrl: `memex.cloud/ct/${expectedServerId}.pdf`,
+        fullUrl: `https://memex.cloud/ct/${expectedServerId}.pdf`,
     })
     injectFakeTabs({
         tabManagement: setup.backgroundModules.tabManagement,

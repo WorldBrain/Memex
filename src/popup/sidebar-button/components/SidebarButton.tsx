@@ -101,12 +101,14 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     width: fill-available;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 10px 5px 20px;
-    height: 55px;
+    padding: 5px 10px;
+    margin: 10px 10px 0px 10px;
+    border-radius: 8px;
+    height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.backgroundColorDarker};
     }
 
     & * {

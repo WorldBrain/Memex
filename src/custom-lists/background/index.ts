@@ -6,7 +6,7 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { SearchIndex } from 'src/search'
-import {
+import type {
     RemoteCollectionsInterface,
     CollectionsSettings,
     PageList,
@@ -22,6 +22,8 @@ import { ServerStorageModules } from 'src/storage/types'
 import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 1000
@@ -43,6 +45,11 @@ export default class CustomListBackground {
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
             services: Pick<Services, 'auth'>
+            // TODO: the fact this needs to be passed down tells me this ideally should be done at a higher level (content sharing BG?)
+            removeChildAnnotationsFromList: (
+                normalizedPageUrl: string,
+                listId: number,
+            ) => Promise<void>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
             >
@@ -56,7 +63,11 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             insertPageToList: async (params) => {
-                await this.setTabIdParamToCurrentTab(params)
+                const currentTab = await this.options.queryTabs?.({
+                    active: true,
+                    currentWindow: true,
+                })
+                params.tabId = currentTab?.[0]?.id
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
@@ -65,7 +76,9 @@ export default class CustomListBackground {
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
+            fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
+            fetchListByName: this.fetchListByName,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
@@ -78,16 +91,10 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
-            updateListForPageInCurrentTab: async (params) => {
-                if (params.tabId == null) {
-                    await this.setTabIdParamToCurrentTab(params)
-                }
-                return this.updateListForPage(params)
-            },
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
 
-        this.localStorage = new BrowserSettingsStore<CollectionsSettings>(
+        this.localStorage = new BrowserSettingsStore(
             options.localBrowserStorage,
             { prefix: 'custom-lists_' },
         )
@@ -95,16 +102,6 @@ export default class CustomListBackground {
 
     generateListId() {
         return Date.now()
-    }
-
-    private async setTabIdParamToCurrentTab<T extends { tabId?: number }>(
-        params: T,
-    ): Promise<void> {
-        const currentTab = await this.options.queryTabs?.({
-            active: true,
-            currentWindow: true,
-        })
-        params.tabId = currentTab?.[0]?.id
     }
 
     private fetchOwnListReferences = async (): Promise<
@@ -260,16 +257,14 @@ export default class CustomListBackground {
         }))
     }
 
-    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
-        skip = 0,
-        limit = 20,
-    }) => {
+    private fetchListsFromReferences = async (
+        references,
+    ): Promise<PageList[]> => {
         const { auth } = this.options.services
         const { contentSharing } = await this.options.getServerStorage()
 
-        const sharedListReferences = await this.fetchFollowedListReferences()
         const sharedLists = await contentSharing.getListsByReferences(
-            sharedListReferences,
+            references,
         )
         const currentUser = await auth.getCurrentUser()!
 
@@ -289,12 +284,28 @@ export default class CustomListBackground {
                 id: sharedList.createdWhen,
                 name: sharedList.title,
                 isFollowed: true,
+                createdAt: new Date(sharedList.createdWhen),
             }))
+    }
+    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
+        const sharedListReferences = await this.fetchFollowedListReferences()
+        return this.fetchListsFromReferences(sharedListReferences)
+    }
+
+    fetchCollaborativeLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+        skip = 0,
+        limit = 20,
+    }) => {
+        const collabListReferences = await this.fetchCollaborativeListReferences()
+        return this.fetchListsFromReferences(collabListReferences)
     }
 
     fetchAllLists = async ({
         skip = 0,
-        limit = 20,
+        limit = 2000,
         skipMobileList = false,
     }): Promise<PageList[]> => {
         return this.storage.fetchAllLists({
@@ -352,26 +363,25 @@ export default class CustomListBackground {
         return this.storage.fetchListIdsByUrl(normalizeUrl(url))
     }
 
-    fetchPageLists = async ({ url }: { url: string }): Promise<string[]> => {
+    fetchPageLists = async ({ url }: { url: string }): Promise<number[]> => {
         const lists = await this.fetchListPagesByUrl({ url })
 
-        return lists.map(({ name }) => name)
+        return lists.map(({ id }) => id)
     }
 
-    updateListSuggestionsCache = async (args: {
-        added?: string
-        removed?: string
-        updated?: [string, string]
+    _updateListSuggestionsCache = async (args: {
+        added?: number
+        removed?: number
     }) => {
         return updateSuggestionsCache({
             ...args,
             suggestionLimit: limitSuggestionsStorageLength,
             getCache: async () => {
-                const suggestions = await this.localStorage.get('suggestions')
+                const suggestions = await this.localStorage.get('suggestionIds')
                 return suggestions ?? []
             },
-            setCache: (suggestions: string[]) =>
-                this.localStorage.set('suggestions', suggestions),
+            setCache: (suggestions) =>
+                this.localStorage.set('suggestionIds', suggestions),
         })
     }
 
@@ -404,17 +414,25 @@ export default class CustomListBackground {
         return this.storage.countInboxUnread()
     }
 
-    createCustomList = async ({ name }: { name: string }): Promise<number> => {
+    createCustomList = async ({
+        name,
+        id: _id,
+        createdAt,
+    }: {
+        name: string
+        id?: number
+        createdAt?: Date
+    }): Promise<number> => {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
-
+        const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
-            id: this.generateListId(),
+            id,
             name,
+            createdAt,
         })
-
-        await this.updateListSuggestionsCache({ added: name })
+        await this._updateListSuggestionsCache({ added: id })
 
         return inserted
     }
@@ -428,8 +446,6 @@ export default class CustomListBackground {
         oldName: string
         newName: string
     }) => {
-        await this.updateListSuggestionsCache({ updated: [oldName, newName] })
-
         return this.storage.updateListName({
             id,
             name: newName,
@@ -437,7 +453,7 @@ export default class CustomListBackground {
     }
 
     insertPageToList = async (
-        params: { url: string } & {
+        params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
             id: number
             tabId?: number
             skipPageIndexing?: boolean
@@ -446,7 +462,10 @@ export default class CustomListBackground {
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
-        const url = params.url
+        const url =
+            'contentIdentifier' in params
+                ? params.contentIdentifier?.fullUrl
+                : params.url
 
         if (!isFullUrl(url)) {
             throw new Error(
@@ -482,8 +501,7 @@ export default class CustomListBackground {
             action: 'addPageToList',
         })
 
-        const list = await this.fetchListById({ id })
-        await this.updateListSuggestionsCache({ added: list.name })
+        await this._updateListSuggestionsCache({ added: id })
 
         return retVal
     }
@@ -499,9 +517,11 @@ export default class CustomListBackground {
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {
-        internalAnalytics.processEvent({
+        await internalAnalytics.processEvent({
             type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
         })
+
+        await this.options.removeChildAnnotationsFromList(url, id)
 
         return this.storage.removePageFromList({
             listId: id,
@@ -511,24 +531,30 @@ export default class CustomListBackground {
 
     fetchInitialListSuggestions = async (
         { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
-    ) => {
-        let suggestions = await this.localStorage.get('suggestions')
+    ): Promise<SpaceDisplayEntry[]> => {
+        const suggestionIds = await this.localStorage.get('suggestionIds')
+        const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
+            localId: l.id,
+            name: l.name,
+            createdAt: l.createdAt.getTime(),
+            focused: false,
+            remoteId: null,
+        })
 
-        if (!suggestions) {
+        if (!suggestionIds) {
             const lists = await this.fetchAllLists({
                 limit,
                 skipMobileList: true,
             })
-            suggestions = lists.map((l) => l.name)
-
-            console['info'](
-                'No cached list suggestions found so loaded suggestions from DB:',
-                suggestions,
+            await this.localStorage.set(
+                'suggestionIds',
+                lists.map((l) => l.id),
             )
-            await this.localStorage.set('suggestions', suggestions)
+            return lists.map(listToDisplayEntry)
         }
 
-        return suggestions.slice(0, limit)
+        const lists = await this.storage.fetchListByIds(suggestionIds)
+        return lists.map(listToDisplayEntry)
     }
 
     fetchListIgnoreCase = async ({ name }: { name: string }) => {
@@ -540,45 +566,40 @@ export default class CustomListBackground {
     searchForListSuggestions = async (args: {
         query: string
         limit?: number
-    }): Promise<string[]> => {
+    }): Promise<Array<Omit<PageList, 'createdAt'> & { createdAt: number }>> => {
         const suggestions = await this.storage.suggestLists(args)
 
-        return suggestions.map(({ name }) => name)
+        return suggestions.map((s) => ({
+            ...s,
+            createdAt: s.createdAt.getTime(),
+        }))
     }
 
-    addOpenTabsToList = async (args: {
-        name: string
-        listId?: number
-        time?: number
-    }) => {
-        if (!args.listId) {
-            const list = await this.fetchListByName({ name: args.name })
-
-            if (!list) {
-                throw new Error('No list found for name:' + args.name)
-            }
-
-            args.listId = list.id
+    addOpenTabsToList = async (args: { listId: number; time?: number }) => {
+        if (!(await this.fetchListById({ id: args.listId }))) {
+            throw new Error('No list found for ID:' + args.listId)
         }
 
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
+            createPage: this.options.pages.indexPage,
             waitForContentIdentifier: this.options.pages
                 .waitForContentIdentifier,
-            createPage: this.options.pages.indexPage,
             time: args.time ?? '$now',
         })
 
-        for (const { fullUrl } of indexed) {
-            await this.storage.insertPageToList({
-                listId: args.listId,
-                fullUrl,
-                pageUrl: normalizeUrl(fullUrl),
-            })
-        }
+        await Promise.all(
+            indexed.map(({ fullUrl }) => {
+                this.storage.insertPageToList({
+                    listId: args.listId,
+                    fullUrl,
+                    pageUrl: normalizeUrl(fullUrl),
+                })
+            }),
+        )
 
-        await this.updateListSuggestionsCache({ added: args.name })
+        await this._updateListSuggestionsCache({ added: args.listId })
     }
 
     removeOpenTabsFromList = async ({ listId }: { listId: number }) => {
@@ -594,30 +615,18 @@ export default class CustomListBackground {
         )
     }
 
-    // Sugar for the List picking UI component
-    updateListForPage = async ({
+    updateListForPage: RemoteCollectionsInterface['updateListForPage'] = async ({
         added,
         deleted,
         url,
         tabId,
         skipPageIndexing,
-    }: {
-        added?: string
-        deleted?: string
-        url: string
-        tabId?: number
-        skipPageIndexing?: boolean
     }) => {
-        const name = added ?? deleted
-        let list = await this.fetchListByName({ name })
-
-        if (!list) {
-            list = { id: await this.createCustomList({ name }) }
-        }
+        const listId = added ?? deleted
 
         if (added) {
             await this.insertPageToList({
-                id: list.id,
+                id: listId,
                 url,
                 tabId,
                 skipPageIndexing,
@@ -625,7 +634,7 @@ export default class CustomListBackground {
         }
 
         if (deleted) {
-            await this.removePageFromList({ id: list.id, url })
+            await this.removePageFromList({ id: listId, url })
         }
     }
 }
