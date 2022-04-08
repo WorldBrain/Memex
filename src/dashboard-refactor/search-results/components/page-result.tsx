@@ -1,4 +1,4 @@
-import React, { PureComponent, HTMLProps } from 'react'
+import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
@@ -23,16 +23,24 @@ import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
+import ListsSegment, {
+    AddSpacesButton,
+} from 'src/common-ui/components/result-item-spaces-segment'
+import type { ListDetailsGetter } from 'src/annotations/types'
 
 export interface Props
     extends PageData,
         PageResult,
         PageInteractionProps,
         PagePickerProps {
+    getListDetailsById: ListDetailsGetter
     onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     filteredbyListID: number
-    shareMenuProps: Omit<ShareMenuProps, 'annotationsBG' | 'contentSharingBG'>
+    shareMenuProps: Omit<
+        ShareMenuProps,
+        'annotationsBG' | 'contentSharingBG' | 'customListsBG'
+    >
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -73,6 +81,47 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.lists.length > 0
     }
 
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
+        return this.props.lists.map((id) => ({
+            id,
+            ...this.props.getListDetailsById(id),
+        }))
+    }
+
+    private renderSpacePicker() {
+        // space picker is separated out to make the Add to Space button contain the call to render the picker
+        if (this.props.isListPickerShown) {
+            return (
+                <div onMouseLeave={this.props.onListPickerBtnClick}>
+                    <HoverBox padding={'0px'} withRelativeContainer>
+                        <CollectionPicker
+                            selectEntry={(listId) =>
+                                this.props.onListPickerUpdate({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                })
+                            }
+                            unselectEntry={(listId) =>
+                                this.props.onListPickerUpdate({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                })
+                            }
+                            createNewEntry={this.props.createNewList}
+                            initialSelectedEntries={() => this.props.lists}
+                            onClickOutside={this.props.onListPickerBtnClick}
+                        />
+                    </HoverBox>
+                </div>
+            )
+        }
+    }
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
@@ -81,18 +130,6 @@ export default class PageResultView extends PureComponent<Props> {
                         onUpdateEntrySelection={this.props.onTagPickerUpdate}
                         initialSelectedEntries={() => this.props.tags}
                         onClickOutside={this.props.onTagPickerBtnClick}
-                    />
-                </HoverBox>
-            )
-        }
-
-        if (this.props.isListPickerShown) {
-            return (
-                <HoverBox right="0" withRelativeContainer>
-                    <CollectionPicker
-                        onUpdateEntrySelection={this.props.onListPickerUpdate}
-                        initialSelectedEntries={() => this.props.lists}
-                        onClickOutside={this.props.onListPickerBtnClick}
                     />
                 </HoverBox>
             )
@@ -181,14 +218,14 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick: this.props.onShareBtnClick,
                     tooltipText: 'Share Page and Notes',
                 },
-                {
-                    key: 'list-page-btn',
-                    image: this.hasLists
-                        ? icons.collectionsFull
-                        : icons.collectionsEmpty,
-                    onClick: this.props.onListPickerBtnClick,
-                    tooltipText: 'Edit Spaces',
-                },
+                // {
+                //     key: 'list-page-btn',
+                //     image: this.hasLists
+                //         ? icons.collectionsFull
+                //         : icons.collectionsEmpty,
+                //     onClick: this.props.onListPickerBtnClick,
+                //     tooltipText: 'Edit Spaces',
+                // },
                 {
                     key: 'expand-notes-btn',
                     image: this.hasNotes
@@ -199,7 +236,7 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             <strong>Add/View Notes</strong>
                             <br />
-                            shift+click to open in sidebar
+                            shift+click to open inline
                         </span>
                     ),
                 },
@@ -222,13 +259,13 @@ export default class PageResultView extends PureComponent<Props> {
                 isDisabled: true,
                 image: this.props.isShared ? icons.shared : icons.link,
             },
-            {
-                key: 'list-page-btn',
-                isDisabled: true,
-                image: this.hasLists
-                    ? icons.collectionsFull
-                    : icons.collectionsEmpty,
-            },
+            // {
+            //     key: 'list-page-btn',
+            //     isDisabled: true,
+            //     image: this.hasLists
+            //         ? icons.collectionsFull
+            //         : icons.collectionsEmpty,
+            // },
             {
                 key: 'expand-notes-btn',
                 image: this.hasNotes ? icons.commentFull : icons.commentEmpty,
@@ -251,6 +288,12 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
+                        onMouseLeave={
+                            this.props.isListPickerShown
+                                ? this.props.onListPickerBtnClick
+                                : undefined
+                        }
+                        onClick={() => window.open(this.fullUrl)}
                         href={this.fullUrl}
                         target="_blank"
                     >
@@ -276,9 +319,47 @@ export default class PageResultView extends PureComponent<Props> {
                                     <PDFIcon>PDF</PDFIcon>
                                 )}
                                 <PageUrl>{this.domain}</PageUrl>
+                                {this.props.hoverState === 'main-content' &&
+                                    (this.props.lists.length === 0 ||
+                                        (this.props.lists.length === 1 &&
+                                            this.props.lists.includes(
+                                                20201014,
+                                                0,
+                                            ))) && (
+                                        <AddSpaceButtonContainer>
+                                            <AddSpacesButton
+                                                hasNoLists={true}
+                                                onEditBtnClick={(event) => {
+                                                    event.stopPropagation()
+                                                    this.props.onListPickerBtnClick(
+                                                        event,
+                                                    )
+                                                }}
+                                                renderSpacePicker={this.renderSpacePicker.bind(
+                                                    this,
+                                                )}
+                                            />
+                                        </AddSpaceButtonContainer>
+                                    )}
                             </DomainContainer>
                         </ResultContent>
                     </PageContentBox>
+                    {this.hasLists &&
+                        !(
+                            this.props.lists.length === 1 &&
+                            this.props.lists.includes(20201014, 0)
+                        ) && (
+                            <ListsSegment
+                                lists={this.displayLists}
+                                onMouseEnter={this.props.onListsHover}
+                                showEditBtn={this.props.hoverState === 'lists'}
+                                onListClick={undefined}
+                                onEditBtnClick={this.props.onListPickerBtnClick}
+                                renderSpacePicker={this.renderSpacePicker.bind(
+                                    this,
+                                )}
+                            />
+                        )}
                     <TagsSegment
                         tags={this.props.tags}
                         onMouseEnter={this.props.onTagsHover}
@@ -362,7 +443,7 @@ const FavIconImg = styled.img`
     border-radius: 30px;
 `
 
-const PageContentBox = styled.a`
+const PageContentBox = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -373,6 +454,10 @@ const PageContentBox = styled.a`
     &:hover {
         background-color: #fafafa;
     }
+`
+
+const AddSpaceButtonContainer = styled.div`
+    margin-left: 1rem;
 `
 
 const ResultContent = styled(Margin)`

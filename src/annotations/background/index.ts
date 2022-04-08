@@ -38,7 +38,6 @@ import { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
-import type ContentSharingBackground from 'src/content-sharing/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -59,13 +58,15 @@ export default class DirectLinkingBackground {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
             pages: PageIndexingBackground
-            contentSharingBG: ContentSharingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing' | 'userManagement'>
             >
+            preAnnotationDelete(params: {
+                annotationUrl: string
+            }): Promise<void>
         },
     ) {
         this.socialBg = options.socialBg
@@ -106,12 +107,11 @@ export default class DirectLinkingBackground {
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
-            insertAnnotToList: this.insertAnnotToList.bind(this),
-            removeAnnotFromList: this.removeAnnotFromList.bind(this),
             goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
                 this,
             ),
             getSharedAnnotations: this.getSharedAnnotations,
+            getListIdsForAnnotation: this.getListIdsForAnnotation,
         }
 
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
@@ -249,6 +249,21 @@ export default class DirectLinkingBackground {
                 action,
             })
         }
+    }
+
+    async removeChildAnnotationsFromList(
+        normalizedPageUrl: string,
+        listId: number,
+    ): Promise<void> {
+        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
+            { pageUrl: normalizedPageUrl },
+        )
+
+        await Promise.all(
+            annotations.map(({ url }) =>
+                this.annotationStorage.removeAnnotFromList({ listId, url }),
+            ),
+        )
     }
 
     followAnnotationRequest({ tab }: TabArg) {
@@ -429,16 +444,8 @@ export default class DirectLinkingBackground {
         return annotationUrl
     }
 
-    async insertAnnotToList(_, params: AnnotListEntry) {
-        return this.annotationStorage.insertAnnotToList(params)
-    }
-
     async getAnnotationByPk(pk) {
         return this.annotationStorage.getAnnotationByPk(pk)
-    }
-
-    async removeAnnotFromList(_, params: AnnotListEntry) {
-        return this.annotationStorage.removeAnnotFromList(params)
     }
 
     async toggleAnnotBookmark(_, { url }: { url: string }) {
@@ -490,6 +497,17 @@ export default class DirectLinkingBackground {
         }))
     }
 
+    getListIdsForAnnotation: AnnotationInterface<
+        'provider'
+    >['getListIdsForAnnotation'] = async (_, { annotationId }) => {
+        const listEntries = await this.annotationStorage.findListEntriesByUrl({
+            url: annotationId,
+        })
+        const listIds = new Set<number>()
+        listEntries.forEach((entry) => listIds.add(entry.listId))
+        return [...listIds]
+    }
+
     async updateAnnotationBookmark(
         _,
         { url, isBookmarked }: { url: string; isBookmarked: boolean },
@@ -538,7 +556,7 @@ export default class DirectLinkingBackground {
             await this.annotationStorage.deleteTagsByUrl({ url: pk })
         }
 
-        await this.options.contentSharingBG.deleteAnnotationShareData({
+        await this.options.preAnnotationDelete({
             annotationUrl: pk,
         })
         await this.annotationStorage.deleteAnnotation(pk)

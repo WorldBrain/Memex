@@ -13,6 +13,8 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
+import * as DATA from './logic.test.data'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -50,6 +52,16 @@ describe('Ribbon logic', () => {
         let globalTooltipState = false
         let globalHighlightsState = false
         const analytics = new FakeAnalytics()
+        const annotationsCache = createAnnotationsCache(
+            {
+                ...backgroundModules,
+                contentSharing:
+                    backgroundModules.contentSharing.remoteFunctions,
+                customLists: backgroundModules.customLists.remoteFunctions,
+                annotations,
+            },
+            { skipPageIndexing: true },
+        )
 
         const ribbonLogic = new RibbonContainerLogic({
             activityIndicatorBG: backgroundModules.activityIndicator,
@@ -83,20 +95,11 @@ describe('Ribbon logic', () => {
                     globalHighlightsState = value
                 },
             },
-            annotationsCache: createAnnotationsCache(
-                {
-                    ...backgroundModules,
-                    tags: backgroundModules.tags.remoteFunctions,
-                    contentSharing:
-                        backgroundModules.contentSharing.remoteFunctions,
-                    annotations,
-                },
-                { skipPageIndexing: true },
-            ),
+            annotationsCache,
         })
 
         const ribbon = device.createElement(ribbonLogic)
-        return { ribbon, inPageUI, ribbonLogic, analytics }
+        return { ribbon, inPageUI, ribbonLogic, analytics, annotationsCache }
     }
 
     it('should load', async ({ device }) => {
@@ -218,6 +221,138 @@ describe('Ribbon logic', () => {
         expect(arePopupsOpen).toBe(true)
         await ribbon.processEvent('setShowSearchBox', { value: false })
         expect(arePopupsOpen).toBe(false)
+    })
+
+    it('should add+remove lists, also adding any shared lists to public annotations', async ({
+        device,
+    }) => {
+        const fullPageUrl = DATA.CURRENT_TAB_URL_1
+        await device.storageManager
+            .collection('customLists')
+            .createObject(DATA.LISTS_1[0])
+        await device.storageManager
+            .collection('customLists')
+            .createObject(DATA.LISTS_1[1])
+        await device.storageManager
+            .collection('sharedListMetadata')
+            .createObject({
+                localId: DATA.LISTS_1[0].id,
+                remoteId: 'test-share-1',
+            })
+        await device.storageManager
+            .collection('annotations')
+            .createObject(DATA.ANNOT_1)
+        await device.storageManager
+            .collection('annotations')
+            .createObject(DATA.ANNOT_2)
+        await device.storageManager
+            .collection('annotationPrivacyLevels')
+            .createObject({
+                annotation: DATA.ANNOT_1.url,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                createdWhen: new Date(),
+            })
+
+        const { ribbon, annotationsCache } = await setupTest(device, {
+            dependencies: { getPageUrl: () => fullPageUrl },
+        })
+
+        const expectListEntries = async (listIds: number[]) =>
+            expect(
+                await device.storageManager
+                    .collection('pageListEntries')
+                    .findAllObjects({}),
+            ).toEqual(
+                listIds.map((listId) =>
+                    expect.objectContaining({ listId, fullUrl: fullPageUrl }),
+                ),
+            )
+
+        await ribbon.init()
+        await annotationsCache.load(fullPageUrl)
+
+        await expectListEntries([])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
+
+        await ribbon.processEvent('updateLists', {
+            value: {
+                added: DATA.LISTS_1[0].id,
+                selected: [],
+                deleted: null,
+                skipPageIndexing: true,
+            },
+        })
+
+        await expectListEntries([DATA.LISTS_1[0].id])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [DATA.LISTS_1[0].id],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
+
+        await ribbon.processEvent('updateLists', {
+            value: {
+                added: DATA.LISTS_1[1].id,
+                selected: [],
+                deleted: null,
+                skipPageIndexing: true,
+            },
+        })
+
+        await expectListEntries([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [DATA.LISTS_1[0].id],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
+
+        await ribbon.processEvent('updateLists', {
+            value: {
+                deleted: DATA.LISTS_1[0].id,
+                selected: [],
+                added: null,
+                skipPageIndexing: true,
+            },
+        })
+
+        await expectListEntries([DATA.LISTS_1[1].id])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
     })
 
     it('should save a private comment', async ({ device }) => {
@@ -576,7 +711,7 @@ describe('Ribbon logic', () => {
             dependencies: {
                 tags: {
                     ...device.backgroundModules.tags.remoteFunctions,
-                    updateTagForPageInCurrentTab: ({ added }) => {
+                    updateTagForPage: ({ added }) => {
                         addedTag = added
                     },
                 } as any,

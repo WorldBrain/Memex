@@ -21,10 +21,7 @@ export function getTemplateDataFetchers({
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
-        | 'shareAnnotations'
-        | 'shareAnnotationsToLists'
-        | 'storage'
-        | 'ensureRemotePageId'
+        'shareAnnotations' | 'storage' | 'ensureRemotePageId'
     >
 }): TemplateDataFetchers {
     const getTagsForUrls = async (urls: string[]) => {

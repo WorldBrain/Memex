@@ -56,7 +56,6 @@ interface StateProps {
     showCollectionsPicker: boolean
     tabId: number
     url: string
-    initLogicRun: boolean
     searchValue: string
 }
 
@@ -140,7 +139,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     handleTagUpdate = async ({ added, deleted }) => {
-        const backendResult = tags.updateTagForPageInCurrentTab({
+        const backendResult = tags.updateTagForPage({
             added,
             deleted,
             url: this.props.url,
@@ -160,7 +159,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
     handleListUpdate = async ({ added, deleted }) => {
-        const backendResult = collections.updateListForPageInCurrentTab({
+        const backendResult = collections.updateListForPage({
             added,
             deleted,
             url: this.props.url,
@@ -175,8 +174,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return backendResult
     }
 
-    handleListAllTabs = (listName: string) =>
-        collections.addOpenTabsToList({ name: listName })
+    handleListAllTabs = (listId: number) =>
+        collections.addOpenTabsToList({ listId })
     fetchListsForPage = async () =>
         collections.fetchPageLists({ url: this.props.url })
 
@@ -186,6 +185,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         } else {
             return 'remote'
         }
+    }
+
+    private get isCurrentPagePDF(): boolean {
+        return isFullUrlPDF(this.props.url)
     }
 
     getPDFMode = () => {
@@ -198,10 +201,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         } else {
             return 'original'
         }
-    }
-
-    private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
     }
 
     private whichFeed = () => {
@@ -274,7 +273,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     renderChildren() {
-        if (!this.props.initLogicRun) {
+        if (this.state.loadState === 'running') {
             return (
                 <LoadingBox>
                     <LoadingIndicator />
@@ -306,7 +305,22 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         header={'Add to Spaces'}
                     />
                     <CollectionPicker
-                        onUpdateEntrySelection={this.handleListUpdate}
+                        selectEntry={(listId) =>
+                            this.handleListUpdate({
+                                added: listId,
+                                deleted: null,
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            this.handleListUpdate({
+                                added: null,
+                                deleted: listId,
+                            })
+                        }
+                        createNewEntry={async (name) => {
+                            this.props.onCollectionAdd(name)
+                            return collections.createCustomList({ name })
+                        }}
                         initialSelectedEntries={this.fetchListsForPage}
                         actOnAllTabs={this.handleListAllTabs}
                     />
@@ -351,8 +365,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 </FeedActivitySection>
                 {this.maybeRenderBlurredNotice()}
                 <BookmarkButton closePopup={this.closePopup} />
-                <CollectionsButton fetchCollections={this.fetchListsForPage} />
-                <TagsButton fetchTags={this.fetchTagsForPage} />
+                <CollectionsButton />
+                <TagsButton />
                 <hr />
                 <LinkButton goToDashboard={this.onSearchClick} />
 
@@ -385,9 +399,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 }
 
-const PopupContainerContainer = styled.div`
-    padding-bottom: 10px;
-`
+const PopupContainerContainer = styled.div``
 
 const ButtonContainer = styled.div`
     display: flex;
@@ -517,7 +529,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     searchValue: selectors.searchValue(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
     showTagsPicker: tagsSelectors.showTagsPicker(state),
-    initLogicRun: selectors.initLogicRun(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({

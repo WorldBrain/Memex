@@ -43,6 +43,7 @@ import {
     InitContentIdentifierReturns,
     WaitForContentIdentifierReturns,
 } from './types'
+import { GenerateServerID } from '../../background-script/types'
 import {
     remoteFunctionWithExtraArgs,
     registerRemoteFunctions,
@@ -81,6 +82,7 @@ export class PageIndexingBackground {
             fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
+            generateServerId: GenerateServerID
         },
     ) {
         this.storage = new PageStorage({
@@ -147,7 +149,9 @@ export class PageIndexingBackground {
             })
 
             if (!stored) {
-                const generatedNormalizedUrl = `memex.cloud/ct/${params.fingerprints[0].fingerprint}.${params.locator.format}`
+                const generatedNormalizedUrl = `memex.cloud/ct/${this.options.generateServerId(
+                    'personalContentMetadata',
+                )}.${params.locator.format}`
                 const generatedIdentifier: ContentIdentifier = {
                     normalizedUrl: generatedNormalizedUrl,
                     fullUrl: `https://${generatedNormalizedUrl}`,
@@ -441,7 +445,7 @@ export class PageIndexingBackground {
     private async processPageDataFromTab(
         props: PageCreationProps,
     ): Promise<PipelineRes | null> {
-        if (!props.tabId) {
+        if (props.tabId == null) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
@@ -605,7 +609,7 @@ export class PageIndexingBackground {
             }
         }
 
-        return props.tabId
+        return props.tabId != null
             ? this.processPageDataFromTab(props)
             : this.processPageDataFromUrl(props)
     }

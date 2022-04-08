@@ -100,7 +100,6 @@ import type { ReadwiseSettings } from 'src/readwise-integration/background/types
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { runCloudIntegrationSideEffects } from 'src/personal-cloud/background/integration-side-effects'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -225,6 +224,7 @@ export function createBackgroundModules(options: {
         createInboxEntry,
         tabManagement,
         getNow,
+        generateServerId,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)
@@ -285,6 +285,18 @@ export function createBackgroundModules(options: {
             (await options.getServerStorage()).storageModules.activityStreams,
     })
 
+    const directLinking = new DirectLinkingBackground({
+        browserAPIs: options.browserAPIs,
+        storageManager,
+        socialBg: social,
+        pages,
+        analytics,
+        getServerStorage,
+        preAnnotationDelete: async (params) => {
+            await contentSharing.deleteAnnotationShare(params)
+        },
+    })
+
     const customLists = new CustomListBackground({
         analytics,
         storageManager,
@@ -296,6 +308,9 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
         getServerStorage,
         services: options.services,
+        removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
+            directLinking,
+        ),
     })
 
     const auth =
@@ -349,6 +364,7 @@ export function createBackgroundModules(options: {
         })
     }
     const userMessages = options.userMessageService
+
     const contentSharing = new ContentSharingBackground({
         backend:
             options.contentSharingBackend ??
@@ -362,22 +378,13 @@ export function createBackgroundModules(options: {
         activityStreams,
         storageManager,
         customLists: customLists.storage,
+        annotations: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
         services: options.services,
         captureException: options.captureException,
         generateServerId,
-    })
-
-    const directLinking = new DirectLinkingBackground({
-        browserAPIs: options.browserAPIs,
-        storageManager,
-        socialBg: social,
-        pages,
-        analytics,
-        getServerStorage,
-        contentSharingBG: contentSharing,
     })
 
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
@@ -485,7 +492,6 @@ export function createBackgroundModules(options: {
                     callFirebaseFunction,
                 ),
                 getServerStorageManager,
-                getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
@@ -506,6 +512,7 @@ export function createBackgroundModules(options: {
                 setLastUpdateSeenTime: (lastSeen) =>
                     personalCloudSettingStore.set('lastSeen', lastSeen),
                 getDeviceId: async () => personalCloud.deviceId!,
+                getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {
@@ -540,7 +547,7 @@ export function createBackgroundModules(options: {
                     : options.storageManager
 
             // WARNING: Keep in mind this skips all storage middleware
-            const { opPerformed } = await updateOrCreate({
+            await updateOrCreate({
                 ...params,
                 storageManager: incomingStorageManager,
                 executeOperation: (...args: any[]) => {
@@ -577,12 +584,7 @@ export function createBackgroundModules(options: {
                     { text: processed },
                 )
             }
-
-            return { opPerformed }
         },
-        runIntegrationSideEffects: runCloudIntegrationSideEffects({
-            customLists,
-        }),
         getServerStorageManager,
     })
     options.services.contentSharing.preKeyGeneration = async (params) => {

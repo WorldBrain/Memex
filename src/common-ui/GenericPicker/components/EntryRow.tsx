@@ -1,13 +1,10 @@
 import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
-import { Layers, X as XIcon } from '@styled-icons/feather'
-import { StyledIconBase } from '@styled-icons/styled-icon'
+import { Layers } from '@styled-icons/feather'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { opacify } from 'polished'
 import { DisplayEntry } from '../types'
-import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 
 export interface Props {
     onPress?: (entry: DisplayEntry) => void
@@ -69,7 +66,6 @@ class EntryRow extends React.Component<Props> {
                 isFocused={focused}
             >
                 <NameWrapper>
-                    {resultItem}
                     {remote && (
                         <ButtonTooltip
                             tooltipText={'Shared Space'}
@@ -78,11 +74,12 @@ class EntryRow extends React.Component<Props> {
                             <Icon
                                 heightAndWidth="12px"
                                 padding="6px"
-                                filePath={icons.link}
+                                filePath={icons.people}
                                 hoverOff
                             />
                         </ButtonTooltip>
                     )}
+                    {resultItem}
                 </NameWrapper>
                 <IconStyleWrapper>
                     {focused && (
@@ -142,7 +139,7 @@ const EmptyCircle = styled.div`
     height: 18px;
     width: 18px;
     border-radius: 18px;
-    border 2px solid ${(props) => props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 export const IconStyleWrapper = styled.div`

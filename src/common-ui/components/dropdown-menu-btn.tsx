@@ -230,9 +230,9 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     width: 100%;
 `
 
-const Menu = styled.ul`
+const Menu = styled.div`
     position: absolute;
-    width: 150px;
+    width: max-content;
     list-style: none;
     background: white;
     border-radius: 8px;
@@ -240,6 +240,8 @@ const Menu = styled.ul`
     background: white;
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
-    z-index: 1100;
+    top: 25px;
+    left: -67px;
+    z-index: 1000;
     padding: 10px;
 `

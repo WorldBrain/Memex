@@ -32,6 +32,7 @@ export interface SaveAnnotationParams<
     contentSharingBG: ContentSharingInterface
     shareOpts?: AnnotationShareOpts
     skipPageIndexing?: boolean
+    keepListsIfUnsharing?: boolean
 }
 
 export interface SaveAnnotationReturnValue {
@@ -39,6 +40,7 @@ export interface SaveAnnotationReturnValue {
     savePromise: Promise<string>
 }
 
+// TODO: Allow this function to return the generated annotation URL before the Promise resolves
 export async function createAnnotation({
     annotationData,
     annotationsBG,
@@ -105,6 +107,7 @@ export async function updateAnnotation({
     annotationsBG,
     contentSharingBG,
     shareOpts,
+    keepListsIfUnsharing,
 }: SaveAnnotationParams<AnnotationUpdateData>): Promise<
     SaveAnnotationReturnValue
 > {
@@ -150,6 +153,7 @@ export async function updateAnnotation({
                 contentSharingBG.setAnnotationPrivacyLevel({
                     annotation: annotationData.localId,
                     privacyLevel: shareOptsToPrivacyLvl(shareOpts),
+                    keepListsIfUnsharing,
                 }),
             ])
             return annotationData.localId

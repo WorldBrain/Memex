@@ -72,9 +72,10 @@ class CollectionsButton extends PureComponent<Props> {
                 <SectionCircle>
                     <Icon
                         filePath={
-                            this.state.hasCollections
-                                ? icons.collectionsFull
-                                : icons.collectionsEmpty
+                            // this.state.hasCollections
+                            //     ? icons.collectionsFull
+                            //     : icons.collectionsEmpty
+                            icons.collectionsEmpty
                         }
                         heightAndWidth="18px"
                         hoverOff
@@ -102,15 +103,17 @@ const SectionCircle = styled.div`
 const ButtonItem = styled.div<{ disabled: boolean }>`
     display: flex;
     grid-gap: 15px;
-    width: 100%;
+    width: fill-available;
+    border-radius: 8px;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 20px;
-    height: 55px;
+    padding: 5px 10px;
+    margin: 0px 10px;
+    height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.backgroundColorDarker};
     }
 
     & * {

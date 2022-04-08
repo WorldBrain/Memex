@@ -56,27 +56,25 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
 
     private shareAllAnnotations = async () => {
         try {
-            await this.props.contentSharingBG.shareAnnotations({
+            const {
+                sharingStates,
+            } = await this.props.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
                 shareToLists: true,
             })
+            this.props.postBulkShareHook?.(sharingStates)
         } catch (err) {}
-
-        this.props.postShareHook?.({
-            isShared: true,
-        })
     }
 
     private unshareAllAnnotations = async () => {
         try {
-            await this.props.contentSharingBG.unshareAnnotations({
+            const {
+                sharingStates,
+            } = await this.props.contentSharingBG.unshareAnnotations({
                 annotationUrls: this.annotationUrls,
             })
+            this.props.postBulkShareHook?.(sharingStates)
         } catch (err) {}
-
-        this.props.postShareHook?.({
-            isShared: false,
-        })
     }
 
     private handleSetShared = async () => {

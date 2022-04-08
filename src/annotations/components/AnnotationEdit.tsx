@@ -11,7 +11,13 @@ interface State {
 }
 
 export interface AnnotationEditEventProps {
-    onEditConfirm: (shouldShare: boolean, isProtected?: boolean) => void
+    onEditConfirm: (
+        showExternalConfirmations?: boolean,
+    ) => (
+        shouldShare: boolean,
+        isProtected: boolean,
+        keepListsIfUnsharing?: boolean,
+    ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
 }
@@ -19,8 +25,6 @@ export interface AnnotationEditEventProps {
 export interface AnnotationEditGeneralProps {
     comment: string
     editorHeight?: string
-    isShared?: boolean
-    isBulkShareProtected?: boolean
 }
 
 export interface Props
@@ -40,7 +44,7 @@ class AnnotationEdit extends React.Component<Props> {
     private editor: MemexEditorInstance
 
     private saveEdit(shouldShare, isProtected) {
-        this.props.onEditConfirm(shouldShare, isProtected)
+        this.props.onEditConfirm(true)(shouldShare, isProtected)
         //AnnotationEditable.removeMarkdownHelp()
     }
 
@@ -61,10 +65,7 @@ class AnnotationEdit extends React.Component<Props> {
             }
 
             if (e.key === 'Enter' && e.metaKey) {
-                return this.saveEdit(
-                    this.props.isShared,
-                    this.props.isBulkShareProtected,
-                )
+                return this.saveEdit(false, false)
             }
         } else {
             if (e.key === 'Enter' && e.shiftKey && e.ctrlKey) {
@@ -80,10 +81,7 @@ class AnnotationEdit extends React.Component<Props> {
             }
 
             if (e.key === 'Enter' && e.ctrlKey) {
-                return this.saveEdit(
-                    this.props.isShared,
-                    this.props.isBulkShareProtected,
-                )
+                return this.saveEdit(false, false)
             }
         }
 
@@ -102,7 +100,6 @@ class AnnotationEdit extends React.Component<Props> {
                     }
                     markdownContent={this.props.comment}
                     onKeyDown={this.handleInputKeyDown}
-                    autoFocus={true}
                     placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                 />
             </EditorContainer>

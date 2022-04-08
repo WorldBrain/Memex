@@ -1,35 +1,24 @@
-export async function updateSuggestionsCache(args: {
-    added?: string
-    removed?: string
-    updated?: [string, string]
+export async function updateSuggestionsCache<T extends string | number>(args: {
+    added?: T
+    removed?: T
     suggestionLimit?: number
-    getCache(): Promise<string[]>
-    setCache(suggestions: string[]): Promise<void>
+    getCache(): Promise<T[]>
+    setCache(suggestions: T[]): Promise<void>
 }) {
     let suggestions = await args.getCache()
-
-    if (args.added) {
+    if (args.added != null) {
         const index = suggestions.indexOf(args.added)
         if (index !== -1) {
             delete suggestions[index]
-            suggestions = suggestions.filter(Boolean)
+            suggestions = suggestions.filter((s) => s != null)
         }
         suggestions.unshift(args.added)
     }
 
-    if (args.updated) {
-        const [oldName, newName] = args.updated
-        const i = suggestions.indexOf(oldName)
-
-        if (i !== -1) {
-            suggestions[i] = newName
-        }
-    }
-
-    if (args.removed) {
+    if (args.removed != null) {
         const index = suggestions.indexOf(args.removed)
         delete suggestions[index]
-        suggestions = suggestions.filter(Boolean)
+        suggestions = suggestions.filter((s) => s != null)
     }
 
     if (args.suggestionLimit) {

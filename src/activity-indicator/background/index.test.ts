@@ -122,6 +122,7 @@ describe('Activity indicator background tests', () => {
             annotationReference: sharedAnnotationReferences['test.com#123'],
             normalizedPageUrl: 'test.com',
             pageCreatorReference: userAReference,
+            sharedListReference: null, // TODO: maybe update test to use lists
             userReference: userBReference,
             reply: { content: 'TEST' },
         })

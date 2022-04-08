@@ -29,6 +29,7 @@ export interface Annotation {
     _body_terms?: string[]
     _comment_terms?: string[]
     tags: string[]
+    lists: number[]
     isShared?: boolean
     isBookmarked?: boolean
     isSocialPost?: boolean
@@ -50,6 +51,7 @@ export interface AnnotationsManagerInterface {
         comment: string
         anchor: Anchor
         tags: string[]
+        lists: number[]
         bookmarked?: boolean
         isSocialPost?: boolean
     }): Promise<Annotation>
@@ -103,3 +105,7 @@ export type TextTruncator = (
 ) => { text: string; isTooLong: boolean }
 
 export type SelectionIndices = [number, number]
+
+export type ListDetailsGetter = (
+    id: number,
+) => { name: string; isShared: boolean }

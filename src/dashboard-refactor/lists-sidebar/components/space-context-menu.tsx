@@ -251,19 +251,9 @@ export class SpaceContextMenu extends PureComponent<
         const roleID = SharedListRoleID.ReadWrite
         const { clipboard, contentSharing } = this.props.services
 
-        console.log('addLinks', {
-            shareList: this.props.shareList,
-            listId: this.props.listId,
-            props: this.props,
-        })
         if (!this.state.remoteId && this.props.shareList) {
             const sharedList = await this.props.shareList()
             this.setState({ remoteId: sharedList.listId })
-            console.log('addLinks', {
-                remoteListId: this.state.remoteId,
-                shareList: this.props.shareList,
-                sharedList,
-            })
         }
 
         const { link } = await contentSharing.generateKeyLink({
@@ -593,7 +583,7 @@ const SidebarItem = styled.div<Props>`
     background-color: ${(props) => props.theme.colors.lightHover};
  }
 
-  
+
 
  ${({ isMenuDisplayed, dropReceivingState }) =>
      css`
@@ -604,7 +594,7 @@ const SidebarItem = styled.div<Props>`
              : `transparent`};
      `};
 
-  
+
 
  &:hover ${IconBox} {
 
@@ -622,7 +612,7 @@ const SidebarItem = styled.div<Props>`
  width: 70%;
  }
 
-  
+
 
  ${({ selectedState }: Props) =>
      selectedState?.isSelected &&
@@ -630,7 +620,7 @@ const SidebarItem = styled.div<Props>`
          background-color: ${colors.onSelect};
      `}
 
-  
+
 
  ${({ dropReceivingState }: Props) =>
      dropReceivingState?.wasPageDropped &&
@@ -638,7 +628,7 @@ const SidebarItem = styled.div<Props>`
          animation: ${blinkingAnimation} 0.2s 2;
      `}
 
-  
+
 
  cursor: ${({ dropReceivingState }: Props) =>
      !dropReceivingState?.isDraggedOver

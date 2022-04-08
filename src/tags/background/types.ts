@@ -23,12 +23,6 @@ export interface RemoteTagsInterface {
         added: string
         deleted: string
         url: string
-        skipPageIndexing?: boolean
-    }): Promise<void>
-    updateTagForPageInCurrentTab(args: {
-        added: string
-        deleted: string
-        url: string
         tabId?: number
     }): Promise<void>
     setTagsForAnnotation(args: { url: string; tags: string[] }): Promise<void>

@@ -46,6 +46,7 @@ import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
@@ -93,6 +94,7 @@ export async function main(
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
+    const collectionsBG = runInBackground<RemoteCollectionsInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
@@ -104,6 +106,7 @@ export async function main(
 
     const annotationsCache = createAnnotationsCache({
         tags: tagsBG,
+        customLists: collectionsBG,
         annotations: annotationsBG,
         contentSharing: runInBackground(),
     })
@@ -174,8 +177,8 @@ export async function main(
                 annotations: annotationsBG,
                 annotationsCache,
                 tags: tagsBG,
+                customLists: collectionsBG,
                 activityIndicatorBG: runInBackground(),
-                customLists: runInBackground(),
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
                 tooltip: {
@@ -212,7 +215,7 @@ export async function main(
                 annotations: annotationsBG,
                 tags: tagsBG,
                 auth: runInBackground(),
-                customLists: runInBackground(),
+                customLists: collectionsBG,
                 contentSharing: runInBackground(),
                 syncSettingsBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

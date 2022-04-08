@@ -170,6 +170,7 @@ export async function main() {
         storageManager,
         persistentStorageManager,
         getServerStorage,
+        localStorage: browser.storage.local,
     })
 
     rpcManager.unpause()

@@ -7,12 +7,11 @@ import { executeReactStateUITask } from 'src/util/ui-logic'
 import SharePrivacyOption, {
     Props as PrivacyOptionProps,
 } from './SharePrivacyOption'
-import { TypographyTextNormal } from 'src/common-ui/components/design-library/typography'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 const COPY_TIMEOUT = 2000
 
@@ -99,96 +98,19 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         }
     }
 
-    render() {
+    private renderMain() {
         return (
-            <ClickAway onClickAway={this.props.onClickOutside}>
-                <Menu>
-                    {this.props.isLoading ? (
-                        <LoadingBox>
-                            <LoadingIndicator size={30} />
-                        </LoadingBox>
-                    ) : (
-                        <>
-                            {this.props.context === 'AllNotesShare' ? (
-                                <>
-                                    {this.props.showLink && this.props.link ? (
-                                        <>
-                                            <TopArea>
-                                                <PrivacyTitle>
-                                                    {this.props.linkTitleCopy}
-                                                </PrivacyTitle>
-                                                {/* {this.props.onPlusBtnClick && (
-                                    <Icon
-                                        icon="plus"
-                                        height="18px"
-                                        onClick={this.props.onPlusBtnClick}
-                                    />
-                                )} */}
-                                                <LinkCopierBox>
-                                                    <LinkCopier
-                                                        state={
-                                                            this.state.copyState
-                                                        }
-                                                        onClick={
-                                                            this.handleLinkCopy
-                                                        }
-                                                    >
-                                                        {this.renderLinkContent()}
-                                                    </LinkCopier>
-                                                </LinkCopierBox>
-                                            </TopArea>
-                                            <PrivacyContainer
-                                                isLinkShown={
-                                                    this.props.showLink
-                                                }
-                                            >
-                                                <TopArea>
-                                                    <PrivacyTitle>
-                                                        {
-                                                            this.props
-                                                                .privacyOptionsTitleCopy
-                                                        }
-                                                    </PrivacyTitle>
-                                                    <PrivacyOptionContainer top="5px">
-                                                        {this.props.privacyOptions.map(
-                                                            (props, i) => (
-                                                                <SharePrivacyOption
-                                                                    key={i}
-                                                                    {...props}
-                                                                />
-                                                            ),
-                                                        )}
-                                                    </PrivacyOptionContainer>
-                                                </TopArea>
-                                            </PrivacyContainer>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <NoResultsSection>
-                                                <SectionCircle>
-                                                    <Icon
-                                                        filePath={
-                                                            icons.heartEmpty
-                                                        }
-                                                        heightAndWidth="20px"
-                                                        color="purple"
-                                                        hoverOff
-                                                    />
-                                                </SectionCircle>
-                                                <SectionTitle>
-                                                    No Link available yet
-                                                </SectionTitle>
-                                                <InfoText>
-                                                    First Bookmark or annotate
-                                                    this page
-                                                </InfoText>
-                                            </NoResultsSection>
-                                        </>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    {this.props.showLink && this.props.link && (
+            <Menu>
+                {this.props.isLoading ? (
+                    <LoadingBox>
+                        <LoadingIndicator size={30} />
+                    </LoadingBox>
+                ) : (
+                    <>
+                        {this.props.context === 'AllNotesShare' ? (
+                            <>
+                                {this.props.showLink && this.props.link ? (
+                                    <>
                                         <TopArea>
                                             <PrivacyTitle>
                                                 {this.props.linkTitleCopy}
@@ -211,36 +133,112 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                                 </LinkCopier>
                                             </LinkCopierBox>
                                         </TopArea>
-                                    )}
-                                    <PrivacyContainer
-                                        isLinkShown={this.props.showLink}
-                                    >
-                                        <TopArea>
-                                            <PrivacyTitle>
-                                                {
-                                                    this.props
-                                                        .privacyOptionsTitleCopy
-                                                }
-                                            </PrivacyTitle>
-                                            <PrivacyOptionContainer top="5px">
-                                                {this.props.privacyOptions.map(
-                                                    (props, i) => (
-                                                        <SharePrivacyOption
-                                                            key={i}
-                                                            {...props}
-                                                        />
-                                                    ),
-                                                )}
-                                            </PrivacyOptionContainer>
-                                        </TopArea>
-                                    </PrivacyContainer>
-                                </>
-                            )}
-                        </>
-                    )}
-                </Menu>
-            </ClickAway>
+                                        <PrivacyContainer
+                                            isLinkShown={this.props.showLink}
+                                        >
+                                            <TopArea>
+                                                <PrivacyTitle>
+                                                    {
+                                                        this.props
+                                                            .privacyOptionsTitleCopy
+                                                    }
+                                                </PrivacyTitle>
+                                                <PrivacyOptionContainer top="5px">
+                                                    {this.props.privacyOptions.map(
+                                                        (props, i) => (
+                                                            <SharePrivacyOption
+                                                                key={i}
+                                                                {...props}
+                                                            />
+                                                        ),
+                                                    )}
+                                                </PrivacyOptionContainer>
+                                            </TopArea>
+                                        </PrivacyContainer>
+                                    </>
+                                ) : (
+                                    <>
+                                        <NoResultsSection>
+                                            <SectionCircle>
+                                                <Icon
+                                                    filePath={icons.heartEmpty}
+                                                    heightAndWidth="20px"
+                                                    color="purple"
+                                                    hoverOff
+                                                />
+                                            </SectionCircle>
+                                            <SectionTitle>
+                                                No Link available yet
+                                            </SectionTitle>
+                                            <InfoText>
+                                                First Bookmark or annotate this
+                                                page
+                                            </InfoText>
+                                        </NoResultsSection>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                {this.props.showLink && this.props.link && (
+                                    <TopArea>
+                                        <PrivacyTitle>
+                                            {this.props.linkTitleCopy}
+                                        </PrivacyTitle>
+                                        {/* {this.props.onPlusBtnClick && (
+                                    <Icon
+                                        icon="plus"
+                                        height="18px"
+                                        onClick={this.props.onPlusBtnClick}
+                                    />
+                                )} */}
+                                        <LinkCopierBox>
+                                            <LinkCopier
+                                                state={this.state.copyState}
+                                                onClick={this.handleLinkCopy}
+                                            >
+                                                {this.renderLinkContent()}
+                                            </LinkCopier>
+                                        </LinkCopierBox>
+                                    </TopArea>
+                                )}
+                                <PrivacyContainer
+                                    isLinkShown={this.props.showLink}
+                                >
+                                    <TopArea>
+                                        <PrivacyTitle>
+                                            {this.props.privacyOptionsTitleCopy}
+                                        </PrivacyTitle>
+                                        <PrivacyOptionContainer top="5px">
+                                            {this.props.privacyOptions.map(
+                                                (props, i) => (
+                                                    <SharePrivacyOption
+                                                        key={i}
+                                                        {...props}
+                                                    />
+                                                ),
+                                            )}
+                                        </PrivacyOptionContainer>
+                                    </TopArea>
+                                </PrivacyContainer>
+                            </>
+                        )}
+                    </>
+                )}
+            </Menu>
         )
+    }
+
+    render() {
+        if (this.props.onClickOutside) {
+            return (
+                <ClickAway onClickAway={this.props.onClickOutside}>
+                    {this.renderMain()}
+                </ClickAway>
+            )
+        }
+
+        return this.renderMain()
     }
 }
 

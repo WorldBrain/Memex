@@ -22,7 +22,12 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     >
     listAnnotationsByPageUrl: RemoteFunction<
         Role,
-        { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
+        {
+            pageUrl: string
+            withTags?: boolean
+            withLists?: boolean
+            withBookmarks?: boolean
+        },
         Annotation[]
     >
     createAnnotation: RemotePositionalFunction<
@@ -67,6 +72,11 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     toggleSidebarOverlay: RemoteFunction<Role, { activeUrl: string }, any>
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
+    getListIdsForAnnotation: RemotePositionalFunction<
+        Role,
+        [{ annotationId: string }],
+        number[]
+    >
     getSharedAnnotations: RemotePositionalFunction<
         Role,
         [
@@ -84,8 +94,6 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             }
         >
     >
-    insertAnnotToList: RemotePositionalFunction<Role, any[], any>
-    removeAnnotFromList: RemotePositionalFunction<Role, any[], any>
     goToAnnotationFromSidebar: RemoteFunction<
         Role,
         {

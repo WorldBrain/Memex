@@ -4,34 +4,58 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 
 export interface ContentSharingInterface
     extends ContentSharingServiceInterface {
-    shareList(options: { listId: number }): Promise<{ remoteListId: string }>
+    shareList(options: {
+        listId: number
+    }): Promise<{
+        remoteListId: string
+        /** Holds the sharing states of all list member annotations that change to being selectively shared upon list share. */
+        annotationSharingStates: AnnotationSharingStates
+    }>
     shareAnnotation(options: {
         annotationUrl: string
         remoteAnnotationId?: string
         shareToLists?: boolean
-        queueInteraction?: ContentSharingQueueInteraction
         withoutPageInfo?: boolean
         setBulkShareProtected?: boolean
         skipPrivacyLevelUpdate?: boolean
-    }): Promise<void>
+        queueInteraction?: ContentSharingQueueInteraction
+        /** Set this to skip DB potentially unneeded lookups (likely only relevant in ContentSharingBG class). */
+        sharingState?: AnnotationSharingState
+    }): Promise<{
+        remoteId: number | string
+        sharingState: AnnotationSharingState
+    }>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
         setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    shareAnnotationsToLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationsToAllLists(options: {
         annotationUrls: string[]
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
-    unshareAnnotationsFromLists(options: {
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
+        setBulkShareProtected?: boolean
         queueInteraction?: ContentSharingQueueInteraction
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    shareAnnotationToSomeLists(options: {
+        annotationUrl: string
+        localListIds: number[]
+        protectAnnotation?: boolean
+    }): Promise<{ sharingState: AnnotationSharingState }>
+    unshareAnnotationFromList(options: {
+        annotationUrl: string
+        localListId: number
+    }): Promise<{ sharingState: AnnotationSharingState }>
     unshareAnnotations(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
-    }): Promise<void>
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotation(options: {
+        annotationUrl: string
+    }): Promise<{ sharingState: AnnotationSharingState }>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
@@ -42,7 +66,7 @@ export interface ContentSharingInterface
         localListIds: number[]
     }): Promise<{ [localListId: string]: string | null }>
     getAllRemoteLists(): Promise<
-        Array<{ localId: number | string; remoteId: string; name: string }>
+        Array<{ localId: number; remoteId: string; name: string }>
     >
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
@@ -56,6 +80,12 @@ export interface ContentSharingInterface
             excludeFromLists?: boolean
         }
     }>
+    getAnnotationSharingState(params: {
+        annotationUrl: string
+    }): Promise<AnnotationSharingState>
+    getAnnotationSharingStates(params: {
+        annotationUrls: string[]
+    }): Promise<AnnotationSharingStates>
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
@@ -68,9 +98,26 @@ export interface ContentSharingInterface
     }>
     setAnnotationPrivacyLevel(params: {
         annotation: string
+        keepListsIfUnsharing?: boolean
         privacyLevel: AnnotationPrivacyLevels
-    }): Promise<void>
+    }): Promise<{
+        remoteId?: number | string
+        sharingState: AnnotationSharingState
+    }>
+    deleteAnnotationShare(params: { annotationUrl: string }): Promise<void>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
+    suggestSharedLists(params: {
+        prefix: string
+    }): Promise<
+        Array<{
+            localId: number
+            name: string
+            remoteId: string
+            createdAt: number
+        }>
+    >
+    canWriteToSharedList(params: { localId: number }): Promise<boolean>
+    canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
 }
 
 export interface ContentSharingEvents {
@@ -83,3 +130,15 @@ export type ContentSharingQueueInteraction =
     | 'queue-and-await'
     | 'queue-and-return'
     | 'skip-queue'
+
+export interface AnnotationSharingState {
+    hasLink: boolean
+    remoteId?: string | number
+    privacyLevel: AnnotationPrivacyLevels
+    privateListIds: number[]
+    sharedListIds: number[]
+}
+
+export interface AnnotationSharingStates {
+    [annotationUrl: string]: AnnotationSharingState
+}

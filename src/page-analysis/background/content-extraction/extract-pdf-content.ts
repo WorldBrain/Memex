@@ -14,7 +14,7 @@ async function extractContent(
     if (process.env.NODE_ENV !== 'test') {
         // Point PDF.js to its worker code, a static file in the extension.
         PDFJS.GlobalWorkerOptions.workerSrc = browser.runtime.getURL(
-            '/build/pdf.worker.min.js',
+            '/build/pdf.worker.js',
         )
     }
 

@@ -24,10 +24,7 @@ export default class CopyPasterBackground {
             search: Pick<SearchBackground, 'searchPages' | 'searchAnnotations'>
             contentSharing: Pick<
                 ContentSharingBackground,
-                | 'shareAnnotations'
-                | 'shareAnnotationsToLists'
-                | 'storage'
-                | 'ensureRemotePageId'
+                'shareAnnotations' | 'storage' | 'ensureRemotePageId'
             >
         },
     ) {

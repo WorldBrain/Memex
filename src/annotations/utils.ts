@@ -59,7 +59,7 @@ export function shareOptsToPrivacyLvl(
             : AnnotationPrivacyLevels.SHARED
     }
 
-    return shareOpts.isBulkShareProtected
+    return shareOpts?.isBulkShareProtected
         ? AnnotationPrivacyLevels.PROTECTED
         : AnnotationPrivacyLevels.PRIVATE
 }

@@ -33,6 +33,7 @@ export const ANNOT_1: Annotation = {
         minute: 0,
     }).toDate(),
     tags: [],
+    lists: [],
 }
 export const ANNOT_2: Annotation = {
     url: DATA.PAGE_2.url + '#1111111111',
@@ -60,6 +61,7 @@ export const ANNOT_2: Annotation = {
         minute: 0,
     }).toDate(),
     tags: [],
+    lists: [],
 }
 
 export const ANNOT_3: Annotation = {
@@ -75,6 +77,7 @@ export const ANNOT_3: Annotation = {
         minute: 0,
     }).toDate(),
     tags: [],
+    lists: [],
 }
 
 export const HIGHLIGHT_1 = (annotationUrl: string): ReadwiseHighlight => ({

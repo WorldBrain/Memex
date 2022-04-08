@@ -4,24 +4,29 @@ import onClickOutside from 'react-onclickoutside'
 
 import { ButtonTooltip } from 'src/common-ui/components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
-import TagHolder from 'src/tags/ui/tag-holder'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import TagPicker, { TagPickerDependencies } from 'src/tags/ui/TagPicker'
+import TagPicker from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
+import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import { browser } from 'webextension-polyfill-ts'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { ListDetailsGetter } from '../types'
 
 interface State {
     isTagPickerShown: boolean
+    isListPickerShown: boolean
     toggleShowTutorial: boolean
 }
 
@@ -30,11 +35,16 @@ export interface AnnotationCreateEventProps {
     onCancel: () => void
     onTagsUpdate: (tags: string[]) => void
     onCommentChange: (text: string) => void
+    getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler
+    onListsHover?: React.MouseEventHandler
     annotationFooterDependencies?: AnnotationFooterEventProps
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
+    createNewList?: SpacePickerDependencies['createNewEntry']
+    addPageToList?: SpacePickerDependencies['selectEntry']
+    removePageFromList?: SpacePickerDependencies['unselectEntry']
 }
 
 export interface AnnotationCreateGeneralProps {
@@ -42,21 +52,21 @@ export interface AnnotationCreateGeneralProps {
     autoFocus?: boolean
     comment: string
     tags: string[]
+    lists: number[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
     contextLocation?: string
     isRibbonCommentBox?: boolean
+    spacesBG?: RemoteCollectionsInterface
+    contentSharingBG?: ContentSharingInterface
 }
 
 export interface Props
     extends AnnotationCreateGeneralProps,
-        AnnotationCreateEventProps,
-        Partial<
-            Pick<
-                TagPickerDependencies,
-                'queryEntries' | 'loadDefaultSuggestions'
-            >
-        > {}
+        AnnotationCreateEventProps {
+    loadDefaultTagSuggestions?: () => string[] | Promise<string[]>
+    tagQueryEntries?: (query: string) => Promise<string[]>
+}
 
 export class AnnotationCreate extends React.Component<Props, State>
     implements FocusableComponent {
@@ -67,8 +77,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
-    private annotCreateRef = React.createRef<AnnotationCreate>()
-
     static defaultProps: Pick<Props, 'hoverState' | 'tags'> = {
         tags: [],
         hoverState: null,
@@ -78,6 +86,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     state: State = {
         isTagPickerShown: false,
+        isListPickerShown: false,
         toggleShowTutorial: false,
     }
 
@@ -85,6 +94,21 @@ export class AnnotationCreate extends React.Component<Props, State>
         if (this.props.autoFocus) {
             this.focus()
         }
+    }
+
+    private get displayLists(): Array<{
+        id: number
+        name: string
+        isShared: boolean
+    }> {
+        return this.props.lists.map((id) => ({
+            id,
+            ...this.props.getListDetailsById(id),
+        }))
+    }
+
+    private get hasSharedLists(): boolean {
+        return this.displayLists.some((list) => list.isShared)
     }
 
     focus() {
@@ -185,6 +209,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                 <ClickAway onClickAway={() => setPickerShown(false)}>
                     <TagPicker
                         {...this.props}
+                        loadDefaultSuggestions={
+                            this.props.loadDefaultTagSuggestions
+                        }
+                        queryEntries={this.props.tagQueryEntries}
                         onUpdateEntrySelection={async ({ selected }) =>
                             onTagsUpdate(selected)
                         }
@@ -196,6 +224,43 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
 
         return <div>{tagPicker}</div>
+    }
+
+    private renderSharedCollectionsPicker = () => {
+        const { lists } = this.props
+
+        const setPickerShown = (isListPickerShown: boolean) =>
+            this.setState({ isListPickerShown })
+
+        return (
+            <CollectionPicker
+                initialSelectedEntries={() => lists}
+                onEscapeKeyDown={() => setPickerShown(false)}
+                unselectEntry={this.props.removePageFromList}
+                createNewEntry={this.props.createNewList}
+                selectEntry={this.props.addPageToList}
+                contentSharingBG={this.props.contentSharingBG}
+                spacesBG={this.props.spacesBG}
+            />
+        )
+    }
+
+    private renderCollectionsPicker = () => {
+        // Not used yet but will be used for the "Add to collection" button
+        const setPickerShown = (isListPickerShown: boolean) =>
+            this.setState({ isListPickerShown })
+
+        return (
+            <div>
+                {this.state.isListPickerShown && (
+                    <HoverBox padding={'0px'}>
+                        <ClickAway onClickAway={() => setPickerShown(false)}>
+                            {this.renderSharedCollectionsPicker()}
+                        </ClickAway>
+                    </HoverBox>
+                )}
+            </div>
+        )
     }
 
     private renderMarkdownHelpButton() {
@@ -218,7 +283,13 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <FooterStyled>
                 <Flex>
-                    <SaveBtn onSave={this.handleSave} />
+                    <SaveBtn
+                        onSave={this.handleSave}
+                        hasSharedLists={this.hasSharedLists}
+                        renderCollectionsPicker={
+                            this.renderSharedCollectionsPicker
+                        }
+                    />
                     <ButtonTooltip tooltipText="esc" position="bottom">
                         <CancelBtnStyled onClick={this.handleCancel}>
                             Cancel
@@ -251,6 +322,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                     />
                     {this.props.comment !== '' && (
                         <>
+                            <ListsSegment
+                                lists={this.displayLists}
+                                onMouseEnter={this.props.onListsHover}
+                                showEditBtn={this.props.hoverState === 'lists'}
+                                onListClick={undefined}
+                                onEditBtnClick={() =>
+                                    this.setState({ isListPickerShown: true })
+                                }
+                                renderSpacePicker={this.renderCollectionsPicker}
+                            />
                             <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
@@ -329,6 +410,12 @@ const FooterContainer = styled.div`
 const SaveActionBar = styled.div`
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+`
+
+const TagsActionBar = styled.div`
+    display: flex;
+    justify-content: end-start;
     align-items: center;
 `
 

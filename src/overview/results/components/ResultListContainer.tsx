@@ -35,6 +35,7 @@ const styles = require('./ResultList.css')
 interface LocalState {
     tagSuggestions: string[]
     activeTagPickerNoteId: string | undefined
+    activeListPickerNoteId: string | undefined
     activeShareMenuNoteId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
 }
@@ -119,6 +120,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
     state: LocalState = {
         tagSuggestions: [],
         activeTagPickerNoteId: undefined,
+        activeListPickerNoteId: undefined,
         activeShareMenuNoteId: undefined,
         activeCopyPasterAnnotationId: undefined,
     }
@@ -207,13 +209,13 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         return (
             <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
-                    <CollectionPicker
+                    {/* <CollectionPicker
                         onUpdateEntrySelection={this.handleListUpdate(index)}
                         initialSelectedEntries={async () => selectedLists}
                         onEscapeKeyDown={
                             this.props.handleListBtnClick(index) as any
                         }
-                    />
+                    /> */}
                 </div>
             </HoverBox>
         )
@@ -319,6 +321,10 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                     this.setState({ activeTagPickerNoteId: id })
                 }
                 activeTagPickerNoteId={this.state.activeTagPickerNoteId}
+                setActiveListPickerNoteId={(id) =>
+                    this.setState({ activeListPickerNoteId: id })
+                }
+                activeListPickerNoteId={this.state.activeListPickerNoteId}
                 setActiveShareMenuNoteId={
                     this.props.isBetaEnabled
                         ? (id) =>

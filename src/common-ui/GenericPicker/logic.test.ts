@@ -81,7 +81,7 @@ const setupLogicHelper = async ({
         added,
         deleted,
     }) =>
-        device.backgroundModules.customLists.updateListForPage({
+        device.backgroundModules.tags.updateTagForPage({
             added,
             deleted,
             url: url ?? TESTURL,
@@ -413,7 +413,7 @@ describe('GenericPickerLogic', () => {
             initialSuggestions,
         })
 
-        const entriesBefore = await device.backgroundModules.customLists.fetchPageLists(
+        const entriesBefore = await device.backgroundModules.tags.fetchPageTags(
             {
                 url: TESTURL,
             },
@@ -423,11 +423,9 @@ describe('GenericPickerLogic', () => {
         })
         await entryPickerLogic.processingUpstreamOperation
 
-        const entriesAfter = await device.backgroundModules.customLists.fetchPageLists(
-            {
-                url: TESTURL,
-            },
-        )
+        const entriesAfter = await device.backgroundModules.tags.fetchPageTags({
+            url: TESTURL,
+        })
 
         expect(entriesBefore).toEqual([])
         expect(entriesAfter).toEqual(['sugg1'])
@@ -440,9 +438,9 @@ describe('GenericPickerLogic', () => {
             initialSuggestions,
         })
 
-        const { customLists } = device.backgroundModules
+        const { tags } = device.backgroundModules
 
-        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([])
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual([])
         expect(testLogic.state.selectedEntries).toEqual([])
 
         await testLogic.processEvent('resultEntryAllPress', {
@@ -450,20 +448,18 @@ describe('GenericPickerLogic', () => {
         })
         await entryPickerLogic.processingUpstreamOperation
 
-        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
-            'sugg1',
-        ])
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual(['sugg1'])
         expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
     })
 
-    it('should correctly add a new ntry to all tabs', async ({ device }) => {
+    it('should correctly add a new entry to all tabs', async ({ device }) => {
         const { testLogic, entryPickerLogic } = await setupLogicHelper({
             device,
         })
 
-        const { customLists } = device.backgroundModules
+        const { tags } = device.backgroundModules
 
-        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([])
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual([])
         expect(testLogic.state.selectedEntries).toEqual([])
 
         await testLogic.processEvent('newEntryAllPress', {
@@ -471,9 +467,7 @@ describe('GenericPickerLogic', () => {
         })
         await entryPickerLogic.processingUpstreamOperation
 
-        expect(await customLists.fetchPageLists({ url: TESTURL })).toEqual([
-            'sugg1',
-        ])
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual(['sugg1'])
         expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
     })
 
@@ -491,7 +485,7 @@ describe('GenericPickerLogic', () => {
             initialSuggestions,
         })
 
-        const entriesBefore = await device.backgroundModules.customLists.fetchPageLists(
+        const entriesBefore = await device.backgroundModules.tags.fetchPageTags(
             {
                 url: TESTURL,
             },
@@ -503,11 +497,9 @@ describe('GenericPickerLogic', () => {
             }),
         ).rejects.toEqual(testError)
 
-        const entriesAfter = await device.backgroundModules.customLists.fetchPageLists(
-            {
-                url: TESTURL,
-            },
-        )
+        const entriesAfter = await device.backgroundModules.tags.fetchPageTags({
+            url: TESTURL,
+        })
 
         expect(entriesBefore).toEqual([])
         expect(entriesAfter).toEqual([])

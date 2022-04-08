@@ -193,6 +193,7 @@ export const easter: () => Thunk = () => (dispatch) =>
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
                         tags: [],
+                        lists: [],
                     },
                 ],
             },
@@ -210,7 +211,6 @@ export const toggleShowTagsPicker: (i: number) => Thunk = (index) => (
     } else {
         dispatch(resetActiveListIndex())
         dispatch(resetActiveCopyPasterIndex())
-
         dispatch(setActiveTagIndex(index))
     }
 }

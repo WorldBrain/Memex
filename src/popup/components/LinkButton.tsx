@@ -71,15 +71,18 @@ const SectionCircle = styled.div`
 const ButtonItem = styled.div<{ disabled: boolean }>`
     display: flex;
     grid-gap: 15px;
-    width: 100%;
+    width: fill-available;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 20px;
-    height: 55px;
+    height: 50px;
     cursor: pointer;
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin: 10px;
+    cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.backgroundColorDarker};
     }
 
     & * {

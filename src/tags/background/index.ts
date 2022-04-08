@@ -40,12 +40,6 @@ export default class TagsBackground {
             delTag: this.delTag,
             addTagToPage: this.addTagToPage,
             updateTagForPage: this.updateTagForPage,
-            updateTagForPageInCurrentTab: async (params) => {
-                if (params.tabId == null) {
-                    await this.setTabIdParamToCurrentTab(params)
-                }
-                return this.updateTagForPage(params)
-            },
             setTagsForAnnotation: this.setTagsForAnnotation,
             fetchPageTags: this.fetchPageTags,
             addTagsToOpenTabs: this.addTagsToOpenTabs,
@@ -57,16 +51,6 @@ export default class TagsBackground {
             options.localBrowserStorage,
             { prefix: 'tags_' },
         )
-    }
-
-    private async setTabIdParamToCurrentTab<T extends { tabId?: number }>(
-        params: T,
-    ): Promise<void> {
-        const currentTab = await this.options.queryTabs?.({
-            active: true,
-            currentWindow: true,
-        })
-        params.tabId = currentTab?.[0]?.id
     }
 
     searchForTagSuggestions = async (args: {
@@ -104,9 +88,9 @@ export default class TagsBackground {
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
 
         const indexed = await maybeIndexTabs(tabs, {
+            createPage: this.options.pages.indexPage,
             waitForContentIdentifier: this.options.pages
                 .waitForContentIdentifier,
-            createPage: this.options.pages.indexPage,
             time: params.time || '$now',
         })
 
@@ -197,24 +181,19 @@ export default class TagsBackground {
         url,
         tag,
         tabId,
-        skipPageIndexing,
     }: {
         url: string
         tag: string
         tabId?: number
-        skipPageIndexing?: boolean
     }) => {
-        if (!skipPageIndexing) {
-            await this.options.pages.indexPage(
-                {
-                    fullUrl: url,
-                    tabId,
-                    visitTime: '$now',
-                },
-                { addInboxEntryOnCreate: true },
-            )
-        }
-
+        await this.options.pages.indexPage(
+            {
+                fullUrl: url,
+                tabId,
+                visitTime: '$now',
+            },
+            { addInboxEntryOnCreate: true },
+        )
         this.options.analytics.trackEvent({
             category: 'Tags',
             action: 'createTagForPage',
@@ -230,21 +209,14 @@ export default class TagsBackground {
         deleted,
         url,
         tabId,
-        skipPageIndexing,
     }: {
         added: string
         deleted: string
         url: string
         tabId?: number
-        skipPageIndexing?: boolean
     }) => {
         if (added) {
-            await this.addTagToPage({
-                url,
-                tag: added,
-                tabId,
-                skipPageIndexing,
-            })
+            await this.addTagToPage({ url, tag: added, tabId })
         }
         if (deleted) {
             await this.delTag({ url, tag: deleted })

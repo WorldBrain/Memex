@@ -196,7 +196,6 @@ export async function setupBackgroundIntegrationTest(
                 storageModules: serverStorage.storageModules,
                 services,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
-                clientDeviceType: PersonalDeviceType.DesktopBrowser,
                 view: new PersonalCloudHub().getView(),
                 getUserId: async () =>
                     (await backgroundModules.auth.authService.getCurrentUser())
@@ -206,10 +205,7 @@ export async function setupBackgroundIntegrationTest(
                     options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
                     backgroundModules.personalCloud.deviceId,
-                autoPkType:
-                    process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
-                        ? 'string'
-                        : 'number',
+                clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.storageManager,

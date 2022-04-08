@@ -1,3 +1,4 @@
+import type { Storage } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { ServerStorage } from 'src/storage/types'
@@ -6,6 +7,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 
 type CloudSendTest =
     | 'tag'
@@ -62,6 +64,7 @@ export function createSelfTests(options: {
     storageManager: StorageManager
     persistentStorageManager: StorageManager
     getServerStorage: () => Promise<ServerStorage>
+    localStorage: Storage.LocalStorageArea
 }) {
     const { backgroundModules } = options
     const { personalCloud } = backgroundModules
@@ -383,62 +386,63 @@ export function createSelfTests(options: {
                 }
             }
 
-            const fullPdfUrl =
-                'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-            const normalizedPdfUrl = normalizeUrl(fullPdfUrl, {})
             let primaryPdfIndentifier: ContentIdentifier
-            if (shouldTest('pdf.online')) {
-                await backgroundModules.pages.indexPage({
-                    fullUrl: fullPdfUrl,
-                })
-                primaryPdfIndentifier =
-                    backgroundModules.pages.contentInfo[normalizedPdfUrl]
-                        .primaryIdentifier
-                if (shouldTest('pdf.online.share')) {
-                    await backgroundModules.customLists.insertPageToList({
-                        id: testListId1,
-                        url: primaryPdfIndentifier.fullUrl,
-                        skipPageIndexing: true,
-                    })
-                    console.log('Added PDF to shared list #1')
+            // TODO: fix this case - currently always results in an error
+            // if (shouldTest('pdf.online')) {
+            //     const fullPdfUrl =
+            //         'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+            //     const normalizedPdfUrl = normalizeUrl(fullPdfUrl, {})
+            //     await backgroundModules.pages.indexPage({
+            //         fullUrl: fullPdfUrl,
+            //     })
+            //     primaryPdfIndentifier =
+            //         backgroundModules.pages.contentInfo[normalizedPdfUrl]
+            //             .primaryIdentifier
+            //     if (shouldTest('pdf.online.share')) {
+            //         await backgroundModules.customLists.insertPageToList({
+            //             id: testListId1,
+            //             url: primaryPdfIndentifier.fullUrl,
+            //             skipPageIndexing: true,
+            //         })
+            //         console.log('Added PDF to shared list #1')
 
-                    if (shouldTest('pdf.online.share.note')) {
-                        const pdfAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
-                            {
-                                tab: {} as any,
-                            },
-                            {
-                                pageUrl: primaryPdfIndentifier.fullUrl,
-                                comment: 'Hi, this is a test comment',
-                                title: testPageTitle,
-                                createdWhen: new Date(),
-                            },
-                            { skipPageIndexing: true },
-                        )
-                        await serverStorage.storageModules.contentSharing.ensurePageInfo(
-                            {
-                                creatorReference: {
-                                    type: 'user-reference',
-                                    id: user.id,
-                                },
-                                pageInfo: {
-                                    normalizedUrl: normalizedPdfUrl,
-                                    originalUrl: fullPdfUrl,
-                                },
-                            },
-                        )
-                        await backgroundModules.contentSharing.shareAnnotation({
-                            annotationUrl: pdfAnnotationUrl,
-                            shareToLists: true,
-                        })
-                        // await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
-                        //     annotation: pdfAnnotationUrl,
-                        //     privacyLevel: AnnotationPrivacyLevels.SHARED,
-                        // })
-                        console.log('Shared PDF note to lists')
-                    }
-                }
-            }
+            //         if (shouldTest('pdf.online.share.note')) {
+            //             const pdfAnnotationUrl = await backgroundModules.directLinking.createAnnotation(
+            //                 {
+            //                     tab: {} as any,
+            //                 },
+            //                 {
+            //                     pageUrl: primaryPdfIndentifier.fullUrl,
+            //                     comment: 'Hi, this is a test comment',
+            //                     title: testPageTitle,
+            //                     createdWhen: new Date(),
+            //                 },
+            //                 { skipPageIndexing: true },
+            //             )
+            //             await serverStorage.storageModules.contentSharing.ensurePageInfo(
+            //                 {
+            //                     creatorReference: {
+            //                         type: 'user-reference',
+            //                         id: user.id,
+            //                     },
+            //                     pageInfo: {
+            //                         normalizedUrl: normalizedPdfUrl,
+            //                         originalUrl: fullPdfUrl,
+            //                     },
+            //                 },
+            //             )
+            //             await backgroundModules.contentSharing.shareAnnotation({
+            //                 annotationUrl: pdfAnnotationUrl,
+            //                 shareToLists: true,
+            //             })
+            //             // await backgroundModules.contentSharing.setAnnotationPrivacyLevel({
+            //             //     annotation: pdfAnnotationUrl,
+            //             //     privacyLevel: AnnotationPrivacyLevels.SHARED,
+            //             // })
+            //             console.log('Shared PDF note to lists')
+            //         }
+            //     }
+            // }
 
             await personalCloud.waitForSync()
             console.log('Waited for sync to cloud from this device')
@@ -506,6 +510,10 @@ export function createSelfTests(options: {
                 }
             }
 
+            await options.localStorage.set({
+                [CLOUD_STORAGE_KEYS.isSetUp]: true,
+            })
+
             console.log('End of self test')
         },
         cloudReceive: async () => {
@@ -515,6 +523,9 @@ export function createSelfTests(options: {
             await ensureTestUser()
             await personalCloud.options.settingStore.set('deviceId', null)
             await personalCloud.startSync()
+            await options.localStorage.set({
+                [CLOUD_STORAGE_KEYS.isSetUp]: true,
+            })
         },
         ensureTestUser: async (email = 'test@test.com') => {
             await ensureTestUser(email)

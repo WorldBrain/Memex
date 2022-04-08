@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { theme } from './design-library/theme'
 
 export interface ThemeProps {
     width?: string
@@ -26,6 +27,7 @@ export class NotifBanner extends React.PureComponent<Props> {
         return (
             <ThemeProvider
                 theme={{
+                    ...theme,
                     ...NotifBanner.defaultProps.theme,
                     ...this.props.theme,
                 }}

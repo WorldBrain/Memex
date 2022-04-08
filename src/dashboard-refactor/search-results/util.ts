@@ -54,8 +54,10 @@ export const formatDayGroupTime = (day: number) =>
 
 export const getInitialFormState = (inputValue = ''): NoteFormState => ({
     tags: [],
+    lists: [],
     inputValue,
     isTagPickerShown: false,
+    isListPickerShown: false,
 })
 
 export const areAllNotesShown = ({ results }: RootState): boolean => {
@@ -113,6 +115,7 @@ export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     isEditing: false,
     areRepliesShown: false,
     isTagPickerShown: false,
+    isListPickerShown: false,
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(inputValue),
@@ -143,6 +146,7 @@ const annotationToNoteData = (
     highlight: annotation.body,
     comment: annotation.comment,
     tags: annotation.tags ?? [],
+    lists: annotation.lists ?? [],
     selector: annotation.selector,
     createdWhen: annotation.createdWhen,
     displayTime: new Date(
@@ -155,7 +159,10 @@ const annotationToNoteData = (
     editNoteForm: {
         inputValue: annotation.comment ?? '',
         tags: annotation.tags ?? [],
+        // TODO: make into lists
+        lists: annotation.lists ?? [],
         isTagPickerShown: false,
+        isListPickerShown: false,
     },
 })
 

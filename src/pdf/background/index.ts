@@ -2,7 +2,6 @@ import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 export class PDFBackground {
     private routeViewer: string
