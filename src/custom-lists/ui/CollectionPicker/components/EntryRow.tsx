@@ -85,8 +85,8 @@ class EntryRow extends React.Component<Props> {
                             position="bottom"
                         >
                             <Icon
-                                heightAndWidth="12px"
-                                padding="6px"
+                                heightAndWidth="14px"
+                                // padding="6px"
                                 icon={'people'}
                                 hoverOff
                                 color="lighterText"

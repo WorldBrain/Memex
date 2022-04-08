@@ -183,11 +183,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const collaborationIcon = this.props.isCollaborative && (
             <>
                 <ButtonTooltip tooltipText={'Shared Space'} position="bottom">
-                    <Icon
-                        heightAndWidth="12px"
-                        filePath={icons.link}
-                        hoverOff
-                    />
+                    <Icon heightAndWidth="14px" icon={'people'} hoverOff />
                 </ButtonTooltip>
             </>
         )
@@ -281,7 +277,6 @@ const Name = styled.div`
     display: block;
     overflow-x: hidden;
     text-overflow: ellipsis;
-    padding-right: 5px;
     color: ${(props) => props.theme.colors.normalText};
 `
 
@@ -411,7 +406,7 @@ const MenuButton = styled.div`
     align-items: center;
     cursor: pointer;
     padding: 0px 10px 0 0;
-    &: ${SidebarItem} {
+    & ${SidebarItem} {
         background-color: red;
     }
     &:hover {

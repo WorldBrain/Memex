@@ -184,7 +184,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     renderMainContent() {
-        if (!this.state.loadingSuggestions) {
+        if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
                     <LoadingIndicator size={25} />

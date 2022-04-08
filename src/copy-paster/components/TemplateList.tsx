@@ -70,7 +70,7 @@ const Center = styled.div`
     height: 200px;
     align-items: center;
     flex-direction: column;
-    grid-gap: 10px;
+    grid-gap: 30px;
 `
 
 const ContentBlock = styled.div`
@@ -95,10 +95,14 @@ const SectionCircle = styled.div`
     align-items: center;
 `
 
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
+const InfoText = styled.div<{ small: boolean }>`
+    color: ${(props) =>
+        props.small
+            ? props.theme.colors.normalText
+            : props.theme.colors.lighterText};
+    font-size: ${(props) => (props.small ? '12px' : '14px')};
     text-align: center;
+    margin-top: ${(props) => props.small && '-25px'};
 `
 
 interface InternalTemplateListProps {
@@ -167,8 +171,9 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         if (this.props.isLoading) {
             return (
                 <Center>
-                    <LoadingIndicator />
+                    <LoadingIndicator size={25} />
                     <InfoText>Copying Content</InfoText>
+                    <InfoText small>Don't close this modal</InfoText>
                 </Center>
             )
         }
