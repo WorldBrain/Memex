@@ -198,14 +198,20 @@ export default class AnnotationEditable extends React.Component<Props> {
                     )}
                     {footerDeps?.onEditIconClick && (
                         <ButtonTooltip
-                            tooltipText="Add/Edit Note"
-                            position="left"
+                            tooltipText={
+                                <span>
+                                    <strong>Add/Edit Note</strong>
+                                    <br />
+                                    or double-click card
+                                </span>
+                            }
+                            position="leftBig"
                         >
                             <HighlightAction>
                                 <Icon
                                     onClick={footerDeps.onEditIconClick}
-                                    filePath={icons.plus}
-                                    heightAndWidth={'14px'}
+                                    icon={'edit'}
+                                    heightAndWidth={'20px'}
                                     padding={'5px'}
                                 />
                             </HighlightAction>
