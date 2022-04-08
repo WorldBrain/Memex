@@ -219,6 +219,7 @@ const AddSpacesButtonContainer = styled.div`
 const ListsContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
 `
 
 const ListSpaceContainer = styled.div`
@@ -228,7 +229,7 @@ const ListSpaceContainer = styled.div`
     border-radius: 4px;
     font-size: 12px;
     font-weight: 400;
-    height: auto;
+    height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
     cursor: pointer;
