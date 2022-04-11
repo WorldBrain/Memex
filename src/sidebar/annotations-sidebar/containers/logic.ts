@@ -238,15 +238,18 @@ export class SidebarContainerLogic extends UILogic<
 
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (pageUrl) {
+            if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
             }
         })
 
         // load followed lists
-        if (previousState.followedListLoadState === 'pristine') {
+        if (
+            previousState.followedListLoadState === 'pristine' &&
+            pageUrl != null
+        ) {
             await this.processUIEvent('loadFollowedLists', {
-                previousState: previousState,
+                previousState,
                 event: null,
             })
         }
@@ -419,15 +422,22 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        this.emitMutation({
+        const mutation: UIMutation<SidebarContainerState> = {
             followedLists: { $set: initNormalizedState() },
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
             users: { $set: {} },
-        })
+        }
 
-        await annotationsCache.load(event.pageUrl)
+        this.emitMutation(mutation)
+        await Promise.all([
+            annotationsCache.load(event.pageUrl),
+            this.processUIEvent('loadFollowedLists', {
+                previousState: this.withMutation(previousState, mutation),
+                event: null,
+            }),
+        ])
 
         if (event.rerenderHighlights) {
             events?.emit('renderHighlights', {
