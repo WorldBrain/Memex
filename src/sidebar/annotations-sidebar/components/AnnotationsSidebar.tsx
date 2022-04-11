@@ -287,7 +287,6 @@ class AnnotationsSidebar extends React.Component<
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
-                    autoFocus
                 />
             </NewAnnotationSection>
         )
