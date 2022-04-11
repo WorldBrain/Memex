@@ -1334,7 +1334,7 @@ export class SidebarContainerLogic extends UILogic<
             return nextAnnotation
         })
 
-        this.emitMutation({ annotations: { $set: nextAnnotations } })
+        this.options.annotationsCache.setAnnotations(nextAnnotations)
     }
 
     updateAnnotationShareInfo: EventHandler<
