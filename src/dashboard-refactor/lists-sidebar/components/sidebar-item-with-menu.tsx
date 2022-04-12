@@ -250,9 +250,8 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         e.stopPropagation()
                     }} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
-                    {...this.props}
                 >
-                    <TitleBox {...this.props}> {this.renderTitle()}</TitleBox>
+                    <TitleBox> {this.renderTitle()}</TitleBox>
 
                     <IconBox
                         dropReceivingState={dropReceivingState}
@@ -339,15 +338,15 @@ border-radius: 5px;
      props.dropReceivingState?.isDraggedOver
          ? props.theme.colors.backgroundColorDarker
          : 'transparent'};
-  
+
  &:hover {
     background-color: ${(props) => props.theme.colors.lightHover};
  }
 
 
- 
 
-  
+
+
 
  ${({ isMenuDisplayed, dropReceivingState }) =>
      css`
@@ -358,7 +357,7 @@ border-radius: 5px;
              : `transparent`};
      `};
 
-  
+
 
  &:hover ${IconBox} {
 
@@ -367,7 +366,7 @@ border-radius: 5px;
 
  }
 
-  
+
 
  &:hover ${TitleBox} {
 
@@ -375,7 +374,7 @@ border-radius: 5px;
 
  }
 
-  
+
 
  ${({ selectedState }: Props) =>
      selectedState?.isSelected &&

@@ -213,9 +213,9 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    protected bindAnnotationEditProps(
+    protected bindAnnotationEditProps = (
         annotation: Annotation,
-    ): AnnotationEditEventProps & AnnotationEditGeneralProps {
+    ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
         //  the time it takes for the BG method to return the generated PK
@@ -231,7 +231,7 @@ export class AnnotationsSidebarContainer<
             onEditConfirm: (showExternalConfirmations) => (
                 shouldShare,
                 isProtected,
-                keepListsIfUnsharing,
+                opts,
             ) => {
                 const showConfirmation =
                     showExternalConfirmations &&
@@ -245,7 +245,8 @@ export class AnnotationsSidebarContainer<
                         annotationUrl: annotation.url,
                         shouldShare,
                         isProtected,
-                        keepListsIfUnsharing,
+                        mainBtnPressed: opts?.mainBtnPressed,
+                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         ...DEF_CONTEXT,
                     },
                 )
@@ -775,8 +776,8 @@ export class AnnotationsSidebarContainer<
                                 bindAnnotationFooterEventProps={(annot) =>
                                     this.bindAnnotationFooterEventProps(annot)
                                 }
-                                bindAnnotationEditProps={(annot) =>
-                                    this.bindAnnotationEditProps(annot)
+                                bindAnnotationEditProps={
+                                    this.bindAnnotationEditProps
                                 }
                                 handleScrollPagination={() =>
                                     this.processEvent('paginateSearch', null)

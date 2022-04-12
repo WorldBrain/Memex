@@ -157,6 +157,7 @@ const Container = styled.div`
     grid-auto-flow: column;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     pointer-events: auto;
+    z-index: 1000;
 `
 
 const ButtonBox = styled.div`

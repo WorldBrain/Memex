@@ -316,7 +316,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         setEditorInstanceRef={(editor) =>
                             (this.editor = editor)
                         }
-                        // autoFocus={this.props.autoFocus}
+                        autoFocus={this.props.autoFocus}
                         placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                         isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />
@@ -332,7 +332,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 }
                                 renderSpacePicker={this.renderCollectionsPicker}
                             />
-                            <TagsSegment
+                            {/* <TagsSegment
                                 tags={this.props.tags}
                                 onMouseEnter={this.props.onTagsHover}
                                 showEditBtn={this.props.hoverState === 'tags'}
@@ -340,7 +340,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     setPickerShown(!this.state.isTagPickerShown)
                                 }
-                            />
+                            /> */}
                             {this.renderTagPicker()}
                             <FooterContainer>
                                 <SaveActionBar>
