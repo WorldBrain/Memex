@@ -54,7 +54,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
     componentDidMount() {
         Mousetrap.bind('mod+shift+enter', () => this.props.onSave(true, false))
-        Mousetrap.bind('mod+enter', () => this.handleSetPrivate(false))
+        Mousetrap.bind('mod+enter', () =>
+            this.props.onSave(this.props.isShared, this.props.isProtected, {
+                mainBtnPressed: true,
+            }),
+        )
         Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
         Mousetrap.bind('alt+enter', () => this.handleSetPrivate(true))
     }
@@ -75,7 +79,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                 },
             })
         } else {
-            return this.props.onSave(false, isBulkShareProtected)
+            return this.props.onSave(
+                this.props.isShared,
+                isBulkShareProtected,
+                { mainBtnPressed: true },
+            )
         }
     }
 
