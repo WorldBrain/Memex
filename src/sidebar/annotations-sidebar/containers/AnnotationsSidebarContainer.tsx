@@ -990,7 +990,7 @@ const ContainerStyled = styled.div`
 const TopBarContainerStyled = styled.div`
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 1300;
     background: #f6f8fb;
     display: flex;
     justify-content: space-between;
