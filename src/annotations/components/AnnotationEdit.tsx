@@ -16,7 +16,9 @@ export interface AnnotationEditEventProps {
     ) => (
         shouldShare: boolean,
         isProtected: boolean,
-        keepListsIfUnsharing?: boolean,
+        opts?: {
+            keepListsIfUnsharing?: boolean
+        },
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void

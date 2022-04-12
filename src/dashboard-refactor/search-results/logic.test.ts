@@ -2153,6 +2153,77 @@ describe('Dashboard search results logic', () => {
                 )
             })
 
+            it('should be able to save selectively shared note in edit state, without changing the share state, when nothing changed', async ({
+                device,
+            }) => {
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[0])
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject(DATA.LISTS_1[1])
+                await device.storageManager
+                    .collection('sharedListMetadata')
+                    .createObject({
+                        localId: DATA.LISTS_1[0].id,
+                        remoteId: 'test-share-1',
+                    })
+
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                    withAuth: true,
+                })
+                await searchResults.init()
+                const noteId = DATA.NOTE_2.url
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: false,
+                        isShared: false,
+                        lists: [],
+                    }),
+                )
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[0].id,
+                })
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[1].id,
+                })
+
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                    }),
+                )
+
+                await searchResults.processEvent('saveNoteEdit', {
+                    noteId,
+                    isProtected: true,
+                    shouldShare: false,
+                    mainBtnPressed: true,
+                })
+
+                // Should be same as above still
+                expect(
+                    searchResults.state.searchResults.noteData.byId[noteId],
+                ).toEqual(
+                    expect.objectContaining({
+                        isBulkShareProtected: true,
+                        isShared: false,
+                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                    }),
+                )
+            })
+
             it('should be able to set note list state', async ({ device }) => {
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),

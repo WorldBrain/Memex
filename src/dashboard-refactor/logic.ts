@@ -1796,6 +1796,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         const pageData =
             params.previousState.searchResults.pageData.byId[existing.pageUrl]
 
+        const hasSharedLists = existing.lists.some(
+            (listId) =>
+                params.previousState.listsSidebar.listData[listId]?.remoteId !=
+                null,
+        )
         const willUnshare =
             !params.incomingPrivacyState.public &&
             (existing.isShared || !params.incomingPrivacyState.protected)
@@ -2027,15 +2032,21 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                const lists = this.getAnnotListsAfterShareStateChange({
-                    previousState,
-                    noteId: event.noteId,
-                    keepListsIfUnsharing: event.keepListsIfUnsharing,
-                    incomingPrivacyState: {
-                        public: event.shouldShare,
-                        protected: !!event.isProtected,
-                    },
-                })
+                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+                //  to make a SAS annotation private protected upon save btn press
+                const lists = event.mainBtnPressed
+                    ? previousState.searchResults.noteData.byId[event.noteId]
+                          ?.lists ?? []
+                    : this.getAnnotListsAfterShareStateChange({
+                          previousState,
+                          noteId: event.noteId,
+                          keepListsIfUnsharing: event.keepListsIfUnsharing,
+                          incomingPrivacyState: {
+                              public: event.shouldShare,
+                              protected: !!event.isProtected,
+                          },
+                      })
 
                 this.emitMutation({
                     searchResults: {
@@ -2070,6 +2081,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         shouldShare: event.shouldShare,
                         shouldCopyShareLink: event.shouldShare,
                         isBulkShareProtected: event.isProtected,
+                        skipPrivacyLevelUpdate: event.mainBtnPressed,
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,
