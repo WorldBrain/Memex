@@ -816,15 +816,20 @@ export class SidebarContainerLogic extends UILogic<
         }
         const existing = previousState.annotations[annotationIndex]
 
-        existing.lists = this.getAnnotListsAfterShareStateChange({
-            previousState,
-            annotationIndex,
-            keepListsIfUnsharing: event.keepListsIfUnsharing,
-            incomingPrivacyState: {
-                public: event.shouldShare,
-                protected: !!event.isProtected,
-            },
-        })
+        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+        //  to make a SAS annotation private protected upon save btn press
+        existing.lists = event.mainBtnPressed
+            ? existing.lists
+            : this.getAnnotListsAfterShareStateChange({
+                  previousState,
+                  annotationIndex,
+                  keepListsIfUnsharing: event.keepListsIfUnsharing,
+                  incomingPrivacyState: {
+                      public: event.shouldShare,
+                      protected: !!event.isProtected,
+                  },
+              })
 
         this.emitMutation({
             annotationModes: {
@@ -855,6 +860,7 @@ export class SidebarContainerLogic extends UILogic<
                     event.isProtected || !!event.keepListsIfUnsharing,
                 skipBackendListUpdateOp: true,
                 keepListsIfUnsharing: event.keepListsIfUnsharing,
+                skipPrivacyLevelUpdate: event.mainBtnPressed,
             },
         )
     }

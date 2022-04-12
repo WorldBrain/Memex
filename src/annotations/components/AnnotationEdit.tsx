@@ -17,6 +17,7 @@ export interface AnnotationEditEventProps {
         shouldShare: boolean,
         isProtected: boolean,
         opts?: {
+            mainBtnPressed?: boolean
             keepListsIfUnsharing?: boolean
         },
     ) => void

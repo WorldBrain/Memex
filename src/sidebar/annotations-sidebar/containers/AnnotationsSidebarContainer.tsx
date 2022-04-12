@@ -245,7 +245,8 @@ export class AnnotationsSidebarContainer<
                         annotationUrl: annotation.url,
                         shouldShare,
                         isProtected,
-                        keepListsIfUnsharing: opts.keepListsIfUnsharing,
+                        mainBtnPressed: opts?.mainBtnPressed,
+                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         ...DEF_CONTEXT,
                     },
                 )

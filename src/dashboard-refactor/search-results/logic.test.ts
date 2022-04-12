@@ -2153,7 +2153,7 @@ describe('Dashboard search results logic', () => {
                 )
             })
 
-            it('should be able to save selectively shared note in edit state, without changing the share state, when nothing changed', async ({
+            it('should keep selectively shared annotation in "selectively shared" state upon main edit save btn press', async ({
                 device,
             }) => {
                 await device.storageManager

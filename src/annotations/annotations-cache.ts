@@ -220,6 +220,7 @@ export interface AnnotationsCacheDependencies {
             annotation: CachedAnnotation,
             shareOpts?: AnnotationShareOpts & {
                 keepListsIfUnsharing?: boolean
+                skipPrivacyLevelUpdate?: boolean
             },
         ) => Promise<void>
         updateTags: (
@@ -259,8 +260,9 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
         shareOpts?: AnnotationShareOpts & {
             skipBackendOps?: boolean
-            skipBackendListUpdateOp?: boolean
             keepListsIfUnsharing?: boolean
+            skipPrivacyLevelUpdate?: boolean
+            skipBackendListUpdateOp?: boolean
         },
     ) => Promise<void>
     delete: (
