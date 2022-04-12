@@ -136,6 +136,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             isShareMenuShown: false,
                         })
                     }
+                    theme={{ leftMenuOffset: '-110px' }}
                 >
                     {this.state.confirmationMode == null ? (
                         <>
@@ -174,33 +175,28 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <>
                 <SaveBtn>
-                    <ButtonTooltip
-                        position="bottom"
-                        tooltipText={`${AnnotationSaveBtn.MOD_KEY} + Enter`}
+                    <SaveBtnText
+                        onClick={() =>
+                            this.props.onSave(
+                                !!this.props.isShared,
+                                !!this.props.isProtected,
+                                { mainBtnPressed: true },
+                            )
+                        }
                     >
-                        <SaveBtnText
-                            onClick={() =>
-                                this.props.onSave(
-                                    !!this.props.isShared,
-                                    !!this.props.isProtected,
-                                    { mainBtnPressed: true },
-                                )
+                        <Icon
+                            hoverOff
+                            heightAndWidth="14px"
+                            filePath={
+                                getShareButtonData(
+                                    this.props.isShared,
+                                    this.props.isProtected,
+                                    this.props.hasSharedLists,
+                                ).icon
                             }
-                        >
-                            <Icon
-                                hoverOff
-                                heightAndWidth="14px"
-                                filePath={
-                                    getShareButtonData(
-                                        this.props.isShared,
-                                        this.props.isProtected,
-                                        this.props.hasSharedLists,
-                                    ).icon
-                                }
-                            />{' '}
-                            Save
-                        </SaveBtnText>
-                    </ButtonTooltip>
+                        />{' '}
+                        Save
+                    </SaveBtnText>
                     <SaveBtnArrow horizontal="1px">
                         <Icon
                             onClick={() =>
