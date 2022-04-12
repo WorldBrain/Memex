@@ -692,7 +692,7 @@ export class AnnotationsSidebarContainer<
                             bottomLeft: false,
                             topLeft: false,
                         }}
-                        onResize={(e, direction, ref, delta, position) => {
+                        onResizeStop={(e, direction, ref, delta, position) => {
                             this.setState({ sidebarWidth: ref.style.width })
                             setLocalStorage(
                                 SIDEBAR_WIDTH_STORAGE_KEY,
@@ -974,7 +974,7 @@ const ContainerStyled = styled.div`
     top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
-    z-index: 999999899; /* This is to combat pages setting high values on certain elements under the sidebar */
+    z-index: 2147483646; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};

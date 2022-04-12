@@ -410,7 +410,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         >(this.props.pagePickerProps, pageId)
 
         return (
-            <ResultBox bottom="10px" key={day.toString() + pageId}>
+            <ResultBox
+                zIndex={Math.floor(page.displayTime / 1000)}
+                bottom="10px"
+                key={day.toString() + pageId}
+            >
                 <PageResult
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
@@ -736,7 +740,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     padding: 0px 15px;
     height: 40px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 1001;
+    z-index: 2147483644;
     margin-top: -6px;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
@@ -769,10 +773,11 @@ const NoteTopBarBox = styled(TopBar)`
     display: flex;
 `
 
-const ResultBox = styled(Margin)`
+const ResultBox = styled(Margin)<{ zIndex: number }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
+    z-index: ${(props) => props.zIndex};
 `
 
 const PageNotesBox = styled(Margin)`
