@@ -241,6 +241,7 @@ interface SidebarEvents {
         annotationUrl: string
         shouldShare: boolean
         isProtected?: boolean
+        mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
     }
     deleteAnnotation: {

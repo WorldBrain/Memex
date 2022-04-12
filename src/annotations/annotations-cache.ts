@@ -220,6 +220,7 @@ export interface AnnotationsCacheDependencies {
             annotation: CachedAnnotation,
             shareOpts?: AnnotationShareOpts & {
                 keepListsIfUnsharing?: boolean
+                skipPrivacyLevelUpdate?: boolean
             },
         ) => Promise<void>
         updateTags: (
@@ -259,8 +260,9 @@ export interface AnnotationsCacheInterface {
         annotation: Omit<CachedAnnotation, 'lastEdited' | 'createdWhen'>,
         shareOpts?: AnnotationShareOpts & {
             skipBackendOps?: boolean
-            skipBackendListUpdateOp?: boolean
             keepListsIfUnsharing?: boolean
+            skipPrivacyLevelUpdate?: boolean
+            skipBackendListUpdateOp?: boolean
         },
     ) => Promise<void>
     delete: (
@@ -281,6 +283,7 @@ export interface AnnotationsCacheInterface {
         id: number
         remoteId: string | null
     }) => void
+    setAnnotations: (annotations: CachedAnnotation[]) => void
 
     annotations: CachedAnnotation[]
     listData: { [listData: number]: { name: string; remoteId: string | null } }
@@ -355,6 +358,14 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     getAnnotationById = (id: string): CachedAnnotation =>
         this.annotations.find((annot) => annot.url === id) ?? null
+
+    setAnnotations: AnnotationsCacheInterface['setAnnotations'] = (
+        annotations,
+    ) => {
+        this.annotations = annotations
+        this.annotationChanges.emit('newStateIntent', this.annotations)
+        this.annotationChanges.emit('newState', this.annotations)
+    }
 
     load = async (url: string, args = {}) => {
         const { backendOperations } = this.dependencies

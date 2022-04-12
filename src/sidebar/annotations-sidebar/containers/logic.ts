@@ -238,15 +238,18 @@ export class SidebarContainerLogic extends UILogic<
 
         await loadInitial<SidebarContainerState>(this, async () => {
             // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (pageUrl) {
+            if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)
             }
         })
 
         // load followed lists
-        if (previousState.followedListLoadState === 'pristine') {
+        if (
+            previousState.followedListLoadState === 'pristine' &&
+            pageUrl != null
+        ) {
             await this.processUIEvent('loadFollowedLists', {
-                previousState: previousState,
+                previousState,
                 event: null,
             })
         }
@@ -419,15 +422,22 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        this.emitMutation({
+        const mutation: UIMutation<SidebarContainerState> = {
             followedLists: { $set: initNormalizedState() },
             followedListLoadState: { $set: 'pristine' },
             followedAnnotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
             users: { $set: {} },
-        })
+        }
 
-        await annotationsCache.load(event.pageUrl)
+        this.emitMutation(mutation)
+        await Promise.all([
+            annotationsCache.load(event.pageUrl),
+            this.processUIEvent('loadFollowedLists', {
+                previousState: this.withMutation(previousState, mutation),
+                event: null,
+            }),
+        ])
 
         if (event.rerenderHighlights) {
             events?.emit('renderHighlights', {
@@ -806,15 +816,20 @@ export class SidebarContainerLogic extends UILogic<
         }
         const existing = previousState.annotations[annotationIndex]
 
-        existing.lists = this.getAnnotListsAfterShareStateChange({
-            previousState,
-            annotationIndex,
-            keepListsIfUnsharing: event.keepListsIfUnsharing,
-            incomingPrivacyState: {
-                public: event.shouldShare,
-                protected: !!event.isProtected,
-            },
-        })
+        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+        //  to make a SAS annotation private protected upon save btn press
+        existing.lists = event.mainBtnPressed
+            ? existing.lists
+            : this.getAnnotListsAfterShareStateChange({
+                  previousState,
+                  annotationIndex,
+                  keepListsIfUnsharing: event.keepListsIfUnsharing,
+                  incomingPrivacyState: {
+                      public: event.shouldShare,
+                      protected: !!event.isProtected,
+                  },
+              })
 
         this.emitMutation({
             annotationModes: {
@@ -845,6 +860,7 @@ export class SidebarContainerLogic extends UILogic<
                     event.isProtected || !!event.keepListsIfUnsharing,
                 skipBackendListUpdateOp: true,
                 keepListsIfUnsharing: event.keepListsIfUnsharing,
+                skipPrivacyLevelUpdate: event.mainBtnPressed,
             },
         )
     }
@@ -1334,7 +1350,7 @@ export class SidebarContainerLogic extends UILogic<
             return nextAnnotation
         })
 
-        this.emitMutation({ annotations: { $set: nextAnnotations } })
+        this.options.annotationsCache.setAnnotations(nextAnnotations)
     }
 
     updateAnnotationShareInfo: EventHandler<

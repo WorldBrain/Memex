@@ -25,7 +25,10 @@ export interface Props {
     onSave: (
         shouldShare: boolean,
         isProtected: boolean,
-        keepListsIfUnsharing?: boolean,
+        opts?: {
+            mainBtnPressed?: boolean
+            keepListsIfUnsharing?: boolean
+        },
     ) => void | Promise<void>
     renderCollectionsPicker?: () => React.ReactNode
 }
@@ -51,7 +54,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
     componentDidMount() {
         Mousetrap.bind('mod+shift+enter', () => this.props.onSave(true, false))
-        Mousetrap.bind('mod+enter', () => this.handleSetPrivate(false))
+        Mousetrap.bind('mod+enter', () =>
+            this.props.onSave(this.props.isShared, this.props.isProtected, {
+                mainBtnPressed: true,
+            }),
+        )
         Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
         Mousetrap.bind('alt+enter', () => this.handleSetPrivate(true))
     }
@@ -72,23 +79,19 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                 },
             })
         } else {
-            return this.props.onSave(false, isBulkShareProtected)
+            return this.props.onSave(
+                this.props.isShared,
+                isBulkShareProtected,
+                { mainBtnPressed: true },
+            )
         }
-    }
-
-    private get saveIcon(): string {
-        return getShareButtonData(
-            this.props.isShared,
-            this.props.isProtected,
-            this.props.hasSharedLists,
-        ).icon
     }
 
     private saveWithShareIntent = (
         shouldShare: boolean,
         keepListsIfUnsharing?: boolean,
     ) => (isProtected?: boolean) =>
-        this.props.onSave(shouldShare, isProtected, keepListsIfUnsharing)
+        this.props.onSave(shouldShare, isProtected, { keepListsIfUnsharing })
 
     private renderConfirmationMode() {
         const { confirmationMode } = this.state
@@ -105,7 +108,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         return this.props.onSave(
                             false,
                             confirmationMode.isBulkShareProtected,
-                            !affirmative,
+                            { keepListsIfUnsharing: !affirmative },
                         )
                     }
                 }}
@@ -180,38 +183,21 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 this.props.onSave(
                                     !!this.props.isShared,
                                     !!this.props.isProtected,
+                                    { mainBtnPressed: true },
                                 )
                             }
                         >
-                            {this.props.isShared && this.props.isProtected && (
-                                <Icon
-                                    hoverOff
-                                    filePath={this.saveIcon}
-                                    heightAndWidth="14px"
-                                />
-                            )}{' '}
-                            {!this.props.isShared && this.props.isProtected && (
-                                <Icon
-                                    hoverOff
-                                    filePath={icons.lockFine}
-                                    heightAndWidth="14px"
-                                />
-                            )}{' '}
-                            {!this.props.isShared &&
-                                !this.props.isProtected && (
-                                    <Icon
-                                        hoverOff
-                                        filePath={icons.personFine}
-                                        heightAndWidth="14px"
-                                    />
-                                )}{' '}
-                            {this.props.isShared && !this.props.isProtected && (
-                                <Icon
-                                    hoverOff
-                                    filePath={icons.globe}
-                                    heightAndWidth="14px"
-                                />
-                            )}{' '}
+                            <Icon
+                                hoverOff
+                                heightAndWidth="14px"
+                                filePath={
+                                    getShareButtonData(
+                                        this.props.isShared,
+                                        this.props.isProtected,
+                                        this.props.hasSharedLists,
+                                    ).icon
+                                }
+                            />{' '}
                             Save
                         </SaveBtnText>
                     </ButtonTooltip>

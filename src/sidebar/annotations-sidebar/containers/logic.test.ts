@@ -1179,6 +1179,90 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
+        it('should keep selectively shared annotation in "selectively shared" state upon main edit save btn press', async ({
+            device,
+        }) => {
+            const fullPageUrl = DATA.CURRENT_TAB_URL_1
+            await device.storageManager
+                .collection('annotations')
+                .createObject(DATA.ANNOT_1)
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[0])
+            await device.storageManager
+                .collection('customLists')
+                .createObject(DATA.LISTS_1[1])
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: DATA.LISTS_1[0].id,
+                    remoteId: 'test-share-1',
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[0].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: DATA.LISTS_1[1].id,
+                    pageUrl: normalizeUrl(fullPageUrl),
+                    fullUrl: fullPageUrl,
+                })
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                pageUrl: fullPageUrl,
+                withAuth: true,
+            })
+            const publicListId = DATA.LISTS_1[0].id
+            const privateListId = DATA.LISTS_1[1].id
+            const annotId = DATA.ANNOT_1.url
+
+            await sidebar.init()
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: annotId,
+                added: privateListId,
+                deleted: null,
+            })
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: annotId,
+                added: publicListId,
+                deleted: null,
+                options: { protectAnnotation: true },
+            })
+
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                    lists: [privateListId, publicListId],
+                }),
+            ])
+
+            await sidebar.processEvent('editAnnotation', {
+                annotationUrl: annotId,
+                mainBtnPressed: true,
+                shouldShare: false,
+                isProtected: true,
+                context,
+            })
+
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    url: annotId,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                    lists: [privateListId, publicListId],
+                }),
+            ])
+        })
+
         it('should be able to make a selectively shared annotation private, removing any shared lists without touching sibling annots', async ({
             device,
         }) => {

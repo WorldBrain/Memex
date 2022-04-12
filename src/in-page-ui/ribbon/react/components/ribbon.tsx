@@ -505,6 +505,7 @@ export default class Ribbon extends Component<Props, State> {
                                             contentSharingBG={
                                                 this.props.contentSharingBG
                                             }
+                                            autoFocus
                                         />
                                     </HoverBox>
                                 )}

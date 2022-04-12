@@ -16,7 +16,10 @@ export interface AnnotationEditEventProps {
     ) => (
         shouldShare: boolean,
         isProtected: boolean,
-        keepListsIfUnsharing?: boolean,
+        opts?: {
+            mainBtnPressed?: boolean
+            keepListsIfUnsharing?: boolean
+        },
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
@@ -25,6 +28,8 @@ export interface AnnotationEditEventProps {
 export interface AnnotationEditGeneralProps {
     comment: string
     editorHeight?: string
+    isShared?: boolean
+    isBulkShareProtected?: boolean
 }
 
 export interface Props
@@ -65,7 +70,11 @@ class AnnotationEdit extends React.Component<Props> {
             }
 
             if (e.key === 'Enter' && e.metaKey) {
-                return this.saveEdit(false, false)
+                return this.props.onEditConfirm(false)(
+                    this.props.isShared,
+                    this.props.isBulkShareProtected,
+                    { mainBtnPressed: true },
+                )
             }
         } else {
             if (e.key === 'Enter' && e.shiftKey && e.ctrlKey) {

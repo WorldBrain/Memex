@@ -68,7 +68,10 @@ export type NoteInteractionProps = Omit<
     ) => (
         shouldShare: boolean,
         isProtected: boolean,
-        keepListsIfUnsharing?: boolean,
+        opts?: {
+            mainBtnPressed?: boolean
+            keepListsIfUnsharing?: boolean
+        },
     ) => void
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
@@ -334,6 +337,7 @@ export type Events = UIEvent<{
     saveNoteEdit: NoteEventArgs & {
         shouldShare: boolean
         isProtected?: boolean
+        mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
     }
 }>

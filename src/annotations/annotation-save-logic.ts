@@ -9,6 +9,7 @@ export interface AnnotationShareOpts {
     shouldShare?: boolean
     shouldCopyShareLink?: boolean
     isBulkShareProtected?: boolean
+    skipPrivacyLevelUpdate?: boolean
 }
 
 type AnnotationCreateData = {
@@ -150,11 +151,12 @@ export async function updateAnnotation({
                         shareToLists: true,
                         skipPrivacyLevelUpdate: true,
                     }),
-                contentSharingBG.setAnnotationPrivacyLevel({
-                    annotation: annotationData.localId,
-                    privacyLevel: shareOptsToPrivacyLvl(shareOpts),
-                    keepListsIfUnsharing,
-                }),
+                !shareOpts?.skipPrivacyLevelUpdate &&
+                    contentSharingBG.setAnnotationPrivacyLevel({
+                        annotation: annotationData.localId,
+                        privacyLevel: shareOptsToPrivacyLvl(shareOpts),
+                        keepListsIfUnsharing,
+                    }),
             ])
             return annotationData.localId
         })(),

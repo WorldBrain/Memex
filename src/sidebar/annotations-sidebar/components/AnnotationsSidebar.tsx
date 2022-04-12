@@ -287,7 +287,6 @@ class AnnotationsSidebar extends React.Component<
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef}
-                    autoFocus
                 />
             </NewAnnotationSection>
         )
@@ -967,44 +966,6 @@ class AnnotationsSidebar extends React.Component<
                                     : null
                             }
                         />
-                        {/* //             <ButtonTooltip
-            //                 tooltipText="Copy All Notes"
-            //                 position="bottomSidebar"
-            //             >
-            //                 <ActionBtn
-            //                     onClick={() =>
-            //                         this.setState({
-            //                             showAllNotesCopyPaster: true,
-            //                         })
-            //                     }
-            //                     isActive={this.state.showAllNotesCopyPaster}
-            //                 >
-            //                     <ActionIcon src={icons.copy} />
-            //                 </ActionBtn>
-            //             </ButtonTooltip>
-            //             <ButtonTooltip
-            //                 tooltipText="Share annotated Page"
-            //                 position="bottomRightEdge"
-            //             >
-            //                 <ActionBtn
-            //                     onClick={() =>
-            //                         this.setState({
-            //                             showAllNotesShareMenu: true,
-            //                         })
-            //                     }
-            //                     isActive={this.state.showAllNotesShareMenu}
-            //                 >
-            //                     <ActionIcon src={icons.link} />
-            //                 </ActionBtn>
-            //             </ButtonTooltip>
-            //         </TopBarActionBtns>
-            //     </FollowedListTitleContainerMyNotes>
-            //     {!this.props.annotations.length ? (
-            //         <EmptyMessage />
-            //     ) : (
-            //         this.props.isExpanded && annots
-            //     )}
-            // </FollowedListNotesContainer> */}
                         Shared Spaces
                     </FollowedListSectionTitle>
 
@@ -1557,6 +1518,7 @@ const NewAnnotationSection = styled.section`
     width: fill-available;
     padding-bottom: 8px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    z-index: 1120;
 `
 
 const NewAnnotationSeparator = styled.div`
