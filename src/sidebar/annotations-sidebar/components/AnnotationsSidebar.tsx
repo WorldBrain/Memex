@@ -1518,6 +1518,7 @@ const NewAnnotationSection = styled.section`
     width: fill-available;
     padding-bottom: 8px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    z-index: 1120;
 `
 
 const NewAnnotationSeparator = styled.div`
