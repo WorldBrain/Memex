@@ -404,7 +404,7 @@ const FooterContainer = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 5px 15px 5px 15px;
-    z-index: 1001;
+    z-index: 998;
 `
 
 const SaveActionBar = styled.div`
