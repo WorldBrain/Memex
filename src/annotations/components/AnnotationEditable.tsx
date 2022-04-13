@@ -211,7 +211,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 <Icon
                                     onClick={footerDeps.onEditIconClick}
                                     icon={'edit'}
-                                    heightAndWidth={'20px'}
+                                    heightAndWidth={'16px'}
                                     padding={'5px'}
                                 />
                             </HighlightAction>
@@ -290,10 +290,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                             tooltipText="Edit Note"
                             position="bottom"
                         >
-                            <EditNoteIcon
+                            <Icon
                                 onClick={
                                     annotationFooterDependencies?.onEditIconClick
                                 }
+                                icon={'edit'}
+                                heightAndWidth={'16px'}
+                                padding={'5px'}
                             />
                         </ButtonTooltip>
                     </EditNoteIconBox>
@@ -644,9 +647,10 @@ const EditNoteIconBox = styled.div`
     border: none;
     outline: none;
     background: white;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     padding: 4px;
+    margin-top: -5px;
     border-radius: 3px;
     border: 1px solid #f0f0f0;
 
@@ -695,10 +699,11 @@ const SaveActionBar = styled.div`
 const HighlightActionsBox = styled.div`
     position: absolute;
     right: 0px;
-    top: 0px;
+    top: -5px;
     width: 50px;
     display: flex;
     justify-content: flex-end;
+    z-index: 10000;
 `
 
 const NoteTextBox = styled.div`

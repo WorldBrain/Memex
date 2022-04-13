@@ -60,7 +60,7 @@ const Banner = styled.div`
     position: ${({ theme }) => theme.position};
     padding: 0 20px;
     bottom: 0px;
-    z-index: 1000000;
+    z-index: 2147483647;
     justify-content: center;
     align-items: center;
 `
