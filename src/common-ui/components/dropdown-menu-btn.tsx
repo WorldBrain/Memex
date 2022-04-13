@@ -148,6 +148,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                             e.stopPropagation
                         }}
                         width={this.props.width}
+                        leftPosition={this.theme.leftMenuOffset}
                     >
                         {this.props.menuTitle && (
                             <MenuTitle>{this.props.menuTitle}</MenuTitle>
@@ -230,7 +231,7 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
     width: 100%;
 `
 
-const Menu = styled.div`
+const Menu = styled.div<{ leftPosition: string }>`
     position: absolute;
     width: max-content;
     list-style: none;
@@ -241,7 +242,7 @@ const Menu = styled.div`
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     top: 25px;
-    left: -67px;
+    left: ${(props) => props.leftPosition};
     z-index: 1000;
     padding: 10px;
 `

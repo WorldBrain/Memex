@@ -64,7 +64,7 @@ const Sidebar = styled(Rnd)<{
 
 const Container = styled.div`
     position: fixed;
-    z-index: 3000;
+    z-index: 2147483645;
 `
 
 const PeekTrigger = styled.div`

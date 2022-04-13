@@ -833,7 +833,11 @@ class AnnotationsSidebar extends React.Component<
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
             return (
-                <AnnotationBox key={annot.url}>
+                <AnnotationBox
+                    key={annot.url}
+                    isActive={this.props.activeAnnotationUrl === annot.url}
+                    zIndex={this.props.annotations.length - i}
+                >
                     <AnnotationEditable
                         {...annot}
                         {...this.props}
@@ -1100,7 +1104,7 @@ const TopBar = styled.div`
     background: ${(props) => props.theme.colors.backgroundColor};
     top: 0px;
     width: 93%;
-    z-index: 1000;
+    z-index: 1300;
     padding: 5px 15px 5px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 `
@@ -1119,9 +1123,10 @@ const EmptyMessageContainer = styled.div`
     align-items: center;
     width: 100%;
 `
-const AnnotationBox = styled.div`
+const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
     padding: 0 2px;
     width: fill-available;
+    z-index: ${(props) => props.zIndex};
 `
 
 const SectionCircle = styled.div`
