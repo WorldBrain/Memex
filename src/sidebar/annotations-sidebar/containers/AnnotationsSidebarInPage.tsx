@@ -18,6 +18,7 @@ import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/Shar
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
+import type { SidebarContainerLogic } from './logic'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -156,7 +157,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         })
     }
 
-    private handleExternalAction = (event: SidebarActionOptions) => {
+    private handleExternalAction = async (event: SidebarActionOptions) => {
+        await (this.logic as SidebarContainerLogic).annotationsLoadComplete
+
         if (event.action === 'comment') {
             this.processEvent('addNewPageComment', {
                 comment: event.annotationData?.commentText,
