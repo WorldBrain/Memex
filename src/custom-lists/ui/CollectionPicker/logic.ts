@@ -99,7 +99,9 @@ export default class SpacePickerLogic extends UILogic<
             ? await this.dependencies.initialSelectedEntries()
             : []
 
-        const defaultSuggestions = await this.loadDefaultSuggestions()
+        const defaultSuggestions = await this.loadDefaultSuggestions(
+            initialSelectedEntries,
+        )
 
         this.defaultEntries = defaultSuggestions
 
@@ -113,16 +115,28 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    private async loadDefaultSuggestions(): Promise<SpaceDisplayEntry[]> {
+    private async loadDefaultSuggestions(
+        selectedEntries: number[],
+    ): Promise<SpaceDisplayEntry[]> {
         const { spacesBG: collectionsBG, contentSharingBG } = this.dependencies
         const suggestions = await collectionsBG.fetchInitialListSuggestions()
         const remoteListIds = await contentSharingBG.getRemoteListIds({
             localListIds: suggestions.map((s) => s.localId as number),
         })
-        return suggestions.map((s) => ({
-            ...s,
-            remoteId: remoteListIds[s.localId] ?? null,
-        }))
+
+        return (
+            suggestions
+                // Sort with the selected entries first
+                .sort(
+                    (a, b) =>
+                        (selectedEntries.includes(b.localId) ? 1 : 0) -
+                        (selectedEntries.includes(a.localId) ? 1 : 0),
+                )
+                .map((s) => ({
+                    ...s,
+                    remoteId: remoteListIds[s.localId] ?? null,
+                }))
+        )
     }
 
     setSearchInputRef: EventHandler<'setSearchInputRef'> = ({

@@ -107,7 +107,13 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                displayEntries: DATA.TEST_LIST_SUGGESTIONS,
+                displayEntries: [
+                    DATA.TEST_LIST_SUGGESTIONS[0],
+                    DATA.TEST_LIST_SUGGESTIONS[2],
+                    DATA.TEST_LIST_SUGGESTIONS[1],
+                    DATA.TEST_LIST_SUGGESTIONS[3],
+                    DATA.TEST_LIST_SUGGESTIONS[4],
+                ],
                 selectedEntries: initialSelectedEntries,
             }),
         )
