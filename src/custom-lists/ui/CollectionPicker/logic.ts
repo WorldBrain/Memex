@@ -67,11 +67,12 @@ export default class SpacePickerLogic extends UILogic<
         super()
     }
 
-    protected defaultEntries: SpaceDisplayEntry[] = []
+    private defaultEntries: SpaceDisplayEntry[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
     private _processingUpstreamOperation: Promise<void>
+
     get processingUpstreamOperation() {
         return this._processingUpstreamOperation
     }
@@ -325,6 +326,7 @@ export default class SpacePickerLogic extends UILogic<
     }) => {
         const { unselectEntry, selectEntry } = this.dependencies
 
+        // If we're going to unselect it
         if (previousState.selectedEntries.includes(entry.localId)) {
             this.emitMutation({
                 selectedEntries: {
@@ -332,12 +334,29 @@ export default class SpacePickerLogic extends UILogic<
                         (id) => id !== entry.localId,
                     ),
                 },
-            } as UIMutation<SpacePickerState>)
+            })
             await unselectEntry(entry.localId)
         } else {
+            const prevDisplayIndex = previousState.displayEntries.findIndex(
+                ({ localId }) => localId === entry.localId,
+            )
+
             this.emitMutation({
                 selectedEntries: { $push: [entry.localId] },
-            } as UIMutation<SpacePickerState>)
+                displayEntries: {
+                    // Reposition selected entry at start of display list
+                    $set: [
+                        previousState.displayEntries[prevDisplayIndex],
+                        ...previousState.displayEntries.slice(
+                            0,
+                            prevDisplayIndex,
+                        ),
+                        ...previousState.displayEntries.slice(
+                            prevDisplayIndex + 1,
+                        ),
+                    ],
+                },
+            })
             await selectEntry(entry.localId)
         }
     }
