@@ -2885,6 +2885,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             allListIds: { $set: localListIds },
                         },
                         listData: { $unset: [listId] },
+                        selectedListId: { $set: undefined },
                     },
                 })
             },
