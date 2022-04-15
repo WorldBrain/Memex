@@ -25,6 +25,7 @@ import {
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { validateListName } from '../utils'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -50,9 +51,14 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        const { newEntryName, displayEntries } = this.state
-        const input = newEntryName.trim()
-        return input !== '' && !displayEntries.find((e) => e.name === input)
+        const otherLists = (this.logic as ListPickerLogic).defaultEntries.map(
+            (e) => ({
+                id: e.localId,
+                name: e.name,
+            }),
+        )
+
+        return validateListName(this.state.newEntryName, otherLists).valid
     }
 
     private get selectedDisplayEntries(): Array<{
