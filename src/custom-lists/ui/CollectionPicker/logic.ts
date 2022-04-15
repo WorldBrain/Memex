@@ -3,6 +3,7 @@ import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { validateListName } from '../utils'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -67,7 +68,7 @@ export default class SpacePickerLogic extends UILogic<
         super()
     }
 
-    private defaultEntries: SpaceDisplayEntry[] = []
+    public defaultEntries: SpaceDisplayEntry[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
@@ -365,7 +366,6 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
             entry.localId,
         )
@@ -431,12 +431,13 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     validateEntry = (entry: string) => {
-        entry = entry.trim()
+        const validationResult = validateListName(
+            entry,
+            this.defaultEntries.map((e) => ({ id: e.localId, name: e.name })),
+        )
 
-        if (entry === '') {
-            throw Error(
-                `Space Picker Validation: Can't add entry with only whitespace`,
-            )
+        if (validationResult.valid === false) {
+            throw Error('Space Picker Validation: ' + validationResult.reason)
         }
 
         return entry

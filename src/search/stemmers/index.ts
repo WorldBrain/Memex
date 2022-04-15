@@ -1,5 +1,5 @@
 import { StemmerSelector } from '@worldbrain/storex-backend-dexie'
-import textStemmer from '@worldbrain/memex-stemmer'
+import textStemmer, { listNameStemmer } from '@worldbrain/memex-stemmer'
 
 import urlStemmer from './url-stemmer'
 
@@ -40,7 +40,7 @@ const customLists: StemmerSelector = (args) => {
     switch (args.fieldName) {
         case 'searchableName':
         default:
-            return textStemmer
+            return listNameStemmer
     }
 }
 

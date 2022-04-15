@@ -135,6 +135,41 @@ describe('Custom List Integrations', () => {
             })
         })
 
+        test('should not drop stop words and special characters in searchable list name field', async () => {
+            const { customLists, storageManager } = await setupTest({
+                skipTestData: true,
+            })
+
+            const listNames = [
+                'the at or and of test',
+                '~!@ #$% ^&* test',
+                'funny stuff 😂🤣',
+            ]
+            await customLists.createCustomLists({ names: listNames })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    name: listNames[0],
+                    searchableName: listNames[0],
+                    nameTerms: listNames[0].split(' '),
+                }),
+                expect.objectContaining({
+                    name: listNames[1],
+                    searchableName: listNames[1],
+                    nameTerms: listNames[1].split(' '),
+                }),
+                expect.objectContaining({
+                    name: listNames[2],
+                    searchableName: listNames[2],
+                    nameTerms: listNames[2].split(' '),
+                }),
+            ])
+        })
+
         test('should not recreate inbox list if already exists', async () => {
             const { customLists } = await setupTest({ skipTestData: true })
 

@@ -7,6 +7,11 @@ import {
 import * as DATA from './logic.test.data'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import delay from 'src/util/delay'
+import {
+    EMPTY_LIST_NAME_ERR_MSG,
+    BAD_CHAR_LIST_NAME_ERR_MSG,
+    NON_UNIQ_LIST_NAME_ERR_MSG,
+} from '../constants'
 
 async function insertTestData({
     storageManager,
@@ -260,9 +265,10 @@ describe('SpacePickerLogic', () => {
     })
 
     it('should correctly validate new entries', async ({ device }) => {
-        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+        const { entryPickerLogic, testLogic } = await setupLogicHelper({
             device,
         })
+        await testLogic.init()
 
         expect(() => entryPickerLogic.validateEntry('test')).not.toThrowError()
         expect(() =>
@@ -275,8 +281,14 @@ describe('SpacePickerLogic', () => {
             entryPickerLogic.validateEntry('test test $test %🤣😁 😅😁'),
         ).not.toThrowError()
         expect(() => entryPickerLogic.validateEntry('   ')).toThrowError(
-            `Space Picker Validation: Can't add entry with only whitespace`,
+            'Space Picker Validation: ' + EMPTY_LIST_NAME_ERR_MSG,
         )
+        expect(() => entryPickerLogic.validateEntry(' test []  ')).toThrowError(
+            'Space Picker Validation: ' + BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+        expect(() =>
+            entryPickerLogic.validateEntry(DATA.TEST_LIST_SUGGESTIONS[0].name),
+        ).toThrowError('Space Picker Validation: ' + NON_UNIQ_LIST_NAME_ERR_MSG)
     })
 
     it('should show default entries again after clearing the search query', async ({

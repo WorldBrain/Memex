@@ -6,19 +6,6 @@ export type ListsState = Pick<
     'listData' | 'localLists' | 'followedLists'
 >
 
-export const isListNameUnique = (
-    name: string,
-    { listData, localLists }: ListsState,
-    args: { listIdToSkip?: number } = {},
-): boolean =>
-    localLists.allListIds.reduce((acc, listId) => {
-        if (listId === args.listIdToSkip) {
-            return acc
-        }
-
-        return acc && listData[listId].name !== name
-    }, true)
-
 export const filterListsByQuery = (
     query: string,
     { listData, localLists, followedLists }: ListsState,
