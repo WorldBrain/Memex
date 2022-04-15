@@ -5,7 +5,7 @@ import {
     EMPTY_LIST_NAME_ERR_MSG,
     NON_UNIQ_LIST_NAME_ERR_MSG,
     BAD_CHAR_LIST_NAME_ERR_MSG,
-} from '../constants'
+} from 'src/custom-lists/ui/constants'
 
 describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()

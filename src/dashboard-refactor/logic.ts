@@ -12,11 +12,7 @@ import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
-    NON_UNIQ_LIST_NAME_ERR_MSG,
     MISSING_PDF_QUERY_PARAM,
-    EMPTY_LIST_NAME_ERR_MSG,
-    BAD_CHAR_LIST_PATTERN,
-    BAD_CHAR_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
@@ -27,7 +23,7 @@ import {
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType } from './search-results/types'
-import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
+import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
 import {
@@ -46,6 +42,7 @@ import { isDuringInstall } from 'src/overview/onboarding/utils'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
+import { validateListName } from 'src/custom-lists/ui/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -2433,30 +2430,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const newListName = event.value.trim()
+        const validationResult = validateListName(
+            newListName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+        )
 
-        if (!newListName.length) {
+        if (validationResult.valid === false) {
             this.emitMutation({
                 listsSidebar: {
                     addListErrorMessage: {
-                        $set: EMPTY_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-            return
-        } else if (BAD_CHAR_LIST_PATTERN.test(newListName)) {
-            this.emitMutation({
-                listsSidebar: {
-                    addListErrorMessage: {
-                        $set: BAD_CHAR_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-            return
-        } else if (!isListNameUnique(newListName, previousState.listsSidebar)) {
-            this.emitMutation({
-                listsSidebar: {
-                    addListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                        $set: validationResult.reason,
                     },
                 },
             })
@@ -2650,44 +2639,40 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         if (newName === oldName) {
             return
-        } else if (!newName.length) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: EMPTY_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-        } else if (BAD_CHAR_LIST_PATTERN.test(newName)) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: BAD_CHAR_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-        } else if (
-            !isListNameUnique(newName, previousState.listsSidebar, {
-                listIdToSkip: listId,
-            })
-        ) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-        } else {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: { $set: null },
-                    listData: {
-                        [listId]: { name: { $set: newName } },
-                    },
-                },
-            })
         }
+        const validationResult = validateListName(
+            newName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+            {
+                listIdToSkip: listId,
+            },
+        )
+
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: {
+                        $set: validationResult.reason,
+                    },
+                },
+            })
+            return
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                editListErrorMessage: { $set: null },
+                listData: {
+                    [listId]: { name: { $set: newName } },
+                },
+            },
+        })
     }
 
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
@@ -2707,10 +2692,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const newName = previousState.listsSidebar.listData[listId].name
 
-        if (!newName.length) {
-            return
-        }
-
         if (newName === oldName) {
             this.emitMutation({
                 listsSidebar: {
@@ -2720,47 +2701,58 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (
-            !isListNameUnique(newName, previousState.listsSidebar, {
+        const validationResult = validateListName(
+            newName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+            {
                 listIdToSkip: listId,
-            })
-        ) {
+            },
+        )
+
+        if (validationResult.valid === false) {
             this.emitMutation({
                 listsSidebar: {
                     editListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                        $set: validationResult.reason,
                     },
                 },
             })
-        } else {
-            await executeUITask(
-                this,
-                (taskState) => ({
-                    listsSidebar: { listEditState: { $set: taskState } },
-                }),
-                async () => {
-                    await this.options.listsBG.updateListName({
-                        id: listId,
-                        oldName,
-                        newName,
-                    })
-
-                    await this.changeListName({
-                        event,
-                        previousState,
-                    })
-
-                    this.emitMutation({
-                        listsSidebar: {
-                            editingListId: { $set: undefined },
-                            editListErrorMessage: {
-                                $set: null,
-                            },
-                        },
-                    })
-                },
-            )
+            return
         }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listEditState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.listsBG.updateListName({
+                    id: listId,
+                    oldName,
+                    newName,
+                })
+
+                await this.changeListName({
+                    event,
+                    previousState,
+                })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        editingListId: { $set: undefined },
+                        editListErrorMessage: {
+                            $set: null,
+                        },
+                    },
+                })
+            },
+        )
     }
 
     cancelListEdit: EventHandler<'cancelListEdit'> = async ({
