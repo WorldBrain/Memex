@@ -1,6 +1,11 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
+import {
+    EMPTY_LIST_NAME_ERR_MSG,
+    NON_UNIQ_LIST_NAME_ERR_MSG,
+    BAD_CHAR_LIST_NAME_ERR_MSG,
+} from '../constants'
 
 describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -228,6 +233,116 @@ describe('Dashboard lists sidebar logic', () => {
                 .collection('customLists')
                 .findOneObject({ id: listId }),
         ).toEqual(expect.objectContaining({ id: listId, name: nameUpdated }))
+    })
+
+    it('should block edit and show error on bad list name edits', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+        const nameA = 'test A'
+        const nameB = 'test B'
+
+        await searchResults.processEvent('confirmListCreate', { value: nameA })
+        await searchResults.processEvent('confirmListCreate', { value: nameB })
+        const listIdA = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', {
+            listId: listIdA,
+        })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(listIdA)
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: '    ',
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            EMPTY_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: nameB,
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: nameA + '[ ( {',
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+    })
+
+    it('should block create and show error on bad list name creates', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: 'test' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: 'test' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: '    ' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            EMPTY_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', {
+            value: 'test [ ( {',
+        })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', {
+            value: 'test 2',
+        })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
     })
 
     it('should be able to cancel list edit', async ({ device }) => {

@@ -15,6 +15,8 @@ import {
     NON_UNIQ_LIST_NAME_ERR_MSG,
     MISSING_PDF_QUERY_PARAM,
     EMPTY_LIST_NAME_ERR_MSG,
+    BAD_CHAR_LIST_PATTERN,
+    BAD_CHAR_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
@@ -2433,10 +2435,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newListName = event.value.trim()
 
         if (!newListName.length) {
+            this.emitMutation({
+                listsSidebar: {
+                    addListErrorMessage: {
+                        $set: EMPTY_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
             return
-        }
-
-        if (!isListNameUnique(newListName, previousState.listsSidebar)) {
+        } else if (BAD_CHAR_LIST_PATTERN.test(newListName)) {
+            this.emitMutation({
+                listsSidebar: {
+                    addListErrorMessage: {
+                        $set: BAD_CHAR_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
+            return
+        } else if (!isListNameUnique(newListName, previousState.listsSidebar)) {
             this.emitMutation({
                 listsSidebar: {
                     addListErrorMessage: {
@@ -2642,6 +2658,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             })
+        } else if (BAD_CHAR_LIST_PATTERN.test(newName)) {
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: {
+                        $set: BAD_CHAR_LIST_NAME_ERR_MSG,
+                    },
+                },
+            })
         } else if (
             !isListNameUnique(newName, previousState.listsSidebar, {
                 listIdToSkip: listId,
@@ -2665,6 +2689,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
     }
+
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
         previousState,
