@@ -226,7 +226,10 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async fetchListByIds(ids: number[]): Promise<PageList[]> {
-        return this.operation('findListsByIds', { ids })
+        const listsData: PageList[] = await this.operation('findListsByIds', {
+            ids,
+        })
+        return ids.map((id) => listsData.find((list) => list.id === id))
     }
 
     async fetchListWithPagesById(id: number) {

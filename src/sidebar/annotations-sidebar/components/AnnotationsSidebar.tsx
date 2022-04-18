@@ -767,6 +767,7 @@ class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
+                <SpacerBottom />
             </React.Fragment>
         )
     }
@@ -1082,6 +1083,10 @@ export default onClickOutside(AnnotationsSidebar)
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const SpacerBottom = styled.div`
+    height: 1200px;
+`
+
 const Link = styled.span`
     color: ${(props) => props.theme.colors.purple};
     padding-left: 4px;
@@ -1282,8 +1287,9 @@ const AnnotationContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding-bottom: 500px;
-    overflow: scroll;
+    /* padding-bottom: 500px;
+    overflow-y: scroll;
+    overflow-x: visible; */
     height: 100%;
 
     scrollbar-width: none;
@@ -1540,7 +1546,7 @@ const AnnotationsSectionStyled = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 5px 10px;
+    padding: 5px 10px 500px 10px;
     height: 100%;
 `
 
@@ -1673,7 +1679,7 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         display: none;
     }
     height: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '100%' : '100vh'};
+        props.sidebarContext === 'dashboard' ? '100%' : '100%'};
 
     scrollbar-width: none;
 `

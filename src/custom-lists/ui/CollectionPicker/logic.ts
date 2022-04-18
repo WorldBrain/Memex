@@ -3,6 +3,7 @@ import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { validateListName } from '../utils'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -67,11 +68,12 @@ export default class SpacePickerLogic extends UILogic<
         super()
     }
 
-    protected defaultEntries: SpaceDisplayEntry[] = []
+    public defaultEntries: SpaceDisplayEntry[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
     private _processingUpstreamOperation: Promise<void>
+
     get processingUpstreamOperation() {
         return this._processingUpstreamOperation
     }
@@ -99,7 +101,9 @@ export default class SpacePickerLogic extends UILogic<
             ? await this.dependencies.initialSelectedEntries()
             : []
 
-        const defaultSuggestions = await this.loadDefaultSuggestions()
+        const defaultSuggestions = await this.loadDefaultSuggestions(
+            initialSelectedEntries,
+        )
 
         this.defaultEntries = defaultSuggestions
 
@@ -113,16 +117,28 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    private async loadDefaultSuggestions(): Promise<SpaceDisplayEntry[]> {
+    private async loadDefaultSuggestions(
+        selectedEntries: number[],
+    ): Promise<SpaceDisplayEntry[]> {
         const { spacesBG: collectionsBG, contentSharingBG } = this.dependencies
         const suggestions = await collectionsBG.fetchInitialListSuggestions()
         const remoteListIds = await contentSharingBG.getRemoteListIds({
             localListIds: suggestions.map((s) => s.localId as number),
         })
-        return suggestions.map((s) => ({
-            ...s,
-            remoteId: remoteListIds[s.localId] ?? null,
-        }))
+
+        return (
+            suggestions
+                // Sort with the selected entries first
+                .sort(
+                    (a, b) =>
+                        (selectedEntries.includes(b.localId) ? 1 : 0) -
+                        (selectedEntries.includes(a.localId) ? 1 : 0),
+                )
+                .map((s) => ({
+                    ...s,
+                    remoteId: remoteListIds[s.localId] ?? null,
+                }))
+        )
     }
 
     setSearchInputRef: EventHandler<'setSearchInputRef'> = ({
@@ -311,6 +327,7 @@ export default class SpacePickerLogic extends UILogic<
     }) => {
         const { unselectEntry, selectEntry } = this.dependencies
 
+        // If we're going to unselect it
         if (previousState.selectedEntries.includes(entry.localId)) {
             this.emitMutation({
                 selectedEntries: {
@@ -318,12 +335,29 @@ export default class SpacePickerLogic extends UILogic<
                         (id) => id !== entry.localId,
                     ),
                 },
-            } as UIMutation<SpacePickerState>)
+            })
             await unselectEntry(entry.localId)
         } else {
+            const prevDisplayIndex = previousState.displayEntries.findIndex(
+                ({ localId }) => localId === entry.localId,
+            )
+
             this.emitMutation({
                 selectedEntries: { $push: [entry.localId] },
-            } as UIMutation<SpacePickerState>)
+                displayEntries: {
+                    // Reposition selected entry at start of display list
+                    $set: [
+                        previousState.displayEntries[prevDisplayIndex],
+                        ...previousState.displayEntries.slice(
+                            0,
+                            prevDisplayIndex,
+                        ),
+                        ...previousState.displayEntries.slice(
+                            prevDisplayIndex + 1,
+                        ),
+                    ],
+                },
+            })
             await selectEntry(entry.localId)
         }
     }
@@ -332,7 +366,6 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        this.validateEntry(entry.name)
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
             entry.localId,
         )
@@ -398,12 +431,13 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     validateEntry = (entry: string) => {
-        entry = entry.trim()
+        const validationResult = validateListName(
+            entry,
+            this.defaultEntries.map((e) => ({ id: e.localId, name: e.name })),
+        )
 
-        if (entry === '') {
-            throw Error(
-                `Space Picker Validation: Can't add entry with only whitespace`,
-            )
+        if (validationResult.valid === false) {
+            throw Error('Space Picker Validation: ' + validationResult.reason)
         }
 
         return entry

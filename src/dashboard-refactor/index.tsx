@@ -144,7 +144,7 @@ export class DashboardContainer extends StatefulUIElement<
         const { listsSidebar } = this.state
 
         if (
-            !listsSidebar.selectedListId ||
+            listsSidebar.selectedListId == null ||
             Object.values(SPECIAL_LIST_IDS).includes(
                 listsSidebar.selectedListId,
             )
@@ -242,8 +242,10 @@ export class DashboardContainer extends StatefulUIElement<
                     : undefined,
             onRenameClick: () =>
                 this.processEvent('setEditingListId', { listId }),
-            onDeleteClick: () =>
-                this.processEvent('setDeletingListId', { listId }),
+            onDeleteClick: (e) => {
+                e.stopPropagation()
+                this.processEvent('setDeletingListId', { listId })
+            },
             onShareClick: () => this.processEvent('setShareListId', { listId }),
             services: {
                 ...this.props.services,

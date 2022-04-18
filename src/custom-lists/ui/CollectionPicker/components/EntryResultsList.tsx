@@ -8,11 +8,16 @@ interface Props {
     entries: SpaceDisplayEntry[]
     renderEntryRow: (list: SpaceDisplayEntry, index: number) => ReactNode
     emptyView?: ReactNode
-    id: string
     query: string
 }
 
 export default class EntryResultsList extends React.Component<Props> {
+    private containerRef = React.createRef<HTMLDivElement>()
+
+    scrollToTop() {
+        this.containerRef.current.scrollTo(0, 0)
+    }
+
     renderMain() {
         if (!this.props.entries || !this.props.entries.length) {
             return this.props.emptyView
@@ -23,7 +28,7 @@ export default class EntryResultsList extends React.Component<Props> {
 
     render = () => {
         return (
-            <StyledContainer id={this.props.id}>
+            <StyledContainer ref={this.containerRef}>
                 {this.props.query === '' && (
                     <RecentItemsNotif>Recently used</RecentItemsNotif>
                 )}

@@ -37,6 +37,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
+import { resolvablePromise } from 'src/util/promises'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -80,6 +81,14 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
+    /**
+     * This exists so the "external action" handling logic (see `AnnotationsSidebarInPage.handleExternalAction`)
+     * can trigger mutation events touching the annotation state early, ensuring that they are delayed at least until
+     * the annotations data has time to be loaded.
+     * The bug that prompted this: shift+clicking newly created highlights on empty pages attempts to activate an annotation
+     * before the sidebar script had been loaded before, let alone the annotations data.
+     */
+    annotationsLoadComplete = resolvablePromise()
     syncSettings: SyncSettingsStore<'contentSharing'>
 
     constructor(private options: SidebarLogicOptions) {
@@ -242,6 +251,7 @@ export class SidebarContainerLogic extends UILogic<
                 await annotationsCache.load(pageUrl)
             }
         })
+        this.annotationsLoadComplete.resolve()
 
         // load followed lists
         if (

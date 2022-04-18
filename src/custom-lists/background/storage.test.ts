@@ -135,6 +135,41 @@ describe('Custom List Integrations', () => {
             })
         })
 
+        test('should not drop stop words and special characters in searchable list name field', async () => {
+            const { customLists, storageManager } = await setupTest({
+                skipTestData: true,
+            })
+
+            const listNames = [
+                'the at or and of test',
+                '~!@ #$% ^&* test',
+                'funny stuff 😂🤣',
+            ]
+            await customLists.createCustomLists({ names: listNames })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    name: listNames[0],
+                    searchableName: listNames[0],
+                    nameTerms: listNames[0].split(' '),
+                }),
+                expect.objectContaining({
+                    name: listNames[1],
+                    searchableName: listNames[1],
+                    nameTerms: listNames[1].split(' '),
+                }),
+                expect.objectContaining({
+                    name: listNames[2],
+                    searchableName: listNames[2],
+                    nameTerms: listNames[2].split(' '),
+                }),
+            ])
+        })
+
         test('should not recreate inbox list if already exists', async () => {
             const { customLists } = await setupTest({ skipTestData: true })
 
@@ -522,14 +557,14 @@ describe('Collection Cache', () => {
                 expect.objectContaining({
                     createdAt: expect.any(Number),
                     localId: expect.any(Number),
-                    name: DATA.LIST_1.name,
+                    name: DATA.LIST_2.name,
                     focused: false,
                     remoteId: null,
                 }),
                 expect.objectContaining({
                     createdAt: expect.any(Number),
                     localId: expect.any(Number),
-                    name: DATA.LIST_2.name,
+                    name: DATA.LIST_1.name,
                     focused: false,
                     remoteId: null,
                 }),
@@ -540,7 +575,7 @@ describe('Collection Cache', () => {
                 expect.objectContaining({
                     createdAt: expect.any(Number),
                     localId: expect.any(Number),
-                    name: DATA.LIST_1.name,
+                    name: DATA.LIST_3.name,
                     focused: false,
                     remoteId: null,
                 }),
@@ -554,7 +589,7 @@ describe('Collection Cache', () => {
                 expect.objectContaining({
                     createdAt: expect.any(Number),
                     localId: expect.any(Number),
-                    name: DATA.LIST_3.name,
+                    name: DATA.LIST_1.name,
                     focused: false,
                     remoteId: null,
                 }),
@@ -565,13 +600,6 @@ describe('Collection Cache', () => {
                 expect.objectContaining({
                     createdAt: expect.any(Number),
                     localId: expect.any(Number),
-                    name: DATA.LIST_1.name,
-                    focused: false,
-                    remoteId: null,
-                }),
-                expect.objectContaining({
-                    createdAt: expect.any(Number),
-                    localId: expect.any(Number),
                     name: DATA.LIST_2.name,
                     focused: false,
                     remoteId: null,
@@ -583,13 +611,20 @@ describe('Collection Cache', () => {
                     focused: false,
                     remoteId: null,
                 }),
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
             ])
         })
 
-        test("adding multiple page entry for same list doesn't add dupe cache entries", async () => {
+        test("adding multiple page entry for same list doesn't add dupe cache entries, though it should re-order by most recently selected", async () => {
             const { listsModule } = await setupCacheTest({})
 
-            const expectedEntries = [
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
                 {
                     createdAt: expect.any(Number),
                     localId: DATA.LIST_1.id,
@@ -611,37 +646,93 @@ describe('Collection Cache', () => {
                     focused: false,
                     remoteId: null,
                 },
-            ]
-
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
-                expectedEntries,
-            )
+            ])
             await listsModule.updateListForPage({
                 added: DATA.LIST_1.id,
                 url: 'https://www.ipsum.com/test',
                 skipPageIndexing: true,
             })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
-                expectedEntries,
-            )
-
-            await listsModule.updateListForPage({
-                added: DATA.LIST_1.id,
-                url: 'https://www.ipsum.com/test1',
-                skipPageIndexing: true,
-            })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
-                expectedEntries,
-            )
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_1.id,
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_2.id,
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_3.id,
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                },
+            ])
 
             await listsModule.updateListForPage({
                 added: DATA.LIST_2.id,
                 url: 'https://www.ipsum.com/test',
                 skipPageIndexing: true,
             })
-            expect(await listsModule.fetchInitialListSuggestions()).toEqual(
-                expectedEntries,
-            )
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_2.id,
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_1.id,
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_3.id,
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                },
+            ])
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_3.id,
+                url: 'https://www.ipsum.com/test1',
+                skipPageIndexing: true,
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_3.id,
+                    name: DATA.LIST_3.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_2.id,
+                    name: DATA.LIST_2.name,
+                    focused: false,
+                    remoteId: null,
+                },
+                {
+                    createdAt: expect.any(Number),
+                    localId: DATA.LIST_1.id,
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                },
+            ])
         })
     })
 })

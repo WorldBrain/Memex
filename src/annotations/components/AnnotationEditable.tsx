@@ -410,18 +410,14 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private renderMarkdownHelpButton() {
         return (
-            <MarkdownButtonContainer>
-                <ButtonTooltip
-                    tooltipText="Show formatting help"
-                    position="bottom"
-                >
-                    <MarkdownButton
-                        src={icons.helpIcon}
-                        onClick={() =>
-                            this.setState({ showQuickTutorial: true })
-                        }
-                    />
-                </ButtonTooltip>
+            <MarkdownButtonContainer
+                onClick={() => this.setState({ showQuickTutorial: true })}
+            >
+                Formatting Help
+                <MarkdownButton
+                    src={icons.helpIcon}
+                    onClick={() => this.setState({ showQuickTutorial: true })}
+                />
             </MarkdownButtonContainer>
         )
     }
@@ -679,6 +675,10 @@ const EditNoteIcon = styled.div`
 `
 const MarkdownButtonContainer = styled.div`
     display: flex;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    align-items: center;
+    cursor: pointer;
 `
 
 const MarkdownButton = styled.img`
@@ -692,8 +692,9 @@ const MarkdownButton = styled.img`
 
 const SaveActionBar = styled.div`
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+    width: 100%;
 `
 
 const HighlightActionsBox = styled.div`
@@ -896,7 +897,6 @@ const CancelBtnStyled = styled.button`
 const BtnContainerStyled = styled.div`
     display: flex;
     flex-direction: row-reverse;
-    width: 100%;
     justify-content: flex-end;
     align-items: center;
 `

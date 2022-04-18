@@ -13,13 +13,9 @@ import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
 import EntryResultsList from './components/EntryResultsList'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import EntryRow, {
-    IconStyleWrapper,
-    ActOnAllTabsButton,
-} from './components/EntryRow'
+import EntryRow, { IconStyleWrapper } from './components/EntryRow'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
@@ -29,6 +25,7 @@ import {
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { validateListName } from '../utils'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -47,14 +44,21 @@ class SpacePicker extends StatefulUIElement<
             }),
     }
 
+    private displayListRef = React.createRef<EntryResultsList>()
+
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        const { newEntryName, displayEntries } = this.state
-        const input = newEntryName.trim()
-        return input !== '' && !displayEntries.find((e) => e.name === input)
+        const otherLists = (this.logic as ListPickerLogic).defaultEntries.map(
+            (e) => ({
+                id: e.localId,
+                name: e.name,
+            }),
+        )
+
+        return validateListName(this.state.newEntryName, otherLists).valid
     }
 
     private get selectedDisplayEntries(): Array<{
@@ -86,8 +90,10 @@ class SpacePicker extends StatefulUIElement<
     handleSelectedListPress = (list: number) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: SpaceDisplayEntry) =>
+    handleResultListPress = (list: SpaceDisplayEntry) => {
+        this.displayListRef.current.scrollToTop()
         this.processEvent('resultEntryPress', { entry: list })
+    }
 
     handleResultListAllPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
@@ -210,11 +216,11 @@ class SpacePicker extends StatefulUIElement<
                     }
                 />
                 <EntryResultsList
+                    ref={this.displayListRef}
                     query={this.state.query}
                     entries={this.state.displayEntries}
-                    renderEntryRow={this.renderListRow}
                     emptyView={this.renderEmptyList()}
-                    id="listResults"
+                    renderEntryRow={this.renderListRow}
                 />
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
