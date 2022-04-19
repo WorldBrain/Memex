@@ -27,6 +27,7 @@ import ListsSegment, {
     AddSpacesButton,
 } from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export interface Props
     extends PageData,
@@ -78,7 +79,10 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     private get hasLists(): boolean {
-        return this.props.lists.length > 0
+        const userLists = this.props.lists.filter(
+            (listId) => !Object.values(SPECIAL_LIST_IDS).includes(listId),
+        )
+        return userLists.length > 0
     }
 
     private get displayLists(): Array<{
@@ -174,7 +178,7 @@ export default class PageResultView extends PureComponent<Props> {
             <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
                 <ButtonTooltip
                     tooltipText={
-                        this.props.filteredbyListID === 20201014
+                        this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
                             ? 'Remove from Inbox'
                             : 'Remove from \nCollection'
                     }
@@ -320,12 +324,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 )}
                                 <PageUrl>{this.domain}</PageUrl>
                                 {this.props.hoverState === 'main-content' &&
-                                    (this.props.lists.length === 0 ||
-                                        (this.props.lists.length === 1 &&
-                                            this.props.lists.includes(
-                                                20201014,
-                                                0,
-                                            ))) && (
+                                    !this.hasLists && (
                                         <AddSpaceButtonContainer>
                                             <AddSpacesButton
                                                 hasNoLists={true}
@@ -344,22 +343,18 @@ export default class PageResultView extends PureComponent<Props> {
                             </DomainContainer>
                         </ResultContent>
                     </PageContentBox>
-                    {this.hasLists &&
-                        !(
-                            this.props.lists.length === 1 &&
-                            this.props.lists.includes(20201014, 0)
-                        ) && (
-                            <ListsSegment
-                                lists={this.displayLists}
-                                onMouseEnter={this.props.onListsHover}
-                                showEditBtn={this.props.hoverState === 'lists'}
-                                onListClick={undefined}
-                                onEditBtnClick={this.props.onListPickerBtnClick}
-                                renderSpacePicker={this.renderSpacePicker.bind(
-                                    this,
-                                )}
-                            />
-                        )}
+                    {this.hasLists && (
+                        <ListsSegment
+                            lists={this.displayLists}
+                            onMouseEnter={this.props.onListsHover}
+                            showEditBtn={this.props.hoverState === 'lists'}
+                            onListClick={undefined}
+                            onEditBtnClick={this.props.onListPickerBtnClick}
+                            renderSpacePicker={this.renderSpacePicker.bind(
+                                this,
+                            )}
+                        />
+                    )}
                     <TagsSegment
                         tags={this.props.tags}
                         onMouseEnter={this.props.onTagsHover}
