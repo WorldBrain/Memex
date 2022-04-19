@@ -52,8 +52,6 @@ export default class RibbonHolder extends StatefulUIElement<
     private setAutoHide = (shouldAutoHide: boolean) => {
         this.isAnyPopupOpen = !shouldAutoHide
 
-        this.state
-
         if (shouldAutoHide) {
             this.hideRibbonWithTimeout()
         }
