@@ -297,7 +297,6 @@ export default class PageResultView extends PureComponent<Props> {
                                 ? this.props.onListPickerBtnClick
                                 : undefined
                         }
-                        onClick={() => window.open(this.fullUrl)}
                         href={this.fullUrl}
                         target="_blank"
                     >
@@ -438,7 +437,7 @@ const FavIconImg = styled.img`
     border-radius: 30px;
 `
 
-const PageContentBox = styled.div`
+const PageContentBox = styled.a`
     display: flex;
     flex-direction: column;
     cursor: pointer;

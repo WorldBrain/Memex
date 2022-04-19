@@ -790,13 +790,31 @@ describe('Dashboard lists sidebar logic', () => {
                     },
                 },
             },
+            searchResults: {
+                pageData: {
+                    byId: {
+                        $set: {
+                            [page.normalizedUrl]: {
+                                lists: [],
+                            },
+                        },
+                    },
+                },
+            },
         })
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(listId)
+        expect(
+            searchResults.state.searchResults.pageData.byId[page.normalizedUrl]
+                .lists,
+        ).toEqual([])
 
         const dataTransfer = new DataTransfer()
         dataTransfer.setData(
             'text/plain',
-            JSON.stringify({ fullPageUrl: page.fullUrl }),
+            JSON.stringify({
+                fullPageUrl: page.fullUrl,
+                normalizedPageUrl: page.normalizedUrl,
+            }),
         )
         await searchResults.processEvent('dropPageOnListItem', {
             listId,
@@ -809,6 +827,11 @@ describe('Dashboard lists sidebar logic', () => {
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
             undefined,
         )
+        expect(
+            searchResults.state.searchResults.pageData.byId[page.normalizedUrl]
+                .lists,
+        ).toEqual([listId])
+
         expect(
             await device.storageManager
                 .collection('pageListEntries')
