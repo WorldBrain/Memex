@@ -110,7 +110,9 @@ export default class AnnotationEditable extends React.Component<Props> {
         showQuickTutorial: false,
     }
 
-    focus() {}
+    focusEditForm() {
+        this.annotEditRef?.current?.focusEditor()
+    }
 
     componentDidMount() {
         this.textAreaHeight()

@@ -45,6 +45,7 @@ export type SidebarContainerOptions = SidebarContainerDependencies & {
 
 export type SidebarLogicOptions = SidebarContainerOptions & {
     focusCreateForm: FocusableComponent['focus']
+    focusEditNoteForm: (annotationId: string) => void
     setLoginModalShown?: (isShown: boolean) => void
     setDisplayNameModalShown?: (isShown: boolean) => void
 }
@@ -546,7 +547,10 @@ export class SidebarContainerLogic extends UILogic<
 
     resetListPickerAnnotationId: EventHandler<
         'resetListPickerAnnotationId'
-    > = () => {
+    > = ({ event }) => {
+        if (event.id != null) {
+            this.options.focusEditNoteForm(event.id)
+        }
         this.emitMutation({ activeListPickerAnnotationId: { $set: undefined } })
     }
 

@@ -22,12 +22,14 @@ const setupLogicHelper = async ({
     device,
     withAuth,
     pageUrl = DATA.CURRENT_TAB_URL_1,
+    focusEditNoteForm = () => undefined,
     focusCreateForm = () => undefined,
     copyToClipboard = () => undefined,
 }: {
     device: UILogicTestDevice
     pageUrl?: string
     withAuth?: boolean
+    focusEditNoteForm?: (annotationId: string) => void
     focusCreateForm?: () => void
     copyToClipboard?: (text: string) => Promise<boolean>
 }) => {
@@ -84,6 +86,7 @@ const setupLogicHelper = async ({
         analytics,
         initialState: 'hidden',
         searchResultLimit: 10,
+        focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
         getPageUrl: () => pageUrl,
@@ -405,6 +408,34 @@ describe('SidebarContainerLogic', () => {
                     },
                 },
             ])
+        })
+
+        it("should be able to focus the associated edit form on closing an annotation's space picker via the keyboard", async ({
+            device,
+        }) => {
+            let focusedAnnotId: string = null
+            const { sidebar } = await setupLogicHelper({
+                device,
+                focusEditNoteForm: (id) => (focusedAnnotId = id),
+            })
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: DATA.ANNOT_1.url,
+            })
+
+            expect(sidebar.state.activeListPickerAnnotationId).toEqual(
+                DATA.ANNOT_1.url,
+            )
+            expect(focusedAnnotId).toEqual(null)
+
+            await sidebar.processEvent('resetListPickerAnnotationId', {
+                id: DATA.ANNOT_1.url,
+            })
+
+            expect(sidebar.state.activeListPickerAnnotationId).toEqual(
+                undefined,
+            )
+            expect(focusedAnnotId).toEqual(DATA.ANNOT_1.url)
         })
     })
 
