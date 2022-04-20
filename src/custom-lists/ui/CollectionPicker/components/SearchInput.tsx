@@ -11,7 +11,7 @@ const search = browser.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
-    onKeyPress: (key: KeyEvent) => void
+    onKeyPress: (e: KeyboardEvent) => void
     searchInputPlaceholder: string
     value: string
     before: JSX.Element
@@ -44,7 +44,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
 
     handleSpecialKeyPress = {
         test: (e: KeyboardEvent) => keyEvents.includes(e.key as KeyEvent),
-        handle: (e: KeyboardEvent) => this.props.onKeyPress(e.key as KeyEvent),
+        handle: (e: KeyboardEvent) => this.props.onKeyPress(e),
     }
 
     render() {

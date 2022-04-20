@@ -340,6 +340,23 @@ export class AnnotationsSidebarContainer<
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
             initialSelectedEntries: () => annotation.lists ?? [],
+            onSubmit: async () => {
+                await this.processEvent('resetListPickerAnnotationId', {})
+
+                if (
+                    this.state.annotationModes.pageAnnotations[
+                        annotation.url
+                    ] === 'edit'
+                ) {
+                    await this.processEvent('editAnnotation', {
+                        annotationUrl: annotation.url,
+                        shouldShare: annotation.isShared,
+                        isProtected: annotation.isBulkShareProtected,
+                        mainBtnPressed: true,
+                        ...DEF_CONTEXT,
+                    })
+                }
+            },
             onEscapeKeyDown: () => {
                 this.processEvent('resetListPickerAnnotationId', {
                     id: annotation.url,
