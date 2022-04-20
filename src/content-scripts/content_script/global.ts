@@ -156,9 +156,11 @@ export async function main(
             }),
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
+            showSpacePicker?: boolean,
         ) =>
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
+                showSpacePicker,
                 analyticsEvent,
                 shouldShare,
             }),

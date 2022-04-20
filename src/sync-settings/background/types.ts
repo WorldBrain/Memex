@@ -50,6 +50,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcutEnabled: boolean
             toggleHighlightsShortcutEnabled: boolean
             createAnnotationShortcutEnabled: boolean
+            createAnnotationWithSpacePickerShortcutEnabled: boolean
             addTagShortcut: string
             addCommentShortcut: string
             openDashboardShortcut: string
@@ -59,6 +60,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcut: string
             toggleHighlightsShortcut: string
             createAnnotationShortcut: string
+            createAnnotationWithSpacePickerShortcut: string
         }
     }
     readwise: {

@@ -80,6 +80,10 @@ function getShortcutHandlers({
         createSharedHighlight: () => annotationFunctions.createHighlight(true),
         createHighlight: () => annotationFunctions.createHighlight(false),
         createAnnotation: () => annotationFunctions.createAnnotation(false),
+        createSharedAnnotationWithSpacePicker: () =>
+            annotationFunctions.createAnnotation(true, true),
+        createAnnotationWithSpacePicker: () =>
+            annotationFunctions.createAnnotation(false, true),
         link: async () => {
             if (userSelectedText()) {
                 await createAndCopyDirectLink()

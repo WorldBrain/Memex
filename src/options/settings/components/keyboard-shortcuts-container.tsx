@@ -13,10 +13,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-
-const styles = require('./settings.css')
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -43,6 +40,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         toggleSidebar: { shortcut: 'r', enabled: true },
         toggleHighlights: { shortcut: 'h', enabled: true },
         createAnnotation: { shortcut: 'a', enabled: true },
+        createAnnotationWithSpacePicker: { shortcut: 'z', enabled: true },
         createHighlight: { shortcut: 'n', enabled: true },
         addTag: { shortcut: 't', enabled: true },
         addComment: { shortcut: 'c', enabled: true },

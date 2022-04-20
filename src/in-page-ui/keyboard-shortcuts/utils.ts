@@ -15,6 +15,7 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
         'toggleSidebar',
         'toggleHighlights',
         'createAnnotation',
+        'createAnnotationWithSpacePicker',
         'createHighlight',
         'link',
         'createBookmark',
@@ -45,6 +46,8 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
                     ? 'createSharedAnnotation'
                     : key === 'createHighlight'
                     ? 'createSharedHighlight'
+                    : key === 'createAnnotationWithSpacePicker'
+                    ? 'createSharedAnnotationWithSpacePicker'
                     : undefined,
         }
     }
