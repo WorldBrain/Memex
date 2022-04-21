@@ -17,7 +17,7 @@ async function insertTestData({
     storageManager,
     backgroundModules,
 }: UILogicTestDevice) {
-    for (const list of DATA.TEST_LISTS) {
+    for (const list of [...DATA.TEST_LISTS].reverse()) {
         await backgroundModules.customLists.createCustomList({
             createdAt: list.createdAt,
             name: list.name,
