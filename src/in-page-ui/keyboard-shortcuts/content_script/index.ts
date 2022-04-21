@@ -69,7 +69,20 @@ function getShortcutHandlers({
     return {
         addComment: () => inPageUI.showRibbon({ action: 'comment' }),
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
-        addToCollection: () => inPageUI.showRibbon({ action: 'list' }),
+        addToCollection: async () => {
+            if (userSelectedText()) {
+                await annotationFunctions.createAnnotation(false, true)
+            } else {
+                await inPageUI.showRibbon({ action: 'list' })
+            }
+        },
+        createSharedAnnotationAndAddToCollection: async () => {
+            if (userSelectedText()) {
+                await annotationFunctions.createAnnotation(true, true)
+            } else {
+                await inPageUI.showRibbon({ action: 'list' })
+            }
+        },
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
         openDashboard: () =>
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
@@ -80,10 +93,6 @@ function getShortcutHandlers({
         createSharedHighlight: () => annotationFunctions.createHighlight(true),
         createHighlight: () => annotationFunctions.createHighlight(false),
         createAnnotation: () => annotationFunctions.createAnnotation(false),
-        createSharedAnnotationWithSpacePicker: () =>
-            annotationFunctions.createAnnotation(true, true),
-        createAnnotationWithSpacePicker: () =>
-            annotationFunctions.createAnnotation(false, true),
         link: async () => {
             if (userSelectedText()) {
                 await createAndCopyDirectLink()

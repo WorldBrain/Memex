@@ -40,11 +40,10 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         toggleSidebar: { shortcut: 'r', enabled: true },
         toggleHighlights: { shortcut: 'h', enabled: true },
         createAnnotation: { shortcut: 'a', enabled: true },
-        createAnnotationWithSpacePicker: { shortcut: 'z', enabled: true },
         createHighlight: { shortcut: 'n', enabled: true },
         addTag: { shortcut: 't', enabled: true },
-        addComment: { shortcut: 'c', enabled: true },
-        addToCollection: { shortcut: 'u', enabled: true },
+        addComment: { shortcut: 'e', enabled: true },
+        addToCollection: { shortcut: 'c', enabled: true },
         createBookmark: { shortcut: 'b', enabled: true },
     }
 
