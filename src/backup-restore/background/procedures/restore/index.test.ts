@@ -74,26 +74,26 @@ describe('BackupRestoreProcedure', () => {
         })
         expect(restoreProcedure.running).toBe(false)
         restoreProcedure._clearDatabase = async () => null
-        restoreProcedure._listBackupCollection = async collection =>
+        restoreProcedure._listBackupCollection = async (collection) =>
             Object.keys(backupObjects[collection])
         restoreProcedure._createBackupObjectFetcher = () => {
             return async ([collection, object]) => {
                 return backupObjects[collection][object]
             }
         }
-        restoreProcedure._writeChange = async change => {
+        restoreProcedure._writeChange = async (change) => {
             expect(restoreProcedure.running).toBe(true)
             writtenChanges.push(change)
         }
-        restoreProcedure._writeImage = async image => {
+        restoreProcedure._writeImage = async (image) => {
             expect(restoreProcedure.running).toBe(true)
             writtenImages.push(image)
         }
 
         const runner = restoreProcedure.runner()
         expect(storage.recording).toBe(null)
-        await new Promise((resolve, reject) => {
-            restoreProcedure.events.on('info', info => {
+        await new Promise<void>((resolve, reject) => {
+            restoreProcedure.events.on('info', (info) => {
                 if (info.status === 'synching') {
                     expect(storage.recording).toBe(false)
                 }
@@ -102,7 +102,7 @@ describe('BackupRestoreProcedure', () => {
             restoreProcedure.events.on('success', () => {
                 resolve()
             })
-            restoreProcedure.events.on('fail', err => {
+            restoreProcedure.events.on('fail', (err) => {
                 reject(err)
             })
             runner()
@@ -298,7 +298,7 @@ describe('BackupRestoreProcedure', () => {
     it('should correctly restore screenshot blobs', async () => {
         const updates = []
         const storageManager = {
-            collection: collectionName => ({
+            collection: (collectionName) => ({
                 updateOneObject: async (...args) => {
                     updates.push([collectionName, ...args])
                 },
@@ -335,7 +335,7 @@ describe('BackupRestoreProcedure', () => {
     it('should correctly restore favIcon blobs', async () => {
         const updates = []
         const storageManager = {
-            collection: collectionName => ({
+            collection: (collectionName) => ({
                 updateObjects: async (...args) => {
                     updates.push([collectionName, ...args])
                 },
@@ -371,7 +371,7 @@ describe('BackupRestoreProcedure', () => {
     it('should not attempt to restore empty objects', async () => {
         const changes = []
         const storageManager = {
-            collection: collectionName => ({
+            collection: (collectionName) => ({
                 createObject: async (...args) => {
                     changes.push([collectionName, ...args])
                 },

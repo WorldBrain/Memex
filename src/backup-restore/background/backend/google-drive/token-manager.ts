@@ -4,7 +4,7 @@ export class DriveTokenManager {
     public memexCloudOrigin: string
     private refreshToken: string
     private tokenExpiryDate: Date
-    private initializationPromise: Promise<any>
+    private initializationPromise: Promise<void>
 
     constructor({
         tokenStore,
@@ -15,27 +15,29 @@ export class DriveTokenManager {
     }) {
         this.memexCloudOrigin = memexCloudOrigin
         this.tokenStore = tokenStore
-        this.initializationPromise = new Promise(async (resolve, reject) => {
-            try {
-                const {
-                    token: accessToken,
-                    expiryDate,
-                } = await this.tokenStore.retrieveAccessToken()
-                if (accessToken) {
-                    this.accessToken = accessToken
-                    this.tokenExpiryDate = expiryDate
-                }
+        this.initializationPromise = new Promise<void>(
+            async (resolve, reject) => {
+                try {
+                    const {
+                        token: accessToken,
+                        expiryDate,
+                    } = await this.tokenStore.retrieveAccessToken()
+                    if (accessToken) {
+                        this.accessToken = accessToken
+                        this.tokenExpiryDate = expiryDate
+                    }
 
-                const refreshToken = await this.tokenStore.retrieveRefreshToken()
-                if (refreshToken) {
-                    this.refreshToken = refreshToken
-                }
+                    const refreshToken = await this.tokenStore.retrieveRefreshToken()
+                    if (refreshToken) {
+                        this.refreshToken = refreshToken
+                    }
 
-                resolve()
-            } catch (err) {
-                reject(err)
-            }
-        })
+                    resolve()
+                } catch (err) {
+                    reject(err)
+                }
+            },
+        )
     }
 
     async getAccessToken() {

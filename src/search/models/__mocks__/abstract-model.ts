@@ -30,5 +30,5 @@ export default abstract class AbstractModel {
         return Buffer.from(data, 'base64')
     }
 
-    public abstract async save()
+    public abstract save()
 }

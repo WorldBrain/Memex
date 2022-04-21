@@ -41,7 +41,7 @@ export default class Visit extends EventModel {
         this.scrollMaxPerc = props.scrollMaxPerc
     }
 
-    get pk() {
+    get pk(): [number, string] {
         return [this.time, this.url]
     }
 
@@ -64,7 +64,7 @@ export default class Visit extends EventModel {
     /**
      * @returns {[number, string]}
      */
-    async save() {
+    async save(): Promise<[number, string]> {
         const { object } = await this.db
             .collection('visits')
             .createObject(this.data)

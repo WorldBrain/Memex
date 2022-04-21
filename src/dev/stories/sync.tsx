@@ -46,7 +46,7 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
-            subscriptionStatus={this.props.subscriptionStatus}
+            subscriptionStatus={(this as any).props.subscriptionStatus}
             removeAllDevices={removeAllDevices}
         />
     ))
@@ -62,7 +62,7 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
-            subscriptionStatus={this.props.subscriptionStatus}
+            subscriptionStatus={(this as any).props.subscriptionStatus}
             removeAllDevices={removeAllDevices}
         />
     ))

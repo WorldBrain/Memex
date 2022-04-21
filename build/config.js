@@ -21,7 +21,7 @@ export const entry = {
     content_script_ribbon: './src/content-scripts/content_script/ribbon.ts',
     content_script_tooltip: './src/content-scripts/content_script/tooltip.ts',
     content_script_sidebar: './src/content-scripts/content_script/sidebar.ts',
-    options: './src/options/options.jsx',
+    options: './src/options/options.tsx',
 }
 
 export const output = {

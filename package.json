@@ -288,7 +288,7 @@
         "tslint-config-prettier": "^1.14.0",
         "tslint-react": "^3.6.0",
         "typeorm": "0.2.17",
-        "typescript": "3.8.3",
+        "typescript": "^4.6.3",
         "uglifyjs-webpack-plugin": "^1.2.7",
         "url-loader": "^1.0.1",
         "web-ext": "^1.10.0",

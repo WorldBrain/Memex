@@ -36,6 +36,7 @@ export type RpcSideName =
     | 'background'
     | 'content-script-global'
     | 'content-script-popup'
+    | 'extension-page-options'
 
 export class PortBasedRPCManager {
     private ports = new Map<string, Runtime.Port>()

@@ -53,7 +53,7 @@ export const migrations: Migrations = {
             return
         }
 
-        await this.deps.syncSettingsStore.dashboard.set(
+        await (this as any).deps.syncSettingsStore.dashboard.set(
             'subscribeBannerShownAfter',
             Date.now(),
         )

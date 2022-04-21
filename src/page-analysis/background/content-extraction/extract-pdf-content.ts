@@ -57,16 +57,18 @@ async function extractContent(
         memexOutline: (await pdf.getOutline()) ?? null,
         documentInformationDict: metadata?.info ?? null,
         metadataMap: metadata?.metadata?.getAll() ?? null,
-        fingerprints: pdf.fingerprints ? pdf.fingerprints : [pdf.fingerprint],
+        fingerprints: (pdf as any).fingerprints
+            ? (pdf as any).fingerprints
+            : [pdf.fingerprint],
     }
 
     return {
         pdfMetadata,
         pdfPageTexts: pageTexts,
         fullText: processedText,
-        author: metadata.info.Author,
-        title: metadata.info.Title || rawContent.title,
-        keywords: metadata.info.Keywords,
+        author: metadata.info['Author'],
+        title: metadata.info['Title'] || rawContent.title,
+        keywords: metadata.info['Keywords'],
     }
 }
 

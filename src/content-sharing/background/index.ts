@@ -874,14 +874,10 @@ export default class ContentSharingBackground {
             privacyLevel?.privacyLevel,
         )
 
-        const [annotation, annotationEntries, remoteId] = await Promise.all<
-            Annotation,
-            AnnotListEntry[],
-            string | number
-        >([
+        const [annotation, annotationEntries, remoteId] = await Promise.all([
             privacyState.public
                 ? annotationsBG.getAnnotationByPk(params.annotationUrl)
-                : Promise.resolve(null),
+                : Promise.resolve<null>(null),
             annotationsBG.findListEntriesByUrl({
                 url: params.annotationUrl,
             }),
