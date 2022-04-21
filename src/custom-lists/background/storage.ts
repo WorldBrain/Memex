@@ -380,7 +380,7 @@ export default class CustomListStorage extends StorageModule {
 
     async suggestLists({
         query,
-        limit = 5,
+        limit = 20,
     }: {
         query: string
         limit?: number
