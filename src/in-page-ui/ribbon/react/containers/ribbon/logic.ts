@@ -231,6 +231,9 @@ export class RibbonContainerLogic extends UILogic<
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
         previousState,
     }) => {
+        this.dependencies.setRibbonShouldAutoHide(
+            previousState.areExtraButtonsShown,
+        )
         const mutation: UIMutation<RibbonContainerState> = {
             areExtraButtonsShown: { $set: !previousState.areExtraButtonsShown },
             areTutorialShown: { $set: false },
@@ -248,6 +251,9 @@ export class RibbonContainerLogic extends UILogic<
     toggleShowTutorial: EventHandler<'toggleShowTutorial'> = ({
         previousState,
     }) => {
+        this.dependencies.setRibbonShouldAutoHide(
+            previousState.areTutorialShown,
+        )
         const mutation: UIMutation<RibbonContainerState> = {
             areTutorialShown: { $set: !previousState.areTutorialShown },
             areExtraButtonsShown: { $set: false },
@@ -308,6 +314,7 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         await this.initLogicResolvable
         this.dependencies.setRibbonShouldAutoHide(!event.value)
+
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {
@@ -375,6 +382,8 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     cancelComment: EventHandler<'cancelComment'> = () => {
+        this.dependencies.setRibbonShouldAutoHide(true)
+
         this.emitMutation({
             commentBox: { $set: INITIAL_RIBBON_COMMENT_BOX_STATE },
         })

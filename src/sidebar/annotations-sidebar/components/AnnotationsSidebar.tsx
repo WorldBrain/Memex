@@ -15,6 +15,7 @@ import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
+import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
@@ -111,12 +112,14 @@ interface AnnotationsSidebarState {
     showSortDropDown?: boolean
 }
 
-class AnnotationsSidebar extends React.Component<
+export class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
-    private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
-    private annotationEditRef
+    private annotationCreateRef = React.createRef() // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationEditRefs: {
+        [annotationUrl: string]: React.RefObject<_AnnotationEditable>
+    } = {}
 
     state = {
         searchText: '',
@@ -143,7 +146,9 @@ class AnnotationsSidebar extends React.Component<
         document.removeEventListener('keydown', this.onKeydown, false)
     }
 
-    focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
+    focusCreateForm = () => (this.annotationCreateRef?.current as any).focus()
+    focusEditNoteForm = (annotationId: string) =>
+        (this.annotationEditRefs[annotationId]?.current).focusEditForm()
 
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -286,7 +291,7 @@ class AnnotationsSidebar extends React.Component<
             <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
-                    ref={this.annotationCreateRef}
+                    ref={this.annotationCreateRef as any}
                 />
             </NewAnnotationSection>
         )
@@ -833,6 +838,8 @@ class AnnotationsSidebar extends React.Component<
     private renderAnnotationsEditable() {
         const annots = this.props.annotations.map((annot, i) => {
             const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
+            const ref = React.createRef<_AnnotationEditable>()
+            this.annotationEditRefs[annot.url] = ref
             return (
                 <AnnotationBox
                     key={annot.url}
@@ -844,8 +851,8 @@ class AnnotationsSidebar extends React.Component<
                         {...this.props}
                         body={annot.body}
                         comment={annot.comment}
-                        createdWhen={annot.createdWhen!}
                         isShared={annot.isShared}
+                        createdWhen={annot.createdWhen!}
                         isBulkShareProtected={annot.isBulkShareProtected}
                         mode={this.props.annotationModes[annot.url]}
                         isActive={this.props.activeAnnotationUrl === annot.url}
@@ -861,7 +868,7 @@ class AnnotationsSidebar extends React.Component<
                             this.props.theme.canClickAnnotations &&
                             annot.body?.length > 0
                         }
-                        ref={(ref) => (this.annotationEditRef = ref)}
+                        passDownRef={ref}
                     />
                 </AnnotationBox>
             )

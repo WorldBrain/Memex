@@ -37,7 +37,7 @@ export class AddSpacesButton extends React.Component<
                 <AddSpacesButtonContainer
                     onClick={(e) => {
                         // this.setState({ showPicker: !this.state.showPicker })
-                        this.props.onEditBtnClick(e)
+                        this.props.onEditBtnClick?.(e)
                     }}
                 >
                     {this.props.hasNoLists ? (
@@ -64,6 +64,7 @@ export class AddSpacesButton extends React.Component<
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
                         onClick={(e) => {
+                            e.preventDefault()
                             e.stopPropagation()
                         }}
                     >

@@ -4,6 +4,7 @@ import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import AnnotationsSidebar, {
+    AnnotationsSidebar as AnnotationsSidebarComponent,
     AnnotationsSidebarProps,
 } from '../components/AnnotationsSidebar'
 import {
@@ -64,8 +65,7 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
-    private sidebarRef
-    private DraggableContainer
+    private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
 
     constructor(props: P) {
         super(
@@ -75,7 +75,16 @@ export class AnnotationsSidebarContainer<
                 analytics,
                 copyToClipboard,
                 focusCreateForm: () =>
-                    this.sidebarRef?.getInstance()?.focusCreateForm(),
+                    (this.sidebarRef?.current[
+                        'instanceRef'
+                    ] as AnnotationsSidebarComponent).focusCreateForm(),
+                focusEditNoteForm: (annotationId) => {
+                    ;(this.sidebarRef?.current[
+                        'instanceRef'
+                    ] as AnnotationsSidebarComponent).focusEditNoteForm(
+                        annotationId,
+                    )
+                },
             }),
         )
     }
@@ -331,8 +340,28 @@ export class AnnotationsSidebarContainer<
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
             initialSelectedEntries: () => annotation.lists ?? [],
-            onEscapeKeyDown: () =>
-                this.processEvent('resetListPickerAnnotationId', null),
+            onSubmit: async () => {
+                await this.processEvent('resetListPickerAnnotationId', {})
+
+                if (
+                    this.state.annotationModes.pageAnnotations[
+                        annotation.url
+                    ] === 'edit'
+                ) {
+                    await this.processEvent('editAnnotation', {
+                        annotationUrl: annotation.url,
+                        shouldShare: annotation.isShared,
+                        isProtected: annotation.isBulkShareProtected,
+                        mainBtnPressed: true,
+                        ...DEF_CONTEXT,
+                    })
+                }
+            },
+            onEscapeKeyDown: () => {
+                this.processEvent('resetListPickerAnnotationId', {
+                    id: annotation.url,
+                })
+            },
             selectEntry: async (listId, options) =>
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
@@ -426,10 +455,7 @@ export class AnnotationsSidebarContainer<
                 <HoverBox top="7px" padding={'0px'}>
                     <ClickAway
                         onClickAway={() =>
-                            this.processEvent(
-                                'resetListPickerAnnotationId',
-                                null,
-                            )
+                            this.processEvent('resetListPickerAnnotationId', {})
                         }
                     >
                         <CollectionPicker
@@ -667,7 +693,6 @@ export class AnnotationsSidebarContainer<
                     className={classNames('ignore-react-onclickoutside')}
                 >
                     <Rnd
-                        ref={this.DraggableContainer}
                         style={style}
                         default={{
                             x: 0,
@@ -706,7 +731,7 @@ export class AnnotationsSidebarContainer<
                                 {...this.state}
                                 getListDetailsById={this.getListDetailsById}
                                 sidebarContext={this.props.sidebarContext}
-                                ref={(ref) => (this.sidebarRef = ref)}
+                                ref={this.sidebarRef as any}
                                 openCollectionPage={(remoteListId) =>
                                     window.open(
                                         getListShareUrl({ remoteListId }),

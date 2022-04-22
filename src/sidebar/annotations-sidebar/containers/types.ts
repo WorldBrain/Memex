@@ -297,7 +297,7 @@ interface SidebarEvents {
     setListPickerAnnotationId: { id: string }
     resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
-    resetListPickerAnnotationId: null
+    resetListPickerAnnotationId: { id?: string }
     setAllNotesShareMenuShown: { shown: boolean }
     resetShareMenuNoteId: null
 }
