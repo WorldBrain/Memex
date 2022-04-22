@@ -64,6 +64,7 @@ export class AddSpacesButton extends React.Component<
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
                         onClick={(e) => {
+                            e.preventDefault()
                             e.stopPropagation()
                         }}
                     >

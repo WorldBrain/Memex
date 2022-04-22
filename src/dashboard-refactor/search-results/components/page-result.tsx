@@ -328,6 +328,7 @@ export default class PageResultView extends PureComponent<Props> {
                                             <AddSpacesButton
                                                 hasNoLists={true}
                                                 onEditBtnClick={(event) => {
+                                                    event.preventDefault()
                                                     event.stopPropagation()
                                                     this.props.onListPickerBtnClick(
                                                         event,
