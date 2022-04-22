@@ -546,6 +546,24 @@ export function createBackgroundModules(options: {
                     ? options.persistentStorageManager
                     : options.storageManager
 
+            // Add any newly created lists to the list suggestion cache
+            if (
+                params.collection === 'customLists' &&
+                params.updates.id != null
+            ) {
+                const existingList = await options.storageManager.backend.operation(
+                    'findObject',
+                    params.collection,
+                    { id: params.updates.id },
+                )
+
+                if (existingList == null) {
+                    await customLists._updateListSuggestionsCache({
+                        added: params.updates.id,
+                    })
+                }
+            }
+
             // WARNING: Keep in mind this skips all storage middleware
             await updateOrCreate({
                 ...params,

@@ -375,4 +375,65 @@ describe('Personal cloud', () => {
             ),
         ).toEqual(fortnightFromNow)
     })
+
+    it(`should add new lists to the list suggestion cache on incoming data write`, async () => {
+        const { setups } = await setupSyncBackgroundTest({
+            deviceCount: 2,
+            startWithSyncDisabled: false,
+        })
+
+        const assertCacheEntries = async (expected: number[]) => {
+            const expectedStorage =
+                expected.length === 0
+                    ? {}
+                    : { ['custom-lists_suggestionIds']: expected }
+
+            expect(
+                await setups[0].browserLocalStorage.get(
+                    'custom-lists_suggestionIds',
+                ),
+            ).toEqual(expectedStorage)
+            expect(
+                await setups[1].browserLocalStorage.get(
+                    'custom-lists_suggestionIds',
+                ),
+            ).toEqual(expectedStorage)
+        }
+
+        const waitForSync = async () => {
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.integrateAllUpdates()
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+        }
+
+        await assertCacheEntries([])
+        await setups[0].backgroundModules.customLists.createCustomList({
+            id: 1,
+            name: 'list 1',
+        })
+        await waitForSync()
+        await assertCacheEntries([1])
+
+        await setups[0].backgroundModules.customLists.createCustomList({
+            id: 2,
+            name: 'list 2',
+        })
+        await waitForSync()
+        await assertCacheEntries([2, 1])
+
+        await setups[0].backgroundModules.customLists.updateList({
+            id: 1,
+            oldName: 'list 1',
+            newName: 'list 1 updated',
+        })
+        await waitForSync()
+        await assertCacheEntries([2, 1]) // Updates should not affect cache
+
+        await setups[0].backgroundModules.customLists.createCustomList({
+            id: 3,
+            name: 'list 3',
+        })
+        await waitForSync()
+        await assertCacheEntries([3, 2, 1])
+    })
 })
