@@ -173,6 +173,7 @@ export class SidebarContainerLogic extends UILogic<
             isExpandedSharedSpaces: false,
             sidebarWidth: '450px',
             loadState: 'pristine',
+            noteCreateState: 'pristine',
             primarySearchState: 'pristine',
             secondarySearchState: 'pristine',
             followedListLoadState: 'pristine',
@@ -640,37 +641,39 @@ export class SidebarContainerLogic extends UILogic<
             showCommentBox: { $set: false },
         })
 
-        if (event.shouldShare && !(await this.ensureLoggedIn())) {
-            return
-        }
+        await executeUITask(this, 'noteCreateState', async () => {
+            if (event.shouldShare && !(await this.ensureLoggedIn())) {
+                return
+            }
 
-        const nextAnnotation = await this.options.annotationsCache.create(
-            {
-                url: annotationUrl,
-                pageUrl,
-                comment,
-                tags: [...commentBox.tags],
-                lists: [...commentBox.lists],
-            },
-            {
-                shouldShare: event.shouldShare,
-                shouldCopyShareLink: event.shouldShare,
-                isBulkShareProtected: event.isProtected,
-            },
-        )
-        // check if annotation has lists with remoteId and reload them
-        // for (const listName of nextAnnotation.lists) {
-        //     const list = await this.options.customLists.fetchListByName({
-        //         name: listName,
-        //     })
-        //     if (list.remoteId) {
-        //         // Want to update the list with the new page comment / note, the following isn't enough though
-        //         // await this.processUIEvent('loadFollowedLists', {
-        //         //     previousState: previousState,
-        //         //     event: null,
-        //         // })
-        //     }
-        // }
+            const nextAnnotation = await this.options.annotationsCache.create(
+                {
+                    url: annotationUrl,
+                    pageUrl,
+                    comment,
+                    tags: [...commentBox.tags],
+                    lists: [...commentBox.lists],
+                },
+                {
+                    shouldShare: event.shouldShare,
+                    shouldCopyShareLink: event.shouldShare,
+                    isBulkShareProtected: event.isProtected,
+                },
+            )
+            // check if annotation has lists with remoteId and reload them
+            // for (const listName of nextAnnotation.lists) {
+            //     const list = await this.options.customLists.fetchListByName({
+            //         name: listName,
+            //     })
+            //     if (list.remoteId) {
+            //         // Want to update the list with the new page comment / note, the following isn't enough though
+            //         // await this.processUIEvent('loadFollowedLists', {
+            //         //     previousState: previousState,
+            //         //     event: null,
+            //         // })
+            //     }
+            // }
+        })
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
