@@ -123,6 +123,7 @@ export interface SidebarContainerState
     extends SidebarFollowedListsState,
         AnnotationConversationsState {
     loadState: TaskState
+    noteCreateState: TaskState
     primarySearchState: TaskState
     secondarySearchState: TaskState
 

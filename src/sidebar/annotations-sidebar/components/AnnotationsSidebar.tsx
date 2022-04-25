@@ -854,43 +854,55 @@ export class AnnotationsSidebar extends React.Component<
     // }
 
     private renderAnnotationsEditable() {
-        const annots = this.props.annotations.map((annot, i) => {
-            const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
-            const ref = React.createRef<_AnnotationEditable>()
-            this.annotationEditRefs[annot.url] = ref
-            return (
-                <AnnotationBox
-                    key={annot.url}
-                    isActive={this.props.activeAnnotationUrl === annot.url}
-                    zIndex={this.props.annotations.length - i}
-                >
-                    <AnnotationEditable
-                        {...annot}
-                        {...this.props}
-                        body={annot.body}
-                        comment={annot.comment}
-                        isShared={annot.isShared}
-                        createdWhen={annot.createdWhen!}
-                        isBulkShareProtected={annot.isBulkShareProtected}
-                        mode={this.props.annotationModes[annot.url]}
+        const annots: JSX.Element[] = []
+
+        if (this.props.noteCreateState === 'running') {
+            annots.push(this.renderLoader('new-note-spinner'))
+        }
+
+        annots.push(
+            ...this.props.annotations.map((annot, i) => {
+                const footerDeps = this.props.bindAnnotationFooterEventProps(
+                    annot,
+                )
+                const ref = React.createRef<_AnnotationEditable>()
+                this.annotationEditRefs[annot.url] = ref
+                return (
+                    <AnnotationBox
+                        key={annot.url}
                         isActive={this.props.activeAnnotationUrl === annot.url}
-                        onHighlightClick={this.props.setActiveAnnotationUrl(
-                            annot.url,
-                        )}
-                        onGoToAnnotation={footerDeps.onGoToAnnotation}
-                        annotationEditDependencies={this.props.bindAnnotationEditProps(
-                            annot,
-                        )}
-                        annotationFooterDependencies={footerDeps}
-                        isClickable={
-                            this.props.theme.canClickAnnotations &&
-                            annot.body?.length > 0
-                        }
-                        passDownRef={ref}
-                    />
-                </AnnotationBox>
-            )
-        })
+                        zIndex={this.props.annotations.length - i}
+                    >
+                        <AnnotationEditable
+                            {...annot}
+                            {...this.props}
+                            body={annot.body}
+                            comment={annot.comment}
+                            isShared={annot.isShared}
+                            createdWhen={annot.createdWhen!}
+                            isBulkShareProtected={annot.isBulkShareProtected}
+                            mode={this.props.annotationModes[annot.url]}
+                            isActive={
+                                this.props.activeAnnotationUrl === annot.url
+                            }
+                            onHighlightClick={this.props.setActiveAnnotationUrl(
+                                annot.url,
+                            )}
+                            onGoToAnnotation={footerDeps.onGoToAnnotation}
+                            annotationEditDependencies={this.props.bindAnnotationEditProps(
+                                annot,
+                            )}
+                            annotationFooterDependencies={footerDeps}
+                            isClickable={
+                                this.props.theme.canClickAnnotations &&
+                                annot.body?.length > 0
+                            }
+                            passDownRef={ref}
+                        />
+                    </AnnotationBox>
+                )
+            }),
+        )
 
         if (this.props.needsWaypoint) {
             annots.push(
