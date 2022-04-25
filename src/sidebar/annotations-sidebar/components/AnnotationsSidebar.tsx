@@ -360,20 +360,30 @@ export class AnnotationsSidebar extends React.Component<
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
 
-                    const ownAnnotationProps: Partial<AnnotationEditableProps> =
-                        data.localId != null
-                            ? {
-                                  mode: this.props.annotationModes[
-                                      data.localId
-                                  ],
-                                  annotationEditDependencies: this.props.bindAnnotationEditProps(
-                                      { url: data.localId, isShared: true },
-                                  ),
-                                  annotationFooterDependencies: this.props.bindAnnotationFooterEventProps(
-                                      { url: data.localId, body: data.body },
-                                  ),
-                              }
-                            : {}
+                    const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
+                    if (data.localId != null) {
+                        const localAnnotation = this.props.annotations.find(
+                            (a) => a.url === data.localId,
+                        )
+
+                        ownAnnotationProps.appendRepliesToggle = true
+                        ownAnnotationProps.mode = this.props.annotationModes[
+                            data.localId
+                        ]
+                        ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
+                            { url: data.localId, isShared: true },
+                        )
+                        ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
+                            { url: data.localId, body: data.body },
+                        )
+                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation
+                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation
+                        ownAnnotationProps.isShared = localAnnotation.isShared
+                        ownAnnotationProps.isBulkShareProtected =
+                            localAnnotation.isBulkShareProtected
+                        ownAnnotationProps.url = data.localId
+                        ownAnnotationProps.lists = localAnnotation.lists
+                    }
 
                     return (
                         <React.Fragment key={data.id}>
