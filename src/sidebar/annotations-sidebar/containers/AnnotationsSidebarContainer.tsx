@@ -166,7 +166,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'body'>,
     ): AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     } {
@@ -223,7 +223,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'isShared'>,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
@@ -798,8 +798,10 @@ export class AnnotationsSidebarContainer<
                                     this.state.showCommentBox
                                 }
                                 annotationCreateProps={this.getCreateProps()}
-                                bindAnnotationFooterEventProps={(annot) =>
-                                    this.bindAnnotationFooterEventProps(annot)
+                                bindAnnotationFooterEventProps={(annotation) =>
+                                    this.bindAnnotationFooterEventProps(
+                                        annotation,
+                                    )
                                 }
                                 bindAnnotationEditProps={
                                     this.bindAnnotationEditProps

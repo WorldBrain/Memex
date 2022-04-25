@@ -1219,7 +1219,12 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { annotations, contentConversationsBG } = this.options
+        const {
+            annotations,
+            auth: authBG,
+            annotationsCache,
+            contentConversationsBG,
+        } = this.options
         const { sharedAnnotationReferences } = previousState.followedLists.byId[
             event.listId
         ]
@@ -1246,12 +1251,13 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
             async () => {
-                const sharedAnnotations = await annotations.getSharedAnnotations(
-                    {
+                const [currentUser, sharedAnnotations] = await Promise.all([
+                    authBG.getCurrentUser(),
+                    annotations.getSharedAnnotations({
                         sharedAnnotationReferences,
                         withCreatorData: true,
-                    },
-                )
+                    }),
+                ])
 
                 this.options.events?.emit('renderHighlights', {
                     highlights: sharedAnnotations
@@ -1275,6 +1281,13 @@ export class SidebarContainerLogic extends UILogic<
                                     createdWhen: annot.createdWhen,
                                     updatedWhen: annot.updatedWhen,
                                     creatorId: annot.creatorReference.id,
+                                    localId:
+                                        annot.creatorReference.id ===
+                                        currentUser.id
+                                            ? annotationsCache.getAnnotationByRemoteId(
+                                                  annot.reference.id,
+                                              )?.url ?? null
+                                            : null,
                                 },
                             ]),
                         ),
@@ -1348,23 +1361,27 @@ export class SidebarContainerLogic extends UILogic<
 
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
-    > = ({ previousState, event }) => {
-        const nextAnnotations = previousState.annotations.map((annotation) => {
-            const privacyState = getAnnotationPrivacyState(
-                event[annotation.url].privacyLevel,
-            )
-            const nextAnnotation =
-                event[annotation.url] == null
-                    ? annotation
-                    : {
-                          ...annotation,
-                          isShared: privacyState.public,
-                          isBulkShareProtected: privacyState.protected,
-                      }
-            return nextAnnotation
-        })
+    > = ({ event }) => {
+        const { annotationsCache } = this.options
 
-        this.options.annotationsCache.setAnnotations(nextAnnotations)
+        const nextAnnotations = annotationsCache.annotations.map(
+            (annotation) => {
+                const privacyState = getAnnotationPrivacyState(
+                    event[annotation.url].privacyLevel,
+                )
+                const nextAnnotation =
+                    event[annotation.url] == null
+                        ? annotation
+                        : {
+                              ...annotation,
+                              isShared: privacyState.public,
+                              isBulkShareProtected: privacyState.protected,
+                          }
+                return nextAnnotation
+            },
+        )
+
+        annotationsCache.setAnnotations(nextAnnotations)
     }
 
     updateAnnotationShareInfo: EventHandler<

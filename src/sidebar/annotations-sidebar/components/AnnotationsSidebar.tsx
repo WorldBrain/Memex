@@ -14,7 +14,9 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
-import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
+import AnnotationEditable, {
+    Props as AnnotationEditableProps,
+} from 'src/annotations/components/HoverControlledAnnotationEditable'
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
@@ -71,12 +73,12 @@ export interface AnnotationsSidebarProps
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'body'>,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
     bindAnnotationEditProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'isShared'>,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -358,6 +360,21 @@ export class AnnotationsSidebar extends React.Component<
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
 
+                    const ownAnnotationProps: Partial<AnnotationEditableProps> =
+                        data.localId != null
+                            ? {
+                                  mode: this.props.annotationModes[
+                                      data.localId
+                                  ],
+                                  annotationEditDependencies: this.props.bindAnnotationEditProps(
+                                      { url: data.localId, isShared: true },
+                                  ),
+                                  annotationFooterDependencies: this.props.bindAnnotationFooterEventProps(
+                                      { url: data.localId, body: data.body },
+                                  ),
+                              }
+                            : {}
+
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable
@@ -389,6 +406,7 @@ export class AnnotationsSidebar extends React.Component<
                                 getListDetailsById={
                                     this.props.getListDetailsById
                                 }
+                                {...ownAnnotationProps}
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}

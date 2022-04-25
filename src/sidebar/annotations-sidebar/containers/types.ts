@@ -88,6 +88,8 @@ export interface SearchTypeChange {
 
 export interface FollowedListAnnotation {
     id: string
+    /** Only should be defined if annotation belongs to local user. */
+    localId: string | null
     body?: string
     comment?: string
     selector?: Anchor

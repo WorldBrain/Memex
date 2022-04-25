@@ -113,7 +113,7 @@ describe('SidebarContainerLogic', () => {
             })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
-            annotationsCache.annotations = [DATA.ANNOT_1]
+            annotationsCache.annotations = [{ ...DATA.ANNOT_1, remoteId: null }]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
@@ -159,7 +159,7 @@ describe('SidebarContainerLogic', () => {
             })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
-            annotationsCache.annotations = [DATA.ANNOT_1]
+            annotationsCache.annotations = [{ ...DATA.ANNOT_1, remoteId: null }]
             sidebar.processMutation({
                 annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
