@@ -38,6 +38,7 @@ import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -886,11 +887,57 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
+        const { annotationsCache } = this.options
+        const annotation = annotationsCache.getAnnotationById(
+            event.annotationUrl,
         )
-        const annotation = previousState.annotations[resultIndex]
-        this.options.annotationsCache.delete(annotation)
+
+        // TODO: Find a better way to do all this. The issue is we only have the local annot ID,
+        //  and we need to figure out which followed annots + list states to update which correspond to that
+        const followedAnnotId =
+            Object.values(previousState.followedAnnotations).find(
+                (a) => a.localId === event.annotationUrl,
+            )?.id ?? null
+
+        const followedListIdsToUpdate: string[] = []
+        Object.values(previousState.followedLists.byId).forEach(
+            (followedList) => {
+                if (
+                    followedList.sharedAnnotationReferences.find(
+                        (ref) => ref.id === followedAnnotId,
+                    )
+                ) {
+                    followedListIdsToUpdate.push(followedList.id)
+                }
+            },
+        )
+
+        if (followedAnnotId != null) {
+            this.emitMutation({
+                followedAnnotations: {
+                    $unset: [followedAnnotId],
+                },
+                followedLists: {
+                    byId: followedListIdsToUpdate.reduce(
+                        (acc, listId) => ({
+                            ...acc,
+                            [listId]: {
+                                sharedAnnotationReferences: {
+                                    $apply: (
+                                        refs: SharedAnnotationReference[],
+                                    ) =>
+                                        refs.filter(
+                                            (ref) => ref.id !== followedAnnotId,
+                                        ),
+                                },
+                            },
+                        }),
+                        {},
+                    ),
+                },
+            })
+        }
+        await annotationsCache.delete(annotation)
     }
 
     shareAnnotation: EventHandler<'shareAnnotation'> = async ({
@@ -1142,6 +1189,7 @@ export class SidebarContainerLogic extends UILogic<
                 })),
         })
     }
+
     expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
         event,
         previousState,

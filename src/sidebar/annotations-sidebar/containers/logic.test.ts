@@ -15,7 +15,6 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 
 const setupLogicHelper = async ({
@@ -308,10 +307,14 @@ describe('SidebarContainerLogic', () => {
         })
 
         it('should be able to delete an annotation', async ({ device }) => {
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
 
+            annotationsCache.setAnnotations([
+                { ...DATA.ANNOT_1, remoteId: null },
+            ])
             sidebar.processMutation({
-                annotations: { $set: [DATA.ANNOT_1] },
                 editForms: {
                     $set: createEditFormsForAnnotations([DATA.ANNOT_1]),
                 },
@@ -2383,7 +2386,10 @@ describe('SidebarContainerLogic', () => {
             device,
         }) => {
             await setupFollowedListsTestData(device)
-            const { sidebar } = await setupLogicHelper({ device })
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
 
             expect(sidebar.state.followedListLoadState).toEqual('success')
             expect(sidebar.state.followedLists).toEqual({
@@ -2508,6 +2514,28 @@ describe('SidebarContainerLogic', () => {
                     localId: DATA.ANNOT_3.url,
                 },
             })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[1].reference,
+            ])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
             expect(sidebar.state.users).toEqual({
                 [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
                     name: DATA.CREATOR_1.user.displayName,
@@ -2546,6 +2574,156 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
                 false,
             )
+        })
+
+        it('should be able to delete own note that shows up in shared spaces, deleting from both sidebar mode states', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            expect(sidebar.state.followedListLoadState).toEqual('success')
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
+                byId: fromPairs(
+                    DATA.FOLLOWED_LISTS.map((list) => [
+                        list.id,
+                        {
+                            ...list,
+                            isExpanded: false,
+                            isContributable: false,
+                            annotationsLoadState: 'pristine',
+                            conversationsLoadState: 'pristine',
+                        },
+                    ]),
+                ),
+            })
+
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: DATA.FOLLOWED_LISTS[0].id,
+            })
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: DATA.FOLLOWED_LISTS[2].id,
+            })
+
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: {
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[0].body,
+                    comment: DATA.SHARED_ANNOTATIONS[0].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[0].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[0].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[0].creatorReference.id,
+                    localId: null,
+                },
+                ['2']: {
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[1].body,
+                    comment: DATA.SHARED_ANNOTATIONS[1].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[1].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[1].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[1].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[1].creatorReference.id,
+                    localId: null,
+                },
+                ['3']: {
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[2].body,
+                    comment: DATA.SHARED_ANNOTATIONS[2].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[2].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[2].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[2].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[2].creatorReference.id,
+                    localId: null,
+                },
+                ['4']: {
+                    id: DATA.SHARED_ANNOTATIONS[3].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[3].body,
+                    comment: DATA.SHARED_ANNOTATIONS[3].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[3].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[3].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[3].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[3].creatorReference.id,
+                    localId: DATA.ANNOT_3.url,
+                },
+            })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining(DATA.ANNOT_1),
+                expect.objectContaining(DATA.ANNOT_2),
+                expect.objectContaining(DATA.ANNOT_3),
+            ])
+
+            await sidebar.processEvent('deleteAnnotation', {
+                annotationUrl: DATA.ANNOT_3.url,
+                context,
+            })
+
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: {
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[0].body,
+                    comment: DATA.SHARED_ANNOTATIONS[0].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[0].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[0].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[0].creatorReference.id,
+                    localId: null,
+                },
+                ['2']: {
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[1].body,
+                    comment: DATA.SHARED_ANNOTATIONS[1].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[1].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[1].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[1].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[1].creatorReference.id,
+                    localId: null,
+                },
+                ['3']: {
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[2].body,
+                    comment: DATA.SHARED_ANNOTATIONS[2].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[2].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[2].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[2].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[2].creatorReference.id,
+                    localId: null,
+                },
+            })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+            ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining(DATA.ANNOT_1),
+                expect.objectContaining(DATA.ANNOT_2),
+            ])
         })
     })
 })
