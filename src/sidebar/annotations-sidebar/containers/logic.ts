@@ -36,7 +36,10 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
-import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
+import {
+    AnnotationPrivacyState,
+    AnnotationPrivacyLevels,
+} from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
@@ -892,12 +895,26 @@ export class SidebarContainerLogic extends UILogic<
             event.annotationUrl,
         )
 
-        // TODO: Find a better way to do all this. The issue is we only have the local annot ID,
-        //  and we need to figure out which followed annots + list states to update which correspond to that
-        const followedAnnotId =
-            Object.values(previousState.followedAnnotations).find(
-                (a) => a.localId === event.annotationUrl,
-            )?.id ?? null
+        this.removeAnnotationFromFollowedLists(
+            event.annotationUrl,
+            previousState,
+        )
+        await annotationsCache.delete(annotation)
+    }
+
+    private removeAnnotationFromFollowedLists(
+        localAnnotationId: string,
+        previousState: SidebarContainerState,
+    ) {
+        // TODO: Find a better way to do all this. The issue is we don't have a nicer way
+        //     to get the followed annotation states with only the local annot ID
+        const followedAnnotId = Object.values(
+            previousState.followedAnnotations,
+        ).find((a) => a.localId === localAnnotationId)?.id
+
+        if (followedAnnotId == null) {
+            return
+        }
 
         const followedListIdsToUpdate: string[] = []
         Object.values(previousState.followedLists.byId).forEach(
@@ -912,32 +929,27 @@ export class SidebarContainerLogic extends UILogic<
             },
         )
 
-        if (followedAnnotId != null) {
-            this.emitMutation({
-                followedAnnotations: {
-                    $unset: [followedAnnotId],
-                },
-                followedLists: {
-                    byId: followedListIdsToUpdate.reduce(
-                        (acc, listId) => ({
-                            ...acc,
-                            [listId]: {
-                                sharedAnnotationReferences: {
-                                    $apply: (
-                                        refs: SharedAnnotationReference[],
-                                    ) =>
-                                        refs.filter(
-                                            (ref) => ref.id !== followedAnnotId,
-                                        ),
-                                },
+        this.emitMutation({
+            followedAnnotations: {
+                $unset: [followedAnnotId],
+            },
+            followedLists: {
+                byId: followedListIdsToUpdate.reduce(
+                    (acc, listId) => ({
+                        ...acc,
+                        [listId]: {
+                            sharedAnnotationReferences: {
+                                $apply: (refs: SharedAnnotationReference[]) =>
+                                    refs.filter(
+                                        (ref) => ref.id !== followedAnnotId,
+                                    ),
                             },
-                        }),
-                        {},
-                    ),
-                },
-            })
-        }
-        await annotationsCache.delete(annotation)
+                        },
+                    }),
+                    {},
+                ),
+            },
+        })
     }
 
     shareAnnotation: EventHandler<'shareAnnotation'> = async ({
@@ -1453,6 +1465,16 @@ export class SidebarContainerLogic extends UILogic<
             incomingPrivacyState: privacyState,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
         })
+
+        if (
+            !event.keepListsIfUnsharing &&
+            event.privacyLevel === AnnotationPrivacyLevels.PRIVATE
+        ) {
+            this.removeAnnotationFromFollowedLists(
+                event.annotationUrl,
+                previousState,
+            )
+        }
 
         await this.options.annotationsCache.update(existing, {
             isBulkShareProtected:

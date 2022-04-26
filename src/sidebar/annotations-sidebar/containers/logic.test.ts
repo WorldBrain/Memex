@@ -2725,5 +2725,173 @@ describe('SidebarContainerLogic', () => {
                 expect.objectContaining(DATA.ANNOT_2),
             ])
         })
+
+        it('should be able to make own note that shows up in shared spaces private, removing it from any followed list state', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            await sidebar.init()
+
+            expect(sidebar.state.followedListLoadState).toEqual('success')
+            expect(sidebar.state.followedLists).toEqual({
+                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
+                byId: fromPairs(
+                    DATA.FOLLOWED_LISTS.map((list) => [
+                        list.id,
+                        {
+                            ...list,
+                            isExpanded: false,
+                            isContributable: false,
+                            annotationsLoadState: 'pristine',
+                            conversationsLoadState: 'pristine',
+                        },
+                    ]),
+                ),
+            })
+
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: DATA.FOLLOWED_LISTS[0].id,
+            })
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: DATA.FOLLOWED_LISTS[2].id,
+            })
+
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    localId: null,
+                }),
+                ['2']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    localId: null,
+                }),
+                ['3']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    localId: null,
+                }),
+                ['4']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[3].reference.id,
+                    localId: DATA.ANNOT_3.url,
+                }),
+            })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining(DATA.ANNOT_1),
+                expect.objectContaining(DATA.ANNOT_2),
+                expect.objectContaining(DATA.ANNOT_3),
+            ])
+
+            // Nothing should change, as we're choosing to keep lists
+            await sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: DATA.ANNOT_3.url,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                keepListsIfUnsharing: true,
+            })
+
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    localId: null,
+                }),
+                ['2']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    localId: null,
+                }),
+                ['3']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    localId: null,
+                }),
+                ['4']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[3].reference.id,
+                    localId: DATA.ANNOT_3.url,
+                }),
+            })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference,
+            ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining(DATA.ANNOT_1),
+                expect.objectContaining(DATA.ANNOT_2),
+                expect.objectContaining({
+                    ...DATA.ANNOT_3,
+                    isShared: false,
+                    isBulkShareProtected: true,
+                    lastEdited: expect.any(Date),
+                }),
+            ])
+
+            // Now we're not keeping lists, so it should get removed from all
+            await sidebar.processEvent('updateAnnotationShareInfo', {
+                annotationUrl: DATA.ANNOT_3.url,
+                privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            })
+
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    localId: null,
+                }),
+                ['2']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    localId: null,
+                }),
+                ['3']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    localId: null,
+                }),
+            })
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[2].reference,
+            ])
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining(DATA.ANNOT_1),
+                expect.objectContaining(DATA.ANNOT_2),
+                expect.objectContaining({
+                    ...DATA.ANNOT_3,
+                    isShared: false,
+                    isBulkShareProtected: false,
+                    lastEdited: expect.any(Date),
+                }),
+            ])
+        })
+
     })
 })
