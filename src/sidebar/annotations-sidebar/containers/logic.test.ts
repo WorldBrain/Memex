@@ -2352,13 +2352,37 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('followed lists + annotations', () => {
-        it('should be able to set notes type + trigger followed list load', async ({
-            device,
-        }) => {
+        async function setupFollowedListsTestData(device: UILogicTestDevice) {
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
                 DATA.FOLLOWED_LISTS
             device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
                 false
+            device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
+                DATA.ANNOTATION_THREADS
+            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
+                DATA.SHARED_ANNOTATIONS
+
+            const localAnnots = [DATA.ANNOT_1, DATA.ANNOT_2, DATA.ANNOT_3]
+
+            for (const { tags, lists, ...annot } of localAnnots) {
+                await device.storageManager
+                    .collection('annotations')
+                    .createObject(annot)
+            }
+
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject({
+                    excludeFromLists: true,
+                    localId: DATA.ANNOT_3.url,
+                    remoteId: DATA.SHARED_ANNOTATIONS[3].reference.id,
+                })
+        }
+
+        it('should be able to set notes type + trigger followed list load', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
             const { sidebar } = await setupLogicHelper({ device })
 
             expect(sidebar.state.followedListLoadState).toEqual('success')
@@ -2379,119 +2403,149 @@ describe('SidebarContainerLogic', () => {
             })
         })
 
-        // it('should be able to expand notes for a followed list + trigger notes load', async ({
-        //     device,
-        // }) => {
-        //     device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
-        //         DATA.FOLLOWED_LISTS
-        //     device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
-        //         false
-        //     device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
-        //         DATA.ANNOTATION_THREADS
-        //     device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
-        //         DATA.SHARED_ANNOTATIONS
-        //     const { sidebar, emittedEvents } = await setupLogicHelper({
-        //         device,
-        //     })
+        it('should be able to expand notes for a followed list + trigger notes load', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
 
-        //     const { id: listId } = DATA.FOLLOWED_LISTS[0]
-        //     const expectedEvents = []
+            const { id: listId } = DATA.FOLLOWED_LISTS[0]
+            const expectedEvents = []
 
-        //     expect(emittedEvents).toEqual(expectedEvents)
-        //     expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
-        //         false,
-        //     )
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].annotationsLoadState,
-        //     ).toEqual('pristine')
-        //     expect(sidebar.state.followedAnnotations).toEqual({})
-        //     expect(sidebar.state.users).toEqual({})
-        //     expect(sidebar.state.conversations).toEqual({})
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].annotationsLoadState,
-        //     ).toEqual('pristine')
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].conversationsLoadState,
-        //     ).toEqual('pristine')
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                false,
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
+            expect(sidebar.state.followedAnnotations).toEqual({})
+            expect(sidebar.state.users).toEqual({})
+            expect(sidebar.state.conversations).toEqual({})
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('pristine')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('pristine')
 
-        //     const expandPromise = sidebar.processEvent(
-        //         'expandFollowedListNotes',
-        //         { listId },
-        //     )
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].annotationsLoadState,
-        //     ).toEqual('running')
-        //     await expandPromise
+            const expandPromise = sidebar.processEvent(
+                'expandFollowedListNotes',
+                { listId },
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('running')
+            await expandPromise
 
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].annotationsLoadState,
-        //     ).toEqual('success')
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].conversationsLoadState,
-        //     ).toEqual('success')
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
+            expect(
+                sidebar.state.followedLists.byId[listId].conversationsLoadState,
+            ).toEqual('success')
 
-        //     expectedEvents.push({
-        //         event: 'renderHighlights',
-        //         args: {
-        //             highlights: [
-        //                 {
-        //                     url: DATA.SHARED_ANNOTATIONS[0].reference.id,
-        //                     selector: DATA.SHARED_ANNOTATIONS[0].selector,
-        //                 },
-        //             ],
-        //         },
-        //     })
-        //     expect(emittedEvents).toEqual(expectedEvents)
-        //     expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
-        //         true,
-        //     )
-        //     expect(
-        //         sidebar.state.followedLists.byId[listId].annotationsLoadState,
-        //     ).toEqual('success')
-        //     expect(sidebar.state.followedAnnotations).toEqual(
-        //         fromPairs(
-        //             DATA.SHARED_ANNOTATIONS.map((note) => [
-        //                 note.reference.id,
-        //                 {
-        //                     id: note.reference.id,
-        //                     body: note.body,
-        //                     comment: note.comment,
-        //                     selector: note.selector,
-        //                     createdWhen: note.createdWhen,
-        //                     updatedWhen: note.updatedWhen,
-        //                     creatorId: note.creatorReference.id,
-        //                 },
-        //             ]),
-        //         ),
-        //     )
-        //     expect(sidebar.state.users).toEqual({
-        //         [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
-        //             name: DATA.CREATOR_1.user.displayName,
-        //             profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
-        //         },
-        //     })
-        //     expect(sidebar.state.conversations).toEqual(
-        //         fromPairs(
-        //             DATA.ANNOTATION_THREADS.map((data) => [
-        //                 data.sharedAnnotation.id,
-        //                 {
-        //                     ...getInitialAnnotationConversationState(),
-        //                     thread: data.thread,
-        //                 },
-        //             ]),
-        //         ),
-        //     )
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [
+                        {
+                            url: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                            selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                        },
+                    ],
+                },
+            })
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                true,
+            )
+            expect(
+                sidebar.state.followedLists.byId[listId].annotationsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.followedAnnotations).toEqual({
+                ['1']: {
+                    id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[0].body,
+                    comment: DATA.SHARED_ANNOTATIONS[0].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[0].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[0].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[0].creatorReference.id,
+                    localId: null,
+                },
+                ['2']: {
+                    id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[1].body,
+                    comment: DATA.SHARED_ANNOTATIONS[1].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[1].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[1].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[1].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[1].creatorReference.id,
+                    localId: null,
+                },
+                ['3']: {
+                    id: DATA.SHARED_ANNOTATIONS[2].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[2].body,
+                    comment: DATA.SHARED_ANNOTATIONS[2].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[2].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[2].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[2].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[2].creatorReference.id,
+                    localId: null,
+                },
+                ['4']: {
+                    id: DATA.SHARED_ANNOTATIONS[3].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[3].body,
+                    comment: DATA.SHARED_ANNOTATIONS[3].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[3].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[3].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[3].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[3].creatorReference.id,
+                    localId: DATA.ANNOT_3.url,
+                },
+            })
+            expect(sidebar.state.users).toEqual({
+                [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
+                    name: DATA.CREATOR_1.user.displayName,
+                    profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
+                },
+                [DATA.SHARED_ANNOTATIONS[3].creatorReference.id]: {
+                    name: DATA.CREATOR_2.user.displayName,
+                    profileImgSrc: DATA.CREATOR_2.profile.avatarURL,
+                },
+            })
+            expect(sidebar.state.conversations).toEqual(
+                fromPairs(
+                    DATA.ANNOTATION_THREADS.map((data) => [
+                        `${data.sharedList.id}:${data.sharedAnnotation.id}`,
+                        {
+                            ...getInitialAnnotationConversationState(),
+                            hasThreadLoadLoadState: 'success',
+                            thread: data.thread,
+                        },
+                    ]),
+                ),
+            )
 
-        //     await sidebar.processEvent('expandFollowedListNotes', { listId })
+            await sidebar.processEvent('expandFollowedListNotes', { listId })
 
-        //     expectedEvents.push({
-        //         event: 'removeAnnotationHighlights',
-        //         args: { urls: [DATA.SHARED_ANNOTATIONS[0].reference.id] },
-        //     })
-        //     expect(emittedEvents).toEqual(expectedEvents)
-        //     expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
-        //         false,
-        //     )
-        // })
+            expectedEvents.push({
+                event: 'removeAnnotationHighlights',
+                args: {
+                    urls: [
+                        DATA.SHARED_ANNOTATIONS[0].reference.id,
+                        DATA.SHARED_ANNOTATIONS[3].reference.id,
+                    ],
+                },
+            })
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.followedLists.byId[listId].isExpanded).toEqual(
+                false,
+            )
+        })
     })
 })
