@@ -905,6 +905,7 @@ export class SidebarContainerLogic extends UILogic<
     private removeAnnotationFromFollowedLists(
         localAnnotationId: string,
         previousState: SidebarContainerState,
+        only?: number[],
     ) {
         // TODO: Find a better way to do all this. The issue is we don't have a nicer way
         //     to get the followed annotation states with only the local annot ID
@@ -916,23 +917,35 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const followedListIdsToUpdate: string[] = []
-        Object.values(previousState.followedLists.byId).forEach(
-            (followedList) => {
-                if (
-                    followedList.sharedAnnotationReferences.find(
-                        (ref) => ref.id === followedAnnotId,
-                    )
-                ) {
-                    followedListIdsToUpdate.push(followedList.id)
-                }
-            },
-        )
+        // Resolve local list IDs to remote
+        const onlyListIds = only
+            ? only.map(
+                  (localListId) =>
+                      this.options.annotationsCache.listData[localListId]
+                          ?.remoteId,
+              )
+            : []
 
+        const followedListIdsToUpdate: string[] = []
+        for (const followedList of Object.values(
+            previousState.followedLists.byId,
+        )) {
+            if (only && !onlyListIds.includes(followedList.id)) {
+                continue
+            }
+
+            if (
+                followedList.sharedAnnotationReferences.find(
+                    (ref) => ref.id === followedAnnotId,
+                )
+            ) {
+                followedListIdsToUpdate.push(followedList.id)
+            }
+        }
+
+        // TODO: Update to work with new lists in the `only` that weren't before
         this.emitMutation({
-            followedAnnotations: {
-                $unset: [followedAnnotId],
-            },
+            followedAnnotations: only ? {} : { $unset: [followedAnnotId] },
             followedLists: {
                 byId: followedListIdsToUpdate.reduce(
                     (acc, listId) => ({
@@ -1458,6 +1471,7 @@ export class SidebarContainerLogic extends UILogic<
         }
         const privacyState = getAnnotationPrivacyState(event.privacyLevel)
         const existing = previousState.annotations[annotationIndex]
+        const oldLists = [...existing.lists]
 
         existing.lists = this.getAnnotListsAfterShareStateChange({
             previousState,
@@ -1466,13 +1480,20 @@ export class SidebarContainerLogic extends UILogic<
             keepListsIfUnsharing: event.keepListsIfUnsharing,
         })
 
-        if (
-            !event.keepListsIfUnsharing &&
-            event.privacyLevel === AnnotationPrivacyLevels.PRIVATE
-        ) {
+        if (!event.keepListsIfUnsharing) {
+            const makingPublic = [
+                AnnotationPrivacyLevels.SHARED,
+                AnnotationPrivacyLevels.SHARED_PROTECTED,
+            ].includes(event.privacyLevel)
+
             this.removeAnnotationFromFollowedLists(
                 event.annotationUrl,
                 previousState,
+                makingPublic
+                    ? oldLists.filter(
+                          (listId) => !existing.lists.includes(listId),
+                      )
+                    : undefined,
             )
         }
 

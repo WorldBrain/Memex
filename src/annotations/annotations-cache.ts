@@ -293,7 +293,7 @@ export interface AnnotationsCacheInterface {
     setAnnotations: (annotations: CachedAnnotation[]) => void
 
     annotations: CachedAnnotation[]
-    listData: { [listData: number]: { name: string; remoteId: string | null } }
+    listData: { [listId: number]: { name: string; remoteId: string | null } }
     readonly highlights: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
     readonly parentPageSharedListIds: Set<number>
