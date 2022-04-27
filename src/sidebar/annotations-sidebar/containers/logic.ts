@@ -905,10 +905,13 @@ export class SidebarContainerLogic extends UILogic<
     private removeAnnotationFromFollowedLists(
         localAnnotationId: string,
         previousState: SidebarContainerState,
-        only?: number[],
+        explicitLists?: {
+            addTo: number[]
+            removeFrom: number[]
+        },
     ) {
-        // TODO: Find a better way to do all this. The issue is we don't have a nicer way
-        //     to get the followed annotation states with only the local annot ID
+        // TODO: Find a better way to do all this without so much iteration. The issue is we don't
+        //     have a nicer way to get the followed annotation states with only the local annot ID
         const followedAnnotId = Object.values(
             previousState.followedAnnotations,
         ).find((a) => a.localId === localAnnotationId)?.id
@@ -917,50 +920,63 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        // Resolve local list IDs to remote
-        const onlyListIds = only
-            ? only.map(
-                  (localListId) =>
-                      this.options.annotationsCache.listData[localListId]
-                          ?.remoteId,
-              )
+        // Resolve local list IDs to remote (or calc lists to remove/add to, if not explicitly given)
+        const localListIdToRemote = (localListId: number) =>
+            this.options.annotationsCache.listData[localListId]?.remoteId
+
+        const addTo = explicitLists
+            ? explicitLists.addTo.map(localListIdToRemote)
             : []
 
-        const followedListIdsToUpdate: string[] = []
-        for (const followedList of Object.values(
-            previousState.followedLists.byId,
-        )) {
-            if (only && !onlyListIds.includes(followedList.id)) {
-                continue
-            }
+        const removeFrom = explicitLists
+            ? explicitLists.removeFrom.map(localListIdToRemote)
+            : previousState.followedLists.allIds.filter((listId) =>
+                  previousState.followedLists.byId[
+                      listId
+                  ]?.sharedAnnotationReferences.find(
+                      (ref) => ref.id === followedAnnotId,
+                  ),
+              )
 
-            if (
-                followedList.sharedAnnotationReferences.find(
-                    (ref) => ref.id === followedAnnotId,
-                )
-            ) {
-                followedListIdsToUpdate.push(followedList.id)
-            }
-        }
-
-        // TODO: Update to work with new lists in the `only` that weren't before
         this.emitMutation({
-            followedAnnotations: only ? {} : { $unset: [followedAnnotId] },
+            followedAnnotations: explicitLists
+                ? {}
+                : { $unset: [followedAnnotId] },
             followedLists: {
-                byId: followedListIdsToUpdate.reduce(
-                    (acc, listId) => ({
-                        ...acc,
-                        [listId]: {
-                            sharedAnnotationReferences: {
-                                $apply: (refs: SharedAnnotationReference[]) =>
-                                    refs.filter(
-                                        (ref) => ref.id !== followedAnnotId,
-                                    ),
+                byId: {
+                    ...removeFrom.reduce(
+                        (acc, listId) => ({
+                            ...acc,
+                            [listId]: {
+                                sharedAnnotationReferences: {
+                                    $apply: (
+                                        refs: SharedAnnotationReference[],
+                                    ) =>
+                                        refs.filter(
+                                            (ref) => ref.id !== followedAnnotId,
+                                        ),
+                                },
                             },
-                        },
-                    }),
-                    {},
-                ),
+                        }),
+                        {},
+                    ),
+                    ...addTo.reduce(
+                        (acc, listId) => ({
+                            ...acc,
+                            [listId]: {
+                                sharedAnnotationReferences: {
+                                    $push: [
+                                        {
+                                            type: 'shared-annotation-reference',
+                                            id: followedAnnotId,
+                                        },
+                                    ],
+                                },
+                            },
+                        }),
+                        {},
+                    ),
+                },
             },
         })
     }
@@ -1490,9 +1506,14 @@ export class SidebarContainerLogic extends UILogic<
                 event.annotationUrl,
                 previousState,
                 makingPublic
-                    ? oldLists.filter(
-                          (listId) => !existing.lists.includes(listId),
-                      )
+                    ? {
+                          addTo: existing.lists.filter(
+                              (listId) => !oldLists.includes(listId),
+                          ),
+                          removeFrom: oldLists.filter(
+                              (listId) => !existing.lists.includes(listId),
+                          ),
+                      }
                     : undefined,
             )
         }

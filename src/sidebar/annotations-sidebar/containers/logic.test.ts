@@ -2365,47 +2365,75 @@ describe('SidebarContainerLogic', () => {
             device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
                 DATA.SHARED_ANNOTATIONS
 
-            let listIdCounter = Date.now()
-            for (const list of DATA.FOLLOWED_LISTS) {
-                listIdCounter++
+            await device.storageManager.collection('customLists').createObject({
+                id: 0,
+                name: DATA.FOLLOWED_LISTS[0].name,
+                searchableName: DATA.FOLLOWED_LISTS[0].name,
+                createdAt: new Date(),
+            })
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: 0,
+                    remoteId: DATA.FOLLOWED_LISTS[0].id,
+                })
 
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject({
-                        id: listIdCounter,
-                        name: list.name,
-                        searchableName: list.name,
-                        createdAt: new Date(listIdCounter),
-                    })
+            await device.storageManager.collection('customLists').createObject({
+                id: 1,
+                name: DATA.FOLLOWED_LISTS[1].name,
+                searchableName: DATA.FOLLOWED_LISTS[1].name,
+                createdAt: new Date(),
+            })
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: 1,
+                    remoteId: DATA.FOLLOWED_LISTS[1].id,
+                })
 
-                await device.storageManager
-                    .collection('sharedListMetadata')
-                    .createObject({ localId: listIdCounter, remoteId: list.id })
-            }
+            await device.storageManager.collection('customLists').createObject({
+                id: 2,
+                name: DATA.FOLLOWED_LISTS[2].name,
+                searchableName: DATA.FOLLOWED_LISTS[2].name,
+                createdAt: new Date(),
+            })
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: 2,
+                    remoteId: DATA.FOLLOWED_LISTS[2].id,
+                })
 
-            // Add the parent page of the shared annot to only the final list
             await device.storageManager
                 .collection('pageListEntries')
                 .createObject({
-                    listId: listIdCounter,
+                    listId: 2,
                     pageUrl: normalizeUrl(DATA.CURRENT_TAB_URL_1),
                     fullUrl: DATA.CURRENT_TAB_URL_1,
-                    createdAt: new Date(listIdCounter),
+                    createdAt: new Date(),
+                })
+            await device.storageManager
+                .collection('pageListEntries')
+                .createObject({
+                    listId: 1,
+                    pageUrl: normalizeUrl(DATA.CURRENT_TAB_URL_1),
+                    fullUrl: DATA.CURRENT_TAB_URL_1,
+                    createdAt: new Date(),
                 })
 
             await device.storageManager
                 .collection('annotListEntries')
                 .createObject({
                     url: DATA.ANNOT_3.url,
-                    listId: listIdCounter,
-                    createdAt: new Date(listIdCounter),
+                    listId: 2,
+                    createdAt: new Date(),
                 })
             await device.storageManager
                 .collection('annotListEntries')
                 .createObject({
                     url: DATA.ANNOT_3.url,
-                    listId: listIdCounter - 2,
-                    createdAt: new Date(listIdCounter),
+                    listId: 0,
+                    createdAt: new Date(),
                 })
 
             for (const { tags, lists, ...annot } of [
@@ -2946,7 +2974,7 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
-        it("should be able to make own note that shows up in shared spaces public, removing it from any followed list states that the parent page isn't a part of", async ({
+        it("should be able to make own note that shows up in shared spaces public, adding/removing it to/from any followed list states that the parent page is/isn't a part of", async ({
             device,
         }) => {
             await setupFollowedListsTestData(device)
@@ -3006,6 +3034,13 @@ describe('SidebarContainerLogic', () => {
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[1].reference,
+            ])
+            expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
@@ -3048,14 +3083,22 @@ describe('SidebarContainerLogic', () => {
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
-            ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
+            ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference]) // No longer in here, as parent page is not
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[0].reference,
+                DATA.SHARED_ANNOTATIONS[1].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference, // Now in here, as parent page is
+            ])
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[2].reference,
-                DATA.SHARED_ANNOTATIONS[3].reference,
+                DATA.SHARED_ANNOTATIONS[3].reference, // Remains in here, as parent page is
             ])
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining(DATA.ANNOT_1),
