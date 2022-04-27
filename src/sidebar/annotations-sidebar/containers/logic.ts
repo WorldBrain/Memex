@@ -722,8 +722,17 @@ export class SidebarContainerLogic extends UILogic<
 
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
-    > = async ({ event }) => {
+    > = async ({ event, previousState }) => {
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+
+        this.removeAnnotationFromFollowedLists(
+            event.annotationId,
+            previousState,
+            {
+                addTo: event.added != null ? [event.added] : [],
+                removeFrom: event.deleted != null ? [event.deleted] : [],
+            },
+        )
 
         await this.options.annotationsCache.updateLists({
             annotationId: event.annotationId,
