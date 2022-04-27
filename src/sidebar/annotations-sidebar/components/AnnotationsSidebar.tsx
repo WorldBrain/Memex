@@ -376,6 +376,7 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
                             { url: data.localId, body: data.body },
                         )
+                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation
                         ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation
                         ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation
                         ownAnnotationProps.isShared = localAnnotation.isShared
