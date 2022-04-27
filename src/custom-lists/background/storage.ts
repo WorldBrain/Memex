@@ -229,7 +229,16 @@ export default class CustomListStorage extends StorageModule {
         const listsData: PageList[] = await this.operation('findListsByIds', {
             ids,
         })
-        return ids.map((id) => listsData.find((list) => list.id === id))
+        const orderedLists: PageList[] = []
+
+        for (const listId of ids) {
+            const data = listsData.find((list) => list.id === listId)
+            if (data) {
+                orderedLists.push(data)
+            }
+        }
+
+        return orderedLists
     }
 
     async fetchListWithPagesById(id: number) {
