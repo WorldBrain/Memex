@@ -840,7 +840,7 @@ export class AnnotationsSidebar extends React.Component<
 
         if (this.props.noteCreateState === 'running') {
             annots.push(
-                <LoaderBox>this.renderLoader('new-note-spinner')</LoaderBox>,
+                <LoaderBox>{this.renderLoader('new-note-spinner')}</LoaderBox>,
             )
         }
 
