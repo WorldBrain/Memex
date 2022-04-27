@@ -839,7 +839,9 @@ export class AnnotationsSidebar extends React.Component<
         const annots: JSX.Element[] = []
 
         if (this.props.noteCreateState === 'running') {
-            annots.push(this.renderLoader('new-note-spinner'))
+            annots.push(
+                <LoaderBox>this.renderLoader('new-note-spinner')</LoaderBox>,
+            )
         }
 
         annots.push(
@@ -1104,6 +1106,14 @@ export default onClickOutside(AnnotationsSidebar)
 
 const SpacerBottom = styled.div`
     height: 1200px;
+`
+
+const LoaderBox = styled.div`
+    height: 100px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
 `
 
 const Link = styled.span`
