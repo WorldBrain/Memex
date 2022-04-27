@@ -1,6 +1,8 @@
 import * as actions from './actions'
 import reducer from './reducer'
 import * as selectors from './selectors'
-import State, * as types from './types'
+import type * as types from './types'
+// tslint:disable-next-line:no-duplicate-imports
+import type State from './types'
 
-export { actions, reducer, selectors, State, types }
+export { actions, reducer, selectors, types, State }

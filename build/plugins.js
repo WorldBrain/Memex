@@ -57,6 +57,12 @@ export default function ({
             filename: 'options.html',
             template: htmlTemplates.options,
         }),
+        new HtmlPlugin({
+            title: 'Playground',
+            chunks: ['playground'],
+            filename: 'playground.html',
+            template: htmlTemplates.options,
+        }),
         new HtmlIncAssetsPlugin({
             append: false,
             assets: staticFiles.htmlAssets,

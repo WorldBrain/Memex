@@ -380,7 +380,6 @@ export const setupRpcConnection = (options: {
         connect: browser.runtime.connect,
         onConnect: browser.runtime.onConnect,
         paused: options.paused,
-        debug: true,
     })
     rpcConnection.setup()
 

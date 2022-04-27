@@ -37,15 +37,23 @@ function main() {
     let unregister = () => {}
     onAuthStateChanged(auth, () => {
         console.log('auth changed!', auth.currentUser?.uid)
-        if (!auth.currentUser.uid) {
+        if (!auth.currentUser?.uid) {
             unregister()
             unregister = () => {}
             return
         }
         unregister = onSnapshot(
             doc(firestore, 'homeFeedInfo', auth.currentUser.uid),
-            () => {
-                port.postMessage('feed info changed!')
+            (snapshot) => {
+                console.log('got home feed info change', snapshot.data())
+                if (port) {
+                    console.log('port open, posting message')
+                    port.postMessage('feed info changed!')
+                } else {
+                    console.log(
+                        `but there's no port yet, so not sending message`,
+                    )
+                }
             },
         )
     })
