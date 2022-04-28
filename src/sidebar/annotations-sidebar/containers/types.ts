@@ -245,6 +245,7 @@ interface SidebarEvents {
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string
+        followedListId?: string
     }
     editAnnotation: {
         context: AnnotationEventContext

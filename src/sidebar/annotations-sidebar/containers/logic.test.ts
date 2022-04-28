@@ -2479,8 +2479,8 @@ describe('SidebarContainerLogic', () => {
                             activeCopyPasterAnnotationId: undefined,
                             activeListPickerAnnotationId: undefined,
                             activeShareMenuAnnotationId: undefined,
-                            annotationModes: {},
-                            annotationEditForms: {},
+                            annotationModes: expect.any(Object),
+                            annotationEditForms: expect.any(Object),
                         },
                     ]),
                 ),
@@ -3382,6 +3382,51 @@ describe('SidebarContainerLogic', () => {
                     activeCopyPasterAnnotationId: undefined,
                     activeListPickerAnnotationId: undefined,
                     activeShareMenuAnnotationId: undefined,
+                }),
+            )
+        })
+
+        it('should be able to change edit mode on own annotations in followed lists', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            await sidebar.init()
+            const annotationId = DATA.ANNOT_3.url
+            const followedListId = DATA.FOLLOWED_LISTS[2].id
+
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    annotationModes: { [annotationId]: 'default' },
+                }),
+            )
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                annotationUrl: annotationId,
+                followedListId,
+                context,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    annotationModes: { [annotationId]: 'edit' },
+                }),
+            )
+
+            await sidebar.processEvent('cancelEdit', {
+                annotationUrl: annotationId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    annotationModes: { [annotationId]: 'default' },
                 }),
             )
         })

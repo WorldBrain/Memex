@@ -666,15 +666,18 @@ export class SidebarContainerLogic extends UILogic<
         this.options.focusCreateForm()
     }
 
-    cancelEdit: EventHandler<'cancelEdit'> = ({ event }) => {
+    cancelEdit: EventHandler<'cancelEdit'> = ({ event, previousState }) => {
         this.emitMutation({
             annotationModes: {
                 pageAnnotations: {
-                    [event.annotationUrl]: {
-                        $set: 'default',
-                    },
+                    [event.annotationUrl]: { $set: 'default' },
                 },
             },
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                annotationModes: {
+                    [event.annotationUrl]: { $set: 'default' },
+                },
+            }),
         })
     }
 
@@ -948,6 +951,11 @@ export class SidebarContainerLogic extends UILogic<
             confirmPrivatizeNoteArgs: {
                 $set: null,
             },
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                annotationModes: {
+                    [event.annotationUrl]: { $set: 'default' },
+                },
+            }),
         })
 
         await this.options.annotationsCache.update(
@@ -1113,12 +1121,27 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
 
-        const mutation: UIMutation<SidebarContainerState> = {
+        let mutation: UIMutation<SidebarContainerState> = {
             annotationModes: {
                 [event.context]: {
                     [event.annotationUrl]: { $set: 'edit' },
                 },
             },
+        }
+
+        if (event.followedListId != null) {
+            mutation = {
+                ...mutation,
+                followedLists: {
+                    byId: {
+                        [event.followedListId]: {
+                            annotationModes: {
+                                [event.annotationUrl]: { $set: 'edit' },
+                            },
+                        },
+                    },
+                },
+            }
         }
 
         // If there was existing form state, we want to keep that, else use the stored annot data or defaults
@@ -1139,6 +1162,7 @@ export class SidebarContainerLogic extends UILogic<
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             annotationModes: {
@@ -1148,6 +1172,13 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             },
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                annotationModes: {
+                    [event.annotationUrl]: {
+                        $set: event.mode,
+                    },
+                },
+            }),
         })
     }
 
@@ -1164,7 +1195,7 @@ export class SidebarContainerLogic extends UILogic<
     loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
         previousState,
     }) => {
-        const { customLists, pageUrl } = this.options
+        const { customLists, pageUrl, annotationsCache } = this.options
 
         await executeUITask(this, 'followedListLoadState', async () => {
             const followedLists = await customLists.fetchFollowedListsWithAnnotations(
@@ -1207,8 +1238,38 @@ export class SidebarContainerLogic extends UILogic<
                                     activeCopyPasterAnnotationId: undefined,
                                     activeListPickerAnnotationId: undefined,
                                     activeShareMenuAnnotationId: undefined,
-                                    annotationModes: {},
-                                    annotationEditForms: {},
+                                    annotationModes: list.sharedAnnotationReferences.reduce(
+                                        (acc, ref) => {
+                                            const localAnnot = annotationsCache.getAnnotationByRemoteId(
+                                                ref.id,
+                                            )
+                                            if (!localAnnot) {
+                                                return acc
+                                            }
+                                            return {
+                                                ...acc,
+                                                [localAnnot.url]: 'default',
+                                            }
+                                        },
+                                        {},
+                                    ),
+                                    annotationEditForms: list.sharedAnnotationReferences.reduce(
+                                        (acc, ref) => {
+                                            const localAnnot = annotationsCache.getAnnotationByRemoteId(
+                                                ref.id,
+                                            )
+                                            if (!localAnnot) {
+                                                return acc
+                                            }
+                                            return {
+                                                ...acc,
+                                                [localAnnot.url]: {
+                                                    ...INIT_FORM_STATE,
+                                                },
+                                            }
+                                        },
+                                        {},
+                                    ),
                                 },
                             ]),
                         ),
