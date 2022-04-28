@@ -462,13 +462,30 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({}) => {
-        this.emitMutation({
+    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({
+        event,
+    }) => {
+        let mutation: UIMutation<SidebarContainerState> = {
             activeShareMenuNoteId: { $set: undefined },
             immediatelyShareNotes: { $set: false },
             confirmPrivatizeNoteArgs: { $set: null },
             confirmSelectNoteSpaceArgs: { $set: null },
-        })
+        }
+
+        if (event != null) {
+            mutation = {
+                ...mutation,
+                followedLists: {
+                    byId: {
+                        [event.followedListId]: {
+                            activeShareMenuAnnotationId: { $set: undefined },
+                        },
+                    },
+                },
+            }
+        }
+
+        this.emitMutation(mutation)
     }
 
     setAllNotesShareMenuShown: EventHandler<
@@ -506,6 +523,27 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (event.followedListId != null) {
+            const newId =
+                previousState.followedLists.byId[event.followedListId]
+                    ?.activeCopyPasterAnnotationId === event.id
+                    ? undefined
+                    : event.id
+
+            this.emitMutation({
+                activeCopyPasterAnnotationId: { $set: undefined },
+                showAllNotesCopyPaster: { $set: false },
+                followedLists: {
+                    byId: {
+                        [event.followedListId]: {
+                            activeCopyPasterAnnotationId: { $set: newId },
+                        },
+                    },
+                },
+            })
+            return
+        }
+
         const newId =
             previousState.activeCopyPasterAnnotationId === event.id
                 ? undefined
@@ -541,6 +579,26 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (event.followedListId != null) {
+            const newId =
+                previousState.followedLists.byId[event.followedListId]
+                    ?.activeListPickerAnnotationId === event.id
+                    ? undefined
+                    : event.id
+
+            this.emitMutation({
+                activeListPickerAnnotationId: { $set: undefined },
+                followedLists: {
+                    byId: {
+                        [event.followedListId]: {
+                            activeListPickerAnnotationId: { $set: newId },
+                        },
+                    },
+                },
+            })
+            return
+        }
+
         const newId =
             previousState.activeListPickerAnnotationId === event.id
                 ? undefined
@@ -990,26 +1048,40 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    shareAnnotation: EventHandler<'shareAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
+    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
         if (!(await this.ensureLoggedIn())) {
             return
         }
+
+        const mutation: UIMutation<SidebarContainerState> =
+            event.followedListId != null
+                ? {
+                      followedLists: {
+                          byId: {
+                              [event.followedListId]: {
+                                  activeShareMenuAnnotationId: {
+                                      $set: event.annotationUrl,
+                                  },
+                              },
+                          },
+                      },
+                  }
+                : {
+                      activeShareMenuNoteId: { $set: event.annotationUrl },
+                  }
 
         if (navigator.platform === 'MacIntel') {
             const immediateShare =
                 event.mouseEvent.metaKey && event.mouseEvent.altKey
             this.emitMutation({
-                activeShareMenuNoteId: { $set: event.annotationUrl },
+                ...mutation,
                 immediatelyShareNotes: { $set: !!immediateShare },
             })
         } else {
             const immediateShare =
                 event.mouseEvent.ctrlKey && event.mouseEvent.altKey
             this.emitMutation({
-                activeShareMenuNoteId: { $set: event.annotationUrl },
+                ...mutation,
                 immediatelyShareNotes: { $set: !!immediateShare },
             })
         }
@@ -1077,7 +1149,7 @@ export class SidebarContainerLogic extends UILogic<
     loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
         previousState,
     }) => {
-        const { customLists, pageUrl, contentSharing } = this.options
+        const { customLists, pageUrl } = this.options
 
         await executeUITask(this, 'followedListLoadState', async () => {
             const followedLists = await customLists.fetchFollowedListsWithAnnotations(
@@ -1114,9 +1186,14 @@ export class SidebarContainerLogic extends UILogic<
                                 {
                                     ...list,
                                     isExpanded: false,
+                                    isContributable: false,
                                     annotationsLoadState: 'pristine',
                                     conversationsLoadState: 'pristine',
-                                    isContributable: false, // areListsContributable[list.id],
+                                    activeCopyPasterAnnotationId: undefined,
+                                    activeListPickerAnnotationId: undefined,
+                                    activeShareMenuAnnotationId: undefined,
+                                    annotationModes: {},
+                                    annotationEditForms: {},
                                 },
                             ]),
                         ),
@@ -1283,7 +1360,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const {
             sharedAnnotationReferences,
-            isExpanded: wasExpanded,
             annotationsLoadState,
         } = previousState.followedLists.byId[event.listId]
         const isolatedView = previousState.isolatedView

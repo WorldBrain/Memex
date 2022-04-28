@@ -103,9 +103,16 @@ interface SidebarFollowedListsState {
     followedLists: NormalizedState<
         SharedAnnotationList & {
             isExpanded: boolean
+            isContributable: boolean
             annotationsLoadState: TaskState
             conversationsLoadState: TaskState
-            isContributable: boolean
+            activeCopyPasterAnnotationId: string | undefined
+            activeListPickerAnnotationId: string | undefined
+            activeShareMenuAnnotationId: string | undefined
+            annotationEditForms: EditForms
+            annotationModes: {
+                [annotationId: string]: AnnotationMode
+            }
         }
     >
 
@@ -139,8 +146,8 @@ export interface SidebarContainerState
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
-    activeTagPickerAnnotationId: string | undefined
     activeListPickerAnnotationId: string | undefined
+    activeTagPickerAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -253,8 +260,9 @@ interface SidebarEvents {
     }
     shareAnnotation: {
         context: AnnotationEventContext
-        annotationUrl: string
         mouseEvent: React.MouseEvent
+        annotationUrl: string
+        followedListId?: string
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
@@ -295,14 +303,14 @@ interface SidebarEvents {
     setSelectNoteSpaceConfirmArgs: SidebarContainerState['confirmSelectNoteSpaceArgs']
 
     setAllNotesCopyPasterShown: { shown: boolean }
-    setCopyPasterAnnotationId: { id: string }
+    setCopyPasterAnnotationId: { id: string; followedListId?: string }
     setTagPickerAnnotationId: { id: string }
-    setListPickerAnnotationId: { id: string }
+    setListPickerAnnotationId: { id: string; followedListId?: string }
     resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
     resetListPickerAnnotationId: { id?: string }
     setAllNotesShareMenuShown: { shown: boolean }
-    resetShareMenuNoteId: null
+    resetShareMenuNoteId: null | { followedListId: string }
 }
 
 export type SidebarContainerEvents = UIEvent<

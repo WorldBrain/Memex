@@ -2476,6 +2476,11 @@ describe('SidebarContainerLogic', () => {
                             isContributable: false,
                             annotationsLoadState: 'pristine',
                             conversationsLoadState: 'pristine',
+                            activeCopyPasterAnnotationId: undefined,
+                            activeListPickerAnnotationId: undefined,
+                            activeShareMenuAnnotationId: undefined,
+                            annotationModes: {},
+                            annotationEditForms: {},
                         },
                     ]),
                 ),
@@ -2658,23 +2663,6 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
 
-            expect(sidebar.state.followedListLoadState).toEqual('success')
-            expect(sidebar.state.followedLists).toEqual({
-                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
-                byId: fromPairs(
-                    DATA.FOLLOWED_LISTS.map((list) => [
-                        list.id,
-                        {
-                            ...list,
-                            isExpanded: false,
-                            isContributable: false,
-                            annotationsLoadState: 'pristine',
-                            conversationsLoadState: 'pristine',
-                        },
-                    ]),
-                ),
-            })
-
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: DATA.FOLLOWED_LISTS[0].id,
             })
@@ -2811,23 +2799,6 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
             await sidebar.init()
-
-            expect(sidebar.state.followedListLoadState).toEqual('success')
-            expect(sidebar.state.followedLists).toEqual({
-                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
-                byId: fromPairs(
-                    DATA.FOLLOWED_LISTS.map((list) => [
-                        list.id,
-                        {
-                            ...list,
-                            isExpanded: false,
-                            isContributable: false,
-                            annotationsLoadState: 'pristine',
-                            conversationsLoadState: 'pristine',
-                        },
-                    ]),
-                ),
-            })
 
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: DATA.FOLLOWED_LISTS[0].id,
@@ -2984,23 +2955,6 @@ describe('SidebarContainerLogic', () => {
             })
             await sidebar.init()
 
-            expect(sidebar.state.followedListLoadState).toEqual('success')
-            expect(sidebar.state.followedLists).toEqual({
-                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
-                byId: fromPairs(
-                    DATA.FOLLOWED_LISTS.map((list) => [
-                        list.id,
-                        {
-                            ...list,
-                            isExpanded: false,
-                            isContributable: false,
-                            annotationsLoadState: 'pristine',
-                            conversationsLoadState: 'pristine',
-                        },
-                    ]),
-                ),
-            })
-
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: DATA.FOLLOWED_LISTS[0].id,
             })
@@ -3122,23 +3076,6 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
             await sidebar.init()
-
-            expect(sidebar.state.followedListLoadState).toEqual('success')
-            expect(sidebar.state.followedLists).toEqual({
-                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
-                byId: fromPairs(
-                    DATA.FOLLOWED_LISTS.map((list) => [
-                        list.id,
-                        {
-                            ...list,
-                            isExpanded: false,
-                            isContributable: false,
-                            annotationsLoadState: 'pristine',
-                            conversationsLoadState: 'pristine',
-                        },
-                    ]),
-                ),
-            })
 
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: DATA.FOLLOWED_LISTS[0].id,
@@ -3351,6 +3288,110 @@ describe('SidebarContainerLogic', () => {
                     lists: expect.any(Array),
                 }),
             ])
+        })
+
+        it('should be able to toggle space picker, copy paster, and share menu popups on own annotations in followed lists', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            await sidebar.init()
+            const annotationId = DATA.ANNOT_3.url
+            const followedListId = DATA.FOLLOWED_LISTS[2].id
+
+            await sidebar.processEvent('expandFollowedListNotes', {
+                listId: followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setCopyPasterAnnotationId', {
+                id: annotationId,
+                followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: annotationId,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setCopyPasterAnnotationId', {
+                id: annotationId,
+                followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: annotationId,
+                followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: annotationId,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: annotationId,
+                followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('shareAnnotation', {
+                annotationUrl: annotationId,
+                followedListId,
+                mouseEvent: {} as any,
+                context,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: annotationId,
+                }),
+            )
+
+            await sidebar.processEvent('resetShareMenuNoteId', {
+                followedListId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerAnnotationId: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
         })
     })
 })
