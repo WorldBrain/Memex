@@ -77,8 +77,6 @@ import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-me
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import {
     PersonalDeviceType,
-    PersonalDeviceOs,
-    PersonalDeviceBrowser,
     PersonalDeviceProduct,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
@@ -224,7 +222,6 @@ export function createBackgroundModules(options: {
         createInboxEntry,
         tabManagement,
         getNow,
-        generateServerId,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)
