@@ -621,6 +621,35 @@ describe('Collection Cache', () => {
             ])
         })
 
+        test('suggestions fetch should work even if cache contains invalid entries', async () => {
+            const { listsModule } = await setupCacheTest({ skipTestData: true })
+
+            const nonExistentListId = 355365456
+            await listsModule._updateListSuggestionsCache({
+                added: nonExistentListId,
+            })
+
+            expect(
+                await listsModule['localStorage'].get('suggestionIds'),
+            ).toEqual([nonExistentListId])
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
+
+            await listsModule.createCustomList(DATA.LIST_1)
+
+            expect(
+                await listsModule['localStorage'].get('suggestionIds'),
+            ).toEqual([DATA.LIST_1.id, nonExistentListId])
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                expect.objectContaining({
+                    createdAt: expect.any(Number),
+                    localId: expect.any(Number),
+                    name: DATA.LIST_1.name,
+                    focused: false,
+                    remoteId: null,
+                }),
+            ])
+        })
+
         test("adding multiple page entry for same list doesn't add dupe cache entries, though it should re-order by most recently selected", async () => {
             const { listsModule } = await setupCacheTest({})
 
