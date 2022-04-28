@@ -310,7 +310,7 @@ interface SidebarEvents {
     resetCopyPasterAnnotationId: null
     resetListPickerAnnotationId: { id?: string }
     setAllNotesShareMenuShown: { shown: boolean }
-    resetShareMenuNoteId: null | { followedListId: string }
+    resetShareMenuNoteId: null
 }
 
 export type SidebarContainerEvents = UIEvent<

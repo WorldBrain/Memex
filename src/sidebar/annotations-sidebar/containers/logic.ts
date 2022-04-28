@@ -463,26 +463,16 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({
-        event,
+        previousState,
     }) => {
         let mutation: UIMutation<SidebarContainerState> = {
             activeShareMenuNoteId: { $set: undefined },
             immediatelyShareNotes: { $set: false },
             confirmPrivatizeNoteArgs: { $set: null },
             confirmSelectNoteSpaceArgs: { $set: null },
-        }
-
-        if (event != null) {
-            mutation = {
-                ...mutation,
-                followedLists: {
-                    byId: {
-                        [event.followedListId]: {
-                            activeShareMenuAnnotationId: { $set: undefined },
-                        },
-                    },
-                },
-            }
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                activeShareMenuAnnotationId: { $set: undefined },
+            }),
         }
 
         this.emitMutation(mutation)
@@ -608,21 +598,46 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    // TODO: type properly
+    private applyStateMutationForAllFollowedLists = (
+        previousState: SidebarContainerState,
+        mutation: UIMutation<any>,
+    ): UIMutation<any> => ({
+        followedLists: {
+            byId: previousState.followedLists.allIds.reduce(
+                (acc, listId) => ({
+                    ...acc,
+                    [listId]: { ...mutation },
+                }),
+                {},
+            ),
+        },
+    })
+
     resetListPickerAnnotationId: EventHandler<
         'resetListPickerAnnotationId'
-    > = ({ event }) => {
+    > = ({ event, previousState }) => {
         if (event.id != null) {
             this.options.focusEditNoteForm(event.id)
         }
-        this.emitMutation({ activeListPickerAnnotationId: { $set: undefined } })
+
+        this.emitMutation({
+            activeListPickerAnnotationId: { $set: undefined },
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                activeListPickerAnnotationId: { $set: undefined },
+            }),
+        })
     }
 
     resetCopyPasterAnnotationId: EventHandler<
         'resetCopyPasterAnnotationId'
-    > = () => {
+    > = ({ previousState }) => {
         this.emitMutation({
             showAllNotesCopyPaster: { $set: false },
             activeCopyPasterAnnotationId: { $set: undefined },
+            ...this.applyStateMutationForAllFollowedLists(previousState, {
+                activeCopyPasterAnnotationId: { $set: undefined },
+            }),
         })
     }
 

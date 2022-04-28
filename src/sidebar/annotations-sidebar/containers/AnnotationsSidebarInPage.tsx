@@ -217,8 +217,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    protected bindAnnotationFooterEventProps(annotation: Annotation) {
-        const boundProps = super.bindAnnotationFooterEventProps(annotation)
+    protected bindAnnotationFooterEventProps(
+        annotation: Annotation,
+        followedListId?: string,
+    ) {
+        const boundProps = super.bindAnnotationFooterEventProps(
+            annotation,
+            followedListId,
+        )
 
         return {
             ...boundProps,

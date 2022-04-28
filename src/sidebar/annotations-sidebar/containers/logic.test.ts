@@ -3327,10 +3327,7 @@ describe('SidebarContainerLogic', () => {
                 }),
             )
 
-            await sidebar.processEvent('setCopyPasterAnnotationId', {
-                id: annotationId,
-                followedListId,
-            })
+            await sidebar.processEvent('resetCopyPasterAnnotationId', null)
 
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
@@ -3353,10 +3350,7 @@ describe('SidebarContainerLogic', () => {
                 }),
             )
 
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: annotationId,
-                followedListId,
-            })
+            await sidebar.processEvent('resetListPickerAnnotationId', {})
 
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
@@ -3381,9 +3375,7 @@ describe('SidebarContainerLogic', () => {
                 }),
             )
 
-            await sidebar.processEvent('resetShareMenuNoteId', {
-                followedListId,
-            })
+            await sidebar.processEvent('resetShareMenuNoteId', null)
 
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({

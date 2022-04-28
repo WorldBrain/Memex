@@ -61,10 +61,16 @@ export interface AnnotationsSidebarProps
     needsWaypoint?: boolean
     appendLoader?: boolean
 
-    renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderCopyPasterForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
-    renderShareMenuForAnnotation: (id: string) => JSX.Element
-    renderListsPickerForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
+    renderListsPickerForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
 
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void
@@ -74,6 +80,7 @@ export interface AnnotationsSidebarProps
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Pick<Annotation, 'url' | 'body'>,
+        followedListId?: string,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
@@ -375,10 +382,17 @@ export class AnnotationsSidebar extends React.Component<
                         )
                         ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
                             { url: data.localId, body: data.body },
+                            listId,
                         )
-                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation
-                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation
-                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation
+                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
+                            listId,
+                        )
                         ownAnnotationProps.isShared = localAnnotation.isShared
                         ownAnnotationProps.isBulkShareProtected =
                             localAnnotation.isBulkShareProtected
@@ -911,6 +925,9 @@ export class AnnotationsSidebar extends React.Component<
                                 annot.body?.length > 0
                             }
                             passDownRef={ref}
+                            renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
+                            renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
+                            renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
                         />
                     </AnnotationBox>
                 )
