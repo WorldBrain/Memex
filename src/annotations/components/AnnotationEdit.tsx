@@ -35,7 +35,6 @@ export interface AnnotationEditGeneralProps {
 export interface Props
     extends AnnotationEditEventProps,
         AnnotationEditGeneralProps {
-    url: string
     rows: number
 }
 

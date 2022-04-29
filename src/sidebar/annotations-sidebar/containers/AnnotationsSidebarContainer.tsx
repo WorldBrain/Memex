@@ -176,6 +176,7 @@ export class AnnotationsSidebarContainer<
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     ...DEF_CONTEXT,
                 }),
             onDeleteIconClick: () =>
@@ -512,7 +513,6 @@ export class AnnotationsSidebarContainer<
                 : this.state.activeShareMenuNoteId
 
         if (state !== currentAnnotationId || currentAnnotation == null) {
-            console.log(state, currentAnnotationId)
             return null
         }
 

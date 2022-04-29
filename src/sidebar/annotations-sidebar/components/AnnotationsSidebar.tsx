@@ -367,16 +367,25 @@ export class AnnotationsSidebar extends React.Component<
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
 
+                    // If annot is owned by the current user, we allow a whole bunch of other functionality
                     const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
                     if (data.localId != null) {
                         const localAnnotation = this.props.annotations.find(
                             (a) => a.url === data.localId,
                         )
 
+                        ownAnnotationProps.isBulkShareProtected =
+                            localAnnotation.isBulkShareProtected
                         ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.mode = this.props.annotationModes[
-                            data.localId
-                        ]
+                        ownAnnotationProps.url = localAnnotation.url
+                        ownAnnotationProps.lists = localAnnotation.lists
+                        ownAnnotationProps.comment = localAnnotation.comment
+                        ownAnnotationProps.isShared = localAnnotation.isShared
+                        ownAnnotationProps.lastEdited =
+                            localAnnotation.lastEdited
+                        ownAnnotationProps.mode = this.props.followedLists.byId[
+                            listId
+                        ].annotationModes[data.localId]
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
                             { url: data.localId, isShared: true },
                         )
@@ -393,11 +402,6 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
                             listId,
                         )
-                        ownAnnotationProps.isShared = localAnnotation.isShared
-                        ownAnnotationProps.isBulkShareProtected =
-                            localAnnotation.isBulkShareProtected
-                        ownAnnotationProps.url = data.localId
-                        ownAnnotationProps.lists = localAnnotation.lists
                     }
 
                     return (

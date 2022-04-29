@@ -260,7 +260,6 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private renderNote() {
         const {
-            url,
             mode,
             comment,
             annotationEditDependencies,
@@ -270,7 +269,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
-                    url={url}
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}

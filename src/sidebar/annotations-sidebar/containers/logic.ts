@@ -1015,11 +1015,15 @@ export class SidebarContainerLogic extends UILogic<
             this.options.annotationsCache.listData[localListId]?.remoteId
 
         const addTo = explicitLists
-            ? explicitLists.addTo.map(localListIdToRemote)
+            ? explicitLists.addTo
+                  .map(localListIdToRemote)
+                  .filter((a) => a != null)
             : []
 
         const removeFrom = explicitLists
-            ? explicitLists.removeFrom.map(localListIdToRemote)
+            ? explicitLists.removeFrom
+                  .map(localListIdToRemote)
+                  .filter((a) => a != null)
             : previousState.followedLists.allIds.filter((listId) =>
                   previousState.followedLists.byId[
                       listId
@@ -1121,28 +1125,26 @@ export class SidebarContainerLogic extends UILogic<
             (annot) => annot.url === event.annotationUrl,
         )
 
-        let mutation: UIMutation<SidebarContainerState> = {
-            annotationModes: {
-                [event.context]: {
-                    [event.annotationUrl]: { $set: 'edit' },
-                },
-            },
-        }
-
-        if (event.followedListId != null) {
-            mutation = {
-                ...mutation,
-                followedLists: {
-                    byId: {
-                        [event.followedListId]: {
-                            annotationModes: {
-                                [event.annotationUrl]: { $set: 'edit' },
-                            },
-                        },
-                    },
-                },
-            }
-        }
+        const mutation: UIMutation<SidebarContainerState> =
+            event.followedListId != null
+                ? {
+                      followedLists: {
+                          byId: {
+                              [event.followedListId]: {
+                                  annotationModes: {
+                                      [event.annotationUrl]: { $set: 'edit' },
+                                  },
+                              },
+                          },
+                      },
+                  }
+                : {
+                      annotationModes: {
+                          [event.context]: {
+                              [event.annotationUrl]: { $set: 'edit' },
+                          },
+                      },
+                  }
 
         // If there was existing form state, we want to keep that, else use the stored annot data or defaults
         if (
