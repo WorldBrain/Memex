@@ -706,11 +706,11 @@ export class AnnotationsSidebar extends React.Component<
             return (
                 <FollowedListNotesContainer
                     bottom={listData.isExpanded ? '20px' : '5px'}
+                    key={listId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        key={listId}
                         onClick={() =>
                             this.props.expandFollowedListNotes(listId)
                         }

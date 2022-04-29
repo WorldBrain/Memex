@@ -3386,7 +3386,7 @@ describe('SidebarContainerLogic', () => {
             )
         })
 
-        it('should be able to change edit mode on own annotations in followed lists', async ({
+        it('should be able to change between edit, delete, and default mode on own annotations in followed lists', async ({
             device,
         }) => {
             await setupFollowedListsTestData(device)
@@ -3422,6 +3422,32 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.processEvent('cancelEdit', {
                 annotationUrl: annotationId,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    annotationModes: { [annotationId]: 'default' },
+                }),
+            )
+
+            await sidebar.processEvent('switchAnnotationMode', {
+                annotationUrl: annotationId,
+                followedListId,
+                mode: 'delete',
+                context,
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    annotationModes: { [annotationId]: 'delete' },
+                }),
+            )
+
+            await sidebar.processEvent('switchAnnotationMode', {
+                annotationUrl: annotationId,
+                followedListId,
+                mode: 'default',
+                context,
             })
 
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(

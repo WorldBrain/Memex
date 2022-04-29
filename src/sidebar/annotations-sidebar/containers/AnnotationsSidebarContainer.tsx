@@ -182,12 +182,14 @@ export class AnnotationsSidebarContainer<
             onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     mode: 'delete',
                     ...DEF_CONTEXT,
                 }),
             onDeleteCancel: () =>
                 this.processEvent('switchAnnotationMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),

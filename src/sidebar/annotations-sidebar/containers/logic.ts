@@ -1166,22 +1166,31 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            annotationModes: {
-                [event.context]: {
-                    [event.annotationUrl]: {
-                        $set: event.mode,
+        if (event.followedListId != null) {
+            this.emitMutation({
+                followedLists: {
+                    byId: {
+                        [event.followedListId]: {
+                            annotationModes: {
+                                [event.annotationUrl]: {
+                                    $set: event.mode,
+                                },
+                            },
+                        },
                     },
                 },
-            },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
+            })
+        } else {
+            this.emitMutation({
                 annotationModes: {
-                    [event.annotationUrl]: {
-                        $set: event.mode,
+                    [event.context]: {
+                        [event.annotationUrl]: {
+                            $set: event.mode,
+                        },
                     },
                 },
-            }),
-        })
+            })
+        }
     }
 
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (

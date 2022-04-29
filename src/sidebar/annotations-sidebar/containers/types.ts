@@ -269,6 +269,7 @@ interface SidebarEvents {
         context: AnnotationEventContext
         annotationUrl: string
         mode: AnnotationMode
+        followedListId?: string
     }
 
     copyNoteLink: { link: string }
