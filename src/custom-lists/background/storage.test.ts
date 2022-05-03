@@ -625,7 +625,7 @@ describe('Collection Cache', () => {
             const { listsModule } = await setupCacheTest({ skipTestData: true })
 
             const nonExistentListId = 355365456
-            await listsModule._updateListSuggestionsCache({
+            await listsModule.updateListSuggestionsCache({
                 added: nonExistentListId,
             })
 
