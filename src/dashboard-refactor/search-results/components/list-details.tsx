@@ -20,7 +20,7 @@ export default class ListDetails extends PureComponent<Props> {
         return (
             <>
                 {this.props.listName && (
-                    <Margin top="10px" bottom="20px">
+                    <TopBarContainer top="10px" bottom="20px">
                         <Container center={!this.props.remoteLink}>
                             <DetailsContainer>
                                 <SectionTitle>
@@ -45,7 +45,7 @@ export default class ListDetails extends PureComponent<Props> {
                                     <>
                                         <Margin right="10px">
                                             <ButtonTooltip
-                                                tooltipText="Invite people to this collection"
+                                                tooltipText="Invite people to this Space"
                                                 position="bottom"
                                             >
                                                 <Icon
@@ -71,7 +71,7 @@ export default class ListDetails extends PureComponent<Props> {
                                     </>
                                 ) : (
                                     <ButtonTooltip
-                                        tooltipText="Invite people to this collection"
+                                        tooltipText="Invite people to this Space"
                                         position="bottom"
                                     >
                                         <PrimaryAction
@@ -97,12 +97,16 @@ export default class ListDetails extends PureComponent<Props> {
                                 )}
                             </BtnsContainer>
                         </Container>
-                    </Margin>
+                    </TopBarContainer>
                 )}{' '}
             </>
         )
     }
 }
+
+const TopBarContainer = styled(Margin)`
+    z-index: 2147483645;
+`
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.normalText};
