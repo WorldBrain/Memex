@@ -878,7 +878,6 @@ const DeleteConfirmStyled = styled.span`
     font-size: 14px;
     color: #000;
     margin-right: 10px;
-    width: 100%;
     text-align: right;
 `
 

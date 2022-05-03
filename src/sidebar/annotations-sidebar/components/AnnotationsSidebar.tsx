@@ -345,7 +345,19 @@ export class AnnotationsSidebar extends React.Component<
             .filter((a) => !!a)
 
         if (!annotationsData.length) {
-            return 'No notes exist in this list for this page'
+            return (
+                <EmptyMessageContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.commentEmpty}
+                            heightAndWidth="20px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <InfoText>No notes exist in this Space anymore.</InfoText>
+                </EmptyMessageContainer>
+            )
         }
 
         return (
