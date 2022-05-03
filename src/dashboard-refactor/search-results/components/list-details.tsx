@@ -105,7 +105,7 @@ export default class ListDetails extends PureComponent<Props> {
 }
 
 const TopBarContainer = styled(Margin)`
-    z-index: 2147483645;
+    z-index: 2147483640;
 `
 
 const InfoText = styled.div`
