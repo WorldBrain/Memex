@@ -115,10 +115,10 @@ class BackgroundScript {
         // Store the timestamp of when the extension was installed
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
 
-        // Enable PDF integration by default
+        // Disable PDF integration by default
         await this.deps.syncSettingsStore.pdfIntegration.set(
             'shouldAutoOpen',
-            true,
+            false,
         )
 
         // TODO: Set up pioneer subscription banner to show up in 2 weeks
