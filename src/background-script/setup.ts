@@ -374,7 +374,7 @@ export function createBackgroundModules(options: {
         }),
         activityStreams,
         storageManager,
-        customLists: customLists.storage,
+        customListsBG: customLists,
         annotations: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
@@ -555,7 +555,7 @@ export function createBackgroundModules(options: {
                 )
 
                 if (existingList == null) {
-                    await customLists._updateListSuggestionsCache({
+                    await customLists.updateListSuggestionsCache({
                         added: params.updates.id,
                     })
                 }

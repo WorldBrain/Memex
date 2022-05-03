@@ -2,7 +2,7 @@ import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { serializeError, deserializeError, ErrorObject } from 'serialize-error'
 import uuid from 'uuid/v1'
 import type { Events } from 'webextension-polyfill-ts/src/generated/events'
-import { Runtime, browser } from 'webextension-polyfill-ts'
+import { Runtime } from 'webextension-polyfill-ts'
 import { filterTabUrl } from 'src/util/uri-utils'
 import { sleepPromise } from '../promises'
 import { RpcError } from '../webextensionRPC'
@@ -13,7 +13,7 @@ interface RPCObject {
         id: string
         name: string
         proxy?: 'background'
-        tabId?: string
+        tabId?: number
     }
     payload: any
     error?: any
@@ -287,7 +287,7 @@ export class PortBasedRPCManager {
         return this.postMessageRequestToRPC(request, port, name)
     }
 
-    private getExtensionPort(name) {
+    private getExtensionPort(name: string) {
         const port = this.ports.get(this.getPortIdForExtBg())
         if (!port) {
             console.error({ ports: this.ports })
@@ -298,7 +298,7 @@ export class PortBasedRPCManager {
         return port
     }
 
-    private getTabPort(tabId, name) {
+    private getTabPort(tabId: number, name: string) {
         const port = this.ports.get(this.getPortIdForTab(tabId))
         if (!port) {
             console.error({ ports: this.ports })
@@ -310,6 +310,7 @@ export class PortBasedRPCManager {
         }
         return port
     }
+
     private postMessageToRPC = async (
         port: Runtime.Port,
         name: string,
@@ -330,13 +331,12 @@ export class PortBasedRPCManager {
         // Return the promise for to await for and allow the promise to be resolved by
         // incoming messages
         const pendingRequest = new Promise((resolve, reject) => {
-            this.addPendingRequest(request.headers.id, {
+            this.pendingRequests.set(request.headers.id, {
                 request,
                 promise: { resolve, reject },
             })
         })
 
-        port.postMessage(request)
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Requested for [${name}]`,
             { request },
@@ -344,10 +344,11 @@ export class PortBasedRPCManager {
 
         let ret: any
         try {
+            port.postMessage(request)
             ret = await pendingRequest
         } catch (err) {
             if (err.fromBgScript) {
-                throw new RpcError('Error occured in bg script')
+                throw new RpcError('Error occured in bg script: ' + err.message)
             } else {
                 throw new RpcError(err.message)
             }
@@ -359,11 +360,10 @@ export class PortBasedRPCManager {
         return ret
     }
 
-    private addPendingRequest = (id, request) => {
-        this.pendingRequests.set(id, request)
-    }
-
-    private messageResponder = async (packet, port) => {
+    private messageResponder = async (
+        packet: RPCObject,
+        port: Runtime.Port,
+    ) => {
         await this._paused
 
         const { headers, payload, error, serializedError } = packet
@@ -379,15 +379,10 @@ export class PortBasedRPCManager {
                 `RPC::messageResponder::PortName(${port.name}):: REQUEST received for [${name}]`,
             )
 
-            let returnPromise
             // If the Request type was a proxy, the background shouldn't fullill this request itself
             // but pass it on to the specific tab to fullfill
             if (headers.proxy === 'background') {
-                returnPromise = this.postMessageRequestToTab(
-                    headers.tabId,
-                    name,
-                    payload,
-                )
+                await this.postMessageRequestToTab(headers.tabId, name, payload)
             } else {
                 const f = this.options.getRegisteredRemoteFunction(name)
 
@@ -416,18 +411,24 @@ export class PortBasedRPCManager {
                         )
                     })
                     .catch((err) => {
-                        console.error(err.mesage)
-                        port.postMessage(
-                            PortBasedRPCManager.createRPCResponseObject({
-                                packet,
-                                payload: null,
-                                error: err.message,
-                                serializedError: serializeError(err),
-                            }),
-                        )
-                        this.log(
-                            `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
-                        )
+                        console.error(err.message)
+                        if (err.message.includes('disconnected port')) {
+                            this.log(
+                                `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}] -- Port Disconnected`,
+                            )
+                        } else {
+                            port.postMessage(
+                                PortBasedRPCManager.createRPCResponseObject({
+                                    packet,
+                                    payload: null,
+                                    error: err.message,
+                                    serializedError: serializeError(err),
+                                }),
+                            )
+                            this.log(
+                                `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
+                            )
+                        }
                         throw new RpcError(err.message)
                     })
             }

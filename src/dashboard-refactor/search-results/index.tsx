@@ -740,7 +740,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     padding: 0px 15px;
     height: 40px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 2147483644;
+    z-index: 2147483639;
     margin-top: -6px;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};

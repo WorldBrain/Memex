@@ -7,7 +7,7 @@ import {
     getAnnotationPrivacyState,
     maybeGetAnnotationPrivacyState,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import type CustomListStorage from 'src/custom-lists/background/storage'
+import type CustomListBG from 'src/custom-lists/background'
 import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -37,7 +37,7 @@ export default class ContentSharingBackground {
         public options: {
             storageManager: StorageManager
             backend: ContentSharingBackend
-            customLists: CustomListStorage
+            customListsBG: CustomListBG
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
@@ -143,7 +143,9 @@ export default class ContentSharingBackground {
         }> = []
 
         for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
-            const list = await this.options.customLists.fetchListById(localId)
+            const list = await this.options.customListsBG.storage.fetchListById(
+                localId,
+            )
             remoteListData.push({
                 localId,
                 remoteId: remoteListIdsDict[localId],
@@ -165,7 +167,7 @@ export default class ContentSharingBackground {
             }
         }
 
-        const localList = await this.options.customLists.fetchListById(
+        const localList = await this.options.customListsBG.storage.fetchListById(
             options.listId,
         )
         if (!localList) {
@@ -200,10 +202,7 @@ export default class ContentSharingBackground {
     private async selectivelySharePrivateListAnnotations(
         listId: number,
     ): Promise<AnnotationSharingStates> {
-        const {
-            annotations: annotationsBG,
-            customLists: customListsBG,
-        } = this.options
+        const { annotations: annotationsBG, customListsBG } = this.options
 
         const annotationEntries = await annotationsBG.findListEntriesByList({
             listId,
@@ -227,13 +226,13 @@ export default class ContentSharingBackground {
             normalizedPageUrls: [...annotationParentPageIds],
         })
         for (const page of parentPages) {
-            const existingPageListEntry = await customListsBG.fetchListEntry(
+            const existingPageListEntry = await customListsBG.storage.fetchListEntry(
                 listId,
                 page.normalizedUrl,
             )
 
             if (!existingPageListEntry) {
-                await customListsBG.insertPageToList({
+                await customListsBG.storage.insertPageToList({
                     pageUrl: page.normalizedUrl,
                     fullUrl: page.originalUrl,
                     listId,
@@ -506,10 +505,13 @@ export default class ContentSharingBackground {
     shareAnnotationToSomeLists: ContentSharingInterface['shareAnnotationToSomeLists'] = async (
         options,
     ) => {
-        const {
-            annotations: annotationsBG,
-            customLists: customListsBG,
-        } = this.options
+        const { annotations: annotationsBG, customListsBG } = this.options
+
+        for (const listId of options.localListIds) {
+            await customListsBG.updateListSuggestionsCache({
+                added: listId,
+            })
+        }
 
         const [annotation, sharingState] = await Promise.all([
             annotationsBG.getAnnotationByPk(options.annotationUrl),
@@ -519,7 +521,7 @@ export default class ContentSharingBackground {
             sharingState.privacyLevel,
         )
 
-        const pageListEntryIds = await customListsBG.fetchListIdsByUrl(
+        const pageListEntryIds = await customListsBG.storage.fetchListIdsByUrl(
             annotation.pageUrl,
         )
         const remoteListIds = await this.storage.getRemoteListIds({
@@ -598,7 +600,7 @@ export default class ContentSharingBackground {
             }
 
             if (!pageListEntryIds.includes(listId) && page != null) {
-                await customListsBG.insertPageToList({
+                await customListsBG.storage.insertPageToList({
                     listId,
                     pageUrl: annotation.pageUrl,
                     fullUrl: page.originalUrl,
@@ -620,10 +622,7 @@ export default class ContentSharingBackground {
     unshareAnnotationFromList: ContentSharingInterface['unshareAnnotationFromList'] = async (
         options,
     ) => {
-        const {
-            annotations: annotationsBG,
-            customLists: customListsBG,
-        } = this.options
+        const { annotations: annotationsBG, customListsBG } = this.options
 
         const sharingState = await this.getAnnotationSharingState({
             annotationUrl: options.annotationUrl,
@@ -669,7 +668,7 @@ export default class ContentSharingBackground {
             excludeFromLists: true,
         })
 
-        const pageListEntryIds = await customListsBG.fetchListIdsByUrl(
+        const pageListEntryIds = await customListsBG.storage.fetchListIdsByUrl(
             annotation.pageUrl,
         )
         const remoteListIds = await this.storage.getRemoteListIds({
@@ -924,10 +923,7 @@ export default class ContentSharingBackground {
     getAnnotationSharingStates: ContentSharingInterface['getAnnotationSharingStates'] = async (
         params,
     ) => {
-        const {
-            annotations: annotationsBG,
-            customLists: customListsBG,
-        } = this.options
+        const { annotations: annotationsBG, customListsBG } = this.options
 
         // TODO: Optimize, this should only take 3 queries, not 3 * annotationCount
         const states: AnnotationSharingStates = {}
@@ -1028,7 +1024,7 @@ export default class ContentSharingBackground {
         params,
     ) => {
         const loweredPrefix = params.prefix.toLowerCase()
-        const lists = await this.options.customLists.fetchAllLists({
+        const lists = await this.options.customListsBG.storage.fetchAllLists({
             limit: 10000,
             skip: 0,
         })
@@ -1095,7 +1091,7 @@ export default class ContentSharingBackground {
     private async fetchSharedListIdsForPage(
         pageUrl: string,
     ): Promise<number[]> {
-        const pageListIds = await this.options.customLists.fetchListIdsByUrl(
+        const pageListIds = await this.options.customListsBG.storage.fetchListIdsByUrl(
             pageUrl,
         )
         const remoteListIds = await this.storage.getRemoteListIds({

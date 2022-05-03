@@ -14,7 +14,9 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
-import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
+import AnnotationEditable, {
+    Props as AnnotationEditableProps,
+} from 'src/annotations/components/HoverControlledAnnotationEditable'
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
@@ -59,10 +61,16 @@ export interface AnnotationsSidebarProps
     needsWaypoint?: boolean
     appendLoader?: boolean
 
-    renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderCopyPasterForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
-    renderShareMenuForAnnotation: (id: string) => JSX.Element
-    renderListsPickerForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
+    renderListsPickerForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
 
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void
@@ -71,12 +79,13 @@ export interface AnnotationsSidebarProps
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'body'>,
+        followedListId?: string,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
     bindAnnotationEditProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'isShared'>,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -336,7 +345,19 @@ export class AnnotationsSidebar extends React.Component<
             .filter((a) => !!a)
 
         if (!annotationsData.length) {
-            return 'No notes exist in this list for this page'
+            return (
+                <EmptyMessageContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.commentEmpty}
+                            heightAndWidth="20px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <InfoText>No notes exist in this Space anymore.</InfoText>
+                </EmptyMessageContainer>
+            )
         }
 
         return (
@@ -357,6 +378,43 @@ export class AnnotationsSidebar extends React.Component<
                     const hasReplies =
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
+
+                    // If annot is owned by the current user, we allow a whole bunch of other functionality
+                    const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
+                    if (data.localId != null) {
+                        const localAnnotation = this.props.annotations.find(
+                            (a) => a.url === data.localId,
+                        )
+
+                        ownAnnotationProps.isBulkShareProtected =
+                            localAnnotation.isBulkShareProtected
+                        ownAnnotationProps.appendRepliesToggle = true
+                        ownAnnotationProps.url = localAnnotation.url
+                        ownAnnotationProps.lists = localAnnotation.lists
+                        ownAnnotationProps.comment = localAnnotation.comment
+                        ownAnnotationProps.isShared = localAnnotation.isShared
+                        ownAnnotationProps.lastEdited =
+                            localAnnotation.lastEdited
+                        ownAnnotationProps.mode = this.props.followedLists.byId[
+                            listId
+                        ].annotationModes[data.localId]
+                        ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
+                            { url: data.localId, isShared: true },
+                        )
+                        ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
+                            { url: data.localId, body: data.body },
+                            listId,
+                        )
+                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
+                            listId,
+                        )
+                    }
 
                     return (
                         <React.Fragment key={data.id}>
@@ -389,6 +447,7 @@ export class AnnotationsSidebar extends React.Component<
                                 getListDetailsById={
                                     this.props.getListDetailsById
                                 }
+                                {...ownAnnotationProps}
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
@@ -659,11 +718,11 @@ export class AnnotationsSidebar extends React.Component<
             return (
                 <FollowedListNotesContainer
                     bottom={listData.isExpanded ? '20px' : '5px'}
+                    key={listId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        key={listId}
                         onClick={() =>
                             this.props.expandFollowedListNotes(listId)
                         }
@@ -882,6 +941,9 @@ export class AnnotationsSidebar extends React.Component<
                                 annot.body?.length > 0
                             }
                             passDownRef={ref}
+                            renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
+                            renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
+                            renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
                         />
                     </AnnotationBox>
                 )

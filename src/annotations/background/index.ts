@@ -20,12 +20,8 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import {
-    Annotation,
-    AnnotationSender,
-    AnnotListEntry,
-} from 'src/annotations/types'
-import { AnnotationInterface, CreateAnnotationParams } from './types'
+import type { Annotation, AnnotationSender } from 'src/annotations/types'
+import type { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import { BrowserSettingsStore } from 'src/util/settings'

@@ -294,23 +294,36 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
             emit: async (eventName, ...args: any[]) => {
                 const tabs = (await browser.tabs.query({})) ?? []
                 for (const { id: tabId } of tabs) {
-                    browser.tabs.sendMessage(tabId, {
-                        ...message,
-                        __REMOTE_EVENT_NAME__: eventName,
-                        data: args[0],
-                    })
+                    try {
+                        await browser.tabs.sendMessage(tabId, {
+                            ...message,
+                            __REMOTE_EVENT_NAME__: eventName,
+                            data: args[0],
+                        })
+                    } catch (err) {
+                        console.error(
+                            `Remote event emitter "${moduleName}" failed to emit event "${eventName}" to tab ${tabId}:\n\tError message: "${err.message}"`,
+                        )
+                    }
                 }
             },
         }
     }
 
     return {
-        emit: async (eventName, ...args: any[]) =>
-            browser.runtime.sendMessage({
-                ...message,
-                __REMOTE_EVENT_NAME__: eventName,
-                data: args[0],
-            }),
+        emit: async (eventName, ...args: any[]) => {
+            try {
+                await browser.runtime.sendMessage({
+                    ...message,
+                    __REMOTE_EVENT_NAME__: eventName,
+                    data: args[0],
+                })
+            } catch (err) {
+                console.error(
+                    `Remote event emitter "${moduleName}" failed to emit event "${eventName}":\n\tError message: "${err.message}"`,
+                )
+            }
+        },
     }
 }
 

@@ -285,11 +285,6 @@ function findPage(offset) {
  */
 async function anchorByPosition(pageIndex, start, end) {
     const page = await getPageView(pageIndex)
-    console.log(`anchorByPosition`, {
-        state: page.renderingState,
-        done: page.textLayer.renderingDone,
-        textLayer: page.textLayer,
-    })
     if (
         page.renderingState === 3 &&
         page.textLayer &&

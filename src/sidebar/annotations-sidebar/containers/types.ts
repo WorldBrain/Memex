@@ -88,6 +88,8 @@ export interface SearchTypeChange {
 
 export interface FollowedListAnnotation {
     id: string
+    /** Only should be defined if annotation belongs to local user. */
+    localId: string | null
     body?: string
     comment?: string
     selector?: Anchor
@@ -101,9 +103,16 @@ interface SidebarFollowedListsState {
     followedLists: NormalizedState<
         SharedAnnotationList & {
             isExpanded: boolean
+            isContributable: boolean
             annotationsLoadState: TaskState
             conversationsLoadState: TaskState
-            isContributable: boolean
+            activeCopyPasterAnnotationId: string | undefined
+            activeListPickerAnnotationId: string | undefined
+            activeShareMenuAnnotationId: string | undefined
+            annotationEditForms: EditForms
+            annotationModes: {
+                [annotationId: string]: AnnotationMode
+            }
         }
     >
 
@@ -137,8 +146,8 @@ export interface SidebarContainerState
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
-    activeTagPickerAnnotationId: string | undefined
     activeListPickerAnnotationId: string | undefined
+    activeTagPickerAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -236,6 +245,7 @@ interface SidebarEvents {
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string
+        followedListId?: string
     }
     editAnnotation: {
         context: AnnotationEventContext
@@ -251,13 +261,15 @@ interface SidebarEvents {
     }
     shareAnnotation: {
         context: AnnotationEventContext
-        annotationUrl: string
         mouseEvent: React.MouseEvent
+        annotationUrl: string
+        followedListId?: string
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
         annotationUrl: string
         mode: AnnotationMode
+        followedListId?: string
     }
 
     copyNoteLink: { link: string }
@@ -293,9 +305,9 @@ interface SidebarEvents {
     setSelectNoteSpaceConfirmArgs: SidebarContainerState['confirmSelectNoteSpaceArgs']
 
     setAllNotesCopyPasterShown: { shown: boolean }
-    setCopyPasterAnnotationId: { id: string }
+    setCopyPasterAnnotationId: { id: string; followedListId?: string }
     setTagPickerAnnotationId: { id: string }
-    setListPickerAnnotationId: { id: string }
+    setListPickerAnnotationId: { id: string; followedListId?: string }
     resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
     resetListPickerAnnotationId: { id?: string }
