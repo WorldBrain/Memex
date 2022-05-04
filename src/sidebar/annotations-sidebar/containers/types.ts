@@ -98,24 +98,21 @@ export interface FollowedListAnnotation {
     creatorId: string
 }
 
+export type FollowedListState = SharedAnnotationList & {
+    isExpanded: boolean
+    isContributable: boolean
+    annotationEditForms: EditForms
+    annotationsLoadState: TaskState
+    conversationsLoadState: TaskState
+    activeShareMenuAnnotationId: string | undefined
+    activeCopyPasterAnnotationId: string | undefined
+    activeListPickerAnnotationId: string | undefined
+    annotationModes: { [annotationId: string]: AnnotationMode }
+}
+
 interface SidebarFollowedListsState {
     followedListLoadState: TaskState
-    followedLists: NormalizedState<
-        SharedAnnotationList & {
-            isExpanded: boolean
-            isContributable: boolean
-            annotationsLoadState: TaskState
-            conversationsLoadState: TaskState
-            activeCopyPasterAnnotationId: string | undefined
-            activeListPickerAnnotationId: string | undefined
-            activeShareMenuAnnotationId: string | undefined
-            annotationEditForms: EditForms
-            annotationModes: {
-                [annotationId: string]: AnnotationMode
-            }
-        }
-    >
-
+    followedLists: NormalizedState<FollowedListState>
     followedAnnotations: { [annotationId: string]: FollowedListAnnotation }
 
     users: {
