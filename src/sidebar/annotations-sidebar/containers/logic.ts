@@ -998,11 +998,9 @@ export class SidebarContainerLogic extends UILogic<
             remove: number[]
         },
     ) {
-        // TODO: Find a better way to do all this without so much iteration. The issue is we don't
-        //     have a nicer way to get the followed annotation states with only the local annot ID
-        const followedAnnotId = Object.values(
-            previousState.followedAnnotations,
-        ).find((a) => a.localId === localAnnotationId)?.id
+        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
+            localAnnotationId,
+        )?.remoteId
 
         if (followedAnnotId == null) {
             return
@@ -1105,11 +1103,9 @@ export class SidebarContainerLogic extends UILogic<
         localAnnotationId: string,
         previousState: SidebarContainerState,
     ) {
-        // TODO: Find a better way to do all this without so much iteration. The issue is we don't
-        //     have a nicer way to get the followed annotation states with only the local annot ID
-        const followedAnnotId = Object.values(
-            previousState.followedAnnotations,
-        ).find((a) => a.localId === localAnnotationId)?.id
+        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
+            localAnnotationId,
+        )?.remoteId
 
         if (followedAnnotId == null) {
             return
