@@ -1,5 +1,4 @@
-import {
-    TemplateDoc,
+import type {
     TemplateRequirements,
     TemplateDocKey,
     TemplateDocNote,
@@ -12,11 +11,15 @@ export const KEYS_TO_REQUIREMENTS: {
     PageTitle: 'page',
     PageTags: 'pageTags',
     PageTagList: 'pageTags',
+    PageSpaces: 'pageSpaces',
+    PageSpaceList: 'pageSpaces',
     PageLink: 'pageLink',
     NoteHighlight: 'note',
     NoteText: 'note',
     NoteTags: 'noteTags',
     NoteTagList: 'noteTags',
+    NoteSpaces: 'noteSpaces',
+    NoteSpaceList: 'noteSpaces',
     NoteLink: 'noteLink',
     url: 'page',
     title: 'page',
@@ -28,6 +31,8 @@ export const NOTE_KEYS: { [Key in keyof TemplateDocNote]-?: true } = {
     NoteText: true,
     NoteTags: true,
     NoteTagList: true,
+    NoteSpaces: true,
+    NoteSpaceList: true,
     NoteLink: true,
 }
 

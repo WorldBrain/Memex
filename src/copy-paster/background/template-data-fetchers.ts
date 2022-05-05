@@ -1,11 +1,14 @@
-import Storex from '@worldbrain/storex'
-import { Page } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
-import { Tag } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
-import { Note } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/types'
+import type Storex from '@worldbrain/storex'
+import type { Page } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
+import type {
+    Tag,
+    List,
+} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
+import type { Note } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/types'
 
 import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
-import ContentSharingBackground from 'src/content-sharing/background'
-import { TemplateDataFetchers } from '../types'
+import type ContentSharingBackground from 'src/content-sharing/background'
+import type { TemplateDataFetchers, UrlMappedData } from '../types'
 import fromPairs from 'lodash/fromPairs'
 import flatten from 'lodash/flatten'
 import type { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
@@ -13,6 +16,8 @@ import {
     isPagePdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import type { PageListEntry } from 'src/custom-lists/background/types'
+import type { AnnotListEntry } from 'src/annotations/types'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -24,16 +29,53 @@ export function getTemplateDataFetchers({
         'shareAnnotations' | 'storage' | 'ensureRemotePageId'
     >
 }): TemplateDataFetchers {
-    const getTagsForUrls = async (urls: string[]) => {
+    const getTagsForUrls = async (
+        urls: string[],
+    ): Promise<UrlMappedData<string[]>> => {
         const tags: Tag[] = await storageManager
             .collection('tags')
             .findObjects({ url: { $in: urls } })
 
-        const tagsForUrls: { [url: string]: string[] } = {}
+        const tagsForUrls: UrlMappedData<string[]> = {}
         for (const tag of tags) {
             tagsForUrls[tag.url] = [...(tagsForUrls[tag.url] ?? []), tag.name]
         }
         return tagsForUrls
+    }
+
+    const getSpacesForUrls = (
+        getEntries: (
+            urls: string[],
+        ) => Promise<Array<{ listId: number; url: string }>>,
+    ) => async (urls: string[]): Promise<UrlMappedData<string[]>> => {
+        const spacesForUrls: UrlMappedData<string[]> = {}
+        const entries = await getEntries(urls)
+
+        const uniqueListIds = new Set<number>()
+        entries.forEach((entry) => uniqueListIds.add(entry.listId))
+
+        if (!uniqueListIds.size) {
+            return spacesForUrls
+        }
+
+        const lists: List[] = await storageManager
+            .collection('customLists')
+            .findObjects({ id: { $in: [...uniqueListIds] } })
+
+        const listNamesById = new Map<number, string>()
+        lists.forEach((list) => listNamesById.set(list.id, list.name))
+
+        entries.forEach((entry) => {
+            const listName = listNamesById.get(entry.listId)
+            if (listName != null) {
+                spacesForUrls[entry.url] = [
+                    ...(spacesForUrls[entry.url] ?? []),
+                    listName,
+                ]
+            }
+        })
+
+        return spacesForUrls
     }
 
     return {
@@ -107,7 +149,7 @@ export function getTemplateDataFetchers({
                     localIds: annotationUrls,
                 },
             )
-            const noteLinks: { [annotationUrl: string]: string } = {}
+            const noteLinks: UrlMappedData<string> = {}
             for (const [annotationUrl, remoteId] of Object.entries(remoteIds)) {
                 noteLinks[annotationUrl] = getNoteShareUrl({
                     remoteAnnotationId:
@@ -140,5 +182,17 @@ export function getTemplateDataFetchers({
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
+        getSpacesForPages: getSpacesForUrls(async (urls) => {
+            const entries: PageListEntry[] = await storageManager
+                .collection('pageListEntries')
+                .findObjects({ pageUrl: { $in: urls } })
+            return entries.map((e) => ({ url: e.pageUrl, listId: e.listId }))
+        }),
+        getSpacesForNotes: getSpacesForUrls(async (urls) => {
+            const entries: AnnotListEntry[] = await storageManager
+                .collection('annotListEntries')
+                .findObjects({ url: { $in: urls } })
+            return entries
+        }),
     }
 }

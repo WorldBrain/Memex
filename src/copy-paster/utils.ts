@@ -1,12 +1,11 @@
 import traverse from 'traverse'
 import mustache from 'mustache'
-import {
+import type {
     Template,
     TemplateDoc,
     TemplateAnalysis,
     TemplateRequirements,
     TemplateDocKey,
-    TemplateDocNote,
 } from './types'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
 

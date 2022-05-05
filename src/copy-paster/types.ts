@@ -19,6 +19,8 @@ export interface TemplateDocPage {
     PageTitle?: string
     PageTags?: string
     PageTagList?: string[]
+    PageSpaces?: string
+    PageSpaceList?: string[]
     PageLink?: string
     Notes?: TemplateDocNote[]
 
@@ -33,6 +35,8 @@ export interface TemplateDocNote {
     NoteText?: string
     NoteTags?: string
     NoteTagList?: string[]
+    NoteSpaces?: string
+    NoteSpaceList?: string[]
     NoteLink?: string
 }
 
@@ -45,9 +49,11 @@ export interface TemplateAnalysis {
 export interface TemplateRequirements {
     page?: boolean
     pageTags?: boolean
+    pageSpaces?: boolean
     pageLink?: boolean
     note?: boolean
     noteTags?: boolean
+    noteSpaces?: boolean
     noteLink?: boolean
 }
 
@@ -65,6 +71,12 @@ export interface TemplateDataFetchers {
         annotationUrls: string[],
     ): Promise<{ [annotationUrl: string]: string[] }>
     getTagsForPages(
+        normalizedPageUrls: string[],
+    ): Promise<{ [normalizedPageUrl: string]: string[] }>
+    getSpacesForNotes(
+        annotationUrls: string[],
+    ): Promise<{ [annotationUrl: string]: string[] }>
+    getSpacesForPages(
         normalizedPageUrls: string[],
     ): Promise<{ [normalizedPageUrl: string]: string[] }>
     getPageLinks(notes: {
@@ -85,4 +97,8 @@ export interface NoteTemplateData {
     pageUrl: string
     body?: string
     comment?: string
+}
+
+export interface UrlMappedData<T> {
+    [url: string]: T
 }
