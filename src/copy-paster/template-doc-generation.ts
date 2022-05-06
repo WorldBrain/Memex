@@ -37,6 +37,12 @@ export const joinSpaces = (spaceNames?: string[]): string | undefined =>
               '',
           )
 
+export const serializeDate = (
+    date?: Date,
+    locale = window.navigator.language,
+): string | undefined =>
+    date == null ? undefined : date.toLocaleString(locale)
+
 const groupNotesByPages = (
     notes: UrlMappedData<NoteTemplateData>,
 ): UrlMappedData<NoteTemplateData[]> => {
@@ -90,11 +96,12 @@ const generateForPages = async ({
 }: GeneratorInput): Promise<TemplateDoc[]> => {
     const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
 
-    let noteLinks: UrlMappedData<string> = {}
     let pageTags: UrlMappedData<string[]> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
+    let pageCreatedAt: UrlMappedData<Date> = {}
     let noteTags: UrlMappedData<string[]> = {}
     let noteSpaces: UrlMappedData<string[]> = {}
+    let noteLinks: UrlMappedData<string> = {}
     let notes: UrlMappedData<NoteTemplateData> = {}
     let noteUrlsForPages: UrlMappedData<string[]> = {}
 
@@ -108,11 +115,18 @@ const generateForPages = async ({
         )
     }
 
+    if (templateAnalysis.requirements.pageCreatedAt) {
+        pageCreatedAt = await dataFetchers.getCreatedAtForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
     if (
         templateAnalysis.requirements.note ||
         templateAnalysis.requirements.noteTags ||
         templateAnalysis.requirements.noteSpaces ||
-        templateAnalysis.requirements.noteLink
+        templateAnalysis.requirements.noteLink ||
+        templateAnalysis.requirements.noteCreatedAt
     ) {
         noteUrlsForPages = await dataFetchers.getNoteIdsForPages(
             params.normalizedPageUrls,
@@ -161,6 +175,7 @@ const generateForPages = async ({
             PageSpaceList: spaces,
             PageUrl: fullUrl,
             PageLink: pageLink,
+            PageCreatedAt: serializeDate(pageCreatedAt[normalizedPageUrl]),
 
             Notes: noteUrls.map((url) => ({
                 NoteText: notes[url].comment,
@@ -170,6 +185,9 @@ const generateForPages = async ({
                 NoteSpaceList: noteSpaces[url],
                 NoteSpaces: joinSpaces(noteSpaces[url]),
                 NoteLink: noteLinks[url],
+                NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
+                    ? serializeDate(notes[url].createdAt)
+                    : undefined,
             })),
 
             title: fullTitle,
@@ -199,6 +217,7 @@ const generateForNotes = async ({
     let pageTags: UrlMappedData<string[]> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
     let pageLinks: UrlMappedData<string> = {}
+    let pageCreatedAt: UrlMappedData<Date> = {}
 
     if (templateAnalysis.requirements.page) {
         pages = await dataFetchers.getPages(params.normalizedPageUrls)
@@ -210,6 +229,12 @@ const generateForNotes = async ({
 
     if (templateAnalysis.requirements.pageSpaces) {
         pageSpaces = await dataFetchers.getSpacesForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
+    if (templateAnalysis.requirements.pageCreatedAt) {
+        pageCreatedAt = await dataFetchers.getCreatedAtForPages(
             params.normalizedPageUrls,
         )
     }
@@ -247,7 +272,8 @@ const generateForNotes = async ({
         !templateAnalysis.requirements.note &&
         !templateAnalysis.requirements.noteLink &&
         !templateAnalysis.requirements.noteTags &&
-        !templateAnalysis.requirements.noteSpaces
+        !templateAnalysis.requirements.noteSpaces &&
+        !templateAnalysis.requirements.noteCreatedAt
     ) {
         const templateDocs: TemplateDoc[] = []
 
@@ -260,6 +286,7 @@ const generateForNotes = async ({
                 PageSpaceList: pageSpaces[pageUrl],
                 PageUrl: fullUrl,
                 PageLink: pageLinks[pageUrl],
+                PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
                 title: fullTitle,
                 tags: pageTags[pageUrl],
@@ -274,9 +301,10 @@ const generateForNotes = async ({
         // but they are using the top-level data (NoteText, etc.) so return
         const templateDocs: TemplateDoc[] = []
 
-        for (const [noteUrl, { body, comment, pageUrl }] of Object.entries(
-            notes,
-        )) {
+        for (const [
+            noteUrl,
+            { body, comment, pageUrl, createdAt },
+        ] of Object.entries(notes)) {
             const pageData = pages[pageUrl] ?? ({} as PageTemplateData)
 
             templateDocs.push({
@@ -287,6 +315,9 @@ const generateForNotes = async ({
                 NoteSpaceList: noteSpaces[noteUrl],
                 NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                 NoteLink: noteLinks[noteUrl],
+                NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
+                    ? serializeDate(createdAt)
+                    : undefined,
 
                 PageTitle: pageData.fullTitle,
                 PageUrl: pageData.fullUrl,
@@ -295,6 +326,7 @@ const generateForNotes = async ({
                 PageSpaces: joinSpaces(pageSpaces[pageUrl]),
                 PageSpaceList: pageSpaces[pageUrl],
                 PageLink: pageLinks[pageUrl],
+                PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
                 title: pageData.fullTitle,
                 url: pageData.fullUrl,
@@ -310,7 +342,9 @@ const generateForNotes = async ({
     // If page is not required, we simply need to set the array of Notes
     if (!templateAnalysis.requirements.page) {
         const templateDocs: TemplateDoc[] = []
-        for (const [noteUrl, { body, comment }] of Object.entries(notes)) {
+        for (const [noteUrl, { body, comment, createdAt }] of Object.entries(
+            notes,
+        )) {
             templateDocs.push({
                 NoteText: comment,
                 NoteHighlight: body,
@@ -319,6 +353,9 @@ const generateForNotes = async ({
                 NoteSpaceList: noteSpaces[noteUrl],
                 NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                 NoteLink: noteLinks[noteUrl],
+                NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
+                    ? serializeDate(createdAt)
+                    : undefined,
             })
         }
 
@@ -337,13 +374,14 @@ const generateForNotes = async ({
             PageSpaces: joinSpaces(pageSpaces[pageUrl]),
             PageSpaceList: pageSpaces[pageUrl],
             PageLink: pageLinks[pageUrl],
+            PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
             title: fullTitle,
             url: fullUrl,
             tags: pageTags[pageUrl],
 
             Notes: notesByPageUrl[pageUrl].map(
-                ({ url: noteUrl, body, comment }) => ({
+                ({ url: noteUrl, body, comment, createdAt }) => ({
                     NoteText: comment,
                     NoteHighlight: body,
                     NoteTagList: noteTags[noteUrl],
@@ -351,6 +389,9 @@ const generateForNotes = async ({
                     NoteSpaceList: noteSpaces[noteUrl],
                     NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                     NoteLink: noteLinks[noteUrl],
+                    NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
+                        ? serializeDate(createdAt)
+                        : undefined,
 
                     PageTitle: fullTitle,
                     PageUrl: fullUrl,
@@ -359,6 +400,7 @@ const generateForNotes = async ({
                     PageSpaces: joinSpaces(pageSpaces[pageUrl]),
                     PageSpaceList: pageSpaces[pageUrl],
                     PageLink: pageLinks[pageUrl],
+                    PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
                     title: fullTitle,
                     url: fullUrl,
@@ -387,7 +429,5 @@ export default async function generateTemplateDocs(
         docs = await generateForNotes(params)
     }
 
-    const after = [...omitEmptyFields(docs)]
-    // console.log('bef, aft:', docs, after)
-    return after
+    return [...omitEmptyFields(docs)]
 }

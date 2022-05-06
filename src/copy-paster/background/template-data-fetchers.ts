@@ -19,6 +19,7 @@ import {
 import type { PageListEntry } from 'src/custom-lists/background/types'
 import type { AnnotListEntry, Annotation } from 'src/annotations/types'
 import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
+import type { Visit, Bookmark } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export function getTemplateDataFetchers({
@@ -126,6 +127,7 @@ export function getTemplateDataFetchers({
                         body: note.body,
                         comment: note.comment,
                         pageUrl: note.pageUrl,
+                        createdAt: note.createdWhen,
                     },
                 }),
                 {},
@@ -184,6 +186,40 @@ export function getTemplateDataFetchers({
                 ]),
             )
             return fromPairs(pairs)
+        },
+        getCreatedAtForPages: async (normalizedPageUrls) => {
+            const visits: Visit[] = await storageManager
+                .collection('visits')
+                .findObjects({ url: { $in: normalizedPageUrls } })
+            const createdAt: UrlMappedData<Date> = {}
+
+            // Set oldest visit time as createdAt time
+            for (const visit of visits) {
+                if (
+                    !createdAt[visit.url] ||
+                    visit.time < createdAt[visit.url]?.getTime()
+                ) {
+                    createdAt[visit.url] = new Date(visit.time)
+                }
+            }
+
+            // If no visit was found for some pages, look up and use bookmark times
+            const missingUrls = normalizedPageUrls.filter(
+                (url) => !createdAt[url],
+            )
+
+            if (!missingUrls.length) {
+                return createdAt
+            }
+
+            const bookmarks: Bookmark[] = await storageManager
+                .collection('bookmarks')
+                .findObjects({ url: { $in: missingUrls } })
+            for (const bookmark of bookmarks) {
+                createdAt[bookmark.url] = new Date(bookmark.time)
+            }
+
+            return createdAt
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
