@@ -48,17 +48,17 @@ export const testLocatorC = {
 }
 
 // Children of page A
-export const testAnnotationAUrl = 'test.com#1'
+export const testAnnotationAUrl = testPageA.url + '#1'
 export const testAnnotationATags = ['a', 'tag']
-export const testAnnotationASpaces = [...testPageASpaces, 'test']
+export const testAnnotationASpaces = ['test', ...testPageASpaces]
 export const testAnnotationAText = 'this is a comment on the annotation'
-export const testAnnotationBUrl = 'test.com#2'
+export const testAnnotationBUrl = testPageA.url + '#2'
 export const testAnnotationBTags = ['a']
 export const testAnnotationBSpaces = ['space 1']
 export const testAnnotationBHighlight = 'this is a highlight from the webpage'
 
 // Children of page B
-export const testAnnotationCUrl = 'test.com#3'
+export const testAnnotationCUrl = testPageB.url + '#3'
 export const testAnnotationCTags = ['z']
 export const testAnnotationCSpaces = []
 export const testAnnotationCHighlight =

@@ -17,7 +17,9 @@ import {
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PageListEntry } from 'src/custom-lists/background/types'
-import type { AnnotListEntry } from 'src/annotations/types'
+import type { AnnotListEntry, Annotation } from 'src/annotations/types'
+import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -67,7 +69,10 @@ export function getTemplateDataFetchers({
 
         entries.forEach((entry) => {
             const listName = listNamesById.get(entry.listId)
-            if (listName != null) {
+            if (
+                listName != null &&
+                !spacesForUrls[entry.url]?.includes(listName)
+            ) {
                 spacesForUrls[entry.url] = [
                     ...(spacesForUrls[entry.url] ?? []),
                     listName,
@@ -192,6 +197,40 @@ export function getTemplateDataFetchers({
             const entries: AnnotListEntry[] = await storageManager
                 .collection('annotListEntries')
                 .findObjects({ url: { $in: urls } })
+
+            // Non-public annotations don't have explicit list entries for shared spaces, instead inheriting them from the parent page
+            const privacyLevels: AnnotationPrivacyLevel[] = await storageManager
+                .collection('annotationPrivacyLevels')
+                .findObjects({ annotation: { $in: urls } })
+
+            for (const privacyLevel of privacyLevels) {
+                if (
+                    ![
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(privacyLevel.privacyLevel)
+                ) {
+                    continue
+                }
+                const annotation: Annotation = await storageManager
+                    .collection('annotations')
+                    .findObject({ url: privacyLevel.annotation })
+                if (annotation == null) {
+                    continue
+                }
+
+                const parentPageEntries: PageListEntry[] = await storageManager
+                    .collection('pageListEntries')
+                    .findObjects({ pageUrl: annotation.pageUrl })
+
+                entries.push(
+                    ...parentPageEntries.map((e) => ({
+                        url: privacyLevel.annotation,
+                        listId: e.listId,
+                    })),
+                )
+            }
+
             return entries
         }),
     }

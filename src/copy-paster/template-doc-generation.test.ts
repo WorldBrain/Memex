@@ -11,6 +11,7 @@ import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background/template-data-fetchers'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { isShareUrl } from 'src/content-sharing/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 async function insertTestData(storageManager: Storex) {
     await storageManager.collection('pages').createObject(DATA.testPageA)
@@ -46,20 +47,44 @@ async function insertTestData(storageManager: Storex) {
         comment: DATA.testAnnotationAText,
         pageUrl: DATA.testPageA.url,
     })
+    await storageManager.collection('annotationPrivacyLevels').createObject({
+        id: 1,
+        createdWhen: new Date(),
+        annotation: DATA.testAnnotationAUrl,
+        privacyLevel: AnnotationPrivacyLevels.SHARED,
+    })
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationBUrl,
         body: DATA.testAnnotationBHighlight,
         pageUrl: DATA.testPageA.url,
+    })
+    await storageManager.collection('annotationPrivacyLevels').createObject({
+        id: 2,
+        createdWhen: new Date(),
+        annotation: DATA.testAnnotationBUrl,
+        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
     })
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationCUrl,
         body: DATA.testAnnotationCHighlight,
         pageUrl: DATA.testPageB.url,
     })
+    await storageManager.collection('annotationPrivacyLevels').createObject({
+        id: 3,
+        createdWhen: new Date(),
+        annotation: DATA.testAnnotationCUrl,
+        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+    })
     await storageManager.collection('annotations').createObject({
         url: DATA.testAnnotationDUrl,
         body: DATA.testAnnotationDHighlight,
         pageUrl: DATA.testPageC.url,
+    })
+    await storageManager.collection('annotationPrivacyLevels').createObject({
+        id: 4,
+        createdWhen: new Date(),
+        annotation: DATA.testAnnotationDUrl,
+        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
     })
 
     const insertTags = (url: string, tags: string[]) =>
@@ -102,9 +127,12 @@ async function insertTestData(storageManager: Storex) {
     await insertPageEntries(DATA.testPageBUrl, DATA.testPageBSpaces)
     await insertPageEntries(DATA.testPageCUrl, DATA.testPageCSpaces)
 
+    // NOTE: this annot is public, thus doesn't contain explicit entries for shared spaces, instead inhereting them from parent
     await insertAnnotEntries(
         DATA.testAnnotationAUrl,
-        DATA.testAnnotationASpaces,
+        DATA.testAnnotationASpaces.filter(
+            (name) => !DATA.testPageASpaces.includes(name),
+        ),
     )
     await insertAnnotEntries(
         DATA.testAnnotationBUrl,
@@ -363,7 +391,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                     },
                 ],
             },
@@ -389,7 +416,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                     },
                 ],
             },
@@ -418,7 +444,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                     },
                 ],
             },
@@ -768,7 +793,6 @@ describe('Content template doc generation', () => {
                                     DATA.testAnnotationBSpaces,
                                 ),
                                 NoteSpaceList: DATA.testAnnotationBSpaces,
-                                NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
                                 PageTagList: DATA.testPageATags,
@@ -803,7 +827,6 @@ describe('Content template doc generation', () => {
                                 //     DATA.testAnnotationCSpaces,
                                 // ),
                                 // NoteSpaceList: DATA.testAnnotationCSpaces,
-                                NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageB.fullTitle,
                                 PageTags: joinTags(DATA.testPageBTags),
                                 PageTagList: DATA.testPageBTags,
@@ -852,7 +875,6 @@ describe('Content template doc generation', () => {
                             },
                             {
                                 NoteHighlight: DATA.testAnnotationBHighlight,
-                                NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
                                 PageTagList: DATA.testPageATags,
@@ -876,7 +898,6 @@ describe('Content template doc generation', () => {
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
-                                NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageB.fullTitle,
                                 PageTags: joinTags(DATA.testPageBTags),
                                 PageTagList: DATA.testPageBTags,
@@ -1271,7 +1292,6 @@ describe('Content template doc generation', () => {
                         tags: DATA.testPageATags,
                         url: DATA.testPageAUrl,
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String),
                     },
                 ],
             },
@@ -1295,7 +1315,6 @@ describe('Content template doc generation', () => {
                         tags: DATA.testPageBTags,
                         url: DATA.testPageBUrl,
                         NoteHighlight: DATA.testAnnotationCHighlight,
-                        NoteLink: expect.any(String),
                     },
                 ],
             },
@@ -1352,7 +1371,6 @@ describe('Content template doc generation', () => {
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
                         NoteSpaceList: DATA.testAnnotationBSpaces,
-                        NoteLink: expect.any(String),
                     },
                 ],
             },
@@ -1384,7 +1402,6 @@ describe('Content template doc generation', () => {
                         NoteTagList: DATA.testAnnotationCTags,
                         // NoteSpaces: joinSpaces(DATA.testAnnotationCSpaces),
                         // NoteSpaceList: DATA.testAnnotationCSpaces,
-                        NoteLink: expect.any(String),
                     },
                 ],
             },
@@ -2084,7 +2101,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                     },
                 ],
             },
@@ -2123,7 +2139,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                         PageUrl: DATA.testPageAUrl,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageLink: expect.any(String), // TODO: properly set once implemented
@@ -2161,7 +2176,6 @@ describe('Content template doc generation', () => {
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
-                        NoteLink: expect.any(String), // TODO: properly set once implemented
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
