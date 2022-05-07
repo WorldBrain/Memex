@@ -12,15 +12,17 @@ import {
 import * as Raven from 'src/util/raven'
 import type { ReadwiseSettings } from './types/settings'
 import type { BrowserSettingsStore } from 'src/util/settings'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { ReadwiseInterface } from './types/remote-interface'
 import {
     remoteFunctionWithoutExtraArgs,
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
-import { Page } from 'src/search'
+import type { Page, Tag } from 'src/search'
 import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
+import type DirectLinkingBackground from 'src/annotations/background'
+import type CustomListBackground from 'src/custom-lists/background'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -42,8 +44,8 @@ export class ReadwiseBackground {
             settingsStore: BrowserSettingsStore<ReadwiseSettings>
             fetch: typeof fetch
             getPageData: GetPageData
-            getAnnotationTags: GetAnnotationTags
-            streamAnnotations(): AsyncIterableIterator<Annotation>
+            annotationsBG: DirectLinkingBackground
+            customListsBG: CustomListBackground
         },
     ) {
         this.readwiseAPI = new HTTPReadwiseAPI({
@@ -72,6 +74,26 @@ export class ReadwiseBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
+    private getAnnotationTags = async (
+        annotationId: string,
+    ): Promise<string[]> => {
+        const tags = await this.options.annotationsBG.annotationStorage.getTagsByAnnotationUrl(
+            annotationId,
+        )
+        return tags.map((tag) => tag.name)
+    }
+
+    private getAnnotationLists = async (
+        annotationId: string,
+    ): Promise<string[]> => {
+        const { annotationsBG, customListsBG } = this.options
+        const listIds = await annotationsBG.getListIdsForAnnotation({} as any, {
+            annotationId,
+        })
+        const lists = await customListsBG.storage.fetchListByIds(listIds)
+        return lists.map((list) => list.name)
+    }
+
     validateAPIKey: ReadwiseInterfaceMethod<'validateAPIKey'> = async ({
         key,
     }) => {
@@ -96,6 +118,13 @@ export class ReadwiseBackground {
         this._apiKey = validatedKey
     }
 
+    private async *streamAnnotations(): AsyncIterableIterator<Annotation> {
+        yield* await this.options.storageManager.operation(
+            'streamObjects',
+            'annotations',
+        )
+    }
+
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
     > = async ({ annotationFilter }) => {
@@ -110,13 +139,20 @@ export class ReadwiseBackground {
             )
         }
 
-        const annotationBatch: Annotation[] = []
-        for await (const annotation of this.options.streamAnnotations()) {
+        const annotationBatch: Array<Annotation & { listNames: string[] }> = []
+        for await (const annotation of this.streamAnnotations()) {
             if (annotationFilter != null && !annotationFilter(annotation)) {
                 continue
             }
-            const tags = await this.options.getAnnotationTags(annotation.url)
-            annotationBatch.push({ ...annotation, tags })
+            const [tags, lists] = await Promise.all([
+                this.getAnnotationTags(annotation.url),
+                this.getAnnotationLists(annotation.url),
+            ])
+            annotationBatch.push({
+                ...annotation,
+                tags: tags.map(replaceSpaces),
+                listNames: lists.map(replaceSpaces),
+            })
         }
 
         const highlights = (
@@ -145,7 +181,7 @@ export class ReadwiseBackground {
 }
 
 function annotationToReadwise(
-    annotation: Omit<Annotation, 'pageTitle'>,
+    annotation: Omit<Annotation, 'pageTitle'> & { listNames: string[] },
     options: { pageData: PageData },
 ): ReadwiseHighlight {
     return {
@@ -155,7 +191,10 @@ function annotationToReadwise(
         highlighted_at: annotation.createdWhen,
         location_type: 'order',
         location: formatReadwiseHighlightLocation(annotation?.selector),
-        note: formatReadwiseHighlightNote(annotation?.comment, annotation.tags),
+        note: formatReadwiseHighlightNote(annotation?.comment, [
+            ...annotation.tags,
+            ...annotation.listNames,
+        ]),
         text: annotation?.body?.length
             ? annotation.body
             : formatReadwiseHighlightTime(annotation?.createdWhen),
@@ -178,3 +217,5 @@ function makePageDataCache(options: { getPageData: GetPageData }): GetPageData {
         return pageData
     }
 }
+
+const replaceSpaces = (name: string): string => name.replace(/\s+/g, '-')

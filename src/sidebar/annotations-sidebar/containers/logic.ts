@@ -20,6 +20,7 @@ import type {
     SidebarContainerEvents,
     EditForm,
     EditForms,
+    FollowedListState,
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
@@ -42,6 +43,7 @@ import {
 } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -801,14 +803,10 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
-        this.removeAnnotationFromFollowedLists(
-            event.annotationId,
-            previousState,
-            {
-                addTo: event.added != null ? [event.added] : [],
-                removeFrom: event.deleted != null ? [event.deleted] : [],
-            },
-        )
+        this.updateAnnotationFollowedLists(event.annotationId, previousState, {
+            add: event.added != null ? [event.added] : [],
+            remove: event.deleted != null ? [event.deleted] : [],
+        })
 
         await this.options.annotationsCache.updateLists({
             annotationId: event.annotationId,
@@ -985,92 +983,159 @@ export class SidebarContainerLogic extends UILogic<
             event.annotationUrl,
         )
 
-        this.removeAnnotationFromFollowedLists(
+        this.removeAnnotationFromAllFollowedLists(
             event.annotationUrl,
             previousState,
         )
         await annotationsCache.delete(annotation)
     }
 
-    private removeAnnotationFromFollowedLists(
+    private updateAnnotationFollowedLists(
         localAnnotationId: string,
         previousState: SidebarContainerState,
-        explicitLists?: {
-            addTo: number[]
-            removeFrom: number[]
+        listUpdates: {
+            add: number[]
+            remove: number[]
         },
     ) {
-        // TODO: Find a better way to do all this without so much iteration. The issue is we don't
-        //     have a nicer way to get the followed annotation states with only the local annot ID
-        const followedAnnotId = Object.values(
-            previousState.followedAnnotations,
-        ).find((a) => a.localId === localAnnotationId)?.id
+        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
+            localAnnotationId,
+        )?.remoteId
 
         if (followedAnnotId == null) {
             return
         }
 
         // Resolve local list IDs to remote (or calc lists to remove/add to, if not explicitly given)
-        const localListIdToRemote = (localListId: number) =>
-            this.options.annotationsCache.listData[localListId]?.remoteId
+        const localListIdToRemoteData = (localListId: number) =>
+            this.options.annotationsCache.listData[localListId]
 
-        const addTo = explicitLists
-            ? explicitLists.addTo
-                  .map(localListIdToRemote)
-                  .filter((a) => a != null)
-            : []
+        const addTo = listUpdates.add
+            .map(localListIdToRemoteData)
+            .filter((a) => a != null)
 
-        const removeFrom = explicitLists
-            ? explicitLists.removeFrom
-                  .map(localListIdToRemote)
-                  .filter((a) => a != null)
-            : previousState.followedLists.allIds.filter((listId) =>
-                  previousState.followedLists.byId[
-                      listId
-                  ]?.sharedAnnotationReferences.find(
-                      (ref) => ref.id === followedAnnotId,
-                  ),
-              )
+        const removeFrom = listUpdates.remove
+            .map(localListIdToRemoteData)
+            .filter((a) => a != null)
 
         this.emitMutation({
-            followedAnnotations: explicitLists
-                ? {}
-                : { $unset: [followedAnnotId] },
             followedLists: {
+                allIds: {
+                    $apply: (ids: string[]): string[] => {
+                        const idSet = new Set(ids)
+                        addTo.forEach((data) => idSet.add(data.remoteId))
+                        removeFrom.forEach((data) => {
+                            if (
+                                previousState.followedLists.byId[data.remoteId]
+                                    ?.sharedAnnotationReferences.length <= 1
+                            ) {
+                                idSet.delete(data.remoteId)
+                            }
+                        })
+                        return [...idSet]
+                    },
+                },
                 byId: {
                     ...removeFrom.reduce(
-                        (acc, listId) => ({
+                        (acc, { remoteId }) => ({
                             ...acc,
-                            [listId]: {
-                                sharedAnnotationReferences: {
-                                    $apply: (
-                                        refs: SharedAnnotationReference[],
-                                    ) =>
-                                        refs.filter(
-                                            (ref) => ref.id !== followedAnnotId,
-                                        ),
-                                },
-                            },
+                            ...(previousState.followedLists.byId[remoteId]
+                                ?.sharedAnnotationReferences.length > 1
+                                ? {
+                                      [remoteId]: {
+                                          sharedAnnotationReferences: {
+                                              $apply: (
+                                                  refs: SharedAnnotationReference[],
+                                              ) =>
+                                                  refs.filter(
+                                                      (ref) =>
+                                                          ref.id !==
+                                                          followedAnnotId,
+                                                  ),
+                                          },
+                                      },
+                                  }
+                                : {
+                                      $unset: [remoteId],
+                                  }),
                         }),
                         {},
                     ),
                     ...addTo.reduce(
-                        (acc, listId) => ({
+                        (acc, { name, remoteId }) => ({
                             ...acc,
-                            [listId]: {
-                                sharedAnnotationReferences: {
-                                    $push: [
-                                        {
-                                            type: 'shared-annotation-reference',
-                                            id: followedAnnotId,
-                                        },
-                                    ],
-                                },
-                            },
+                            [remoteId]:
+                                previousState.followedLists.byId[remoteId] !=
+                                null
+                                    ? {
+                                          sharedAnnotationReferences: {
+                                              $push: [
+                                                  {
+                                                      type:
+                                                          'shared-annotation-reference',
+                                                      id: followedAnnotId,
+                                                  },
+                                              ],
+                                          },
+                                      }
+                                    : {
+                                          $set: this.createdFollowedListState({
+                                              name,
+                                              id: remoteId,
+                                              sharedAnnotationReferences: [
+                                                  {
+                                                      type:
+                                                          'shared-annotation-reference',
+                                                      id: followedAnnotId,
+                                                  },
+                                              ],
+                                          }),
+                                      },
                         }),
                         {},
                     ),
                 },
+            },
+        })
+    }
+
+    private removeAnnotationFromAllFollowedLists(
+        localAnnotationId: string,
+        previousState: SidebarContainerState,
+    ) {
+        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
+            localAnnotationId,
+        )?.remoteId
+
+        if (followedAnnotId == null) {
+            return
+        }
+
+        const removeFrom = previousState.followedLists.allIds.filter((listId) =>
+            previousState.followedLists.byId[
+                listId
+            ]?.sharedAnnotationReferences.find(
+                (ref) => ref.id === followedAnnotId,
+            ),
+        )
+
+        this.emitMutation({
+            followedAnnotations: { $unset: [followedAnnotId] },
+            followedLists: {
+                byId: removeFrom.reduce(
+                    (acc, listId) => ({
+                        ...acc,
+                        [listId]: {
+                            sharedAnnotationReferences: {
+                                $apply: (refs: SharedAnnotationReference[]) =>
+                                    refs.filter(
+                                        (ref) => ref.id !== followedAnnotId,
+                                    ),
+                            },
+                        },
+                    }),
+                    {},
+                ),
             },
         })
     }
@@ -1240,54 +1305,44 @@ export class SidebarContainerLogic extends UILogic<
                         $set: fromPairs(
                             followedLists.map((list) => [
                                 list.id,
-                                {
-                                    ...list,
-                                    isExpanded: false,
-                                    isContributable: false,
-                                    annotationsLoadState: 'pristine',
-                                    conversationsLoadState: 'pristine',
-                                    activeCopyPasterAnnotationId: undefined,
-                                    activeListPickerAnnotationId: undefined,
-                                    activeShareMenuAnnotationId: undefined,
-                                    annotationModes: list.sharedAnnotationReferences.reduce(
-                                        (acc, ref) => {
-                                            const localAnnot = annotationsCache.getAnnotationByRemoteId(
-                                                ref.id,
-                                            )
-                                            if (!localAnnot) {
-                                                return acc
-                                            }
-                                            return {
-                                                ...acc,
-                                                [localAnnot.url]: 'default',
-                                            }
-                                        },
-                                        {},
-                                    ),
-                                    annotationEditForms: list.sharedAnnotationReferences.reduce(
-                                        (acc, ref) => {
-                                            const localAnnot = annotationsCache.getAnnotationByRemoteId(
-                                                ref.id,
-                                            )
-                                            if (!localAnnot) {
-                                                return acc
-                                            }
-                                            return {
-                                                ...acc,
-                                                [localAnnot.url]: {
-                                                    ...INIT_FORM_STATE,
-                                                },
-                                            }
-                                        },
-                                        {},
-                                    ),
-                                },
+                                this.createdFollowedListState(list),
                             ]),
                         ),
                     },
                 },
             })
         })
+    }
+
+    private createdFollowedListState = (
+        list: SharedAnnotationList,
+    ): FollowedListState => {
+        const initAnnotStates = (initValue: any) =>
+            list.sharedAnnotationReferences.reduce((acc, ref) => {
+                const localAnnot = this.options.annotationsCache.getAnnotationByRemoteId(
+                    ref.id,
+                )
+                if (!localAnnot) {
+                    return acc
+                }
+                return {
+                    ...acc,
+                    [localAnnot.url]: initValue,
+                }
+            }, {})
+
+        return {
+            ...list,
+            isExpanded: false,
+            isContributable: false,
+            annotationsLoadState: 'pristine',
+            conversationsLoadState: 'pristine',
+            activeCopyPasterAnnotationId: undefined,
+            activeListPickerAnnotationId: undefined,
+            activeShareMenuAnnotationId: undefined,
+            annotationModes: initAnnotStates('default'),
+            annotationEditForms: initAnnotStates({ ...INIT_FORM_STATE }),
+        }
     }
 
     expandMyNotes: EventHandler<'expandMyNotes'> = async ({
@@ -1674,20 +1729,25 @@ export class SidebarContainerLogic extends UILogic<
                 AnnotationPrivacyLevels.SHARED_PROTECTED,
             ].includes(event.privacyLevel)
 
-            this.removeAnnotationFromFollowedLists(
-                event.annotationUrl,
-                previousState,
-                makingPublic
-                    ? {
-                          addTo: existing.lists.filter(
-                              (listId) => !oldLists.includes(listId),
-                          ),
-                          removeFrom: oldLists.filter(
-                              (listId) => !existing.lists.includes(listId),
-                          ),
-                      }
-                    : undefined,
-            )
+            if (makingPublic) {
+                this.updateAnnotationFollowedLists(
+                    event.annotationUrl,
+                    previousState,
+                    {
+                        add: existing.lists.filter(
+                            (listId) => !oldLists.includes(listId),
+                        ),
+                        remove: oldLists.filter(
+                            (listId) => !existing.lists.includes(listId),
+                        ),
+                    },
+                )
+            } else {
+                this.removeAnnotationFromAllFollowedLists(
+                    event.annotationUrl,
+                    previousState,
+                )
+            }
         }
 
         await this.options.annotationsCache.update(existing, {

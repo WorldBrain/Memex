@@ -390,9 +390,11 @@ export function createBackgroundModules(options: {
     )
 
     const readwise = new ReadwiseBackground({
-        storageManager,
-        settingsStore: readwiseSettingsStore,
         fetch,
+        storageManager,
+        customListsBG: customLists,
+        annotationsBG: directLinking,
+        settingsStore: readwiseSettingsStore,
         getPageData: async (normalizedUrl) =>
             pick(
                 await pages.storage.getPage(normalizedUrl),
@@ -400,18 +402,6 @@ export function createBackgroundModules(options: {
                 'fullUrl',
                 'fullTitle',
             ),
-        getAnnotationTags: async (annotationUrl) =>
-            (
-                await directLinking.annotationStorage.getTagsByAnnotationUrl(
-                    annotationUrl,
-                )
-            ).map(({ name }) => name.replace(/\s+/g, '-')),
-        async *streamAnnotations() {
-            yield* await storageManager.operation(
-                'streamObjects',
-                'annotations',
-            )
-        },
     })
 
     const copyPaster = new CopyPasterBackground({

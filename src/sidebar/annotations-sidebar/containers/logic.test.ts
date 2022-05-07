@@ -2356,14 +2356,22 @@ describe('SidebarContainerLogic', () => {
 
     describe('followed lists + annotations', () => {
         async function setupFollowedListsTestData(device: UILogicTestDevice) {
-            device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () =>
-                DATA.FOLLOWED_LISTS
+            device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () => [
+                DATA.FOLLOWED_LISTS[0],
+                DATA.FOLLOWED_LISTS[1],
+                DATA.FOLLOWED_LISTS[2],
+            ]
             device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
                 false
             device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
                 DATA.ANNOTATION_THREADS
-            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
-                DATA.SHARED_ANNOTATIONS
+            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () => [
+                DATA.SHARED_ANNOTATIONS[0],
+                DATA.SHARED_ANNOTATIONS[1],
+                DATA.SHARED_ANNOTATIONS[2],
+                DATA.SHARED_ANNOTATIONS[3],
+                DATA.SHARED_ANNOTATIONS[4],
+            ]
 
             await device.storageManager.collection('customLists').createObject({
                 id: 0,
@@ -2404,6 +2412,19 @@ describe('SidebarContainerLogic', () => {
                     remoteId: DATA.FOLLOWED_LISTS[2].id,
                 })
 
+            await device.storageManager.collection('customLists').createObject({
+                id: 3,
+                name: DATA.FOLLOWED_LISTS[3].name,
+                searchableName: DATA.FOLLOWED_LISTS[3].name,
+                createdAt: new Date(),
+            })
+            await device.storageManager
+                .collection('sharedListMetadata')
+                .createObject({
+                    localId: 3,
+                    remoteId: DATA.FOLLOWED_LISTS[3].id,
+                })
+
             await device.storageManager
                 .collection('pageListEntries')
                 .createObject({
@@ -2440,6 +2461,7 @@ describe('SidebarContainerLogic', () => {
                 DATA.ANNOT_1,
                 DATA.ANNOT_2,
                 DATA.ANNOT_3,
+                DATA.ANNOT_4,
             ]) {
                 await device.storageManager
                     .collection('annotations')
@@ -2453,6 +2475,14 @@ describe('SidebarContainerLogic', () => {
                     localId: DATA.ANNOT_3.url,
                     remoteId: DATA.SHARED_ANNOTATIONS[3].reference.id,
                 })
+
+            await device.storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject({
+                    excludeFromLists: true,
+                    localId: DATA.ANNOT_4.url,
+                    remoteId: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                })
         }
 
         it('should be able to set notes type + trigger followed list load', async ({
@@ -2464,11 +2494,14 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
 
+            // This awkwardness is due to the sloppy test data setup
+            const loadedFollowedLists = DATA.FOLLOWED_LISTS.slice(0, -1)
+
             expect(sidebar.state.followedListLoadState).toEqual('success')
             expect(sidebar.state.followedLists).toEqual({
-                allIds: DATA.FOLLOWED_LISTS.map((list) => list.id),
+                allIds: loadedFollowedLists.map((list) => list.id),
                 byId: fromPairs(
-                    DATA.FOLLOWED_LISTS.map((list) => [
+                    loadedFollowedLists.map((list) => [
                         list.id,
                         {
                             ...list,
@@ -2591,6 +2624,16 @@ describe('SidebarContainerLogic', () => {
                     creatorId: DATA.SHARED_ANNOTATIONS[3].creatorReference.id,
                     localId: DATA.ANNOT_3.url,
                 },
+                ['5']: {
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[4].body,
+                    comment: DATA.SHARED_ANNOTATIONS[4].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[4].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[4].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[4].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[4].creatorReference.id,
+                    localId: DATA.ANNOT_4.url,
+                },
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -2711,6 +2754,16 @@ describe('SidebarContainerLogic', () => {
                     creatorId: DATA.SHARED_ANNOTATIONS[3].creatorReference.id,
                     localId: DATA.ANNOT_3.url,
                 },
+                ['5']: {
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[4].body,
+                    comment: DATA.SHARED_ANNOTATIONS[4].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[4].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[4].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[4].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[4].creatorReference.id,
+                    localId: DATA.ANNOT_4.url,
+                },
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -2734,6 +2787,7 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
 
             await sidebar.processEvent('deleteAnnotation', {
@@ -2772,6 +2826,16 @@ describe('SidebarContainerLogic', () => {
                     creatorId: DATA.SHARED_ANNOTATIONS[2].creatorReference.id,
                     localId: null,
                 },
+                ['5']: {
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    body: DATA.SHARED_ANNOTATIONS[4].body,
+                    comment: DATA.SHARED_ANNOTATIONS[4].comment,
+                    selector: DATA.SHARED_ANNOTATIONS[4].selector,
+                    createdWhen: DATA.SHARED_ANNOTATIONS[4].createdWhen,
+                    updatedWhen: DATA.SHARED_ANNOTATIONS[4].updatedWhen,
+                    creatorId: DATA.SHARED_ANNOTATIONS[4].creatorReference.id,
+                    localId: DATA.ANNOT_4.url,
+                },
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -2787,6 +2851,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining(DATA.ANNOT_1),
                 expect.objectContaining(DATA.ANNOT_2),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
         })
 
@@ -2824,6 +2889,10 @@ describe('SidebarContainerLogic', () => {
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
                 }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
+                }),
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -2847,6 +2916,7 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
 
             // Nothing should change, as we're choosing to keep lists
@@ -2872,6 +2942,10 @@ describe('SidebarContainerLogic', () => {
                 ['4']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -2899,6 +2973,7 @@ describe('SidebarContainerLogic', () => {
                     lastEdited: expect.any(Date),
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
 
             // Now we're not keeping lists, so it should get removed from all
@@ -2919,6 +2994,10 @@ describe('SidebarContainerLogic', () => {
                 ['3']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[2].reference.id,
                     localId: null,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -2942,6 +3021,7 @@ describe('SidebarContainerLogic', () => {
                     lastEdited: expect.any(Date),
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
         })
 
@@ -2979,6 +3059,10 @@ describe('SidebarContainerLogic', () => {
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
                 }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
+                }),
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -3009,6 +3093,7 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
 
             await sidebar.processEvent('updateAnnotationShareInfo', {
@@ -3032,6 +3117,10 @@ describe('SidebarContainerLogic', () => {
                 ['4']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -3064,6 +3153,7 @@ describe('SidebarContainerLogic', () => {
                     lastEdited: expect.any(Date),
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining(DATA.ANNOT_4),
             ])
         })
 
@@ -3101,6 +3191,10 @@ describe('SidebarContainerLogic', () => {
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
                 }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
+                }),
             })
             expect(
                 sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
@@ -3131,6 +3225,10 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining({
+                    ...DATA.ANNOT_4,
+                    lists: expect.any(Array),
+                }),
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
@@ -3155,6 +3253,10 @@ describe('SidebarContainerLogic', () => {
                 ['4']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -3183,6 +3285,10 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining({
+                    ...DATA.ANNOT_4,
+                    lists: expect.any(Array),
+                }),
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
@@ -3207,6 +3313,10 @@ describe('SidebarContainerLogic', () => {
                 ['4']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -3235,6 +3345,10 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining({
+                    ...DATA.ANNOT_4,
+                    lists: expect.any(Array),
+                }),
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
@@ -3259,6 +3373,10 @@ describe('SidebarContainerLogic', () => {
                 ['4']: expect.objectContaining({
                     id: DATA.SHARED_ANNOTATIONS[3].reference.id,
                     localId: DATA.ANNOT_3.url,
+                }),
+                ['5']: expect.objectContaining({
+                    id: DATA.SHARED_ANNOTATIONS[4].reference.id,
+                    localId: DATA.ANNOT_4.url,
                 }),
             })
             expect(
@@ -3287,7 +3405,77 @@ describe('SidebarContainerLogic', () => {
                     ...DATA.ANNOT_3,
                     lists: expect.any(Array),
                 }),
+                expect.objectContaining({
+                    ...DATA.ANNOT_4,
+                    lists: expect.any(Array),
+                }),
             ])
+
+            // Followed list states should be created and removed on final annotation add/removal
+            expect(sidebar.state.followedLists.allIds).toEqual(
+                expect.not.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+            )
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id],
+            ).toEqual(undefined)
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: DATA.ANNOT_3.url,
+                deleted: null,
+                added: 3,
+            })
+
+            expect(sidebar.state.followedLists.allIds).toEqual(
+                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+            )
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: DATA.ANNOT_4.url,
+                deleted: null,
+                added: 3,
+            })
+
+            expect(sidebar.state.followedLists.allIds).toEqual(
+                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+            )
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([
+                DATA.SHARED_ANNOTATIONS[3].reference,
+                DATA.SHARED_ANNOTATIONS[4].reference,
+            ])
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: DATA.ANNOT_4.url,
+                deleted: 3,
+                added: null,
+            })
+
+            expect(sidebar.state.followedLists.allIds).toEqual(
+                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+            )
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                    .sharedAnnotationReferences,
+            ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
+
+            await sidebar.processEvent('updateListsForAnnotation', {
+                annotationId: DATA.ANNOT_3.url,
+                deleted: 3,
+                added: null,
+            })
+
+            expect(sidebar.state.followedLists.allIds).toEqual(
+                expect.not.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+            )
+            expect(
+                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id],
+            ).toEqual(undefined)
         })
 
         it('should be able to toggle space picker, copy paster, and share menu popups on own annotations in followed lists', async ({

@@ -57,6 +57,20 @@ export const ANNOT_3: Annotation = {
     lists: [],
 }
 
+export const ANNOT_4: Annotation = {
+    url: normalizeUrl(CURRENT_TAB_URL_1) + '/#126',
+    pageUrl: normalizeUrl(CURRENT_TAB_URL_1),
+    pageTitle: CURRENT_TAB_TITLE_2 + ' next 2.0',
+    body: 'yet another test highlight',
+    lastEdited: new Date('2022-05-04'),
+    createdWhen: new Date('2022-05-04'),
+    selector: {
+        descriptor: { content: [{ type: 'TextPositionSelector', start: 1 }] },
+    } as any,
+    tags: [],
+    lists: [],
+}
+
 export const CREATOR_1: UserPublicDetails = {
     user: { displayName: 'Tester A' },
     profile: { avatarURL: 'https://worldbrain.io/test.jpg' },
@@ -122,6 +136,16 @@ export const SHARED_ANNOTATIONS: Array<
         updatedWhen: ANNOT_3.lastEdited.getTime(),
         uploadedWhen: 11111,
     },
+    {
+        reference: { type: 'shared-annotation-reference', id: '5' },
+        creatorReference: { type: 'user-reference', id: TEST_USER.id },
+        creator: CREATOR_2,
+        normalizedPageUrl: ANNOT_4.pageUrl,
+        comment: ANNOT_4.comment,
+        createdWhen: ANNOT_4.createdWhen.getTime(),
+        updatedWhen: ANNOT_4.lastEdited.getTime(),
+        uploadedWhen: 11111,
+    },
 ]
 
 export const FOLLOWED_LISTS: SharedAnnotationList[] = [
@@ -149,6 +173,11 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
             SHARED_ANNOTATIONS[2].reference,
             SHARED_ANNOTATIONS[3].reference,
         ],
+    },
+    {
+        id: 'test d',
+        name: 'test d',
+        sharedAnnotationReferences: [],
     },
 ]
 
