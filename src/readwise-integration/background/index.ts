@@ -5,6 +5,7 @@ import type {
 } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
 import {
+    formatReadwiseHighlightTag,
     formatReadwiseHighlightNote,
     formatReadwiseHighlightTime,
     formatReadwiseHighlightLocation,
@@ -12,7 +13,7 @@ import {
 import * as Raven from 'src/util/raven'
 import type { ReadwiseSettings } from './types/settings'
 import type { BrowserSettingsStore } from 'src/util/settings'
-import type { Annotation, AnnotListEntry } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import { ReadwiseInterface } from './types/remote-interface'
 import {
     remoteFunctionWithoutExtraArgs,
@@ -52,6 +53,7 @@ export class ReadwiseBackground {
             fetch: options.fetch,
         })
 
+        // NOTE: This needs to stay here doing nothing as it serves as the Storex collection definition, which needs to stay around in the registry to generate the correct Dexie schema
         this.__deprecatedActionQueue = new ActionQueue({
             storageManager: options.storageManager,
             collectionName: 'readwiseAction',
@@ -125,6 +127,7 @@ export class ReadwiseBackground {
         )
     }
 
+    // NOTE: if you need to update this, likely you also need to update the storage hook which reuploads annotations on update (see @memex-common:readwise-integration/storage)
     uploadAllAnnotations: ReadwiseInterfaceMethod<
         'uploadAllAnnotations'
     > = async ({ annotationFilter }) => {
@@ -150,8 +153,8 @@ export class ReadwiseBackground {
             ])
             annotationBatch.push({
                 ...annotation,
-                tags: tags.map(replaceSpaces),
-                listNames: lists.map(replaceSpaces),
+                tags: tags.map(formatReadwiseHighlightTag),
+                listNames: lists.map(formatReadwiseHighlightTag),
             })
         }
 
@@ -217,5 +220,3 @@ function makePageDataCache(options: { getPageData: GetPageData }): GetPageData {
         return pageData
     }
 }
-
-const replaceSpaces = (name: string): string => name.replace(/\s+/g, '-')
