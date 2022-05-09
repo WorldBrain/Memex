@@ -3881,7 +3881,7 @@ describe('Personal cloud translation layer', () => {
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     lists: [],
-                    tags: [{ name: testTagWithHypens }],
+                    tags: [{ name: testTagWithSpaces }],
                 })
                 const highlightWithTagsAndSpaces = cloudDataToReadwiseHighlight(
                     {
@@ -3889,8 +3889,8 @@ describe('Personal cloud translation layer', () => {
                         selector: testSelectors.first,
                         locator: testLocators.first as any,
                         metadata: testMetadata.first,
-                        lists: [{ name: testListWithHypens }],
-                        tags: [{ name: testTagWithHypens }],
+                        lists: [{ name: testListWithSpaces }],
+                        tags: [{ name: testTagWithSpaces }],
                     },
                 )
 

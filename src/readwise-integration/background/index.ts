@@ -5,7 +5,6 @@ import type {
 } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { HTTPReadwiseAPI } from '@worldbrain/memex-common/lib/readwise-integration/api'
 import {
-    formatReadwiseHighlightTag,
     formatReadwiseHighlightNote,
     formatReadwiseHighlightTime,
     formatReadwiseHighlightLocation,
@@ -147,14 +146,14 @@ export class ReadwiseBackground {
             if (annotationFilter != null && !annotationFilter(annotation)) {
                 continue
             }
-            const [tags, lists] = await Promise.all([
+            const [tags, listNames] = await Promise.all([
                 this.getAnnotationTags(annotation.url),
                 this.getAnnotationLists(annotation.url),
             ])
             annotationBatch.push({
                 ...annotation,
-                tags: tags.map(formatReadwiseHighlightTag),
-                listNames: lists.map(formatReadwiseHighlightTag),
+                listNames,
+                tags,
             })
         }
 

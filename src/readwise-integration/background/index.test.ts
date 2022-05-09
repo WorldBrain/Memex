@@ -9,6 +9,7 @@ import {
 } from 'src/tests/integration-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
+import { formatReadwiseHighlightTag } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Readwise Annotations',
@@ -349,25 +350,27 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                                 DATA.TAG_2
                                                             } .${
                                                                 DATA.TAG_3
-                                                            } .${DATA.LIST_1.name.replace(
-                                                                ' ',
-                                                                '-',
-                                                            )} .${DATA.LIST_2.name.replace(
-                                                                ' ',
-                                                                '-',
+                                                            } .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_1
+                                                                    .name,
+                                                            )} .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_2
+                                                                    .name,
                                                             )}\n` +
-                                                            expectedHighlight1.note,
+                                                            expectedHighlight1.note +
+                                                            `\n#${DATA.TAG_1} #${DATA.TAG_2} #${DATA.TAG_3} [[${DATA.LIST_1.name}]] [[${DATA.LIST_2.name}]]`,
                                                     },
                                                     {
                                                         ...expectedHighlight2,
                                                         note:
                                                             `.${
                                                                 DATA.TAG_2
-                                                            } .${DATA.LIST_2.name.replace(
-                                                                ' ',
-                                                                '-',
+                                                            } .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_2
+                                                                    .name,
                                                             )}\n` +
-                                                            expectedHighlight2.note,
+                                                            expectedHighlight2.note +
+                                                            `\n#${DATA.TAG_2} [[${DATA.LIST_2.name}]]`,
                                                     },
                                                 ],
                                             }),
@@ -404,6 +407,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     status: 200,
                                 })
 
+                                const testTagWithWhitespace =
+                                    'test tag  with   whitespace'
+
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
                                     {
@@ -428,7 +434,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
                                     {
-                                        tag: 'test tag  with   whitespace',
+                                        tag: testTagWithWhitespace,
                                         url: firstAnnotationUrl,
                                     },
                                 )
@@ -458,8 +464,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3} .test-tag-with-whitespace\n` +
-                                                            expectedHighlight1.note,
+                                                            `.${DATA.TAG_1} .${
+                                                                DATA.TAG_2
+                                                            } .${
+                                                                DATA.TAG_3
+                                                            } .${formatReadwiseHighlightTag(
+                                                                testTagWithWhitespace,
+                                                            )}\n` +
+                                                            expectedHighlight1.note +
+                                                            `\n#${DATA.TAG_1} #${DATA.TAG_2} #${DATA.TAG_3} [[${testTagWithWhitespace}]]`,
                                                     },
                                                 ],
                                             }),
