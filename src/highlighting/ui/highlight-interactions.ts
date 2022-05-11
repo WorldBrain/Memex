@@ -126,7 +126,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
     }
 
     saveAndRenderHighlightAndEditInSidebar = async (
-        params: SaveAndRenderHighlightDeps,
+        params: SaveAndRenderHighlightDeps & {
+            showSpacePicker?: boolean
+        },
     ) => {
         analytics.trackEvent(
             params.analyticsEvent ?? {
@@ -140,7 +142,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         if (annotation) {
             await params.inPageUI.showSidebar({
                 annotationUrl: annotation.url,
-                action: 'edit_annotation',
+                action: params.showSpacePicker
+                    ? 'edit_annotation_spaces'
+                    : 'edit_annotation',
             })
         } else {
             await params.inPageUI.showSidebar({ action: 'comment' })

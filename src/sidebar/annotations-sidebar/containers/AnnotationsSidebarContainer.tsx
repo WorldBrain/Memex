@@ -4,6 +4,7 @@ import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import AnnotationsSidebar, {
+    AnnotationsSidebar as AnnotationsSidebarComponent,
     AnnotationsSidebarProps,
 } from '../components/AnnotationsSidebar'
 import {
@@ -64,8 +65,7 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
-    private sidebarRef
-    private DraggableContainer
+    private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
 
     constructor(props: P) {
         super(
@@ -75,7 +75,16 @@ export class AnnotationsSidebarContainer<
                 analytics,
                 copyToClipboard,
                 focusCreateForm: () =>
-                    this.sidebarRef?.getInstance()?.focusCreateForm(),
+                    (this.sidebarRef?.current[
+                        'instanceRef'
+                    ] as AnnotationsSidebarComponent).focusCreateForm(),
+                focusEditNoteForm: (annotationId) => {
+                    ;(this.sidebarRef?.current[
+                        'instanceRef'
+                    ] as AnnotationsSidebarComponent).focusEditNoteForm(
+                        annotationId,
+                    )
+                },
             }),
         )
     }
@@ -157,7 +166,9 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'body'>,
+        /** This needs to be defined for footer events for annots in followed lists states  */
+        followedListId?: string,
     ): AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     } {
@@ -165,17 +176,20 @@ export class AnnotationsSidebarContainer<
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     ...DEF_CONTEXT,
                 }),
             onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     mode: 'delete',
                     ...DEF_CONTEXT,
                 }),
             onDeleteCancel: () =>
                 this.processEvent('switchAnnotationMode', {
                     annotationUrl: annotation.url,
+                    followedListId,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),
@@ -188,6 +202,7 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('shareAnnotation', {
                     annotationUrl: annotation.url,
                     ...DEF_CONTEXT,
+                    followedListId,
                     mouseEvent,
                 }),
             onGoToAnnotation:
@@ -201,6 +216,7 @@ export class AnnotationsSidebarContainer<
             onCopyPasterBtnClick: () =>
                 this.processEvent('setCopyPasterAnnotationId', {
                     id: annotation.url,
+                    followedListId,
                 }),
             onTagIconClick: () =>
                 this.processEvent('setTagPickerAnnotationId', {
@@ -209,12 +225,13 @@ export class AnnotationsSidebarContainer<
             onListIconClick: () =>
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
+                    followedListId,
                 }),
         }
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'isShared'>,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
@@ -331,8 +348,28 @@ export class AnnotationsSidebarContainer<
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
             initialSelectedEntries: () => annotation.lists ?? [],
-            onEscapeKeyDown: () =>
-                this.processEvent('resetListPickerAnnotationId', null),
+            onSubmit: async () => {
+                await this.processEvent('resetListPickerAnnotationId', {})
+
+                if (
+                    this.state.annotationModes.pageAnnotations[
+                        annotation.url
+                    ] === 'edit'
+                ) {
+                    await this.processEvent('editAnnotation', {
+                        annotationUrl: annotation.url,
+                        shouldShare: annotation.isShared,
+                        isProtected: annotation.isBulkShareProtected,
+                        mainBtnPressed: true,
+                        ...DEF_CONTEXT,
+                    })
+                }
+            },
+            onEscapeKeyDown: () => {
+                this.processEvent('resetListPickerAnnotationId', {
+                    id: annotation.url,
+                })
+            },
             selectEntry: async (listId, options) =>
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
@@ -350,15 +387,33 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderCopyPasterManagerForAnnotation = (
-        currentAnnotationId: string,
-    ) => {
-        if (this.state.activeCopyPasterAnnotationId !== currentAnnotationId) {
+        followedListId?: string,
+    ) => (currentAnnotationId: string) => {
+        const state =
+            followedListId != null
+                ? this.state.followedLists.byId[followedListId]
+                      .activeCopyPasterAnnotationId
+                : this.state.activeCopyPasterAnnotationId
+
+        if (state !== currentAnnotationId) {
             return null
         }
 
         return (
             <CopyPasterWrapper>
-                {this.renderCopyPasterManager([currentAnnotationId])}
+                <HoverBox padding={'0px'}>
+                    <PageNotesCopyPaster
+                        copyPaster={this.props.copyPaster}
+                        annotationUrls={[currentAnnotationId]}
+                        normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
+                        onClickOutside={() =>
+                            this.processEvent(
+                                'resetCopyPasterAnnotationId',
+                                null,
+                            )
+                        }
+                    />
+                </HoverBox>
             </CopyPasterWrapper>
         )
     }
@@ -409,15 +464,20 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderListPickerForAnnotation = (currentAnnotationId: string) => {
+    private renderListPickerForAnnotation = (followedListId?: string) => (
+        currentAnnotationId: string,
+    ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
 
-        if (
-            this.state.activeListPickerAnnotationId !== currentAnnotationId ||
-            currentAnnotation == null
-        ) {
+        const state =
+            followedListId != null
+                ? this.state.followedLists.byId[followedListId]
+                      .activeListPickerAnnotationId
+                : this.state.activeListPickerAnnotationId
+
+        if (state !== currentAnnotationId || currentAnnotation == null) {
             return null
         }
 
@@ -426,10 +486,7 @@ export class AnnotationsSidebarContainer<
                 <HoverBox top="7px" padding={'0px'}>
                     <ClickAway
                         onClickAway={() =>
-                            this.processEvent(
-                                'resetListPickerAnnotationId',
-                                null,
-                            )
+                            this.processEvent('resetListPickerAnnotationId', {})
                         }
                     >
                         <CollectionPicker
@@ -444,15 +501,20 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderShareMenuForAnnotation = (currentAnnotationId: string) => {
+    private renderShareMenuForAnnotation = (followedListId?: string) => (
+        currentAnnotationId: string,
+    ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
 
-        if (
-            this.state.activeShareMenuNoteId !== currentAnnotationId ||
-            currentAnnotation == null
-        ) {
+        const state =
+            followedListId != null
+                ? this.state.followedLists.byId[followedListId]
+                      .activeShareMenuAnnotationId
+                : this.state.activeShareMenuNoteId
+
+        if (state !== currentAnnotationId || currentAnnotation == null) {
             return null
         }
 
@@ -492,21 +554,6 @@ export class AnnotationsSidebarContainer<
                     </ClickAway>
                 </HoverBox>
             </ShareMenuWrapper>
-        )
-    }
-
-    private renderCopyPasterManager(annotationUrls: string[]) {
-        return (
-            <HoverBox padding={'0px'}>
-                <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
-                    annotationUrls={annotationUrls}
-                    normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
-                    onClickOutside={() =>
-                        this.processEvent('resetCopyPasterAnnotationId', null)
-                    }
-                />
-            </HoverBox>
         )
     }
 
@@ -667,7 +714,6 @@ export class AnnotationsSidebarContainer<
                     className={classNames('ignore-react-onclickoutside')}
                 >
                     <Rnd
-                        ref={this.DraggableContainer}
                         style={style}
                         default={{
                             x: 0,
@@ -706,7 +752,7 @@ export class AnnotationsSidebarContainer<
                                 {...this.state}
                                 getListDetailsById={this.getListDetailsById}
                                 sidebarContext={this.props.sidebarContext}
-                                ref={(ref) => (this.sidebarRef = ref)}
+                                ref={this.sidebarRef as any}
                                 openCollectionPage={(remoteListId) =>
                                     window.open(
                                         getListShareUrl({ remoteListId }),
@@ -773,8 +819,14 @@ export class AnnotationsSidebarContainer<
                                     this.state.showCommentBox
                                 }
                                 annotationCreateProps={this.getCreateProps()}
-                                bindAnnotationFooterEventProps={(annot) =>
-                                    this.bindAnnotationFooterEventProps(annot)
+                                bindAnnotationFooterEventProps={(
+                                    annotation,
+                                    followedlistId,
+                                ) =>
+                                    this.bindAnnotationFooterEventProps(
+                                        annotation,
+                                        followedlistId,
+                                    )
                                 }
                                 bindAnnotationEditProps={
                                     this.bindAnnotationEditProps

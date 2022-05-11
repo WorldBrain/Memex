@@ -3,9 +3,9 @@ import { Anchor } from 'src/highlighting/types'
 import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 
 export type InPageUISidebarAction =
-    | 'annotate'
     | 'comment'
     | 'edit_annotation'
+    | 'edit_annotation_spaces'
     | 'show_annotation'
     | 'set_sharing_access'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'

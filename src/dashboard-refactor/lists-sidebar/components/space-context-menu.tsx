@@ -189,9 +189,6 @@ export default class SpaceContextMenuButton extends PureComponent<
     }
 }
 
-const updateArray = (arr, index, newEl) => {
-    return [...arr.slice(0, index), newEl, ...arr.slice(index + 1)]
-}
 export class SpaceContextMenu extends PureComponent<
     Props,
     {
@@ -244,11 +241,8 @@ export class SpaceContextMenu extends PureComponent<
     }
 
     private addLinks = async () => {
-        this.setState({
-            isLoading: true,
-        })
+        this.setState({ isLoading: true })
 
-        const roleID = SharedListRoleID.ReadWrite
         const { clipboard, contentSharing } = this.props.services
 
         if (!this.state.remoteId && this.props.shareList) {
@@ -256,43 +250,40 @@ export class SpaceContextMenu extends PureComponent<
             this.setState({ remoteId: sharedList.listId })
         }
 
-        const { link } = await contentSharing.generateKeyLink({
-            key: { roleID },
-            listReference: {
-                id: this.state.remoteId,
-                type: 'shared-list-reference',
-            },
-        })
-
-        const newLinks: InviteLink[] = [{ link, roleID }]
-
-        // Also create reader link if non-reader link is the first being created
-        if (
-            !this.state.inviteLinks.length
-            // &&
-            // roleID !== SharedListRoleID.Commenter
-        ) {
-            const commenterLink = await contentSharing.generateKeyLink({
+        const [commenterLink, contributorLink] = await Promise.all([
+            contentSharing.generateKeyLink({
                 key: { roleID: SharedListRoleID.Commenter },
                 listReference: {
                     id: this.state.remoteId,
                     type: 'shared-list-reference',
                 },
-            })
-
-            newLinks.unshift({
-                link: commenterLink.link,
-                roleID: SharedListRoleID.Commenter,
-            })
-        }
+            }),
+            contentSharing.generateKeyLink({
+                key: { roleID: SharedListRoleID.ReadWrite },
+                listReference: {
+                    id: this.state.remoteId,
+                    type: 'shared-list-reference',
+                },
+            }),
+        ])
 
         this.setState({
-            inviteLinks: [...this.state.inviteLinks, ...newLinks],
+            inviteLinks: [
+                {
+                    link: commenterLink.link,
+                    roleID: SharedListRoleID.Commenter,
+                },
+                {
+                    link: contributorLink.link,
+                    roleID: SharedListRoleID.ReadWrite,
+                },
+            ],
             showSuccessMsg: true,
             isLoading: false,
         })
 
-        await clipboard.copy(link)
+        await clipboard.copy(contributorLink.link)
+
         setTimeout(
             () => this.setState({ showSuccessMsg: false }),
             ListShareModalLogic.SUCCESS_MSG_TIMEOUT,
@@ -307,22 +298,20 @@ export class SpaceContextMenu extends PureComponent<
         }
 
         await this.props.services.clipboard.copy(inviteLink.link)
-        this.setState({
-            inviteLinks: updateArray(this.state.inviteLinks, event.linkIndex, {
-                ...inviteLink,
-                showCopyMsg: true,
-            }),
-        })
+
+        const showInviteLinkCopyMsg = (showCopyMsg: boolean) =>
+            this.setState({
+                inviteLinks: [
+                    ...this.state.inviteLinks.slice(0, event.linkIndex),
+                    { ...inviteLink, showCopyMsg },
+                    ...this.state.inviteLinks.slice(event.linkIndex + 1),
+                ],
+            })
+
+        showInviteLinkCopyMsg(true)
 
         setTimeout(
-            () =>
-                this.setState({
-                    inviteLinks: updateArray(
-                        this.state.inviteLinks,
-                        event.linkIndex,
-                        { ...inviteLink, showCopyMsg: false },
-                    ),
-                }),
+            () => showInviteLinkCopyMsg(false),
             ListShareModalLogic.COPY_MSG_TIMEOUT,
         )
     }

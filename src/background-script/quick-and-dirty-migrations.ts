@@ -47,17 +47,20 @@ export const migrations: Migrations = {
     [MIGRATION_PREFIX + 'migrate-to-cloud']: async ({
         localExtSettingStore,
         storex: storageManager,
-        backgroundModules: { syncSettings },
+        backgroundModules,
     }) => {
         if ((await localExtSettingStore.get('installTimestamp')) != null) {
             return
         }
 
-        await this.deps.syncSettingsStore.dashboard.set(
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+        await syncSettings.dashboard.set(
             'subscribeBannerShownAfter',
             Date.now(),
         )
-        await syncSettings.__migrateLocalStorage()
+        await backgroundModules.syncSettings.__migrateLocalStorage()
         await migrateInstallTime({
             storageManager,
             getOldInstallTime: () =>

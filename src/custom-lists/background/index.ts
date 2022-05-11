@@ -369,7 +369,7 @@ export default class CustomListBackground {
         return lists.map(({ id }) => id)
     }
 
-    _updateListSuggestionsCache = async (args: {
+    updateListSuggestionsCache = async (args: {
         added?: number
         removed?: number
     }) => {
@@ -432,7 +432,7 @@ export default class CustomListBackground {
             name,
             createdAt,
         })
-        await this._updateListSuggestionsCache({ added: id })
+        await this.updateListSuggestionsCache({ added: id })
 
         return inserted
     }
@@ -501,7 +501,7 @@ export default class CustomListBackground {
             action: 'addPageToList',
         })
 
-        await this._updateListSuggestionsCache({ added: id })
+        await this.updateListSuggestionsCache({ added: id })
 
         return retVal
     }
@@ -599,7 +599,7 @@ export default class CustomListBackground {
             }),
         )
 
-        await this._updateListSuggestionsCache({ added: args.listId })
+        await this.updateListSuggestionsCache({ added: args.listId })
     }
 
     removeOpenTabsFromList = async ({ listId }: { listId: number }) => {

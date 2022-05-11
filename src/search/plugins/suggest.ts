@@ -65,6 +65,10 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
         }
     }
 
+    /**
+     * NOTE: This is now only used for the space picker's suggestion functionality, and has been changed to
+     *  deal with some space picker-specific stuff. Likely things won't work so nicely elsewhere
+     */
     async suggestObjects<S, P = any>({
         collection,
         query,
@@ -76,7 +80,9 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
     }) {
         const db = this.backend.dexieInstance
         // Grab first entry from the filter query; ignore rest for now
-        const [[indexName, value], ...fields] = Object.entries<string>(query)
+        const [[indexName, searchQuery], ...fields] = Object.entries<string>(
+            query,
+        )
 
         if (fields.length > 1) {
             throw new UnimplementedError(
@@ -84,14 +90,15 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
             )
         }
 
+        const distinctTerms = searchQuery.split(/\s+/).filter(Boolean)
         const whereClause = db.table<S, P>(collection).where(indexName)
 
         let coll =
             options.ignoreCase &&
             options.ignoreCase.length &&
             options.ignoreCase[0] === indexName
-                ? whereClause.startsWithIgnoreCase(value)
-                : whereClause.startsWith(value)
+                ? whereClause.startsWithAnyOfIgnoreCase(distinctTerms)
+                : whereClause.startsWithAnyOf(distinctTerms)
 
         if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
             throw new InvalidFindOptsError(
@@ -105,17 +112,19 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
             coll = coll.reverse()
         }
 
-        let suggestions: any[]
+        let suggestions: any[] = []
+        const _pks: any[] = []
         if (options.multiEntryAssocField) {
-            const records = await coll.toArray()
-            suggestions = records.map(
-                (record) => record[options.multiEntryAssocField],
-            )
+            const records = await coll.distinct().toArray()
+            records.forEach((record) => {
+                _pks.push(record['id'])
+                suggestions.push(record[options.multiEntryAssocField])
+            })
         } else {
             suggestions = await coll.uniqueKeys()
         }
 
-        const pks = options.includePks ? await coll.primaryKeys() : []
+        const pks = options.includePks ? _pks : []
 
         return suggestions.map((suggestion: S, i) => ({
             suggestion,

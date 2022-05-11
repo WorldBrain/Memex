@@ -20,5 +20,8 @@ export interface TooltipDependencies extends AnnotationFunctions {
 
 export interface AnnotationFunctions {
     createHighlight(shouldShare: boolean): Promise<void>
-    createAnnotation(shouldShare: boolean): Promise<void>
+    createAnnotation(
+        shouldShare: boolean,
+        showSpacePicker?: boolean,
+    ): Promise<void>
 }

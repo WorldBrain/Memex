@@ -52,6 +52,7 @@ export interface AnnotationProps {
     isActive?: boolean
     isShared: boolean
     hasReplies?: boolean
+    appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
@@ -110,7 +111,9 @@ export default class AnnotationEditable extends React.Component<Props> {
         showQuickTutorial: false,
     }
 
-    focus() {}
+    focusEditForm() {
+        this.annotEditRef?.current?.focusEditor()
+    }
 
     componentDidMount() {
         this.textAreaHeight()
@@ -257,7 +260,6 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private renderNote() {
         const {
-            url,
             mode,
             comment,
             annotationEditDependencies,
@@ -267,7 +269,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
-                    url={url}
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
@@ -317,27 +318,28 @@ export default class AnnotationEditable extends React.Component<Props> {
             annotationFooterDependencies: footerDeps,
             isBulkShareProtected,
             repliesLoadingState,
+            appendRepliesToggle,
             onReplyBtnClick,
             hoverState,
             hasReplies,
             isShared,
-            lists,
         } = this.props
 
+        const repliesToggle: ItemBoxBottomAction =
+            repliesLoadingState === 'running'
+                ? { node: <LoadingIndicator size={16} /> }
+                : {
+                      key: 'replies-btn',
+                      onClick: onReplyBtnClick,
+                      tooltipText: 'Toggle replies',
+                      tooltipPosition: 'left',
+                      image: hasReplies
+                          ? icons.commentFull
+                          : icons.commentEmpty,
+                  }
+
         if (!footerDeps) {
-            return [
-                repliesLoadingState === 'running'
-                    ? { node: <LoadingIndicator size={16} /> }
-                    : {
-                          key: 'replies-btn',
-                          onClick: onReplyBtnClick,
-                          tooltipText: 'Toggle replies',
-                          tooltipPosition: 'left',
-                          image: hasReplies
-                              ? icons.commentFull
-                              : icons.commentEmpty,
-                      },
-            ]
+            return [repliesToggle]
         }
 
         const shareIconData = getShareButtonData(
@@ -347,6 +349,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
 
         if (hoverState === null) {
+            if (appendRepliesToggle) {
+                return [repliesToggle]
+            }
+
             if (isShared || isBulkShareProtected) {
                 return [
                     {
@@ -386,6 +392,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onShareClick,
                     tooltipText: shareIconData.label,
                 },
+                appendRepliesToggle && repliesToggle,
             ]
         }
 
@@ -405,6 +412,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                 isDisabled: true,
                 image: shareIconData.icon,
             },
+            appendRepliesToggle && repliesToggle,
         ]
     }
 
@@ -870,7 +878,6 @@ const DeleteConfirmStyled = styled.span`
     font-size: 14px;
     color: #000;
     margin-right: 10px;
-    width: 100%;
     text-align: right;
 `
 

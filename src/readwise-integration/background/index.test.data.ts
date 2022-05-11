@@ -80,6 +80,17 @@ export const ANNOT_3: Annotation = {
     lists: [],
 }
 
+export const LIST_1 = {
+    id: 1,
+    name: 'list 1',
+    createdAt: new Date('2022-05-04'),
+}
+export const LIST_2 = {
+    id: 2,
+    name: 'list 2',
+    createdAt: new Date('2022-05-05'),
+}
+
 export const HIGHLIGHT_1 = (annotationUrl: string): ReadwiseHighlight => ({
     text: ANNOT_1.body,
     title: DATA.TEST_TAB_1.title,

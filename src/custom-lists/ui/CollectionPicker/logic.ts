@@ -22,6 +22,8 @@ export interface SpacePickerDependencies {
     unselectEntry: (listId: number) => Promise<void>
     actOnAllTabs?: (listId: number) => Promise<void>
     onEscapeKeyDown?: () => void | Promise<void>
+    /** Called when user keys Enter+Cmd/Ctrl in main text input */
+    onSubmit?: () => void | Promise<void>
     initialSelectedEntries?: () => number[] | Promise<number[]>
     children?: any
     onClickOutside?: React.MouseEventHandler
@@ -38,7 +40,7 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
     newEntryPress: { entry: string }
-    keyPress: { key: KeyEvent }
+    keyPress: { event: KeyboardEvent }
     focusInput: {}
 }>
 
@@ -152,48 +154,62 @@ export default class SpacePickerLogic extends UILogic<
         this.searchInputRef?.focus()
     }
 
-    keyPress: EventHandler<'keyPress'> = ({
-        event: { key },
+    keyPress: EventHandler<'keyPress'> = async ({
+        event: { event },
         previousState,
     }) => {
-        if (this.newTabKeys.includes(key)) {
+        if (
+            event.key === 'Enter' &&
+            event.metaKey &&
+            this.dependencies.onSubmit
+        ) {
+            await this.dependencies.onSubmit()
+            return
+        }
+
+        if (this.newTabKeys.includes(event.key as KeyEvent)) {
             if (previousState.newEntryName !== '' && !(this.focusIndex >= 0)) {
-                return this.newEntryPress({
+                await this.newEntryPress({
                     previousState,
                     event: { entry: previousState.newEntryName },
                 })
+                return
             }
 
             if (previousState.displayEntries[this.focusIndex]) {
-                return this.resultEntryPress({
+                await this.resultEntryPress({
                     event: {
                         entry: previousState.displayEntries[this.focusIndex],
                     },
                     previousState,
                 })
+                return
             }
         }
 
-        if (key === 'ArrowUp') {
+        if (event.key === 'ArrowUp') {
             if (this.focusIndex > -1) {
-                return this._updateFocus(
+                this._updateFocus(
                     --this.focusIndex,
                     previousState.displayEntries,
                 )
+                return
             }
         }
 
-        if (key === 'ArrowDown') {
+        if (event.key === 'ArrowDown') {
             if (this.focusIndex < previousState.displayEntries.length - 1) {
-                return this._updateFocus(
+                this._updateFocus(
                     ++this.focusIndex,
                     previousState.displayEntries,
                 )
+                return
             }
         }
 
-        if (key === 'Escape' && this.dependencies.onEscapeKeyDown) {
-            return this.dependencies.onEscapeKeyDown()
+        if (event.key === 'Escape' && this.dependencies.onEscapeKeyDown) {
+            await this.dependencies.onEscapeKeyDown()
+            return
         }
     }
 

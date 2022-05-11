@@ -77,8 +77,6 @@ import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-me
 import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import {
     PersonalDeviceType,
-    PersonalDeviceOs,
-    PersonalDeviceBrowser,
     PersonalDeviceProduct,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
@@ -224,7 +222,6 @@ export function createBackgroundModules(options: {
         createInboxEntry,
         tabManagement,
         getNow,
-        generateServerId,
     })
     tabManagement.events.on('tabRemoved', (event) => {
         pages.handleTabClose(event)
@@ -377,7 +374,7 @@ export function createBackgroundModules(options: {
         }),
         activityStreams,
         storageManager,
-        customLists: customLists.storage,
+        customListsBG: customLists,
         annotations: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
@@ -393,9 +390,11 @@ export function createBackgroundModules(options: {
     )
 
     const readwise = new ReadwiseBackground({
-        storageManager,
-        settingsStore: readwiseSettingsStore,
         fetch,
+        storageManager,
+        customListsBG: customLists,
+        annotationsBG: directLinking,
+        settingsStore: readwiseSettingsStore,
         getPageData: async (normalizedUrl) =>
             pick(
                 await pages.storage.getPage(normalizedUrl),
@@ -403,18 +402,6 @@ export function createBackgroundModules(options: {
                 'fullUrl',
                 'fullTitle',
             ),
-        getAnnotationTags: async (annotationUrl) =>
-            (
-                await directLinking.annotationStorage.getTagsByAnnotationUrl(
-                    annotationUrl,
-                )
-            ).map(({ name }) => name.replace(/\s+/g, '-')),
-        async *streamAnnotations() {
-            yield* await storageManager.operation(
-                'streamObjects',
-                'annotations',
-            )
-        },
     })
 
     const copyPaster = new CopyPasterBackground({
@@ -545,6 +532,24 @@ export function createBackgroundModules(options: {
                 params.storageType === PersonalCloudClientStorageType.Persistent
                     ? options.persistentStorageManager
                     : options.storageManager
+
+            // Add any newly created lists to the list suggestion cache
+            if (
+                params.collection === 'customLists' &&
+                params.updates.id != null
+            ) {
+                const existingList = await options.storageManager.backend.operation(
+                    'findObject',
+                    params.collection,
+                    { id: params.updates.id },
+                )
+
+                if (existingList == null) {
+                    await customLists.updateListSuggestionsCache({
+                        added: params.updates.id,
+                    })
+                }
+            }
 
             // WARNING: Keep in mind this skips all storage middleware
             await updateOrCreate({

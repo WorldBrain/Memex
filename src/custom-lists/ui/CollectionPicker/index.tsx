@@ -118,11 +118,11 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
     }
 
-    handleKeyPress = (key: KeyEvent) => {
-        if (key === 'Escape') {
-            this.handleClickOutside(key)
+    handleKeyPress = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            this.handleClickOutside(event.key)
         }
-        this.processEvent('keyPress', { key })
+        this.processEvent('keyPress', { event })
     }
 
     renderListRow = (list: SpaceDisplayEntry, index: number) => (

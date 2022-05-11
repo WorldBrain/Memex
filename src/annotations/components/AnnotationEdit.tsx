@@ -35,7 +35,6 @@ export interface AnnotationEditGeneralProps {
 export interface Props
     extends AnnotationEditEventProps,
         AnnotationEditGeneralProps {
-    url: string
     rows: number
 }
 
@@ -46,7 +45,11 @@ class AnnotationEdit extends React.Component<Props> {
         editorHeight: '50px',
     }
 
-    private editor: MemexEditorInstance
+    private editorRef: MemexEditorInstance
+
+    focusEditor() {
+        this.editorRef?.focus()
+    }
 
     private saveEdit(shouldShare, isProtected) {
         this.props.onEditConfirm(true)(shouldShare, isProtected)
@@ -110,6 +113,7 @@ class AnnotationEdit extends React.Component<Props> {
                     markdownContent={this.props.comment}
                     onKeyDown={this.handleInputKeyDown}
                     placeholder={`Add Note. Click on ( ? ) for formatting help.`}
+                    setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
                 />
             </EditorContainer>

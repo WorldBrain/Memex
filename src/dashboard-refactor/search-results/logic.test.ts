@@ -491,7 +491,7 @@ describe('Dashboard search results logic', () => {
 
             expect(dataTransfer['img']).toEqual(mockElement)
             expect(dataTransfer.getData('text/plain')).toEqual(
-                `{"fullPageUrl":"https://test.com"}`,
+                `{"fullPageUrl":"https://test.com","normalizedPageUrl":"test.com"}`,
             )
             expect(mockElement.style.display).toEqual('block')
             expect(searchResults.state.searchResults.draggedPageId).toEqual(
@@ -1922,6 +1922,74 @@ describe('Dashboard search results logic', () => {
                         isShared: true,
                     }),
                 )
+            })
+
+            it('should modify suggestion cache upon adding lists to annotations', async ({
+                device,
+            }) => {
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject({
+                        ...DATA.LISTS_1[0],
+                        createdAt: new Date('2020-01-01'),
+                    })
+                await device.storageManager
+                    .collection('customLists')
+                    .createObject({
+                        ...DATA.LISTS_1[1],
+                        createdAt: new Date('2020-01-02'),
+                    })
+
+                const { searchResults } = await setupTest(device, {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
+                })
+                await searchResults.init()
+                const noteId = DATA.NOTE_2.url
+
+                const LIST_SUGGESTIONS = [
+                    {
+                        localId: DATA.LISTS_1[0].id,
+                        name: DATA.LISTS_1[0].name,
+                        createdAt: expect.any(Number),
+                        focused: false,
+                        remoteId: null,
+                    },
+                    {
+                        localId: DATA.LISTS_1[1].id,
+                        name: DATA.LISTS_1[1].name,
+                        createdAt: expect.any(Number),
+                        focused: false,
+                        remoteId: null,
+                    },
+                ]
+
+                expect(
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
+                        { limit: 10 },
+                    ),
+                ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[1].id,
+                })
+
+                expect(
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
+                        { limit: 10 },
+                    ),
+                ).toEqual([LIST_SUGGESTIONS[1], LIST_SUGGESTIONS[0]])
+
+                await searchResults.processEvent('setNoteLists', {
+                    noteId,
+                    added: DATA.LISTS_1[0].id,
+                })
+
+                expect(
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
+                        { limit: 10 },
+                    ),
+                ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
             })
 
             it('should be able to update note share info, filtering out shared lists on unshare if requested else inheriting parent page lists', async ({

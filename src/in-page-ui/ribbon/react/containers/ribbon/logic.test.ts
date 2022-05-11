@@ -188,7 +188,7 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.highlights.areHighlightsEnabled).toBe(false)
     })
 
-    it('should call passed-down callback when toggling popup open state', async ({
+    it('should call passed-down callback when toggling popout open states', async ({
         device,
     }) => {
         let arePopupsOpen = false
@@ -205,6 +205,10 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('setShowCommentBox', { value: true })
         expect(arePopupsOpen).toBe(true)
         await ribbon.processEvent('setShowCommentBox', { value: false })
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('cancelComment', null)
 
         expect(arePopupsOpen).toBe(false)
         await ribbon.processEvent('setShowListsPicker', { value: true })
@@ -220,7 +224,16 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('setShowSearchBox', { value: true })
         expect(arePopupsOpen).toBe(true)
         await ribbon.processEvent('setShowSearchBox', { value: false })
+
         expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('toggleShowExtraButtons', null)
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('toggleShowExtraButtons', null)
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('toggleShowTutorial', null)
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('toggleShowTutorial', null)
     })
 
     it('should add+remove lists, also adding any shared lists to public annotations', async ({

@@ -17,7 +17,7 @@ async function insertTestData({
     storageManager,
     backgroundModules,
 }: UILogicTestDevice) {
-    for (const list of DATA.TEST_LISTS) {
+    for (const list of [...DATA.TEST_LISTS].reverse()) {
         await backgroundModules.customLists.createCustomList({
             createdAt: list.createdAt,
             name: list.name,
@@ -36,6 +36,7 @@ const setupLogicHelper = async ({
     initialSelectedEntries,
     skipTestData,
     url,
+    onSubmit = () => undefined,
     ...args
 }: {
     device: UILogicTestDevice
@@ -43,6 +44,7 @@ const setupLogicHelper = async ({
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
+    onSubmit?: () => void
 
     initialSelectedEntries?: number[]
     skipTestData?: boolean
@@ -63,6 +65,7 @@ const setupLogicHelper = async ({
         contentSharingBG:
             device.backgroundModules.contentSharing.remoteFunctions,
         spacesBG: device.backgroundModules.customLists.remoteFunctions,
+        onSubmit,
     })
 
     const testLogic = device.createElement(entryPickerLogic)
@@ -259,9 +262,33 @@ describe('SpacePickerLogic', () => {
         ]
 
         for (const [key, focusedEntryId] of keyPresses) {
-            await testLogic.processEvent('keyPress', { key })
+            await testLogic.processEvent('keyPress', {
+                event: { key } as KeyboardEvent,
+            })
             expectStateToEqualWithFocus(focusedEntryId)
         }
+    })
+
+    it('should trigger props.onSubmit upon ctrl/cmd+Enter press', async ({
+        device,
+    }) => {
+        let wasSubmitted = false
+        const { testLogic } = await setupLogicHelper({
+            device,
+            onSubmit: () => (wasSubmitted = true),
+        })
+
+        await testLogic.init()
+
+        expect(wasSubmitted).toBe(false)
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'Enter' } as KeyboardEvent,
+        })
+        expect(wasSubmitted).toBe(false)
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'Enter', metaKey: true } as KeyboardEvent,
+        })
+        expect(wasSubmitted).toBe(true)
     })
 
     it('should correctly validate new entries', async ({ device }) => {

@@ -14,7 +14,10 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
 } from 'src/annotations/components/AnnotationCreate'
-import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
+import AnnotationEditable, {
+    Props as AnnotationEditableProps,
+} from 'src/annotations/components/HoverControlledAnnotationEditable'
+import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
@@ -58,10 +61,16 @@ export interface AnnotationsSidebarProps
     needsWaypoint?: boolean
     appendLoader?: boolean
 
-    renderCopyPasterForAnnotation: (id: string) => JSX.Element
+    renderCopyPasterForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
-    renderShareMenuForAnnotation: (id: string) => JSX.Element
-    renderListsPickerForAnnotation: (id: string) => JSX.Element
+    renderShareMenuForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
+    renderListsPickerForAnnotation: (
+        followedListId?: string,
+    ) => (id: string) => JSX.Element
 
     expandMyNotes: () => void
     expandSharedSpaces: (listIds: string[]) => void
@@ -70,12 +79,13 @@ export interface AnnotationsSidebarProps
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'body'>,
+        followedListId?: string,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
     bindAnnotationEditProps: (
-        annotation: Annotation,
+        annotation: Pick<Annotation, 'url' | 'isShared'>,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -111,12 +121,14 @@ interface AnnotationsSidebarState {
     showSortDropDown?: boolean
 }
 
-class AnnotationsSidebar extends React.Component<
+export class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
-    private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
-    private annotationEditRef
+    private annotationCreateRef = React.createRef() // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationEditRefs: {
+        [annotationUrl: string]: React.RefObject<_AnnotationEditable>
+    } = {}
 
     state = {
         searchText: '',
@@ -143,7 +155,9 @@ class AnnotationsSidebar extends React.Component<
         document.removeEventListener('keydown', this.onKeydown, false)
     }
 
-    focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
+    focusCreateForm = () => (this.annotationCreateRef?.current as any).focus()
+    focusEditNoteForm = (annotationId: string) =>
+        (this.annotationEditRefs[annotationId]?.current).focusEditForm()
 
     private onKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -286,7 +300,7 @@ class AnnotationsSidebar extends React.Component<
             <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
-                    ref={this.annotationCreateRef}
+                    ref={this.annotationCreateRef as any}
                 />
             </NewAnnotationSection>
         )
@@ -331,7 +345,19 @@ class AnnotationsSidebar extends React.Component<
             .filter((a) => !!a)
 
         if (!annotationsData.length) {
-            return 'No notes exist in this list for this page'
+            return (
+                <EmptyMessageContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.commentEmpty}
+                            heightAndWidth="20px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <InfoText>No notes exist in this Space anymore.</InfoText>
+                </EmptyMessageContainer>
+            )
         }
 
         return (
@@ -352,6 +378,43 @@ class AnnotationsSidebar extends React.Component<
                     const hasReplies =
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
+
+                    // If annot is owned by the current user, we allow a whole bunch of other functionality
+                    const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
+                    if (data.localId != null) {
+                        const localAnnotation = this.props.annotations.find(
+                            (a) => a.url === data.localId,
+                        )
+
+                        ownAnnotationProps.isBulkShareProtected =
+                            localAnnotation.isBulkShareProtected
+                        ownAnnotationProps.appendRepliesToggle = true
+                        ownAnnotationProps.url = localAnnotation.url
+                        ownAnnotationProps.lists = localAnnotation.lists
+                        ownAnnotationProps.comment = localAnnotation.comment
+                        ownAnnotationProps.isShared = localAnnotation.isShared
+                        ownAnnotationProps.lastEdited =
+                            localAnnotation.lastEdited
+                        ownAnnotationProps.mode = this.props.followedLists.byId[
+                            listId
+                        ].annotationModes[data.localId]
+                        ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
+                            { url: data.localId, isShared: true },
+                        )
+                        ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
+                            { url: data.localId, body: data.body },
+                            listId,
+                        )
+                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
+                            listId,
+                        )
+                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
+                            listId,
+                        )
+                    }
 
                     return (
                         <React.Fragment key={data.id}>
@@ -384,6 +447,7 @@ class AnnotationsSidebar extends React.Component<
                                 getListDetailsById={
                                     this.props.getListDetailsById
                                 }
+                                {...ownAnnotationProps}
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
@@ -654,11 +718,11 @@ class AnnotationsSidebar extends React.Component<
             return (
                 <FollowedListNotesContainer
                     bottom={listData.isExpanded ? '20px' : '5px'}
+                    key={listId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        key={listId}
                         onClick={() =>
                             this.props.expandFollowedListNotes(listId)
                         }
@@ -831,41 +895,60 @@ class AnnotationsSidebar extends React.Component<
     // }
 
     private renderAnnotationsEditable() {
-        const annots = this.props.annotations.map((annot, i) => {
-            const footerDeps = this.props.bindAnnotationFooterEventProps(annot)
-            return (
-                <AnnotationBox
-                    key={annot.url}
-                    isActive={this.props.activeAnnotationUrl === annot.url}
-                    zIndex={this.props.annotations.length - i}
-                >
-                    <AnnotationEditable
-                        {...annot}
-                        {...this.props}
-                        body={annot.body}
-                        comment={annot.comment}
-                        createdWhen={annot.createdWhen!}
-                        isShared={annot.isShared}
-                        isBulkShareProtected={annot.isBulkShareProtected}
-                        mode={this.props.annotationModes[annot.url]}
-                        isActive={this.props.activeAnnotationUrl === annot.url}
-                        onHighlightClick={this.props.setActiveAnnotationUrl(
-                            annot.url,
-                        )}
-                        onGoToAnnotation={footerDeps.onGoToAnnotation}
-                        annotationEditDependencies={this.props.bindAnnotationEditProps(
-                            annot,
-                        )}
-                        annotationFooterDependencies={footerDeps}
-                        isClickable={
-                            this.props.theme.canClickAnnotations &&
-                            annot.body?.length > 0
-                        }
-                        ref={(ref) => (this.annotationEditRef = ref)}
-                    />
-                </AnnotationBox>
+        const annots: JSX.Element[] = []
+
+        if (this.props.noteCreateState === 'running') {
+            annots.push(
+                <LoaderBox>{this.renderLoader('new-note-spinner')}</LoaderBox>,
             )
-        })
+        }
+
+        annots.push(
+            ...this.props.annotations.map((annot, i) => {
+                const footerDeps = this.props.bindAnnotationFooterEventProps(
+                    annot,
+                )
+                const ref = React.createRef<_AnnotationEditable>()
+                this.annotationEditRefs[annot.url] = ref
+                return (
+                    <AnnotationBox
+                        key={annot.url}
+                        isActive={this.props.activeAnnotationUrl === annot.url}
+                        zIndex={this.props.annotations.length - i}
+                    >
+                        <AnnotationEditable
+                            {...annot}
+                            {...this.props}
+                            body={annot.body}
+                            comment={annot.comment}
+                            isShared={annot.isShared}
+                            createdWhen={annot.createdWhen!}
+                            isBulkShareProtected={annot.isBulkShareProtected}
+                            mode={this.props.annotationModes[annot.url]}
+                            isActive={
+                                this.props.activeAnnotationUrl === annot.url
+                            }
+                            onHighlightClick={this.props.setActiveAnnotationUrl(
+                                annot.url,
+                            )}
+                            onGoToAnnotation={footerDeps.onGoToAnnotation}
+                            annotationEditDependencies={this.props.bindAnnotationEditProps(
+                                annot,
+                            )}
+                            annotationFooterDependencies={footerDeps}
+                            isClickable={
+                                this.props.theme.canClickAnnotations &&
+                                annot.body?.length > 0
+                            }
+                            passDownRef={ref}
+                            renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
+                            renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
+                            renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
+                        />
+                    </AnnotationBox>
+                )
+            }),
+        )
 
         if (this.props.needsWaypoint) {
             annots.push(
@@ -1085,6 +1168,14 @@ export default onClickOutside(AnnotationsSidebar)
 
 const SpacerBottom = styled.div`
     height: 1200px;
+`
+
+const LoaderBox = styled.div`
+    height: 100px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
 `
 
 const Link = styled.span`

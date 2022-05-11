@@ -833,7 +833,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         const page = previousState.searchResults.pageData.byId[event.pageId]
         event.dataTransfer.setData(
             'text/plain',
-            JSON.stringify({ fullPageUrl: page.fullUrl }),
+            JSON.stringify({
+                fullPageUrl: page.fullUrl,
+                normalizedPageUrl: page.normalizedUrl,
+            }),
         )
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageId } },
@@ -2532,9 +2535,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
-        const { fullPageUrl } = JSON.parse(
+        const { fullPageUrl, normalizedPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
-        )
+        ) as { fullPageUrl: string; normalizedPageUrl: string }
+
+        if (!fullPageUrl || !normalizedPageUrl) {
+            return
+        }
 
         this.options.analytics.trackEvent({
             category: 'Collections',
@@ -2553,6 +2560,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listData: {
                     [event.listId]: {
                         wasPageDropped: { $set: true },
+                    },
+                },
+            },
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [normalizedPageUrl]: {
+                            lists: {
+                                $apply: (lists: number[]) =>
+                                    lists.includes(event.listId)
+                                        ? lists
+                                        : [...lists, event.listId],
+                            },
+                        },
                     },
                 },
             },

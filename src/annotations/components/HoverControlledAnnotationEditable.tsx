@@ -10,7 +10,7 @@ interface State {
 }
 
 export default class HoverControlledAnnotationEditable extends React.Component<
-    Props,
+    Props & { passDownRef?: React.RefObject<AnnotationEditable> },
     State
 > {
     static defaultProps = AnnotationEditable.defaultProps
@@ -23,9 +23,11 @@ export default class HoverControlledAnnotationEditable extends React.Component<
         this.setState({ hoverState })
 
     render() {
+        const { passDownRef, ...props } = this.props
         return (
             <AnnotationEditable
-                {...this.props}
+                {...props}
+                ref={passDownRef}
                 onHighlightHover={this.setHoverState('main-content')}
                 onFooterHover={this.setHoverState('footer')}
                 onNoteHover={this.setHoverState('note')}
