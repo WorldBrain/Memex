@@ -59,6 +59,17 @@ export async function migrate({
                 )
 
                 if (newLists.size) {
+                    // Ensure we use existing lists if they have the same names
+                    const existingLists = (await dexie
+                        .table('customLists')
+                        .where('name')
+                        .anyOf([...newLists])
+                        .toArray()) as Array<{ name: string; id: number }>
+                    existingLists.forEach((list) => {
+                        newLists.delete(list.name)
+                        listNamesToIds.set(list.name, list.id)
+                    })
+
                     const customListData = [...newLists].map((name) => {
                         listIdCounter++
                         listNamesToIds.set(name, listIdCounter)
