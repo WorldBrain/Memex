@@ -13,7 +13,7 @@ interface Dependencies {
     chunkSize?: number
 }
 
-export async function migrate({
+export async function migrateTagsToSpaces({
     dexie,
     queueChangesForCloudSync,
     chunkSize = 100,

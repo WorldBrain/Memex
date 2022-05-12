@@ -25,7 +25,9 @@ async function setupTest() {
         storex: setup.storageManager,
         db: setup.storageManager.backend['dexieInstance'],
         localStorage: setup.browserAPIs.storage.local,
-        backgroundModules: setup.backgroundModules,
+        bgModules: setup.backgroundModules,
+        syncSettingsStore:
+            setup.backgroundModules.bgScript.deps.syncSettingsStore,
         localExtSettingStore:
             setup.backgroundModules.personalCloud.options.localExtSettingStore,
         normalizeUrl,
@@ -35,6 +37,165 @@ async function setupTest() {
 }
 
 describe('quick-and-dirty migration tests', () => {
+    describe('tags to spaces migration', () => {
+        it('should do nothing if sync settings key already set', async () => {
+            const { migrationProps } = await setupTest()
+
+            await migrationProps.db
+                .table('tags')
+                .bulkAdd([{ name: 'test a', url: 'test.com/1' }])
+
+            await migrationProps.syncSettingsStore.extension.set(
+                'areTagsMigratedToSpaces',
+                true,
+            )
+            const expectedSyncSettingsStoreChange = {
+                id: expect.any(Number),
+                createdWhen: expect.any(Number),
+                action: {
+                    type: 'push-object',
+                    updates: [
+                        expect.objectContaining({
+                            type: 'overwrite',
+                            collection: 'settings',
+                            object: expect.objectContaining({
+                                key: '@Extension-areTagsMigratedToSpaces',
+                                value: true,
+                            }),
+                        }),
+                    ],
+                },
+            }
+
+            expect(
+                await migrationProps.db.table('customLists').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('annotListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('personalCloudAction').toArray(),
+            ).toEqual([expectedSyncSettingsStoreChange])
+
+            await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db.table('customLists').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('annotListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('personalCloudAction').toArray(),
+            ).toEqual([expectedSyncSettingsStoreChange])
+        })
+
+        it('should run if sync settings key not set, and set it post migration', async () => {
+            const { migrationProps } = await setupTest()
+
+            const testTag = { name: 'test a', url: 'test.com/1' }
+            await migrationProps.db.table('tags').bulkAdd([testTag])
+
+            expect(
+                await migrationProps.db.table('customLists').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('annotListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('personalCloudAction').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.syncSettingsStore.extension.get(
+                    'areTagsMigratedToSpaces',
+                ),
+            ).not.toBe(true)
+
+            await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces'](
+                migrationProps,
+            )
+
+            expect(
+                await migrationProps.db.table('customLists').toArray(),
+            ).toEqual([expect.objectContaining({ name: testTag.name })])
+            expect(
+                await migrationProps.db.table('pageListEntries').toArray(),
+            ).toEqual([expect.objectContaining({ pageUrl: testTag.url })])
+            expect(
+                await migrationProps.db.table('annotListEntries').toArray(),
+            ).toEqual([])
+            expect(
+                await migrationProps.db.table('personalCloudAction').toArray(),
+            ).toEqual([
+                {
+                    id: expect.any(Number),
+                    createdWhen: expect.any(Number),
+                    action: {
+                        type: 'push-object',
+                        updates: [
+                            expect.objectContaining({
+                                type: 'overwrite',
+                                collection: 'customLists',
+                                object: expect.objectContaining({
+                                    name: testTag.name,
+                                }),
+                            }),
+                        ],
+                    },
+                },
+                {
+                    id: expect.any(Number),
+                    createdWhen: expect.any(Number),
+                    action: {
+                        type: 'push-object',
+                        updates: [
+                            expect.objectContaining({
+                                type: 'overwrite',
+                                collection: 'pageListEntries',
+                                object: expect.objectContaining({
+                                    pageUrl: testTag.url,
+                                }),
+                            }),
+                        ],
+                    },
+                },
+                {
+                    id: expect.any(Number),
+                    createdWhen: expect.any(Number),
+                    action: {
+                        type: 'push-object',
+                        updates: [
+                            expect.objectContaining({
+                                type: 'overwrite',
+                                collection: 'settings',
+                                object: expect.objectContaining({
+                                    key: '@Extension-areTagsMigratedToSpaces',
+                                    value: true,
+                                }),
+                            }),
+                        ],
+                    },
+                },
+            ])
+            expect(
+                await migrationProps.syncSettingsStore.extension.get(
+                    'areTagsMigratedToSpaces',
+                ),
+            ).toBe(true)
+        })
+    })
+
     describe('post-cloud update readwise key migration', () => {
         it('should do nothing if no existing key exists', async () => {
             const { migrationProps, fetch } = await setupTest()

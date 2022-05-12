@@ -2,7 +2,7 @@ import type Dexie from 'dexie'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/utils'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { migrate } from './tags-migration'
+import { migrateTagsToSpaces } from './tags-migration'
 import * as DATA from './tags-migration.test.data'
 
 async function setupTest() {
@@ -29,7 +29,7 @@ async function testMigration(
     expect(queuedData.get('pageListEntries')).toBeUndefined()
     expect(queuedData.get('annotListEntries')).toBeUndefined()
 
-    await migrate({
+    await migrateTagsToSpaces({
         dexie,
         chunkSize: 50,
         queueChangesForCloudSync: async (data) => {
@@ -157,7 +157,7 @@ describe('tags to spaces data migration', () => {
             })),
         )
 
-        await migrate({
+        await migrateTagsToSpaces({
             dexie,
             chunkSize: 50,
             queueChangesForCloudSync: async (data) => {
