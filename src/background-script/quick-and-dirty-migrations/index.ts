@@ -9,14 +9,14 @@ import {
 import textStemmer from '@worldbrain/memex-stemmer'
 
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
-import type { BackgroundModules } from './setup'
+import type { BackgroundModules } from '../setup'
 import {
     createSyncSettingsStore,
     SyncSettingsStore,
 } from 'src/sync-settings/util'
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
-import type { LocalExtensionSettings } from './types'
+import type { LocalExtensionSettings } from '../types'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { migrateTagsToSpaces } from './tags-migration'

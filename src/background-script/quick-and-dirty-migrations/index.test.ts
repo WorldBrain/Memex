@@ -6,11 +6,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import range from 'lodash/range'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import {
-    migrations,
-    MigrationProps,
-    MIGRATION_PREFIX,
-} from './quick-and-dirty-migrations'
+import { migrations, MigrationProps, MIGRATION_PREFIX } from '.'
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
 
