@@ -174,6 +174,18 @@ class BackgroundScript {
         })
     }
 
+    private async ___runTagsMigration() {
+        await migrations['migrate-tags-to-spaces']({
+            bgModules: this.deps.bgModules,
+            storex: this.deps.storageManager,
+            db: this.deps.storageManager.backend['dexieInstance'],
+            localStorage: this.deps.storageAPI.local,
+            normalizeUrl: this.deps.urlNormalizer,
+            syncSettingsStore: this.deps.syncSettingsStore,
+            localExtSettingStore: this.deps.localExtSettingStore,
+        })
+    }
+
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
