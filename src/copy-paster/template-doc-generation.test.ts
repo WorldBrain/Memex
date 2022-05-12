@@ -35,8 +35,8 @@ async function insertTestData(storageManager: Storex) {
         time: DATA.testPageCCreatedAt.getTime() + 1000,
     })
 
-    const spaceNames = new Set<string>([
-        ...DATA.testPageASpaces,
+    const publicSpaceNames = new Set<string>([
+        ...[...DATA.testPageASpaces, ...DATA.testPageAPrivateSpaces],
         ...DATA.testPageBSpaces,
         ...DATA.testPageCSpaces,
         ...DATA.testAnnotationASpaces,
@@ -44,10 +44,25 @@ async function insertTestData(storageManager: Storex) {
         ...DATA.testAnnotationCSpaces,
         ...DATA.testAnnotationDSpaces,
     ])
+    const privateSpaceNames = new Set<string>([...DATA.testPageAPrivateSpaces])
 
     const spaceNamesToIds = new Map<string, number>()
     let listIdCounter = 0
-    for (const name of spaceNames) {
+    for (const name of publicSpaceNames) {
+        await storageManager.collection('customLists').createObject({
+            name,
+            id: listIdCounter,
+            createdAt: new Date(listIdCounter),
+        })
+        await storageManager.collection('sharedListMetadata').createObject({
+            localId: listIdCounter,
+            remoteId: listIdCounter.toString(),
+        })
+        spaceNamesToIds.set(name, listIdCounter)
+        listIdCounter++
+    }
+
+    for (const name of privateSpaceNames) {
         await storageManager.collection('customLists').createObject({
             name,
             id: listIdCounter,
@@ -144,7 +159,10 @@ async function insertTestData(storageManager: Storex) {
     await insertTags(DATA.testAnnotationCUrl, DATA.testAnnotationCTags)
     await insertTags(DATA.testAnnotationDUrl, DATA.testAnnotationDTags)
 
-    await insertPageEntries(DATA.testPageAUrl, DATA.testPageASpaces)
+    await insertPageEntries(DATA.testPageAUrl, [
+        ...DATA.testPageASpaces,
+        ...DATA.testPageAPrivateSpaces,
+    ])
     await insertPageEntries(DATA.testPageBUrl, DATA.testPageBSpaces)
     await insertPageEntries(DATA.testPageCUrl, DATA.testPageCSpaces)
 
@@ -152,7 +170,11 @@ async function insertTestData(storageManager: Storex) {
     await insertAnnotEntries(
         DATA.testAnnotationAUrl,
         DATA.testAnnotationASpaces.filter(
-            (name) => !DATA.testPageASpaces.includes(name),
+            (name) =>
+                ![
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ].includes(name),
         ),
     )
     await insertAnnotEntries(
@@ -280,8 +302,14 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
@@ -482,8 +510,14 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 title: DATA.testPageA.fullTitle,
@@ -601,8 +635,14 @@ describe('Content template doc generation', () => {
                 Pages: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         PageUrl: DATA.testPageAUrl,
                         title: DATA.testPageA.fullTitle,
                         url: DATA.testPageAUrl,
@@ -661,8 +701,14 @@ describe('Content template doc generation', () => {
                 Pages: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageA.fullTitle,
@@ -732,8 +778,14 @@ describe('Content template doc generation', () => {
         expect(await generate('{{{PageTitle}}} {{{PageSpaces}}}')).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
@@ -821,8 +873,14 @@ describe('Content template doc generation', () => {
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
                         PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
@@ -845,8 +903,14 @@ describe('Content template doc generation', () => {
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
                                 PageTagList: DATA.testPageATags,
-                                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                                PageSpaceList: DATA.testPageASpaces,
+                                PageSpaces: joinSpaces([
+                                    ...DATA.testPageASpaces,
+                                    ...DATA.testPageAPrivateSpaces,
+                                ]),
+                                PageSpaceList: [
+                                    ...DATA.testPageASpaces,
+                                    ...DATA.testPageAPrivateSpaces,
+                                ],
                                 PageUrl: DATA.testPageAUrl,
                                 PageLink: expect.any(String),
                                 PageCreatedAt: serializeDate(
@@ -870,8 +934,14 @@ describe('Content template doc generation', () => {
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
                                 PageTagList: DATA.testPageATags,
-                                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                                PageSpaceList: DATA.testPageASpaces,
+                                PageSpaces: joinSpaces([
+                                    ...DATA.testPageASpaces,
+                                    ...DATA.testPageAPrivateSpaces,
+                                ]),
+                                PageSpaceList: [
+                                    ...DATA.testPageASpaces,
+                                    ...DATA.testPageAPrivateSpaces,
+                                ],
                                 PageUrl: DATA.testPageAUrl,
                                 PageLink: expect.any(String),
                                 PageCreatedAt: serializeDate(
@@ -1427,8 +1497,14 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 PageLink: expect.any(String),
                 title: DATA.testPageA.fullTitle,
@@ -1439,8 +1515,14 @@ describe('Content template doc generation', () => {
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageA.fullTitle,
@@ -1457,8 +1539,14 @@ describe('Content template doc generation', () => {
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageA.fullTitle,
@@ -1587,8 +1675,14 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
@@ -1608,8 +1702,14 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
@@ -1731,8 +1831,14 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 NoteText: DATA.testAnnotationAText,
                 NoteTags: joinTags(DATA.testAnnotationATags),
@@ -1900,8 +2006,14 @@ describe('Content template doc generation', () => {
         ).toEqual([
             {
                 PageTitle: DATA.testPageA.fullTitle,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
 
                 title: DATA.testPageA.fullTitle,
@@ -2016,8 +2128,14 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 NoteCreatedAt: serializeDate(DATA.testAnnotationACreatedAt),
@@ -2031,8 +2149,14 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageUrl: DATA.testPageAUrl,
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 NoteCreatedAt: serializeDate(DATA.testAnnotationBCreatedAt),
@@ -2154,8 +2278,14 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
-                PageSpaces: joinSpaces(DATA.testPageASpaces),
-                PageSpaceList: DATA.testPageASpaces,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpaceList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
@@ -2175,8 +2305,14 @@ describe('Content template doc generation', () => {
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         url: DATA.testPageAUrl,
                         tags: DATA.testPageATags,
                         title: DATA.testPageA.fullTitle,
@@ -2195,8 +2331,14 @@ describe('Content template doc generation', () => {
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
-                        PageSpaces: joinSpaces(DATA.testPageASpaces),
-                        PageSpaceList: DATA.testPageASpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpaceList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
                         url: DATA.testPageAUrl,
                         tags: DATA.testPageATags,
                         title: DATA.testPageA.fullTitle,
