@@ -1,5 +1,6 @@
 export const TAG_NAME_PREFIX = 'test tag '
 export const PAGE_URL_PREFIX = 'test.com/'
+export const PDF_PAGE_URL_PREFIX = 'memex.cloud/ct/'
 
 export const createTestTagRecords = (args: {
     numOfTags: number
@@ -11,7 +12,10 @@ export const createTestTagRecords = (args: {
     )
 
     return [...Array(args.pagesPerTag).keys()].flatMap((pageNumber) => {
-        const normalizedPageUrl = PAGE_URL_PREFIX + pageNumber
+        const normalizedPageUrl =
+            pageNumber % 2 === 0
+                ? PAGE_URL_PREFIX + pageNumber
+                : PDF_PAGE_URL_PREFIX + pageNumber + '.pdf'
         return [
             ...tagNames.map((tagName) => ({
                 name: tagName,
@@ -32,5 +36,5 @@ export const createTestTagRecords = (args: {
 
 const createAnnotsForPage = (normalizedPageUrl: string, numOfAnnots: number) =>
     [...Array(numOfAnnots).keys()].map(
-        (i) => `${normalizedPageUrl}#${Date.now() + i}`,
+        (i) => `${normalizedPageUrl}/#${Date.now() + i}`,
     )
