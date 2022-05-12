@@ -3,6 +3,7 @@ import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/uti
 import { listNameStemmer } from '@worldbrain/memex-stemmer'
 import type { PageListEntry } from 'src/custom-lists/background/types'
 import type { AnnotListEntry } from 'src/annotations/types'
+import * as Raven from 'src/util/raven'
 
 interface Dependencies {
     dexie: Dexie
@@ -100,6 +101,11 @@ export async function migrateTagsToSpaces({
                 for (const tag of tags) {
                     const listId = listNamesToIds.get(tag.name)
                     if (listId == null) {
+                        Raven.captureException(
+                            new Error(
+                                `Tags migration: List ID not found for tag name: ${tag.name}`,
+                            ),
+                        )
                         continue
                     }
 
