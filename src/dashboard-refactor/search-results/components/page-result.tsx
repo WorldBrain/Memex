@@ -216,12 +216,12 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick: this.props.onCopyPasterBtnClick,
                     tooltipText: 'Copy Page',
                 },
-                {
-                    key: 'share-page-btn',
-                    image: this.props.isShared ? icons.shared : icons.link,
-                    onClick: this.props.onShareBtnClick,
-                    tooltipText: 'Share Page and Notes',
-                },
+                // {
+                //     key: 'share-page-btn',
+                //     image: this.props.isShared ? icons.shared : icons.link,
+                //     onClick: this.props.onShareBtnClick,
+                //     tooltipText: 'Share Page and Notes',
+                // },
                 // {
                 //     key: 'list-page-btn',
                 //     image: this.hasLists
@@ -258,11 +258,11 @@ export default class PageResultView extends PureComponent<Props> {
                 isDisabled: true,
                 image: icons.copy,
             },
-            {
-                key: 'share-page-btn',
-                isDisabled: true,
-                image: this.props.isShared ? icons.shared : icons.link,
-            },
+            // {
+            //     key: 'share-page-btn',
+            //     isDisabled: true,
+            //     image: this.props.isShared ? icons.shared : icons.link,
+            // },
             // {
             //     key: 'list-page-btn',
             //     isDisabled: true,

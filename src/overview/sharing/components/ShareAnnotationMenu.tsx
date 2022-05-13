@@ -109,19 +109,38 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                     <>
                         {this.props.context === 'AllNotesShare' ? (
                             <>
-                                {this.props.showLink && this.props.link ? (
+                                <PrivacyContainer
+                                    isLinkShown={this.props.showLink}
+                                >
+                                    <TopArea>
+                                        <PrivacyTitle>
+                                            {this.props.privacyOptionsTitleCopy}
+                                        </PrivacyTitle>
+                                        <PrivacyOptionContainer top="5px">
+                                            {this.props.privacyOptions.map(
+                                                (props, i) => (
+                                                    <SharePrivacyOption
+                                                        key={i}
+                                                        {...props}
+                                                    />
+                                                ),
+                                            )}
+                                        </PrivacyOptionContainer>
+                                    </TopArea>
+                                </PrivacyContainer>
+                                {/* {this.props.showLink && this.props.link ? (
                                     <>
                                         <TopArea>
                                             <PrivacyTitle>
                                                 {this.props.linkTitleCopy}
                                             </PrivacyTitle>
-                                            {/* {this.props.onPlusBtnClick && (
+                                            {this.props.onPlusBtnClick && (
                                     <Icon
                                         icon="plus"
                                         height="18px"
                                         onClick={this.props.onPlusBtnClick}
                                     />
-                                )} */}
+                                )}
                                             <LinkCopierBox>
                                                 <LinkCopier
                                                     state={this.state.copyState}
@@ -176,7 +195,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                             </InfoText>
                                         </NoResultsSection>
                                     </>
-                                )}
+                                )} */}
                             </>
                         ) : (
                             <>

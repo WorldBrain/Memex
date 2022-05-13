@@ -1131,7 +1131,7 @@ export class AnnotationsSidebar extends React.Component<
                     />
                 </ButtonTooltip>
                 <ButtonTooltip
-                    tooltipText="Share annotated Page"
+                    tooltipText="Bulk-edit note privacy"
                     position="bottomRightEdge"
                 >
                     <Icon
@@ -1141,7 +1141,7 @@ export class AnnotationsSidebar extends React.Component<
                             })
                         }
                         heightAndWidth="14px"
-                        filePath={icons.link}
+                        filePath={icons.multiEdit}
                     />
                 </ButtonTooltip>
             </TopBarActionBtns>
