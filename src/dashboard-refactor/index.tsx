@@ -552,8 +552,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
-        const { searchResults, listsSidebar } = this.state
-        const { searchFilters } = this.state
+        const { searchResults, listsSidebar, searchFilters } = this.state
 
         return (
             <SearchResultsContainer

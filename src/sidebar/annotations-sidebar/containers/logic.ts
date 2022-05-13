@@ -96,7 +96,7 @@ export class SidebarContainerLogic extends UILogic<
      * before the sidebar script had been loaded before, let alone the annotations data.
      */
     annotationsLoadComplete = resolvablePromise()
-    syncSettings: SyncSettingsStore<'contentSharing'>
+    syncSettings: SyncSettingsStore<'contentSharing' | 'extension'>
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -214,6 +214,7 @@ export class SidebarContainerLogic extends UILogic<
             showClearFiltersBtn: false,
             showFiltersSidebar: false,
             showSocialSearch: false,
+            shouldShowTagsUIs: false,
 
             pageCount: 0,
             noResults: false,
@@ -254,6 +255,11 @@ export class SidebarContainerLogic extends UILogic<
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
+            const areTagsMigrated = await this.syncSettings.extension.get(
+                'areTagsMigratedToSpaces',
+            )
+            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
+
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl != null) {
                 await annotationsCache.load(pageUrl)

@@ -169,6 +169,7 @@ export interface SidebarContainerState
     // Filter sidebar props
     showFiltersSidebar: boolean
     showSocialSearch: boolean
+    shouldShowTagsUIs: boolean
 
     annotCount?: number
 

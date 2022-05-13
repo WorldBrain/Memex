@@ -355,13 +355,15 @@ export default class PageResultView extends PureComponent<Props> {
                             )}
                         />
                     )}
-                    <TagsSegment
-                        tags={this.props.tags}
-                        onMouseEnter={this.props.onTagsHover}
-                        showEditBtn={this.props.hoverState === 'tags'}
-                        onEditBtnClick={this.props.onTagPickerBtnClick}
-                        onTagClick={this.props.onTagClick}
-                    />
+                    {this.props.onTagPickerBtnClick && (
+                        <TagsSegment
+                            tags={this.props.tags}
+                            onMouseEnter={this.props.onTagsHover}
+                            showEditBtn={this.props.hoverState === 'tags'}
+                            onEditBtnClick={this.props.onTagPickerBtnClick}
+                            onTagClick={this.props.onTagClick}
+                        />
+                    )}
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
