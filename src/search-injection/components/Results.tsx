@@ -99,7 +99,7 @@ const SettingsButtonContainer = styled.div`
 const MemexContainer = styled.div`
     display: flex;
     flex-direction: column;
-    height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
+    max-height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
     width: ${(props) =>
         props.position === 'above' ? 'fill-available' : '450px'};
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
