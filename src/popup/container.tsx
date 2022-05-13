@@ -260,7 +260,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>Save & annotate this PDF</NoticeTitle>
                     <PrimaryAction
-                        label="Open PDF Reader"
+                        label="Open Memex PDF Reader"
                         onClick={() =>
                             this.processEvent('togglePDFReader', null)
                         }
