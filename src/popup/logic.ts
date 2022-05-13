@@ -13,7 +13,7 @@ export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
     tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
     runtimeAPI: Pick<Runtime.Static, 'getURL'>
-    syncSettings: SyncSettingsStore<'pdfIntegration'>
+    syncSettings: SyncSettingsStore<'pdfIntegration' | 'extension'>
     pdfIntegrationBG: PDFRemoteInterface
 }
 
@@ -25,6 +25,7 @@ export interface Event {
 export interface State {
     loadState: UITaskState
     currentPageUrl: string
+    shouldShowTagsUIs: boolean
     isPDFReaderEnabled: boolean
     isFileAccessAllowed: boolean
 }
@@ -41,18 +42,20 @@ export default class PopupLogic extends UILogic<State, Event> {
     }
 
     getInitialState = (): State => ({
-        loadState: 'pristine',
-        isPDFReaderEnabled: false,
         currentPageUrl: '',
+        loadState: 'pristine',
+        shouldShowTagsUIs: false,
+        isPDFReaderEnabled: false,
         isFileAccessAllowed: false,
     })
 
     async init() {
         const { syncSettings, tabsAPI, extensionAPI } = this.dependencies
         await loadInitial(this, async () => {
-            const isPDFReaderEnabled = await syncSettings.pdfIntegration.get(
-                'shouldAutoOpen',
-            )
+            const [areTagsMigrated, isPDFReaderEnabled] = await Promise.all([
+                syncSettings.extension.get('areTagsMigratedToSpaces'),
+                syncSettings.pdfIntegration.get('shouldAutoOpen'),
+            ])
             const [currentTab] = await tabsAPI.query({
                 active: true,
                 currentWindow: true,
@@ -60,6 +63,7 @@ export default class PopupLogic extends UILogic<State, Event> {
             const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
             this.emitMutation({
                 currentPageUrl: { $set: currentTab?.url },
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
                 isFileAccessAllowed: { $set: isFileAccessAllowed },
             })

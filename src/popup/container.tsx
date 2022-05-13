@@ -366,7 +366,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 {this.maybeRenderBlurredNotice()}
                 <BookmarkButton closePopup={this.closePopup} />
                 <CollectionsButton />
-                <TagsButton />
+                {this.state.shouldShowTagsUIs && <TagsButton />}
                 <hr />
                 <LinkButton goToDashboard={this.onSearchClick} />
 

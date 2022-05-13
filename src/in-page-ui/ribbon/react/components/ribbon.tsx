@@ -327,6 +327,38 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private renderTagsUIs() {
+        if (!this.props.tagging.shouldShowTagsUIs) {
+            return false
+        }
+
+        return (
+            <>
+                <ButtonTooltip
+                    tooltipText={this.getTooltipText('addTag')}
+                    position="leftNarrow"
+                >
+                    <Icon
+                        onClick={() =>
+                            this.props.tagging.setShowTagsPicker(
+                                !this.props.tagging.showTagsPicker,
+                            )
+                        }
+                        color={'darkerIconColor'}
+                        heightAndWidth="18px"
+                        filePath={
+                            this.props.tagging.pageHasTags ||
+                            this.props.tagging.tags.length > 0
+                                ? icons.tagFull
+                                : icons.tagEmpty
+                        }
+                    />
+                </ButtonTooltip>
+                {this.renderTagsPicker()}
+            </>
+        )
+    }
+
     render() {
         if (!this.state.shortcutsReady) {
             return false
@@ -521,28 +553,7 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 {this.renderCollectionsPicker()}
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText('addTag')}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.tagging.setShowTagsPicker(
-                                                !this.props.tagging
-                                                    .showTagsPicker,
-                                            )
-                                        }
-                                        color={'darkerIconColor'}
-                                        heightAndWidth="18px"
-                                        filePath={
-                                            this.props.tagging.pageHasTags ||
-                                            this.props.tagging.tags.length > 0
-                                                ? icons.tagFull
-                                                : icons.tagEmpty
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                {this.renderTagsPicker()}
+                                {this.renderTagsUIs()}
                                 <HorizontalLine />
                                 <ButtonTooltip
                                     tooltipText="Settings"

@@ -19,7 +19,7 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
-    onTagPickerBtnClick: React.MouseEventHandler
+    onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
@@ -200,6 +200,7 @@ export interface RootState {
     noResultsType: NoResultsType
     isListShareMenuShown: boolean
     isSortMenuShown: boolean
+    shouldShowTagsUIs: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
     isCloudUpgradeBannerShown: boolean

@@ -133,6 +133,7 @@ export class RibbonContainerLogic extends UILogic<
                 tags: [],
                 showTagsPicker: false,
                 pageHasTags: false,
+                shouldShowTagsUIs: false,
             },
             lists: {
                 showListsPicker: false,
@@ -149,9 +150,20 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async (incoming) => {
+        const { getPageUrl, syncSettings } = this.dependencies
+
         await loadInitial<RibbonContainerState>(this, async () => {
-            const url = await this.dependencies.getPageUrl()
-            this.emitMutation({ pageUrl: { $set: url } })
+            const [url, areTagsMigrated] = await Promise.all([
+                getPageUrl(),
+                syncSettings.extension.get('areTagsMigratedToSpaces'),
+            ])
+
+            this.emitMutation({
+                pageUrl: { $set: url },
+                tagging: {
+                    shouldShowTagsUIs: { $set: !areTagsMigrated },
+                },
+            })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()

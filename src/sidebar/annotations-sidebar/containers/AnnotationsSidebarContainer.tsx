@@ -848,7 +848,9 @@ export class AnnotationsSidebarContainer<
                                     this.renderShareMenuForAnnotation
                                 }
                                 renderTagsPickerForAnnotation={
-                                    this.renderTagsPickerForAnnotation
+                                    this.state.shouldShowTagsUIs
+                                        ? this.renderTagsPickerForAnnotation
+                                        : undefined
                                 }
                                 renderListsPickerForAnnotation={
                                     this.renderListPickerForAnnotation

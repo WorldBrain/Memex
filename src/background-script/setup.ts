@@ -416,25 +416,6 @@ export function createBackgroundModules(options: {
         prefix: 'localSettings.',
     })
 
-    const bgScript = new BackgroundScript({
-        storageManager,
-        tabManagement,
-        localExtSettingStore,
-        storageChangesMan: options.localStorageChangesManager,
-        customListsBackground: customLists,
-        copyPasterBackground: copyPaster,
-        notifsBackground: notifications,
-        syncSettingsBG: syncSettings,
-        urlNormalizer: normalizeUrl,
-        commandsAPI: browser.commands,
-        readwiseBG: readwise,
-        runtimeAPI: browser.runtime,
-        storageAPI: browser.storage,
-        alarmsAPI: browser.alarms,
-        tabsAPI: browser.tabs,
-        syncSettingsStore,
-    })
-
     const connectivityChecker = new ConnectivityCheckerBackground({
         xhr: new XMLHttpRequest(),
     })
@@ -592,6 +573,29 @@ export function createBackgroundModules(options: {
         },
         getServerStorageManager,
     })
+
+    const bgScript = new BackgroundScript({
+        storageChangesMan: options.localStorageChangesManager,
+        urlNormalizer: normalizeUrl,
+        commandsAPI: browser.commands,
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
+        alarmsAPI: browser.alarms,
+        tabsAPI: browser.tabs,
+        localExtSettingStore,
+        syncSettingsStore,
+        storageManager,
+        bgModules: {
+            readwise,
+            copyPaster,
+            customLists,
+            syncSettings,
+            tabManagement,
+            personalCloud,
+            notifications,
+        },
+    })
+
     options.services.contentSharing.preKeyGeneration = async (params) => {
         if (params.key.roleID > SharedListRoleID.Commenter) {
             await personalCloud.waitForSync()

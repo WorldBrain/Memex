@@ -21,6 +21,7 @@ const setupLogicHelper = async ({
     device,
     withAuth,
     pageUrl = DATA.CURRENT_TAB_URL_1,
+    skipInitEvent = false,
     focusEditNoteForm = () => undefined,
     focusCreateForm = () => undefined,
     copyToClipboard = () => undefined,
@@ -28,6 +29,7 @@ const setupLogicHelper = async ({
     device: UILogicTestDevice
     pageUrl?: string
     withAuth?: boolean
+    skipInitEvent?: boolean
     focusEditNoteForm?: (annotationId: string) => void
     focusCreateForm?: () => void
     copyToClipboard?: (text: string) => Promise<boolean>
@@ -93,7 +95,9 @@ const setupLogicHelper = async ({
 
     const sidebar = device.createElement(sidebarLogic)
 
-    await sidebar.init()
+    if (!skipInitEvent) {
+        await sidebar.init()
+    }
     return { sidebar, sidebarLogic, analytics, annotationsCache, emittedEvents }
 }
 
@@ -667,6 +671,25 @@ describe('SidebarContainerLogic', () => {
             })
             expect(isCreateFormFocused).toBe(true)
         })
+    })
+
+    it('should check whether tags migration is done to signal showing of tags UI on init', async ({
+        device,
+    }) => {
+        const {
+            sidebar,
+            sidebarLogic: { syncSettings },
+        } = await setupLogicHelper({ device, skipInitEvent: true })
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', false)
+        expect(sidebar.state.shouldShowTagsUIs).toBe(false)
+        await sidebar.init()
+        expect(sidebar.state.shouldShowTagsUIs).toBe(true)
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', true)
+        expect(sidebar.state.shouldShowTagsUIs).toBe(true)
+        await sidebar.init()
+        expect(sidebar.state.shouldShowTagsUIs).toBe(false)
     })
 
     it('should be able to set active annotation copy paster', async ({

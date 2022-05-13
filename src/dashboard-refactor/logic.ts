@@ -85,7 +85,9 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
-    syncSettings: SyncSettingsStore<'contentSharing' | 'dashboard'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'dashboard' | 'extension'
+    >
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -135,6 +137,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
+                shouldShowTagsUIs: false,
                 showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
@@ -246,20 +249,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
 
         const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
-        const listsSidebarLocked = await this.syncSettings.dashboard.get(
-            'listSidebarLocked',
-        )
-        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
-            'onboardingMsgSeen',
-        )
-        const subBannerShownAfter = await this.syncSettings.dashboard.get(
-            'subscribeBannerShownAfter',
-        )
+        const [
+            listsSidebarLocked,
+            onboardingMsgSeen,
+            subBannerShownAfter,
+            areTagsMigrated,
+        ] = await Promise.all([
+            this.syncSettings.dashboard.get('listSidebarLocked'),
+            this.syncSettings.dashboard.get('onboardingMsgSeen'),
+            this.syncSettings.dashboard.get('subscribeBannerShownAfter'),
+            this.syncSettings.extension.get('areTagsMigratedToSpaces'),
+        ])
 
         const mutation: UIMutation<State> = {
             isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
                 isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: {

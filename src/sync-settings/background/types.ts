@@ -39,6 +39,7 @@ export interface SyncSettingsByFeature {
     extension: {
         blocklist: string
         shouldTrackAnalytics: boolean
+        areTagsMigratedToSpaces: boolean
         keyboardShortcuts: {
             shortcutsEnabled: boolean
             addTagShortcutEnabled: boolean
