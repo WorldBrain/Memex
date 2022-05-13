@@ -124,7 +124,6 @@ class Container extends React.Component<Props, State> {
             this.setState({
                 searchResults: searchResDocs,
             })
-            console.log('2', this.state.searchResults.length)
         } catch (e) {
             const searchRes = []
             const searchResDocs = searchRes.slice(0, limit)
