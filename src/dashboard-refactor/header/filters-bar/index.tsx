@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 
-import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
-import styles, { fonts } from 'src/dashboard-refactor/styles'
+import { fonts } from 'src/dashboard-refactor/styles'
 import TagPicker from 'src/tags/ui/TagPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPicker from './DomainPicker/'
@@ -15,10 +14,8 @@ import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { Icon } from 'src/dashboard-refactor/styled-components'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { select } from '@storybook/addon-knobs'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -120,7 +117,7 @@ export interface FiltersBarProps {
     toggleTagsFilter: () => void
     toggleDatesFilter: () => void
     toggleDomainsFilter: () => void
-    tagPickerProps: TagPickerDependencies
+    tagPickerProps?: TagPickerDependencies
     datePickerProps: DateRangeSelectionProps
     domainPickerProps: DomainPickerDependencies
 }
@@ -310,15 +307,19 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             icons.globe,
                             this.props.domainPickerProps,
                         )}
-                        {this.renderTagPicker()}
-                        {this.renderFilterSelectButton(
-                            'Tags',
-                            'tag',
-                            this.props.toggleTagsFilter,
-                            this.props.showTagsFilter,
-                            this.props.areTagsFiltered,
-                            icons.tagEmpty,
-                            this.props.tagPickerProps,
+                        {this.props.tagPickerProps && (
+                            <>
+                                {this.renderTagPicker()}
+                                {this.renderFilterSelectButton(
+                                    'Tags',
+                                    'tag',
+                                    this.props.toggleTagsFilter,
+                                    this.props.showTagsFilter,
+                                    this.props.areTagsFiltered,
+                                    icons.tagEmpty,
+                                    this.props.tagPickerProps,
+                                )}
+                            </>
                         )}
                         {this.renderDomainPicker()}
                     </FilterBtnsContainer>

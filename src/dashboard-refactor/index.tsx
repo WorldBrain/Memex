@@ -266,7 +266,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderFiltersBar() {
         const { searchBG } = this.props
-        const { searchFilters } = this.state
+        const { searchFilters, searchResults } = this.state
 
         const toggleTagsFilter = () =>
             this.processEvent('toggleShowTagPicker', {
@@ -339,30 +339,33 @@ export class DashboardContainer extends StatefulUIElement<
                             domains: updatePickerValues(args)(args.selected),
                         }),
                 }}
-                tagPickerProps={{
-                    onClickOutside: toggleTagsFilter,
-                    onEscapeKeyDown: toggleTagsFilter,
-                    initialSelectedEntries: () => searchFilters.tagsIncluded,
-                    queryEntries: (query) =>
-                        searchBG.suggest({
-                            query,
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
-                        }),
-                    loadDefaultSuggestions: () =>
-                        searchBG.extendedSuggest({
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.tagsIncluded,
-                                ...searchFilters.tagsExcluded,
-                            ],
-                        }),
-                    onUpdateEntrySelection: (args) =>
-                        this.processEvent('setTagsIncluded', {
-                            tags: updatePickerValues(args)(args.selected),
-                        }),
-                }}
+                tagPickerProps={
+                    searchResults.shouldShowTagsUIs && {
+                        onClickOutside: toggleTagsFilter,
+                        onEscapeKeyDown: toggleTagsFilter,
+                        initialSelectedEntries: () =>
+                            searchFilters.tagsIncluded,
+                        queryEntries: (query) =>
+                            searchBG.suggest({
+                                query,
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                            }),
+                        loadDefaultSuggestions: () =>
+                            searchBG.extendedSuggest({
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                                notInclude: [
+                                    ...searchFilters.tagsIncluded,
+                                    ...searchFilters.tagsExcluded,
+                                ],
+                            }),
+                        onUpdateEntrySelection: (args) =>
+                            this.processEvent('setTagsIncluded', {
+                                tags: updatePickerValues(args)(args.selected),
+                            }),
+                    }
+                }
             />
         )
     }
