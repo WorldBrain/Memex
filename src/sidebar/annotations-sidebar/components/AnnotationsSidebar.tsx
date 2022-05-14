@@ -1140,7 +1140,7 @@ export class AnnotationsSidebar extends React.Component<
                                 showAllNotesShareMenu: true,
                             })
                         }
-                        heightAndWidth="14px"
+                        heightAndWidth="16px"
                         filePath={icons.multiEdit}
                     />
                 </ButtonTooltip>
