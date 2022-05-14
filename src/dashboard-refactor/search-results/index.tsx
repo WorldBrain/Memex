@@ -183,20 +183,29 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
-                renderTagsPickerForAnnotation={() =>
-                    noteData.isTagPickerShown && (
-                        <HoverBox left="0" top="-40px" withRelativeContainer>
-                            <TagPicker
-                                initialSelectedEntries={() => noteData.tags}
-                                onClickOutside={
-                                    interactionProps.onTagPickerBtnClick
-                                }
-                                onUpdateEntrySelection={
-                                    interactionProps.updateTags
-                                }
-                            />
-                        </HoverBox>
-                    )
+                renderTagsPickerForAnnotation={
+                    this.props.shouldShowTagsUIs
+                        ? () =>
+                              noteData.isTagPickerShown && (
+                                  <HoverBox
+                                      left="0"
+                                      top="-40px"
+                                      withRelativeContainer
+                                  >
+                                      <TagPicker
+                                          initialSelectedEntries={() =>
+                                              noteData.tags
+                                          }
+                                          onClickOutside={
+                                              interactionProps.onTagPickerBtnClick
+                                          }
+                                          onUpdateEntrySelection={
+                                              interactionProps.updateTags
+                                          }
+                                      />
+                                  </HoverBox>
+                              )
+                        : undefined
                 }
                 renderListsPickerForAnnotation={() =>
                     noteData.isListPickerShown && (
@@ -432,6 +441,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
+                    onTagPickerBtnClick={
+                        this.props.shouldShowTagsUIs
+                            ? interactionProps.onTagPickerBtnClick
+                            : undefined
+                    }
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>

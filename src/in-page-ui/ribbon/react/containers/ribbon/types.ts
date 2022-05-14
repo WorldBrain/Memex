@@ -8,6 +8,7 @@ import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cach
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { MaybePromise } from 'src/util/types'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -31,4 +32,5 @@ export interface RibbonContainerDependencies {
     annotationsCache: AnnotationsCacheInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
+    syncSettings: SyncSettingsStore<'extension'>
 }

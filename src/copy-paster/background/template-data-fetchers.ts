@@ -18,7 +18,10 @@ import {
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PageListEntry } from 'src/custom-lists/background/types'
 import type { AnnotListEntry, Annotation } from 'src/annotations/types'
-import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
+import type {
+    AnnotationPrivacyLevel,
+    SharedListMetadata,
+} from 'src/content-sharing/background/types'
 import type { Visit, Bookmark } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
@@ -259,11 +262,25 @@ export function getTemplateDataFetchers({
                     .collection('pageListEntries')
                     .findObjects({ pageUrl: annotation.pageUrl })
 
+                const sharedListMetadata: SharedListMetadata[] = await storageManager
+                    .collection('sharedListMetadata')
+                    .findObjects({
+                        localId: {
+                            $in: parentPageEntries.map((e) => e.listId),
+                        },
+                    })
+
+                const sharedListIds = new Set([
+                    ...sharedListMetadata.map((d) => d.localId),
+                ])
+
                 entries.push(
-                    ...parentPageEntries.map((e) => ({
-                        url: privacyLevel.annotation,
-                        listId: e.listId,
-                    })),
+                    ...parentPageEntries
+                        .filter((e) => sharedListIds.has(e.listId))
+                        .map((e) => ({
+                            url: privacyLevel.annotation,
+                            listId: e.listId,
+                        })),
                 )
             }
 

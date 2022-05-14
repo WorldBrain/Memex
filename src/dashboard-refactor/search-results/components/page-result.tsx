@@ -80,8 +80,11 @@ export default class PageResultView extends PureComponent<Props> {
 
     private get hasLists(): boolean {
         const userLists = this.props.lists.filter(
-            (listId) => !Object.values(SPECIAL_LIST_IDS).includes(listId),
+            (listId) =>
+                !Object.values(SPECIAL_LIST_IDS).includes(listId) &&
+                listId !== this.props.filteredbyListID,
         )
+        console.log(userLists.length)
         return userLists.length > 0
     }
 
@@ -216,12 +219,12 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick: this.props.onCopyPasterBtnClick,
                     tooltipText: 'Copy Page',
                 },
-                {
-                    key: 'share-page-btn',
-                    image: this.props.isShared ? icons.shared : icons.link,
-                    onClick: this.props.onShareBtnClick,
-                    tooltipText: 'Share Page and Notes',
-                },
+                // {
+                //     key: 'share-page-btn',
+                //     image: this.props.isShared ? icons.shared : icons.link,
+                //     onClick: this.props.onShareBtnClick,
+                //     tooltipText: 'Share Page and Notes',
+                // },
                 // {
                 //     key: 'list-page-btn',
                 //     image: this.hasLists
@@ -258,11 +261,11 @@ export default class PageResultView extends PureComponent<Props> {
                 isDisabled: true,
                 image: icons.copy,
             },
-            {
-                key: 'share-page-btn',
-                isDisabled: true,
-                image: this.props.isShared ? icons.shared : icons.link,
-            },
+            // {
+            //     key: 'share-page-btn',
+            //     isDisabled: true,
+            //     image: this.props.isShared ? icons.shared : icons.link,
+            // },
             // {
             //     key: 'list-page-btn',
             //     isDisabled: true,
@@ -353,15 +356,18 @@ export default class PageResultView extends PureComponent<Props> {
                             renderSpacePicker={this.renderSpacePicker.bind(
                                 this,
                             )}
+                            filteredbyListID={this.props.filteredbyListID}
                         />
                     )}
-                    <TagsSegment
-                        tags={this.props.tags}
-                        onMouseEnter={this.props.onTagsHover}
-                        showEditBtn={this.props.hoverState === 'tags'}
-                        onEditBtnClick={this.props.onTagPickerBtnClick}
-                        onTagClick={this.props.onTagClick}
-                    />
+                    {this.props.onTagPickerBtnClick && (
+                        <TagsSegment
+                            tags={this.props.tags}
+                            onMouseEnter={this.props.onTagsHover}
+                            showEditBtn={this.props.hoverState === 'tags'}
+                            onEditBtnClick={this.props.onTagPickerBtnClick}
+                            onTagClick={this.props.onTagClick}
+                        />
+                    )}
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,

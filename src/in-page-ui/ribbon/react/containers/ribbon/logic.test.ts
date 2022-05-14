@@ -15,6 +15,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -63,10 +64,15 @@ describe('Ribbon logic', () => {
             { skipPageIndexing: true },
         )
 
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+
         const ribbonLogic = new RibbonContainerLogic({
             activityIndicatorBG: backgroundModules.activityIndicator,
             getPageUrl: () => currentTab.normalizedUrl,
             analytics,
+            syncSettings,
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
@@ -99,7 +105,14 @@ describe('Ribbon logic', () => {
         })
 
         const ribbon = device.createElement(ribbonLogic)
-        return { ribbon, inPageUI, ribbonLogic, analytics, annotationsCache }
+        return {
+            ribbon,
+            inPageUI,
+            ribbonLogic,
+            analytics,
+            annotationsCache,
+            syncSettings,
+        }
     }
 
     it('should load', async ({ device }) => {
@@ -778,5 +791,21 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('hydrateStateFromDB', { url: newURL })
         expect(ribbon.state.bookmark.isBookmarked).toBe(false)
         expect(ribbon.state.pageUrl).toEqual(newURL)
+    })
+
+    it('should check whether tags migration is done to signal showing of tags UI on init', async ({
+        device,
+    }) => {
+        const { ribbon, syncSettings } = await setupTest(device)
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', false)
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
+        await ribbon.init()
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', true)
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
+        await ribbon.init()
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
     })
 })

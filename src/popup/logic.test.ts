@@ -43,6 +43,25 @@ async function setupTest(
 describe('Popup UI logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
+    it('should check whether tags migration is done to signal showing of tags UI on init', async ({
+        device,
+    }) => {
+        const currentPageUrl = 'https://memex.memex'
+        const { logic, syncSettingsStore } = await setupTest(device, {
+            currentPageUrl,
+        })
+
+        await syncSettingsStore.extension.set('areTagsMigratedToSpaces', false)
+        expect(logic.state.shouldShowTagsUIs).toBe(false)
+        await logic.init()
+        expect(logic.state.shouldShowTagsUIs).toBe(true)
+
+        await syncSettingsStore.extension.set('areTagsMigratedToSpaces', true)
+        expect(logic.state.shouldShowTagsUIs).toBe(true)
+        await logic.init()
+        expect(logic.state.shouldShowTagsUIs).toBe(false)
+    })
+
     it('should hydrate PDF reader enabled state based on sync settings+current URL on init', async ({
         device,
     }) => {

@@ -62,6 +62,7 @@ export interface RibbonTaggingProps {
     tags: string[]
     pageHasTags: boolean
     showTagsPicker: boolean
+    shouldShowTagsUIs: boolean
     updateTags: PickerUpdateHandler
     tagAllTabs: (value: string) => Promise<void>
     setShowTagsPicker: (value: boolean) => void
