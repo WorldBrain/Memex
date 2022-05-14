@@ -80,8 +80,11 @@ export default class PageResultView extends PureComponent<Props> {
 
     private get hasLists(): boolean {
         const userLists = this.props.lists.filter(
-            (listId) => !Object.values(SPECIAL_LIST_IDS).includes(listId),
+            (listId) =>
+                !Object.values(SPECIAL_LIST_IDS).includes(listId) &&
+                listId !== this.props.filteredbyListID,
         )
+        console.log(userLists.length)
         return userLists.length > 0
     }
 
@@ -353,6 +356,7 @@ export default class PageResultView extends PureComponent<Props> {
                             renderSpacePicker={this.renderSpacePicker.bind(
                                 this,
                             )}
+                            filteredbyListID={this.props.filteredbyListID}
                         />
                     )}
                     {this.props.onTagPickerBtnClick && (
