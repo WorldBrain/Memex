@@ -168,9 +168,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: [],
                 domainsIncluded: [],
                 isDateFilterActive: false,
+                isSpaceFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
+                spacesIncluded: [],
                 tagsExcluded: [],
                 tagsIncluded: [],
                 dateFromInput: '',
@@ -480,7 +482,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        const skipMutation: UIMutation<State['searchFilters']> = {
+        const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
                 : { $set: 0 },
@@ -497,7 +499,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 const searchState = this.withMutation(previousState, {
-                    searchFilters: skipMutation,
+                    searchFilters,
                 })
                 let {
                     noteData,
@@ -534,7 +536,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
 
                 this.emitMutation({
-                    searchFilters: skipMutation,
+                    searchFilters,
                     searchResults: {
                         areResultsExhausted: {
                             $set: resultsExhausted,
@@ -2140,7 +2142,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchFilters: {
                 isTagFilterActive: { $set: event.isActive },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+            },
+        })
+    }
+
+    toggleShowSpacePicker: EventHandler<'toggleShowSpacePicker'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: {
+                isSpaceFilterActive: { $set: event.isActive },
+                isDomainFilterActive: { $set: false },
+                isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2151,8 +2167,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDateFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2163,8 +2180,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDomainFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2197,6 +2215,50 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateTo: { $set: event.value } },
+        })
+    }
+
+    setSpacesIncluded: EventHandler<'setSpacesIncluded'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $set: event.spaceIds },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    addIncludedSpace: EventHandler<'addIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $push: [event.spaceId] },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    delIncludedSpace: EventHandler<'delIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.spacesIncluded.findIndex(
+            (spaceId) => spaceId === event.spaceId,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $splice: [[index, 1]] },
+                searchFiltersOpen: { $set: true },
+            },
         })
     }
 
