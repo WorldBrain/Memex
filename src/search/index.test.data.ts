@@ -2,6 +2,10 @@ export const VISIT_3 = Date.now()
 export const VISIT_2 = VISIT_3 - 1000 * 60
 export const VISIT_1 = VISIT_2 - 1000 * 60
 export const BOOKMARK_1 = VISIT_3 - 1000 * 60 * 86400 // Bookmark from a day ago
+export const SPACE_1 = 'space a'
+export const SPACE_1_ID = 123
+export const SPACE_2 = 'space b'
+export const SPACE_2_ID = 124
 export const PAGE_1 = {
     url: 'https://www.lorem.com/test2',
     content: {
