@@ -123,45 +123,36 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
     private async filterByCollections(
         urls: string[],
-        params: AnnotSearchParams,
+        { collections }: AnnotSearchParams,
     ) {
-        const ids = params.collections.map((id) => Number(id))
-
-        const pageEntries = await this.backend.dexieInstance
-            .table('pageListEntries')
-            .where('listId')
-            .anyOf(ids)
-            .primaryKeys()
-
-        const pageUrls = new Set(pageEntries.map((pk) => pk[1]))
-
-        return this.backend.dexieInstance
-            .table(AnnotsStorage.ANNOTS_COLL)
+        const entries = (await this.backend.dexieInstance
+            .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
             .where('url')
             .anyOf(urls)
-            .and((annot) => pageUrls.has(annot.pageUrl))
-            .primaryKeys() as Promise<string[]>
+            .and((annotListEntry) =>
+                collections.includes(annotListEntry.listId),
+            )
+            .primaryKeys()) as Array<[number, string]>
 
-        // IMPLEMENTATION FOR ANNOTS COLLECTIONS
-        // const [listIds, entries] = await Promise.all([
-        //     this.backend.dexieInstance
-        //         .table<any, number>(AnnotsStorage.LISTS_COLL)
-        //         .where('name')
-        //         .anyOf(params.collections)
-        //         .primaryKeys(),
-        //     this.backend.dexieInstance
-        //         .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
-        //         .where('url')
-        //         .anyOf(urls)
-        //         .primaryKeys(),
-        // ])
+        const urlSet = new Set<string>()
+        const listsByUrl = new Map<string, number[]>()
+        entries.forEach(([listId, pageUrl]) =>
+            listsByUrl.set(pageUrl, [
+                ...(listsByUrl.get(pageUrl) ?? []),
+                listId,
+            ]),
+        )
 
-        // const lists = new Set(listIds)
-        // const entryUrls = new Set(
-        //     entries
-        //         .filter(([listId]) => lists.has(listId))
-        //         .map(([, url]) => url),
-        // ))
+        for (const [url, memberLists] of listsByUrl.entries()) {
+            if (
+                collections.length === memberLists.length &&
+                memberLists.every((listId) => collections.includes(listId))
+            ) {
+                urlSet.add(url)
+            }
+        }
+
+        return [...urlSet]
     }
 
     private async filterByDomains(
