@@ -84,7 +84,6 @@ export default class PageResultView extends PureComponent<Props> {
                 !Object.values(SPECIAL_LIST_IDS).includes(listId) &&
                 listId !== this.props.filteredbyListID,
         )
-        console.log(userLists.length)
         return userLists.length > 0
     }
 
@@ -183,7 +182,7 @@ export default class PageResultView extends PureComponent<Props> {
                     tooltipText={
                         this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
                             ? 'Remove from Inbox'
-                            : 'Remove from \nCollection'
+                            : 'Remove from Space'
                     }
                     position="left"
                 >

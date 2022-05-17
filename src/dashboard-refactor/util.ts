@@ -27,6 +27,7 @@ export const areSearchFiltersEmpty = ({
     !searchFilters.dateTo &&
     !searchFilters.domainsExcluded.length &&
     !searchFilters.domainsIncluded.length &&
+    !searchFilters.spacesIncluded.length &&
     !searchFilters.tagsExcluded.length &&
     !searchFilters.tagsIncluded.length &&
     !searchFilters.searchQuery.length
@@ -38,7 +39,7 @@ export const stateToSearchParams = ({
     RootState,
     'listsSidebar' | 'searchFilters'
 >): BackgroundSearchParams => {
-    const lists = searchFilters.spacesIncluded
+    const lists = [...searchFilters.spacesIncluded]
     if (listsSidebar.selectedListId != null) {
         lists.push(listsSidebar.selectedListId)
     }
