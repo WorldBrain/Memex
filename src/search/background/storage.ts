@@ -1,17 +1,18 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
+import { COLLECTION_NAMES as CONTENT_SHARE_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/content-sharing/client-storage'
 import { COLLECTION_NAMES as ANNOT_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/annotations/constants'
 import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
-import {
+import type {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import {
+import type {
     AnnotSearchParams,
     AnnotPage,
     PageUrlsByDay,
@@ -21,13 +22,15 @@ import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
 import { SocialSearchPlugin } from './social-search'
-import { SocialPage } from 'src/social-integration/types'
+import type { SocialPage } from 'src/social-integration/types'
 import { SuggestPlugin, SuggestType } from '../plugins/suggest'
-import { Annotation, AnnotListEntry } from 'src/annotations/types'
-import {
-    List,
-    ListEntry,
-} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
+import type { Annotation, AnnotListEntry } from 'src/annotations/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import type {
+    AnnotationPrivacyLevel,
+    SharedListMetadata,
+} from 'src/content-sharing/background/types'
+import type { PageListEntry } from 'src/custom-lists/background/types'
 
 export interface SearchStorageProps {
     storageManager: Storex
@@ -49,8 +52,14 @@ export type LegacySearch = (
 
 export default class SearchStorage extends StorageModule {
     static TAGS_COLL = TAG_COLLECTION_NAMES.tag
-    static LISTS_ENTRIES_COLL = ANNOT_COLLECTION_NAMES.listEntry
+    static ANNOTS_COLL = ANNOT_COLLECTION_NAMES.annotation
+    static ANNOT_LISTS_ENTRIES_COLL = ANNOT_COLLECTION_NAMES.listEntry
+    static PAGE_LISTS_ENTRIES_COLL = LIST_COLLECTION_NAMES.listEntry
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
+    static ANNOT_PRIVACY_LEVELS_COLL =
+        CONTENT_SHARE_COLLECTION_NAMES.annotationPrivacy
+    static LIST_METADATA_LEVELS_COLL =
+        CONTENT_SHARE_COLLECTION_NAMES.listMetadata
     static BMS_COLL = ANNOT_COLLECTION_NAMES.bookmark
     private legacySearch
 
@@ -72,10 +81,30 @@ export default class SearchStorage extends StorageModule {
                 operation: 'findObjects',
                 args: [{ url: { $in: '$annotUrls:string[]' } }],
             },
-            findAnnotListEntriesByUrl: {
-                collection: SearchStorage.LISTS_ENTRIES_COLL,
+            findAnnotListEntriesByUrls: {
+                collection: SearchStorage.ANNOT_LISTS_ENTRIES_COLL,
                 operation: 'findObjects',
                 args: [{ url: { $in: '$annotUrls:string[]' } }],
+            },
+            findPageListEntriesByUrls: {
+                collection: SearchStorage.PAGE_LISTS_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: [{ pageUrl: { $in: '$urls:string[]' } }],
+            },
+            findAnnotPrivacyLevelsByUrls: {
+                collection: SearchStorage.ANNOT_PRIVACY_LEVELS_COLL,
+                operation: 'findObjects',
+                args: [{ annotation: { $in: '$urls:string[]' } }],
+            },
+            findAnnotationsByUrls: {
+                collection: SearchStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: [{ url: { $in: '$urls:string[]' } }],
+            },
+            findListMetadataByIds: {
+                collection: SearchStorage.LIST_METADATA_LEVELS_COLL,
+                operation: 'findObjects',
+                args: [{ localId: { $in: '$listIds:string[]' } }],
             },
             findListById: {
                 collection: SearchStorage.LISTS_COLL,
@@ -154,14 +183,64 @@ export default class SearchStorage extends StorageModule {
         annotsToLists: Map<string, number[]>
         bmUrls: Set<string>
     }> {
+        const privacyLevels: AnnotationPrivacyLevel[] = await this.operation(
+            'findAnnotPrivacyLevelsByUrls',
+            { urls: annotUrls },
+        )
         const bookmarks = await this.operation('findAnnotBookmarksByUrl', {
             annotUrls,
         })
 
+        const pageUrlToAnnotUrls = new Map<string, string[]>()
+        const annotsToLists = new Map<string, number[]>()
+
+        // Public annotations inherit shared lists from their parent pages, so we need to look them up differently
+        const publicAnnotUrls = privacyLevels
+            .filter(
+                (level) => getAnnotationPrivacyState(level.privacyLevel).public,
+            )
+            .map((level) => level.annotation)
+
+        if (publicAnnotUrls.length > 0) {
+            const publicAnnotations: Annotation[] = await this.operation(
+                'findAnnotationsByUrls',
+                { urls: publicAnnotUrls },
+            )
+
+            publicAnnotations.forEach(({ url, pageUrl }) => {
+                const prev = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                pageUrlToAnnotUrls.set(pageUrl, [...prev, url])
+            })
+
+            const pageListEntries: PageListEntry[] = await this.operation(
+                'findPageListEntriesByUrls',
+                { urls: [...pageUrlToAnnotUrls.keys()] },
+            )
+            const sharedListMetadata: SharedListMetadata[] = await this.operation(
+                'findListMetadataByIds',
+                { listIds: [...pageListEntries.map((entry) => entry.listId)] },
+            )
+            const sharedListIds = new Set(
+                sharedListMetadata.map((meta) => meta.localId),
+            )
+
+            pageListEntries.forEach(({ listId, pageUrl }) => {
+                // Only concerned with shared lists
+                if (!sharedListIds.has(listId)) {
+                    return
+                }
+
+                const annotUrls = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                for (const annotUrl of annotUrls) {
+                    const prev = annotsToLists.get(annotUrl) ?? []
+                    annotsToLists.set(annotUrl, [...prev, listId])
+                }
+            })
+        }
+
         const bmUrls = new Set<string>(bookmarks.map((bm) => bm.url))
 
         const tags = await this.operation('findAnnotTagsByUrl', { annotUrls })
-
         const annotsToTags = new Map<string, string[]>()
 
         tags.forEach(({ name, url }) => {
@@ -169,15 +248,14 @@ export default class SearchStorage extends StorageModule {
             annotsToTags.set(url, [...current, name])
         })
 
-        const listEntries: AnnotListEntry[] = await this.operation(
-            'findAnnotListEntriesByUrl',
+        const annotListEntries: AnnotListEntry[] = await this.operation(
+            'findAnnotListEntriesByUrls',
             {
                 annotUrls,
             },
         )
-        const annotsToLists = new Map<string, number[]>()
 
-        listEntries.forEach(({ listId, url }) => {
+        annotListEntries.forEach(({ listId, url }) => {
             const current = annotsToLists.get(url) ?? []
             annotsToLists.set(url, [...current, listId])
         })

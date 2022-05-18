@@ -689,7 +689,10 @@ describe('Annotations search', () => {
         const { searchBg } = await setupTest()
 
         const resA = await searchBg.searchAnnotations({ query: 'highlight' })
-        expect(resA.docs[0].annotations[0].lists).toEqual([coll1Id, coll2Id])
-        expect(resA.docs[0].annotations[1]).toBeUndefined()
+        expect(resA.docs[0].annotations).toEqual([
+            expect.objectContaining({
+                lists: [coll1Id, coll2Id],
+            }),
+        ])
     })
 })
