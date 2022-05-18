@@ -38,7 +38,7 @@ export const hybrid = {
         pageTitle: 'Annotation title',
         pageUrl: normalizedPageUrl2,
         body: 'Whooo this is a highlight bla',
-        url: `${fullPageUrl2}#12124124124`,
+        url: `${fullPageUrl2}/#12124124125`,
         comment: 'Great quote in that highlight term',
         selector: {} as Anchor,
         createdWhen: new Date('2019-01-30T13:02Z'),

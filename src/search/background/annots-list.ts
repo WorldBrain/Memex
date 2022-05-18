@@ -1,10 +1,12 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { AnnotSearchParams } from './types'
+import type { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
 import AnnotsStorage from 'src/annotations/background/storage'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
+import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 const moment = require('moment-timezone')
 
 export class AnnotationsListPlugin extends StorageBackendPlugin<
@@ -125,8 +127,65 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         urls: string[],
         { collections }: AnnotSearchParams,
     ) {
-        const entries = (await this.backend.dexieInstance
-            .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
+        const dexie = this.backend.dexieInstance
+        const listsByAnnotUrl = new Map<string, number[]>()
+
+        // Check if any of the filtered collections are public (require different lookups for public annotations)
+        const listMetadataIds = (await dexie
+            .table('sharedListMetadata')
+            .where('localId')
+            .anyOf(collections)
+            .primaryKeys()) as Array<number>
+
+        const publicCollections = collections.filter((listId) =>
+            listMetadataIds.includes(listId),
+        )
+        if (publicCollections.length > 0) {
+            const privacyLevels = (await dexie
+                .table('annotationPrivacyLevels')
+                .where('annotation')
+                .anyOf(urls)
+                .toArray()) as Array<AnnotationPrivacyLevel>
+            const publicAnnotUrls = privacyLevels
+                .filter(
+                    (level) =>
+                        getAnnotationPrivacyState(level.privacyLevel).public,
+                )
+                .map((level) => level.annotation)
+
+            const publicAnnotations = (await dexie
+                .table(AnnotsStorage.ANNOTS_COLL)
+                .where('url')
+                .anyOf(publicAnnotUrls)
+                .toArray()) as Array<Annotation>
+
+            const pageUrlToAnnotUrls = new Map<string, string[]>()
+
+            publicAnnotations.forEach(({ url, pageUrl }) => {
+                const prev = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                pageUrlToAnnotUrls.set(pageUrl, [...prev, url])
+            })
+
+            const parentPagePublicListEntries = (await dexie
+                .table('pageListEntries')
+                .where('pageUrl')
+                .anyOf([...pageUrlToAnnotUrls.keys()])
+                .and((pageListEntry) =>
+                    publicCollections.includes(pageListEntry.listId),
+                )
+                .primaryKeys()) as Array<[number, string]>
+
+            parentPagePublicListEntries.forEach(([listId, pageUrl]) => {
+                const annotUrls = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                for (const annotUrl of annotUrls) {
+                    const prev = listsByAnnotUrl.get(annotUrl) ?? []
+                    listsByAnnotUrl.set(annotUrl, [...prev, listId])
+                }
+            })
+        }
+
+        const annotListEntries = (await dexie
+            .table(AnnotsStorage.LIST_ENTRIES_COLL)
             .where('url')
             .anyOf(urls)
             .and((annotListEntry) =>
@@ -135,15 +194,13 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             .primaryKeys()) as Array<[number, string]>
 
         const urlSet = new Set<string>()
-        const listsByUrl = new Map<string, number[]>()
-        entries.forEach(([listId, pageUrl]) =>
-            listsByUrl.set(pageUrl, [
-                ...(listsByUrl.get(pageUrl) ?? []),
-                listId,
-            ]),
-        )
 
-        for (const [url, memberLists] of listsByUrl.entries()) {
+        annotListEntries.forEach(([listId, annotUrl]) => {
+            const prev = listsByAnnotUrl.get(annotUrl) ?? []
+            listsByAnnotUrl.set(annotUrl, [...prev, listId])
+        })
+
+        for (const [url, memberLists] of listsByAnnotUrl.entries()) {
             if (
                 collections.length === memberLists.length &&
                 memberLists.every((listId) => collections.includes(listId))

@@ -121,6 +121,8 @@ describe('Annotations search', () => {
             name: DATA.coll2,
         })
 
+        await contentSharingBg.shareList({ listId: coll1Id })
+
         await customListsBg.insertPageToList({
             id: coll2Id,
             url: DATA.fullPageUrl1,
@@ -140,10 +142,6 @@ describe('Annotations search', () => {
         await contentSharingBg.shareAnnotationToSomeLists({
             localListIds: [coll1Id],
             annotationUrl: DATA.hybrid.object.url,
-        })
-        await contentSharingBg.shareAnnotationToSomeLists({
-            localListIds: [coll1Id],
-            annotationUrl: DATA.annotation.object.url,
         })
 
         // Insert tags
