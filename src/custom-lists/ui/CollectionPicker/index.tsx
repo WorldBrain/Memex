@@ -51,6 +51,10 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
+        if (this.props.filterMode) {
+            return false
+        }
+
         const otherLists = (this.logic as ListPickerLogic).defaultEntries.map(
             (e) => ({
                 id: e.localId,
@@ -145,7 +149,9 @@ class SpacePicker extends StatefulUIElement<
             focused={list.focused}
             remoteId={list.remoteId}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText="Remove from Space"
+            removeTooltipText={
+                this.props.removeTooltipText ?? 'Remove from Space'
+            }
             actOnAllTooltipText="Add all tabs in window to Space"
         />
     )
@@ -167,7 +173,7 @@ class SpacePicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName.length > 0) {
+        if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return
         }
 
@@ -182,8 +188,12 @@ class SpacePicker extends StatefulUIElement<
                             hoverOff
                         />
                     </SectionCircle>
-                    <SectionTitle>Create your first space</SectionTitle>
-                    <InfoText>by typing into the search field </InfoText>
+                    <SectionTitle>Create your first Space</SectionTitle>
+                    <InfoText>
+                        {this.props.filterMode
+                            ? 'to use as a search filter'
+                            : 'by typing into the search field'}
+                    </InfoText>
                 </EmptyListsView>
             )
         }
@@ -201,7 +211,9 @@ class SpacePicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Search Spaces"
+                    searchInputPlaceholder={
+                        this.props.searchInputPlaceholder ?? 'Search Spaces'
+                    }
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}

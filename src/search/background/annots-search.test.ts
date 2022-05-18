@@ -121,8 +121,14 @@ describe('Annotations search', () => {
             name: DATA.coll2,
         })
 
+        await contentSharingBg.shareList({ listId: coll1Id })
+
         await customListsBg.insertPageToList({
             id: coll2Id,
+            url: DATA.fullPageUrl1,
+        })
+        await customListsBg.insertPageToList({
+            id: coll1Id,
             url: DATA.fullPageUrl1,
         })
         await customListsBg.insertPageToList({
@@ -130,8 +136,12 @@ describe('Annotations search', () => {
             url: DATA.fullPageUrl2,
         })
         await contentSharingBg.shareAnnotationToSomeLists({
-            localListIds: [coll1Id],
+            localListIds: [coll1Id, coll2Id],
             annotationUrl: DATA.highlight.object.url,
+        })
+        await contentSharingBg.shareAnnotationToSomeLists({
+            localListIds: [coll1Id],
+            annotationUrl: DATA.hybrid.object.url,
         })
 
         // Insert tags
@@ -222,13 +232,19 @@ describe('Annotations search', () => {
                 query: 'highlight',
                 lists: [coll1Id],
             })
-            expect(countAnnots(resA)).toBe(1)
+            expect(countAnnots(resA)).toBe(2)
 
             const resB = await searchBg.searchAnnotations({
                 query: 'highlight',
+                lists: [coll1Id, coll2Id],
+            })
+            expect(countAnnots(resB)).toBe(1)
+
+            const resC = await searchBg.searchAnnotations({
+                query: 'highlight',
                 lists: [9999999], // Not a real collection ID
             })
-            expect(countAnnots(resB)).toBe(0)
+            expect(countAnnots(resC)).toBe(0)
         })
 
         test('tags filter', async () => {
@@ -425,29 +441,46 @@ describe('Annotations search', () => {
                 { tab: null },
                 {
                     url: DATA.normalizedPageUrl1,
-                    collections: [coll2Id],
+                    collections: [coll1Id],
                 },
             )
-            expect(resA.length).toBe(3)
             expect(resA.map((a) => a.url)).toEqual(
                 expect.arrayContaining([
                     DATA.highlight.object.url,
                     DATA.annotation.object.url,
-                    DATA.comment.object.url,
                 ]),
             )
 
             const resB = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 {
+                    url: DATA.normalizedPageUrl1,
+                    collections: [coll1Id, coll2Id],
+                },
+            )
+            expect(resB.map((a) => a.url)).toEqual(
+                expect.arrayContaining([DATA.highlight.object.url]),
+            )
+
+            const resC = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
                     url: DATA.normalizedPageUrl2,
                     collections: [coll1Id],
                 },
             )
-            expect(resB.length).toBe(1)
-            expect(resB.map((a) => a.url)).toEqual(
+            expect(resC.map((a) => a.url)).toEqual(
                 expect.arrayContaining([DATA.hybrid.object.url]),
             )
+
+            const resD = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.normalizedPageUrl2,
+                    collections: [coll1Id, coll2Id],
+                },
+            )
+            expect(resD.map((a) => a.url)).toEqual([])
         })
     })
 
@@ -656,7 +689,10 @@ describe('Annotations search', () => {
         const { searchBg } = await setupTest()
 
         const resA = await searchBg.searchAnnotations({ query: 'highlight' })
-        expect(resA.docs[0].annotations[0].lists).toEqual([coll1Id])
-        expect(resA.docs[0].annotations[1]).toBeUndefined()
+        expect(resA.docs[0].annotations).toEqual([
+            expect.objectContaining({
+                lists: [coll1Id, coll2Id],
+            }),
+        ])
     })
 })

@@ -4,18 +4,19 @@ import styled, { css } from 'styled-components'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { fonts } from 'src/dashboard-refactor/styles'
 import TagPicker from 'src/tags/ui/TagPicker'
+import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPicker from './DomainPicker/'
 import DatePicker, {
     DateRangeSelectionProps,
 } from 'src/overview/search-bar/components/DateRangeSelection'
-import { SearchFilterLabel, SearchFilterType } from '../types'
+import type { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { Icon } from 'src/dashboard-refactor/styled-components'
-
 import * as icons from 'src/common-ui/components/design-library/icons'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -111,14 +112,18 @@ export interface FiltersBarProps {
     showTagsFilter: boolean
     showDatesFilter: boolean
     areTagsFiltered: boolean
+    showSpaceFilter: boolean
     areDatesFiltered: boolean
+    areSpacesFiltered: boolean
     showDomainsFilter: boolean
     areDomainsFiltered: boolean
     toggleTagsFilter: () => void
     toggleDatesFilter: () => void
+    toggleSpaceFilter: () => void
     toggleDomainsFilter: () => void
     tagPickerProps?: TagPickerDependencies
     datePickerProps: DateRangeSelectionProps
+    spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
 }
 
@@ -132,6 +137,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         filterIcons: string,
         filterProps:
             | TagPickerDependencies
+            | SpacePickerDependencies
             | DateRangeSelectionProps
             | DomainPickerDependencies,
     ) => (
@@ -139,7 +145,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             <FilterSelectButton
                 selected={isShown}
                 onClick={onToggle}
-                className={`${name} -picker - button`}
+                className={`${name}-picker-button`}
                 filterActive={isFiltered}
             >
                 <Icon path={filterIcons} heightAndWidth="16px" hoverOff />
@@ -257,9 +263,27 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             <HoverBox left="195px" position="absolute" top="50px">
                 <TagPicker
                     {...this.props.tagPickerProps}
-                    searchInputPlaceholder="Add Tag Filters"
+                    searchInputPlaceholder="Add tag filters"
                     removeToolTipText="Remove filter"
                     outsideClickIgnoreClass="tag-picker-button"
+                    filterMode
+                />
+            </HoverBox>
+        )
+    }
+
+    private renderSpacePicker = () => {
+        if (!this.props.showSpaceFilter) {
+            return false
+        }
+
+        return (
+            <HoverBox left="195px" position="absolute" top="50px">
+                <SpacePicker
+                    {...this.props.spacePickerProps}
+                    searchInputPlaceholder="Add Space filters"
+                    removeTooltipText="Remove Space filter"
+                    outsideClickIgnoreClass="space-picker-button"
                     filterMode
                 />
             </HoverBox>
@@ -275,7 +299,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             <HoverBox left="90px" position="absolute" top="50px">
                 <DomainPicker
                     {...this.props.domainPickerProps}
-                    searchInputPlaceholder="Add Domain Filters"
+                    searchInputPlaceholder="Add domain filters"
                     removeToolTipText="Remove filter"
                     outsideClickIgnoreClass="domain-picker-button"
                 />
@@ -320,6 +344,18 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                                     this.props.tagPickerProps,
                                 )}
                             </>
+                        )}
+                        {this.renderSpacePicker()}
+                        {this.renderFilterSelectButton(
+                            'Spaces',
+                            'space',
+                            this.props.toggleSpaceFilter,
+                            this.props.showSpaceFilter,
+                            this.props.areSpacesFiltered,
+                            this.props.areSpacesFiltered
+                                ? icons.collectionsFull
+                                : icons.collectionsEmpty,
+                            this.props.spacePickerProps,
                         )}
                         {this.renderDomainPicker()}
                     </FilterBtnsContainer>

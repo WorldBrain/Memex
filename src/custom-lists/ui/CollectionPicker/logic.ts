@@ -26,6 +26,9 @@ export interface SpacePickerDependencies {
     onSubmit?: () => void | Promise<void>
     initialSelectedEntries?: () => number[] | Promise<number[]>
     children?: any
+    filterMode?: boolean
+    removeTooltipText?: string
+    searchInputPlaceholder?: string
     onClickOutside?: React.MouseEventHandler
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface

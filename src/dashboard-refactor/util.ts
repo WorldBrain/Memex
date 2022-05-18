@@ -27,6 +27,7 @@ export const areSearchFiltersEmpty = ({
     !searchFilters.dateTo &&
     !searchFilters.domainsExcluded.length &&
     !searchFilters.domainsIncluded.length &&
+    !searchFilters.spacesIncluded.length &&
     !searchFilters.tagsExcluded.length &&
     !searchFilters.tagsIncluded.length &&
     !searchFilters.searchQuery.length
@@ -37,21 +38,25 @@ export const stateToSearchParams = ({
 }: Pick<
     RootState,
     'listsSidebar' | 'searchFilters'
->): BackgroundSearchParams => ({
-    endDate: searchFilters.dateTo,
-    startDate: searchFilters.dateFrom,
-    query: searchFilters.searchQuery,
-    domains: searchFilters.domainsIncluded,
-    domainsExclude: searchFilters.domainsExcluded,
-    tagsInc: searchFilters.tagsIncluded,
-    tagsExc: searchFilters.tagsExcluded,
-    limit: searchFilters.limit,
-    skip: searchFilters.skip,
-    lists:
-        listsSidebar.selectedListId != null
-            ? [listsSidebar.selectedListId]
-            : undefined,
-})
+>): BackgroundSearchParams => {
+    const lists = [...searchFilters.spacesIncluded]
+    if (listsSidebar.selectedListId != null) {
+        lists.push(listsSidebar.selectedListId)
+    }
+
+    return {
+        lists,
+        endDate: searchFilters.dateTo,
+        startDate: searchFilters.dateFrom,
+        query: searchFilters.searchQuery,
+        domains: searchFilters.domainsIncluded,
+        domainsExclude: searchFilters.domainsExcluded,
+        tagsInc: searchFilters.tagsIncluded,
+        tagsExc: searchFilters.tagsExcluded,
+        limit: searchFilters.limit,
+        skip: searchFilters.skip,
+    }
+}
 
 /**
  * NOTE: This function results in the loss of data. Only use in special cases.

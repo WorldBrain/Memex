@@ -100,6 +100,7 @@ export type PagePickerAugdProps = {
 
 export type SearchResultToState = (
     result: AnnotationsSearchResponse | StandardSearchResponse,
+    extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
 export type SearchType = 'pages' | 'notes'

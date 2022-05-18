@@ -280,6 +280,10 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('toggleShowDomainPicker', {
                 isActive: !searchFilters.isDomainFilterActive,
             })
+        const toggleSpacesFilter = () =>
+            this.processEvent('toggleShowSpacePicker', {
+                isActive: !searchFilters.isSpaceFilterActive,
+            })
 
         return (
             <FiltersBar
@@ -287,10 +291,13 @@ export class DashboardContainer extends StatefulUIElement<
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
                 showDatesFilter={searchFilters.isDateFilterActive}
+                showSpaceFilter={searchFilters.isSpaceFilterActive}
                 showDomainsFilter={searchFilters.isDomainFilterActive}
-                toggleTagsFilter={toggleTagsFilter}
-                toggleDatesFilter={toggleDatesFilter}
                 toggleDomainsFilter={toggleDomainsFilter}
+                toggleSpaceFilter={toggleSpacesFilter}
+                toggleDatesFilter={toggleDatesFilter}
+                toggleTagsFilter={toggleTagsFilter}
+                areSpacesFiltered={searchFilters.spacesIncluded.length > 0}
                 areTagsFiltered={searchFilters.tagsIncluded.length > 0}
                 areDatesFiltered={
                     searchFilters.dateTo != null ||
@@ -366,6 +373,20 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                     }
                 }
+                spacePickerProps={{
+                    spacesBG: this.props.listsBG,
+                    onClickOutside: toggleSpacesFilter,
+                    onEscapeKeyDown: toggleSpacesFilter,
+                    contentSharingBG: this.props.contentShareBG,
+                    createNewEntry: () => undefined,
+                    initialSelectedEntries: () => searchFilters.spacesIncluded,
+                    selectEntry: (spaceId) =>
+                        this.processEvent('addIncludedSpace', {
+                            spaceId,
+                        }),
+                    unselectEntry: (spaceId) =>
+                        this.processEvent('delIncludedSpace', { spaceId }),
+                }}
             />
         )
     }

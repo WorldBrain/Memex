@@ -1,10 +1,12 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { AnnotSearchParams } from './types'
+import type { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
 import AnnotsStorage from 'src/annotations/background/storage'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
+import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
+import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 const moment = require('moment-timezone')
 
 export class AnnotationsListPlugin extends StorageBackendPlugin<
@@ -123,45 +125,91 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
     private async filterByCollections(
         urls: string[],
-        params: AnnotSearchParams,
+        { collections }: AnnotSearchParams,
     ) {
-        const ids = params.collections.map((id) => Number(id))
+        const dexie = this.backend.dexieInstance
+        const listsByAnnotUrl = new Map<string, number[]>()
 
-        const pageEntries = await this.backend.dexieInstance
-            .table('pageListEntries')
-            .where('listId')
-            .anyOf(ids)
-            .primaryKeys()
+        // Check if any of the filtered collections are public (require different lookups for public annotations)
+        const listMetadataIds = (await dexie
+            .table('sharedListMetadata')
+            .where('localId')
+            .anyOf(collections)
+            .primaryKeys()) as Array<number>
 
-        const pageUrls = new Set(pageEntries.map((pk) => pk[1]))
+        const publicCollections = collections.filter((listId) =>
+            listMetadataIds.includes(listId),
+        )
+        if (publicCollections.length > 0) {
+            const privacyLevels = (await dexie
+                .table('annotationPrivacyLevels')
+                .where('annotation')
+                .anyOf(urls)
+                .toArray()) as Array<AnnotationPrivacyLevel>
+            const publicAnnotUrls = privacyLevels
+                .filter(
+                    (level) =>
+                        getAnnotationPrivacyState(level.privacyLevel).public,
+                )
+                .map((level) => level.annotation)
 
-        return this.backend.dexieInstance
-            .table(AnnotsStorage.ANNOTS_COLL)
+            const publicAnnotations = (await dexie
+                .table(AnnotsStorage.ANNOTS_COLL)
+                .where('url')
+                .anyOf(publicAnnotUrls)
+                .toArray()) as Array<Annotation>
+
+            const pageUrlToAnnotUrls = new Map<string, string[]>()
+
+            publicAnnotations.forEach(({ url, pageUrl }) => {
+                const prev = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                pageUrlToAnnotUrls.set(pageUrl, [...prev, url])
+            })
+
+            const parentPagePublicListEntries = (await dexie
+                .table('pageListEntries')
+                .where('pageUrl')
+                .anyOf([...pageUrlToAnnotUrls.keys()])
+                .and((pageListEntry) =>
+                    publicCollections.includes(pageListEntry.listId),
+                )
+                .primaryKeys()) as Array<[number, string]>
+
+            parentPagePublicListEntries.forEach(([listId, pageUrl]) => {
+                const annotUrls = pageUrlToAnnotUrls.get(pageUrl) ?? []
+                for (const annotUrl of annotUrls) {
+                    const prev = listsByAnnotUrl.get(annotUrl) ?? []
+                    listsByAnnotUrl.set(annotUrl, [...prev, listId])
+                }
+            })
+        }
+
+        const annotListEntries = (await dexie
+            .table(AnnotsStorage.LIST_ENTRIES_COLL)
             .where('url')
             .anyOf(urls)
-            .and((annot) => pageUrls.has(annot.pageUrl))
-            .primaryKeys() as Promise<string[]>
+            .and((annotListEntry) =>
+                collections.includes(annotListEntry.listId),
+            )
+            .primaryKeys()) as Array<[number, string]>
 
-        // IMPLEMENTATION FOR ANNOTS COLLECTIONS
-        // const [listIds, entries] = await Promise.all([
-        //     this.backend.dexieInstance
-        //         .table<any, number>(AnnotsStorage.LISTS_COLL)
-        //         .where('name')
-        //         .anyOf(params.collections)
-        //         .primaryKeys(),
-        //     this.backend.dexieInstance
-        //         .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
-        //         .where('url')
-        //         .anyOf(urls)
-        //         .primaryKeys(),
-        // ])
+        const urlSet = new Set<string>()
 
-        // const lists = new Set(listIds)
-        // const entryUrls = new Set(
-        //     entries
-        //         .filter(([listId]) => lists.has(listId))
-        //         .map(([, url]) => url),
-        // ))
+        annotListEntries.forEach(([listId, annotUrl]) => {
+            const prev = listsByAnnotUrl.get(annotUrl) ?? []
+            listsByAnnotUrl.set(annotUrl, [...prev, listId])
+        })
+
+        for (const [url, memberLists] of listsByAnnotUrl.entries()) {
+            if (
+                collections.length === memberLists.length &&
+                memberLists.every((listId) => collections.includes(listId))
+            ) {
+                urlSet.add(url)
+            }
+        }
+
+        return [...urlSet]
     }
 
     private async filterByDomains(
