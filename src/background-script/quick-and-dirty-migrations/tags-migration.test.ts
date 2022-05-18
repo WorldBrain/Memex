@@ -18,6 +18,7 @@ async function setupTest() {
 async function testMigration(
     dexie: Dexie,
     tagsDataSet: Array<{ url: string; name: string }>,
+    chunkSize = 50,
 ) {
     await dexie.table('tags').bulkAdd(tagsDataSet)
     const queuedData = new Map<string, any[]>()
@@ -31,7 +32,7 @@ async function testMigration(
 
     await migrateTagsToSpaces({
         dexie,
-        chunkSize: 50,
+        chunkSize,
         queueChangesForCloudSync: async (data) => {
             const prev = queuedData.get(data.collection) ?? []
             queuedData.set(data.collection, [...prev, ...data.objs])
@@ -108,6 +109,53 @@ describe('tags to spaces data migration', () => {
                 annotsPerPage: 5,
             }),
         )
+    })
+
+    it('should still work with a large number of chunks', async () => {
+        const { dexie: dexieA } = await setupTest()
+        await testMigration(
+            dexieA,
+            DATA.createTestTagRecords({
+                numOfTags: 5,
+                pagesPerTag: 5,
+                annotsPerPage: 5,
+            }),
+            5,
+        )
+    })
+
+    it('should still work with duplicate space entries (not throw Dexie.BulkError on Dexie.bulkAdd)', async () => {
+        const { dexie: dexieA } = await setupTest()
+        const tagsDataSet = DATA.createTestTagRecords({
+            numOfTags: 5,
+            pagesPerTag: 5,
+            annotsPerPage: 5,
+        })
+        await dexieA.table('tags').bulkAdd(tagsDataSet)
+
+        await dexieA.table('customLists').add({
+            id: 111,
+            name: tagsDataSet[0].name,
+            createdAt: new Date(),
+            searchableName: tagsDataSet[0].name,
+            nameTerms: [],
+            isDeletable: true,
+            isNestable: true,
+        })
+
+        // This entry will be duplicated via the migration logic
+        await dexieA.table('pageListEntries').add({
+            listId: 111,
+            pageUrl: tagsDataSet[0].url,
+            fullUrl: 'https://' + tagsDataSet[0].url,
+            createdAt: new Date(),
+        })
+
+        await migrateTagsToSpaces({
+            dexie: dexieA,
+            chunkSize: 50,
+            queueChangesForCloudSync: async (data) => {},
+        })
     })
 
     it('should still work without pages and without annotations', async () => {

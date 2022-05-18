@@ -1,4 +1,4 @@
-import type Dexie from 'dexie'
+import type { BulkError, default as Dexie } from 'dexie'
 import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/utils'
 import { listNameStemmer } from '@worldbrain/memex-stemmer'
 import type { PageListEntry } from 'src/custom-lists/background/types'
@@ -13,6 +13,18 @@ interface Dependencies {
     }) => Promise<void>
     chunkSize?: number
 }
+
+const handleBulkAddError = (
+    totalDocCount: number,
+    docType: 'spaces' | 'page entries' | 'annotation entries',
+) => (e: BulkError) =>
+    console.warn(
+        `${
+            Object.values(e.failures).length
+        } ${docType} failed to be created. However, ${
+            totalDocCount - Object.values(e.failures).length
+        } ${docType} were created successfully.`,
+    )
 
 export async function migrateTagsToSpaces({
     dexie,
@@ -85,7 +97,12 @@ export async function migrateTagsToSpaces({
                         }
                     })
 
-                    await dexie.table('customLists').bulkAdd(customListData)
+                    await dexie
+                        .table('customLists')
+                        .bulkAdd(customListData)
+                        .catch(
+                            handleBulkAddError(customListData.length, 'spaces'),
+                        )
                     await queueChangesForCloudSync({
                         collection: 'customLists',
                         objs: customListData,
@@ -119,13 +136,21 @@ export async function migrateTagsToSpaces({
                         pageListEntryData.push({
                             listId,
                             pageUrl: tag.url,
-                            fullUrl: 'https://' + tag.url, // TODO: does this cover all cases?
+                            fullUrl: 'https://' + tag.url,
                             createdAt: new Date(),
                         })
                     }
                 }
 
-                await dexie.table('pageListEntries').bulkAdd(pageListEntryData)
+                await dexie
+                    .table('pageListEntries')
+                    .bulkAdd(pageListEntryData)
+                    .catch(
+                        handleBulkAddError(
+                            pageListEntryData.length,
+                            'page entries',
+                        ),
+                    )
                 await queueChangesForCloudSync({
                     collection: 'pageListEntries',
                     objs: pageListEntryData,
@@ -133,6 +158,12 @@ export async function migrateTagsToSpaces({
                 await dexie
                     .table('annotListEntries')
                     .bulkAdd(annotListEntryData)
+                    .catch(
+                        handleBulkAddError(
+                            annotListEntryData.length,
+                            'annotation entries',
+                        ),
+                    )
                 await queueChangesForCloudSync({
                     collection: 'annotListEntries',
                     objs: annotListEntryData,
