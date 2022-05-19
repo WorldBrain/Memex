@@ -144,7 +144,7 @@ class BackgroundScript {
      */
     private async handleUnifiedLogic() {
         await this.deps.bgModules.customLists.createInboxListIfAbsent()
-        await this.deps.bgModules.notifications.deliverStaticNotifications()
+        // await this.deps.bgModules.notifications.deliverStaticNotifications()
         await this.deps.bgModules.tabManagement.trackExistingTabs()
     }
 
@@ -156,13 +156,15 @@ class BackgroundScript {
         this.deps.runtimeAPI.onInstalled.addListener(async (details) => {
             switch (details.reason) {
                 case 'install':
+                    await this.handleInstallLogic()
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
-                    return this.handleInstallLogic()
+                    break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
                     await setLocalStorage(READ_STORAGE_FLAG, false)
-                    return this.handleUnifiedLogic()
+                    await this.handleUnifiedLogic()
+                    break
                 default:
             }
         })
