@@ -349,16 +349,21 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         const { unselectEntry, selectEntry } = this.dependencies
+        let nextState: SpacePickerState
 
         // If we're going to unselect it
         if (previousState.selectedEntries.includes(entry.localId)) {
-            this.emitMutation({
+            const mutation: UIMutation<SpacePickerState> = {
                 selectedEntries: {
                     $set: previousState.selectedEntries.filter(
                         (id) => id !== entry.localId,
                     ),
                 },
-            })
+            }
+
+            this.emitMutation(mutation)
+            nextState = this.withMutation(previousState, mutation)
+
             await unselectEntry(entry.localId)
         } else {
             const prevDisplayIndexState = previousState.displayEntries.findIndex(
@@ -368,7 +373,7 @@ export default class SpacePickerLogic extends UILogic<
                 ({ localId }) => localId === entry.localId,
             )
 
-            this.emitMutation({
+            const mutation: UIMutation<SpacePickerState> = {
                 selectedEntries: { $push: [entry.localId] },
                 displayEntries: {
                     // Reposition selected entry at start of display list
@@ -383,7 +388,10 @@ export default class SpacePickerLogic extends UILogic<
                         ),
                     ],
                 },
-            })
+            }
+
+            this.emitMutation(mutation)
+            nextState = this.withMutation(previousState, mutation)
 
             this.defaultEntries = [
                 this.defaultEntries[prevDisplayIndexDefaults],
@@ -393,6 +401,11 @@ export default class SpacePickerLogic extends UILogic<
 
             await selectEntry(entry.localId)
         }
+
+        await this.searchInputChanged({
+            event: { query: '' },
+            previousState: nextState,
+        })
     }
 
     resultEntryAllPress: EventHandler<'resultEntryAllPress'> = async ({

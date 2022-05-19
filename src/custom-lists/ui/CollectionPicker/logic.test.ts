@@ -563,6 +563,51 @@ describe('SpacePickerLogic', () => {
         expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
     })
 
+    it('should clear query upon entry selection', async ({ device }) => {
+        const { testLogic } = await setupLogicHelper({
+            device,
+        })
+
+        await testLogic.init()
+
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'test',
+                selectedEntries: [],
+            }),
+        )
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                selectedEntries: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+            }),
+        )
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'test',
+                selectedEntries: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+            }),
+        )
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                selectedEntries: [],
+            }),
+        )
+    })
+
     it('should show default entries again + new entry after selecting a new entry', async ({
         device,
     }) => {
