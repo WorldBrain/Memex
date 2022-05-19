@@ -34,7 +34,6 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
-const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
@@ -82,6 +81,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 tabsAPI: browser.tabs,
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
+                customListsBG: collections,
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -166,18 +166,18 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         })
         // Redux actions
         if (added) {
+            await this.processEvent('addPageList', { listId: added })
             this.props.onCollectionAdd(added)
         }
         if (deleted) {
-            return this.props.onCollectionDel(deleted)
+            await this.processEvent('delPageList', { listId: deleted })
+            this.props.onCollectionDel(deleted)
         }
         return backendResult
     }
 
     handleListAllTabs = (listId: number) =>
         collections.addOpenTabsToList({ listId })
-    fetchListsForPage = async () =>
-        collections.fetchPageLists({ url: this.props.url })
 
     getPDFLocation = () => {
         if (this.state.currentPageUrl.startsWith('file://')) {
@@ -321,7 +321,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             this.props.onCollectionAdd(name)
                             return collections.createCustomList({ name })
                         }}
-                        initialSelectedEntries={this.fetchListsForPage}
+                        initialSelectedEntries={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
                     />
                 </SpacePickerContainer>
@@ -365,7 +365,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 </FeedActivitySection>
                 {this.maybeRenderBlurredNotice()}
                 <BookmarkButton closePopup={this.closePopup} />
-                <CollectionsButton />
+                <CollectionsButton pageListsIds={this.state.pageListIds} />
                 {this.state.shouldShowTagsUIs && <TagsButton />}
                 <hr />
                 <LinkButton goToDashboard={this.onSearchClick} />

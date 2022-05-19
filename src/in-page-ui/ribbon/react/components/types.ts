@@ -77,7 +77,7 @@ export interface ListEntryArgs {
 }
 
 export interface RibbonListsProps {
-    pageBelongsToList: boolean
+    pageListIds: number[]
     showListsPicker: boolean
     updateLists: (
         args: PickerUpdateHandlerArgs<number> & { skipPageIndexing?: boolean },

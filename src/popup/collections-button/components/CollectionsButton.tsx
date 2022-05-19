@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import Button from '../../components/Button'
 import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
@@ -10,11 +9,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
 
-const styles = require('./CollectionsButton.css')
-const buttonStyles = require('../../components/Button.css')
-
 export interface OwnProps {
-    fetchCollections?: () => Promise<string[]>
+    pageListsIds: number[]
 }
 
 interface StateProps {
@@ -31,13 +27,6 @@ export type Props = OwnProps & StateProps & DispatchProps
 class CollectionsButton extends PureComponent<Props> {
     async componentDidMount() {
         await this.getKeyboardShortcutText()
-        const hasCollections = await this.props.fetchCollections()
-
-        if (hasCollections.length > 0) {
-            this.setState({
-                hasCollections: true,
-            })
-        }
     }
 
     state = {
@@ -72,10 +61,9 @@ class CollectionsButton extends PureComponent<Props> {
                 <SectionCircle>
                     <Icon
                         filePath={
-                            // this.state.hasCollections
-                            //     ? icons.collectionsFull
-                            //     : icons.collectionsEmpty
-                            icons.collectionsEmpty
+                            this.props.pageListsIds.length > 0
+                                ? icons.collectionsFull
+                                : icons.collectionsEmpty
                         }
                         heightAndWidth="18px"
                         hoverOff

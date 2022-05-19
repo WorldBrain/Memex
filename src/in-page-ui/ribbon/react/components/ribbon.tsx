@@ -474,9 +474,8 @@ export default class Ribbon extends Component<Props, State> {
                                         heightAndWidth="18px"
                                         color={'darkerIconColor'}
                                         filePath={
-                                            this.props.lists
-                                                .pageBelongsToList ||
-                                            this.props.lists.pageBelongsToList
+                                            this.props.lists.pageListIds
+                                                .length > 0
                                                 ? icons.collectionsFull
                                                 : icons.collectionsEmpty
                                         }

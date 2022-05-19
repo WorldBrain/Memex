@@ -249,7 +249,7 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('toggleShowTutorial', null)
     })
 
-    it('should add+remove lists, also adding any shared lists to public annotations', async ({
+    it('should be able to add+remove lists, also adding any shared lists to public annotations', async ({
         device,
     }) => {
         const fullPageUrl = DATA.CURRENT_TAB_URL_1
@@ -283,7 +283,7 @@ describe('Ribbon logic', () => {
             dependencies: { getPageUrl: () => fullPageUrl },
         })
 
-        const expectListEntries = async (listIds: number[]) =>
+        const expectListEntries = async (listIds: number[]) => {
             expect(
                 await device.storageManager
                     .collection('pageListEntries')
@@ -293,6 +293,8 @@ describe('Ribbon logic', () => {
                     expect.objectContaining({ listId, fullUrl: fullPageUrl }),
                 ),
             )
+            expect(ribbon.state.lists.pageListIds).toEqual(listIds)
+        }
 
         await ribbon.init()
         await annotationsCache.load(fullPageUrl)
@@ -367,6 +369,29 @@ describe('Ribbon logic', () => {
         })
 
         await expectListEntries([DATA.LISTS_1[1].id])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
+
+        await ribbon.processEvent('updateLists', {
+            value: {
+                deleted: DATA.LISTS_1[1].id,
+                selected: [],
+                added: null,
+                skipPageIndexing: true,
+            },
+        })
+
+        await expectListEntries([])
         expect(annotationsCache.annotations).toEqual([
             expect.objectContaining({
                 url: DATA.ANNOT_1.url,
