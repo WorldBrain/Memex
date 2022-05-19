@@ -361,7 +361,10 @@ export default class SpacePickerLogic extends UILogic<
             })
             await unselectEntry(entry.localId)
         } else {
-            const prevDisplayIndex = previousState.displayEntries.findIndex(
+            const prevDisplayIndexState = previousState.displayEntries.findIndex(
+                ({ localId }) => localId === entry.localId,
+            )
+            const prevDisplayIndexDefaults = this.defaultEntries.findIndex(
                 ({ localId }) => localId === entry.localId,
             )
 
@@ -370,17 +373,24 @@ export default class SpacePickerLogic extends UILogic<
                 displayEntries: {
                     // Reposition selected entry at start of display list
                     $set: [
-                        previousState.displayEntries[prevDisplayIndex],
+                        previousState.displayEntries[prevDisplayIndexState],
                         ...previousState.displayEntries.slice(
                             0,
-                            prevDisplayIndex,
+                            prevDisplayIndexState,
                         ),
                         ...previousState.displayEntries.slice(
-                            prevDisplayIndex + 1,
+                            prevDisplayIndexState + 1,
                         ),
                     ],
                 },
             })
+
+            this.defaultEntries = [
+                this.defaultEntries[prevDisplayIndexDefaults],
+                ...this.defaultEntries.slice(0, prevDisplayIndexDefaults),
+                ...this.defaultEntries.slice(prevDisplayIndexDefaults + 1),
+            ]
+
             await selectEntry(entry.localId)
         }
     }
