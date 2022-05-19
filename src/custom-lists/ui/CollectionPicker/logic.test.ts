@@ -385,7 +385,7 @@ describe('SpacePickerLogic', () => {
     }) => {
         let selectedEntryId: string | number = null
         let unselectedEntryId: string | number = null
-        const { testLogic } = await setupLogicHelper({
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
             device,
             unselectEntry: async (entryId) => {
                 unselectedEntryId = entryId
@@ -405,6 +405,13 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_LIST_SUGGESTIONS[3],
             DATA.TEST_LIST_SUGGESTIONS[4],
         ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
         expect(selectedEntryId).toBe(null)
         expect(unselectedEntryId).toBe(null)
 
@@ -413,6 +420,13 @@ describe('SpacePickerLogic', () => {
         })
 
         expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -436,6 +450,13 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_LIST_SUGGESTIONS[3],
             DATA.TEST_LIST_SUGGESTIONS[4],
         ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
         expect(testLogic.state.selectedEntries).toEqual([])
         expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
         expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
@@ -445,6 +466,13 @@ describe('SpacePickerLogic', () => {
         })
 
         expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -462,6 +490,13 @@ describe('SpacePickerLogic', () => {
         })
 
         expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[3],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -526,6 +561,51 @@ describe('SpacePickerLogic', () => {
             }),
         )
         expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
+    })
+
+    it('should clear query upon entry selection', async ({ device }) => {
+        const { testLogic } = await setupLogicHelper({
+            device,
+        })
+
+        await testLogic.init()
+
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'test',
+                selectedEntries: [],
+            }),
+        )
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                selectedEntries: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+            }),
+        )
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'test',
+                selectedEntries: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+            }),
+        )
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: '',
+                selectedEntries: [],
+            }),
+        )
     })
 
     it('should show default entries again + new entry after selecting a new entry', async ({

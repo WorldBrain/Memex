@@ -7,6 +7,7 @@ import {
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export interface Dependencies {
@@ -14,15 +15,19 @@ export interface Dependencies {
     tabsAPI: Pick<Tabs.Static, 'create' | 'query' | 'update'>
     runtimeAPI: Pick<Runtime.Static, 'getURL'>
     syncSettings: SyncSettingsStore<'pdfIntegration' | 'extension'>
+    customListsBG: RemoteCollectionsInterface
     pdfIntegrationBG: PDFRemoteInterface
 }
 
 export interface Event {
     togglePDFReader: null
     togglePDFReaderEnabled: null
+    addPageList: { listId: number }
+    delPageList: { listId: number }
 }
 
 export interface State {
+    pageListIds: number[]
     loadState: UITaskState
     currentPageUrl: string
     shouldShowTagsUIs: boolean
@@ -42,6 +47,7 @@ export default class PopupLogic extends UILogic<State, Event> {
     }
 
     getInitialState = (): State => ({
+        pageListIds: [],
         currentPageUrl: '',
         loadState: 'pristine',
         shouldShowTagsUIs: false,
@@ -50,7 +56,13 @@ export default class PopupLogic extends UILogic<State, Event> {
     })
 
     async init() {
-        const { syncSettings, tabsAPI, extensionAPI } = this.dependencies
+        const {
+            tabsAPI,
+            syncSettings,
+            extensionAPI,
+            customListsBG,
+        } = this.dependencies
+
         await loadInitial(this, async () => {
             const [areTagsMigrated, isPDFReaderEnabled] = await Promise.all([
                 syncSettings.extension.get('areTagsMigratedToSpaces'),
@@ -60,8 +72,17 @@ export default class PopupLogic extends UILogic<State, Event> {
                 active: true,
                 currentWindow: true,
             })
+
+            const pageListIds =
+                currentTab?.url != null
+                    ? await customListsBG.fetchPageLists({
+                          url: currentTab.url,
+                      })
+                    : []
+
             const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
             this.emitMutation({
+                pageListIds: { $set: pageListIds },
                 currentPageUrl: { $set: currentTab?.url },
                 shouldShowTagsUIs: { $set: !areTagsMigrated },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
@@ -94,6 +115,24 @@ export default class PopupLogic extends UILogic<State, Event> {
 
         await tabsAPI.update(currentTab.id, { url: nextPageUrl })
         this.emitMutation({ currentPageUrl: { $set: nextPageUrl } })
+    }
+
+    addPageList: EventHandler<'addPageList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageListIdsSet = new Set(previousState.pageListIds)
+        pageListIdsSet.add(event.listId)
+        this.emitMutation({ pageListIds: { $set: [...pageListIdsSet] } })
+    }
+
+    delPageList: EventHandler<'delPageList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageListIdsSet = new Set(previousState.pageListIds)
+        pageListIdsSet.delete(event.listId)
+        this.emitMutation({ pageListIds: { $set: [...pageListIdsSet] } })
     }
 
     togglePDFReaderEnabled: EventHandler<'togglePDFReaderEnabled'> = async ({

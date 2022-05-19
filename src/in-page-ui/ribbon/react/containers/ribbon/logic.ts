@@ -137,7 +137,7 @@ export class RibbonContainerLogic extends UILogic<
             },
             lists: {
                 showListsPicker: false,
-                pageBelongsToList: false,
+                pageListIds: [],
             },
             search: {
                 showSearchBox: false,
@@ -209,11 +209,7 @@ export class RibbonContainerLogic extends UILogic<
                     $set: tags.length > 0,
                 },
             },
-            lists: {
-                pageBelongsToList: {
-                    $set: lists.length > 0,
-                },
-            },
+            lists: { pageListIds: { $set: lists } },
         })
     }
 
@@ -509,6 +505,16 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        const pageListsSet = new Set(previousState.lists.pageListIds)
+        if (event.value.added != null) {
+            pageListsSet.add(event.value.added)
+        } else {
+            pageListsSet.delete(event.value.deleted)
+        }
+        this.emitMutation({
+            lists: { pageListIds: { $set: [...pageListsSet] } },
+        })
+
         await this.dependencies.annotationsCache.updatePublicAnnotationLists({
             added: event.value.added,
             deleted: event.value.deleted,

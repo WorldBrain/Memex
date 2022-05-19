@@ -1,4 +1,6 @@
-import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { EventEmitter } from 'events'
+import type TypedEventEmitter from 'typed-emitter'
+import type { Tabs, Browser } from 'webextension-polyfill-ts'
 
 import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'
@@ -15,8 +17,7 @@ import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { LoggableTabChecker } from 'src/activity-logger/background/types'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import { blacklist } from 'src/blacklist/background'
-import TypedEventEmitter from 'typed-emitter'
-import { EventEmitter } from 'events'
+import { captureException } from 'src/util/raven'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
 const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
@@ -154,12 +155,11 @@ export default class TabManagementBackground {
         for (const file of CONTENT_SCRIPTS) {
             await this.options.browserAPIs.tabs
                 .executeScript(tab.id, { file })
-                .catch((err) =>
-                    console.error(
-                        'Cannot inject content-scripts into page - reason:',
-                        err.message,
-                    ),
-                )
+                .catch((err) => {
+                    const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
+                    captureException(new Error(message))
+                    console.error(message)
+                })
         }
     }
 

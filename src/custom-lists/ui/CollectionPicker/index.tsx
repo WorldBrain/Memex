@@ -200,7 +200,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     renderMainContent() {
-        if (this.state.loadingSuggestions) {
+        if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
                     <LoadingIndicator size={25} />
@@ -219,7 +219,7 @@ class SpacePicker extends StatefulUIElement<
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
-                    loading={this.state.loadingQueryResults}
+                    loading={this.state.loadingQueryResults === 'running'}
                     before={
                         <EntrySelectedList
                             entries={this.selectedDisplayEntries}
@@ -258,7 +258,6 @@ class SpacePicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     {this.renderMainContent()}
-                    {this.props.children}
                 </OuterSearchBox>
             </ThemeProvider>
         )

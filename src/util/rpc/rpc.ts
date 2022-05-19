@@ -290,7 +290,7 @@ export class PortBasedRPCManager {
     private getExtensionPort(name: string) {
         const port = this.ports.get(this.getPortIdForExtBg())
         if (!port) {
-            console.error({ ports: this.ports })
+            console.error('ports: ', [...this.ports.entries()])
             throw new Error(
                 `Could not get a port to message the extension [${this.getPortIdForExtBg()}] (when trying to call [${name}] )`,
             )
@@ -301,7 +301,7 @@ export class PortBasedRPCManager {
     private getTabPort(tabId: number, name: string) {
         const port = this.ports.get(this.getPortIdForTab(tabId))
         if (!port) {
-            console.error({ ports: this.ports })
+            console.error('ports: ', [...this.ports.entries()])
             throw new Error(
                 `Could not get a port to ${this.getPortIdForTab(
                     tabId,
