@@ -133,10 +133,11 @@ export class RibbonContainerLogic extends UILogic<
                 tags: [],
                 showTagsPicker: false,
                 pageHasTags: false,
+                shouldShowTagsUIs: false,
             },
             lists: {
                 showListsPicker: false,
-                pageBelongsToList: false,
+                pageListIds: [],
             },
             search: {
                 showSearchBox: false,
@@ -149,9 +150,20 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async (incoming) => {
+        const { getPageUrl, syncSettings } = this.dependencies
+
         await loadInitial<RibbonContainerState>(this, async () => {
-            const url = await this.dependencies.getPageUrl()
-            this.emitMutation({ pageUrl: { $set: url } })
+            const [url, areTagsMigrated] = await Promise.all([
+                getPageUrl(),
+                syncSettings.extension.get('areTagsMigratedToSpaces'),
+            ])
+
+            this.emitMutation({
+                pageUrl: { $set: url },
+                tagging: {
+                    shouldShowTagsUIs: { $set: !areTagsMigrated },
+                },
+            })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
@@ -197,11 +209,7 @@ export class RibbonContainerLogic extends UILogic<
                     $set: tags.length > 0,
                 },
             },
-            lists: {
-                pageBelongsToList: {
-                    $set: lists.length > 0,
-                },
-            },
+            lists: { pageListIds: { $set: lists } },
         })
     }
 
@@ -497,6 +505,16 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        const pageListsSet = new Set(previousState.lists.pageListIds)
+        if (event.value.added != null) {
+            pageListsSet.add(event.value.added)
+        } else {
+            pageListsSet.delete(event.value.deleted)
+        }
+        this.emitMutation({
+            lists: { pageListIds: { $set: [...pageListsSet] } },
+        })
+
         await this.dependencies.annotationsCache.updatePublicAnnotationLists({
             added: event.value.added,
             deleted: event.value.deleted,

@@ -51,6 +51,10 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
+        if (this.props.filterMode) {
+            return false
+        }
+
         const otherLists = (this.logic as ListPickerLogic).defaultEntries.map(
             (e) => ({
                 id: e.localId,
@@ -145,7 +149,9 @@ class SpacePicker extends StatefulUIElement<
             focused={list.focused}
             remoteId={list.remoteId}
             resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText="Remove from Space"
+            removeTooltipText={
+                this.props.removeTooltipText ?? 'Remove from Space'
+            }
             actOnAllTooltipText="Add all tabs in window to Space"
         />
     )
@@ -167,7 +173,7 @@ class SpacePicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName.length > 0) {
+        if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return
         }
 
@@ -182,15 +188,19 @@ class SpacePicker extends StatefulUIElement<
                             hoverOff
                         />
                     </SectionCircle>
-                    <SectionTitle>Create your first space</SectionTitle>
-                    <InfoText>by typing into the search field </InfoText>
+                    <SectionTitle>Create your first Space</SectionTitle>
+                    <InfoText>
+                        {this.props.filterMode
+                            ? 'to use as a search filter'
+                            : 'by typing into the search field'}
+                    </InfoText>
                 </EmptyListsView>
             )
         }
     }
 
     renderMainContent() {
-        if (this.state.loadingSuggestions) {
+        if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
                     <LoadingIndicator size={25} />
@@ -201,13 +211,15 @@ class SpacePicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
-                    searchInputPlaceholder="Search Spaces"
+                    searchInputPlaceholder={
+                        this.props.searchInputPlaceholder ?? 'Search Spaces'
+                    }
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
-                    loading={this.state.loadingQueryResults}
+                    loading={this.state.loadingQueryResults === 'running'}
                     before={
                         <EntrySelectedList
                             entries={this.selectedDisplayEntries}
@@ -246,7 +258,6 @@ class SpacePicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     {this.renderMainContent()}
-                    {this.props.children}
                 </OuterSearchBox>
             </ThemeProvider>
         )

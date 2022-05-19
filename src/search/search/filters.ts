@@ -4,6 +4,7 @@ import difference from 'lodash/fp/difference'
 
 import { DBGet, SearchParams, FilteredIDs } from '..'
 import { DexieUtilsPlugin } from '../plugins/dexie-utils'
+import { PageListEntry } from 'src/custom-lists/background/types'
 
 const pageIndexLookup = (getDb: DBGet) => async (
     index: string,
@@ -149,15 +150,23 @@ const listSearch = (getDb: DBGet) => async ({
     const db = await getDb()
     const urls = new Set<string>()
 
-    // The list filter contains only one list at a time
-    // It is just a temporary hack until multiple lists for filtering in used.
-    // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
-    const listEntries = await db
+    const listEntries: PageListEntry[] = await db
         .collection('pageListEntries')
-        .findObjects({ listId: Number(lists[0]) })
+        .findObjects({ listId: { $in: lists } })
 
-    listEntries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
+    const listsByUrl = new Map<string, number[]>()
+    listEntries.forEach(({ pageUrl, listId }) =>
+        listsByUrl.set(pageUrl, [...(listsByUrl.get(pageUrl) ?? []), listId]),
+    )
 
+    for (const [url, memberLists] of listsByUrl.entries()) {
+        if (
+            lists.length === memberLists.length &&
+            memberLists.every((listId) => lists.includes(listId))
+        ) {
+            urls.add(url)
+        }
+    }
     return urls
 }
 

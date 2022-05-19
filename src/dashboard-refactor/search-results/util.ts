@@ -169,8 +169,9 @@ const annotationToNoteData = (
 export const annotationSearchResultToState: SearchResultToState = (
     result: AnnotationsSearchResponse,
 ) => {
+    // This case is for annots search with terms set
     if (!result.isAnnotsSearch) {
-        return pageSearchResultToState(result)
+        return pageSearchResultToState(result, { areNotesShown: true })
     }
 
     const pageData = initNormalizedState<PageData>()
@@ -220,6 +221,7 @@ export const annotationSearchResultToState: SearchResultToState = (
 
 export const pageSearchResultToState: SearchResultToState = (
     result: StandardSearchResponse,
+    extraPageResultState,
 ) => {
     const pageData = initNormalizedState<PageData>()
     const noteData = initNormalizedState<NoteData & NoteResult>()
@@ -234,6 +236,7 @@ export const pageSearchResultToState: SearchResultToState = (
         pageResults.byId[id] = getInitialPageResultState(
             pageResult.url,
             noteIds,
+            extraPageResultState,
         )
 
         pageData.allIds.push(id)

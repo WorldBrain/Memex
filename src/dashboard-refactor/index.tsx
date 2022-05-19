@@ -266,7 +266,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderFiltersBar() {
         const { searchBG } = this.props
-        const { searchFilters } = this.state
+        const { searchFilters, searchResults } = this.state
 
         const toggleTagsFilter = () =>
             this.processEvent('toggleShowTagPicker', {
@@ -280,6 +280,10 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('toggleShowDomainPicker', {
                 isActive: !searchFilters.isDomainFilterActive,
             })
+        const toggleSpacesFilter = () =>
+            this.processEvent('toggleShowSpacePicker', {
+                isActive: !searchFilters.isSpaceFilterActive,
+            })
 
         return (
             <FiltersBar
@@ -287,10 +291,13 @@ export class DashboardContainer extends StatefulUIElement<
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
                 showDatesFilter={searchFilters.isDateFilterActive}
+                showSpaceFilter={searchFilters.isSpaceFilterActive}
                 showDomainsFilter={searchFilters.isDomainFilterActive}
-                toggleTagsFilter={toggleTagsFilter}
-                toggleDatesFilter={toggleDatesFilter}
                 toggleDomainsFilter={toggleDomainsFilter}
+                toggleSpaceFilter={toggleSpacesFilter}
+                toggleDatesFilter={toggleDatesFilter}
+                toggleTagsFilter={toggleTagsFilter}
+                areSpacesFiltered={searchFilters.spacesIncluded.length > 0}
                 areTagsFiltered={searchFilters.tagsIncluded.length > 0}
                 areDatesFiltered={
                     searchFilters.dateTo != null ||
@@ -339,29 +346,46 @@ export class DashboardContainer extends StatefulUIElement<
                             domains: updatePickerValues(args)(args.selected),
                         }),
                 }}
-                tagPickerProps={{
-                    onClickOutside: toggleTagsFilter,
-                    onEscapeKeyDown: toggleTagsFilter,
-                    initialSelectedEntries: () => searchFilters.tagsIncluded,
-                    queryEntries: (query) =>
-                        searchBG.suggest({
-                            query,
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
+                tagPickerProps={
+                    searchResults.shouldShowTagsUIs && {
+                        onClickOutside: toggleTagsFilter,
+                        onEscapeKeyDown: toggleTagsFilter,
+                        initialSelectedEntries: () =>
+                            searchFilters.tagsIncluded,
+                        queryEntries: (query) =>
+                            searchBG.suggest({
+                                query,
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                            }),
+                        loadDefaultSuggestions: () =>
+                            searchBG.extendedSuggest({
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                                notInclude: [
+                                    ...searchFilters.tagsIncluded,
+                                    ...searchFilters.tagsExcluded,
+                                ],
+                            }),
+                        onUpdateEntrySelection: (args) =>
+                            this.processEvent('setTagsIncluded', {
+                                tags: updatePickerValues(args)(args.selected),
+                            }),
+                    }
+                }
+                spacePickerProps={{
+                    spacesBG: this.props.listsBG,
+                    onClickOutside: toggleSpacesFilter,
+                    onEscapeKeyDown: toggleSpacesFilter,
+                    contentSharingBG: this.props.contentShareBG,
+                    createNewEntry: () => undefined,
+                    initialSelectedEntries: () => searchFilters.spacesIncluded,
+                    selectEntry: (spaceId) =>
+                        this.processEvent('addIncludedSpace', {
+                            spaceId,
                         }),
-                    loadDefaultSuggestions: () =>
-                        searchBG.extendedSuggest({
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.tagsIncluded,
-                                ...searchFilters.tagsExcluded,
-                            ],
-                        }),
-                    onUpdateEntrySelection: (args) =>
-                        this.processEvent('setTagsIncluded', {
-                            tags: updatePickerValues(args)(args.selected),
-                        }),
+                    unselectEntry: (spaceId) =>
+                        this.processEvent('delIncludedSpace', { spaceId }),
                 }}
             />
         )
@@ -552,8 +576,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
-        const { searchResults, listsSidebar } = this.state
-        const { searchFilters } = this.state
+        const { searchResults, listsSidebar, searchFilters } = this.state
 
         return (
             <SearchResultsContainer

@@ -6,6 +6,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import TagsBackground from 'src/tags/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
+import { BackgroundModules } from 'src/background-script/setup'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -23,16 +24,13 @@ describe('Search index integration', () => {
         const { searchIndex } = backgroundModules.search
 
         if (!options?.excludeTestData) {
-            await insertTestData(
-                pick(backgroundModules, 'bookmarks', 'tags', 'pages'),
-            )
+            await insertTestData(backgroundModules)
         }
+
         return {
             storageManager,
             searchIndex,
-            pages: backgroundModules.pages,
-            tags: backgroundModules.tags,
-            bookmarks: backgroundModules.bookmarks,
+            ...backgroundModules,
             search: (params = {}) =>
                 searchIndex.search({
                     mapResultsFunc: (db) => (res) => {
@@ -43,11 +41,7 @@ describe('Search index integration', () => {
         }
     }
 
-    async function insertTestData(params: {
-        bookmarks: BookmarksBackground
-        pages: PageIndexingBackground
-        tags: TagsBackground
-    }) {
+    async function insertTestData(params: BackgroundModules) {
         // Insert some test data for all tests to use
         await params.pages.addPage({
             pageDoc: DATA.PAGE_3,
@@ -66,7 +60,7 @@ describe('Search index integration', () => {
             visits: [DATA.VISIT_1],
         })
 
-        // // Add some test tags
+        // Add some test tags
         await params.tags.addTagToExistingUrl({
             url: DATA.PAGE_3.url,
             tag: 'good',
@@ -78,6 +72,35 @@ describe('Search index integration', () => {
         await params.tags.addTagToExistingUrl({
             url: DATA.PAGE_2.url,
             tag: 'quality',
+        })
+    }
+
+    // NOTE: this test data setup logic is separate as adding it to the main logic above failed a bunch of these tests.
+    //  These are some of our older, and more poorly setup, tests, which def need more attention. Though we're lacking
+    //  the time to do it right now, hence the separation.
+    async function insertSpaceTestData(
+        params: Pick<BackgroundModules, 'customLists'>,
+    ) {
+        await params.customLists.createCustomList({
+            id: DATA.SPACE_1_ID,
+            name: DATA.SPACE_1,
+        })
+        await params.customLists.createCustomList({
+            id: DATA.SPACE_2_ID,
+            name: DATA.SPACE_2,
+        })
+
+        await params.customLists.insertPageToList({
+            url: DATA.PAGE_1.url,
+            id: DATA.SPACE_1_ID,
+        })
+        await params.customLists.insertPageToList({
+            url: DATA.PAGE_1.url,
+            id: DATA.SPACE_2_ID,
+        })
+        await params.customLists.insertPageToList({
+            url: DATA.PAGE_2.url,
+            id: DATA.SPACE_2_ID,
         })
     }
 
@@ -394,6 +417,25 @@ describe('Search index integration', () => {
             testTags({ tags: ['quality'] }, { tags: ['quality', 'good'] }),
         )
 
+        test('spaces filtered search', async () => {
+            const { search, customLists } = await setupTest()
+            await insertSpaceTestData({ customLists })
+
+            const { docs: docsA } = await search({ lists: [DATA.SPACE_1_ID] })
+            expect(docsA).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
+
+            const { docs: docsB } = await search({ lists: [DATA.SPACE_2_ID] })
+            expect(docsB).toEqual([
+                [DATA.PAGE_ID_2, DATA.VISIT_2],
+                [DATA.PAGE_ID_1, DATA.VISIT_1],
+            ])
+
+            const { docs: docsC } = await search({
+                lists: [DATA.SPACE_2_ID, DATA.SPACE_1_ID],
+            })
+            expect(docsC).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
+        })
+
         // TODO: Suggest code moved to storex plugin; Move these tests too
         // test('domains suggest', async () => {
         //     const expected1 = ['lorem.com']
@@ -650,6 +692,52 @@ describe('Search index integration', () => {
             expect(after).not.toEqual(
                 expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
             )
+        })
+
+        test('space adding affects search', async () => {
+            const { search, customLists } = await setupTest()
+            await insertSpaceTestData({ customLists })
+            const { docs: before } = await search({ lists: [DATA.SPACE_1_ID] })
+            expect(before).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
+
+            await customLists.insertPageToList({
+                url: DATA.PAGE_2.url,
+                id: DATA.SPACE_1_ID,
+            })
+
+            const { docs: after } = await search({ lists: [DATA.SPACE_1_ID] })
+            expect(after).toEqual(
+                expect.arrayContaining([
+                    [DATA.PAGE_ID_2, DATA.VISIT_2],
+                    [DATA.PAGE_ID_1, DATA.VISIT_1],
+                ]),
+            )
+        })
+
+        test('space deleting affects search', async () => {
+            const { search, customLists } = await setupTest()
+            await insertSpaceTestData({ customLists })
+
+            await customLists.insertPageToList({
+                url: DATA.PAGE_2.url,
+                id: DATA.SPACE_1_ID,
+            })
+
+            const { docs: before } = await search({ lists: [DATA.SPACE_1_ID] })
+            expect(before).toEqual(
+                expect.arrayContaining([
+                    [DATA.PAGE_ID_2, DATA.VISIT_2],
+                    [DATA.PAGE_ID_1, DATA.VISIT_1],
+                ]),
+            )
+
+            await customLists.removePageFromList({
+                url: DATA.PAGE_2.url,
+                id: DATA.SPACE_1_ID,
+            })
+
+            const { docs: after } = await search({ lists: [DATA.SPACE_1_ID] })
+            expect(after).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
         })
 
         test('bookmark adding affects search', async () => {

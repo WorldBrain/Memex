@@ -63,6 +63,28 @@ describe('Dashboard search filters logic', () => {
         )
     })
 
+    it('should be able to set the space filter active state', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.searchFilters.isSpaceFilterActive).toEqual(
+            false,
+        )
+        await searchResults.processEvent('toggleShowSpacePicker', {
+            isActive: true,
+        })
+        expect(searchResults.state.searchFilters.isSpaceFilterActive).toEqual(
+            true,
+        )
+        await searchResults.processEvent('toggleShowSpacePicker', {
+            isActive: false,
+        })
+        expect(searchResults.state.searchFilters.isSpaceFilterActive).toEqual(
+            false,
+        )
+    })
+
     it('should be able to set the domain filter active state', async ({
         device,
     }) => {
@@ -228,6 +250,54 @@ describe('Dashboard search filters logic', () => {
 
         expect(searchResults.state.searchFilters.tagsExcluded).toEqual([tag2])
         expect(searchResults.logic['searchTriggeredCount']).toBe(6)
+    })
+
+    it('should be able to add and remove included space filters', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device, {
+            overrideSearchTrigger: true,
+        })
+        const spaceIdA = 1
+        const spaceIdB = 2
+
+        expect(searchResults.state.searchFilters.spacesIncluded).toEqual([])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
+
+        await searchResults.processEvent('addIncludedSpace', {
+            spaceId: spaceIdA,
+        })
+
+        expect(searchResults.state.searchFilters.spacesIncluded).toEqual([
+            spaceIdA,
+        ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(1)
+
+        await searchResults.processEvent('addIncludedSpace', {
+            spaceId: spaceIdB,
+        })
+
+        expect(searchResults.state.searchFilters.spacesIncluded).toEqual([
+            spaceIdA,
+            spaceIdB,
+        ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(2)
+
+        await searchResults.processEvent('delIncludedSpace', {
+            spaceId: spaceIdA,
+        })
+
+        expect(searchResults.state.searchFilters.spacesIncluded).toEqual([
+            spaceIdB,
+        ])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(3)
+
+        await searchResults.processEvent('delIncludedSpace', {
+            spaceId: spaceIdB,
+        })
+
+        expect(searchResults.state.searchFilters.spacesIncluded).toEqual([])
+        expect(searchResults.logic['searchTriggeredCount']).toBe(4)
     })
 
     it('should be able to add and remove included + excluded domain filters', async ({

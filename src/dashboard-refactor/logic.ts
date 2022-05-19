@@ -85,7 +85,9 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
-    syncSettings: SyncSettingsStore<'contentSharing' | 'dashboard'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'dashboard' | 'extension'
+    >
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -135,6 +137,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
+                shouldShowTagsUIs: false,
                 showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
@@ -165,9 +168,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: [],
                 domainsIncluded: [],
                 isDateFilterActive: false,
+                isSpaceFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
+                spacesIncluded: [],
                 tagsExcluded: [],
                 tagsIncluded: [],
                 dateFromInput: '',
@@ -246,20 +251,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
 
         const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
-        const listsSidebarLocked = await this.syncSettings.dashboard.get(
-            'listSidebarLocked',
-        )
-        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
-            'onboardingMsgSeen',
-        )
-        const subBannerShownAfter = await this.syncSettings.dashboard.get(
-            'subscribeBannerShownAfter',
-        )
+        const [
+            listsSidebarLocked,
+            onboardingMsgSeen,
+            subBannerShownAfter,
+            areTagsMigrated,
+        ] = await Promise.all([
+            this.syncSettings.dashboard.get('listSidebarLocked'),
+            this.syncSettings.dashboard.get('onboardingMsgSeen'),
+            this.syncSettings.dashboard.get('subscribeBannerShownAfter'),
+            this.syncSettings.extension.get('areTagsMigratedToSpaces'),
+        ])
 
         const mutation: UIMutation<State> = {
             isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
                 isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: {
@@ -474,7 +482,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        const skipMutation: UIMutation<State['searchFilters']> = {
+        const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
                 : { $set: 0 },
@@ -491,7 +499,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 const searchState = this.withMutation(previousState, {
-                    searchFilters: skipMutation,
+                    searchFilters,
                 })
                 let {
                     noteData,
@@ -528,7 +536,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
 
                 this.emitMutation({
-                    searchFilters: skipMutation,
+                    searchFilters,
                     searchResults: {
                         areResultsExhausted: {
                             $set: resultsExhausted,
@@ -2134,7 +2142,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchFilters: {
                 isTagFilterActive: { $set: event.isActive },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+            },
+        })
+    }
+
+    toggleShowSpacePicker: EventHandler<'toggleShowSpacePicker'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: {
+                isSpaceFilterActive: { $set: event.isActive },
+                isDomainFilterActive: { $set: false },
+                isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2145,8 +2167,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDateFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2157,8 +2180,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDomainFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2191,6 +2215,50 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateTo: { $set: event.value } },
+        })
+    }
+
+    setSpacesIncluded: EventHandler<'setSpacesIncluded'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $set: event.spaceIds },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    addIncludedSpace: EventHandler<'addIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $push: [event.spaceId] },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    delIncludedSpace: EventHandler<'delIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.spacesIncluded.findIndex(
+            (spaceId) => spaceId === event.spaceId,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $splice: [[index, 1]] },
+                searchFiltersOpen: { $set: true },
+            },
         })
     }
 

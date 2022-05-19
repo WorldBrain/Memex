@@ -724,7 +724,7 @@ const NoteTextBox = styled.div`
     line-height: 20px;
     line-break: normal;
     word-break: break-word;
-    hyphens: auto;
+    hyphens: none;
     width: 100%;
 `
 

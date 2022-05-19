@@ -26,15 +26,16 @@ export type FilterList =
     | 'listsIncluded'
     | 'listsExcluded'
 
-export type SearchFilterType = 'date' | 'tag' | 'domain' | 'list'
+export type SearchFilterType = 'date' | 'tag' | 'domain' | 'space'
 
-export type SearchFilterLabel = 'Date' | 'Tags' | 'Domains' | 'Collections'
+export type SearchFilterLabel = 'Date' | 'Tags' | 'Domains' | 'Spaces'
 
 export interface SearchFiltersState {
     searchQuery: string
     searchFiltersOpen: boolean
     isTagFilterActive: boolean
     isDateFilterActive: boolean
+    isSpaceFilterActive: boolean
     isDomainFilterActive: boolean
 
     dateFromInput: string
@@ -44,6 +45,7 @@ export interface SearchFiltersState {
 
     tagsIncluded: string[]
     tagsExcluded: string[]
+    spacesIncluded: number[]
     domainsIncluded: string[]
     domainsExcluded: string[]
 
@@ -57,12 +59,16 @@ export type SearchFilterEvents = UIEvent<{
     setSearchFiltersOpen: { isOpen: boolean }
     toggleShowTagPicker: { isActive: boolean }
     toggleShowDatePicker: { isActive: boolean }
+    toggleShowSpacePicker: { isActive: boolean }
     toggleShowDomainPicker: { isActive: boolean }
 
     setDateFromInputValue: { value: string }
     setDateToInputValue: { value: string }
     setDateFrom: { value: number }
     setDateTo: { value: number }
+
+    addIncludedSpace: { spaceId: number }
+    delIncludedSpace: { spaceId: number }
 
     addIncludedTag: { tag: string }
     delIncludedTag: { tag: string }
@@ -76,6 +82,7 @@ export type SearchFilterEvents = UIEvent<{
 
     setTagsIncluded: { tags: string[] }
     setTagsExcluded: { tags: string[] }
+    setSpacesIncluded: { spaceIds: number[] }
     setDomainsIncluded: { domains: string[] }
     setDomainsExcluded: { domains: string[] }
 

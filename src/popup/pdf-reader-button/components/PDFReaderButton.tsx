@@ -39,8 +39,8 @@ class PDFreaderButton extends PureComponent<Props> {
                     </SectionCircle>
                     <ButtonInnerContent>
                         {this.props.pdfMode === 'reader'
-                            ? 'Close PDF reader'
-                            : 'Open PDF reader'}
+                            ? 'Close Memex PDF reader'
+                            : 'Open Memex PDF reader'}
                         <SubTitle>One-time open current PDF</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>

@@ -48,6 +48,7 @@ import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -183,6 +184,9 @@ export async function main(
                 activityIndicatorBG: runInBackground(),
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
+                syncSettings: createSyncSettingsStore({
+                    syncSettingsBG: runInBackground(),
+                }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,
