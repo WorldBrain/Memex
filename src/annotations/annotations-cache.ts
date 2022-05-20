@@ -423,7 +423,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const { backendOperations } = this.dependencies
         const stateBeforeModifications = this._annotations
 
-        const annotUrl = await backendOperations.create(annotation, shareOpts)
+        const annotCreatePromise = backendOperations.create(
+            annotation,
+            shareOpts,
+        )
         // NOTE: we're separating the lists from the annotation to avoid confusing them with the lists we potentially need to inherit from the parent page (if annot is to be shared)
         const baseLists = [...annotation.lists]
 
@@ -446,6 +449,7 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
         this.annotationChanges.emit('newStateIntent', this.annotations)
 
+        const annotUrl = await annotCreatePromise
         if (annotation.tags.length) {
             await backendOperations.updateTags(annotUrl, annotation.tags)
         }

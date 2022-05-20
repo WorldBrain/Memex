@@ -288,6 +288,7 @@ export class SidebarContainerLogic extends UILogic<
 
     private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
+            noteCreateState: { $set: 'success' },
             annotations: {
                 $set: nextAnnotations,
             },
