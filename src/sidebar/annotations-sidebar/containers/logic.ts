@@ -24,7 +24,7 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import { generateUrl } from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
@@ -725,7 +725,10 @@ export class SidebarContainerLogic extends UILogic<
         if (comment.length === 0) {
             return
         }
-        const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
+        const annotationUrl = generateAnnotationUrl({
+            pageUrl,
+            now: () => Date.now(),
+        })
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },

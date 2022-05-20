@@ -51,27 +51,26 @@ export const createAnnotationsCache = (
                 )
 
                 const annotationUrls = annotations.map((a) => a.url)
-                const privacyLevels = await bgModules.contentSharing.findAnnotationPrivacyLevels(
-                    {
+                const [privacyLevels, remoteAnnotationIds] = await Promise.all([
+                    bgModules.contentSharing.findAnnotationPrivacyLevels({
                         annotationUrls,
-                    },
-                )
-                const remoteAnnotationIds = await bgModules.contentSharing.getRemoteAnnotationIds(
-                    { annotationUrls },
-                )
+                    }),
+                    bgModules.contentSharing.getRemoteAnnotationIds({
+                        annotationUrls,
+                    }),
+                ])
 
-                return annotations.map((a) => ({
-                    ...a,
-                    isShared: [
-                        AnnotationPrivacyLevels.SHARED,
-                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(privacyLevels[a.url]),
-                    isBulkShareProtected: [
-                        AnnotationPrivacyLevels.PROTECTED,
-                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(privacyLevels[a.url]),
-                    remoteId: remoteAnnotationIds[a.url] ?? null,
-                }))
+                return annotations.map((annot) => {
+                    const privacyState = maybeGetAnnotationPrivacyState(
+                        privacyLevels[annot.url] as AnnotationPrivacyLevels,
+                    )
+                    return {
+                        ...annot,
+                        isShared: privacyState.public,
+                        isBulkShareProtected: privacyState.protected,
+                        remoteId: remoteAnnotationIds[annot.url] ?? null,
+                    }
+                })
             },
             create: async (annotation, shareOpts) => {
                 const { savePromise } = await createAnnotation({
@@ -379,8 +378,11 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     load = async (url: string, args = {}) => {
         const { backendOperations } = this.dependencies
-        const annotations = await backendOperations.load(url, args)
-        const { sharedLists } = await backendOperations.loadPageData(url)
+
+        const [annotations, { sharedLists }] = await Promise.all([
+            backendOperations.load(url, args),
+            backendOperations.loadPageData(url),
+        ])
         sharedLists.forEach((listId) =>
             this.parentPageSharedListIds.add(listId),
         )
@@ -393,7 +395,10 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
             }
         }
 
-        this.listData = await backendOperations.loadListData()
+        if (Object.keys(this.listData).length === 0) {
+            this.listData = await backendOperations.loadListData()
+        }
+
         this.annotations = annotations.sort(this.dependencies.sortingFn)
         this.annotationChanges.emit('load', this._annotations)
         this.annotationChanges.emit('newStateIntent', this.annotations)
