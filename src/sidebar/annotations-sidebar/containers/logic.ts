@@ -180,7 +180,7 @@ export class SidebarContainerLogic extends UILogic<
             sidebarWidth: '450px',
             loadState: 'pristine',
             noteCreateState: 'pristine',
-            primarySearchState: 'pristine',
+            annotationsLoadState: 'pristine',
             secondarySearchState: 'pristine',
             followedListLoadState: 'pristine',
 
@@ -455,8 +455,11 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
+
         await Promise.all([
-            annotationsCache.load(event.pageUrl),
+            executeUITask(this, 'annotationsLoadState', async () => {
+                await annotationsCache.load(event.pageUrl)
+            }),
             this.processUIEvent('loadFollowedLists', {
                 previousState: this.withMutation(previousState, mutation),
                 event: null,
@@ -1355,11 +1358,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const {
-            isExpanded: wasExpanded,
-            loadState,
-            annotations,
-        } = previousState
+        const { isExpanded: wasExpanded, annotations } = previousState
 
         const annotIds = annotations.map((annot) => annot.url as string)
 

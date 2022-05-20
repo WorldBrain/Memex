@@ -975,7 +975,8 @@ export class AnnotationsSidebar extends React.Component<
                     <>
                         {this.renderNewAnnotation()}
 
-                        {this.props.annotations.length > 0 ? (
+                        {this.props.noteCreateState === 'running' ||
+                        this.props.annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
