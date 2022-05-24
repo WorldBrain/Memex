@@ -3,21 +3,13 @@ import styled, { css, keyframes } from 'styled-components'
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import {
-    ListSource,
-    DropReceivingState,
-    SelectedState,
-} from 'src/dashboard-refactor/types'
+import { DropReceivingState, SelectedState } from 'src/dashboard-refactor/types'
 import { Props as EditableItemProps } from './sidebar-editable-item'
 import { ListData, ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import SpaceContextMenuButton from './space-context-menu'
-import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { progressPercent } from 'src/options/imports/selectors'
+import { contentSharing } from 'src/util/remote-functions-background'
 
 export interface Props {
     className?: string
@@ -26,7 +18,6 @@ export interface Props {
     name: string
     listId: number
     listData?: ListData
-    source?: ListSource
     hasActivity?: boolean
     isMenuDisplayed?: boolean
     isCollaborative?: boolean
@@ -39,18 +30,12 @@ export interface Props {
     editableProps?: EditableItemProps
     selectedState: SelectedState
     onMoreActionClick?: (listId: number) => void
-    services?: UIElementServices<'contentSharing' | 'overlay' | 'clipboard'>
     shareList?: () => Promise<{ listId: string }>
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
     private handleSelection: React.MouseEventHandler = (e) =>
         this.props.selectedState.onSelection(this.props.listId)
-
-    private handleMoreActionClick: React.MouseEventHandler = (e) => {
-        e.stopPropagation()
-        this.props.onMoreActionClick(this.props.listId)
-    }
 
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
@@ -102,7 +87,12 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (onMoreActionClick) {
-            return <SpaceContextMenuButton {...this.props} />
+            return (
+                <SpaceContextMenuButton
+                    contentSharingBG={contentSharing}
+                    {...this.props}
+                />
+            )
         }
     }
 

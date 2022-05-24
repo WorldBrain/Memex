@@ -1,22 +1,13 @@
 import React, { PureComponent } from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import styles, { fonts } from 'src/dashboard-refactor/styles'
+import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
-import {
-    ListSource,
-    DropReceivingState,
-    SelectedState,
-} from 'src/dashboard-refactor/types'
-import { Props as EditableItemProps } from './sidebar-editable-item'
-import { ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
-// import { getViewportBreakpoint } from '@worldbrain/memex-common/lib/common-ui/styles/utils'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import EditableMenuItem from './editable-menu-item'
 import { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
@@ -24,10 +15,12 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import ListShareModalLogic from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/logic'
 import { Props as ListSidebarItemProps } from './sidebar-item-with-menu'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { contentSharing } from 'src/util/remote-functions-background'
 import { ButtonTooltip } from 'src/common-ui/components'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export interface Props extends ListSidebarItemProps {
+    contentSharingBG: ContentSharingInterface
     buttonRef?: React.RefObject<HTMLButtonElement>
     position?: { x: number; y: number }
     shareList?: () => Promise<{ listId: string }>
@@ -158,13 +151,7 @@ export default class SpaceContextMenuButton extends PureComponent<
     }
 
     render() {
-        const {
-            dropReceivingState,
-            onMoreActionClick,
-            newItemsCount,
-            hasActivity,
-        } = this.props
-        if (onMoreActionClick) {
+        if (this.props.onMoreActionClick) {
             return (
                 <>
                     <MoreIconBackground
@@ -174,7 +161,7 @@ export default class SpaceContextMenuButton extends PureComponent<
                         <Icon heightAndWidth="14px" path={icons.dots} />
                     </MoreIconBackground>
 
-                    {!(!this.props.source || !this.props.isMenuDisplayed) && (
+                    {this.props.isMenuDisplayed && (
                         <ClickAway onClickAway={this.handleMoreActionClick}>
                             <SpaceContextMenu
                                 {...this.props}
@@ -194,7 +181,6 @@ export class SpaceContextMenu extends PureComponent<
     {
         inviteLinks: InviteLink[]
         showSuccessMsg: boolean
-        remoteId?: string
         nameValue: string
         isLoading: boolean
     }
@@ -204,10 +190,7 @@ export class SpaceContextMenu extends PureComponent<
         this.state = {
             inviteLinks: [],
             showSuccessMsg: false,
-            remoteId: this.props.listData
-                ? this.props.listData.remoteId
-                : undefined,
-            nameValue: this.props.editableProps.initValue,
+            nameValue: this.props.listData.name,
             isLoading: true,
         }
     }
@@ -215,16 +198,22 @@ export class SpaceContextMenu extends PureComponent<
     private closeModal: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         this.props.onMoreActionClick(this.props.listId)
-        this.props.editableProps.onConfirmClick(this.state.nameValue)
     }
 
     async componentDidMount() {
-        const listIDs = await contentSharing.getExistingKeyLinksForList({
-            listReference: {
-                id: this.state.remoteId,
-                type: 'shared-list-reference',
+        if (this.props.listData.remoteId == null) {
+            this.setState({ isLoading: false })
+            return
+        }
+
+        const listIDs = await this.props.contentSharingBG.getExistingKeyLinksForList(
+            {
+                listReference: {
+                    id: this.props.listData.remoteId,
+                    type: 'shared-list-reference',
+                },
             },
-        })
+        )
 
         if (listIDs.links.length > 0) {
             this.setState({
@@ -234,34 +223,29 @@ export class SpaceContextMenu extends PureComponent<
         }
 
         if (!listIDs.links.length) {
-            this.setState({
-                isLoading: false,
-            })
+            this.setState({ isLoading: false })
         }
     }
 
     private addLinks = async () => {
         this.setState({ isLoading: true })
 
-        const { clipboard, contentSharing } = this.props.services
-
-        if (!this.state.remoteId && this.props.shareList) {
-            const sharedList = await this.props.shareList()
-            this.setState({ remoteId: sharedList.listId })
+        if (!this.props.listData.remoteId && this.props.shareList) {
+            await this.props.shareList()
         }
 
         const [commenterLink, contributorLink] = await Promise.all([
-            contentSharing.generateKeyLink({
+            this.props.contentSharingBG.generateKeyLink({
                 key: { roleID: SharedListRoleID.Commenter },
                 listReference: {
-                    id: this.state.remoteId,
+                    id: this.props.listData.remoteId,
                     type: 'shared-list-reference',
                 },
             }),
-            contentSharing.generateKeyLink({
+            this.props.contentSharingBG.generateKeyLink({
                 key: { roleID: SharedListRoleID.ReadWrite },
                 listReference: {
-                    id: this.state.remoteId,
+                    id: this.props.listData.remoteId,
                     type: 'shared-list-reference',
                 },
             }),
@@ -282,7 +266,7 @@ export class SpaceContextMenu extends PureComponent<
             isLoading: false,
         })
 
-        await clipboard.copy(contributorLink.link)
+        await copyToClipboard(contributorLink.link)
 
         setTimeout(
             () => this.setState({ showSuccessMsg: false }),
@@ -297,7 +281,7 @@ export class SpaceContextMenu extends PureComponent<
             throw new Error('Link to copy does not exist - cannot copy')
         }
 
-        await this.props.services.clipboard.copy(inviteLink.link)
+        await copyToClipboard(inviteLink.link)
 
         const showInviteLinkCopyMsg = (showCopyMsg: boolean) =>
             this.setState({
@@ -317,111 +301,89 @@ export class SpaceContextMenu extends PureComponent<
     }
 
     render() {
-        if (!this.props.source || !this.props.isMenuDisplayed) {
+        if (!this.props.isMenuDisplayed) {
             return false
         }
 
-        const renderMenu = (children: React.ReactNode) => (
-            <>
-                {/* <ClickAway onClickAway={this.closeModal}> */}
-
-                <Modal
-                    show={true}
-                    closeModal={this.closeModal}
-                    position={this.props.position}
-                    onMouseLeave={this.closeModal}
-                >
-                    <MenuContainer>{children}</MenuContainer>
-                </Modal>
-
-                {/* </ClickAway> */}
-            </>
-        )
-
-        if (this.props.source === 'followed-lists') {
-            return renderMenu(
-                <MenuButton onClick={this.props.onUnfollowClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="12px" path={'TODO.svg'} />
-                    </Margin>
-                    Unfollow
-                </MenuButton>,
-            )
-        }
-
-        return renderMenu(
-            <>
-                {this.state.isLoading ? (
-                    <LoadingContainer>
-                        <LoadingIndicator size={30} />
-                    </LoadingContainer>
-                ) : (
-                    <>
-                        {!(
-                            this.props.services && this.state.inviteLinks.length
-                        ) ? (
-                            <ShareSectionContainer
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                }}
-                            >
-                                <PrimaryAction
-                                    label={
-                                        <ButtonLabel>
-                                            {' '}
-                                            <Icon
-                                                color="white"
-                                                heightAndWidth="12px"
-                                                path={icons.link}
-                                                hoverOff
-                                            />{' '}
-                                            Share this Space
-                                        </ButtonLabel>
-                                    }
+        return (
+            <Modal
+                show={true}
+                closeModal={this.closeModal}
+                position={this.props.position}
+                onMouseLeave={this.closeModal}
+            >
+                <MenuContainer>
+                    {this.state.isLoading ? (
+                        <LoadingContainer>
+                            <LoadingIndicator size={30} />
+                        </LoadingContainer>
+                    ) : (
+                        <>
+                            {!this.state.inviteLinks.length ? (
+                                <ShareSectionContainer
                                     onClick={(e) => {
                                         e.stopPropagation()
-                                        this.addLinks()
                                     }}
-                                />
-                            </ShareSectionContainer>
-                        ) : (
-                            <ShareSectionContainer
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                }}
-                            >
-                                {this.state.inviteLinks.map((link, linkIndex) =>
-                                    renderCopyableLink({
-                                        ...link,
-                                        linkIndex,
-                                        copyLink: this.copyLink,
+                                >
+                                    <PrimaryAction
+                                        label={
+                                            <ButtonLabel>
+                                                {' '}
+                                                <Icon
+                                                    color="white"
+                                                    heightAndWidth="12px"
+                                                    path={icons.link}
+                                                    hoverOff
+                                                />{' '}
+                                                Share this Space
+                                            </ButtonLabel>
+                                        }
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            this.addLinks()
+                                        }}
+                                    />
+                                </ShareSectionContainer>
+                            ) : (
+                                <ShareSectionContainer
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                    }}
+                                >
+                                    {this.state.inviteLinks.map(
+                                        (link, linkIndex) =>
+                                            renderCopyableLink({
+                                                ...link,
+                                                linkIndex,
+                                                copyLink: this.copyLink,
+                                            }),
+                                    )}
+                                </ShareSectionContainer>
+                            )}
+                        </>
+                    )}
+                    <MenuButton onClick={this.props.onDeleteClick}>
+                        <Margin horizontal="10px">
+                            <Icon heightAndWidth="14px" path={icons.trash} />
+                        </Margin>
+                        Delete
+                    </MenuButton>
+                    <EditArea>
+                        <EditableMenuItem
+                            // key={i}
+                            onRenameStart={this.props.onRenameClick}
+                            nameValueState={{
+                                value: this.state.nameValue,
+                                setValue: (value) =>
+                                    this.setState({
+                                        nameValue: value,
                                     }),
-                                )}
-                            </ShareSectionContainer>
-                        )}
-                    </>
-                )}
-                <MenuButton onClick={this.props.onDeleteClick}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="14px" path={icons.trash} />
-                    </Margin>
-                    Delete
-                </MenuButton>
-                <EditArea>
-                    <EditableMenuItem
-                        // key={i}
-                        onRenameStart={this.props.onRenameClick}
-                        nameValueState={{
-                            value: this.state.nameValue,
-                            setValue: (value) =>
-                                this.setState({
-                                    nameValue: value,
-                                }),
-                        }}
-                        {...this.props.editableProps}
-                    />
-                </EditArea>
-            </>,
+                            }}
+                            {...this.props.editableProps}
+                        />
+                    </EditArea>
+                </MenuContainer>
+            </Modal>
         )
     }
 }
