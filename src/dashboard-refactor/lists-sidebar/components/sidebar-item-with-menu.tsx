@@ -29,6 +29,7 @@ export interface Props {
     dropReceivingState?: DropReceivingState
     editableProps?: EditableItemProps
     selectedState: SelectedState
+    changeListName?: (value: string) => void
     onMoreActionClick?: (listId: number) => void
     shareList?: () => Promise<void>
 }

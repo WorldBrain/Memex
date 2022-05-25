@@ -165,7 +165,22 @@ class SpacePicker extends StatefulUIElement<
                 onMoreActionClick={(listId) =>
                     this.processEvent('toggleEntryContextMenu', { listId })
                 }
-                onRenameClick={() => {}}
+                changeListName={(name) =>
+                    this.processEvent('validateListName', {
+                        name,
+                        listId: list.localId,
+                    })
+                }
+                editableProps={{
+                    onConfirmClick: (name) =>
+                        this.processEvent('renameList', {
+                            listId: list.localId,
+                            name,
+                        }),
+                    onCancelClick: () => {},
+                    initValue: list.name,
+                    errorMessage: this.state.renameListErrorMessage,
+                }}
                 contentSharingBG={this.props.contentSharingBG}
                 listData={{
                     id: list.localId,

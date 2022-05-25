@@ -19,7 +19,7 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
-export interface Props extends ListSidebarItemProps, State {
+export interface Props extends ListSidebarItemProps {
     contentSharingBG: ContentSharingInterface
     buttonRef?: React.RefObject<HTMLButtonElement>
 }
@@ -172,7 +172,7 @@ export default class SpaceContextMenuButton extends PureComponent<
 }
 
 export class SpaceContextMenu extends PureComponent<
-    Props,
+    Props & State,
     {
         inviteLinks: InviteLink[]
         showSuccessMsg: boolean
@@ -184,9 +184,9 @@ export class SpaceContextMenu extends PureComponent<
         super(props)
         this.state = {
             inviteLinks: [],
+            isLoading: true,
             showSuccessMsg: false,
             nameValue: this.props.listData.name,
-            isLoading: true,
         }
     }
 
@@ -361,6 +361,7 @@ export class SpaceContextMenu extends PureComponent<
                     <EditArea>
                         <EditableMenuItem
                             // key={i}
+                            changeListName={this.props.changeListName}
                             onRenameStart={this.props.onRenameClick}
                             nameValueState={{
                                 value: this.state.nameValue,

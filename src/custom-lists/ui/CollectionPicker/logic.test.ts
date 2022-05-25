@@ -508,6 +508,123 @@ describe('SpacePickerLogic', () => {
         ])
     })
 
+    it('should be able to rename list for given entry, and validate new names', async ({
+        device,
+    }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+        const newNameA = 'new list name'
+        const newNameB = 'another new list name'
+
+        await testLogic.init()
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+
+        // Attempt to re-use another list name - should set error
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_LIST_SUGGESTIONS[0].name,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+
+        // Attempt to use a list name with invalid characters - also should set error
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_LIST_SUGGESTIONS[1].name + '[ ( {',
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: newNameA,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            name: newNameB,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+    })
     it('should correctly select existing entry for all tabs', async ({
         device,
     }) => {

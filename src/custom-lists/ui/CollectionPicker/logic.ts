@@ -47,6 +47,8 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
     toggleEntryContextMenu: { listId: number }
+    validateListName: { listId: number; name: string }
+    renameList: { listId: number; name: string }
     shareList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
@@ -68,6 +70,7 @@ export interface SpacePickerState {
     loadingSuggestions: TaskState
     loadingShareStates: TaskState
     loadingQueryResults: TaskState
+    renameListErrorMessage: string | null
 }
 
 const sortDisplayEntries = (selectedEntries: number[]) => (
@@ -110,6 +113,7 @@ export default class SpacePickerLogic extends UILogic<
         loadingSuggestions: 'pristine',
         loadingShareStates: 'pristine',
         loadingQueryResults: 'pristine',
+        renameListErrorMessage: null,
     })
 
     init: EventHandler<'init'> = async () => {
@@ -277,6 +281,92 @@ export default class SpacePickerLogic extends UILogic<
                 {
                     ...this.defaultEntries[defaultEntryIndex],
                     remoteId: remoteListId,
+                },
+                ...this.defaultEntries.slice(defaultEntryIndex + 1),
+            ]
+        }
+    }
+
+    private _validateListName(listId: number, name: string): boolean {
+        const validationResult = validateListName(
+            name,
+            this.defaultEntries.map((entry) => ({
+                id: entry.localId,
+                name: entry.name,
+            })),
+            { listIdToSkip: listId },
+        )
+
+        this.emitMutation({
+            renameListErrorMessage: {
+                $set:
+                    validationResult.valid === false
+                        ? validationResult.reason
+                        : null,
+            },
+        })
+
+        return validationResult.valid
+    }
+
+    validateListName: EventHandler<'validateListName'> = async ({ event }) => {
+        this._validateListName(event.listId, event.name)
+    }
+
+    renameList: EventHandler<'renameList'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (!this._validateListName(event.listId, event.name)) {
+            return
+        }
+
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        const validationResult = validateListName(
+            event.name,
+            this.defaultEntries.map((entry) => ({
+                id: entry.localId,
+                name: entry.name,
+            })),
+            { listIdToSkip: event.listId },
+        )
+
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                renameListErrorMessage: {
+                    $set: validationResult.reason,
+                },
+            })
+            return
+        }
+
+        await this.dependencies.spacesBG.updateListName({
+            id: event.listId,
+            newName: event.name,
+            oldName: previousState.displayEntries[stateEntryIndex].name,
+        })
+
+        if (stateEntryIndex !== -1) {
+            this.emitMutation({
+                displayEntries: {
+                    [stateEntryIndex]: { name: { $set: event.name } },
+                },
+                renameListErrorMessage: { $set: null },
+            })
+        }
+
+        if (defaultEntryIndex !== -1) {
+            this.defaultEntries = [
+                ...this.defaultEntries.slice(0, defaultEntryIndex),
+                {
+                    ...this.defaultEntries[defaultEntryIndex],
+                    name: event.name,
                 },
                 ...this.defaultEntries.slice(defaultEntryIndex + 1),
             ]

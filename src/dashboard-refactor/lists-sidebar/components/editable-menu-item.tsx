@@ -13,11 +13,11 @@ interface NameValueState {
     setValue: (string) => void
 }
 export interface Props {
-    initValue?: string
+    initValue: string
     errorMessage: string | null
     onCancelClick: (value: string) => void
     onConfirmClick: (value: string) => void
-    changeListName: (value: string) => void
+    changeListName?: (value: string) => void
     onRenameStart?: React.MouseEventHandler<Element>
 }
 
@@ -29,7 +29,7 @@ export default class EditableMenuItem extends React.PureComponent<
     // state: State = { value: this.props.initValue }
     constructor(props: Props & { nameValueState: NameValueState }) {
         super(props)
-        this.props.onRenameStart(null)
+        this.props.onRenameStart?.(null)
     }
 
     private handleChange: React.MouseEventHandler<HTMLInputElement> = (
@@ -37,7 +37,7 @@ export default class EditableMenuItem extends React.PureComponent<
     ) => {
         const value = (event.target as HTMLInputElement).value
         this.props.nameValueState.setValue(value)
-        this.props.changeListName(value)
+        this.props.changeListName?.(value)
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -60,12 +60,6 @@ export default class EditableMenuItem extends React.PureComponent<
         // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
     }
-
-    private handleConfirm: React.MouseEventHandler = () =>
-        this.props.onConfirmClick(this.props.nameValueState.value)
-
-    private handleCancel: React.MouseEventHandler = () =>
-        this.props.onCancelClick(this.props.nameValueState.value)
 
     render() {
         return (
