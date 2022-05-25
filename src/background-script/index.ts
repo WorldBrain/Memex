@@ -122,6 +122,12 @@ class BackgroundScript {
             false,
         )
 
+        // Disable tags
+        await this.deps.syncSettingsStore.extension.set(
+            'areTagsMigratedToSpaces',
+            true,
+        )
+
         // TODO: Set up pioneer subscription banner to show up in 2 weeks
         // const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
         // await this.deps.syncSettings.dashboard.set(
