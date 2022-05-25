@@ -27,7 +27,6 @@ class EntryRow extends React.Component<Props> {
             localId,
             remoteId,
             createdAt,
-            isContextMenuOpen,
         } = this.props
         return {
             name,
@@ -36,7 +35,6 @@ class EntryRow extends React.Component<Props> {
             localId,
             remoteId,
             createdAt,
-            isContextMenuOpen,
         }
     }
 

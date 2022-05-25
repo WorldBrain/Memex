@@ -22,9 +22,10 @@ import {
     contentSharing,
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { Icon as StyledIcon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateListName } from '../utils'
-import SpaceContextMenuButton from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
+import { SpaceContextMenu } from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -150,51 +151,21 @@ class SpacePicker extends StatefulUIElement<
                 localId={list.localId}
                 focused={list.focused}
                 remoteId={list.remoteId}
-                isContextMenuOpen={list.isContextMenuOpen}
                 resultItem={<ListResultItem>{list.name}</ListResultItem>}
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
                 actOnAllTooltipText="Add all tabs in window to Space"
             />
-            <SpaceContextMenuButton
-                fixedPositioning
-                isMenuDisplayed={list.isContextMenuOpen}
-                listId={list.localId}
-                name={list.name}
-                selectedState={{ isSelected: false } as any}
-                onMoreActionClick={(listId) =>
-                    this.processEvent('toggleEntryContextMenu', { listId })
-                }
-                changeListName={(name) =>
-                    this.processEvent('validateListName', {
-                        name,
+            <SpaceContextMenuBtn
+                onClick={() =>
+                    this.processEvent('toggleEntryContextMenu', {
                         listId: list.localId,
                     })
                 }
-                onDeleteConfirm={() =>
-                    this.processEvent('deleteList', { listId: list.localId })
-                }
-                editableProps={{
-                    onConfirmClick: (name) =>
-                        this.processEvent('renameList', {
-                            listId: list.localId,
-                            name,
-                        }),
-                    onCancelClick: () => {},
-                    initValue: list.name,
-                    errorMessage: this.state.renameListErrorMessage,
-                }}
-                contentSharingBG={this.props.contentSharingBG}
-                listData={{
-                    id: list.localId,
-                    name: list.name,
-                    remoteId: list.remoteId,
-                }}
-                shareList={() =>
-                    this.processEvent('shareList', { listId: list.localId })
-                }
-            />
+            >
+                <StyledIcon heightAndWidth="14px" path={icons.dots} />
+            </SpaceContextMenuBtn>
         </EntryRowContainer>
     )
 
@@ -241,6 +212,59 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
+    private renderSpaceContextMenu = () => {
+        if (this.state.contextMenuListId == null) {
+            return
+        }
+
+        const list = (this.logic as ListPickerLogic).defaultEntries.find(
+            (l) => l.localId === this.state.contextMenuListId,
+        )
+        if (list == null) {
+            return
+        }
+
+        return (
+            <SpaceContextMenu
+                fixedPositioning
+                contentSharingBG={this.props.contentSharingBG}
+                listId={this.state.contextMenuListId}
+                name={list.name}
+                selectedState={{ isSelected: false } as any}
+                onMoreActionClick={(listId) =>
+                    this.processEvent('toggleEntryContextMenu', { listId })
+                }
+                changeListName={(name) =>
+                    this.processEvent('validateListName', {
+                        name,
+                        listId: list.localId,
+                    })
+                }
+                onDeleteConfirm={() =>
+                    this.processEvent('deleteList', { listId: list.localId })
+                }
+                editableProps={{
+                    onConfirmClick: (name) =>
+                        this.processEvent('renameList', {
+                            listId: list.localId,
+                            name,
+                        }),
+                    onCancelClick: () => {},
+                    initValue: list.name,
+                    errorMessage: this.state.renameListErrorMessage,
+                }}
+                listData={{
+                    id: list.localId,
+                    name: list.name,
+                    remoteId: list.remoteId,
+                }}
+                shareList={() =>
+                    this.processEvent('shareList', { listId: list.localId })
+                }
+            />
+        )
+    }
+
     renderMainContent() {
         if (this.state.loadingSuggestions === 'running') {
             return (
@@ -252,6 +276,7 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <>
+                {this.renderSpaceContextMenu()}
                 <PickerSearchInput
                     searchInputPlaceholder={
                         this.props.searchInputPlaceholder ??
@@ -379,6 +404,16 @@ const EntryRowContainer = styled.div`
     flex=direction: row;
     align-items: center;
     margin: 0px 10px;
+`
+
+const SpaceContextMenuBtn = styled.div`
+    border-radius: 3px;
+    padding: 2px;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 export default onClickOutside(SpacePicker)

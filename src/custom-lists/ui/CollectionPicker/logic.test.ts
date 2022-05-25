@@ -368,78 +368,36 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
+        expect(testLogic.state.contextMenuListId).toEqual(null)
+        await testLogic.processEvent('toggleEntryContextMenu', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        })
+
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        )
 
         await testLogic.processEvent('toggleEntryContextMenu', {
             listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            { ...DATA.TEST_LIST_SUGGESTIONS[1], isContextMenuOpen: true },
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
+        expect(testLogic.state.contextMenuListId).toEqual(null)
 
         await testLogic.processEvent('toggleEntryContextMenu', {
             listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        )
 
-        // Should do nothing as ID doesn't exist
         await testLogic.processEvent('toggleEntryContextMenu', {
-            listId: 123102310231203,
+            listId: DATA.TEST_LIST_SUGGESTIONS[0].localId,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+        )
     })
 
     it('should be share list for given entry', async ({ device }) => {

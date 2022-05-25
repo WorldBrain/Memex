@@ -13,7 +13,6 @@ export interface SpaceDisplayEntry {
     name: string
     createdAt: number
     focused: boolean
-    isContextMenuOpen: boolean
 }
 
 export interface SpacePickerDependencies {
@@ -67,6 +66,7 @@ export interface SpacePickerState {
     newEntryName: string
     displayEntries: SpaceDisplayEntry[]
     selectedEntries: number[]
+    contextMenuListId: number | null
     loadState: TaskState
     loadingSuggestions: TaskState
     loadingShareStates: TaskState
@@ -115,6 +115,7 @@ export default class SpacePickerLogic extends UILogic<
         loadingShareStates: 'pristine',
         loadingQueryResults: 'pristine',
         renameListErrorMessage: null,
+        contextMenuListId: null,
     })
 
     init: EventHandler<'init'> = async () => {
@@ -232,21 +233,11 @@ export default class SpacePickerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const entryIndex = previousState.displayEntries.findIndex(
-            (entry) => entry.localId === event.listId,
-        )
-
-        if (entryIndex === -1) {
-            return
-        }
-
-        this.emitMutation({
-            displayEntries: {
-                [entryIndex]: {
-                    isContextMenuOpen: { $apply: (isOpen) => !isOpen },
-                },
-            },
-        })
+        const nextListId =
+            previousState.contextMenuListId === event.listId
+                ? null
+                : event.listId
+        this.emitMutation({ contextMenuListId: { $set: nextListId } })
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
@@ -445,7 +436,6 @@ export default class SpacePickerLogic extends UILogic<
                     name: s.name,
                     focused: false,
                     createdAt: s.createdAt,
-                    isContextMenuOpen: false,
                     remoteId: remoteListIds[s.id] ?? null,
                 }))
                 .sort(sortDisplayEntries(selectedEntries))
@@ -628,7 +618,6 @@ export default class SpacePickerLogic extends UILogic<
             focused: false,
             remoteId: null,
             createdAt: Date.now(),
-            isContextMenuOpen: false,
         }
         this.defaultEntries.unshift(newEntry)
         this.emitMutation({
