@@ -9,10 +9,11 @@ import { validateListName } from '../utils'
 
 export interface SpaceDisplayEntry {
     localId: number
-    remoteId: string | number | null
+    remoteId: string | null
     name: string
-    focused: boolean
     createdAt: number
+    focused: boolean
+    isContextMenuOpen: boolean
 }
 
 export interface SpacePickerDependencies {
@@ -36,6 +37,7 @@ export interface SpacePickerDependencies {
     contentSharingBG: ContentSharingInterface
 }
 
+// TODO: This needs cleanup - so inconsistent
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string }
@@ -44,6 +46,8 @@ export type SpacePickerEvent = UIEvent<{
     newEntryAllPress: { entry: string }
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
+    toggleEntryContextMenu: { listId: number }
+    shareList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
     focusInput: {}
@@ -219,6 +223,66 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    toggleEntryContextMenu: EventHandler<'toggleEntryContextMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        const entryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        if (entryIndex === -1) {
+            return
+        }
+
+        this.emitMutation({
+            displayEntries: {
+                [entryIndex]: {
+                    isContextMenuOpen: { $apply: (isOpen) => !isOpen },
+                },
+            },
+        })
+    }
+
+    shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        // Already shared. Exit early
+        if (previousState.displayEntries[stateEntryIndex]?.remoteId != null) {
+            return
+        }
+
+        const {
+            remoteListId,
+        } = await this.dependencies.contentSharingBG.shareList({
+            listId: event.listId,
+        })
+
+        if (stateEntryIndex !== -1 && remoteListId != null) {
+            this.emitMutation({
+                displayEntries: {
+                    [stateEntryIndex]: { remoteId: { $set: remoteListId } },
+                },
+            })
+        }
+
+        if (defaultEntryIndex !== -1) {
+            this.defaultEntries = [
+                ...this.defaultEntries.slice(0, defaultEntryIndex),
+                {
+                    ...this.defaultEntries[defaultEntryIndex],
+                    remoteId: remoteListId,
+                },
+                ...this.defaultEntries.slice(defaultEntryIndex + 1),
+            ]
+        }
+    }
+
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
         event: { query },
         previousState,
@@ -255,8 +319,9 @@ export default class SpacePickerLogic extends UILogic<
                 .map((s) => ({
                     localId: s.id,
                     name: s.name,
-                    createdAt: s.createdAt,
                     focused: false,
+                    createdAt: s.createdAt,
+                    isContextMenuOpen: false,
                     remoteId: remoteListIds[s.id] ?? null,
                 }))
                 .sort(sortDisplayEntries(selectedEntries))
@@ -439,6 +504,7 @@ export default class SpacePickerLogic extends UILogic<
             focused: false,
             remoteId: null,
             createdAt: Date.now(),
+            isContextMenuOpen: false,
         }
         this.defaultEntries.unshift(newEntry)
         this.emitMutation({

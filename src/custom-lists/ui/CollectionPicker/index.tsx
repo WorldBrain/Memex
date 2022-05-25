@@ -11,10 +11,8 @@ import ListPickerLogic, {
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
-import EntryResultsList from './components/EntryResultsList'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import EntryRow, { IconStyleWrapper } from './components/EntryRow'
-import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
@@ -26,6 +24,7 @@ import {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateListName } from '../utils'
+import SpaceContextMenuButton from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -44,7 +43,7 @@ class SpacePicker extends StatefulUIElement<
             }),
     }
 
-    private displayListRef = React.createRef<EntryResultsList>()
+    private displayListRef = React.createRef<HTMLDivElement>()
 
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
@@ -95,7 +94,7 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('selectedEntryPress', { entry: list })
 
     handleResultListPress = (list: SpaceDisplayEntry) => {
-        this.displayListRef.current.scrollToTop()
+        this.displayListRef.current.scrollTo(0, 0)
         this.processEvent('resultEntryPress', { entry: list })
     }
 
@@ -130,30 +129,54 @@ class SpacePicker extends StatefulUIElement<
     }
 
     renderListRow = (list: SpaceDisplayEntry, index: number) => (
-        <EntryRow
-            createdAt={list.createdAt}
-            onPress={this.handleResultListPress}
-            onPressActOnAll={
-                this.props.actOnAllTabs
-                    ? (t) =>
-                          this.handleResultListAllPress(t as SpaceDisplayEntry)
-                    : undefined
-            }
-            onFocus={this.handleResultListFocus}
-            key={`ListKeyName-${list.localId}`}
-            id={`ListKeyName-${list.localId}`}
-            index={index}
-            name={list.name}
-            selected={this.state.selectedEntries.includes(list.localId)}
-            localId={list.localId}
-            focused={list.focused}
-            remoteId={list.remoteId}
-            resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText={
-                this.props.removeTooltipText ?? 'Remove from Space'
-            }
-            actOnAllTooltipText="Add all tabs in window to Space"
-        />
+        <EntryRowContainer key={list.localId}>
+            <EntryRow
+                createdAt={list.createdAt}
+                onPress={this.handleResultListPress}
+                onPressActOnAll={
+                    this.props.actOnAllTabs
+                        ? (t) =>
+                              this.handleResultListAllPress(
+                                  t as SpaceDisplayEntry,
+                              )
+                        : undefined
+                }
+                onFocus={this.handleResultListFocus}
+                key={`ListKeyName-${list.localId}`}
+                id={`ListKeyName-${list.localId}`}
+                index={index}
+                name={list.name}
+                selected={this.state.selectedEntries.includes(list.localId)}
+                localId={list.localId}
+                focused={list.focused}
+                remoteId={list.remoteId}
+                isContextMenuOpen={list.isContextMenuOpen}
+                resultItem={<ListResultItem>{list.name}</ListResultItem>}
+                removeTooltipText={
+                    this.props.removeTooltipText ?? 'Remove from Space'
+                }
+                actOnAllTooltipText="Add all tabs in window to Space"
+            />
+            <SpaceContextMenuButton
+                isMenuDisplayed={list.isContextMenuOpen}
+                listId={list.localId}
+                name={list.name}
+                selectedState={{ isSelected: false } as any}
+                onMoreActionClick={(listId) =>
+                    this.processEvent('toggleEntryContextMenu', { listId })
+                }
+                onRenameClick={() => {}}
+                contentSharingBG={this.props.contentSharingBG}
+                listData={{
+                    id: list.localId,
+                    name: list.name,
+                    remoteId: list.remoteId,
+                }}
+                shareList={() =>
+                    this.processEvent('shareList', { listId: list.localId })
+                }
+            />
+        </EntryRowContainer>
     )
 
     renderNewListAllTabsButton = () =>
@@ -228,13 +251,14 @@ class SpacePicker extends StatefulUIElement<
                         />
                     }
                 />
-                <EntryResultsList
-                    ref={this.displayListRef}
-                    query={this.state.query}
-                    entries={this.state.displayEntries}
-                    emptyView={this.renderEmptyList()}
-                    renderEntryRow={this.renderListRow}
-                />
+                <EntryList ref={this.displayListRef}>
+                    {this.state.query === '' && (
+                        <EntryListHeader>Recently used</EntryListHeader>
+                    )}
+                    {!this.state.displayEntries.length
+                        ? this.renderEmptyList()
+                        : this.state.displayEntries.map(this.renderListRow)}
+                </EntryList>
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
                         resultItem={
@@ -264,6 +288,23 @@ class SpacePicker extends StatefulUIElement<
         )
     }
 }
+
+const EntryListHeader = styled.div`
+    padding: 5px 10px;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.subText};
+`
+
+const EntryList = styled.div`
+    overflow-y: auto;
+    max-height: 280px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.backgroundHighlight};
@@ -311,6 +352,13 @@ const EmptyListsView = styled.div`
     align-items: center;
     grid-gap: 5px;
     padding: 20px 15px;
+`
+
+const EntryRowContainer = styled.div`
+    display: flex;
+    flex=direction: row;
+    align-items: center;
+    margin: 0px 10px;
 `
 
 export default onClickOutside(SpacePicker)

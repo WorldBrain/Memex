@@ -1,28 +1,21 @@
 import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
-import { Layers, X as XIcon } from '@styled-icons/feather'
-import { StyledIconBase } from '@styled-icons/styled-icon'
+import { Layers } from '@styled-icons/feather'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { opacify } from 'polished'
 import type { SpaceDisplayEntry } from '../logic'
 
-export interface Props {
+export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
     onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     id?: string
-    name: string
-    localId: number
-    createdAt: number
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
     selected?: boolean
-    focused?: boolean
-    remoteId: string | number | null
 }
 
 class EntryRow extends React.Component<Props> {
@@ -34,8 +27,17 @@ class EntryRow extends React.Component<Props> {
             localId,
             remoteId,
             createdAt,
+            isContextMenuOpen,
         } = this.props
-        return { name, selected, focused, localId, remoteId, createdAt }
+        return {
+            name,
+            selected,
+            focused,
+            localId,
+            remoteId,
+            createdAt,
+            isContextMenuOpen,
+        }
     }
 
     handleEntryPress = () => {
@@ -167,7 +169,7 @@ const Row = styled.div`
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    margin: 0px 10px;
+    width: 100%;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;

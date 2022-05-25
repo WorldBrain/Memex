@@ -19,33 +19,35 @@ import { ButtonTooltip } from 'src/common-ui/components'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
-export interface Props extends ListSidebarItemProps {
+export interface Props extends ListSidebarItemProps, State {
     contentSharingBG: ContentSharingInterface
     buttonRef?: React.RefObject<HTMLButtonElement>
-    position?: { x: number; y: number }
+}
+
+export interface State {
+    xPosition: number
+    yPosition: number
 }
 
 const Modal = ({
     children,
     show,
     closeModal,
-    position,
-    onMouseLeave,
+    xPosition,
+    yPosition,
 }: {
     children: JSX.Element
     show: boolean
     closeModal: React.MouseEventHandler
-    position: { x: number; y: number }
-    onMouseLeave: any
-}) => {
+} & State) => {
     return (
         <ModalRoot style={{ display: show ? 'block' : 'none' }}>
             <Overlay onClick={closeModal} />
 
             <ModalContent
-                onMouseLeave={closeModal}
-                x={position.x}
-                y={position.y}
+                // onMouseLeave={closeModal}
+                x={xPosition}
+                y={yPosition}
             >
                 {children}
             </ModalContent>
@@ -64,18 +66,14 @@ const renderCopyableLink = ({
     copyLink: ({ event }: { event: { linkIndex: number } }) => Promise<void>
 }) => {
     const viewportBreakpoint = 'normal'
-    // const viewportBreakpoint = getViewportBreakpoint(this.getViewportWidth(),)
 
     return (
-        <Margin bottom="3px">
+        <Margin bottom="3px" key={link}>
             <LinkAndRoleBox viewportBreakpoint={viewportBreakpoint}>
                 <CopyLinkBox>
                     <LinkBox
                         left="small"
-                        onClick={
-                            () => copyLink({ event: { linkIndex } })
-                            // this.processEvent('copyLink', { linkIndex })
-                        }
+                        onClick={() => copyLink({ event: { linkIndex } })}
                     >
                         <Link>
                             {showCopyMsg
@@ -132,21 +130,22 @@ const renderCopyableLink = ({
 
 export default class SpaceContextMenuButton extends PureComponent<
     Props,
-    { position: { x: number; y: number } }
+    State
 > {
     private buttonRef: React.RefObject<HTMLInputElement>
 
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-        this.setState({ position: { x: rect.x + 35, y: rect.y - 6 } })
+        this.setState({ xPosition: 0, yPosition: 0 })
+        // this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 })
         this.props.onMoreActionClick(this.props.listId)
     }
 
     constructor(props) {
         super(props)
         this.buttonRef = React.createRef()
-        this.state = { position: { x: 0, y: 0 } }
+        this.state = { xPosition: 0, yPosition: 0 }
     }
 
     render() {
@@ -162,10 +161,7 @@ export default class SpaceContextMenuButton extends PureComponent<
 
                     {this.props.isMenuDisplayed && (
                         <ClickAway onClickAway={this.handleMoreActionClick}>
-                            <SpaceContextMenu
-                                {...this.props}
-                                position={this.state.position}
-                            />
+                            <SpaceContextMenu {...this.props} {...this.state} />
                         </ClickAway>
                     )}
                 </>
@@ -305,12 +301,7 @@ export class SpaceContextMenu extends PureComponent<
         }
 
         return (
-            <Modal
-                show={true}
-                closeModal={this.closeModal}
-                position={this.props.position}
-                onMouseLeave={this.closeModal}
-            >
+            <Modal show={true} closeModal={this.closeModal} {...this.props}>
                 <MenuContainer>
                     {this.state.isLoading ? (
                         <LoadingContainer>
@@ -470,7 +461,6 @@ const ModalContent = styled.div<{ x: number; y: number }>`
     text-align: center;
     border-radius: 4px;
     width: 300px;
-    width-max: 250px;
 `
 
 const Overlay = styled.div`
