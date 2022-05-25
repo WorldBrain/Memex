@@ -30,7 +30,6 @@ export interface SpacePickerDependencies {
     initialSelectedEntries?: () => number[] | Promise<number[]>
     children?: any
     filterMode?: boolean
-    fixedMenuPositioning?: boolean
     removeTooltipText?: string
     searchInputPlaceholder?: string
     onClickOutside?: React.MouseEventHandler

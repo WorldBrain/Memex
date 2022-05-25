@@ -31,105 +31,6 @@ export interface State {
     yPosition: number
 }
 
-const Modal = ({
-    children,
-    show,
-    closeModal,
-    xPosition,
-    yPosition,
-}: {
-    children: JSX.Element
-    show: boolean
-    closeModal: React.MouseEventHandler
-} & State) => {
-    return (
-        <ModalRoot style={{ display: show ? 'block' : 'none' }}>
-            <Overlay onClick={closeModal} />
-
-            <ModalContent
-                // onMouseLeave={closeModal}
-                x={xPosition}
-                y={yPosition}
-            >
-                {children}
-            </ModalContent>
-        </ModalRoot>
-    )
-}
-
-const renderCopyableLink = ({
-    link,
-    roleID,
-    linkIndex,
-    showCopyMsg,
-    copyLink,
-}: InviteLink & {
-    linkIndex: number
-    copyLink: ({ event }: { event: { linkIndex: number } }) => Promise<void>
-}) => {
-    const viewportBreakpoint = 'normal'
-
-    return (
-        <Margin bottom="3px" key={link}>
-            <LinkAndRoleBox viewportBreakpoint={viewportBreakpoint}>
-                <CopyLinkBox>
-                    <LinkBox
-                        left="small"
-                        onClick={() => copyLink({ event: { linkIndex } })}
-                    >
-                        <Link>
-                            {showCopyMsg
-                                ? 'Copied to clipboard'
-                                : link.split('https://')[1]}
-                        </Link>
-                        <IconContainer id={'iconContainer'}>
-                            <Icon
-                                heightAndWidth="14px"
-                                path={icons.copy}
-                                onClick={
-                                    () =>
-                                        copyLink({
-                                            event: { linkIndex },
-                                        })
-                                    // this.processEvent('copyLink', { linkIndex })
-                                }
-                            />
-                            <Icon
-                                heightAndWidth="14px"
-                                path={icons.goTo}
-                                onClick={
-                                    () => window.open(link)
-                                    // this.processEvent('copyLink', { linkIndex })
-                                }
-                            />
-                        </IconContainer>
-                    </LinkBox>
-                </CopyLinkBox>
-                <PermissionArea>
-                    <ButtonTooltip
-                        position={'bottomSingleLine'}
-                        tooltipText={
-                            sharedListRoleIDToString(roleID) ===
-                            'Contributor' ? (
-                                <span>Add highlights, pages & replies</span>
-                            ) : (
-                                <span>View & reply to highlights & pages</span>
-                            )
-                        }
-                    >
-                        <PermissionText
-                            title={null}
-                            viewportBreakpoint={viewportBreakpoint}
-                        >
-                            {sharedListRoleIDToString(roleID) + ' Access'}
-                        </PermissionText>
-                    </ButtonTooltip>
-                </PermissionArea>
-            </LinkAndRoleBox>
-        </Margin>
-    )
-}
-
 export default class SpaceContextMenuButton extends PureComponent<
     Props,
     State
@@ -308,110 +209,192 @@ export class SpaceContextMenu extends PureComponent<
         this.props.onDeleteClick?.(e)
     }
 
-    render() {
-        if (!this.props.isMenuDisplayed) {
-            return false
+    private renderShareLinks() {
+        if (!this.state.inviteLinks.length) {
+            return (
+                <ShareSectionContainer onClick={(e) => e.stopPropagation()}>
+                    <PrimaryAction
+                        label={
+                            <ButtonLabel>
+                                {' '}
+                                <Icon
+                                    color="white"
+                                    heightAndWidth="12px"
+                                    path={icons.link}
+                                    hoverOff
+                                />{' '}
+                                Share this Space
+                            </ButtonLabel>
+                        }
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            this.addLinks()
+                        }}
+                    />
+                </ShareSectionContainer>
+            )
         }
 
+        return (
+            <ShareSectionContainer
+                onClick={(e) => {
+                    e.stopPropagation()
+                }}
+            >
+                {this.state.inviteLinks.map(
+                    ({ link, showCopyMsg, roleID }, linkIndex) => (
+                        <Margin bottom="3px" key={link}>
+                            <LinkAndRoleBox viewportBreakpoint="normal">
+                                <CopyLinkBox>
+                                    <LinkBox
+                                        left="small"
+                                        onClick={() =>
+                                            this.copyLink({
+                                                event: { linkIndex },
+                                            })
+                                        }
+                                    >
+                                        <Link>
+                                            {showCopyMsg
+                                                ? 'Copied to clipboard'
+                                                : link.split('https://')[1]}
+                                        </Link>
+                                        <IconContainer id={'iconContainer'}>
+                                            <Icon
+                                                heightAndWidth="14px"
+                                                path={icons.copy}
+                                                onClick={
+                                                    () =>
+                                                        this.copyLink({
+                                                            event: {
+                                                                linkIndex,
+                                                            },
+                                                        })
+                                                    // this.processEvent('copyLink', { linkIndex })
+                                                }
+                                            />
+                                            <Icon
+                                                heightAndWidth="14px"
+                                                path={icons.goTo}
+                                                onClick={
+                                                    () => window.open(link)
+                                                    // this.processEvent('copyLink', { linkIndex })
+                                                }
+                                            />
+                                        </IconContainer>
+                                    </LinkBox>
+                                </CopyLinkBox>
+                                <PermissionArea>
+                                    <ButtonTooltip
+                                        position={'bottomSingleLine'}
+                                        tooltipText={
+                                            sharedListRoleIDToString(roleID) ===
+                                            'Contributor' ? (
+                                                <span>
+                                                    Add highlights, pages &
+                                                    replies
+                                                </span>
+                                            ) : (
+                                                <span>
+                                                    View & reply to highlights &
+                                                    pages
+                                                </span>
+                                            )
+                                        }
+                                    >
+                                        <PermissionText
+                                            title={null}
+                                            viewportBreakpoint="normal"
+                                        >
+                                            {sharedListRoleIDToString(roleID) +
+                                                ' Access'}
+                                        </PermissionText>
+                                    </ButtonTooltip>
+                                </PermissionArea>
+                            </LinkAndRoleBox>
+                        </Margin>
+                    ),
+                )}
+            </ShareSectionContainer>
+        )
+    }
+
+    private renderMainContent() {
         if (
             this.state.mode === 'confirm' &&
             this.props.onDeleteConfirm != null
         ) {
             return (
-                <Modal show closeModal={this.closeModal} {...this.props}>
-                    <MenuContainer>
-                        <TitleBox>Delete this Space?</TitleBox>
-                        <DetailsText>
-                            This does not delete the pages in it
-                        </DetailsText>
-                        <PrimaryAction
-                            onClick={this.props.onDeleteConfirm}
-                            label={<ButtonLabel>Delete</ButtonLabel>}
-                        />
-                        <SecondaryAction
-                            onClick={() => this.setState({ mode: null })}
-                            label={<ButtonLabel>Cancel</ButtonLabel>}
-                        />
-                    </MenuContainer>
-                </Modal>
+                <>
+                    <TitleBox>Delete this Space?</TitleBox>
+                    <DetailsText>
+                        This does not delete the pages in it
+                    </DetailsText>
+                    <PrimaryAction
+                        onClick={this.props.onDeleteConfirm}
+                        label={<ButtonLabel>Delete</ButtonLabel>}
+                    />
+                    <SecondaryAction
+                        onClick={() => this.setState({ mode: null })}
+                        label={<ButtonLabel>Cancel</ButtonLabel>}
+                    />
+                </>
+            )
+        }
+
+        if (this.state.isLoading) {
+            return (
+                <LoadingContainer>
+                    <LoadingIndicator size={30} />
+                </LoadingContainer>
             )
         }
 
         return (
-            <Modal show closeModal={this.closeModal} {...this.props}>
-                <MenuContainer>
-                    {this.state.isLoading ? (
-                        <LoadingContainer>
-                            <LoadingIndicator size={30} />
-                        </LoadingContainer>
-                    ) : (
-                        <>
-                            {!this.state.inviteLinks.length ? (
-                                <ShareSectionContainer
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                    }}
-                                >
-                                    <PrimaryAction
-                                        label={
-                                            <ButtonLabel>
-                                                {' '}
-                                                <Icon
-                                                    color="white"
-                                                    heightAndWidth="12px"
-                                                    path={icons.link}
-                                                    hoverOff
-                                                />{' '}
-                                                Share this Space
-                                            </ButtonLabel>
-                                        }
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            this.addLinks()
-                                        }}
-                                    />
-                                </ShareSectionContainer>
-                            ) : (
-                                <ShareSectionContainer
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                    }}
-                                >
-                                    {this.state.inviteLinks.map(
-                                        (link, linkIndex) =>
-                                            renderCopyableLink({
-                                                ...link,
-                                                linkIndex,
-                                                copyLink: this.copyLink,
-                                            }),
-                                    )}
-                                </ShareSectionContainer>
-                            )}
-                        </>
-                    )}
-                    <MenuButton onClick={this.handleDeleteClick}>
-                        <Margin horizontal="10px">
-                            <Icon heightAndWidth="14px" path={icons.trash} />
-                        </Margin>
-                        Delete
-                    </MenuButton>
-                    <EditArea>
-                        <EditableMenuItem
-                            // key={i}
-                            changeListName={this.props.changeListName}
-                            onRenameStart={this.props.onRenameClick}
-                            nameValueState={{
-                                value: this.state.nameValue,
-                                setValue: (value) =>
-                                    this.setState({
-                                        nameValue: value,
-                                    }),
-                            }}
-                            {...this.props.editableProps}
-                        />
-                    </EditArea>
-                </MenuContainer>
-            </Modal>
+            <>
+                {this.renderShareLinks()}
+                <MenuButton onClick={this.handleDeleteClick}>
+                    <Margin horizontal="10px">
+                        <Icon heightAndWidth="14px" path={icons.trash} />
+                    </Margin>
+                    Delete
+                </MenuButton>
+                <EditArea>
+                    <EditableMenuItem
+                        // key={i}
+                        changeListName={this.props.changeListName}
+                        onRenameStart={this.props.onRenameClick}
+                        nameValueState={{
+                            value: this.state.nameValue,
+                            setValue: (value) =>
+                                this.setState({
+                                    nameValue: value,
+                                }),
+                        }}
+                        {...this.props.editableProps}
+                    />
+                </EditArea>
+            </>
+        )
+    }
+
+    render() {
+        if (!this.props.isMenuDisplayed) {
+            return false
+        }
+
+        return (
+            <ModalRoot fixedPosition={this.props.fixedPositioning}>
+                <Overlay onClick={this.closeModal} />
+                <ModalContent
+                    // onMouseLeave={closeModal}
+                    x={this.props.xPosition}
+                    y={this.props.yPosition}
+                    fixedPosition={this.props.fixedPositioning}
+                >
+                    <MenuContainer>{this.renderMainContent()}</MenuContainer>
+                </ModalContent>
+            </ModalRoot>
         )
     }
 }
@@ -477,25 +460,34 @@ const ButtonLabel = styled.div`
     }
 `
 
-const ModalRoot = styled.div`
+const ModalRoot = styled.div<{ fixedPosition: boolean }>`
+    ${(props) =>
+        props.fixedPosition
+            ? ''
+            : `
     z-index: 1000;
-    width: 100%;
     border-radius: 12px;
     height: 100%;
-    position: fixed;
     top: 0;
     left: 0;
-    padding-top: 80px;
     width: 500px;
+    position: fixed;
+    padding-top: 80px;
+    width: 100%;
+`}
 `
 
 /* Modal content */
 
-const ModalContent = styled.div<{ x: number; y: number }>`
+const ModalContent = styled.div<{
+    x: number
+    y: number
+    fixedPosition: boolean
+}>`
     z-index: 999;
     position: absolute;
-    top: ${(props) => props.y}px;
-    left: ${(props) => props.x}px;
+    top: ${(props) => (props.fixedPosition ? 0 : props.y)}px;
+    left: ${(props) => (props.fixedPosition ? 0 : props.x)}px;
     text-align: center;
     border-radius: 4px;
     width: 300px;

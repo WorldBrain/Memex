@@ -158,7 +158,7 @@ class SpacePicker extends StatefulUIElement<
                 actOnAllTooltipText="Add all tabs in window to Space"
             />
             <SpaceContextMenuButton
-                fixedPositioning={this.props.fixedMenuPositioning}
+                fixedPositioning
                 isMenuDisplayed={list.isContextMenuOpen}
                 listId={list.localId}
                 name={list.name}
@@ -315,6 +315,7 @@ const EntryListHeader = styled.div`
 `
 
 const EntryList = styled.div`
+    position: relative;
     overflow-y: auto;
     max-height: 280px;
 
