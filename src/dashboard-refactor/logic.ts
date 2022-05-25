@@ -2663,6 +2663,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const { remoteListId } = await this.options.contentShareBG.shareList({
+            listId: event.listId,
+        })
+
         const memberAnnotParentPageIds = new Set<string>()
         const memberPrivateAnnotIds = new Set<string>()
         for (const noteData of Object.values(
@@ -2707,7 +2711,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 listData: {
                     [event.listId]: {
-                        remoteId: { $set: event.remoteId },
+                        remoteId: { $set: remoteListId },
                     },
                 },
             },

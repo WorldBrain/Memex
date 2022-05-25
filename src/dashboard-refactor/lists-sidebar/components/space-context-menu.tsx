@@ -23,7 +23,6 @@ export interface Props extends ListSidebarItemProps {
     contentSharingBG: ContentSharingInterface
     buttonRef?: React.RefObject<HTMLButtonElement>
     position?: { x: number; y: number }
-    shareList?: () => Promise<{ listId: string }>
 }
 
 const Modal = ({

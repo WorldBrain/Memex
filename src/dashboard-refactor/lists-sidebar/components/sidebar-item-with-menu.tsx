@@ -30,7 +30,7 @@ export interface Props {
     editableProps?: EditableItemProps
     selectedState: SelectedState
     onMoreActionClick?: (listId: number) => void
-    shareList?: () => Promise<{ listId: string }>
+    shareList?: () => Promise<void>
 }
 
 export default class ListsSidebarItemWithMenu extends PureComponent<Props> {

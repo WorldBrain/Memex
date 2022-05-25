@@ -252,14 +252,9 @@ export class DashboardContainer extends StatefulUIElement<
                 contentSharing: this.props.contentShareBG,
             },
             shareList: async () => {
-                const {
-                    remoteListId,
-                } = await this.props.contentShareBG.shareList({ listId })
                 await this.processEvent('shareList', {
                     listId,
-                    remoteId: remoteListId,
                 })
-                return { listId: remoteListId }
             },
         }))
     }

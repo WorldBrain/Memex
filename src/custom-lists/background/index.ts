@@ -534,6 +534,7 @@ export default class CustomListBackground {
     ): Promise<SpaceDisplayEntry[]> => {
         const suggestionIds = await this.localStorage.get('suggestionIds')
         const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
+            isContextMenuOpen: false,
             localId: l.id,
             name: l.name,
             createdAt: l.createdAt.getTime(),
