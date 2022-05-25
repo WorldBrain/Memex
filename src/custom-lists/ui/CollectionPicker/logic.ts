@@ -49,6 +49,7 @@ export type SpacePickerEvent = UIEvent<{
     toggleEntryContextMenu: { listId: number }
     validateListName: { listId: number; name: string }
     renameList: { listId: number; name: string }
+    deleteList: { listId: number }
     shareList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
@@ -346,12 +347,6 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        await this.dependencies.spacesBG.updateListName({
-            id: event.listId,
-            newName: event.name,
-            oldName: previousState.displayEntries[stateEntryIndex].name,
-        })
-
         if (stateEntryIndex !== -1) {
             this.emitMutation({
                 displayEntries: {
@@ -371,6 +366,41 @@ export default class SpacePickerLogic extends UILogic<
                 ...this.defaultEntries.slice(defaultEntryIndex + 1),
             ]
         }
+
+        await this.dependencies.spacesBG.updateListName({
+            id: event.listId,
+            newName: event.name,
+            oldName: previousState.displayEntries[stateEntryIndex].name,
+        })
+    }
+
+    deleteList: EventHandler<'deleteList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        if (stateEntryIndex !== -1) {
+            this.emitMutation({
+                displayEntries: {
+                    $apply: (entries) =>
+                        entries.filter((e) => e.localId !== event.listId),
+                },
+            })
+        }
+
+        if (defaultEntryIndex !== -1) {
+            this.defaultEntries = [
+                ...this.defaultEntries.slice(0, defaultEntryIndex),
+                ...this.defaultEntries.slice(defaultEntryIndex + 1),
+            ]
+        }
+        await this.dependencies.spacesBG.removeList({ id: event.listId })
     }
 
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({

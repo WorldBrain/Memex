@@ -171,6 +171,9 @@ class SpacePicker extends StatefulUIElement<
                         listId: list.localId,
                     })
                 }
+                onDeleteConfirm={() =>
+                    this.processEvent('deleteList', { listId: list.localId })
+                }
                 editableProps={{
                     onConfirmClick: (name) =>
                         this.processEvent('renameList', {

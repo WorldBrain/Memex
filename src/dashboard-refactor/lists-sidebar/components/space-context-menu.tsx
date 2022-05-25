@@ -18,6 +18,7 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { ButtonTooltip } from 'src/common-ui/components'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 export interface Props extends ListSidebarItemProps {
     contentSharingBG: ContentSharingInterface
@@ -178,11 +179,13 @@ export class SpaceContextMenu extends PureComponent<
         showSuccessMsg: boolean
         nameValue: string
         isLoading: boolean
+        mode: 'confirm' | null
     }
 > {
     constructor(props) {
         super(props)
         this.state = {
+            mode: null,
             inviteLinks: [],
             isLoading: true,
             showSuccessMsg: false,
@@ -295,13 +298,42 @@ export class SpaceContextMenu extends PureComponent<
         )
     }
 
+    private handleDeleteClick: React.MouseEventHandler = (e) => {
+        this.setState({ mode: 'confirm' })
+        this.props.onDeleteClick?.(e)
+    }
+
     render() {
         if (!this.props.isMenuDisplayed) {
             return false
         }
 
+        if (
+            this.state.mode === 'confirm' &&
+            this.props.onDeleteConfirm != null
+        ) {
+            return (
+                <Modal show closeModal={this.closeModal} {...this.props}>
+                    <MenuContainer>
+                        <TitleBox>Delete this Space?</TitleBox>
+                        <DetailsText>
+                            This does not delete the pages in it
+                        </DetailsText>
+                        <PrimaryAction
+                            onClick={this.props.onDeleteConfirm}
+                            label={<ButtonLabel>Delete</ButtonLabel>}
+                        />
+                        <SecondaryAction
+                            onClick={() => this.setState({ mode: null })}
+                            label={<ButtonLabel>Cancel</ButtonLabel>}
+                        />
+                    </MenuContainer>
+                </Modal>
+            )
+        }
+
         return (
-            <Modal show={true} closeModal={this.closeModal} {...this.props}>
+            <Modal show closeModal={this.closeModal} {...this.props}>
                 <MenuContainer>
                     {this.state.isLoading ? (
                         <LoadingContainer>
@@ -352,7 +384,7 @@ export class SpaceContextMenu extends PureComponent<
                             )}
                         </>
                     )}
-                    <MenuButton onClick={this.props.onDeleteClick}>
+                    <MenuButton onClick={this.handleDeleteClick}>
                         <Margin horizontal="10px">
                             <Icon heightAndWidth="14px" path={icons.trash} />
                         </Margin>
@@ -478,7 +510,7 @@ const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width:3 50px
+    max-width: 350px;
     position: absolute;
     background-color: ${colors.white};
     box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
@@ -699,6 +731,11 @@ const CopyLinkBox = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: 100%;
+`
+
+const DetailsText = styled.span`
+    opacity: 0.8;
+    font-size: 12px;
 `
 
 const PermissionText = styled.span<{

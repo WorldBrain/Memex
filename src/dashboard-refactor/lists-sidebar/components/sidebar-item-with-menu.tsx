@@ -25,6 +25,7 @@ export interface Props {
     onUnfollowClick?: React.MouseEventHandler
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
+    onDeleteConfirm?: React.MouseEventHandler
     onShareClick?: React.MouseEventHandler
     dropReceivingState?: DropReceivingState
     editableProps?: EditableItemProps
