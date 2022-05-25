@@ -29,6 +29,7 @@ export interface Props extends ListSidebarItemProps {
 export interface State {
     xPosition: number
     yPosition: number
+    nameValue: string
 }
 
 export default class SpaceContextMenuButton extends PureComponent<
@@ -47,12 +48,17 @@ export default class SpaceContextMenuButton extends PureComponent<
             this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 })
         }
         this.props.onMoreActionClick(this.props.listId)
+        this.props.editableProps?.onConfirmClick(this.state.nameValue)
     }
 
     constructor(props) {
         super(props)
         this.buttonRef = React.createRef()
-        this.state = { xPosition: 0, yPosition: 0 }
+        this.state = {
+            xPosition: 0,
+            yPosition: 0,
+            nameValue: this.props.listData.name,
+        }
     }
 
     render() {
@@ -68,7 +74,13 @@ export default class SpaceContextMenuButton extends PureComponent<
 
                     {this.props.isMenuDisplayed && (
                         <ClickAway onClickAway={this.handleMoreActionClick}>
-                            <SpaceContextMenu {...this.props} {...this.state} />
+                            <SpaceContextMenu
+                                {...this.props}
+                                {...this.state}
+                                onNameChange={(nameValue) =>
+                                    this.setState({ nameValue })
+                                }
+                            />
                         </ClickAway>
                     )}
                 </>
@@ -79,11 +91,10 @@ export default class SpaceContextMenuButton extends PureComponent<
 }
 
 export class SpaceContextMenu extends PureComponent<
-    Props & State,
+    Props & State & { onNameChange: (value: string) => void },
     {
         inviteLinks: InviteLink[]
         showSuccessMsg: boolean
-        nameValue: string
         isLoading: boolean
         mode: 'confirm' | null
     }
@@ -95,13 +106,13 @@ export class SpaceContextMenu extends PureComponent<
             inviteLinks: [],
             isLoading: true,
             showSuccessMsg: false,
-            nameValue: this.props.listData.name,
         }
     }
 
     private closeModal: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         this.props.onMoreActionClick(this.props.listId)
+        this.props.editableProps?.onConfirmClick(this.props.nameValue)
     }
 
     async componentDidMount() {
@@ -361,16 +372,10 @@ export class SpaceContextMenu extends PureComponent<
                 </MenuButton>
                 <EditArea>
                     <EditableMenuItem
-                        // key={i}
                         changeListName={this.props.changeListName}
                         onRenameStart={this.props.onRenameClick}
-                        nameValueState={{
-                            value: this.state.nameValue,
-                            setValue: (value) =>
-                                this.setState({
-                                    nameValue: value,
-                                }),
-                        }}
+                        onNameChange={this.props.onNameChange}
+                        nameValue={this.props.nameValue}
                         {...this.props.editableProps}
                     />
                 </EditArea>

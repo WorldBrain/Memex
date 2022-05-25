@@ -1,33 +1,19 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import colors from 'src/dashboard-refactor/colors'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import * as icons from 'src/common-ui/components/design-library/icons'
-
-interface State {
-    value: string
-}
-interface NameValueState {
-    value: string
-    setValue: (string) => void
-}
 export interface Props {
-    initValue: string
+    nameValue: string
     errorMessage: string | null
     onCancelClick: (value: string) => void
     onConfirmClick: (value: string) => void
     changeListName?: (value: string) => void
     onRenameStart?: React.MouseEventHandler<Element>
+    onNameChange: (value: string) => void
 }
 
-export default class EditableMenuItem extends React.PureComponent<
-    Props & { nameValueState: NameValueState },
-    State
-> {
-    static defaultProps: Partial<Props> = { initValue: '' }
+export default class EditableMenuItem extends React.PureComponent<Props> {
     // state: State = { value: this.props.initValue }
-    constructor(props: Props & { nameValueState: NameValueState }) {
+    constructor(props: Props) {
         super(props)
         this.props.onRenameStart?.(null)
     }
@@ -36,24 +22,24 @@ export default class EditableMenuItem extends React.PureComponent<
         event,
     ) => {
         const value = (event.target as HTMLInputElement).value
-        this.props.nameValueState.setValue(value)
+        this.props.onNameChange(value)
         this.props.changeListName?.(value)
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
         if (e.key === 'Escape') {
-            if (this.props.nameValueState.value.length) {
+            if (this.props.nameValue.length) {
                 e.stopPropagation()
             }
-            this.props.onCancelClick(this.props.nameValueState.value)
+            this.props.onCancelClick(this.props.nameValue)
             return
         }
 
         if (e.key === 'Enter') {
-            if (this.props.nameValueState.value.length) {
+            if (this.props.nameValue.length) {
                 e.stopPropagation()
-                this.props.onConfirmClick(this.props.nameValueState.value)
+                this.props.onConfirmClick(this.props.nameValue)
             }
         }
 
@@ -67,7 +53,7 @@ export default class EditableMenuItem extends React.PureComponent<
                 <Container onClick={(e) => e.stopPropagation()}>
                     <EditableListTitle
                         onChange={this.handleChange}
-                        value={this.props.nameValueState.value}
+                        value={this.props.nameValue}
                         onKeyDown={this.handleInputKeyDown}
                     />
                 </Container>

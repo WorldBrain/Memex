@@ -329,6 +329,10 @@ export default class SpacePickerLogic extends UILogic<
             (entry) => entry.localId === event.listId,
         )
 
+        if (previousState.displayEntries[stateEntryIndex].name === event.name) {
+            return
+        }
+
         const validationResult = validateListName(
             event.name,
             this.defaultEntries.map((entry) => ({
