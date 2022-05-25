@@ -158,6 +158,7 @@ class SpacePicker extends StatefulUIElement<
                 actOnAllTooltipText="Add all tabs in window to Space"
             />
             <SpaceContextMenuButton
+                fixedPositioning={this.props.fixedMenuPositioning}
                 isMenuDisplayed={list.isContextMenuOpen}
                 listId={list.localId}
                 name={list.name}

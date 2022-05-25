@@ -323,6 +323,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }}
                         initialSelectedEntries={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
+                        fixedMenuPositioning
                     />
                 </SpacePickerContainer>
             )

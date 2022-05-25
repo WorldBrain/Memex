@@ -21,6 +21,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 export interface Props extends ListSidebarItemProps {
+    fixedPositioning?: boolean
     contentSharingBG: ContentSharingInterface
     buttonRef?: React.RefObject<HTMLButtonElement>
 }
@@ -137,9 +138,13 @@ export default class SpaceContextMenuButton extends PureComponent<
 
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
-        const rect = this.buttonRef?.current?.getBoundingClientRect()
-        this.setState({ xPosition: 0, yPosition: 0 })
-        // this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 })
+
+        if (this.props.fixedPositioning) {
+            this.setState({ xPosition: 15, yPosition: 20 })
+        } else {
+            const rect = this.buttonRef?.current?.getBoundingClientRect()
+            this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 })
+        }
         this.props.onMoreActionClick(this.props.listId)
     }
 
@@ -632,7 +637,6 @@ const MenuSection = styled.div`
 `
 const MenuButton = styled.div`
     height: 34px;
-    width: 100%;
     font-family: 'Inter', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
     color: ${(props) => props.theme.colors.normalText};
