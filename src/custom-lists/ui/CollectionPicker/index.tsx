@@ -46,6 +46,7 @@ class SpacePicker extends StatefulUIElement<
 
     private displayListRef = React.createRef<HTMLDivElement>()
     private contextMenuRef = React.createRef<SpaceContextMenu>()
+    private contextMenuBtnRef = React.createRef<HTMLDivElement>()
 
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
@@ -156,12 +157,10 @@ class SpacePicker extends StatefulUIElement<
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
+                contextMenuBtnRef={this.contextMenuBtnRef}
                 onContextMenuBtnPress={
                     entry.isOwned
-                        ? () =>
-                              this.processEvent('toggleEntryContextMenu', {
-                                  listId: entry.localId,
-                              })
+                        ? this.handleSpaceContextMenuOpen(entry.localId)
                         : undefined
                 }
                 actOnAllTooltipText="Add all tabs in window to Space"
@@ -212,6 +211,71 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
+    private handleSpaceContextMenuOpen = (listId: number) => async (
+        entry: SpaceDisplayEntry,
+    ) => {
+        const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
+        const rect2 = this.contextMenuRef?.current?.getContainerRect()
+
+        // Popup
+
+        if (window.outerHeight < 500) {
+            await this.processEvent('updateContextMenuPosition', {
+                x: -200,
+                y: 0,
+            })
+        }
+
+        // right side of screen
+
+        if (window.outerWidth - rect.right < 400) {
+            await this.processEvent('updateContextMenuPosition', {
+                x: outerWidth - rect.right,
+            })
+            //lower side
+
+            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                await this.processEvent('updateContextMenuPosition', {
+                    y: outerHeight - rect.bottom + 40,
+                })
+            }
+            // upper side
+            else {
+                await this.processEvent('updateContextMenuPosition', {
+                    y: outerHeight - rect.top + 110,
+                })
+            }
+        }
+
+        // left side of screen
+
+        if (window.outerWidth - rect.right > window.outerWidth / 2) {
+            await this.processEvent('updateContextMenuPosition', {
+                x: outerWidth - rect.right - 320,
+            })
+
+            // lower side
+
+            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                await this.processEvent('updateContextMenuPosition', {
+                    y: outerHeight - rect.bottom + 40,
+                })
+            }
+            // upper side
+            else {
+                await this.processEvent('updateContextMenuPosition', {
+                    y: outerHeight - rect.top + 110,
+                })
+            }
+        }
+        await this.processEvent('toggleEntryContextMenu', { listId })
+
+        // if (window.innerHeight - rect.bottom < 400) { || window.innerHeight - rect.bottom < 400
+        //     this.setState({ yPosition: rect.y - 300, xPosition: rect.x - 300 })
+        // }
+        //else { this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 }) }
+    }
+
     private handleSpaceContextMenuClose = (
         listId: number,
         shouldSaveName?: boolean,
@@ -248,10 +312,12 @@ class SpacePicker extends StatefulUIElement<
                 )}
             >
                 <SpaceContextMenu
-                    fixedPositioning
+                    // fixedPositioning
                     ref={this.contextMenuRef}
-                    contentSharingBG={this.props.contentSharingBG}
                     listId={this.state.contextMenuListId}
+                    xPosition={this.state.contextMenuPositionX}
+                    yPosition={this.state.contextMenuPositionY}
+                    contentSharingBG={this.props.contentSharingBG}
                     name={list.name}
                     selectedState={{ isSelected: false } as any}
                     changeListName={(name) =>

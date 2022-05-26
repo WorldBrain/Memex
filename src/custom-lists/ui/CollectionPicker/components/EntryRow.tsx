@@ -16,6 +16,7 @@ export interface Props extends SpaceDisplayEntry {
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
+    contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
 }
 
@@ -76,6 +77,7 @@ class EntryRow extends React.Component<Props> {
             selected,
             resultItem,
             onPressActOnAll,
+            contextMenuBtnRef,
             onContextMenuBtnPress,
         } = this.props
 
@@ -106,7 +108,7 @@ class EntryRow extends React.Component<Props> {
                 </NameWrapper>
                 <IconStyleWrapper>
                     {focused && onContextMenuBtnPress && (
-                        <ButtonContainer>
+                        <ButtonContainer ref={contextMenuBtnRef}>
                             <Icon
                                 filePath={icons.dots}
                                 heightAndWidth="14px"

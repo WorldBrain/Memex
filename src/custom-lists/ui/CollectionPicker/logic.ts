@@ -50,6 +50,7 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
     toggleEntryContextMenu: { listId: number }
+    updateContextMenuPosition: { x?: number; y?: number }
     validateListName: { listId: number; name: string }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
@@ -70,6 +71,8 @@ export interface SpacePickerState {
     newEntryName: string
     displayEntries: SpaceDisplayEntry[]
     selectedEntries: number[]
+    contextMenuPositionX: number
+    contextMenuPositionY: number
     contextMenuListId: number | null
     loadState: TaskState
     loadingSuggestions: TaskState
@@ -127,6 +130,8 @@ export default class SpacePickerLogic extends UILogic<
         loadingQueryResults: 'pristine',
         renameListErrorMessage: null,
         contextMenuListId: null,
+        contextMenuPositionX: 0,
+        contextMenuPositionY: 0,
     })
 
     init: EventHandler<'init'> = async () => {
@@ -271,6 +276,25 @@ export default class SpacePickerLogic extends UILogic<
                 ? null
                 : event.listId
         this.emitMutation({ contextMenuListId: { $set: nextListId } })
+    }
+
+    updateContextMenuPosition: EventHandler<
+        'updateContextMenuPosition'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            contextMenuPositionX: {
+                $set:
+                    event.x != null
+                        ? event.x
+                        : previousState.contextMenuPositionX,
+            },
+            contextMenuPositionY: {
+                $set:
+                    event.y != null
+                        ? event.y
+                        : previousState.contextMenuPositionY,
+            },
+        })
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {

@@ -188,7 +188,7 @@ export class SpaceContextMenu extends PureComponent<
 
     private closeModal: React.MouseEventHandler = (e) => {
         e.stopPropagation()
-        this.props.onMoreActionClick(this.props.listId)
+        this.props.onMoreActionClick?.(this.props.listId)
         this.props.editableProps?.onConfirmClick(this.state.nameValue)
     }
 
