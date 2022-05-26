@@ -58,6 +58,7 @@ export const TEST_LIST_SUGGESTIONS = TEST_LISTS.map((list) => ({
     focused: false,
     localId: list.id,
     name: list.name,
+    isOwned: true,
     remoteId:
         TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ?? null,
 }))
@@ -68,6 +69,7 @@ export const derivePickerEntries = (
     lists.map((list) => ({
         name: list.name,
         localId: list.id,
+        isOwned: true,
         focused: false,
         createdAt: list.createdAt.getTime(),
         remoteId:

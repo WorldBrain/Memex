@@ -2,8 +2,11 @@ import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
+import type {
+    RemoteCollectionsInterface,
+    PageList,
+} from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { validateListName } from '../utils'
 
@@ -13,6 +16,7 @@ export interface SpaceDisplayEntry {
     name: string
     createdAt: number
     focused: boolean
+    isOwned?: boolean
 }
 
 export interface SpacePickerDependencies {
@@ -93,6 +97,13 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     public defaultEntries: SpaceDisplayEntry[] = []
+    /**
+     * Contains data for lists that are followed/joined. Currently only used to determine whether those lists
+     * are owned by the current user or not (for sake of allowing renaming, deleting, etc.).
+     */
+    private remoteIdToFollowedListDataDict: {
+        [remoteId: string]: PageList
+    } = {}
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
@@ -143,14 +154,36 @@ export default class SpacePickerLogic extends UILogic<
             })
 
             await executeUITask(this, 'loadingShareStates', async () => {
-                const remoteListIds = await contentSharingBG.getRemoteListIds({
+                const remoteListIdsP = contentSharingBG.getRemoteListIds({
                     localListIds: this.defaultEntries.map(
                         (s) => s.localId as number,
                     ),
                 })
+                const followedListsP = spacesBG.fetchAllFollowedLists({})
+
+                // Sort out remote IDs first, as they should load much faster (local data)
+                const localToRemoteIdDict = await remoteListIdsP
                 this.defaultEntries = this.defaultEntries.map((s) => ({
                     ...s,
-                    remoteId: remoteListIds[s.localId] ?? null,
+                    remoteId: localToRemoteIdDict[s.localId] ?? null,
+                }))
+                this.emitMutation({
+                    displayEntries: { $set: this.defaultEntries },
+                })
+
+                // Now sort out the ownership state, which needs a remote query
+                const followedLists = await followedListsP
+                for (const list of followedLists) {
+                    this.remoteIdToFollowedListDataDict[list.remoteId] = list
+                }
+
+                this.defaultEntries = this.defaultEntries.map((s) => ({
+                    ...s,
+                    isOwned:
+                        s.remoteId != null
+                            ? this.remoteIdToFollowedListDataDict[s.remoteId]
+                                  ?.isOwned ?? true
+                            : true,
                 }))
                 this.emitMutation({
                     displayEntries: { $set: this.defaultEntries },
@@ -430,14 +463,22 @@ export default class SpacePickerLogic extends UILogic<
             const remoteListIds = await contentSharingBG.getRemoteListIds({
                 localListIds: suggestions.map((s) => s.id),
             })
-            const displayEntries = suggestions
-                .map((s) => ({
-                    localId: s.id,
-                    name: s.name,
-                    focused: false,
-                    createdAt: s.createdAt,
-                    remoteId: remoteListIds[s.id] ?? null,
-                }))
+            const displayEntries: SpaceDisplayEntry[] = suggestions
+                .map((s) => {
+                    const remoteId = remoteListIds[s.id] ?? null
+                    return {
+                        remoteId,
+                        name: s.name,
+                        localId: s.id,
+                        focused: false,
+                        createdAt: s.createdAt,
+                        isOwned:
+                            remoteId != null
+                                ? this.remoteIdToFollowedListDataDict[remoteId]
+                                      ?.isOwned ?? true
+                                : true,
+                    }
+                })
                 .sort(sortDisplayEntries(selectedEntries))
 
             this.emitMutation({ displayEntries: { $set: displayEntries } })

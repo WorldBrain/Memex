@@ -156,10 +156,13 @@ class SpacePicker extends StatefulUIElement<
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
-                onContextMenuBtnPress={() =>
-                    this.processEvent('toggleEntryContextMenu', {
-                        listId: entry.localId,
-                    })
+                onContextMenuBtnPress={
+                    entry.isOwned
+                        ? () =>
+                              this.processEvent('toggleEntryContextMenu', {
+                                  listId: entry.localId,
+                              })
+                        : undefined
                 }
                 actOnAllTooltipText="Add all tabs in window to Space"
             />

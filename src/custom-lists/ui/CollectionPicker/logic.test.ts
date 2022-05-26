@@ -12,6 +12,7 @@ import {
     BAD_CHAR_LIST_NAME_ERR_MSG,
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from '../constants'
+import { PageList } from 'src/custom-lists/background/types'
 
 async function insertTestData({
     storageManager,
@@ -125,6 +126,60 @@ describe('SpacePickerLogic', () => {
                 selectedEntries: initialSelectedEntries,
             }),
         )
+    })
+
+    it('should correctly load initial entries and set ownership state', async ({
+        device,
+    }) => {
+        const testFollowedListData: PageList = {
+            isOwned: false,
+            id: DATA.TEST_LISTS[0].id,
+            name: DATA.TEST_LISTS[0].name,
+            createdAt: DATA.TEST_LISTS[0].createdAt,
+            remoteId: DATA.TEST_LIST_METADATA[0].remoteId,
+        }
+        device.backgroundModules.customLists.remoteFunctions.fetchAllFollowedLists = async () => [
+            testFollowedListData,
+        ]
+
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([])
+        expect(entryPickerLogic.defaultEntries).toEqual([])
+        expect(entryPickerLogic['remoteIdToFollowedListDataDict']).toEqual({})
+
+        await testLogic.init()
+
+        expect(testLogic.state.displayEntries).toEqual([
+            { ...DATA.TEST_LIST_SUGGESTIONS[0], isOwned: false },
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            { ...DATA.TEST_LIST_SUGGESTIONS[0], isOwned: false },
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic['remoteIdToFollowedListDataDict']).toEqual({
+            [testFollowedListData.remoteId]: testFollowedListData,
+        })
+
+        // Ensure the ownership state can be kept after searching
+        await testLogic.processEvent('searchInputChanged', { query: 'List' })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            { ...DATA.TEST_LIST_SUGGESTIONS[0], isOwned: false },
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
     })
 
     it('should correctly search for a entry when entry is already selected', async ({
