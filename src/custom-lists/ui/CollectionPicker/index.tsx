@@ -26,6 +26,7 @@ import { Icon as StyledIcon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateListName } from '../utils'
 import { SpaceContextMenu } from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
+import { ClickAway } from 'src/util/click-away-wrapper'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -45,6 +46,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private displayListRef = React.createRef<HTMLDivElement>()
+    private contextMenuRef = React.createRef<SpaceContextMenu>()
 
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
@@ -212,6 +214,20 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
+    private handleSpaceContextMenuClose = (
+        listId: number,
+        shouldSaveName?: boolean,
+    ) => async () => {
+        if (shouldSaveName) {
+            const name = this.contextMenuRef.current.state.nameValue
+            await this.processEvent('renameList', {
+                listId,
+                name,
+            })
+        }
+        await this.processEvent('toggleEntryContextMenu', { listId })
+    }
+
     private renderSpaceContextMenu = () => {
         if (this.state.contextMenuListId == null) {
             return
@@ -225,43 +241,53 @@ class SpacePicker extends StatefulUIElement<
         }
 
         return (
-            <SpaceContextMenu
-                fixedPositioning
-                contentSharingBG={this.props.contentSharingBG}
-                listId={this.state.contextMenuListId}
-                name={list.name}
-                selectedState={{ isSelected: false } as any}
-                onMoreActionClick={(listId) =>
-                    this.processEvent('toggleEntryContextMenu', { listId })
-                }
-                changeListName={(name) =>
-                    this.processEvent('validateListName', {
-                        name,
-                        listId: list.localId,
-                    })
-                }
-                onDeleteConfirm={() =>
-                    this.processEvent('deleteList', { listId: list.localId })
-                }
-                editableProps={{
-                    onConfirmClick: (name) =>
-                        this.processEvent('renameList', {
-                            listId: list.localId,
+            <ClickAway
+                onClickAway={this.handleSpaceContextMenuClose(
+                    list.localId,
+                    true,
+                )}
+            >
+                <SpaceContextMenu
+                    fixedPositioning
+                    ref={this.contextMenuRef}
+                    contentSharingBG={this.props.contentSharingBG}
+                    listId={this.state.contextMenuListId}
+                    name={list.name}
+                    selectedState={{ isSelected: false } as any}
+                    changeListName={(name) =>
+                        this.processEvent('validateListName', {
                             name,
-                        }),
-                    onCancelClick: () => {},
-                    initValue: list.name,
-                    errorMessage: this.state.renameListErrorMessage,
-                }}
-                listData={{
-                    id: list.localId,
-                    name: list.name,
-                    remoteId: list.remoteId,
-                }}
-                shareList={() =>
-                    this.processEvent('shareList', { listId: list.localId })
-                }
-            />
+                            listId: list.localId,
+                        })
+                    }
+                    onDeleteConfirm={() =>
+                        this.processEvent('deleteList', {
+                            listId: list.localId,
+                        })
+                    }
+                    editableProps={{
+                        onConfirmClick: (name) =>
+                            this.processEvent('renameList', {
+                                listId: list.localId,
+                                name,
+                            }),
+                        onCancelClick: this.handleSpaceContextMenuClose(
+                            list.localId,
+                            false,
+                        ),
+                        initValue: list.name,
+                        errorMessage: this.state.renameListErrorMessage,
+                    }}
+                    listData={{
+                        id: list.localId,
+                        name: list.name,
+                        remoteId: list.remoteId,
+                    }}
+                    shareList={() =>
+                        this.processEvent('shareList', { listId: list.localId })
+                    }
+                />
+            </ClickAway>
         )
     }
 
