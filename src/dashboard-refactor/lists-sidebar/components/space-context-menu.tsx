@@ -36,6 +36,7 @@ export default class SpaceContextMenuButton extends PureComponent<
     State
 > {
     private buttonRef: React.RefObject<HTMLInputElement>
+    private contextMenuRef: React.RefObject<SpaceContextMenu>
 
     private handleMoreActionClick: React.MouseEventHandler = (e) => {
         e.stopPropagation()
@@ -71,7 +72,11 @@ export default class SpaceContextMenuButton extends PureComponent<
 
                     {this.props.isMenuDisplayed && (
                         <ClickAway onClickAway={this.handleMoreActionClick}>
-                            <SpaceContextMenu {...this.props} {...this.state} />
+                            <SpaceContextMenu
+                                ref={this.contextMenuRef}
+                                {...this.props}
+                                {...this.state}
+                            />
                         </ClickAway>
                     )}
                 </>
@@ -91,6 +96,8 @@ export class SpaceContextMenu extends PureComponent<
         nameValue: string
     }
 > {
+    private containerElRef = React.createRef<HTMLDivElement>()
+
     constructor(props) {
         super(props)
         this.state = {
@@ -100,12 +107,6 @@ export class SpaceContextMenu extends PureComponent<
             showSuccessMsg: false,
             nameValue: this.props.listData.name,
         }
-    }
-
-    private closeModal: React.MouseEventHandler = (e) => {
-        e.stopPropagation()
-        this.props.onMoreActionClick(this.props.listId)
-        this.props.editableProps?.onConfirmClick(this.state.nameValue)
     }
 
     async componentDidMount() {
@@ -133,6 +134,16 @@ export class SpaceContextMenu extends PureComponent<
         if (!listIDs.links.length) {
             this.setState({ isLoading: false })
         }
+    }
+
+    getContainerRect(): DOMRect | null {
+        return this.containerElRef?.current?.getBoundingClientRect() ?? null
+    }
+
+    private closeModal: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
+        this.props.onMoreActionClick(this.props.listId)
+        this.props.editableProps?.onConfirmClick(this.state.nameValue)
     }
 
     private addLinks = async () => {
@@ -380,7 +391,10 @@ export class SpaceContextMenu extends PureComponent<
 
     render() {
         return (
-            <ModalRoot fixedPosition={this.props.fixedPositioning}>
+            <ModalRoot
+                ref={this.containerElRef}
+                fixedPosition={this.props.fixedPositioning}
+            >
                 {!this.props.fixedPositioning && (
                     <Overlay onClick={this.closeModal} />
                 )}

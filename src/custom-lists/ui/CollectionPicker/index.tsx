@@ -217,11 +217,13 @@ class SpacePicker extends StatefulUIElement<
         shouldSaveName?: boolean,
     ) => async () => {
         if (shouldSaveName) {
-            const name = this.contextMenuRef.current.state.nameValue
-            await this.processEvent('renameList', {
-                listId,
-                name,
-            })
+            const name = this.contextMenuRef?.current?.state.nameValue
+            if (name != null) {
+                await this.processEvent('renameList', {
+                    listId,
+                    name,
+                })
+            }
         }
         await this.processEvent('toggleEntryContextMenu', { listId })
     }
