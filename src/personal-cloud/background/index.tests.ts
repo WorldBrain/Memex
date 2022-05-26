@@ -1,3 +1,6 @@
+import SQLite3 from 'better-sqlite3'
+import StorageManager from '@worldbrain/storex'
+import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/lib/sqlite'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import type {
     BackgroundIntegrationTest,
@@ -11,7 +14,11 @@ import {
 } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { createLazyTestServerStorage } from 'src/storage/server'
+import {
+    createLazyTestServerStorage,
+    createLazyServerStorage,
+    setupServerStorageManagerMiddleware,
+} from 'src/storage/server'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
@@ -285,6 +292,35 @@ export async function setupSyncBackgroundTest(
     let now = 555
     const getNow = () => now++
     const setups: BackgroundIntegrationTestSetup[] = []
+
+    let getSqlStorageMananager: () => Promise<StorageManager> | undefined
+    const translationLayerTestBackend =
+        process.env.TRANSLATION_LAYER_TEST_BACKEND
+    if (translationLayerTestBackend) {
+        if (translationLayerTestBackend === 'sqlite') {
+            const getSqlServerStorage = createLazyServerStorage(
+                async () => {
+                    const sqlite = SQLite3(':memory:')
+                    const backend = createSQLiteStorageBackend(sqlite)
+                    const storageManager = new StorageManager({ backend })
+                    setupServerStorageManagerMiddleware(storageManager)
+                    return storageManager
+                },
+                {
+                    autoPkType: 'number',
+                    skipApplicationLayer: true,
+                },
+            )
+            getSqlStorageMananager = async () => {
+                return (await getSqlServerStorage()).storageManager
+            }
+        } else {
+            throw new Error(
+                `Unknown TRANSLATION_LAYER_TEST_BACKEND: ${translationLayerTestBackend}`,
+            )
+        }
+    }
+
     for (let i = 0; i < options.deviceCount; ++i) {
         const services = await createServices({
             backend: 'memory',
@@ -293,6 +329,7 @@ export async function setupSyncBackgroundTest(
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.storageManager,
             storageModules: serverStorage.storageModules,
+            getSqlStorageMananager,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
             services,
             view: cloudHub.getView(),
