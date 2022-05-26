@@ -215,65 +215,57 @@ class SpacePicker extends StatefulUIElement<
         entry: SpaceDisplayEntry,
     ) => {
         const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
-        const rect2 = this.contextMenuRef?.current?.getContainerRect()
 
         // Popup
-
         if (window.outerHeight < 500) {
             await this.processEvent('updateContextMenuPosition', {
-                x: -200,
-                y: 0,
+                x: outerWidth,
+                y: outerHeight,
             })
-        }
-
-        // right side of screen
-
-        if (window.outerWidth - rect.right < 400) {
-            await this.processEvent('updateContextMenuPosition', {
-                x: outerWidth - rect.right,
-            })
-            //lower side
-
-            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+        } else {
+            // right side of screen
+            if (window.outerWidth - rect.right < 400) {
                 await this.processEvent('updateContextMenuPosition', {
-                    y: outerHeight - rect.bottom + 40,
+                    x: outerWidth - rect.right,
                 })
+                //lower side
+
+                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom - 50,
+                    })
+                }
+                // upper side
+                else {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom + 100,
+                    })
+                }
             }
-            // upper side
-            else {
+
+            // left side of screen
+
+            if (window.outerWidth - rect.right > window.outerWidth / 2) {
                 await this.processEvent('updateContextMenuPosition', {
-                    y: outerHeight - rect.top + 110,
+                    x: outerWidth - rect.right - 320,
                 })
-            }
-        }
 
-        // left side of screen
+                // lower side
 
-        if (window.outerWidth - rect.right > window.outerWidth / 2) {
-            await this.processEvent('updateContextMenuPosition', {
-                x: outerWidth - rect.right - 320,
-            })
-
-            // lower side
-
-            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
-                await this.processEvent('updateContextMenuPosition', {
-                    y: outerHeight - rect.bottom + 40,
-                })
-            }
-            // upper side
-            else {
-                await this.processEvent('updateContextMenuPosition', {
-                    y: outerHeight - rect.top + 110,
-                })
+                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom + 40,
+                    })
+                }
+                // upper side
+                else {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.top + 110,
+                    })
+                }
             }
         }
         await this.processEvent('toggleEntryContextMenu', { listId })
-
-        // if (window.innerHeight - rect.bottom < 400) { || window.innerHeight - rect.bottom < 400
-        //     this.setState({ yPosition: rect.y - 300, xPosition: rect.x - 300 })
-        // }
-        //else { this.setState({ xPosition: rect.x - 35, yPosition: rect.y - 6 }) }
     }
 
     private handleSpaceContextMenuClose = (

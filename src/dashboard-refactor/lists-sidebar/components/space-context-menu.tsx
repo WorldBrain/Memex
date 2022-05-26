@@ -512,6 +512,8 @@ const ButtonLabel = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
+    font-size: 14px;
+    font-weight: 400;
 
     & * {
         cursor: pointer;
@@ -543,7 +545,7 @@ const ModalContent = styled.div<{
     fixedPosition: boolean
 }>`
     z-index: 999;
-    position: absolute;
+    position: fixed;
     bottom: ${(props) => (props.fixedPosition ? 0 : props.y)}px;
     right: ${(props) => (props.fixedPosition ? 0 : props.x)}px;
     text-align: center;
