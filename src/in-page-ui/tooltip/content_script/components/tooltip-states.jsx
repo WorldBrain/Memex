@@ -18,7 +18,7 @@ const CreateButtons = styled.div`
     padding: 0 8px;
 `
 
-const ButtonDiv = styled.button`
+const ButtonDiv = styled.div`
     height: fit-content;
     width: fit-content;
     outline: none;
@@ -26,6 +26,13 @@ const ButtonDiv = styled.button`
     background: none;
     cursor: pointer;
     padding: 0px;
+`
+
+const AnnotationTooltipText = styled.span`
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-style: unset;
+    letter-spacing: 0.3px;
 `
 
 export const InitialComponent = ({
@@ -39,10 +46,10 @@ export const InitialComponent = ({
         <ButtonDiv onClick={createHighlight}>
             <ButtonTooltip
                 tooltipText={
-                    <span>
+                    <AnnotationTooltipText>
                         <strong>Highlight</strong>
                         <br />+ shift to share
-                    </span>
+                    </AnnotationTooltipText>
                 }
                 position="bottomHighlighter"
             >
@@ -57,10 +64,10 @@ export const InitialComponent = ({
         <ButtonDiv onClick={createAnnotation}>
             <ButtonTooltip
                 tooltipText={
-                    <span>
+                    <AnnotationTooltipText>
                         <strong>Annotate</strong>
                         <br />+ shift to share
-                    </span>
+                    </AnnotationTooltipText>
                 }
                 position="bottomHighlighter"
             >
@@ -84,11 +91,11 @@ export const InitialComponent = ({
         <ButtonDiv onClick={closeTooltip}>
             <ButtonTooltip
                 tooltipText={
-                    <span>
+                    <AnnotationTooltipText>
                         <strong>Close Highlighter</strong>
                         <br />
                         Disable in Settings
-                    </span>
+                    </AnnotationTooltipText>
                 }
                 position="bottomHighlighter"
             >
