@@ -26,7 +26,7 @@ import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/ty
 import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 const limitSuggestionsReturnLength = 1000
-const limitSuggestionsStorageLength = 1000
+const limitSuggestionsStorageLength = 25
 
 export default class CustomListBackground {
     storage: CustomListStorage
