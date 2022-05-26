@@ -10,6 +10,7 @@ export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
     onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
+    onContextMenuBtnPress?: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     id?: string
     removeTooltipText?: string
@@ -38,11 +39,11 @@ class EntryRow extends React.Component<Props> {
         }
     }
 
-    handleEntryPress = () => {
+    private handleEntryPress = () => {
         this.props.onPress && this.props.onPress(this._getEntry())
     }
 
-    handleActOnAllPress = (e: SyntheticEvent) => {
+    private handleActOnAllPress: React.MouseEventHandler = (e) => {
         this.props.onPressActOnAll &&
             this.props.onPressActOnAll(this._getEntry())
         e.preventDefault()
@@ -50,23 +51,32 @@ class EntryRow extends React.Component<Props> {
         return false
     }
 
-    handleMouseOver = () => {
+    private handleContextMenuBtnPress: React.MouseEventHandler = (e) => {
+        this.props.onContextMenuBtnPress &&
+            this.props.onContextMenuBtnPress(this._getEntry())
+        e.preventDefault()
+        e.stopPropagation()
+        return false
+    }
+
+    private handleMouseOver = () => {
         this.props.onFocus &&
             this.props.onFocus(this._getEntry(), this.props.index)
     }
 
-    handleMouseOut = () => {
+    private handleMouseOut = () => {
         this.props.onFocus && this.props.onFocus(this._getEntry(), null)
     }
 
     render() {
         const {
             id,
+            focused,
             remoteId,
             selected,
-            focused,
-            onPressActOnAll,
             resultItem,
+            onPressActOnAll,
+            onContextMenuBtnPress,
         } = this.props
 
         return (
@@ -95,6 +105,15 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
+                    {focused && onContextMenuBtnPress && (
+                        <ButtonContainer>
+                            <Icon
+                                filePath={icons.dots}
+                                heightAndWidth="14px"
+                                onClick={this.handleContextMenuBtnPress}
+                            />
+                        </ButtonContainer>
+                    )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
                             <ButtonTooltip

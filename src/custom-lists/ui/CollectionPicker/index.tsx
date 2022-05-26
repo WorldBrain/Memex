@@ -22,7 +22,6 @@ import {
     contentSharing,
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { Icon as StyledIcon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateListName } from '../utils'
 import { SpaceContextMenu } from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
@@ -131,10 +130,10 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('keyPress', { event })
     }
 
-    renderListRow = (list: SpaceDisplayEntry, index: number) => (
-        <EntryRowContainer key={list.localId}>
+    renderListRow = (entry: SpaceDisplayEntry, index: number) => (
+        <EntryRowContainer key={entry.localId}>
             <EntryRow
-                createdAt={list.createdAt}
+                createdAt={entry.createdAt}
                 onPress={this.handleResultListPress}
                 onPressActOnAll={
                     this.props.actOnAllTabs
@@ -145,29 +144,25 @@ class SpacePicker extends StatefulUIElement<
                         : undefined
                 }
                 onFocus={this.handleResultListFocus}
-                key={`ListKeyName-${list.localId}`}
-                id={`ListKeyName-${list.localId}`}
+                key={`ListKeyName-${entry.localId}`}
+                id={`ListKeyName-${entry.localId}`}
                 index={index}
-                name={list.name}
-                selected={this.state.selectedEntries.includes(list.localId)}
-                localId={list.localId}
-                focused={list.focused}
-                remoteId={list.remoteId}
-                resultItem={<ListResultItem>{list.name}</ListResultItem>}
+                name={entry.name}
+                selected={this.state.selectedEntries.includes(entry.localId)}
+                localId={entry.localId}
+                focused={entry.focused}
+                remoteId={entry.remoteId}
+                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
-                actOnAllTooltipText="Add all tabs in window to Space"
-            />
-            <SpaceContextMenuBtn
-                onClick={() =>
+                onContextMenuBtnPress={() =>
                     this.processEvent('toggleEntryContextMenu', {
-                        listId: list.localId,
+                        listId: entry.localId,
                     })
                 }
-            >
-                <StyledIcon heightAndWidth="14px" path={icons.dots} />
-            </SpaceContextMenuBtn>
+                actOnAllTooltipText="Add all tabs in window to Space"
+            />
         </EntryRowContainer>
     )
 
