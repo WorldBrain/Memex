@@ -402,7 +402,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
-    private renderPageResult = (pageId: string, day: number) => {
+    private renderPageResult = (pageId: string, day: number, index: number) => {
         const page = {
             ...this.props.pageData.byId[pageId],
             ...this.props.results[day].pages.byId[pageId],
@@ -420,7 +420,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <ResultBox
-                zIndex={Math.floor(page.displayTime / 1000)}
+                zIndex={index}
                 bottom="10px"
                 key={day.toString() + pageId}
             >
@@ -630,7 +630,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         for (const { day, pages } of Object.values(this.props.results)) {
             days.push(
                 <DayResultGroup key={day} when={timestampToString(day)}>
-                    {pages.allIds.map((id) => this.renderPageResult(id, day))}
+                    {pages.allIds.map((id, index) =>
+                        this.renderPageResult(
+                            id,
+                            day,
+                            pages.allIds.length - index,
+                        ),
+                    )}
                 </DayResultGroup>,
             )
         }
