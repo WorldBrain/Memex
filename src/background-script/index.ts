@@ -183,7 +183,7 @@ class BackgroundScript {
     }
 
     private async ___runTagsMigration() {
-        await migrations['migrate-tags-to-spaces']({
+        await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
             bgModules: this.deps.bgModules,
             storex: this.deps.storageManager,
             db: this.deps.storageManager.backend['dexieInstance'],

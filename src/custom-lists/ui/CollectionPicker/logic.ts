@@ -366,10 +366,10 @@ export default class SpacePickerLogic extends UILogic<
 
             await unselectEntry(entry.localId)
         } else {
-            const prevDisplayIndexState = previousState.displayEntries.findIndex(
+            const prevDisplayEntriesIndex = previousState.displayEntries.findIndex(
                 ({ localId }) => localId === entry.localId,
             )
-            const prevDisplayIndexDefaults = this.defaultEntries.findIndex(
+            const prevDefaultEntriesIndex = this.defaultEntries.findIndex(
                 ({ localId }) => localId === entry.localId,
             )
 
@@ -378,13 +378,13 @@ export default class SpacePickerLogic extends UILogic<
                 displayEntries: {
                     // Reposition selected entry at start of display list
                     $set: [
-                        previousState.displayEntries[prevDisplayIndexState],
+                        previousState.displayEntries[prevDisplayEntriesIndex],
                         ...previousState.displayEntries.slice(
                             0,
-                            prevDisplayIndexState,
+                            prevDisplayEntriesIndex,
                         ),
                         ...previousState.displayEntries.slice(
-                            prevDisplayIndexState + 1,
+                            prevDisplayEntriesIndex + 1,
                         ),
                     ],
                 },
@@ -393,11 +393,24 @@ export default class SpacePickerLogic extends UILogic<
             this.emitMutation(mutation)
             nextState = this.withMutation(previousState, mutation)
 
-            this.defaultEntries = [
-                this.defaultEntries[prevDisplayIndexDefaults],
-                ...this.defaultEntries.slice(0, prevDisplayIndexDefaults),
-                ...this.defaultEntries.slice(prevDisplayIndexDefaults + 1),
-            ]
+            // `defaultEntries` is initially only populated with what it gets from suggestions cache. If a search happens
+            //   and an entry which isn't one of the initial suggestions is pressed, then we need to add it to `defaultEntries`
+            if (prevDefaultEntriesIndex !== -1) {
+                this.defaultEntries = [
+                    this.defaultEntries[prevDefaultEntriesIndex],
+                    ...this.defaultEntries.slice(0, prevDefaultEntriesIndex),
+                    ...this.defaultEntries.slice(prevDefaultEntriesIndex + 1),
+                ]
+            } else {
+                this.defaultEntries = [
+                    {
+                        ...previousState.displayEntries[
+                            prevDisplayEntriesIndex
+                        ],
+                    },
+                    ...this.defaultEntries,
+                ]
+            }
 
             await selectEntry(entry.localId)
         }
