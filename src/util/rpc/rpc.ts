@@ -411,7 +411,7 @@ export class PortBasedRPCManager {
                         )
                     })
                     .catch((err) => {
-                        console.error(err.message)
+                        console.error(err)
                         if (err.message.includes('disconnected port')) {
                             this.log(
                                 `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}] -- Port Disconnected`,

@@ -172,21 +172,21 @@ const generateForPages = async ({
             PageTags: joinTags(tags),
             PageTagList: tags,
             PageSpaces: joinSpaces(spaces),
-            PageSpaceList: spaces,
+            PageSpacesList: spaces,
             PageUrl: fullUrl,
             PageLink: pageLink,
             PageCreatedAt: serializeDate(pageCreatedAt[normalizedPageUrl]),
 
             Notes: noteUrls.map((url) => ({
-                NoteText: notes[url].comment,
-                NoteHighlight: notes[url].body,
+                NoteText: notes[url]?.comment,
+                NoteHighlight: notes[url]?.body,
                 NoteTagList: noteTags[url],
                 NoteTags: joinTags(noteTags[url]),
-                NoteSpaceList: noteSpaces[url],
+                NoteSpacesList: noteSpaces[url],
                 NoteSpaces: joinSpaces(noteSpaces[url]),
                 NoteLink: noteLinks[url],
                 NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
-                    ? serializeDate(notes[url].createdAt)
+                    ? serializeDate(notes[url]?.createdAt)
                     : undefined,
             })),
 
@@ -283,7 +283,7 @@ const generateForNotes = async ({
                 PageTags: joinTags(pageTags[pageUrl]),
                 PageTagList: pageTags[pageUrl],
                 PageSpaces: joinSpaces(pageSpaces[pageUrl]),
-                PageSpaceList: pageSpaces[pageUrl],
+                PageSpacesList: pageSpaces[pageUrl],
                 PageUrl: fullUrl,
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
@@ -312,7 +312,7 @@ const generateForNotes = async ({
                 NoteHighlight: body,
                 NoteTagList: noteTags[noteUrl],
                 NoteTags: joinTags(noteTags[noteUrl]),
-                NoteSpaceList: noteSpaces[noteUrl],
+                NoteSpacesList: noteSpaces[noteUrl],
                 NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                 NoteLink: noteLinks[noteUrl],
                 NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
@@ -324,7 +324,7 @@ const generateForNotes = async ({
                 PageTags: joinTags(pageTags[pageUrl]),
                 PageTagList: pageTags[pageUrl],
                 PageSpaces: joinSpaces(pageSpaces[pageUrl]),
-                PageSpaceList: pageSpaces[pageUrl],
+                PageSpacesList: pageSpaces[pageUrl],
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
@@ -350,7 +350,7 @@ const generateForNotes = async ({
                 NoteHighlight: body,
                 NoteTagList: noteTags[noteUrl],
                 NoteTags: joinTags(noteTags[noteUrl]),
-                NoteSpaceList: noteSpaces[noteUrl],
+                NoteSpacesList: noteSpaces[noteUrl],
                 NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                 NoteLink: noteLinks[noteUrl],
                 NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
@@ -372,7 +372,7 @@ const generateForNotes = async ({
             PageTags: joinTags(pageTags[pageUrl]),
             PageTagList: pageTags[pageUrl],
             PageSpaces: joinSpaces(pageSpaces[pageUrl]),
-            PageSpaceList: pageSpaces[pageUrl],
+            PageSpacesList: pageSpaces[pageUrl],
             PageLink: pageLinks[pageUrl],
             PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
@@ -386,7 +386,7 @@ const generateForNotes = async ({
                     NoteHighlight: body,
                     NoteTagList: noteTags[noteUrl],
                     NoteTags: joinTags(noteTags[noteUrl]),
-                    NoteSpaceList: noteSpaces[noteUrl],
+                    NoteSpacesList: noteSpaces[noteUrl],
                     NoteSpaces: joinSpaces(noteSpaces[noteUrl]),
                     NoteLink: noteLinks[noteUrl],
                     NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
@@ -398,7 +398,7 @@ const generateForNotes = async ({
                     PageTags: joinTags(pageTags[pageUrl]),
                     PageTagList: pageTags[pageUrl],
                     PageSpaces: joinSpaces(pageSpaces[pageUrl]),
-                    PageSpaceList: pageSpaces[pageUrl],
+                    PageSpacesList: pageSpaces[pageUrl],
                     PageLink: pageLinks[pageUrl],
                     PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
