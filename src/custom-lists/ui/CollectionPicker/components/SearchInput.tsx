@@ -55,7 +55,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     placeholder={
                         this.props.showPlaceholder ?? true
                             ? this.props.searchInputPlaceholder
-                            : 'Search Spaces'
+                            : 'Search & Add Spaces'
                     }
                     defaultValue={this.props.value}
                     onChange={this.onChange}

@@ -24,6 +24,16 @@ async function insertTestData({
             id: list.id,
         })
     }
+
+    // Ensure not all the test lists are in the initial suggestions, for testing diversity
+    const suggestions = await backgroundModules.customLists['localStorage'].get(
+        'suggestionIds',
+    )
+    await backgroundModules.customLists['localStorage'].set(
+        'suggestionIds',
+        suggestions.slice(0, 5),
+    )
+
     for (const metadata of DATA.TEST_LIST_METADATA) {
         await storageManager
             .collection('sharedListMetadata')
@@ -509,6 +519,76 @@ describe('SpacePickerLogic', () => {
         ])
         expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[3].localId)
         expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+    })
+
+    it('should correctly add to the default entries array upon selection of list outside of initial suggestions', async ({
+        device,
+    }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        const expectedEntry = {
+            createdAt: DATA.TEST_LISTS[5].createdAt.getTime(),
+            localId: DATA.TEST_LISTS[5].id,
+            name: DATA.TEST_LISTS[5].name,
+            focused: false,
+            remoteId: null,
+        }
+
+        await testLogic.init()
+
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'suggestions',
+        })
+
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(testLogic.state.displayEntries).toEqual([expectedEntry])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: expectedEntry,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            expectedEntry,
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            expectedEntry,
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.selectedEntries).toEqual([expectedEntry.localId])
     })
 
     it('should correctly unselect selected entries shown in the search input bar', async ({

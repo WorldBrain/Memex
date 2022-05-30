@@ -212,7 +212,8 @@ class SpacePicker extends StatefulUIElement<
             <>
                 <PickerSearchInput
                     searchInputPlaceholder={
-                        this.props.searchInputPlaceholder ?? 'Search Spaces'
+                        this.props.searchInputPlaceholder ??
+                        'Search & Add Spaces'
                     }
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}

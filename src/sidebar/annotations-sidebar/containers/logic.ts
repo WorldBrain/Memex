@@ -24,7 +24,7 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import { generateUrl } from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
 import { initNormalizedState } from 'src/common-ui/utils'
@@ -180,7 +180,7 @@ export class SidebarContainerLogic extends UILogic<
             sidebarWidth: '450px',
             loadState: 'pristine',
             noteCreateState: 'pristine',
-            primarySearchState: 'pristine',
+            annotationsLoadState: 'pristine',
             secondarySearchState: 'pristine',
             followedListLoadState: 'pristine',
 
@@ -288,6 +288,7 @@ export class SidebarContainerLogic extends UILogic<
 
     private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
         const mutation: UIMutation<SidebarContainerState> = {
+            noteCreateState: { $set: 'success' },
             annotations: {
                 $set: nextAnnotations,
             },
@@ -455,8 +456,11 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
+
         await Promise.all([
-            annotationsCache.load(event.pageUrl),
+            executeUITask(this, 'annotationsLoadState', async () => {
+                await annotationsCache.load(event.pageUrl)
+            }),
             this.processUIEvent('loadFollowedLists', {
                 previousState: this.withMutation(previousState, mutation),
                 event: null,
@@ -722,7 +726,10 @@ export class SidebarContainerLogic extends UILogic<
         if (comment.length === 0) {
             return
         }
-        const annotationUrl = generateUrl({ pageUrl, now: () => Date.now() })
+        const annotationUrl = generateAnnotationUrl({
+            pageUrl,
+            now: () => Date.now(),
+        })
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -1355,11 +1362,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const {
-            isExpanded: wasExpanded,
-            loadState,
-            annotations,
-        } = previousState
+        const { isExpanded: wasExpanded, annotations } = previousState
 
         const annotIds = annotations.map((annot) => annot.url as string)
 

@@ -19,7 +19,7 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { generateUrl } from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 
@@ -176,7 +176,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const body = anchor ? anchor.quote : ''
 
         const annotation: Annotation = {
-            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body,
             pageUrl,
             tags: [],

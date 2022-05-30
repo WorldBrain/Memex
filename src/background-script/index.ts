@@ -122,6 +122,12 @@ class BackgroundScript {
             false,
         )
 
+        // Disable tags
+        await this.deps.syncSettingsStore.extension.set(
+            'areTagsMigratedToSpaces',
+            true,
+        )
+
         // TODO: Set up pioneer subscription banner to show up in 2 weeks
         // const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
         // await this.deps.syncSettings.dashboard.set(
@@ -145,7 +151,17 @@ class BackgroundScript {
     private async handleUnifiedLogic() {
         await this.deps.bgModules.customLists.createInboxListIfAbsent()
         // await this.deps.bgModules.notifications.deliverStaticNotifications()
-        await this.deps.bgModules.tabManagement.trackExistingTabs()
+        // await this.deps.bgModules.tabManagement.trackExistingTabs()
+    }
+
+    private setupOnDemandContentScriptInjection() {
+        // NOTE: this code lacks automated test coverage.
+        // ---Ensure you test manually upon change, as the content script injection won't work on ext install/update without it---
+        this.deps.tabsAPI.onActivated.addListener(async ({ tabId }) => {
+            await this.deps.bgModules.tabManagement.injectContentScriptsIfNeeded(
+                tabId,
+            )
+        })
     }
 
     /**
@@ -177,7 +193,7 @@ class BackgroundScript {
     }
 
     private async ___runTagsMigration() {
-        await migrations['migrate-tags-to-spaces']({
+        await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
             bgModules: this.deps.bgModules,
             storex: this.deps.storageManager,
             db: this.deps.storageManager.backend['dexieInstance'],
@@ -251,6 +267,7 @@ class BackgroundScript {
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupStartupHooks()
+        this.setupOnDemandContentScriptInjection()
         this.setupCommands()
         this.setupUninstallURL()
     }

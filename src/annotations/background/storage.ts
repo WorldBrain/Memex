@@ -255,7 +255,7 @@ export default class AnnotationStorage extends StorageModule {
         }
 
         if (withLists !== false) {
-            const annotationLists: AnnotListEntry[] = await this.operation(
+            const listEntries: AnnotListEntry[] = await this.operation(
                 'listAnnotationListsForAnnotations',
                 {
                     annotationUrls,
@@ -263,12 +263,9 @@ export default class AnnotationStorage extends StorageModule {
             )
 
             annotationsListMap = new Map()
-            for (const list of annotationLists) {
-                const prev = annotationsListMap.get(list.url) ?? []
-                const customList: List = await this.operation('findListById', {
-                    id: list.listId,
-                })
-                annotationsListMap.set(list.url, [...prev, customList.id])
+            for (const entry of listEntries) {
+                const prev = annotationsListMap.get(entry.url) ?? []
+                annotationsListMap.set(entry.url, [...prev, entry.listId])
             }
         }
 

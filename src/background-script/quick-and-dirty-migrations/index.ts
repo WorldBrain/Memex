@@ -49,9 +49,7 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
-    // TODO: uncomment below line when ready to migrate tags (currently skips because lacks non-legacy migration prefix)
-    // [MIGRATION_PREFIX + 'migrate-tags-to-spaces']: async ({
-    ['migrate-tags-to-spaces']: async ({
+    [MIGRATION_PREFIX + 'migrate-tags-to-spaces']: async ({
         bgModules: { personalCloud },
         syncSettingsStore,
         db,

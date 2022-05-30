@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.2.14",
+    "version": "3.2.15",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
