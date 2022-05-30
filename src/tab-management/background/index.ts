@@ -154,7 +154,7 @@ export default class TabManagementBackground {
 
         for (const file of CONTENT_SCRIPTS) {
             await this.options.browserAPIs.tabs
-                .executeScript(tab.id, { file })
+                .executeScript(tab.id, { file, runAt: 'document_idle' })
                 .catch((err) => {
                     const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
                     captureException(new Error(message))
@@ -173,11 +173,8 @@ export default class TabManagementBackground {
             return false
         }
 
-        // First check if we want to log this page (hence the 'maybe' in the name).
         const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
-        const isPaused = await getPauseState()
-
-        return !isPaused && !isBlacklisted({ url })
+        return !isBlacklisted({ url })
     }
 
     /**

@@ -135,7 +135,10 @@ export function runInBackground<T extends object>(): T {
 }
 
 // Runs a remoteFunction in the content script on a certain tab
-export function runInTab<T extends object>(tabId): T {
+export function runInTab<T extends object>(
+    tabId: number,
+    opts?: { quietConsole?: boolean },
+): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) =>
@@ -143,6 +146,7 @@ export function runInTab<T extends object>(tabId): T {
                     tabId,
                     property.toString(),
                     args,
+                    opts?.quietConsole,
                 )
         },
     })

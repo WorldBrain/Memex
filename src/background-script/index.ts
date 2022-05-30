@@ -9,7 +9,7 @@ import type {
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import { makeRemotelyCallable } from '../util/webextensionRPC'
+import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import type { AlarmsConfig } from './alarms'
@@ -41,6 +41,7 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -151,7 +152,25 @@ class BackgroundScript {
     private async handleUnifiedLogic() {
         await this.deps.bgModules.customLists.createInboxListIfAbsent()
         // await this.deps.bgModules.notifications.deliverStaticNotifications()
-        await this.deps.bgModules.tabManagement.trackExistingTabs()
+        // await this.deps.bgModules.tabManagement.trackExistingTabs()
+    }
+
+    private setupOnDemandContentScriptInjection() {
+        // NOTE: this code lacks automated test coverage.
+        // ---Ensure you test manually upon change, as the content script injection won't work on ext install/update without it---
+        this.deps.tabsAPI.onActivated.addListener(async ({ tabId }) => {
+            try {
+                await runInTab<InPageUIContentScriptRemoteInterface>(tabId, {
+                    quietConsole: true,
+                }).ping()
+            } catch (err) {
+                // If the ping fails, the content script is not yet set up
+                const tab = await this.deps.tabsAPI.get(tabId)
+                await this.deps.bgModules.tabManagement.injectContentScripts(
+                    tab,
+                )
+            }
+        })
     }
 
     /**
@@ -176,11 +195,11 @@ class BackgroundScript {
         })
     }
 
-    private setupStartupHooks() {
-        this.deps.runtimeAPI.onStartup.addListener(async () => {
-            this.deps.bgModules.tabManagement.trackExistingTabs()
-        })
-    }
+    // private setupStartupHooks() {
+    //     this.deps.runtimeAPI.onStartup.addListener(async () => {
+    //         this.deps.bgModules.tabManagement.trackExistingTabs()
+    //     })
+    // }
 
     private async ___runTagsMigration() {
         await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
@@ -256,7 +275,8 @@ class BackgroundScript {
 
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
-        this.setupStartupHooks()
+        // this.setupStartupHooks()
+        this.setupOnDemandContentScriptInjection()
         this.setupCommands()
         this.setupUninstallURL()
     }

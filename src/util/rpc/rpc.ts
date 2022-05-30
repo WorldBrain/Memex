@@ -265,8 +265,13 @@ export class PortBasedRPCManager {
         return this.postMessageToRPC(port, name, payload)
     }
 
-    public postMessageRequestToTab(tabId: number, name: string, payload: any) {
-        const port = this.getTabPort(tabId, name)
+    public postMessageRequestToTab(
+        tabId: number,
+        name: string,
+        payload: any,
+        quietConsole?: boolean,
+    ) {
+        const port = this.getTabPort(tabId, name, quietConsole)
         return this.postMessageToRPC(port, name, payload)
     }
 
@@ -298,10 +303,13 @@ export class PortBasedRPCManager {
         return port
     }
 
-    private getTabPort(tabId: number, name: string) {
+    private getTabPort(tabId: number, name: string, quietConsole?: boolean) {
         const port = this.ports.get(this.getPortIdForTab(tabId))
         if (!port) {
-            console.error('ports: ', [...this.ports.entries()])
+            if (!quietConsole) {
+                console.error('ports: ', [...this.ports.entries()])
+            }
+
             throw new Error(
                 `Could not get a port to ${this.getPortIdForTab(
                     tabId,
