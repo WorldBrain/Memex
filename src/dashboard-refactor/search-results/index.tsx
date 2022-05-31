@@ -634,10 +634,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         const days: JSX.Element[] = []
+        var groupIndex = 1500
 
         for (const { day, pages } of Object.values(this.props.results)) {
+            groupIndex = groupIndex - 1
             days.push(
-                <DayResultGroup key={day} when={timestampToString(day)}>
+                <DayResultGroup
+                    zIndex={groupIndex}
+                    key={day}
+                    when={timestampToString(day)}
+                >
                     {pages.allIds.map((id, index) =>
                         this.renderPageResult(
                             id,
