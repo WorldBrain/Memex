@@ -4,7 +4,7 @@ import styled from 'styled-components'
 export interface Props {
     nameValue: string
     errorMessage: string | null
-    onCancelClick: (value: string) => void
+    onCancelClick: (shouldSave: boolean) => void
     onConfirmClick: (value: string) => void
     changeListName?: (value: string) => void
     onRenameStart?: React.MouseEventHandler<Element>
@@ -32,7 +32,7 @@ export default class EditableMenuItem extends React.PureComponent<Props> {
             if (this.props.nameValue.length) {
                 e.stopPropagation()
             }
-            this.props.onCancelClick(this.props.nameValue)
+            this.props.onCancelClick(false)
             return
         }
 

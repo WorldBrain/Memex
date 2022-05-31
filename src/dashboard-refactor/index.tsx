@@ -514,7 +514,7 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
-                        cancelAddNewList: () =>
+                        cancelAddNewList: (shouldSave) =>
                             this.processEvent('cancelListCreate', null),
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
