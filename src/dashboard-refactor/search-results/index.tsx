@@ -815,6 +815,7 @@ const PageNotesBox = styled(Margin)`
     padding-left: 10px;
     padding-top: 5px;
     border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    z-index: 4;
 `
 
 const Separator = styled.div`
