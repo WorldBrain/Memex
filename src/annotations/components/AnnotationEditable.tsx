@@ -30,6 +30,7 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { props } from 'lodash/fp'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -41,6 +42,7 @@ export interface NoteProps extends AnnotationProps {
 }
 
 export interface AnnotationProps {
+    zIndex?: number
     tags: string[]
     lists: number[]
     createdWhen: Date | number
@@ -505,7 +507,11 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <AnnotationBox top="5px" bottom="2px">
+                <AnnotationBox
+                    zIndex={this.props.zIndex}
+                    top="5px"
+                    bottom="2px"
+                >
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -663,9 +669,10 @@ const EditNoteIconBox = styled.div`
     }
 `
 
-const AnnotationBox = styled(Margin)`
+const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 99%;
     align-self: center;
+    z-index: ${(props) => props.zIndex};
 `
 
 const EditNoteIcon = styled.div`
