@@ -120,9 +120,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         </Loader>
     )
 
-    private renderNoteResult = (day: number, pageId: string) => (
-        noteId: string,
-    ) => {
+    private renderNoteResult = (
+        day: number,
+        pageId: string,
+        zIndex: number,
+    ) => (noteId: string) => {
         const pageData = this.props.pageData.byId[pageId]
         const noteData = this.props.noteData.byId[noteId]
 
@@ -147,6 +149,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <AnnotationEditable
+                zIndex={zIndex}
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
@@ -370,9 +373,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <Separator />
                     </>
                 )}
-                {noteIds[notesType].map(
-                    this.renderNoteResult(day, normalizedUrl),
-                )}
+                {noteIds[notesType].map((noteId, index) => {
+                    const zIndex = noteIds[notesType].length - index
+                    return this.renderNoteResult(
+                        day,
+                        normalizedUrl,
+                        zIndex,
+                    )(noteId)
+                })}
             </PageNotesBox>
         )
     }
@@ -626,10 +634,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         const days: JSX.Element[] = []
+        var groupIndex = 1500
 
         for (const { day, pages } of Object.values(this.props.results)) {
+            groupIndex = groupIndex - 1
             days.push(
-                <DayResultGroup key={day} when={timestampToString(day)}>
+                <DayResultGroup
+                    zIndex={groupIndex}
+                    key={day}
+                    when={timestampToString(day)}
+                >
                     {pages.allIds.map((id, index) =>
                         this.renderPageResult(
                             id,
@@ -807,6 +821,7 @@ const PageNotesBox = styled(Margin)`
     padding-left: 10px;
     padding-top: 5px;
     border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    z-index: 4;
 `
 
 const Separator = styled.div`
