@@ -214,16 +214,16 @@ class SpacePicker extends StatefulUIElement<
         const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
 
         // Popup
-        if (window.outerHeight < 500) {
+        if (window.outerWidth < 500) {
             await this.processEvent('updateContextMenuPosition', {
-                x: outerWidth,
-                y: outerHeight,
+                x: undefined,
+                y: undefined,
             })
         } else {
             // right side of screen
             if (window.outerWidth - rect.right < 400) {
                 await this.processEvent('updateContextMenuPosition', {
-                    x: outerWidth - rect.right,
+                    x: outerWidth - rect.left,
                 })
                 //lower side
 
@@ -294,7 +294,6 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <SpaceContextMenu
-                // fixedPositioning
                 spaceName={list.name}
                 ref={this.contextMenuRef}
                 localListId={this.state.contextMenuListId}

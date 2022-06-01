@@ -167,7 +167,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             this.props.onDeleteSpaceConfirm != null
         ) {
             return (
-                <>
+                <DeleteBox>
                     <TitleBox>Delete this Space?</TitleBox>
                     <DetailsText>
                         This does not delete the pages in it
@@ -182,7 +182,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         }
                         label={<ButtonLabel>Cancel</ButtonLabel>}
                     />
-                </>
+                </DeleteBox>
             )
         }
 
@@ -243,6 +243,14 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 }
 
+const DeleteBox = styled.div`
+    padding: 20px;
+    display: flex;
+    grid-gap: 10px;
+    justify-content: center;
+    flex-direction: column;
+`
+
 const PermissionArea = styled.div`
     z-index: auto;
 `
@@ -298,11 +306,17 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
     z-index: 1000;
     border-radius: 12px;
     height: 100%;
-    width: 500px;
+    width: 100%;
     position: relative;
-    padding-top: 80px;
     width: 100%;
 `}
+    ${(props) =>
+        props.x || props.y
+            ? ''
+            : `
+            display: flex;
+            justify-content: center;
+            `}
 `
 
 /* Modal content */
@@ -314,21 +328,23 @@ const ModalContent = styled.div<{
 }>`
     z-index: 999;
     position: fixed;
-    top: ${(props) => (props.fixedPosition ? 0 : props.y)}px;
-    left: ${(props) => (props.fixedPosition ? 0 : props.x)}px;
     text-align: center;
     border-radius: 4px;
     width: 300px;
+    bottom: ${(props) => (props.x && props.y ? props.y + 'px' : 'unset')};
+    right: ${(props) => (props.x && props.y ? props.x + 'px' : 'unset')};
 `
 
 const Overlay = styled.div`
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     z-index: 995;
     border-radius: 5px;
+    backdrop-filter: ${(props) =>
+        props.x && props.y ? 'backdrop-filter: blur(3px)' : 'unset'};
 `
 
 const MenuContainer = styled.div`
@@ -362,11 +378,13 @@ const IconBox = styled.div<Props>`
 const TitleBox = styled.div`
     display: flex;
     flex: 1;
-    width: 100%;
     height: 100%;
     padding-left: 15px;
     align-items: center;
     padding-right: 10px;
+    font-weight: bold;
+    color: ${(props) => props.theme.colors.darkerText};
+    justify-content: center;
 `
 
 const MenuButton = styled.div`
@@ -470,7 +488,12 @@ const CopyLinkBox = styled.div`
 
 const DetailsText = styled.span`
     opacity: 0.8;
-    font-size: 12px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: ${fonts.primary.weight.normal};
+    color: ${(props) => props.theme.colors.normalText};
+    margin-bottom: 5px;
+    margin-top: -5px;
 `
 
 const PermissionText = styled.span<{

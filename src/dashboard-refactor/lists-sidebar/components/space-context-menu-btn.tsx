@@ -41,7 +41,6 @@ export default class SpaceContextMenuButton extends PureComponent<
             this.setState({ xPosition: 15, yPosition: 20 })
         } else {
             const rect = this.buttonRef?.current?.getBoundingClientRect()
-            const rect2 = this.contextMenuRef?.current?.getContainerRect()
 
             // Popup
 
@@ -93,8 +92,37 @@ export default class SpaceContextMenuButton extends PureComponent<
         e.stopPropagation()
 
         const rect = this.buttonRef?.current?.getBoundingClientRect()
-        this.setState({ yPosition: rect.y, xPosition: rect.right })
-        this.props.toggleMenu(e)
+        // right side of screen
+
+        if (window.outerWidth - rect.right < 400) {
+            this.setState({ xPosition: outerWidth - rect.right })
+
+            //lower side
+
+            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                this.setState({ yPosition: outerHeight - rect.bottom + 40 })
+            }
+            // upper side
+            else {
+                this.setState({ yPosition: outerHeight - rect.top + 110 })
+            }
+        }
+
+        // left side of screen
+
+        if (window.outerWidth - rect.right > window.outerWidth / 2) {
+            this.setState({ xPosition: outerWidth - rect.right - 320 })
+
+            // upper side
+
+            if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                this.setState({ yPosition: outerHeight - rect.bottom - 40 })
+            }
+            // lower side
+            else {
+                this.setState({ yPosition: outerHeight - rect.top + 40 })
+            }
+        }
 
         return this.props.toggleMenu(e)
     }
