@@ -2898,7 +2898,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : event.listId
 
         this.emitMutation({
-            listsSidebar: { showMoreMenuListId: { $set: listIdToSet } },
+            listsSidebar: {
+                showMoreMenuListId: { $set: listIdToSet },
+                editingListId: { $set: listIdToSet },
+            },
         })
     }
 

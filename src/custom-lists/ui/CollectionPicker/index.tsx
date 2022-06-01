@@ -24,8 +24,7 @@ import {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateListName } from '../utils'
-import { SpaceContextMenu } from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu'
-import { ClickAway } from 'src/util/click-away-wrapper'
+import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -158,11 +157,9 @@ class SpacePicker extends StatefulUIElement<
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
                 contextMenuBtnRef={this.contextMenuBtnRef}
-                onContextMenuBtnPress={
-                    entry.isOwned
-                        ? this.handleSpaceContextMenuOpen(entry.localId)
-                        : undefined
-                }
+                onContextMenuBtnPress={this.handleSpaceContextMenuOpen(
+                    entry.localId,
+                )}
                 actOnAllTooltipText="Add all tabs in window to Space"
             />
         </EntryRowContainer>
@@ -298,20 +295,14 @@ class SpacePicker extends StatefulUIElement<
         return (
             <SpaceContextMenu
                 // fixedPositioning
+                spaceName={list.name}
                 ref={this.contextMenuRef}
-                listId={this.state.contextMenuListId}
+                localListId={this.state.contextMenuListId}
                 xPosition={this.state.contextMenuPositionX}
                 yPosition={this.state.contextMenuPositionY}
                 contentSharingBG={this.props.contentSharingBG}
-                name={list.name}
-                selectedState={{ isSelected: false } as any}
-                changeListName={(name) =>
-                    this.processEvent('validateListName', {
-                        name,
-                        listId: list.localId,
-                    })
-                }
-                onDeleteConfirm={() =>
+                spacesBG={this.props.spacesBG}
+                onDeleteSpaceConfirm={() =>
                     this.processEvent('deleteList', {
                         listId: list.localId,
                     })
@@ -329,17 +320,13 @@ class SpacePicker extends StatefulUIElement<
                     onCancelClick: this.handleSpaceContextMenuClose(
                         list.localId,
                     ),
-                    initValue: list.name,
                     errorMessage: this.state.renameListErrorMessage,
                 }}
-                listData={{
-                    id: list.localId,
-                    name: list.name,
-                    remoteId: list.remoteId,
-                }}
-                shareList={() =>
+                shareSpace={() =>
                     this.processEvent('shareList', { listId: list.localId })
                 }
+                onClose={this.handleSpaceContextMenuClose(list.localId)}
+                remoteListId={list.remoteId}
             />
         )
     }

@@ -7,9 +7,12 @@ import { DropReceivingState, SelectedState } from 'src/dashboard-refactor/types'
 import { Props as EditableItemProps } from './sidebar-editable-item'
 import { ListData, ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import SpaceContextMenuButton from './space-context-menu'
+import SpaceContextMenuButton from './space-context-menu-btn'
 import { ButtonTooltip } from 'src/common-ui/components'
-import { contentSharing } from 'src/util/remote-functions-background'
+import {
+    contentSharing,
+    collections,
+} from 'src/util/remote-functions-background'
 
 export interface Props {
     className?: string
@@ -26,12 +29,12 @@ export interface Props {
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onDeleteConfirm?: React.MouseEventHandler
-    onShareClick?: React.MouseEventHandler
+    onShareClick?: () => Promise<void>
     dropReceivingState?: DropReceivingState
     editableProps?: EditableItemProps
     selectedState: SelectedState
     changeListName?: (value: string) => void
-    onMoreActionClick?: (listId: number) => void
+    onMoreActionClick?: React.MouseEventHandler
     shareList?: () => Promise<void>
 }
 
@@ -60,12 +63,9 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             dropReceivingState,
             onMoreActionClick,
             newItemsCount,
-            hasActivity,
+            onShareClick,
+            listData,
         } = this.props
-
-        // if (hasActivity) {
-        //     return <ActivityBeacon />
-        // }
 
         if (newItemsCount) {
             return (
@@ -92,7 +92,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return (
                 <SpaceContextMenuButton
                     contentSharingBG={contentSharing}
-                    {...this.props}
+                    spacesBG={collections}
+                    spaceName={listData.name}
+                    localListId={listData.id}
+                    remoteListId={listData.remoteId}
+                    onClose={this.props.editableProps!.onCancelClick}
+                    toggleMenu={this.props.onMoreActionClick}
+                    editableProps={this.props.editableProps!}
+                    isMenuDisplayed={this.props.isMenuDisplayed}
+                    shareSpace={onShareClick}
                 />
             )
         }

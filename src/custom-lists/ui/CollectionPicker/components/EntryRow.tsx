@@ -10,7 +10,7 @@ export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
     onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
-    onContextMenuBtnPress?: (entry: SpaceDisplayEntry, index?: number) => void
+    onContextMenuBtnPress: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     id?: string
     removeTooltipText?: string
@@ -78,7 +78,6 @@ class EntryRow extends React.Component<Props> {
             resultItem,
             onPressActOnAll,
             contextMenuBtnRef,
-            onContextMenuBtnPress,
         } = this.props
 
         return (
@@ -107,7 +106,7 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
-                    {focused && onContextMenuBtnPress && (
+                    {focused && (
                         <ButtonContainer ref={contextMenuBtnRef}>
                             <Icon
                                 filePath={icons.dots}

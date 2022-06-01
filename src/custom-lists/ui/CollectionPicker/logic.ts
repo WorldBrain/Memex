@@ -16,7 +16,6 @@ export interface SpaceDisplayEntry {
     name: string
     createdAt: number
     focused: boolean
-    isOwned?: boolean
 }
 
 export interface SpacePickerDependencies {
@@ -159,36 +158,16 @@ export default class SpacePickerLogic extends UILogic<
             })
 
             await executeUITask(this, 'loadingShareStates', async () => {
-                const remoteListIdsP = contentSharingBG.getRemoteListIds({
-                    localListIds: this.defaultEntries.map(
-                        (s) => s.localId as number,
-                    ),
-                })
-                const followedListsP = spacesBG.fetchAllFollowedLists({})
-
-                // Sort out remote IDs first, as they should load much faster (local data)
-                const localToRemoteIdDict = await remoteListIdsP
+                const localToRemoteIdDict = await contentSharingBG.getRemoteListIds(
+                    {
+                        localListIds: this.defaultEntries.map(
+                            (s) => s.localId as number,
+                        ),
+                    },
+                )
                 this.defaultEntries = this.defaultEntries.map((s) => ({
                     ...s,
                     remoteId: localToRemoteIdDict[s.localId] ?? null,
-                }))
-                this.emitMutation({
-                    displayEntries: { $set: this.defaultEntries },
-                })
-
-                // Now sort out the ownership state, which needs a remote query
-                const followedLists = await followedListsP
-                for (const list of followedLists) {
-                    this.remoteIdToFollowedListDataDict[list.remoteId] = list
-                }
-
-                this.defaultEntries = this.defaultEntries.map((s) => ({
-                    ...s,
-                    isOwned:
-                        s.remoteId != null
-                            ? this.remoteIdToFollowedListDataDict[s.remoteId]
-                                  ?.isOwned ?? true
-                            : true,
                 }))
                 this.emitMutation({
                     displayEntries: { $set: this.defaultEntries },
