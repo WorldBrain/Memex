@@ -207,6 +207,12 @@ class BackgroundScript {
         })
     }
 
+    private async ___testContentScriptsTeardown(tabId: number) {
+        await runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).teardownContentScripts()
+    }
+
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
