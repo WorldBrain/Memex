@@ -9,8 +9,23 @@ import {
 } from 'src/in-page-ui/tooltip/content_script/interactions'
 import { conditionallyShowOnboardingNotifications } from 'src/in-page-ui/tooltip/onboarding-interactions'
 import { insertTutorial } from 'src/in-page-ui/tooltip/content_script/tutorialInteractions'
+import { browser } from 'webextension-polyfill-ts'
+import type { InPageUIRootMount } from 'src/in-page-ui/types'
+import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
+import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 
 export const main: TooltipScriptMain = async (options) => {
+    const cssFile = browser.runtime.getURL(`/content_script.css`)
+    let mount: InPageUIRootMount | null = null
+    const createMount = () => {
+        if (!mount) {
+            mount = createInPageUI('tooltip', cssFile, [
+                IGNORE_CLICK_OUTSIDE_CLASS,
+            ])
+        }
+    }
+    createMount()
+
     runOnScriptShutdown(() => removeTooltip())
     await conditionallyShowOnboardingNotifications({
         toolbarNotifications: options.toolbarNotifications,
@@ -18,13 +33,15 @@ export const main: TooltipScriptMain = async (options) => {
 
     options.inPageUI.events.on('componentShouldSetUp', async (event) => {
         if (event.component === 'tooltip') {
+            createMount()
             await bodyLoader()
-            await insertTooltip(options)
+            await insertTooltip({ ...options, mount })
             await insertTutorial()
         }
     })
     options.inPageUI.events.on('componentShouldDestroy', async (event) => {
         if (event.component === 'tooltip') {
+            destroyInPageUI('tooltip')
             await removeTooltip()
         }
     })
@@ -33,7 +50,7 @@ export const main: TooltipScriptMain = async (options) => {
             return
         }
         if (event.newState.tooltip) {
-            showContentTooltip(options)
+            showContentTooltip({ ...options, mount })
         }
     })
 }
