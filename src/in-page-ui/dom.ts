@@ -9,7 +9,7 @@ export function createInPageUIRoot({
 }: {
     containerId: string
     rootId: string
-    cssFile: string
+    cssFile?: string
     rootClassNames?: string[]
     containerClassNames?: string[]
 }) {
@@ -66,10 +66,14 @@ export function createShadowRootIfSupported(
         shadow.innerHTML = innerHTML
 
         shadow.appendChild(rootElement)
-        injectCSS(cssFile, shadow)
+        if (cssFile != null) {
+            injectCSS(cssFile, shadow)
+        }
     } else {
         container.appendChild(rootElement)
-        injectCSS(cssFile)
+        if (cssFile != null) {
+            injectCSS(cssFile)
+        }
     }
 
     return { rootElement, shadow }
