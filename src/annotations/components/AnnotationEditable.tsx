@@ -30,7 +30,6 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { props } from 'lodash/fp'
 
 export interface HighlightProps extends AnnotationProps {
     body: string

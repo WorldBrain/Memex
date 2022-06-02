@@ -168,12 +168,10 @@ describe('Dashboard lists sidebar logic', () => {
         })
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
 
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(
-            undefined,
-        )
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
-        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
         expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+        // await searchResults.processEvent('setEditingListId', { listId: 123 })
+        // expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        // expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
 
         await searchResults.processEvent('cancelListEdit', null)
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(

@@ -9,7 +9,7 @@ import type {
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import { makeRemotelyCallable } from '../util/webextensionRPC'
+import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import type { AlarmsConfig } from './alarms'
@@ -41,6 +41,9 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
+import { captureException } from 'src/util/raven'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -204,6 +207,12 @@ class BackgroundScript {
         })
     }
 
+    private async ___testContentScriptsTeardown(tabId: number) {
+        await runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).teardownContentScripts()
+    }
+
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
@@ -264,12 +273,54 @@ class BackgroundScript {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
+    private setupExtUpdateHandling() {
+        const { runtimeAPI, bgModules } = this.deps
+        runtimeAPI.onUpdateAvailable.addListener(async () => {
+            try {
+                await bgModules.tabManagement.mapTabChunks(
+                    async ({ url, id }) => {
+                        if (
+                            !url ||
+                            isExtensionTab({ url }) ||
+                            isBrowserPageTab({ url })
+                        ) {
+                            return
+                        }
+
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            id,
+                        ).teardownContentScripts()
+                    },
+                    {
+                        onError: (err, tab) => {
+                            console.error(
+                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                                err.message,
+                            )
+                            captureException(err)
+                        },
+                    },
+                )
+            } catch (err) {
+                console.error(
+                    'Error encountered attempting to teardown content scripts for extension update:',
+                    err.message,
+                )
+                captureException(err)
+            }
+
+            // This call prompts the extension to reload, updating the scripts to the newest versions
+            runtimeAPI.reload()
+        })
+    }
+
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupStartupHooks()
         this.setupOnDemandContentScriptInjection()
         this.setupCommands()
         this.setupUninstallURL()
+        this.setupExtUpdateHandling()
     }
 
     setupAlarms(alarms: AlarmsConfig) {
