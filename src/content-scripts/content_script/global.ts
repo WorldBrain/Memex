@@ -271,6 +271,7 @@ export async function main(
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
+        ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
         reloadRibbon: () => inPageUI.reloadRibbon(),

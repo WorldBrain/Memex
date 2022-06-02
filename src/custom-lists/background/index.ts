@@ -23,6 +23,7 @@ import { Services } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import { isExtensionTab } from 'src/tab-management/utils'
 import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 const limitSuggestionsReturnLength = 1000
@@ -610,6 +611,17 @@ export default class CustomListBackground {
         }
 
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+
+        // Ensure content scripts are injected into each tab, so they can init page content identifier
+        await Promise.all(
+            tabs
+                .filter((tab) => !isExtensionTab(tab))
+                .map(async (tab) => {
+                    await this.options.tabManagement.injectContentScriptsIfNeeded(
+                        tab.id,
+                    )
+                }),
+        )
 
         const indexed = await maybeIndexTabs(tabs, {
             createPage: this.options.pages.indexPage,

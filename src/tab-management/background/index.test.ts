@@ -18,6 +18,11 @@ describe('activity logger background tests', () => {
             { id: 5, url: 'https://worldbrain.io', status: 'complete' },
         ] as Tabs.Tab[]
 
+        const createScriptCallObj = (tabId: number, file: string) => ({
+            id: tabId,
+            script: { file, runAt: 'document_idle' },
+        })
+
         // Mock out tabs API, so it sets something we can check
         browserAPIs.tabs.query = async () => mockTabs
 
@@ -48,14 +53,10 @@ describe('activity logger background tests', () => {
                 return
             }
 
-            expectedCalls.push({
-                id: tab.id,
-                script: { file: '/lib/browser-polyfill.js' },
-            })
-            expectedCalls.push({
-                id: tab.id,
-                script: { file: '/content_script.js' },
-            })
+            expectedCalls.push(
+                createScriptCallObj(tab.id, '/lib/browser-polyfill.js'),
+                createScriptCallObj(tab.id, '/content_script.js'),
+            )
         })
         expect(executeScriptsCalls).toEqual(
             expect.arrayContaining(expectedCalls),
