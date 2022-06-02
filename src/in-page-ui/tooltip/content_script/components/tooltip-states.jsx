@@ -18,7 +18,7 @@ const CreateButtons = styled.div`
     padding: 0 8px;
 `
 
-const ButtonDiv = styled.div`
+const ButtonDiv = styled.button`
     height: fit-content;
     width: fit-content;
     outline: none;
