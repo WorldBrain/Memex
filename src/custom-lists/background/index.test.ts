@@ -58,6 +58,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
                             ) => a) as any
+                            setup.backgroundModules.tabManagement.injectContentScripts = () =>
+                                undefined
 
                             listId = await customLists(
                                 setup,
@@ -151,6 +153,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
                             ) => a) as any
+                            setup.backgroundModules.tabManagement.injectContentScripts = () =>
+                                undefined
 
                             listId = await customLists(
                                 setup,
