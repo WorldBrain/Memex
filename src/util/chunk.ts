@@ -22,11 +22,16 @@ export async function mapChunks<T = any, R = any>(
     array: T[],
     size: number,
     cb: (t: T, i: number, arr: T[]) => Promise<R>,
+    onError?: (err: Error) => void,
 ) {
     const result = []
 
     for (const items of chunk(array, size)) {
-        const res = await Promise.all(items.map(cb))
+        const res = await Promise.all(
+            onError != null
+                ? items.map((...args) => cb(...args).catch(onError))
+                : items.map(cb),
+        )
         result.push(...res)
     }
 

@@ -16,7 +16,7 @@ import { resolvablePromise } from 'src/util/resolvable'
 import { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { LoggableTabChecker } from 'src/activity-logger/background/types'
-import { isLoggable, getPauseState } from 'src/activity-logger'
+import { isLoggable } from 'src/activity-logger'
 import { blacklist } from 'src/blacklist/background'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
@@ -122,10 +122,24 @@ export default class TabManagementBackground {
         return tabs.length ? tabs[0].id : null
     }
 
-    async trackExistingTabs() {
-        const tabs = await this.options.browserAPIs.tabs.query({})
+    async mapTabChunks<T>(
+        mapFn: (tab: Tabs.Tab) => Promise<T>,
+        {
+            chunkSize = CONCURR_TAB_LOAD,
+            query = {},
+            onError,
+        }: {
+            chunkSize?: number
+            query?: Tabs.QueryQueryInfoType
+            onError?: (error: Error) => void
+        } = {},
+    ) {
+        const tabs = await this.options.browserAPIs.tabs.query(query)
+        await mapChunks(tabs, chunkSize, mapFn, onError)
+    }
 
-        await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
+    async trackExistingTabs() {
+        this.mapTabChunks(async (tab) => {
             if (this.tabManager.isTracked(tab.id)) {
                 return
             }
