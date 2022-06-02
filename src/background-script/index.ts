@@ -276,30 +276,38 @@ class BackgroundScript {
     private setupExtUpdateHandling() {
         const { runtimeAPI, bgModules } = this.deps
         runtimeAPI.onUpdateAvailable.addListener(async () => {
-            await bgModules.tabManagement.mapTabChunks(
-                async ({ url, id }) => {
-                    if (
-                        !url ||
-                        isExtensionTab({ url }) ||
-                        isBrowserPageTab({ url })
-                    ) {
-                        return
-                    }
+            try {
+                await bgModules.tabManagement.mapTabChunks(
+                    async ({ url, id }) => {
+                        if (
+                            !url ||
+                            isExtensionTab({ url }) ||
+                            isBrowserPageTab({ url })
+                        ) {
+                            return
+                        }
 
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        id,
-                    ).teardownContentScripts()
-                },
-                {
-                    onError: (err) => {
-                        console.error(
-                            'Error attempting to teardown content scripts:',
-                            err.message,
-                        )
-                        captureException(err)
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            id,
+                        ).teardownContentScripts()
                     },
-                },
-            )
+                    {
+                        onError: (err, tab) => {
+                            console.error(
+                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                                err.message,
+                            )
+                            captureException(err)
+                        },
+                    },
+                )
+            } catch (err) {
+                console.error(
+                    'Error encountered attempting to teardown content scripts for extension update:',
+                    err.message,
+                )
+                captureException(err)
+            }
 
             // This call prompts the extension to reload, updating the scripts to the newest versions
             runtimeAPI.reload()

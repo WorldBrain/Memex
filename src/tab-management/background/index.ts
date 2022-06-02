@@ -131,7 +131,7 @@ export default class TabManagementBackground {
         }: {
             chunkSize?: number
             query?: Tabs.QueryQueryInfoType
-            onError?: (error: Error) => void
+            onError?: (error: Error, tab: Tabs.Tab) => void
         } = {},
     ) {
         const tabs = await this.options.browserAPIs.tabs.query(query)
