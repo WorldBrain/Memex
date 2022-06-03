@@ -7,20 +7,17 @@ export interface Props {
     onCancelClick: (shouldSave: boolean) => void
     onConfirmClick: (value: string) => void
     changeListName?: (value: string) => void
-    onRenameStart?: React.MouseEventHandler<Element>
     onNameChange: (value: string) => void
+    onRenameStart?: React.MouseEventHandler<Element>
 }
 
 export default class EditableMenuItem extends React.PureComponent<Props> {
-    // state: State = { value: this.props.initValue }
     constructor(props: Props) {
         super(props)
         this.props.onRenameStart?.(null)
     }
 
-    private handleChange: React.MouseEventHandler<HTMLInputElement> = (
-        event,
-    ) => {
+    private handleChange: React.KeyboardEventHandler = (event) => {
         const value = (event.target as HTMLInputElement).value
         this.props.onNameChange(value)
         this.props.changeListName?.(value)
@@ -50,8 +47,17 @@ export default class EditableMenuItem extends React.PureComponent<Props> {
     render() {
         return (
             <>
-                <Container onClick={(e) => e.stopPropagation()}>
+                <Container
+                    onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
+                >
                     <EditableListTitle
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
                         onChange={this.handleChange}
                         value={this.props.nameValue}
                         onKeyDown={this.handleInputKeyDown}

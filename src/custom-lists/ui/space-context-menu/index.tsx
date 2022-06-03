@@ -27,6 +27,17 @@ export interface Props extends Dependencies {
     onClose: (saveChanges?: boolean) => void
 }
 
+// NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
+//  from opening when you use the context menu in the dashboard.
+//  __If you add new click handlers to this component, ensure you wrap them with this!__
+const wrapClick = (
+    handler: React.MouseEventHandler,
+): React.MouseEventHandler => (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    return handler(e)
+}
+
 export default class SpaceContextMenuContainer extends StatefulUIElement<
     Props,
     State,
@@ -47,22 +58,16 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
-        e.stopPropagation()
         const { remoteListId } = this.props
         if (remoteListId != null) {
             window.open(getListShareUrl({ remoteListId }))
         }
     }
 
-    private handleMenuClose: React.MouseEventHandler = (e) => {
-        e.stopPropagation()
-        this.props.onClose(true)
-    }
-
     private renderShareLinks() {
         if (!this.state.inviteLinks.length) {
             return (
-                <ShareSectionContainer onClick={(e) => e.stopPropagation()}>
+                <ShareSectionContainer onClick={wrapClick}>
                     <PrimaryAction
                         label={
                             <ButtonLabel>
@@ -76,21 +81,16 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 Share this Space
                             </ButtonLabel>
                         }
-                        onClick={async (e) => {
-                            e.stopPropagation()
-                            await this.processEvent('addLinks', null)
-                        }}
+                        onClick={wrapClick((e) =>
+                            this.processEvent('addLinks', null),
+                        )}
                     />
                 </ShareSectionContainer>
             )
         }
 
         return (
-            <ShareSectionContainer
-                onClick={(e) => {
-                    e.stopPropagation()
-                }}
-            >
+            <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
                         <Margin bottom="3px" key={link}>
@@ -98,12 +98,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 <CopyLinkBox>
                                     <LinkBox
                                         left="small"
-                                        onClick={() =>
+                                        onClick={wrapClick((e) =>
                                             this.processEvent(
                                                 'copyInviteLink',
                                                 { linkIndex },
-                                            )
-                                        }
+                                            ),
+                                        )}
                                     >
                                         <Link>
                                             {showCopyMsg
@@ -114,20 +114,19 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                             <Icon
                                                 heightAndWidth="14px"
                                                 path={icons.copy}
-                                                onClick={() =>
+                                                onClick={wrapClick(() =>
                                                     this.processEvent(
                                                         'copyInviteLink',
                                                         { linkIndex },
-                                                    )
-                                                }
+                                                    ),
+                                                )}
                                             />
                                             <Icon
                                                 heightAndWidth="14px"
                                                 path={icons.goTo}
-                                                onClick={
-                                                    () => window.open(link)
-                                                    // this.processEvent('copyLink', { linkIndex })
-                                                }
+                                                onClick={wrapClick(() =>
+                                                    window.open(link),
+                                                )}
                                             />
                                         </IconContainer>
                                     </LinkBox>
@@ -172,7 +171,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             return (
                 <>
                     <PrimaryAction
-                        onClick={this.handleWebViewOpen}
+                        onClick={wrapClick(this.handleWebViewOpen)}
                         label="Open Web View"
                     />
                 </>
@@ -190,13 +189,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         This does not delete the pages in it
                     </DetailsText>
                     <PrimaryAction
-                        onClick={this.props.onDeleteSpaceConfirm}
+                        onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
                         label={<ButtonLabel>Delete</ButtonLabel>}
                     />
                     <SecondaryAction
-                        onClick={() =>
-                            this.processEvent('cancelDeleteSpace', null)
-                        }
+                        onClick={wrapClick(() =>
+                            this.processEvent('cancelDeleteSpace', null),
+                        )}
                         label={<ButtonLabel>Cancel</ButtonLabel>}
                     />
                 </DeleteBox>
@@ -218,7 +217,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <>
                 {this.renderShareLinks()}
                 <MenuButton
-                    onClick={() => this.processEvent('deleteSpace', null)}
+                    onClick={wrapClick(() =>
+                        this.processEvent('deleteSpace', null),
+                    )}
                 >
                     <Margin horizontal="10px">
                         <Icon heightAndWidth="14px" path={icons.trash} />
@@ -245,7 +246,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 fixedPosition={this.props.fixedPositioning}
             >
                 {!this.props.fixedPositioning && (
-                    <Overlay onClick={this.handleMenuClose} />
+                    <Overlay
+                        onClick={wrapClick((e) => this.props.onClose(true))}
+                    />
                 )}
                 <ModalContent
                     // onMouseLeave={closeModal}
