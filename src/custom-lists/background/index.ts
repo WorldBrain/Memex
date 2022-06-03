@@ -520,9 +520,15 @@ export default class CustomListBackground {
             )
         }
 
+        const pageUrl = normalizeUrl(url)
+        const existing = await this.storage.fetchListEntry(id, pageUrl)
+        if (existing != null) {
+            return { object: existing }
+        }
+
         const retVal = await this.storage.insertPageToList({
+            pageUrl,
             listId: id,
-            pageUrl: normalizeUrl(url),
             fullUrl: url,
         })
 
@@ -630,14 +636,28 @@ export default class CustomListBackground {
             time: args.time ?? '$now',
         })
 
+        const existingListEntries = await this.storage.fetchListPageEntriesByUrls(
+            {
+                listId: args.listId,
+                normalizedPageUrls: indexed.map(({ fullUrl }) =>
+                    normalizeUrl(fullUrl),
+                ),
+            },
+        )
+        const existingEntryUrls = new Set(
+            existingListEntries.map((entry) => entry.fullUrl),
+        )
+
         await Promise.all(
-            indexed.map(({ fullUrl }) => {
-                this.storage.insertPageToList({
-                    listId: args.listId,
-                    fullUrl,
-                    pageUrl: normalizeUrl(fullUrl),
-                })
-            }),
+            indexed
+                .filter(({ fullUrl }) => !existingEntryUrls.has(fullUrl))
+                .map(({ fullUrl }) => {
+                    this.storage.insertPageToList({
+                        listId: args.listId,
+                        fullUrl,
+                        pageUrl: normalizeUrl(fullUrl),
+                    })
+                }),
         )
 
         await this.updateListSuggestionsCache({ added: args.listId })
