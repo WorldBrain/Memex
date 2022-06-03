@@ -294,6 +294,7 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <SpaceContextMenu
+                loadOwnershipData
                 spaceName={list.name}
                 ref={this.contextMenuRef}
                 localListId={this.state.contextMenuListId}

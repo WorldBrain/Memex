@@ -1,12 +1,10 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-
 import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
@@ -14,11 +12,11 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { ButtonTooltip } from 'src/common-ui/components'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-
 import { StatefulUIElement } from 'src/util/ui-logic'
 import EditableMenuItem, {
     Props as EditableMenuItemProps,
 } from 'src/dashboard-refactor/lists-sidebar/components/editable-menu-item'
+import { getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends Dependencies {
     xPosition?: number
@@ -48,7 +46,15 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         return this.containerElRef?.current?.getBoundingClientRect() ?? null
     }
 
-    private closeModal: React.MouseEventHandler = (e) => {
+    private handleWebViewOpen: React.MouseEventHandler = (e) => {
+        e.stopPropagation()
+        const { remoteListId } = this.props
+        if (remoteListId != null) {
+            window.open(getListShareUrl({ remoteListId }))
+        }
+    }
+
+    private handleMenuClose: React.MouseEventHandler = (e) => {
         e.stopPropagation()
         this.props.onClose(true)
     }
@@ -162,6 +168,17 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderMainContent() {
+        if (this.state.mode === 'followed-space') {
+            return (
+                <>
+                    <PrimaryAction
+                        onClick={this.handleWebViewOpen}
+                        label="Open Web View"
+                    />
+                </>
+            )
+        }
+
         if (
             this.state.mode === 'confirm-space-delete' &&
             this.props.onDeleteSpaceConfirm != null
@@ -228,7 +245,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 fixedPosition={this.props.fixedPositioning}
             >
                 {!this.props.fixedPositioning && (
-                    <Overlay onClick={this.closeModal} />
+                    <Overlay onClick={this.handleMenuClose} />
                 )}
                 <ModalContent
                     // onMouseLeave={closeModal}
