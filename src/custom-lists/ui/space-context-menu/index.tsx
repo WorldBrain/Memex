@@ -169,12 +169,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     private renderMainContent() {
         if (this.state.mode === 'followed-space') {
             return (
-                <>
+                <DeleteBox>
                     <PrimaryAction
                         onClick={wrapClick(this.handleWebViewOpen)}
-                        label="Open Web View"
+                        label="Go to Space"
+                        fontSize={'14px'}
                     />
-                </>
+                </DeleteBox>
             )
         }
 
