@@ -246,7 +246,11 @@ export class DashboardContainer extends StatefulUIElement<
                 e.stopPropagation()
                 this.processEvent('setDeletingListId', { listId })
             },
-            onShareClick: () => this.processEvent('setShareListId', { listId }),
+            onSpaceShare: (remoteListId) =>
+                this.processEvent('setListRemoteId', {
+                    localListId: listId,
+                    remoteListId,
+                }),
             services: {
                 ...this.props.services,
                 contentSharing: this.props.contentShareBG,

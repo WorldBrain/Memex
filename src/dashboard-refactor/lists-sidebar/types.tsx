@@ -82,6 +82,7 @@ export type Events = UIEvent<{
     setShowMoreMenuListId: { listId: number }
     dropPageOnListItem: { listId: number; dataTransfer: DataTransfer }
     shareList: { listId: number }
+    setListRemoteId: { localListId: number; remoteListId: string }
 
     confirmListDelete: null
     cancelListDelete: null

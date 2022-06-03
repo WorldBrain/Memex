@@ -322,8 +322,11 @@ class SpacePicker extends StatefulUIElement<
                     ),
                     errorMessage: this.state.renameListErrorMessage,
                 }}
-                shareSpace={() =>
-                    this.processEvent('shareList', { listId: list.localId })
+                onSpaceShare={(remoteListId) =>
+                    this.processEvent('setListRemoteId', {
+                        localListId: list.localId,
+                        remoteListId,
+                    })
                 }
                 onClose={this.handleSpaceContextMenuClose(list.localId)}
                 remoteListId={list.remoteId}

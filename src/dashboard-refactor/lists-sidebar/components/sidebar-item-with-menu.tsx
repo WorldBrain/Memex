@@ -29,7 +29,7 @@ export interface Props {
     onRenameClick?: React.MouseEventHandler
     onDeleteClick?: React.MouseEventHandler
     onDeleteConfirm?: React.MouseEventHandler
-    onShareClick?: () => Promise<void>
+    onSpaceShare?: (remoteListId: string) => Promise<void>
     dropReceivingState?: DropReceivingState
     editableProps?: EditableItemProps
     selectedState: SelectedState
@@ -63,7 +63,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             dropReceivingState,
             onMoreActionClick,
             newItemsCount,
-            onShareClick,
+            onSpaceShare,
             listData,
         } = this.props
 
@@ -100,7 +100,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     toggleMenu={this.props.onMoreActionClick}
                     editableProps={this.props.editableProps!}
                     isMenuDisplayed={this.props.isMenuDisplayed}
-                    shareSpace={onShareClick}
+                    onSpaceShare={onSpaceShare}
                 />
             )
         }

@@ -82,7 +82,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             </ButtonLabel>
                         }
                         onClick={wrapClick((e) =>
-                            this.processEvent('addLinks', null),
+                            this.processEvent('shareSpace', null),
                         )}
                     />
                 </ShareSectionContainer>

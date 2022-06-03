@@ -2662,6 +2662,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                listData: {
+                    [event.localListId]: {
+                        remoteId: { $set: event.remoteListId },
+                    },
+                },
+            },
+        })
+    }
+
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
         const { remoteListId } = await this.options.contentShareBG.shareList({
             listId: event.listId,

@@ -13,12 +13,12 @@ export interface Dependencies {
     remoteListId: string | null
     spaceName: string
     loadOwnershipData?: boolean
-    shareSpace?: () => Promise<void>
+    onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
 }
 
 export type Event = UIEvent<{
-    addLinks: null
+    shareSpace: null
     deleteSpace: null
     cancelDeleteSpace: null
     updateSpaceName: { name: string }
@@ -118,35 +118,37 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
-    addLinks: EventHandler<'addLinks'> = async ({}) => {
+    shareSpace: EventHandler<'shareSpace'> = async ({}) => {
         const {
-            remoteListId,
-            contentSharingBG,
-            shareSpace: shareList,
+            localListId,
+            onSpaceShare,
             copyToClipboard,
+            contentSharingBG,
         } = this.dependencies
 
+        let remoteListId = this.dependencies.remoteListId
+
         await executeUITask(this, 'inviteLinksLoadState', async () => {
-            if (remoteListId == null && shareList != null) {
-                await shareList()
+            if (remoteListId == null) {
+                const shareResult = await contentSharingBG.shareList({
+                    listId: localListId,
+                })
+                remoteListId = shareResult.remoteListId
+                onSpaceShare?.(remoteListId)
             }
 
-            const [commenterLink, contributorLink] = await Promise.all([
-                contentSharingBG.generateKeyLink({
-                    key: { roleID: SharedListRoleID.Commenter },
-                    listReference: {
-                        id: remoteListId,
-                        type: 'shared-list-reference',
-                    },
-                }),
-                contentSharingBG.generateKeyLink({
-                    key: { roleID: SharedListRoleID.ReadWrite },
-                    listReference: {
-                        id: remoteListId,
-                        type: 'shared-list-reference',
-                    },
-                }),
-            ])
+            const [commenterLink, contributorLink] = await Promise.all(
+                [SharedListRoleID.Commenter, SharedListRoleID.ReadWrite].map(
+                    (roleID) =>
+                        contentSharingBG.generateKeyLink({
+                            key: { roleID },
+                            listReference: {
+                                id: remoteListId,
+                                type: 'shared-list-reference',
+                            },
+                        }),
+                ),
+            )
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },

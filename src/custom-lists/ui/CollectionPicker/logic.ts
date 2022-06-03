@@ -48,12 +48,12 @@ export type SpacePickerEvent = UIEvent<{
     newEntryAllPress: { entry: string }
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
+    setListRemoteId: { localListId: number; remoteListId: string }
     toggleEntryContextMenu: { listId: number }
     updateContextMenuPosition: { x?: number; y?: number }
     validateListName: { listId: number; name: string }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    shareList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
     focusInput: {}
@@ -269,43 +269,30 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
+        event,
+        previousState,
+    }) => {
         const stateEntryIndex = previousState.displayEntries.findIndex(
-            (entry) => entry.localId === event.listId,
+            (entry) => entry.localId === event.localListId,
         )
         const defaultEntryIndex = this.defaultEntries.findIndex(
-            (entry) => entry.localId === event.listId,
+            (entry) => entry.localId === event.localListId,
         )
 
-        // Already shared. Exit early
-        if (previousState.displayEntries[stateEntryIndex]?.remoteId != null) {
-            return
+        if (stateEntryIndex === -1 || defaultEntryIndex === -1) {
+            throw new Error('Canot set remote id for list that is not tracked')
         }
 
-        const {
-            remoteListId,
-        } = await this.dependencies.contentSharingBG.shareList({
-            listId: event.listId,
+        this.defaultEntries[defaultEntryIndex].remoteId = event.remoteListId
+
+        this.emitMutation({
+            displayEntries: {
+                [stateEntryIndex]: {
+                    remoteId: { $set: event.remoteListId },
+                },
+            },
         })
-
-        if (stateEntryIndex !== -1 && remoteListId != null) {
-            this.emitMutation({
-                displayEntries: {
-                    [stateEntryIndex]: { remoteId: { $set: remoteListId } },
-                },
-            })
-        }
-
-        if (defaultEntryIndex !== -1) {
-            this.defaultEntries = [
-                ...this.defaultEntries.slice(0, defaultEntryIndex),
-                {
-                    ...this.defaultEntries[defaultEntryIndex],
-                    remoteId: remoteListId,
-                },
-                ...this.defaultEntries.slice(defaultEntryIndex + 1),
-            ]
-        }
     }
 
     private _validateListName(listId: number, name: string): boolean {
