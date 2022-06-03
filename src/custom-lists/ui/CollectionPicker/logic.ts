@@ -2,17 +2,20 @@ import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
+import type {
+    RemoteCollectionsInterface,
+    PageList,
+} from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { validateListName } from '../utils'
 
 export interface SpaceDisplayEntry {
     localId: number
-    remoteId: string | number | null
+    remoteId: string | null
     name: string
-    focused: boolean
     createdAt: number
+    focused: boolean
 }
 
 export interface SpacePickerDependencies {
@@ -36,6 +39,7 @@ export interface SpacePickerDependencies {
     contentSharingBG: ContentSharingInterface
 }
 
+// TODO: This needs cleanup - so inconsistent
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string }
@@ -44,6 +48,12 @@ export type SpacePickerEvent = UIEvent<{
     newEntryAllPress: { entry: string }
     resultEntryPress: { entry: SpaceDisplayEntry }
     resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
+    setListRemoteId: { localListId: number; remoteListId: string }
+    toggleEntryContextMenu: { listId: number }
+    updateContextMenuPosition: { x?: number; y?: number }
+    validateListName: { listId: number; name: string }
+    renameList: { listId: number; name: string }
+    deleteList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
     focusInput: {}
@@ -60,10 +70,14 @@ export interface SpacePickerState {
     newEntryName: string
     displayEntries: SpaceDisplayEntry[]
     selectedEntries: number[]
+    contextMenuPositionX: number
+    contextMenuPositionY: number
+    contextMenuListId: number | null
     loadState: TaskState
     loadingSuggestions: TaskState
     loadingShareStates: TaskState
     loadingQueryResults: TaskState
+    renameListErrorMessage: string | null
 }
 
 const sortDisplayEntries = (selectedEntries: number[]) => (
@@ -106,6 +120,10 @@ export default class SpacePickerLogic extends UILogic<
         loadingSuggestions: 'pristine',
         loadingShareStates: 'pristine',
         loadingQueryResults: 'pristine',
+        renameListErrorMessage: null,
+        contextMenuListId: null,
+        contextMenuPositionX: 0,
+        contextMenuPositionY: 0,
     })
 
     init: EventHandler<'init'> = async () => {
@@ -133,14 +151,16 @@ export default class SpacePickerLogic extends UILogic<
             })
 
             await executeUITask(this, 'loadingShareStates', async () => {
-                const remoteListIds = await contentSharingBG.getRemoteListIds({
-                    localListIds: this.defaultEntries.map(
-                        (s) => s.localId as number,
-                    ),
-                })
+                const localToRemoteIdDict = await contentSharingBG.getRemoteListIds(
+                    {
+                        localListIds: this.defaultEntries.map(
+                            (s) => s.localId as number,
+                        ),
+                    },
+                )
                 this.defaultEntries = this.defaultEntries.map((s) => ({
                     ...s,
-                    remoteId: remoteListIds[s.localId] ?? null,
+                    remoteId: localToRemoteIdDict[s.localId] ?? null,
                 }))
                 this.emitMutation({
                     displayEntries: { $set: this.defaultEntries },
@@ -219,6 +239,181 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
+    toggleEntryContextMenu: EventHandler<'toggleEntryContextMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        const nextListId =
+            previousState.contextMenuListId === event.listId
+                ? null
+                : event.listId
+        this.emitMutation({ contextMenuListId: { $set: nextListId } })
+    }
+
+    updateContextMenuPosition: EventHandler<
+        'updateContextMenuPosition'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            contextMenuPositionX: {
+                $set:
+                    event.x != null
+                        ? event.x
+                        : previousState.contextMenuPositionX,
+            },
+            contextMenuPositionY: {
+                $set:
+                    event.y != null
+                        ? event.y
+                        : previousState.contextMenuPositionY,
+            },
+        })
+    }
+
+    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
+        event,
+        previousState,
+    }) => {
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.localListId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.localListId,
+        )
+
+        if (stateEntryIndex === -1 || defaultEntryIndex === -1) {
+            throw new Error('Canot set remote id for list that is not tracked')
+        }
+
+        this.defaultEntries[defaultEntryIndex].remoteId = event.remoteListId
+
+        this.emitMutation({
+            displayEntries: {
+                [stateEntryIndex]: {
+                    remoteId: { $set: event.remoteListId },
+                },
+            },
+        })
+    }
+
+    private _validateListName(listId: number, name: string): boolean {
+        const validationResult = validateListName(
+            name,
+            this.defaultEntries.map((entry) => ({
+                id: entry.localId,
+                name: entry.name,
+            })),
+            { listIdToSkip: listId },
+        )
+
+        this.emitMutation({
+            renameListErrorMessage: {
+                $set:
+                    validationResult.valid === false
+                        ? validationResult.reason
+                        : null,
+            },
+        })
+
+        return validationResult.valid
+    }
+
+    validateListName: EventHandler<'validateListName'> = async ({ event }) => {
+        this._validateListName(event.listId, event.name)
+    }
+
+    renameList: EventHandler<'renameList'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (!this._validateListName(event.listId, event.name)) {
+            return
+        }
+
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        if (previousState.displayEntries[stateEntryIndex].name === event.name) {
+            return
+        }
+
+        const validationResult = validateListName(
+            event.name,
+            this.defaultEntries.map((entry) => ({
+                id: entry.localId,
+                name: entry.name,
+            })),
+            { listIdToSkip: event.listId },
+        )
+
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                renameListErrorMessage: {
+                    $set: validationResult.reason,
+                },
+            })
+            return
+        }
+
+        if (stateEntryIndex !== -1) {
+            this.emitMutation({
+                displayEntries: {
+                    [stateEntryIndex]: { name: { $set: event.name } },
+                },
+                renameListErrorMessage: { $set: null },
+            })
+        }
+
+        if (defaultEntryIndex !== -1) {
+            this.defaultEntries = [
+                ...this.defaultEntries.slice(0, defaultEntryIndex),
+                {
+                    ...this.defaultEntries[defaultEntryIndex],
+                    name: event.name,
+                },
+                ...this.defaultEntries.slice(defaultEntryIndex + 1),
+            ]
+        }
+
+        await this.dependencies.spacesBG.updateListName({
+            id: event.listId,
+            newName: event.name,
+            oldName: previousState.displayEntries[stateEntryIndex].name,
+        })
+    }
+
+    deleteList: EventHandler<'deleteList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const stateEntryIndex = previousState.displayEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+        const defaultEntryIndex = this.defaultEntries.findIndex(
+            (entry) => entry.localId === event.listId,
+        )
+
+        if (stateEntryIndex !== -1) {
+            this.emitMutation({
+                displayEntries: {
+                    $apply: (entries) =>
+                        entries.filter((e) => e.localId !== event.listId),
+                },
+            })
+        }
+
+        if (defaultEntryIndex !== -1) {
+            this.defaultEntries = [
+                ...this.defaultEntries.slice(0, defaultEntryIndex),
+                ...this.defaultEntries.slice(defaultEntryIndex + 1),
+            ]
+        }
+        await this.dependencies.spacesBG.removeList({ id: event.listId })
+    }
+
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
         event: { query },
         previousState,
@@ -251,14 +446,17 @@ export default class SpacePickerLogic extends UILogic<
             const remoteListIds = await contentSharingBG.getRemoteListIds({
                 localListIds: suggestions.map((s) => s.id),
             })
-            const displayEntries = suggestions
-                .map((s) => ({
-                    localId: s.id,
-                    name: s.name,
-                    createdAt: s.createdAt,
-                    focused: false,
-                    remoteId: remoteListIds[s.id] ?? null,
-                }))
+            const displayEntries: SpaceDisplayEntry[] = suggestions
+                .map((s) => {
+                    const remoteId = remoteListIds[s.id] ?? null
+                    return {
+                        remoteId,
+                        name: s.name,
+                        localId: s.id,
+                        focused: false,
+                        createdAt: s.createdAt,
+                    }
+                })
                 .sort(sortDisplayEntries(selectedEntries))
 
             this.emitMutation({ displayEntries: { $set: displayEntries } })

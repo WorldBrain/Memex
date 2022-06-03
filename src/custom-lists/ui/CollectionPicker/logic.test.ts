@@ -12,6 +12,7 @@ import {
     BAD_CHAR_LIST_NAME_ERR_MSG,
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from '../constants'
+import { PageList } from 'src/custom-lists/background/types'
 
 async function insertTestData({
     storageManager,
@@ -369,6 +370,220 @@ describe('SpacePickerLogic', () => {
         expectDefaultState()
     })
 
+    it('should be able to toggle context menu for given entry', async ({
+        device,
+    }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state.contextMenuListId).toEqual(null)
+        await testLogic.processEvent('toggleEntryContextMenu', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        })
+
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        )
+
+        await testLogic.processEvent('toggleEntryContextMenu', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        })
+
+        expect(testLogic.state.contextMenuListId).toEqual(null)
+
+        await testLogic.processEvent('toggleEntryContextMenu', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        })
+
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        )
+
+        await testLogic.processEvent('toggleEntryContextMenu', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[0].localId,
+        })
+
+        expect(testLogic.state.contextMenuListId).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+        )
+    })
+
+    it('should be able to rename list for given entry, and validate new names', async ({
+        device,
+    }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+        const newNameA = 'new list name'
+        const newNameB = 'another new list name'
+
+        await testLogic.init()
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+
+        // Attempt to re-use another list name - should set error
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_LIST_SUGGESTIONS[0].name,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+
+        // Attempt to use a list name with invalid characters - also should set error
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_LIST_SUGGESTIONS[1].name + '[ ( {',
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            name: newNameA,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+
+        await testLogic.processEvent('renameList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            name: newNameB,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.renameListErrorMessage).toEqual(null)
+    })
+
+    it('should be delete list for given entry', async ({ device }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+
+        await testLogic.processEvent('deleteList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+
+        await testLogic.processEvent('deleteList', {
+            listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+    })
+
     it('should correctly select existing entry for all tabs', async ({
         device,
     }) => {
@@ -388,6 +603,137 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state.selectedEntries).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0].localId,
         ])
+    })
+
+    it('should correctly select/unselect existing entry', async ({
+        device,
+    }) => {
+        let selectedEntryId: string | number = null
+        let unselectedEntryId: string | number = null
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+            unselectEntry: async (entryId) => {
+                unselectedEntryId = entryId
+            },
+            selectEntry: async (entryId) => {
+                selectedEntryId = entryId
+            },
+        })
+
+        await testLogic.init()
+
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(selectedEntryId).toBe(null)
+        expect(unselectedEntryId).toBe(null)
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.selectedEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+        ])
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(unselectedEntryId).toBe(null)
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.selectedEntries).toEqual([])
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.selectedEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+        ])
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+
+        await testLogic.processEvent('resultEntryPress', {
+            entry: DATA.TEST_LIST_SUGGESTIONS[3],
+        })
+
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(entryPickerLogic.defaultEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[3],
+            DATA.TEST_LIST_SUGGESTIONS[0],
+            DATA.TEST_LIST_SUGGESTIONS[1],
+            DATA.TEST_LIST_SUGGESTIONS[2],
+            DATA.TEST_LIST_SUGGESTIONS[4],
+        ])
+        expect(testLogic.state.selectedEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_LIST_SUGGESTIONS[3].localId,
+        ])
+        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[3].localId)
+        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
     })
 
     it('should correctly select/unselect existing entry', async ({

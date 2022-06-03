@@ -3532,6 +3532,9 @@ describe('Dashboard search results logic', () => {
             it('should be able to add a private annotation to a private list, then share that list, making the annotations selectively shared and add the parent page to the list', async ({
                 device,
             }) => {
+                const testRemoteListId = 'remote-list-0'
+                device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
+                    ({ remoteListId: testRemoteListId } as any)
                 const { searchResults } = await setupTest(device, {
                     seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
                 })
@@ -3628,7 +3631,6 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('shareList', {
                     listId: listIdA,
-                    remoteId: 'test-list-0',
                 })
 
                 expect(
@@ -3636,7 +3638,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(
                     expect.objectContaining({
                         id: listIdA,
-                        remoteId: 'test-list-0',
+                        remoteId: testRemoteListId,
                     }),
                 )
                 expect(

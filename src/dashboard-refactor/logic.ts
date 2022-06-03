@@ -2662,7 +2662,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                listData: {
+                    [event.localListId]: {
+                        remoteId: { $set: event.remoteListId },
+                    },
+                },
+            },
+        })
+    }
+
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const { remoteListId } = await this.options.contentShareBG.shareList({
+            listId: event.listId,
+        })
+
         const memberAnnotParentPageIds = new Set<string>()
         const memberPrivateAnnotIds = new Set<string>()
         for (const noteData of Object.values(
@@ -2707,7 +2726,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 listData: {
                     [event.listId]: {
-                        remoteId: { $set: event.remoteId },
+                        remoteId: { $set: remoteListId },
                     },
                 },
             },
@@ -2894,7 +2913,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : event.listId
 
         this.emitMutation({
-            listsSidebar: { showMoreMenuListId: { $set: listIdToSet } },
+            listsSidebar: {
+                showMoreMenuListId: { $set: listIdToSet },
+                editingListId: { $set: listIdToSet },
+            },
         })
     }
 

@@ -82,6 +82,8 @@ export default class CustomListBackground {
             fetchListByName: this.fetchListByName,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
+            fetchSharedListDataWithOwnership: this
+                .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
             fetchInitialListSuggestions: this.fetchInitialListSuggestions,
@@ -259,7 +261,7 @@ export default class CustomListBackground {
     }
 
     private fetchListsFromReferences = async (
-        references,
+        references: SharedListReference[],
     ): Promise<PageList[]> => {
         const { auth } = this.options.services
         const { contentSharing } = await this.options.getServerStorage()
@@ -288,6 +290,33 @@ export default class CustomListBackground {
                 createdAt: new Date(sharedList.createdWhen),
             }))
     }
+
+    fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({
+        remoteListId,
+    }) => {
+        const currentUser = await this.options.services.auth.getCurrentUser()
+        if (!currentUser) {
+            return null
+        }
+
+        const { contentSharing } = await this.options.getServerStorage()
+        const sharedList = await contentSharing.getListByReference({
+            id: remoteListId,
+            type: 'shared-list-reference',
+        })
+        if (sharedList == null) {
+            return null
+        }
+
+        return {
+            name: sharedList.title,
+            id: sharedList.createdWhen,
+            remoteId: sharedList.reference.id as string,
+            createdAt: new Date(sharedList.createdWhen),
+            isOwned: sharedList.creator.id === currentUser.id,
+        }
+    }
+
     fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
         skip = 0,
         limit = 20,
@@ -491,9 +520,15 @@ export default class CustomListBackground {
             )
         }
 
+        const pageUrl = normalizeUrl(url)
+        const existing = await this.storage.fetchListEntry(id, pageUrl)
+        if (existing != null) {
+            return { object: existing }
+        }
+
         const retVal = await this.storage.insertPageToList({
+            pageUrl,
             listId: id,
-            pageUrl: normalizeUrl(url),
             fullUrl: url,
         })
 
@@ -601,14 +636,28 @@ export default class CustomListBackground {
             time: args.time ?? '$now',
         })
 
+        const existingListEntries = await this.storage.fetchListPageEntriesByUrls(
+            {
+                listId: args.listId,
+                normalizedPageUrls: indexed.map(({ fullUrl }) =>
+                    normalizeUrl(fullUrl),
+                ),
+            },
+        )
+        const existingEntryUrls = new Set(
+            existingListEntries.map((entry) => entry.fullUrl),
+        )
+
         await Promise.all(
-            indexed.map(({ fullUrl }) => {
-                this.storage.insertPageToList({
-                    listId: args.listId,
-                    fullUrl,
-                    pageUrl: normalizeUrl(fullUrl),
-                })
-            }),
+            indexed
+                .filter(({ fullUrl }) => !existingEntryUrls.has(fullUrl))
+                .map(({ fullUrl }) => {
+                    this.storage.insertPageToList({
+                        listId: args.listId,
+                        fullUrl,
+                        pageUrl: normalizeUrl(fullUrl),
+                    })
+                }),
         )
 
         await this.updateListSuggestionsCache({ added: args.listId })
