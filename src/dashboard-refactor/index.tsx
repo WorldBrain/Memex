@@ -246,20 +246,19 @@ export class DashboardContainer extends StatefulUIElement<
                 e.stopPropagation()
                 this.processEvent('setDeletingListId', { listId })
             },
-            onShareClick: () => this.processEvent('setShareListId', { listId }),
+            onSpaceShare: (remoteListId) =>
+                this.processEvent('setListRemoteId', {
+                    localListId: listId,
+                    remoteListId,
+                }),
             services: {
                 ...this.props.services,
                 contentSharing: this.props.contentShareBG,
             },
             shareList: async () => {
-                const {
-                    remoteListId,
-                } = await this.props.contentShareBG.shareList({ listId })
                 await this.processEvent('shareList', {
                     listId,
-                    remoteId: remoteListId,
                 })
-                return { listId: remoteListId }
             },
         }))
     }
@@ -519,7 +518,7 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
-                        cancelAddNewList: () =>
+                        cancelAddNewList: (shouldSave) =>
                             this.processEvent('cancelListCreate', null),
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {

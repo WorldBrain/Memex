@@ -5,10 +5,10 @@ import { delayed, getPositionState } from '../utils'
 import { createAndCopyDirectLink } from '../../../annotations/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction } from '../../../util/webextensionRPC'
-import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
-import { TooltipPosition } from '../types'
-import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
+import type { TooltipPosition } from '../types'
+import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
+import type { InPageUIRootMount } from 'src/in-page-ui/types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -46,11 +46,15 @@ async function _getCloseMessageShown() {
 }
 
 // Target container for the Tooltip.
-let target = null
+let target: HTMLElement = null
 let showTooltip = null
 
 /* Denotes whether the user inserted/removed tooltip themselves. */
 let manualOverride = false
+
+interface TooltipInsertDependencies extends TooltipDependencies {
+    mount: InPageUIRootMount
+}
 
 /**
  * Creates target container for Tooltip.
@@ -58,20 +62,14 @@ let manualOverride = false
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-export const insertTooltip = async (params: TooltipDependencies) => {
+export const insertTooltip = async (params: TooltipInsertDependencies) => {
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
     }
 
-    target = document.createElement('div')
-    target.setAttribute('id', 'memex-direct-linking-tooltip')
-    document.body.appendChild(target)
-
-    const cssFile = browser.runtime.getURL('/content_script.css')
-    injectCSS(cssFile)
-
-    showTooltip = await setupUIContainer(target, {
+    target = params.mount.rootElement
+    showTooltip = await setupUIContainer(params.mount, {
         inPageUI: params.inPageUI,
         createAndCopyDirectLink,
         createAnnotation: params.createAnnotation,
@@ -168,7 +166,7 @@ export const removeTooltip = (options?: { override?: boolean }) => {
 // })
 // }
 
-export const showContentTooltip = async (params: TooltipDependencies) => {
+export const showContentTooltip = async (params: TooltipInsertDependencies) => {
     if (!showTooltip) {
         await insertTooltip(params)
     }
@@ -272,9 +270,7 @@ export function userSelectedText() {
 }
 
 function isTargetInsideTooltip(event) {
-    const $tooltipContainer = document.querySelector(
-        '#memex-direct-linking-tooltip',
-    )
+    const $tooltipContainer = document.querySelector('#memex-tooltip-container')
     if (!$tooltipContainer) {
         // edge case, where the destroy() is called
         return true

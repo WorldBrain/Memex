@@ -3,7 +3,7 @@ import { createInPageUIRoot, destroyRootElement } from './dom'
 
 export function createInPageUI(
     name: string,
-    cssFile: string,
+    cssFile?: string,
     containerClassNames?: string[],
 ) {
     const mount = createInPageUIRoot({

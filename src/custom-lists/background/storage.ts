@@ -87,6 +87,14 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObjects',
                     args: { pageUrl: '$url:string' },
                 },
+                findListEntriesByUrls: {
+                    collection: CustomListStorage.LIST_ENTRIES_COLL,
+                    operation: 'findObjects',
+                    args: {
+                        listId: '$listId:number',
+                        pageUrl: { $in: '$urls:string' },
+                    },
+                },
                 findListEntriesByLists: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'findObjects',
@@ -303,6 +311,20 @@ export default class CustomListStorage extends StorageModule {
             const entries = entriesByListId.get(list.id)
             return this.prepareList(list, entries, entries != null)
         })
+    }
+
+    async fetchListPageEntriesByUrls({
+        listId,
+        normalizedPageUrls,
+    }: {
+        listId: number
+        normalizedPageUrls: string[]
+    }) {
+        const pageListEntries: PageListEntry[] = await this.operation(
+            'findListEntriesByUrls',
+            { urls: normalizedPageUrls, listId },
+        )
+        return pageListEntries
     }
 
     async insertCustomList({

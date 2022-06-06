@@ -9,7 +9,7 @@ import type {
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import { makeRemotelyCallable } from '../util/webextensionRPC'
+import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import type { AlarmsConfig } from './alarms'
@@ -41,6 +41,9 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
+import { captureException } from 'src/util/raven'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -122,6 +125,12 @@ class BackgroundScript {
             false,
         )
 
+        // Disable tags
+        await this.deps.syncSettingsStore.extension.set(
+            'areTagsMigratedToSpaces',
+            true,
+        )
+
         // TODO: Set up pioneer subscription banner to show up in 2 weeks
         // const fortnightFromNow = now + 1000 * 60 * 60 * 24 * 7 * 2
         // await this.deps.syncSettings.dashboard.set(
@@ -145,7 +154,17 @@ class BackgroundScript {
     private async handleUnifiedLogic() {
         await this.deps.bgModules.customLists.createInboxListIfAbsent()
         // await this.deps.bgModules.notifications.deliverStaticNotifications()
-        await this.deps.bgModules.tabManagement.trackExistingTabs()
+        // await this.deps.bgModules.tabManagement.trackExistingTabs()
+    }
+
+    private setupOnDemandContentScriptInjection() {
+        // NOTE: this code lacks automated test coverage.
+        // ---Ensure you test manually upon change, as the content script injection won't work on ext install/update without it---
+        this.deps.tabsAPI.onActivated.addListener(async ({ tabId }) => {
+            await this.deps.bgModules.tabManagement.injectContentScriptsIfNeeded(
+                tabId,
+            )
+        })
     }
 
     /**
@@ -177,7 +196,7 @@ class BackgroundScript {
     }
 
     private async ___runTagsMigration() {
-        await migrations['migrate-tags-to-spaces']({
+        await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
             bgModules: this.deps.bgModules,
             storex: this.deps.storageManager,
             db: this.deps.storageManager.backend['dexieInstance'],
@@ -186,6 +205,12 @@ class BackgroundScript {
             syncSettingsStore: this.deps.syncSettingsStore,
             localExtSettingStore: this.deps.localExtSettingStore,
         })
+    }
+
+    private async ___testContentScriptsTeardown(tabId: number) {
+        await runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).teardownContentScripts()
     }
 
     /**
@@ -248,11 +273,54 @@ class BackgroundScript {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
+    private setupExtUpdateHandling() {
+        const { runtimeAPI, bgModules } = this.deps
+        runtimeAPI.onUpdateAvailable.addListener(async () => {
+            try {
+                await bgModules.tabManagement.mapTabChunks(
+                    async ({ url, id }) => {
+                        if (
+                            !url ||
+                            isExtensionTab({ url }) ||
+                            isBrowserPageTab({ url })
+                        ) {
+                            return
+                        }
+
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            id,
+                        ).teardownContentScripts()
+                    },
+                    {
+                        onError: (err, tab) => {
+                            console.error(
+                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                                err.message,
+                            )
+                            captureException(err)
+                        },
+                    },
+                )
+            } catch (err) {
+                console.error(
+                    'Error encountered attempting to teardown content scripts for extension update:',
+                    err.message,
+                )
+                captureException(err)
+            }
+
+            // This call prompts the extension to reload, updating the scripts to the newest versions
+            runtimeAPI.reload()
+        })
+    }
+
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupStartupHooks()
+        this.setupOnDemandContentScriptInjection()
         this.setupCommands()
         this.setupUninstallURL()
+        this.setupExtUpdateHandling()
     }
 
     setupAlarms(alarms: AlarmsConfig) {

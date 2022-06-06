@@ -835,7 +835,7 @@ export class AnnotationsSidebarContainer<
                                     this.processEvent('paginateSearch', null)
                                 }
                                 isSearchLoading={
-                                    this.state.primarySearchState ===
+                                    this.state.annotationsLoadState ===
                                         'running' ||
                                     this.state.loadState === 'running'
                                 }

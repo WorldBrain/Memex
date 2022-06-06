@@ -69,6 +69,9 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
+    fetchSharedListDataWithOwnership(args: {
+        remoteListId: string
+    }): Promise<PageList | null>
     fetchCollaborativeLists(args: {
         skip?: number
         limit?: number

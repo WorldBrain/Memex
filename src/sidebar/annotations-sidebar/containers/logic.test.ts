@@ -471,15 +471,11 @@ describe('SidebarContainerLogic', () => {
                 comment: DATA.COMMENT_1,
             })
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-            expect(sidebar.state.noteCreateState).toEqual('pristine')
 
-            const p = sidebar.processEvent('saveNewPageComment', {
+            await sidebar.processEvent('saveNewPageComment', {
                 shouldShare: false,
             })
-            expect(sidebar.state.noteCreateState).toEqual('running')
 
-            await p
-            expect(sidebar.state.noteCreateState).toEqual('success')
             expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({

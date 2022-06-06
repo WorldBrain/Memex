@@ -232,7 +232,7 @@ describe('Content template doc generation', () => {
                 PageTags: joinTags(DATA.testPageCTags),
                 PageTagList: DATA.testPageCTags,
                 PageSpaces: joinSpaces(DATA.testPageCSpaces),
-                PageSpaceList: DATA.testPageCSpaces,
+                PageSpacesList: DATA.testPageCSpaces,
                 title: DATA.testPageC.fullTitle,
                 url: DATA.testLocatorC.originalLocation,
                 tags: DATA.testPageCTags,
@@ -261,7 +261,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationDTags),
                         NoteTagList: DATA.testAnnotationDTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationDSpaces),
-                        NoteSpaceList: DATA.testAnnotationDSpaces,
+                        NoteSpacesList: DATA.testAnnotationDSpaces,
                     },
                 ],
             },
@@ -306,7 +306,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -440,14 +440,14 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpaceList: DATA.testAnnotationBSpaces,
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
                     },
                 ],
             },
@@ -514,7 +514,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -639,7 +639,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -650,7 +650,7 @@ describe('Content template doc generation', () => {
                     {
                         PageTitle: DATA.testPageB.fullTitle,
                         PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpaceList: DATA.testPageBSpaces,
+                        PageSpacesList: DATA.testPageBSpaces,
                         PageUrl: DATA.testPageBUrl,
                         title: DATA.testPageB.fullTitle,
                         url: DATA.testPageBUrl,
@@ -705,7 +705,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -717,7 +717,7 @@ describe('Content template doc generation', () => {
                     {
                         PageTitle: DATA.testPageB.fullTitle,
                         PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpaceList: DATA.testPageBSpaces,
+                        PageSpacesList: DATA.testPageBSpaces,
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageB.fullTitle,
@@ -782,7 +782,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -793,7 +793,7 @@ describe('Content template doc generation', () => {
             {
                 PageTitle: DATA.testPageB.fullTitle,
                 PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                PageSpaceList: DATA.testPageBSpaces,
+                PageSpacesList: DATA.testPageBSpaces,
                 PageUrl: DATA.testPageBUrl,
                 title: DATA.testPageB.fullTitle,
                 url: DATA.testPageBUrl,
@@ -877,7 +877,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -895,7 +895,7 @@ describe('Content template doc generation', () => {
                                 NoteSpaces: joinSpaces(
                                     DATA.testAnnotationASpaces,
                                 ),
-                                NoteSpaceList: DATA.testAnnotationASpaces,
+                                NoteSpacesList: DATA.testAnnotationASpaces,
                                 NoteLink: expect.any(String),
                                 NoteCreatedAt: serializeDate(
                                     DATA.testAnnotationACreatedAt,
@@ -907,7 +907,7 @@ describe('Content template doc generation', () => {
                                     ...DATA.testPageASpaces,
                                     ...DATA.testPageAPrivateSpaces,
                                 ]),
-                                PageSpaceList: [
+                                PageSpacesList: [
                                     ...DATA.testPageASpaces,
                                     ...DATA.testPageAPrivateSpaces,
                                 ],
@@ -927,7 +927,7 @@ describe('Content template doc generation', () => {
                                 NoteSpaces: joinSpaces(
                                     DATA.testAnnotationBSpaces,
                                 ),
-                                NoteSpaceList: DATA.testAnnotationBSpaces,
+                                NoteSpacesList: DATA.testAnnotationBSpaces,
                                 NoteCreatedAt: serializeDate(
                                     DATA.testAnnotationBCreatedAt,
                                 ),
@@ -938,7 +938,7 @@ describe('Content template doc generation', () => {
                                     ...DATA.testPageASpaces,
                                     ...DATA.testPageAPrivateSpaces,
                                 ]),
-                                PageSpaceList: [
+                                PageSpacesList: [
                                     ...DATA.testPageASpaces,
                                     ...DATA.testPageAPrivateSpaces,
                                 ],
@@ -958,7 +958,7 @@ describe('Content template doc generation', () => {
                         PageTags: joinTags(DATA.testPageBTags),
                         PageTagList: DATA.testPageBTags,
                         PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpaceList: DATA.testPageBSpaces,
+                        PageSpacesList: DATA.testPageBSpaces,
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
                         PageCreatedAt: serializeDate(DATA.testPageBCreatedAt),
@@ -974,7 +974,7 @@ describe('Content template doc generation', () => {
                                 // NoteSpaces: joinSpaces(
                                 //     DATA.testAnnotationCSpaces,
                                 // ),
-                                // NoteSpaceList: DATA.testAnnotationCSpaces,
+                                // NoteSpacesList: DATA.testAnnotationCSpaces,
                                 NoteCreatedAt: serializeDate(
                                     DATA.testAnnotationCCreatedAt,
                                 ),
@@ -982,7 +982,7 @@ describe('Content template doc generation', () => {
                                 PageTags: joinTags(DATA.testPageBTags),
                                 PageTagList: DATA.testPageBTags,
                                 PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                                PageSpaceList: DATA.testPageBSpaces,
+                                PageSpacesList: DATA.testPageBSpaces,
                                 PageUrl: DATA.testPageBUrl,
                                 PageLink: expect.any(String),
                                 PageCreatedAt: serializeDate(
@@ -1501,7 +1501,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -1519,7 +1519,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -1532,7 +1532,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                         NoteLink: expect.any(String),
                     },
                     {
@@ -1543,7 +1543,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -1556,7 +1556,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpaceList: DATA.testAnnotationBSpaces,
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
                     },
                 ],
             },
@@ -1565,7 +1565,7 @@ describe('Content template doc generation', () => {
                 PageTags: joinTags(DATA.testPageBTags),
                 PageTagList: DATA.testPageBTags,
                 PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                PageSpaceList: DATA.testPageBSpaces,
+                PageSpacesList: DATA.testPageBSpaces,
                 PageUrl: DATA.testPageBUrl,
                 PageLink: expect.any(String),
                 title: DATA.testPageB.fullTitle,
@@ -1577,7 +1577,7 @@ describe('Content template doc generation', () => {
                         PageTags: joinTags(DATA.testPageBTags),
                         PageTagList: DATA.testPageBTags,
                         PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpaceList: DATA.testPageBSpaces,
+                        PageSpacesList: DATA.testPageBSpaces,
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageB.fullTitle,
@@ -1587,7 +1587,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationCTags),
                         NoteTagList: DATA.testAnnotationCTags,
                         // NoteSpaces: joinSpaces(DATA.testAnnotationCSpaces),
-                        // NoteSpaceList: DATA.testAnnotationCSpaces,
+                        // NoteSpacesList: DATA.testAnnotationCSpaces,
                     },
                 ],
             },
@@ -1679,7 +1679,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -1706,7 +1706,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -1781,7 +1781,7 @@ describe('Content template doc generation', () => {
                 NoteTags: joinTags(DATA.testAnnotationATags),
                 NoteTagList: DATA.testAnnotationATags,
                 NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                NoteSpaceList: DATA.testAnnotationASpaces,
+                NoteSpacesList: DATA.testAnnotationASpaces,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
             },
@@ -1835,7 +1835,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -1844,7 +1844,7 @@ describe('Content template doc generation', () => {
                 NoteTags: joinTags(DATA.testAnnotationATags),
                 NoteTagList: DATA.testAnnotationATags,
                 NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                NoteSpaceList: DATA.testAnnotationASpaces,
+                NoteSpacesList: DATA.testAnnotationASpaces,
                 NoteCreatedAt: serializeDate(DATA.testAnnotationACreatedAt),
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
@@ -1933,7 +1933,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationACreatedAt,
                         ),
@@ -2010,7 +2010,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -2081,12 +2081,12 @@ describe('Content template doc generation', () => {
             {
                 NoteText: DATA.testAnnotationAText,
                 NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                NoteSpaceList: DATA.testAnnotationASpaces,
+                NoteSpacesList: DATA.testAnnotationASpaces,
             },
             {
                 NoteHighlight: DATA.testAnnotationBHighlight,
                 NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                NoteSpaceList: DATA.testAnnotationBSpaces,
+                NoteSpacesList: DATA.testAnnotationBSpaces,
             },
         ])
 
@@ -2132,7 +2132,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -2153,7 +2153,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -2224,12 +2224,12 @@ describe('Content template doc generation', () => {
                     {
                         NoteText: DATA.testAnnotationAText,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                     },
                     {
                         NoteHighlight: DATA.testAnnotationBHighlight,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpaceList: DATA.testAnnotationBSpaces,
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
                     },
                 ],
             },
@@ -2282,7 +2282,7 @@ describe('Content template doc generation', () => {
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ]),
-                PageSpaceList: [
+                PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
                 ],
@@ -2296,7 +2296,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationACreatedAt,
                         ),
@@ -2309,7 +2309,7 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -2322,7 +2322,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpaceList: DATA.testAnnotationBSpaces,
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationBCreatedAt,
                         ),
@@ -2335,7 +2335,86 @@ describe('Content template doc generation', () => {
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ]),
-                        PageSpaceList: [
+                        PageSpacesList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
+                        url: DATA.testPageAUrl,
+                        tags: DATA.testPageATags,
+                        title: DATA.testPageA.fullTitle,
+                    },
+                ],
+            },
+        ])
+
+        expect(
+            await generate(
+                '{{#Notes}}{{{NoteText}}} {{{NoteTags}}} {{{NoteCreatedAt}}} {{#NoteSpacesList}} {{{.}}} {{/NoteSpacesList}}{{/Notes}} {{{PageCreatedAt}}} {{{PageTitle}}} {{{PageTags}}} {{#PageSpacesList}} {{{.}}} {{/PageSpacesList}}',
+            ),
+        ).toEqual([
+            {
+                PageUrl: DATA.testPageAUrl,
+                PageTitle: DATA.testPageA.fullTitle,
+                PageTags: joinTags(DATA.testPageATags),
+                PageTagList: DATA.testPageATags,
+                PageSpaces: joinSpaces([
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ]),
+                PageSpacesList: [
+                    ...DATA.testPageASpaces,
+                    ...DATA.testPageAPrivateSpaces,
+                ],
+                PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
+                url: DATA.testPageAUrl,
+                tags: DATA.testPageATags,
+                title: DATA.testPageA.fullTitle,
+                Notes: [
+                    {
+                        NoteText: DATA.testAnnotationAText,
+                        NoteTags: joinTags(DATA.testAnnotationATags),
+                        NoteTagList: DATA.testAnnotationATags,
+                        NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
+                        NoteSpacesList: DATA.testAnnotationASpaces,
+                        NoteCreatedAt: serializeDate(
+                            DATA.testAnnotationACreatedAt,
+                        ),
+                        PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
+                        PageUrl: DATA.testPageAUrl,
+                        PageTitle: DATA.testPageA.fullTitle,
+                        PageTags: joinTags(DATA.testPageATags),
+                        PageTagList: DATA.testPageATags,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpacesList: [
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ],
+                        url: DATA.testPageAUrl,
+                        tags: DATA.testPageATags,
+                        title: DATA.testPageA.fullTitle,
+                    },
+                    {
+                        NoteHighlight: DATA.testAnnotationBHighlight,
+                        NoteTags: joinTags(DATA.testAnnotationBTags),
+                        NoteTagList: DATA.testAnnotationBTags,
+                        NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
+                        NoteCreatedAt: serializeDate(
+                            DATA.testAnnotationBCreatedAt,
+                        ),
+                        PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
+                        PageUrl: DATA.testPageAUrl,
+                        PageTitle: DATA.testPageA.fullTitle,
+                        PageTags: joinTags(DATA.testPageATags),
+                        PageTagList: DATA.testPageATags,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageASpaces,
+                            ...DATA.testPageAPrivateSpaces,
+                        ]),
+                        PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
                         ],
@@ -2440,7 +2519,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpaceList: DATA.testAnnotationASpaces,
+                        NoteSpacesList: DATA.testAnnotationASpaces,
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationACreatedAt,
                         ),
@@ -2456,7 +2535,7 @@ describe('Content template doc generation', () => {
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
                         NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpaceList: DATA.testAnnotationBSpaces,
+                        NoteSpacesList: DATA.testAnnotationBSpaces,
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationBCreatedAt,
                         ),

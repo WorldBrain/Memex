@@ -84,7 +84,7 @@ export interface ListsSidebarGroupProps {
     isAddInputShown?: boolean
     loadingState: TaskState
     confirmAddNewList?: (name: string) => void
-    cancelAddNewList?: (name: string) => void
+    cancelAddNewList?: (shouldSave: boolean) => void
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick?: React.MouseEventHandler
     listsArray?: ListsSidebarItemProps[]

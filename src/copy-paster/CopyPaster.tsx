@@ -153,7 +153,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 }}
                 onClickHowto={() => {
                     window.open(
-                        'https://worldbrain.io/tutorials/copy-templates',
+                        'https://links.memex.garden/tutorials/text-exporter',
                     )
                 }}
                 onTitleChange={(title) => {

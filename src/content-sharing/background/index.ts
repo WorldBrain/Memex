@@ -923,7 +923,7 @@ export default class ContentSharingBackground {
     getAnnotationSharingStates: ContentSharingInterface['getAnnotationSharingStates'] = async (
         params,
     ) => {
-        const { annotations: annotationsBG, customListsBG } = this.options
+        const { annotations: annotationsBG } = this.options
 
         // TODO: Optimize, this should only take 3 queries, not 3 * annotationCount
         const states: AnnotationSharingStates = {}

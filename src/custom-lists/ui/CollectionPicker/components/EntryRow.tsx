@@ -1,28 +1,23 @@
 import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
-import { Layers, X as XIcon } from '@styled-icons/feather'
-import { StyledIconBase } from '@styled-icons/styled-icon'
+import { Layers } from '@styled-icons/feather'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { opacify } from 'polished'
 import type { SpaceDisplayEntry } from '../logic'
 
-export interface Props {
+export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
     onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
     onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
+    onContextMenuBtnPress: (entry: SpaceDisplayEntry, index?: number) => void
     index: number
     id?: string
-    name: string
-    localId: number
-    createdAt: number
     removeTooltipText?: string
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
+    contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
-    focused?: boolean
-    remoteId: string | number | null
 }
 
 class EntryRow extends React.Component<Props> {
@@ -35,14 +30,21 @@ class EntryRow extends React.Component<Props> {
             remoteId,
             createdAt,
         } = this.props
-        return { name, selected, focused, localId, remoteId, createdAt }
+        return {
+            name,
+            selected,
+            focused,
+            localId,
+            remoteId,
+            createdAt,
+        }
     }
 
-    handleEntryPress = () => {
+    private handleEntryPress = () => {
         this.props.onPress && this.props.onPress(this._getEntry())
     }
 
-    handleActOnAllPress = (e: SyntheticEvent) => {
+    private handleActOnAllPress: React.MouseEventHandler = (e) => {
         this.props.onPressActOnAll &&
             this.props.onPressActOnAll(this._getEntry())
         e.preventDefault()
@@ -50,23 +52,32 @@ class EntryRow extends React.Component<Props> {
         return false
     }
 
-    handleMouseOver = () => {
+    private handleContextMenuBtnPress: React.MouseEventHandler = (e) => {
+        this.props.onContextMenuBtnPress &&
+            this.props.onContextMenuBtnPress(this._getEntry())
+        e.preventDefault()
+        e.stopPropagation()
+        return false
+    }
+
+    private handleMouseOver = () => {
         this.props.onFocus &&
             this.props.onFocus(this._getEntry(), this.props.index)
     }
 
-    handleMouseOut = () => {
+    private handleMouseOut = () => {
         this.props.onFocus && this.props.onFocus(this._getEntry(), null)
     }
 
     render() {
         const {
             id,
+            focused,
             remoteId,
             selected,
-            focused,
-            onPressActOnAll,
             resultItem,
+            onPressActOnAll,
+            contextMenuBtnRef,
         } = this.props
 
         return (
@@ -95,6 +106,15 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
+                    {focused && (
+                        <ButtonContainer ref={contextMenuBtnRef}>
+                            <Icon
+                                filePath={icons.dots}
+                                heightAndWidth="14px"
+                                onClick={this.handleContextMenuBtnPress}
+                            />
+                        </ButtonContainer>
+                    )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
                             <ButtonTooltip
@@ -167,7 +187,7 @@ const Row = styled.div`
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    margin: 0px 10px;
+    width: 100%;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;
