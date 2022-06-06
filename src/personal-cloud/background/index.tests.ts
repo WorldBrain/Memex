@@ -27,6 +27,9 @@ import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middlewar
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
+import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -298,21 +301,31 @@ export async function setupSyncBackgroundTest(
         process.env.TRANSLATION_LAYER_TEST_BACKEND
     if (translationLayerTestBackend) {
         if (translationLayerTestBackend === 'sqlite') {
-            const getSqlServerStorage = createLazyServerStorage(
-                async () => {
-                    const sqlite = SQLite3(':memory:')
-                    const backend = createSQLiteStorageBackend(sqlite)
-                    const storageManager = new StorageManager({ backend })
-                    setupServerStorageManagerMiddleware(storageManager)
-                    return storageManager
-                },
-                {
-                    autoPkType: 'number',
-                    skipApplicationLayer: true,
-                },
-            )
+            let sqlStorageManager: StorageManager
             getSqlStorageMananager = async () => {
-                return (await getSqlServerStorage()).storageManager
+                if (sqlStorageManager) {
+                    return sqlStorageManager
+                }
+                const sqlite = SQLite3(':memory:')
+                const backend = createSQLiteStorageBackend(sqlite)
+                sqlStorageManager = new StorageManager({ backend })
+                const userManagement = new UserStorage({
+                    storageManager: sqlStorageManager,
+                })
+                const personalCloudStorage = new PersonalCloudStorage({
+                    storageManager: sqlStorageManager,
+                    autoPkType: 'number',
+                })
+                sqlStorageManager.registry.registerCollection(
+                    'user',
+                    userManagement.collections.user,
+                )
+                registerModuleCollections(
+                    sqlStorageManager.registry,
+                    personalCloudStorage,
+                )
+                await sqlStorageManager.finishInitialization()
+                return sqlStorageManager
             }
         } else {
             throw new Error(
