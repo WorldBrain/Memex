@@ -128,7 +128,7 @@ export interface SidebarContainerState
         AnnotationConversationsState {
     loadState: TaskState
     noteCreateState: TaskState
-    primarySearchState: TaskState
+    annotationsLoadState: TaskState
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'

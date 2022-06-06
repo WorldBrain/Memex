@@ -20,7 +20,7 @@ export interface TemplateDocPage {
     PageTags?: string
     PageTagList?: string[]
     PageSpaces?: string
-    PageSpaceList?: string[]
+    PageSpacesList?: string[]
     PageCreatedAt?: string
     PageLink?: string
     Notes?: TemplateDocNote[]
@@ -37,7 +37,7 @@ export interface TemplateDocNote {
     NoteTags?: string
     NoteTagList?: string[]
     NoteSpaces?: string
-    NoteSpaceList?: string[]
+    NoteSpacesList?: string[]
     NoteCreatedAt?: string
     NoteLink?: string
 }

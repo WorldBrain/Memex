@@ -13,7 +13,7 @@ interface State {
 export interface Props {
     initValue?: string
     errorMessage: string | null
-    onCancelClick: (value: string) => void
+    onCancelClick: (shouldSave: boolean) => void
     onConfirmClick: (value: string) => void
 }
 
@@ -33,7 +33,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
             if (this.state.value.length) {
                 e.stopPropagation()
             }
-            this.props.onCancelClick(this.state.value)
+            this.props.onCancelClick(false)
             return
         }
 
@@ -50,7 +50,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 
     private handleCancel: React.MouseEventHandler = () =>
-        this.props.onCancelClick(this.state.value)
+        this.props.onCancelClick(false)
 
     render() {
         return (

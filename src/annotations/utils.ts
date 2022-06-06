@@ -6,7 +6,10 @@ import type { AnnotationShareOpts } from './annotation-save-logic'
 export const __OLD_LAST_SHARED_ANNOTS =
     '@ContentSharing-last-shared-annotation-timestamp'
 
-export const generateUrl = (params: { pageUrl: string; now: () => number }) => {
+export const generateAnnotationUrl = (params: {
+    pageUrl: string
+    now: () => number
+}) => {
     const { pageUrl, now } = params
     return `${normalizeUrl(pageUrl)}/#${now()}`
 }

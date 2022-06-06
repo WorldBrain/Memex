@@ -3,12 +3,13 @@ import styled from 'styled-components'
 
 export interface Props {
     when?: string
+    zIndex?: number
 }
 
 export default class DayResultGroup extends PureComponent<Props> {
     render() {
         return (
-            <DayContainer>
+            <DayContainer zIndex={this.props.zIndex}>
                 {this.props.when && (
                     <DayWhenText>{this.props.when}</DayWhenText>
                 )}
@@ -18,10 +19,11 @@ export default class DayResultGroup extends PureComponent<Props> {
     }
 }
 
-const DayContainer = styled.div`
+const DayContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
     width: fill-available;
+    z-index: ${(props) => props.zIndex};
 `
 
 const DayWhenText = styled.h1`

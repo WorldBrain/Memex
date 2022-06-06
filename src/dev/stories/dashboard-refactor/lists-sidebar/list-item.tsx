@@ -152,7 +152,7 @@ export const listsSidebarItemWithMenuProps: Props = {
     ...listsSidebarItemProps.hoveredAndSelected,
     onDeleteClick: () => {},
     onRenameClick: () => {},
-    onShareClick: () => {},
+    // onShareClick: () => {},
 }
 
 export const listsSidebarItemWithShortMenuProps: Props = {

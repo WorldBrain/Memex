@@ -36,6 +36,13 @@ export const TEST_LISTS = [
         isDeletable: true,
         createdAt: new Date('2021-01-15'),
     },
+    {
+        id: 6,
+        name: 'List 6 - not in suggestions',
+        isNestable: true,
+        isDeletable: true,
+        createdAt: new Date('2022-05-27'),
+    },
 ]
 
 export const TEST_LIST_METADATA = [
@@ -53,7 +60,7 @@ export const TEST_LIST_METADATA = [
     },
 ]
 
-export const TEST_LIST_SUGGESTIONS = TEST_LISTS.map((list) => ({
+export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 5).map((list) => ({
     createdAt: list.createdAt.getTime(),
     focused: false,
     localId: list.id,

@@ -41,6 +41,7 @@ export interface NoteProps extends AnnotationProps {
 }
 
 export interface AnnotationProps {
+    zIndex?: number
     tags: string[]
     lists: number[]
     createdWhen: Date | number
@@ -505,7 +506,11 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <AnnotationBox top="5px" bottom="2px">
+                <AnnotationBox
+                    zIndex={this.props.zIndex}
+                    top="5px"
+                    bottom="2px"
+                >
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -663,9 +668,10 @@ const EditNoteIconBox = styled.div`
     }
 `
 
-const AnnotationBox = styled(Margin)`
+const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 99%;
     align-self: center;
+    z-index: ${(props) => props.zIndex};
 `
 
 const EditNoteIcon = styled.div`

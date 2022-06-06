@@ -168,12 +168,10 @@ describe('Dashboard lists sidebar logic', () => {
         })
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
 
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(
-            undefined,
-        )
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
-        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
         expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+        // await searchResults.processEvent('setEditingListId', { listId: 123 })
+        // expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        // expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
 
         await searchResults.processEvent('cancelListEdit', null)
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
@@ -848,6 +846,9 @@ describe('Dashboard lists sidebar logic', () => {
     it('should be able to share a list, setting its remoteId state', async ({
         device,
     }) => {
+        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
+            ({ remoteListId: DATA.LISTS_1[1].remoteId } as any)
+
         for (const listData of DATA.LISTS_1) {
             await device.storageManager.collection('customLists').createObject({
                 id: listData.id,
@@ -867,7 +868,6 @@ describe('Dashboard lists sidebar logic', () => {
 
         await searchResults.processEvent('shareList', {
             listId,
-            remoteId: DATA.LISTS_1[1].remoteId,
         })
 
         expect(searchResults.state.listsSidebar.listData[listId].remoteId).toBe(
