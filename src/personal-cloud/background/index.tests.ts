@@ -23,13 +23,17 @@ import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
-import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
+import {
+    ChangeWatchMiddlewareSettings,
+    ChangeWatchMiddleware,
+} from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
 import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
@@ -301,32 +305,42 @@ export async function setupSyncBackgroundTest(
         process.env.TRANSLATION_LAYER_TEST_BACKEND
     if (translationLayerTestBackend) {
         if (translationLayerTestBackend === 'sqlite') {
-            let sqlStorageManager: StorageManager
-            getSqlStorageMananager = async () => {
-                if (sqlStorageManager) {
-                    return sqlStorageManager
-                }
-                const sqlite = SQLite3(':memory:')
-                const backend = createSQLiteStorageBackend(sqlite)
-                sqlStorageManager = new StorageManager({ backend })
-                const userManagement = new UserStorage({
-                    storageManager: sqlStorageManager,
-                })
-                const personalCloudStorage = new PersonalCloudStorage({
-                    storageManager: sqlStorageManager,
-                    autoPkType: 'number',
-                })
-                sqlStorageManager.registry.registerCollection(
-                    'user',
-                    userManagement.collections.user,
+            const sqlite = SQLite3(':memory:', {
+                // verbose: (...args) => console.log(...args)
+            })
+            const backend = createSQLiteStorageBackend(sqlite, {
+                // debug: true,
+            })
+            const sqlStorageManager = new StorageManager({ backend })
+            const userManagement = new UserStorage({
+                storageManager: sqlStorageManager,
+            })
+            const personalCloudStorage = new PersonalCloudStorage({
+                storageManager: sqlStorageManager,
+                autoPkType: 'number',
+            })
+            sqlStorageManager.registry.registerCollection(
+                'user',
+                userManagement.collections.user,
+            )
+            serverStorage.storageModules.personalCloud = personalCloudStorage
+            registerModuleCollections(
+                sqlStorageManager.registry,
+                personalCloudStorage,
+            )
+            await sqlStorageManager.finishInitialization()
+
+            const middleware: StorageMiddleware[] = []
+            if (options.serverChangeWatchSettings) {
+                middleware.push(
+                    new ChangeWatchMiddleware({
+                        ...options.serverChangeWatchSettings,
+                        storageManager: sqlStorageManager,
+                    }),
                 )
-                registerModuleCollections(
-                    sqlStorageManager.registry,
-                    personalCloudStorage,
-                )
-                await sqlStorageManager.finishInitialization()
-                return sqlStorageManager
             }
+            sqlStorageManager.setMiddleware(middleware)
+            getSqlStorageMananager = async () => sqlStorageManager
         } else {
             throw new Error(
                 `Unknown TRANSLATION_LAYER_TEST_BACKEND: ${translationLayerTestBackend}`,
@@ -393,7 +407,14 @@ export async function setupSyncBackgroundTest(
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync, serverStorage, getNow }
+    return {
+        userId,
+        setups,
+        sync,
+        serverStorage,
+        getNow,
+        getSqlStorageMananager,
+    }
 }
 
 const getReadablePattern = (pattern: number[]) =>
