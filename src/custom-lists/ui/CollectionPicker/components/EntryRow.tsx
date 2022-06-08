@@ -53,8 +53,7 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleContextMenuBtnPress: React.MouseEventHandler = (e) => {
-        this.props.onContextMenuBtnPress &&
-            this.props.onContextMenuBtnPress(this._getEntry())
+        this.props.onContextMenuBtnPress(this._getEntry())
         e.preventDefault()
         e.stopPropagation()
         return false

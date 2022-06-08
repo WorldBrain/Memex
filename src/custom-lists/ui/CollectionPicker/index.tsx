@@ -285,7 +285,7 @@ class SpacePicker extends StatefulUIElement<
             return
         }
 
-        const list = (this.logic as ListPickerLogic).defaultEntries.find(
+        const list = this.state.displayEntries.find(
             (l) => l.localId === this.state.contextMenuListId,
         )
         if (list == null) {
