@@ -12,7 +12,6 @@ import {
     BAD_CHAR_LIST_NAME_ERR_MSG,
     NON_UNIQ_LIST_NAME_ERR_MSG,
 } from '../constants'
-import { PageList } from 'src/custom-lists/background/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 async function insertTestData({
@@ -263,6 +262,43 @@ describe('SpacePickerLogic', () => {
                 displayEntries: DATA.TEST_LIST_SUGGESTIONS.slice(0, 1),
             }),
         )
+    })
+
+    it('should do an inclusive search ANDing all distinct terms given', async ({
+        device,
+    }) => {
+        const { testLogic } = await setupLogicHelper({
+            device,
+        })
+        await testLogic.init()
+        expect(testLogic.state.displayEntries).toEqual(
+            DATA.TEST_LIST_SUGGESTIONS,
+        )
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'list',
+            skipDebounce: true,
+        })
+        expect(testLogic.state.displayEntries).toEqual([
+            ...DATA.TEST_LIST_SUGGESTIONS,
+            DATA.testListToSuggestion(DATA.TEST_LISTS[5]),
+        ])
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'list test',
+            skipDebounce: true,
+        })
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.TEST_LIST_SUGGESTIONS[0],
+        ])
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'list not',
+            skipDebounce: true,
+        })
+        expect(testLogic.state.displayEntries).toEqual([
+            DATA.testListToSuggestion(DATA.TEST_LISTS[5]),
+        ])
     })
 
     it('should correctly navigate the search results by up and down arrows', async ({

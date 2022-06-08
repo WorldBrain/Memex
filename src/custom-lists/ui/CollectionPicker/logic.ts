@@ -43,7 +43,7 @@ export interface SpacePickerDependencies {
 // TODO: This needs cleanup - so inconsistent
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
-    searchInputChanged: { query: string }
+    searchInputChanged: { query: string; skipDebounce?: boolean }
     selectedEntryPress: { entry: number }
     resultEntryAllPress: { entry: SpaceDisplayEntry }
     newEntryAllPress: { entry: string }
@@ -422,7 +422,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
-        event: { query },
+        event: { query, skipDebounce },
         previousState,
     }) => {
         this.emitMutation({
@@ -433,6 +433,9 @@ export default class SpacePickerLogic extends UILogic<
         if (!query || query === '') {
             this.emitMutation({ displayEntries: { $set: this.defaultEntries } })
         } else {
+            if (skipDebounce) {
+                return this.querySpaces(query, previousState)
+            }
             return this.query(query, previousState)
         }
     }
@@ -440,15 +443,15 @@ export default class SpacePickerLogic extends UILogic<
     /**
      * Searches for the term via the `queryEntries` function provided to the component
      */
-    private queryRemote = async (
-        term: string,
+    private querySpaces = async (
+        query: string,
         { selectedListIds }: SpacePickerState,
     ) => {
         const { spacesBG, contentSharingBG } = this.dependencies
 
         await executeUITask(this, 'loadingQueryResults', async () => {
             const suggestions = await spacesBG.searchForListSuggestions({
-                query: term.toLocaleLowerCase(),
+                query: query.toLocaleLowerCase(),
             })
             const remoteListIds = await contentSharingBG.getRemoteListIds({
                 localListIds: suggestions.map((s) => s.id),
@@ -467,11 +470,11 @@ export default class SpacePickerLogic extends UILogic<
                 .sort(sortDisplayEntries(new Set(selectedListIds)))
 
             this.emitMutation({ displayEntries: { $set: displayEntries } })
-            this._setCreateEntryDisplay(displayEntries, term)
+            this._setCreateEntryDisplay(displayEntries, query)
         })
     }
 
-    private query = debounce(this.queryRemote, 150, { leading: true })
+    private query = debounce(this.querySpaces, 150, { leading: true })
 
     /**
      * If the term provided does not exist in the entry list, then set the new entry state to the term.

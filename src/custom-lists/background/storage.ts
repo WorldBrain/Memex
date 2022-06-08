@@ -423,7 +423,7 @@ export default class CustomListStorage extends StorageModule {
                 query: { nameTerms: query },
                 options: {
                     multiEntryAssocField: 'name',
-                    includePks: true,
+                    ignoreCase: ['nameTerms'],
                     limit,
                 },
             },
