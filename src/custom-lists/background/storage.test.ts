@@ -170,6 +170,28 @@ describe('Custom List Integrations', () => {
             ])
         })
 
+        test('should be able to index space name terms split by forward slash', async () => {
+            const { customLists, storageManager } = await setupTest({
+                skipTestData: true,
+            })
+
+            const listName = 'ok the/at/test list'
+
+            await customLists.createCustomList({ name: listName })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    name: listName,
+                    searchableName: listName,
+                    nameTerms: ['ok', 'the', 'at', 'test', 'list'],
+                }),
+            ])
+        })
+
         test('should not recreate inbox list if already exists', async () => {
             const { customLists } = await setupTest({ skipTestData: true })
 
