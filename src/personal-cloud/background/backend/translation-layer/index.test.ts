@@ -32,6 +32,10 @@ import {
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
+import {
+    initSqlUsage,
+    InitSqlUsageParams,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -153,12 +157,6 @@ async function getDatabaseContents(
     return contents
 }
 
-function getPersonalWhere(collection: string) {
-    if (collection.startsWith('personal')) {
-        return { user: TEST_USER.id }
-    }
-}
-
 type DataChange = [
     /* type: */ DataChangeType,
     /* collection: */ string,
@@ -168,6 +166,7 @@ type DataChange = [
 
 function dataChanges(
     remoteData: typeof REMOTE_TEST_DATA_V24,
+    userId: number | string,
     changes: DataChange[],
     options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
 ) {
@@ -193,7 +192,7 @@ function dataChanges(
                     ? expect.anything()
                     : now,
                 createdByDevice: remoteData.personalDeviceInfo.first.id,
-                user: TEST_USER.id,
+                user: userId,
                 type: change[0],
                 collection: change[1],
                 objectId: change[2],
@@ -203,74 +202,13 @@ function dataChanges(
     ]
 }
 
-function dataUsage(
-    remoteData: typeof REMOTE_TEST_DATA_V24,
-    changes: DataChange[],
-    options?: {
-        skipChanges?: number
-        skippedUpdates?: number
-        skipAssertTimestamp?: boolean
-    },
-) {
-    let now = 554
-    const advance = () => {
-        ++now
-    }
-    const skip = (options?.skipChanges ?? 0) - (options?.skippedUpdates ?? 0)
-    const usageEntries: any[] = []
-    for (let i = 0; i < skip; ++i) {
-        advance()
-        usageEntries.push(expect.anything())
-    }
-    for (let i = 0; i < options?.skippedUpdates ?? 0; ++i) {
-        advance()
-    }
-
-    for (const change of changes) {
-        advance()
-
-        if (change[0] === DataChangeType.Modify) {
-            continue
-        }
-
-        usageEntries.push({
-            id: expect.anything(),
-            createdWhen: options?.skipAssertTimestamp ? expect.anything() : now,
-            createdByDevice: remoteData.personalDeviceInfo.first.id,
-            user: TEST_USER.id,
-            action:
-                change[0] === DataChangeType.Create
-                    ? DataUsageAction.Create
-                    : DataUsageAction.Delete,
-            collection: change[1],
-            objectId: change[2],
-        })
-    }
-
-    return usageEntries
-}
-
-function dataChangesAndUsage(
-    remoteData: typeof REMOTE_TEST_DATA_V24,
-    changes: DataChange[],
-    options?: {
-        skipChanges?: number
-        skippedUpdates?: number
-        skipAssertTimestamp?: boolean
-    },
-) {
-    return {
-        // dataUsageEntry: dataUsage(remoteData, changes, options),
-        personalDataChange: dataChanges(remoteData, changes, options),
-    }
-}
-
-function blockStats(params: { usedBlocks: number }) {
+function blockStats(params: { userId: number | string; usedBlocks: number }) {
     return {
         id: expect.anything(),
+        createdWhen: expect.any(Number),
         usedBlocks: params.usedBlocks,
         lastChange: expect.any(Number),
-        user: TEST_USER.id,
+        user: params.userId,
     }
 }
 
@@ -292,6 +230,20 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 const idIndex = tagConnection.objectId - 1
                 const id = collectionIds[idIndex]
                 tagConnection.objectId = id
+            }
+
+            if (sqlUserId) {
+                for (const [collectionName, objects] of Object.entries(
+                    params.merged,
+                )) {
+                    for (const [objectName, object] of Object.entries(
+                        objects,
+                    )) {
+                        if ('user' in object) {
+                            object.user = sqlUserId
+                        }
+                    }
+                }
             }
         },
     })
@@ -318,12 +270,24 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
               },
     })
 
+    let sqlUserId: number | string | undefined
+    if (getSqlStorageMananager) {
+        const initDeps: InitSqlUsageParams = {
+            storageManager: serverStorage.storageManager,
+            getSqlStorageMananager,
+            userId: TEST_USER.id,
+        }
+        await initSqlUsage(initDeps)
+        sqlUserId = initDeps.userId
+    }
+
     const serverStorageManager =
         (await getSqlStorageMananager?.()) ?? serverStorage.storageManager
     serverIdCapturer.setup(serverStorageManager)
     storageHooksChangeWatcher.setUp({
         fetch: fakeFetch.fetch,
         serverStorageManager,
+        getSqlStorageMananager,
         getCurrentUserReference: async () => ({
             id: userId,
             type: 'user-reference',
@@ -333,10 +297,33 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         },
     })
 
+    const getPersonalWhere = (collection: string) => {
+        if (collection.startsWith('personal')) {
+            return { user: sqlUserId ?? TEST_USER.id }
+        }
+    }
     return {
         serverIdCapturer,
         setups,
         serverStorageManager,
+        getPersonalWhere,
+        personalDataChanges: (
+            remoteData: typeof REMOTE_TEST_DATA_V24,
+            changes: DataChange[],
+            options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+        ) => ({
+            personalDataChange: dataChanges(
+                remoteData,
+                sqlUserId ?? TEST_USER.id,
+                changes,
+                options,
+            ),
+        }),
+        personalBlockStats: (params: { usedBlocks: number }) =>
+            blockStats({
+                ...params,
+                userId: sqlUserId ?? TEST_USER.id,
+            }),
         testDownload: async (
             expected: PersonalCloudUpdateBatch,
             downloadOptions?: {
@@ -416,6 +403,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -435,13 +425,13 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                 ]),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
@@ -457,6 +447,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -482,10 +475,10 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [
                     {
                         ...testMetadata.first,
@@ -512,6 +505,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -534,13 +530,13 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 1 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 1 })],
                 personalContentMetadata: [testMetadata.second],
                 personalContentLocator: [testLocators.second],
             })
@@ -555,6 +551,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
 
@@ -591,7 +590,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
@@ -604,7 +603,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
                 ]),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
                 personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
             })
@@ -627,6 +626,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
 
@@ -662,7 +664,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
@@ -679,7 +681,7 @@ describe('Personal cloud translation layer', () => {
                     }],
 
                 ], { skipChanges: 0 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
@@ -698,6 +700,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -722,10 +727,10 @@ describe('Personal cloud translation layer', () => {
                     'personalBookmark',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: [testBookmarks.first]
@@ -741,6 +746,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -770,10 +778,10 @@ describe('Personal cloud translation layer', () => {
                     'personalBookmark',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: []
@@ -789,6 +797,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -813,11 +824,11 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -836,6 +847,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             const updatedDuration =
@@ -871,10 +885,10 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
-                ], { skipChanges: 6, skippedUpdates: 1 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                ], { skipChanges: 6 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -902,6 +916,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
 
@@ -934,7 +951,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Delete, 'personalContentRead', testReads.first.id, {
                         url: LOCAL_TEST_DATA_V24.visits.first.url,
@@ -945,8 +962,8 @@ describe('Personal cloud translation layer', () => {
                         url: LOCAL_TEST_DATA_V24.visits.second.url,
                         time: LOCAL_TEST_DATA_V24.visits.second.time,
                     }],
-                ], { skipChanges: 8, skippedUpdates: 2 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                ], { skipChanges: 8 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [],
@@ -980,6 +997,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1009,12 +1029,12 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1033,6 +1053,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1067,10 +1090,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
@@ -1098,6 +1121,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1131,12 +1157,12 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.first.id, { url: LOCAL_TEST_DATA_V24.annotations.first.url }],
                     [DataChangeType.Delete, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.second.id, { url: LOCAL_TEST_DATA_V24.annotations.second.url }],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [],
@@ -1155,6 +1181,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1206,13 +1235,13 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1244,6 +1273,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1294,12 +1326,12 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1327,6 +1359,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1391,11 +1426,11 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1425,6 +1460,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1472,10 +1510,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationPrivacyLevel'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id, changeInfo],
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1494,6 +1532,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1516,7 +1557,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                 ], { skipChanges: 0 }),
@@ -1536,6 +1577,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1567,7 +1611,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalList', testLists.first.id],
                 ], { skipChanges: 2 }),
                 personalBlockStats: [],
@@ -1595,6 +1639,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1622,7 +1669,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalList', testLists.first.id, { id: testLists.first.localId }],
                     [DataChangeType.Delete, 'personalList', testLists.second.id, { id: testLists.second.localId }],
                 ], { skipChanges: 2 }),
@@ -1642,6 +1689,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1672,11 +1722,11 @@ describe('Personal cloud translation layer', () => {
                     'personalListEntry'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListEntry', testListEntries.first.id],
                     [DataChangeType.Create, 'personalListEntry', testListEntries.second.id],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.first, testListEntries.second],
@@ -1694,6 +1744,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1732,10 +1785,10 @@ describe('Personal cloud translation layer', () => {
                     'personalListEntry'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListEntry', testListEntries.first.id, changeInfo],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.second],
@@ -1752,6 +1805,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1776,7 +1832,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListShare', testListShares.first.id],
                 ], { skipChanges: 1 }),
                 personalBlockStats: [],
@@ -1795,6 +1851,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1826,7 +1885,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListShare', testListShares.first.id, changeInfo],
                 ], { skipChanges: 2 }),
                 personalBlockStats: [],
@@ -1845,6 +1904,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1872,10 +1934,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationListEntry',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotationListEntries.first.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalAnnotationListEntry: [testAnnotationListEntries.first],
             })
 
@@ -1890,6 +1952,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1925,10 +1990,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationListEntry',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationListEntry', testAnnotationListEntries.first.id, changeInfo],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalAnnotationListEntry: [],
             })
 
@@ -1943,6 +2008,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1985,11 +2053,11 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2009,6 +2077,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2066,11 +2137,11 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationShare', testAnnotationShares.second.id],
 
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2099,6 +2170,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2149,10 +2223,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationShare', testAnnotationShares.second.id, changeInfo],
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2171,6 +2245,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2199,11 +2276,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -2220,6 +2297,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2252,11 +2332,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondPageTag.id],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -2285,6 +2365,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2320,10 +2403,10 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [testConnections.secondPageTag],
@@ -2341,6 +2424,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2373,11 +2459,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstPageTag.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [],
@@ -2395,6 +2481,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2430,13 +2519,13 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -2461,6 +2550,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2503,12 +2595,12 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2539,6 +2631,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2584,10 +2679,10 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                 ], { skipChanges: 10 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2606,6 +2701,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2645,11 +2743,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstAnnotationTag.id],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -2668,6 +2766,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2690,7 +2791,7 @@ describe('Personal cloud translation layer', () => {
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.second.id],
                 ], { skipChanges: 0 }),
@@ -2709,6 +2810,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2746,7 +2850,7 @@ describe('Personal cloud translation layer', () => {
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.second.id],
                 ], { skipChanges: 2 }),
@@ -2788,6 +2892,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2814,7 +2921,7 @@ describe('Personal cloud translation layer', () => {
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id, { id: LOCAL_TEST_DATA_V24.templates.first.id }],
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id, { id: LOCAL_TEST_DATA_V24.templates.second.id }],
                 ], { skipChanges: 2 }),
@@ -2833,6 +2940,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2858,7 +2968,7 @@ describe('Personal cloud translation layer', () => {
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -2880,6 +2990,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2915,7 +3028,7 @@ describe('Personal cloud translation layer', () => {
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -2939,6 +3052,9 @@ describe('Personal cloud translation layer', () => {
                 setups,
                 serverIdCapturer,
                 serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2975,7 +3091,7 @@ describe('Personal cloud translation layer', () => {
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -3000,6 +3116,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3033,7 +3151,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
@@ -3057,6 +3175,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3095,7 +3215,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
                     ], { skipChanges: 6, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
@@ -3126,6 +3246,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3166,7 +3288,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
@@ -3197,6 +3319,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3249,7 +3373,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                         [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
@@ -3276,6 +3400,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3319,7 +3445,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalList', testLists.first.id],
@@ -3355,6 +3481,8 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -3412,7 +3540,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                         [DataChangeType.Create, 'personalList', testLists.first.id],
                         [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotListEntries.first.id],
@@ -3949,6 +4077,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4018,7 +4149,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
                     personalList: [testLists.first],
@@ -4075,6 +4206,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4144,7 +4278,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
                     personalList: [testLists.first],
@@ -4201,6 +4335,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4276,7 +4413,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
                     personalList: [testLists.first],
@@ -4334,6 +4471,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4410,7 +4550,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
                     personalList: [testLists.first],
@@ -4468,6 +4608,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverIdCapturer,
                     serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4545,7 +4688,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalList: [testLists.first],

@@ -14,11 +14,7 @@ import {
 } from 'src/tests/background-integration-tests'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import {
-    createLazyTestServerStorage,
-    createLazyServerStorage,
-    setupServerStorageManagerMiddleware,
-} from 'src/storage/server'
+import { createLazyTestServerStorage } from 'src/storage/server'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
@@ -26,6 +22,7 @@ import {
 import {
     ChangeWatchMiddlewareSettings,
     ChangeWatchMiddleware,
+    mergeChangeWatchSettings,
 } from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
@@ -280,6 +277,10 @@ export async function setupSyncBackgroundTest(
             ChangeWatchMiddlewareSettings,
             'storageManager'
         >
+        sqlChangeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
         useDownloadTranslationLayer?: boolean
         testInstance?: BackgroundIntegrationTestInstance
         enableFailsafes?: boolean
@@ -288,10 +289,17 @@ export async function setupSyncBackgroundTest(
 ) {
     const userId = TEST_USER.id
 
+    const translationLayerTestBackend =
+        process.env.TRANSLATION_LAYER_TEST_BACKEND
     const getServerStorage =
         options.testInstance?.getSetupOptions?.().getServerStorage ??
         createLazyTestServerStorage({
-            changeWatchSettings: options.serverChangeWatchSettings,
+            changeWatchSettings: !!translationLayerTestBackend
+                ? options.serverChangeWatchSettings
+                : mergeChangeWatchSettings([
+                      options.serverChangeWatchSettings,
+                      options.sqlChangeWatchSettings,
+                  ]),
         })
     const serverStorage = await getServerStorage()
     const cloudHub = new PersonalCloudHub()
@@ -301,8 +309,6 @@ export async function setupSyncBackgroundTest(
     const setups: BackgroundIntegrationTestSetup[] = []
 
     let getSqlStorageMananager: () => Promise<StorageManager> | undefined
-    const translationLayerTestBackend =
-        process.env.TRANSLATION_LAYER_TEST_BACKEND
     if (translationLayerTestBackend) {
         if (translationLayerTestBackend === 'sqlite') {
             const sqlite = SQLite3(':memory:', {
@@ -323,7 +329,7 @@ export async function setupSyncBackgroundTest(
                 'user',
                 userManagement.collections.user,
             )
-            serverStorage.storageModules.personalCloud = personalCloudStorage
+            // serverStorage.storageModules.personalCloud = personalCloudStorage
             registerModuleCollections(
                 sqlStorageManager.registry,
                 personalCloudStorage,
@@ -331,10 +337,10 @@ export async function setupSyncBackgroundTest(
             await sqlStorageManager.finishInitialization()
 
             const middleware: StorageMiddleware[] = []
-            if (options.serverChangeWatchSettings) {
+            if (options.sqlChangeWatchSettings) {
                 middleware.push(
                     new ChangeWatchMiddleware({
-                        ...options.serverChangeWatchSettings,
+                        ...options.sqlChangeWatchSettings,
                         storageManager: sqlStorageManager,
                     }),
                 )
