@@ -70,7 +70,7 @@ class SpacePicker extends StatefulUIElement<
         localId: number
         name: string
     }> {
-        return this.state.selectedEntries
+        return this.state.selectedListIds
             .map((entryId) =>
                 this.state.displayEntries.find(
                     (entry) => entry.localId === entryId,
@@ -148,7 +148,7 @@ class SpacePicker extends StatefulUIElement<
                 id={`ListKeyName-${entry.localId}`}
                 index={index}
                 name={entry.name}
-                selected={this.state.selectedEntries.includes(entry.localId)}
+                selected={this.state.selectedListIds.includes(entry.localId)}
                 localId={entry.localId}
                 focused={entry.focused}
                 remoteId={entry.remoteId}
@@ -285,7 +285,7 @@ class SpacePicker extends StatefulUIElement<
             return
         }
 
-        const list = (this.logic as ListPickerLogic).defaultEntries.find(
+        const list = this.state.displayEntries.find(
             (l) => l.localId === this.state.contextMenuListId,
         )
         if (list == null) {
@@ -351,7 +351,7 @@ class SpacePicker extends StatefulUIElement<
                         this.props.searchInputPlaceholder ??
                         'Search & Add Spaces'
                     }
-                    showPlaceholder={this.state.selectedEntries.length === 0}
+                    showPlaceholder={this.state.selectedListIds.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}

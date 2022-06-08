@@ -565,9 +565,9 @@ export default class CustomListBackground {
         })
     }
 
-    fetchInitialListSuggestions = async (
-        { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
-    ): Promise<SpaceDisplayEntry[]> => {
+    fetchInitialListSuggestions: RemoteCollectionsInterface['fetchInitialListSuggestions'] = async ({
+        extraListIds,
+    } = {}): Promise<SpaceDisplayEntry[]> => {
         const suggestionIds = await this.localStorage.get('suggestionIds')
         const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
             localId: l.id,
@@ -577,19 +577,28 @@ export default class CustomListBackground {
             remoteId: null,
         })
 
-        if (!suggestionIds) {
-            const lists = await this.fetchAllLists({
-                limit,
-                skipMobileList: true,
-            })
-            await this.localStorage.set(
-                'suggestionIds',
-                lists.map((l) => l.id),
-            )
+        if (suggestionIds) {
+            const lists = await this.storage.fetchListByIds([
+                ...suggestionIds,
+                ...(extraListIds ?? []),
+            ])
             return lists.map(listToDisplayEntry)
         }
 
-        const lists = await this.storage.fetchListByIds(suggestionIds)
+        const lists = await this.fetchAllLists({
+            limit: limitSuggestionsStorageLength - (extraListIds?.length ?? 0),
+            skipMobileList: true,
+        })
+
+        if (extraListIds?.length) {
+            const extraLists = await this.storage.fetchListByIds(extraListIds)
+            lists.push(...extraLists)
+        }
+
+        await this.localStorage.set(
+            'suggestionIds',
+            lists.map((l) => l.id),
+        )
         return lists.map(listToDisplayEntry)
     }
 

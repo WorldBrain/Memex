@@ -321,7 +321,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             this.props.onCollectionAdd(name)
                             return collections.createCustomList({ name })
                         }}
-                        initialSelectedEntries={() => this.state.pageListIds}
+                        initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
                     />
                 </SpacePickerContainer>

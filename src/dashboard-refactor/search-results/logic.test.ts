@@ -1964,9 +1964,7 @@ describe('Dashboard search results logic', () => {
                 ]
 
                 expect(
-                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
-                        { limit: 10 },
-                    ),
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(),
                 ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
 
                 await searchResults.processEvent('setNoteLists', {
@@ -1975,9 +1973,7 @@ describe('Dashboard search results logic', () => {
                 })
 
                 expect(
-                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
-                        { limit: 10 },
-                    ),
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(),
                 ).toEqual([LIST_SUGGESTIONS[1], LIST_SUGGESTIONS[0]])
 
                 await searchResults.processEvent('setNoteLists', {
@@ -1986,9 +1982,7 @@ describe('Dashboard search results logic', () => {
                 })
 
                 expect(
-                    await device.backgroundModules.customLists.fetchInitialListSuggestions(
-                        { limit: 10 },
-                    ),
+                    await device.backgroundModules.customLists.fetchInitialListSuggestions(),
                 ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
             })
 

@@ -378,7 +378,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onEscapeKeyDown: toggleSpacesFilter,
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
-                    initialSelectedEntries: () => searchFilters.spacesIncluded,
+                    initialSelectedListIds: () => searchFilters.spacesIncluded,
                     selectEntry: (spaceId) =>
                         this.processEvent('addIncludedSpace', {
                             spaceId,

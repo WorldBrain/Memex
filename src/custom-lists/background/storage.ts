@@ -239,7 +239,7 @@ export default class CustomListStorage extends StorageModule {
         })
         const orderedLists: PageList[] = []
 
-        for (const listId of ids) {
+        for (const listId of new Set(ids)) {
             const data = listsData.find((list) => list.id === listId)
             if (data) {
                 orderedLists.push(data)
@@ -423,7 +423,7 @@ export default class CustomListStorage extends StorageModule {
                 query: { nameTerms: query },
                 options: {
                     multiEntryAssocField: 'name',
-                    includePks: true,
+                    ignoreCase: ['nameTerms'],
                     limit,
                 },
             },
