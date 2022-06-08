@@ -88,7 +88,8 @@ export interface RemoteCollectionsInterface {
     fetchListByName(args: { name: string }): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchInitialListSuggestions(args?: {
-        limit?: number
+        /** Set this to factor in fetching of extra entries that might not be in the recently used suggestion store. */
+        extraListIds?: number[]
     }): Promise<SpaceDisplayEntry[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<number[]>

@@ -234,7 +234,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return (
             <CollectionPicker
-                initialSelectedEntries={() => lists}
+                initialSelectedListIds={() => lists}
                 onEscapeKeyDown={() => setPickerShown(false)}
                 unselectEntry={this.props.removePageFromList}
                 createNewEntry={this.props.createNewList}
