@@ -233,12 +233,8 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
             }
 
             if (sqlUserId) {
-                for (const [collectionName, objects] of Object.entries(
-                    params.merged,
-                )) {
-                    for (const [objectName, object] of Object.entries(
-                        objects,
-                    )) {
+                for (const objects of Object.values(params.merged)) {
+                    for (const object of Object.values(objects)) {
                         if ('user' in object) {
                             object.user = sqlUserId
                         }
