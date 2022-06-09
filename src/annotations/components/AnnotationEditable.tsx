@@ -41,6 +41,7 @@ export interface NoteProps extends AnnotationProps {
 }
 
 export interface AnnotationProps {
+    zIndex?: number
     tags: string[]
     lists: number[]
     createdWhen: Date | number
@@ -52,6 +53,7 @@ export interface AnnotationProps {
     isActive?: boolean
     isShared: boolean
     hasReplies?: boolean
+    appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
     repliesLoadingState?: UITaskState
     onReplyBtnClick?: React.MouseEventHandler
@@ -110,7 +112,9 @@ export default class AnnotationEditable extends React.Component<Props> {
         showQuickTutorial: false,
     }
 
-    focus() {}
+    focusEditForm() {
+        this.annotEditRef?.current?.focusEditor()
+    }
 
     componentDidMount() {
         this.textAreaHeight()
@@ -257,7 +261,6 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     private renderNote() {
         const {
-            url,
             mode,
             comment,
             annotationEditDependencies,
@@ -267,7 +270,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'edit') {
             return (
                 <AnnotationEdit
-                    url={url}
                     ref={this.annotEditRef}
                     {...annotationEditDependencies}
                     rows={2}
@@ -317,27 +319,28 @@ export default class AnnotationEditable extends React.Component<Props> {
             annotationFooterDependencies: footerDeps,
             isBulkShareProtected,
             repliesLoadingState,
+            appendRepliesToggle,
             onReplyBtnClick,
             hoverState,
             hasReplies,
             isShared,
-            lists,
         } = this.props
 
+        const repliesToggle: ItemBoxBottomAction =
+            repliesLoadingState === 'running'
+                ? { node: <LoadingIndicator size={16} /> }
+                : {
+                      key: 'replies-btn',
+                      onClick: onReplyBtnClick,
+                      tooltipText: 'Toggle replies',
+                      tooltipPosition: 'left',
+                      image: hasReplies
+                          ? icons.commentFull
+                          : icons.commentEmpty,
+                  }
+
         if (!footerDeps) {
-            return [
-                repliesLoadingState === 'running'
-                    ? { node: <LoadingIndicator size={16} /> }
-                    : {
-                          key: 'replies-btn',
-                          onClick: onReplyBtnClick,
-                          tooltipText: 'Toggle replies',
-                          tooltipPosition: 'left',
-                          image: hasReplies
-                              ? icons.commentFull
-                              : icons.commentEmpty,
-                      },
-            ]
+            return [repliesToggle]
         }
 
         const shareIconData = getShareButtonData(
@@ -347,6 +350,10 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
 
         if (hoverState === null) {
+            if (appendRepliesToggle) {
+                return [repliesToggle]
+            }
+
             if (isShared || isBulkShareProtected) {
                 return [
                     {
@@ -386,6 +393,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     onClick: footerDeps.onShareClick,
                     tooltipText: shareIconData.label,
                 },
+                appendRepliesToggle && repliesToggle,
             ]
         }
 
@@ -405,23 +413,20 @@ export default class AnnotationEditable extends React.Component<Props> {
                 isDisabled: true,
                 image: shareIconData.icon,
             },
+            appendRepliesToggle && repliesToggle,
         ]
     }
 
     private renderMarkdownHelpButton() {
         return (
-            <MarkdownButtonContainer>
-                <ButtonTooltip
-                    tooltipText="Show formatting help"
-                    position="bottom"
-                >
-                    <MarkdownButton
-                        src={icons.helpIcon}
-                        onClick={() =>
-                            this.setState({ showQuickTutorial: true })
-                        }
-                    />
-                </ButtonTooltip>
+            <MarkdownButtonContainer
+                onClick={() => this.setState({ showQuickTutorial: true })}
+            >
+                Formatting Help
+                <MarkdownButton
+                    src={icons.helpIcon}
+                    onClick={() => this.setState({ showQuickTutorial: true })}
+                />
             </MarkdownButtonContainer>
         )
     }
@@ -501,7 +506,11 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <ThemeProvider theme={this.theme}>
-                <AnnotationBox top="5px" bottom="2px">
+                <AnnotationBox
+                    zIndex={this.props.zIndex}
+                    top="5px"
+                    bottom="2px"
+                >
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
@@ -659,9 +668,10 @@ const EditNoteIconBox = styled.div`
     }
 `
 
-const AnnotationBox = styled(Margin)`
+const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 99%;
     align-self: center;
+    z-index: ${(props) => props.zIndex};
 `
 
 const EditNoteIcon = styled.div`
@@ -679,6 +689,10 @@ const EditNoteIcon = styled.div`
 `
 const MarkdownButtonContainer = styled.div`
     display: flex;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    align-items: center;
+    cursor: pointer;
 `
 
 const MarkdownButton = styled.img`
@@ -692,8 +706,9 @@ const MarkdownButton = styled.img`
 
 const SaveActionBar = styled.div`
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+    width: 100%;
 `
 
 const HighlightActionsBox = styled.div`
@@ -715,7 +730,7 @@ const NoteTextBox = styled.div`
     line-height: 20px;
     line-break: normal;
     word-break: break-word;
-    hyphens: auto;
+    hyphens: none;
     width: 100%;
 `
 
@@ -869,7 +884,6 @@ const DeleteConfirmStyled = styled.span`
     font-size: 14px;
     color: #000;
     margin-right: 10px;
-    width: 100%;
     text-align: right;
 `
 
@@ -896,7 +910,6 @@ const CancelBtnStyled = styled.button`
 const BtnContainerStyled = styled.div`
     display: flex;
     flex-direction: row-reverse;
-    width: 100%;
     justify-content: flex-end;
     align-items: center;
 `

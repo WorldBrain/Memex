@@ -88,6 +88,8 @@ export interface SearchTypeChange {
 
 export interface FollowedListAnnotation {
     id: string
+    /** Only should be defined if annotation belongs to local user. */
+    localId: string | null
     body?: string
     comment?: string
     selector?: Anchor
@@ -96,17 +98,21 @@ export interface FollowedListAnnotation {
     creatorId: string
 }
 
+export type FollowedListState = SharedAnnotationList & {
+    isExpanded: boolean
+    isContributable: boolean
+    annotationEditForms: EditForms
+    annotationsLoadState: TaskState
+    conversationsLoadState: TaskState
+    activeShareMenuAnnotationId: string | undefined
+    activeCopyPasterAnnotationId: string | undefined
+    activeListPickerAnnotationId: string | undefined
+    annotationModes: { [annotationId: string]: AnnotationMode }
+}
+
 interface SidebarFollowedListsState {
     followedListLoadState: TaskState
-    followedLists: NormalizedState<
-        SharedAnnotationList & {
-            isExpanded: boolean
-            annotationsLoadState: TaskState
-            conversationsLoadState: TaskState
-            isContributable: boolean
-        }
-    >
-
+    followedLists: NormalizedState<FollowedListState>
     followedAnnotations: { [annotationId: string]: FollowedListAnnotation }
 
     users: {
@@ -121,7 +127,8 @@ export interface SidebarContainerState
     extends SidebarFollowedListsState,
         AnnotationConversationsState {
     loadState: TaskState
-    primarySearchState: TaskState
+    noteCreateState: TaskState
+    annotationsLoadState: TaskState
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
@@ -136,8 +143,8 @@ export interface SidebarContainerState
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
-    activeTagPickerAnnotationId: string | undefined
     activeListPickerAnnotationId: string | undefined
+    activeTagPickerAnnotationId: string | undefined
 
     pageUrl?: string
     annotations: Annotation[]
@@ -162,6 +169,7 @@ export interface SidebarContainerState
     // Filter sidebar props
     showFiltersSidebar: boolean
     showSocialSearch: boolean
+    shouldShowTagsUIs: boolean
 
     annotCount?: number
 
@@ -235,6 +243,7 @@ interface SidebarEvents {
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string
+        followedListId?: string
     }
     editAnnotation: {
         context: AnnotationEventContext
@@ -250,13 +259,15 @@ interface SidebarEvents {
     }
     shareAnnotation: {
         context: AnnotationEventContext
-        annotationUrl: string
         mouseEvent: React.MouseEvent
+        annotationUrl: string
+        followedListId?: string
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
         annotationUrl: string
         mode: AnnotationMode
+        followedListId?: string
     }
 
     copyNoteLink: { link: string }
@@ -292,12 +303,12 @@ interface SidebarEvents {
     setSelectNoteSpaceConfirmArgs: SidebarContainerState['confirmSelectNoteSpaceArgs']
 
     setAllNotesCopyPasterShown: { shown: boolean }
-    setCopyPasterAnnotationId: { id: string }
+    setCopyPasterAnnotationId: { id: string; followedListId?: string }
     setTagPickerAnnotationId: { id: string }
-    setListPickerAnnotationId: { id: string }
+    setListPickerAnnotationId: { id: string; followedListId?: string }
     resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
-    resetListPickerAnnotationId: null
+    resetListPickerAnnotationId: { id?: string }
     setAllNotesShareMenuShown: { shown: boolean }
     resetShareMenuNoteId: null
 }

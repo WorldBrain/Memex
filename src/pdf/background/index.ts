@@ -46,10 +46,10 @@ export class PDFBackground {
     }
 
     private refreshSetting = async () => {
-        this._shouldOpen =
-            (await this.deps.syncSettings.pdfIntegration.get(
-                'shouldAutoOpen',
-            )) ?? true
+        const storedSetting = await this.deps.syncSettings.pdfIntegration.get(
+            'shouldAutoOpen',
+        )
+        this._shouldOpen = storedSetting ?? false
     }
 
     private doRedirect(requestUrl: string, tabId: number) {

@@ -264,16 +264,9 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private renderMarkdownHelpButton() {
         return (
-            <MarkdownButtonContainer>
-                <ButtonTooltip
-                    tooltipText="Show formatting help"
-                    position="bottom"
-                >
-                    <MarkdownButton
-                        src={icons.helpIcon}
-                        onClick={() => this.toggleShowTutorial()}
-                    />
-                </ButtonTooltip>
+            <MarkdownButtonContainer onClick={() => this.toggleShowTutorial()}>
+                Formatting Help
+                <MarkdownButton src={icons.helpIcon} />
             </MarkdownButtonContainer>
         )
     }
@@ -360,7 +353,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             top={
                                 this.props.contextLocation === 'dashboard'
                                     ? 'unset'
-                                    : '215px'
+                                    : '10px'
                             }
                             bottom={
                                 this.props.contextLocation === 'dashboard'
@@ -370,13 +363,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                             right={
                                 this.props.contextLocation === 'dashboard'
                                     ? '20px'
-                                    : '50px'
+                                    : '0px'
                             }
                             width="430px"
                             position={
                                 this.props.contextLocation === 'dashboard'
                                     ? 'fixed'
-                                    : 'initial'
+                                    : 'relative'
                             }
                             height="430px"
                             overflow="scroll"
@@ -408,7 +401,8 @@ const FooterContainer = styled.div`
 
 const SaveActionBar = styled.div`
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
+    width: 100%;
     align-items: center;
 `
 
@@ -420,6 +414,10 @@ const TagsActionBar = styled.div`
 
 const MarkdownButtonContainer = styled.div`
     display: flex;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.lighterText};
+    align-items: center;
+    cursor: pointer;
 `
 
 const MarkdownButton = styled.img`

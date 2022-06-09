@@ -8,7 +8,6 @@ import {
     fontSizeSmall,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
-import { props } from 'lodash/fp'
 
 const StyledPrimaryAction = styled.div`
     padding: 8px 20px;

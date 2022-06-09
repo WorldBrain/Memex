@@ -15,6 +15,7 @@ import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -63,10 +64,15 @@ describe('Ribbon logic', () => {
             { skipPageIndexing: true },
         )
 
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+
         const ribbonLogic = new RibbonContainerLogic({
             activityIndicatorBG: backgroundModules.activityIndicator,
             getPageUrl: () => currentTab.normalizedUrl,
             analytics,
+            syncSettings,
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
@@ -99,7 +105,14 @@ describe('Ribbon logic', () => {
         })
 
         const ribbon = device.createElement(ribbonLogic)
-        return { ribbon, inPageUI, ribbonLogic, analytics, annotationsCache }
+        return {
+            ribbon,
+            inPageUI,
+            ribbonLogic,
+            analytics,
+            annotationsCache,
+            syncSettings,
+        }
     }
 
     it('should load', async ({ device }) => {
@@ -188,7 +201,7 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.highlights.areHighlightsEnabled).toBe(false)
     })
 
-    it('should call passed-down callback when toggling popup open state', async ({
+    it('should call passed-down callback when toggling popout open states', async ({
         device,
     }) => {
         let arePopupsOpen = false
@@ -205,6 +218,10 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('setShowCommentBox', { value: true })
         expect(arePopupsOpen).toBe(true)
         await ribbon.processEvent('setShowCommentBox', { value: false })
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('setShowCommentBox', { value: true })
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('cancelComment', null)
 
         expect(arePopupsOpen).toBe(false)
         await ribbon.processEvent('setShowListsPicker', { value: true })
@@ -220,10 +237,19 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('setShowSearchBox', { value: true })
         expect(arePopupsOpen).toBe(true)
         await ribbon.processEvent('setShowSearchBox', { value: false })
+
         expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('toggleShowExtraButtons', null)
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('toggleShowExtraButtons', null)
+
+        expect(arePopupsOpen).toBe(false)
+        await ribbon.processEvent('toggleShowTutorial', null)
+        expect(arePopupsOpen).toBe(true)
+        await ribbon.processEvent('toggleShowTutorial', null)
     })
 
-    it('should add+remove lists, also adding any shared lists to public annotations', async ({
+    it('should be able to add+remove lists, also adding any shared lists to public annotations', async ({
         device,
     }) => {
         const fullPageUrl = DATA.CURRENT_TAB_URL_1
@@ -257,7 +283,7 @@ describe('Ribbon logic', () => {
             dependencies: { getPageUrl: () => fullPageUrl },
         })
 
-        const expectListEntries = async (listIds: number[]) =>
+        const expectListEntries = async (listIds: number[]) => {
             expect(
                 await device.storageManager
                     .collection('pageListEntries')
@@ -267,6 +293,8 @@ describe('Ribbon logic', () => {
                     expect.objectContaining({ listId, fullUrl: fullPageUrl }),
                 ),
             )
+            expect(ribbon.state.lists.pageListIds).toEqual(listIds)
+        }
 
         await ribbon.init()
         await annotationsCache.load(fullPageUrl)
@@ -341,6 +369,29 @@ describe('Ribbon logic', () => {
         })
 
         await expectListEntries([DATA.LISTS_1[1].id])
+        expect(annotationsCache.annotations).toEqual([
+            expect.objectContaining({
+                url: DATA.ANNOT_1.url,
+                isShared: true,
+                lists: [],
+            }),
+            expect.objectContaining({
+                url: DATA.ANNOT_2.url,
+                isShared: false,
+                lists: [],
+            }),
+        ])
+
+        await ribbon.processEvent('updateLists', {
+            value: {
+                deleted: DATA.LISTS_1[1].id,
+                selected: [],
+                added: null,
+                skipPageIndexing: true,
+            },
+        })
+
+        await expectListEntries([])
         expect(annotationsCache.annotations).toEqual([
             expect.objectContaining({
                 url: DATA.ANNOT_1.url,
@@ -765,5 +816,21 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('hydrateStateFromDB', { url: newURL })
         expect(ribbon.state.bookmark.isBookmarked).toBe(false)
         expect(ribbon.state.pageUrl).toEqual(newURL)
+    })
+
+    it('should check whether tags migration is done to signal showing of tags UI on init', async ({
+        device,
+    }) => {
+        const { ribbon, syncSettings } = await setupTest(device)
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', false)
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
+        await ribbon.init()
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
+
+        await syncSettings.extension.set('areTagsMigratedToSpaces', true)
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
+        await ribbon.init()
+        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
     })
 })

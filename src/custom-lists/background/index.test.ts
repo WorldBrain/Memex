@@ -58,6 +58,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
                             ) => a) as any
+                            setup.backgroundModules.tabManagement.injectContentScripts = () =>
+                                undefined
 
                             listId = await customLists(
                                 setup,
@@ -151,6 +153,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.pages.waitForContentIdentifier = (async (
                                 a,
                             ) => a) as any
+                            setup.backgroundModules.tabManagement.injectContentScripts = () =>
+                                undefined
 
                             listId = await customLists(
                                 setup,
@@ -257,7 +261,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             searchableName: TEST_LIST_1,
                                             isDeletable: true,
                                             isNestable: true,
-                                            nameTerms: ['custom', 'list'],
+                                            nameTerms: ['my', 'custom', 'list'],
                                         },
                                     },
                                 }),
@@ -293,7 +297,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: expect.any(Number),
                                     name: TEST_LIST_1,
                                     searchableName: TEST_LIST_1,
-                                    nameTerms: ['custom', 'list'],
+                                    nameTerms: ['my', 'custom', 'list'],
                                     createdAt: expect.any(Date),
                                     isDeletable: true,
                                     isNestable: true,
@@ -372,7 +376,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updates: {
                                             name: TEST_LIST_2,
                                             searchableName: TEST_LIST_2,
-                                            nameTerms: { 0: 'updated' },
+                                            nameTerms: {
+                                                0: 'updated',
+                                                1: 'list',
+                                                2: 'title',
+                                            },
                                         },
                                     },
                                 }),
@@ -492,7 +500,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: expect.any(Number),
                                     name: TEST_LIST_1,
                                     searchableName: TEST_LIST_1,
-                                    nameTerms: ['custom', 'list'],
+                                    nameTerms: ['my', 'custom', 'list'],
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -581,7 +589,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: listId,
                                     name: 'My Custom List',
                                     searchableName: 'My Custom List',
-                                    nameTerms: ['custom', 'list'],
+                                    nameTerms: ['my', 'custom', 'list'],
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),

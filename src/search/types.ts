@@ -34,7 +34,7 @@ export interface SearchParams {
     startDate?: number
     skip?: number
     limit?: number
-    lists: string[]
+    lists: number[]
 }
 
 export interface FilteredIDs<T = string> {

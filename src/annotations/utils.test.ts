@@ -1,5 +1,5 @@
-import { generateUrl } from './utils'
-import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
+import { generateAnnotationUrl } from './utils'
+import { isUrlForAnnotation } from '@worldbrain/memex-common/lib/annotations/utils'
 
 const NORMALIZED_PAGE_URLS = [
     'getmemex.com',
@@ -14,7 +14,10 @@ describe('Annotation utility fns', () => {
         for (const pageUrl of NORMALIZED_PAGE_URLS) {
             expect(isUrlForAnnotation(pageUrl)).toBe(false)
 
-            const annotUrl = generateUrl({ pageUrl, now: () => Date.now() })
+            const annotUrl = generateAnnotationUrl({
+                pageUrl,
+                now: () => Date.now(),
+            })
             expect(isUrlForAnnotation(annotUrl)).toBe(true)
         }
     })

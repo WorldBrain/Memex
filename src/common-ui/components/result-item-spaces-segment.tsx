@@ -12,6 +12,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     lists: Array<{ id: number; name: string; isShared: boolean }>
     onListClick?: (tag: number) => void
     renderSpacePicker?: () => JSX.Element
+    filteredbyListID?: number
 }
 
 interface ButtonProps {
@@ -37,7 +38,7 @@ export class AddSpacesButton extends React.Component<
                 <AddSpacesButtonContainer
                     onClick={(e) => {
                         // this.setState({ showPicker: !this.state.showPicker })
-                        this.props.onEditBtnClick(e)
+                        this.props.onEditBtnClick?.(e)
                     }}
                 >
                     {this.props.hasNoLists ? (
@@ -64,6 +65,7 @@ export class AddSpacesButton extends React.Component<
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
                         onClick={(e) => {
+                            e.preventDefault()
                             e.stopPropagation()
                         }}
                     >
@@ -93,6 +95,7 @@ export default function ListsSegment({
     showEditBtn,
     onEditBtnClick,
     renderSpacePicker,
+    filteredbyListID,
     ...props
 }: Props) {
     return (
@@ -105,7 +108,9 @@ export default function ListsSegment({
                 />
                 {lists
                     .filter(
-                        (l) => !Object.values(SPECIAL_LIST_IDS).includes(l.id),
+                        (l) =>
+                            !Object.values(SPECIAL_LIST_IDS).includes(l.id) &&
+                            l.id !== filteredbyListID,
                     )
                     .slice(0)
                     .map((space) => {

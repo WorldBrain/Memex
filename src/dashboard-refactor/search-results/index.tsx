@@ -120,9 +120,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         </Loader>
     )
 
-    private renderNoteResult = (day: number, pageId: string) => (
-        noteId: string,
-    ) => {
+    private renderNoteResult = (
+        day: number,
+        pageId: string,
+        zIndex: number,
+    ) => (noteId: string) => {
         const pageData = this.props.pageData.byId[pageId]
         const noteData = this.props.noteData.byId[noteId]
 
@@ -147,6 +149,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <AnnotationEditable
+                zIndex={zIndex}
                 key={noteId}
                 url={noteId}
                 tags={noteData.tags}
@@ -183,20 +186,29 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
-                renderTagsPickerForAnnotation={() =>
-                    noteData.isTagPickerShown && (
-                        <HoverBox left="0" top="-40px" withRelativeContainer>
-                            <TagPicker
-                                initialSelectedEntries={() => noteData.tags}
-                                onClickOutside={
-                                    interactionProps.onTagPickerBtnClick
-                                }
-                                onUpdateEntrySelection={
-                                    interactionProps.updateTags
-                                }
-                            />
-                        </HoverBox>
-                    )
+                renderTagsPickerForAnnotation={
+                    this.props.shouldShowTagsUIs
+                        ? () =>
+                              noteData.isTagPickerShown && (
+                                  <HoverBox
+                                      left="0"
+                                      top="-40px"
+                                      withRelativeContainer
+                                  >
+                                      <TagPicker
+                                          initialSelectedEntries={() =>
+                                              noteData.tags
+                                          }
+                                          onClickOutside={
+                                              interactionProps.onTagPickerBtnClick
+                                          }
+                                          onUpdateEntrySelection={
+                                              interactionProps.updateTags
+                                          }
+                                      />
+                                  </HoverBox>
+                              )
+                        : undefined
                 }
                 renderListsPickerForAnnotation={() =>
                     noteData.isListPickerShown && (
@@ -361,9 +373,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <Separator />
                     </>
                 )}
-                {noteIds[notesType].map(
-                    this.renderNoteResult(day, normalizedUrl),
-                )}
+                {noteIds[notesType].map((noteId, index) => {
+                    const zIndex = noteIds[notesType].length - index
+                    return this.renderNoteResult(
+                        day,
+                        normalizedUrl,
+                        zIndex,
+                    )(noteId)
+                })}
             </PageNotesBox>
         )
     }
@@ -393,7 +410,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
-    private renderPageResult = (pageId: string, day: number) => {
+    private renderPageResult = (pageId: string, day: number, index: number) => {
         const page = {
             ...this.props.pageData.byId[pageId],
             ...this.props.results[day].pages.byId[pageId],
@@ -411,7 +428,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <ResultBox
-                zIndex={Math.floor(page.displayTime / 1000)}
+                zIndex={index}
                 bottom="10px"
                 key={day.toString() + pageId}
             >
@@ -432,6 +449,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
+                    onTagPickerBtnClick={
+                        this.props.shouldShowTagsUIs
+                            ? interactionProps.onTagPickerBtnClick
+                            : undefined
+                    }
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
@@ -612,11 +634,23 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         const days: JSX.Element[] = []
+        var groupIndex = 1500
 
         for (const { day, pages } of Object.values(this.props.results)) {
+            groupIndex = groupIndex - 1
             days.push(
-                <DayResultGroup key={day} when={timestampToString(day)}>
-                    {pages.allIds.map((id) => this.renderPageResult(id, day))}
+                <DayResultGroup
+                    zIndex={groupIndex}
+                    key={day}
+                    when={timestampToString(day)}
+                >
+                    {pages.allIds.map((id, index) =>
+                        this.renderPageResult(
+                            id,
+                            day,
+                            pages.allIds.length - index,
+                        ),
+                    )}
                 </DayResultGroup>,
             )
         }
@@ -740,7 +774,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     padding: 0px 15px;
     height: 40px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 2147483644;
+    z-index: 2147483639;
     margin-top: -6px;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
@@ -787,6 +821,7 @@ const PageNotesBox = styled(Margin)`
     padding-left: 10px;
     padding-top: 5px;
     border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    z-index: 4;
 `
 
 const Separator = styled.div`

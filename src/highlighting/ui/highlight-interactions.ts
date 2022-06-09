@@ -19,7 +19,7 @@ import {
     AnnotationCacheChangeEvents,
     AnnotationsCacheInterface,
 } from 'src/annotations/annotations-cache'
-import { generateUrl } from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 
@@ -126,7 +126,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
     }
 
     saveAndRenderHighlightAndEditInSidebar = async (
-        params: SaveAndRenderHighlightDeps,
+        params: SaveAndRenderHighlightDeps & {
+            showSpacePicker?: boolean
+        },
     ) => {
         analytics.trackEvent(
             params.analyticsEvent ?? {
@@ -140,7 +142,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         if (annotation) {
             await params.inPageUI.showSidebar({
                 annotationUrl: annotation.url,
-                action: 'edit_annotation',
+                action: params.showSpacePicker
+                    ? 'edit_annotation_spaces'
+                    : 'edit_annotation',
             })
         } else {
             await params.inPageUI.showSidebar({ action: 'comment' })
@@ -172,7 +176,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const body = anchor ? anchor.quote : ''
 
         const annotation: Annotation = {
-            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body,
             pageUrl,
             tags: [],

@@ -4,7 +4,7 @@ import analytics from 'src/analytics'
 import { BackgroundSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
-import { generateUrl } from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 
 export default class AnnotationsManager implements AnnotationsManagerInterface {
     private _isSetUp = false
@@ -76,7 +76,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         }
 
         const annotation = {
-            url: generateUrl({ pageUrl, now: () => Date.now() }),
+            url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             pageUrl,
             pageTitle,
             body,

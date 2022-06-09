@@ -85,6 +85,10 @@ describe('Dashboard Refactor misc logic', () => {
             'subscribeBannerShownAfter',
             now,
         )
+        await logicA.syncSettings.extension.set(
+            'areTagsMigratedToSpaces',
+            false,
+        )
         await logicA['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: false,
         })
@@ -96,6 +100,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsA.state.searchResults.shouldShowTagsUIs).toBe(false)
         expect(searchResultsA.state.isCloudEnabled).toBe(true)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
@@ -105,6 +110,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(true)
+        expect(searchResultsA.state.searchResults.shouldShowTagsUIs).toBe(true)
         expect(searchResultsA.state.isCloudEnabled).toBe(false)
 
         const {
@@ -117,6 +123,7 @@ describe('Dashboard Refactor misc logic', () => {
             'subscribeBannerShownAfter',
             null,
         )
+        await logicA.syncSettings.extension.set('areTagsMigratedToSpaces', true)
         await logicB['options'].localStorage.set({
             [CLOUD_STORAGE_KEYS.isSetUp]: true,
         })
@@ -128,6 +135,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.searchResults.shouldShowTagsUIs).toBe(false)
         expect(searchResultsB.state.isCloudEnabled).toBe(true)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
@@ -137,6 +145,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
         ).toBe(false)
+        expect(searchResultsB.state.searchResults.shouldShowTagsUIs).toBe(false)
         expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 

@@ -943,6 +943,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 url: DATA.PAGE_1.fullUrl,
                                 tabId: DATA.TEST_TAB_1.id,
                             })
+                            await contentSharing(
+                                setup,
+                            ).shareAnnotationToSomeLists({
+                                annotationUrl: DATA.ANNOT_1.url,
+                                localListIds: [listId],
+                            })
                         },
                         expectedStorageChanges: {
                             pageListEntries: (): StorageCollectionDiff => ({
@@ -952,6 +958,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                         listId,
                                         fullUrl: DATA.PAGE_1.fullUrl,
                                         pageUrl: DATA.ANNOT_1.pageUrl,
+                                        createdAt: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            annotListEntries: (): StorageCollectionDiff => ({
+                                [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        listId,
+                                        url: DATA.ANNOT_1.url,
                                         createdAt: expect.any(Date),
                                     },
                                 },
@@ -1003,7 +1019,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                                 pageUrl: DATA.ANNOT_1.pageUrl,
                                                 selector: undefined,
                                                 tags: [],
-                                                lists: [],
+                                                lists: [listId],
                                                 isBulkShareProtected: false,
                                                 isShared: false,
                                             },

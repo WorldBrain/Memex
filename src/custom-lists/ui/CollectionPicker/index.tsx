@@ -11,15 +11,9 @@ import ListPickerLogic, {
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
-import EntryResultsList from './components/EntryResultsList'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import EntryRow, {
-    IconStyleWrapper,
-    ActOnAllTabsButton,
-} from './components/EntryRow'
-import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import EntryRow, { IconStyleWrapper } from './components/EntryRow'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
@@ -29,6 +23,8 @@ import {
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { validateListName } from '../utils'
+import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -47,14 +43,27 @@ class SpacePicker extends StatefulUIElement<
             }),
     }
 
+    private displayListRef = React.createRef<HTMLDivElement>()
+    private contextMenuRef = React.createRef<SpaceContextMenu>()
+    private contextMenuBtnRef = React.createRef<HTMLDivElement>()
+
     constructor(props: SpacePickerDependencies) {
         super(props, new ListPickerLogic(props))
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        const { newEntryName, displayEntries } = this.state
-        const input = newEntryName.trim()
-        return input !== '' && !displayEntries.find((e) => e.name === input)
+        if (this.props.filterMode) {
+            return false
+        }
+
+        const otherLists = (this.logic as ListPickerLogic).defaultEntries.map(
+            (e) => ({
+                id: e.localId,
+                name: e.name,
+            }),
+        )
+
+        return validateListName(this.state.newEntryName, otherLists).valid
     }
 
     private get selectedDisplayEntries(): Array<{
@@ -86,8 +95,10 @@ class SpacePicker extends StatefulUIElement<
     handleSelectedListPress = (list: number) =>
         this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: SpaceDisplayEntry) =>
+    handleResultListPress = (list: SpaceDisplayEntry) => {
+        this.displayListRef.current.scrollTo(0, 0)
         this.processEvent('resultEntryPress', { entry: list })
+    }
 
     handleResultListAllPress = (list: SpaceDisplayEntry) =>
         this.processEvent('resultEntryAllPress', { entry: list })
@@ -112,36 +123,46 @@ class SpacePicker extends StatefulUIElement<
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
     }
 
-    handleKeyPress = (key: KeyEvent) => {
-        if (key === 'Escape') {
-            this.handleClickOutside(key)
+    handleKeyPress = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            this.handleClickOutside(event.key)
         }
-        this.processEvent('keyPress', { key })
+        this.processEvent('keyPress', { event })
     }
 
-    renderListRow = (list: SpaceDisplayEntry, index: number) => (
-        <EntryRow
-            createdAt={list.createdAt}
-            onPress={this.handleResultListPress}
-            onPressActOnAll={
-                this.props.actOnAllTabs
-                    ? (t) =>
-                          this.handleResultListAllPress(t as SpaceDisplayEntry)
-                    : undefined
-            }
-            onFocus={this.handleResultListFocus}
-            key={`ListKeyName-${list.localId}`}
-            id={`ListKeyName-${list.localId}`}
-            index={index}
-            name={list.name}
-            selected={this.state.selectedEntries.includes(list.localId)}
-            localId={list.localId}
-            focused={list.focused}
-            remoteId={list.remoteId}
-            resultItem={<ListResultItem>{list.name}</ListResultItem>}
-            removeTooltipText="Remove from Space"
-            actOnAllTooltipText="Add all tabs in window to Space"
-        />
+    renderListRow = (entry: SpaceDisplayEntry, index: number) => (
+        <EntryRowContainer key={entry.localId}>
+            <EntryRow
+                createdAt={entry.createdAt}
+                onPress={this.handleResultListPress}
+                onPressActOnAll={
+                    this.props.actOnAllTabs
+                        ? (t) =>
+                              this.handleResultListAllPress(
+                                  t as SpaceDisplayEntry,
+                              )
+                        : undefined
+                }
+                onFocus={this.handleResultListFocus}
+                key={`ListKeyName-${entry.localId}`}
+                id={`ListKeyName-${entry.localId}`}
+                index={index}
+                name={entry.name}
+                selected={this.state.selectedEntries.includes(entry.localId)}
+                localId={entry.localId}
+                focused={entry.focused}
+                remoteId={entry.remoteId}
+                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
+                removeTooltipText={
+                    this.props.removeTooltipText ?? 'Remove from Space'
+                }
+                contextMenuBtnRef={this.contextMenuBtnRef}
+                onContextMenuBtnPress={this.handleSpaceContextMenuOpen(
+                    entry.localId,
+                )}
+                actOnAllTooltipText="Add all tabs in window to Space"
+            />
+        </EntryRowContainer>
     )
 
     renderNewListAllTabsButton = () =>
@@ -161,7 +182,7 @@ class SpacePicker extends StatefulUIElement<
         )
 
     renderEmptyList() {
-        if (this.state.newEntryName.length > 0) {
+        if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return
         }
 
@@ -176,15 +197,145 @@ class SpacePicker extends StatefulUIElement<
                             hoverOff
                         />
                     </SectionCircle>
-                    <SectionTitle>Create your first space</SectionTitle>
-                    <InfoText>by typing into the search field </InfoText>
+                    <SectionTitle>Create your first Space</SectionTitle>
+                    <InfoText>
+                        {this.props.filterMode
+                            ? 'to use as a search filter'
+                            : 'by typing into the search field'}
+                    </InfoText>
                 </EmptyListsView>
             )
         }
     }
 
+    private handleSpaceContextMenuOpen = (listId: number) => async (
+        entry: SpaceDisplayEntry,
+    ) => {
+        const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
+
+        // Popup
+        if (window.outerWidth < 500) {
+            await this.processEvent('updateContextMenuPosition', {
+                x: undefined,
+                y: undefined,
+            })
+        } else {
+            // right side of screen
+            if (window.outerWidth - rect.right < 400) {
+                await this.processEvent('updateContextMenuPosition', {
+                    x: outerWidth - rect.left,
+                })
+                //lower side
+
+                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom - 50,
+                    })
+                }
+                // upper side
+                else {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom + 100,
+                    })
+                }
+            }
+
+            // left side of screen
+
+            if (window.outerWidth - rect.right > window.outerWidth / 2) {
+                await this.processEvent('updateContextMenuPosition', {
+                    x: outerWidth - rect.right - 320,
+                })
+
+                // lower side
+
+                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.bottom + 40,
+                    })
+                }
+                // upper side
+                else {
+                    await this.processEvent('updateContextMenuPosition', {
+                        y: outerHeight - rect.top + 110,
+                    })
+                }
+            }
+        }
+        await this.processEvent('toggleEntryContextMenu', { listId })
+    }
+
+    private handleSpaceContextMenuClose = (listId: number) => async (
+        shouldSaveName: boolean,
+    ) => {
+        if (shouldSaveName) {
+            const name = this.contextMenuRef?.current?.state.nameValue
+            if (name != null) {
+                await this.processEvent('renameList', {
+                    listId,
+                    name,
+                })
+            }
+        }
+        await this.processEvent('toggleEntryContextMenu', { listId })
+    }
+
+    private renderSpaceContextMenu = () => {
+        if (this.state.contextMenuListId == null) {
+            return
+        }
+
+        const list = (this.logic as ListPickerLogic).defaultEntries.find(
+            (l) => l.localId === this.state.contextMenuListId,
+        )
+        if (list == null) {
+            return
+        }
+
+        return (
+            <SpaceContextMenu
+                loadOwnershipData
+                spaceName={list.name}
+                ref={this.contextMenuRef}
+                localListId={this.state.contextMenuListId}
+                xPosition={this.state.contextMenuPositionX}
+                yPosition={this.state.contextMenuPositionY}
+                contentSharingBG={this.props.contentSharingBG}
+                spacesBG={this.props.spacesBG}
+                onDeleteSpaceConfirm={() =>
+                    this.processEvent('deleteList', {
+                        listId: list.localId,
+                    })
+                }
+                editableProps={{
+                    onConfirmClick: async (name) => {
+                        await this.processEvent('renameList', {
+                            listId: list.localId,
+                            name,
+                        })
+                        await this.processEvent('toggleEntryContextMenu', {
+                            listId: list.localId,
+                        })
+                    },
+                    onCancelClick: this.handleSpaceContextMenuClose(
+                        list.localId,
+                    ),
+                    errorMessage: this.state.renameListErrorMessage,
+                }}
+                onSpaceShare={(remoteListId) =>
+                    this.processEvent('setListRemoteId', {
+                        localListId: list.localId,
+                        remoteListId,
+                    })
+                }
+                onClose={this.handleSpaceContextMenuClose(list.localId)}
+                remoteListId={list.remoteId}
+            />
+        )
+    }
+
     renderMainContent() {
-        if (this.state.loadingSuggestions) {
+        if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
                     <LoadingIndicator size={25} />
@@ -194,14 +345,18 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <>
+                {this.renderSpaceContextMenu()}
                 <PickerSearchInput
-                    searchInputPlaceholder="Search Spaces"
+                    searchInputPlaceholder={
+                        this.props.searchInputPlaceholder ??
+                        'Search & Add Spaces'
+                    }
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
-                    loading={this.state.loadingQueryResults}
+                    loading={this.state.loadingQueryResults === 'running'}
                     before={
                         <EntrySelectedList
                             entries={this.selectedDisplayEntries}
@@ -209,13 +364,14 @@ class SpacePicker extends StatefulUIElement<
                         />
                     }
                 />
-                <EntryResultsList
-                    query={this.state.query}
-                    entries={this.state.displayEntries}
-                    renderEntryRow={this.renderListRow}
-                    emptyView={this.renderEmptyList()}
-                    id="listResults"
-                />
+                <EntryList ref={this.displayListRef}>
+                    {this.state.query === '' && (
+                        <EntryListHeader>Recently used</EntryListHeader>
+                    )}
+                    {!this.state.displayEntries.length
+                        ? this.renderEmptyList()
+                        : this.state.displayEntries.map(this.renderListRow)}
+                </EntryList>
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
                         resultItem={
@@ -240,12 +396,29 @@ class SpacePicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     {this.renderMainContent()}
-                    {this.props.children}
                 </OuterSearchBox>
             </ThemeProvider>
         )
     }
 }
+
+const EntryListHeader = styled.div`
+    padding: 5px 10px;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.subText};
+`
+
+const EntryList = styled.div`
+    position: relative;
+    overflow-y: auto;
+    max-height: 280px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.backgroundHighlight};
@@ -293,6 +466,23 @@ const EmptyListsView = styled.div`
     align-items: center;
     grid-gap: 5px;
     padding: 20px 15px;
+`
+
+const EntryRowContainer = styled.div`
+    display: flex;
+    flex=direction: row;
+    align-items: center;
+    margin: 0px 10px;
+`
+
+const SpaceContextMenuBtn = styled.div`
+    border-radius: 3px;
+    padding: 2px;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 export default onClickOutside(SpacePicker)

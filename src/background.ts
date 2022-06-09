@@ -3,7 +3,6 @@ import browser from 'webextension-polyfill'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
-import initSentry from './util/raven'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
@@ -35,9 +34,11 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
-import { captureException } from 'src/util/raven'
+import initSentry, { captureException } from 'src/util/raven'
 import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
+
+let __debugCounter = 0
 
 export async function main() {
     const rpcManager = setupRpcConnection({
@@ -81,6 +82,7 @@ export async function main() {
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
     })
+    __debugCounter++
 
     const backgroundModules = createBackgroundModules({
         services,
@@ -108,6 +110,7 @@ export async function main() {
             return result.data as Promise<Returns>
         },
     })
+    __debugCounter++
     registerBackgroundModuleCollections({
         storageManager,
         persistentStorageManager,
@@ -115,7 +118,9 @@ export async function main() {
     })
 
     await storageManager.finishInitialization()
+    __debugCounter++
     await persistentStorageManager.finishInitialization()
+    __debugCounter++
 
     const { setStorageLoggingEnabled } = await setStorageMiddleware(
         storageManager,
@@ -125,9 +130,20 @@ export async function main() {
             personalCloud: backgroundModules.personalCloud,
         },
     )
+    __debugCounter++
     await setupBackgroundModules(backgroundModules, storageManager)
+    __debugCounter++
 
-    navigator?.storage?.persist?.()
+    navigator?.storage
+        ?.persist?.()
+        .catch((err) =>
+            captureException(
+                new Error(
+                    `Error occurred on navigator.storage.persist() call: ${err.message}`,
+                ),
+            ),
+        )
+    __debugCounter++
 
     setStorex(storageManager)
 
@@ -156,6 +172,7 @@ export async function main() {
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
+    __debugCounter++
 
     // Attach interesting features onto global globalThis scope for interested users
     globalThis['getDb'] = getDb
@@ -174,6 +191,13 @@ export async function main() {
     })
 
     rpcManager.unpause()
+    __debugCounter++
 }
 
-main()
+main().catch((err) =>
+    captureException(
+        new Error(
+            `Error occurred during background script setup: ${err.message} - debug counter: ${__debugCounter}`,
+        ),
+    ),
+)

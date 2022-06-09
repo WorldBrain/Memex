@@ -101,15 +101,6 @@ class Container extends React.Component<Props, State> {
             }
         }
 
-        const hideResults =
-            (await this.props.syncSettings.searchInjection.get(
-                'hideMemexResults',
-            )) ?? false
-        const position =
-            (await this.props.syncSettings.searchInjection.get(
-                'memexResultsPosition',
-            )) ?? 'side'
-
         const subBannerShownAfter = await this.props.syncSettings.dashboard.get(
             'subscribeBannerShownAfter',
         )
@@ -119,16 +110,6 @@ class Container extends React.Component<Props, State> {
         if (notification) {
             fetchNotif = await this.fetchNotifById(notification.id)
         }
-
-        this.setState({
-            hideResults,
-            position,
-            isNotif: fetchNotif && !fetchNotif.readTime,
-            notification,
-            isCloudUpgradeBannerShown: !isCloudEnabled,
-            isSubscriptionBannerShown:
-                subBannerShownAfter != null && subBannerShownAfter < Date.now(),
-        })
 
         const limit = constants.LIMIT[this.props.position]
         const query = this.props.query
@@ -151,6 +132,27 @@ class Container extends React.Component<Props, State> {
                 searchResults: searchResDocs,
             })
         }
+
+        const hideResults =
+            ((await this.props.syncSettings.searchInjection.get(
+                'hideMemexResults',
+            )) ||
+                this.state.searchResults.length === 0) ??
+            false
+        const position =
+            (await this.props.syncSettings.searchInjection.get(
+                'memexResultsPosition',
+            )) ?? 'side'
+
+        this.setState({
+            hideResults,
+            position,
+            isNotif: fetchNotif && !fetchNotif.readTime,
+            notification,
+            isCloudUpgradeBannerShown: !isCloudEnabled,
+            isSubscriptionBannerShown:
+                subBannerShownAfter != null && subBannerShownAfter < Date.now(),
+        })
     }
 
     handleResultLinkClick = () =>

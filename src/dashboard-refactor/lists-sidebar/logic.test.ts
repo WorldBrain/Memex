@@ -1,6 +1,11 @@
 import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
+import {
+    EMPTY_LIST_NAME_ERR_MSG,
+    NON_UNIQ_LIST_NAME_ERR_MSG,
+    BAD_CHAR_LIST_NAME_ERR_MSG,
+} from 'src/custom-lists/ui/constants'
 
 describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -163,12 +168,10 @@ describe('Dashboard lists sidebar logic', () => {
         })
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
 
-        expect(searchResults.state.listsSidebar.editingListId).toEqual(
-            undefined,
-        )
-        await searchResults.processEvent('setEditingListId', { listId: 123 })
-        expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
         expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
+        // await searchResults.processEvent('setEditingListId', { listId: 123 })
+        // expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
+        // expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
 
         await searchResults.processEvent('cancelListEdit', null)
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(
@@ -228,6 +231,116 @@ describe('Dashboard lists sidebar logic', () => {
                 .collection('customLists')
                 .findOneObject({ id: listId }),
         ).toEqual(expect.objectContaining({ id: listId, name: nameUpdated }))
+    })
+
+    it('should block edit and show error on bad list name edits', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+        const nameA = 'test A'
+        const nameB = 'test B'
+
+        await searchResults.processEvent('confirmListCreate', { value: nameA })
+        await searchResults.processEvent('confirmListCreate', { value: nameB })
+        const listIdA = +Object.keys(
+            searchResults.state.listsSidebar.listData,
+        )[0]
+
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(
+            undefined,
+        )
+        await searchResults.processEvent('setEditingListId', {
+            listId: listIdA,
+        })
+        expect(searchResults.state.listsSidebar.editingListId).toEqual(listIdA)
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: '    ',
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            EMPTY_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: nameB,
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+
+        await searchResults.processEvent('changeListName', {
+            value: nameA + '[ ( {',
+        })
+        expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+        expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
+            expect.objectContaining({
+                id: listIdA,
+                name: nameA,
+            }),
+        )
+    })
+
+    it('should block create and show error on bad list name creates', async ({
+        device,
+    }) => {
+        const { searchResults } = await setupTest(device)
+
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: 'test' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: 'test' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            NON_UNIQ_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', { value: '    ' })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            EMPTY_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', {
+            value: 'test [ ( {',
+        })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            BAD_CHAR_LIST_NAME_ERR_MSG,
+        )
+
+        await searchResults.processEvent('confirmListCreate', {
+            value: 'test 2',
+        })
+        expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
+            null,
+        )
     })
 
     it('should be able to cancel list edit', async ({ device }) => {
@@ -675,13 +788,31 @@ describe('Dashboard lists sidebar logic', () => {
                     },
                 },
             },
+            searchResults: {
+                pageData: {
+                    byId: {
+                        $set: {
+                            [page.normalizedUrl]: {
+                                lists: [],
+                            },
+                        },
+                    },
+                },
+            },
         })
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(listId)
+        expect(
+            searchResults.state.searchResults.pageData.byId[page.normalizedUrl]
+                .lists,
+        ).toEqual([])
 
         const dataTransfer = new DataTransfer()
         dataTransfer.setData(
             'text/plain',
-            JSON.stringify({ fullPageUrl: page.fullUrl }),
+            JSON.stringify({
+                fullPageUrl: page.fullUrl,
+                normalizedPageUrl: page.normalizedUrl,
+            }),
         )
         await searchResults.processEvent('dropPageOnListItem', {
             listId,
@@ -694,6 +825,11 @@ describe('Dashboard lists sidebar logic', () => {
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
             undefined,
         )
+        expect(
+            searchResults.state.searchResults.pageData.byId[page.normalizedUrl]
+                .lists,
+        ).toEqual([listId])
+
         expect(
             await device.storageManager
                 .collection('pageListEntries')
@@ -710,6 +846,9 @@ describe('Dashboard lists sidebar logic', () => {
     it('should be able to share a list, setting its remoteId state', async ({
         device,
     }) => {
+        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
+            ({ remoteListId: DATA.LISTS_1[1].remoteId } as any)
+
         for (const listData of DATA.LISTS_1) {
             await device.storageManager.collection('customLists').createObject({
                 id: listData.id,
@@ -729,7 +868,6 @@ describe('Dashboard lists sidebar logic', () => {
 
         await searchResults.processEvent('shareList', {
             listId,
-            remoteId: DATA.LISTS_1[1].remoteId,
         })
 
         expect(searchResults.state.listsSidebar.listData[listId].remoteId).toBe(

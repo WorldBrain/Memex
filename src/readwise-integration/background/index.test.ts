@@ -9,6 +9,7 @@ import {
 } from 'src/tests/integration-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 import { READWISE_API_URL } from '@worldbrain/memex-common/lib/readwise-integration/api/constants'
+import { formatReadwiseHighlightTag } from '@worldbrain/memex-common/lib/readwise-integration/utils'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Readwise Annotations',
@@ -236,7 +237,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should prepend any annotation tags to note text when uploading highlights to readwise',
+            'should prepend any annotation tags and spaces to note text when uploading highlights to readwise',
             () => {
                 return {
                     steps: [
@@ -252,6 +253,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup.fetch.post(READWISE_API_URL, {
                                     status: 200,
                                 })
+
+                                await setup.backgroundModules.customLists.createCustomList(
+                                    DATA.LIST_1,
+                                )
+                                await setup.backgroundModules.customLists.createCustomList(
+                                    DATA.LIST_2,
+                                )
 
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
@@ -281,6 +289,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         url: firstAnnotationUrl,
                                     },
                                 )
+                                await setup.backgroundModules.contentSharing.shareAnnotationToSomeLists(
+                                    {
+                                        annotationUrl: firstAnnotationUrl,
+                                        localListIds: [
+                                            DATA.LIST_1.id,
+                                            DATA.LIST_2.id,
+                                        ],
+                                    },
+                                )
                                 const secondAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_2 },
                                     {
@@ -293,6 +310,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         tag: DATA.TAG_2,
                                         url: secondAnnotationUrl,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.shareAnnotationToSomeLists(
+                                    {
+                                        annotationUrl: secondAnnotationUrl,
+                                        localListIds: [DATA.LIST_2.id],
                                     },
                                 )
 
@@ -323,14 +346,31 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3}\n` +
-                                                            expectedHighlight1.note,
+                                                            `.${DATA.TAG_1} .${
+                                                                DATA.TAG_2
+                                                            } .${
+                                                                DATA.TAG_3
+                                                            } .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_1
+                                                                    .name,
+                                                            )} .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_2
+                                                                    .name,
+                                                            )}\n` +
+                                                            expectedHighlight1.note +
+                                                            `\n#${DATA.TAG_1} #${DATA.TAG_2} #${DATA.TAG_3} [[${DATA.LIST_1.name}]] [[${DATA.LIST_2.name}]]`,
                                                     },
                                                     {
                                                         ...expectedHighlight2,
                                                         note:
-                                                            `.${DATA.TAG_2}\n` +
-                                                            expectedHighlight2.note,
+                                                            `.${
+                                                                DATA.TAG_2
+                                                            } .${formatReadwiseHighlightTag(
+                                                                DATA.LIST_2
+                                                                    .name,
+                                                            )}\n` +
+                                                            expectedHighlight2.note +
+                                                            `\n#${DATA.TAG_2} [[${DATA.LIST_2.name}]]`,
                                                     },
                                                 ],
                                             }),
@@ -367,6 +407,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     status: 200,
                                 })
 
+                                const testTagWithWhitespace =
+                                    'test tag  with   whitespace'
+
                                 const firstAnnotationUrl = await setup.backgroundModules.directLinking.createAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
                                     {
@@ -391,7 +434,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await setup.backgroundModules.directLinking.addTagForAnnotation(
                                     { tab: DATA.TEST_TAB_1 },
                                     {
-                                        tag: 'test tag  with   whitespace',
+                                        tag: testTagWithWhitespace,
                                         url: firstAnnotationUrl,
                                     },
                                 )
@@ -421,8 +464,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                                     {
                                                         ...expectedHighlight1,
                                                         note:
-                                                            `.${DATA.TAG_1} .${DATA.TAG_2} .${DATA.TAG_3} .test-tag-with-whitespace\n` +
-                                                            expectedHighlight1.note,
+                                                            `.${DATA.TAG_1} .${
+                                                                DATA.TAG_2
+                                                            } .${
+                                                                DATA.TAG_3
+                                                            } .${formatReadwiseHighlightTag(
+                                                                testTagWithWhitespace,
+                                                            )}\n` +
+                                                            expectedHighlight1.note +
+                                                            `\n#${DATA.TAG_1} #${DATA.TAG_2} #${DATA.TAG_3} [[${testTagWithWhitespace}]]`,
                                                     },
                                                 ],
                                             }),

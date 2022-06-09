@@ -18,6 +18,7 @@ import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/Shar
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
+import type { SidebarContainerLogic } from './logic'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -129,7 +130,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return containerNode?.getRootNode() as Document
     }
 
-    private activateAnnotation(url: string, annotationMode: 'edit' | 'show') {
+    private activateAnnotation(
+        url: string,
+        annotationMode: 'edit' | 'edit_spaces' | 'show',
+    ) {
         if (annotationMode === 'show') {
             this.processEvent('switchAnnotationMode', {
                 annotationUrl: url,
@@ -141,6 +145,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 annotationUrl: url,
                 context: 'pageAnnotations',
             })
+
+            if (annotationMode === 'edit_spaces') {
+                this.processEvent('setListPickerAnnotationId', { id: url })
+            }
         }
 
         this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
@@ -156,7 +164,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         })
     }
 
-    private handleExternalAction = (event: SidebarActionOptions) => {
+    private handleExternalAction = async (event: SidebarActionOptions) => {
+        await (this.logic as SidebarContainerLogic).annotationsLoadComplete
+
         if (event.action === 'comment') {
             this.processEvent('addNewPageComment', {
                 comment: event.annotationData?.commentText,
@@ -166,6 +176,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.activateAnnotation(event.annotationUrl, 'show')
         } else if (event.action === 'edit_annotation') {
             this.activateAnnotation(event.annotationUrl, 'edit')
+        } else if (event.action === 'edit_annotation_spaces') {
+            this.activateAnnotation(event.annotationUrl, 'edit_spaces')
         } else if (event.action === 'set_sharing_access') {
             this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,
@@ -205,8 +217,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    protected bindAnnotationFooterEventProps(annotation: Annotation) {
-        const boundProps = super.bindAnnotationFooterEventProps(annotation)
+    protected bindAnnotationFooterEventProps(
+        annotation: Annotation,
+        followedListId?: string,
+    ) {
+        const boundProps = super.bindAnnotationFooterEventProps(
+            annotation,
+            followedListId,
+        )
 
         return {
             ...boundProps,

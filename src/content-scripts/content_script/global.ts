@@ -21,7 +21,10 @@ import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import type { ContentScriptRegistry, GetContentFingerprints } from './types'
 import type { ContentScriptsInterface } from '../background/types'
 import type { ContentScriptComponent } from '../types'
-import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
+import {
+    initKeyboardShortcuts,
+    resetKeyboardShortcuts,
+} from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
@@ -48,6 +51,7 @@ import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -156,9 +160,11 @@ export async function main(
             }),
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
+            showSpacePicker?: boolean,
         ) =>
             highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
+                showSpacePicker,
                 analyticsEvent,
                 shouldShare,
             }),
@@ -181,6 +187,9 @@ export async function main(
                 activityIndicatorBG: runInBackground(),
                 contentSharing: runInBackground(),
                 bookmarks: runInBackground(),
+                syncSettings: createSyncSettingsStore({
+                    syncSettingsBG: runInBackground(),
+                }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,
@@ -265,6 +274,7 @@ export async function main(
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
+        ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
         reloadRibbon: () => inPageUI.reloadRibbon(),
@@ -292,6 +302,13 @@ export async function main(
             category: 'Annotations',
             action: 'createFromContextMenu',
         }),
+        teardownContentScripts: async () => {
+            await inPageUI.hideHighlights()
+            await inPageUI.hideSidebar()
+            await inPageUI.removeRibbon()
+            await inPageUI.removeTooltip()
+            resetKeyboardShortcuts()
+        },
     })
 
     // 6. Setup other interactions with this page (things that always run)

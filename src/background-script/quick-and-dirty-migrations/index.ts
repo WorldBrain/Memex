@@ -9,21 +9,31 @@ import {
 import textStemmer from '@worldbrain/memex-stemmer'
 
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
-import type { BackgroundModules } from './setup'
-import { createSyncSettingsStore } from 'src/sync-settings/util'
+import type { BackgroundModules } from '../setup'
+import {
+    createSyncSettingsStore,
+    SyncSettingsStore,
+} from 'src/sync-settings/util'
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
-import type { LocalExtensionSettings } from './types'
+import type { LocalExtensionSettings } from '../types'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
+import { migrateTagsToSpaces } from './tags-migration'
+import { PersonalCloudActionType } from 'src/personal-cloud/background/types'
+import { PersonalCloudUpdateType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
 export interface MigrationProps {
     db: Dexie
     storex: Storex
     normalizeUrl: URLNormalizer
     localStorage: Storage.LocalStorageArea
-    backgroundModules: Pick<BackgroundModules, 'readwise' | 'syncSettings'>
+    bgModules: Pick<
+        BackgroundModules,
+        'readwise' | 'syncSettings' | 'personalCloud'
+    >
     localExtSettingStore: SettingStore<LocalExtensionSettings>
+    syncSettingsStore: SyncSettingsStore<'extension'>
 }
 
 export interface Migrations {
@@ -39,6 +49,43 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    [MIGRATION_PREFIX + 'migrate-tags-to-spaces']: async ({
+        bgModules: { personalCloud },
+        syncSettingsStore,
+        db,
+    }) => {
+        const alreadyMigratedOnAnotherDevice = await syncSettingsStore.extension.get(
+            'areTagsMigratedToSpaces',
+        )
+        if (alreadyMigratedOnAnotherDevice) {
+            return
+        }
+
+        await migrateTagsToSpaces({
+            dexie: db,
+            queueChangesForCloudSync: async ({ collection, objs }) =>
+                personalCloud.actionQueue.scheduleManyActions(
+                    objs.map((object) => ({
+                        type: PersonalCloudActionType.PushObject,
+                        updates: [
+                            {
+                                collection,
+                                deviceId: personalCloud.deviceId!,
+                                type: PersonalCloudUpdateType.Overwrite,
+                                schemaVersion: personalCloud.currentSchemaVersion!,
+                                object: personalCloud.preprocessObjectForPush({
+                                    collection,
+                                    object,
+                                }),
+                            },
+                        ],
+                    })),
+                    { queueInteraction: 'queue-and-return' },
+                ),
+        })
+
+        await syncSettingsStore.extension.set('areTagsMigratedToSpaces', true)
+    },
     /*
      * This is the migration to bring over old pre-cloud user data to the new cloud-based
      * model. Previously this was done by version number in the calling BG script class, though
@@ -47,17 +94,20 @@ export const migrations: Migrations = {
     [MIGRATION_PREFIX + 'migrate-to-cloud']: async ({
         localExtSettingStore,
         storex: storageManager,
-        backgroundModules: { syncSettings },
+        bgModules: backgroundModules,
     }) => {
         if ((await localExtSettingStore.get('installTimestamp')) != null) {
             return
         }
 
-        await (this as any).deps.syncSettingsStore.dashboard.set(
+        const syncSettings = createSyncSettingsStore({
+            syncSettingsBG: backgroundModules.syncSettings,
+        })
+        await syncSettings.dashboard.set(
             'subscribeBannerShownAfter',
             Date.now(),
         )
-        await syncSettings.__migrateLocalStorage()
+        await backgroundModules.syncSettings.__migrateLocalStorage()
         await migrateInstallTime({
             storageManager,
             getOldInstallTime: () =>
@@ -74,7 +124,7 @@ export const migrations: Migrations = {
      * the user re-entered their API key.
      */
     [MIGRATION_PREFIX + 'migrate-readwise-key']: async ({
-        backgroundModules,
+        bgModules: backgroundModules,
         localStorage,
     }) => {
         // Note I'm using the constant for the synced settings here because the name is the same as the old local storage key name

@@ -1,4 +1,6 @@
 import { Tabs, Browser } from 'webextension-polyfill'
+import { EventEmitter } from 'events'
+import type TypedEventEmitter from 'typed-emitter'
 
 import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'
@@ -6,6 +8,7 @@ import {
     registerRemoteFunctions,
     remoteFunctionWithExtraArgs,
     remoteFunctionWithoutExtraArgs,
+    runInTab,
 } from 'src/util/webextensionRPC'
 import { TabManager } from './tab-manager'
 import { TabChangeListener, TabManagementInterface } from './types'
@@ -13,10 +16,11 @@ import { resolvablePromise } from 'src/util/resolvable'
 import { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { LoggableTabChecker } from 'src/activity-logger/background/types'
-import { isLoggable, getPauseState } from 'src/activity-logger'
+import { isLoggable } from 'src/activity-logger'
 import { blacklist } from 'src/blacklist/background'
-import TypedEventEmitter from 'typed-emitter'
-import { EventEmitter } from 'events'
+import { captureException } from 'src/util/raven'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { isExtensionTab } from '../utils'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
 const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
@@ -118,10 +122,24 @@ export default class TabManagementBackground {
         return tabs.length ? tabs[0].id : null
     }
 
-    async trackExistingTabs() {
-        const tabs = await this.options.browserAPIs.tabs.query({})
+    async mapTabChunks<T>(
+        mapFn: (tab: Tabs.Tab) => Promise<T>,
+        {
+            chunkSize = CONCURR_TAB_LOAD,
+            query = {},
+            onError,
+        }: {
+            chunkSize?: number
+            query?: Tabs.QueryQueryInfoType
+            onError?: (error: Error, tab: Tabs.Tab) => void
+        } = {},
+    ) {
+        const tabs = await this.options.browserAPIs.tabs.query(query)
+        await mapChunks(tabs, chunkSize, mapFn, onError)
+    }
 
-        await mapChunks(tabs, CONCURR_TAB_LOAD, async (tab) => {
+    async trackExistingTabs() {
+        this.mapTabChunks(async (tab) => {
             if (this.tabManager.isTracked(tab.id)) {
                 return
             }
@@ -130,7 +148,8 @@ export default class TabManagementBackground {
                 isLoaded: TabManagementBackground.isTabLoaded(tab),
             })
 
-            await this.injectContentScripts(tab)
+            // NOTE: this is now done on-demand. See `BackgroundScript.setupOnDemandContentScriptInjection`
+            // await this.injectContentScripts(tab)
         })
 
         this.trackingExistingTabs.resolve()
@@ -144,22 +163,33 @@ export default class TabManagementBackground {
         })
     }
 
+    async injectContentScriptsIfNeeded(tabId: number) {
+        try {
+            await runInTab<InPageUIContentScriptRemoteInterface>(tabId, {
+                quietConsole: true,
+            }).ping()
+        } catch (err) {
+            // If the ping fails, the content script is not yet set up
+            const _tab = await this.options.browserAPIs.tabs.get(tabId)
+            await this.injectContentScripts(_tab)
+        }
+    }
+
     async injectContentScripts(tab: Tabs.Tab) {
         const isLoggable = await this.shouldLogTab(tab)
 
-        if (!isLoggable) {
+        if (!isLoggable || isExtensionTab({ url: tab.url! })) {
             return
         }
 
         for (const file of CONTENT_SCRIPTS) {
             await this.options.browserAPIs.tabs
-                .executeScript(tab.id, { file })
-                .catch((err) =>
-                    console.error(
-                        'Cannot inject content-scripts into page - reason:',
-                        err.message,
-                    ),
-                )
+                .executeScript(tab.id, { file, runAt: 'document_idle' })
+                .catch((err) => {
+                    const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
+                    captureException(new Error(message))
+                    console.error(message)
+                })
         }
     }
 
@@ -173,11 +203,8 @@ export default class TabManagementBackground {
             return false
         }
 
-        // First check if we want to log this page (hence the 'maybe' in the name).
         const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
-        const isPaused = await getPauseState()
-
-        return !isPaused && !isBlacklisted({ url })
+        return !isBlacklisted({ url })
     }
 
     /**

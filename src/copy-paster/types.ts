@@ -19,6 +19,9 @@ export interface TemplateDocPage {
     PageTitle?: string
     PageTags?: string
     PageTagList?: string[]
+    PageSpaces?: string
+    PageSpacesList?: string[]
+    PageCreatedAt?: string
     PageLink?: string
     Notes?: TemplateDocNote[]
 
@@ -33,6 +36,9 @@ export interface TemplateDocNote {
     NoteText?: string
     NoteTags?: string
     NoteTagList?: string[]
+    NoteSpaces?: string
+    NoteSpacesList?: string[]
+    NoteCreatedAt?: string
     NoteLink?: string
 }
 
@@ -45,34 +51,41 @@ export interface TemplateAnalysis {
 export interface TemplateRequirements {
     page?: boolean
     pageTags?: boolean
+    pageSpaces?: boolean
+    pageCreatedAt?: boolean
     pageLink?: boolean
     note?: boolean
     noteTags?: boolean
+    noteSpaces?: boolean
+    noteCreatedAt?: boolean
     noteLink?: boolean
 }
 
 export interface TemplateDataFetchers {
     getPages(
         normalizedPageUrls: string[],
-    ): Promise<{ [normalizedPageUrl: string]: PageTemplateData }>
-    getNotes(
-        annotationUrls: string[],
-    ): Promise<{ [annotationUrl: string]: NoteTemplateData }>
+    ): Promise<UrlMappedData<PageTemplateData>>
+    getNotes(annotationUrls: string[]): Promise<UrlMappedData<NoteTemplateData>>
     getNoteIdsForPages(
         normalizedPageUrls: string[],
-    ): Promise<{ [normalizedPageUrl: string]: string[] }>
-    getTagsForNotes(
-        annotationUrls: string[],
-    ): Promise<{ [annotationUrl: string]: string[] }>
+    ): Promise<UrlMappedData<string[]>>
+    getTagsForNotes(annotationUrls: string[]): Promise<UrlMappedData<string[]>>
     getTagsForPages(
         normalizedPageUrls: string[],
-    ): Promise<{ [normalizedPageUrl: string]: string[] }>
-    getPageLinks(notes: {
-        [normalizedPageUrl: string]: { annotationUrls: string[] }
-    }): Promise<{ [normalizedPageUrl: string]: string }>
-    getNoteLinks(
+    ): Promise<UrlMappedData<string[]>>
+    getSpacesForNotes(
         annotationUrls: string[],
-    ): Promise<{ [annotationUrl: string]: string }>
+    ): Promise<UrlMappedData<string[]>>
+    getSpacesForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<string[]>>
+    getCreatedAtForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<Date>>
+    getPageLinks(
+        notes: UrlMappedData<{ annotationUrls: string[] }>,
+    ): Promise<UrlMappedData<string>>
+    getNoteLinks(annotationUrls: string[]): Promise<UrlMappedData<string>>
 }
 
 export interface PageTemplateData {
@@ -85,4 +98,9 @@ export interface NoteTemplateData {
     pageUrl: string
     body?: string
     comment?: string
+    createdAt: Date
+}
+
+export interface UrlMappedData<T> {
+    [url: string]: T
 }

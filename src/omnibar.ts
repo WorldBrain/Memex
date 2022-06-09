@@ -26,11 +26,8 @@ import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
 import { TabManager } from './tab-management/background/tab-manager'
-import { getFirebase } from './util/firebase-app-initialized'
 
 export async function main() {
-    const generateServerId = (collectionName) =>
-        getFirebase().firestore().collection(collectionName).doc().id
     const tabManagement = new TabManagementBackground({
         tabManager: new TabManager(),
         browserAPIs: browser,
@@ -45,7 +42,6 @@ export async function main() {
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
         persistentStorageManager: createPersistentStorageManager(),
-        generateServerId,
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,

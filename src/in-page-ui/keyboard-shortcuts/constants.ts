@@ -1,12 +1,12 @@
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 
 export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 
 const altKey = getKeyName({ key: 'alt' })
 
-export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
+export const KEYBOARDSHORTCUTS_DEFAULT_STATE: SyncSettingsByFeature['extension']['keyboardShortcuts'] = {
     shortcutsEnabled: true,
-    linkShortcut: 'shift+l',
     openDashboardShortcut: altKey + '+f',
     toggleSidebarShortcut: altKey + '+q',
     toggleHighlightsShortcut: altKey + '+r',
@@ -16,7 +16,6 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     addTagShortcut: altKey + '+x',
     addToCollectionShortcut: altKey + '+c',
     addCommentShortcut: altKey + '+e',
-    linkShortcutEnabled: false,
     toggleSidebarShortcutEnabled: true,
     toggleHighlightsShortcutEnabled: true,
     createAnnotationShortcutEnabled: true,

@@ -9,14 +9,12 @@ import type {
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
-import type NotifsBackground from '../notifications/background'
-import { makeRemotelyCallable } from '../util/webextensionRPC'
+import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
-import type CopyPasterBackground from 'src/copy-paster/background'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
 import {
     OVERVIEW_URL,
@@ -24,7 +22,6 @@ import {
     OPTIONS_URL,
     LEARN_MORE_URL,
 } from 'src/constants'
-import type { ReadwiseBackground } from 'src/readwise-integration/background'
 
 // TODO: pass these deps down via constructor
 import {
@@ -32,8 +29,6 @@ import {
     blacklist,
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
-import type TabManagementBackground from 'src/tab-management/background'
-import type CustomListBackground from 'src/custom-lists/background'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type {
@@ -41,22 +36,20 @@ import type {
     RemoteBGScriptInterface,
     OpenTabParams,
 } from './types'
-import type { SyncSettingsBackground } from 'src/sync-settings/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
+import type { BackgroundModules } from './setup'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
+import { captureException } from 'src/util/raven'
 
 interface Dependencies {
-    storageManager: Storex
-    tabManagement: TabManagementBackground
-    notifsBackground: NotifsBackground
-    copyPasterBackground: CopyPasterBackground
-    customListsBackground: CustomListBackground
-    readwiseBG: ReadwiseBackground
-    syncSettingsBG: SyncSettingsBackground
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
-    syncSettingsStore: SyncSettingsStore<'pdfIntegration' | 'dashboard'>
+    syncSettingsStore: SyncSettingsStore<
+        'pdfIntegration' | 'dashboard' | 'extension'
+    >
     urlNormalizer: URLNormalizer
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
@@ -64,6 +57,17 @@ interface Dependencies {
     commandsAPI: Commands.Static
     alarmsAPI: Alarms.Static
     tabsAPI: Tabs.Static
+    storageManager: Storex
+    bgModules: Pick<
+        BackgroundModules,
+        | 'tabManagement'
+        | 'notifications'
+        | 'copyPaster'
+        | 'customLists'
+        | 'personalCloud'
+        | 'readwise'
+        | 'syncSettings'
+    >
 }
 
 class BackgroundScript {
@@ -115,9 +119,15 @@ class BackgroundScript {
         // Store the timestamp of when the extension was installed
         await this.deps.localExtSettingStore.set('installTimestamp', Date.now())
 
-        // Enable PDF integration by default
+        // Disable PDF integration by default
         await this.deps.syncSettingsStore.pdfIntegration.set(
             'shouldAutoOpen',
+            false,
+        )
+
+        // Disable tags
+        await this.deps.syncSettingsStore.extension.set(
+            'areTagsMigratedToSpaces',
             true,
         )
 
@@ -133,7 +143,7 @@ class BackgroundScript {
         )
 
         await insertDefaultTemplates({
-            copyPaster: this.deps.copyPasterBackground,
+            copyPaster: this.deps.bgModules.copyPaster,
             localStorage: this.deps.storageAPI.local,
         })
     }
@@ -142,9 +152,19 @@ class BackgroundScript {
      * Runs on both extension update and install.
      */
     private async handleUnifiedLogic() {
-        await this.deps.customListsBackground.createInboxListIfAbsent()
-        await this.deps.notifsBackground.deliverStaticNotifications()
-        await this.deps.tabManagement.trackExistingTabs()
+        await this.deps.bgModules.customLists.createInboxListIfAbsent()
+        // await this.deps.bgModules.notifications.deliverStaticNotifications()
+        // await this.deps.bgModules.tabManagement.trackExistingTabs()
+    }
+
+    private setupOnDemandContentScriptInjection() {
+        // NOTE: this code lacks automated test coverage.
+        // ---Ensure you test manually upon change, as the content script injection won't work on ext install/update without it---
+        this.deps.tabsAPI.onActivated.addListener(async ({ tabId }) => {
+            await this.deps.bgModules.tabManagement.injectContentScriptsIfNeeded(
+                tabId,
+            )
+        })
     }
 
     /**
@@ -155,13 +175,15 @@ class BackgroundScript {
         this.deps.runtimeAPI.onInstalled.addListener(async (details) => {
             switch (details.reason) {
                 case 'install':
+                    await this.handleInstallLogic()
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
-                    return this.handleInstallLogic()
+                    break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
                     await setLocalStorage(READ_STORAGE_FLAG, false)
-                    return this.handleUnifiedLogic()
+                    await this.handleUnifiedLogic()
+                    break
                 default:
             }
         })
@@ -169,8 +191,26 @@ class BackgroundScript {
 
     private setupStartupHooks() {
         this.deps.runtimeAPI.onStartup.addListener(async () => {
-            this.deps.tabManagement.trackExistingTabs()
+            this.deps.bgModules.tabManagement.trackExistingTabs()
         })
+    }
+
+    private async ___runTagsMigration() {
+        await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
+            bgModules: this.deps.bgModules,
+            storex: this.deps.storageManager,
+            db: this.deps.storageManager.backend['dexieInstance'],
+            localStorage: this.deps.storageAPI.local,
+            normalizeUrl: this.deps.urlNormalizer,
+            syncSettingsStore: this.deps.syncSettingsStore,
+            localExtSettingStore: this.deps.localExtSettingStore,
+        })
+    }
+
+    private async ___testContentScriptsTeardown(tabId: number) {
+        await runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).teardownContentScripts()
     }
 
     /**
@@ -188,15 +228,13 @@ class BackgroundScript {
             }
 
             await migration({
+                bgModules: this.deps.bgModules,
                 storex: this.deps.storageManager,
                 db: this.deps.storageManager.backend['dexieInstance'],
                 localStorage: this.deps.storageAPI.local,
                 normalizeUrl: this.deps.urlNormalizer,
+                syncSettingsStore: this.deps.syncSettingsStore,
                 localExtSettingStore: this.deps.localExtSettingStore,
-                backgroundModules: {
-                    readwise: this.deps.readwiseBG,
-                    syncSettings: this.deps.syncSettingsBG,
-                },
             })
             await this.deps.storageAPI.local.set({ [storageKey]: true })
         }
@@ -228,18 +266,61 @@ class BackgroundScript {
     }
 
     sendNotification(notifId: string) {
-        return this.deps.notifsBackground.dispatchNotification(notifId)
+        return this.deps.bgModules.notifications.dispatchNotification(notifId)
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
+    private setupExtUpdateHandling() {
+        const { runtimeAPI, bgModules } = this.deps
+        runtimeAPI.onUpdateAvailable.addListener(async () => {
+            try {
+                await bgModules.tabManagement.mapTabChunks(
+                    async ({ url, id }) => {
+                        if (
+                            !url ||
+                            isExtensionTab({ url }) ||
+                            isBrowserPageTab({ url })
+                        ) {
+                            return
+                        }
+
+                        await runInTab<InPageUIContentScriptRemoteInterface>(
+                            id,
+                        ).teardownContentScripts()
+                    },
+                    {
+                        onError: (err, tab) => {
+                            console.error(
+                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                                err.message,
+                            )
+                            captureException(err)
+                        },
+                    },
+                )
+            } catch (err) {
+                console.error(
+                    'Error encountered attempting to teardown content scripts for extension update:',
+                    err.message,
+                )
+                captureException(err)
+            }
+
+            // This call prompts the extension to reload, updating the scripts to the newest versions
+            runtimeAPI.reload()
+        })
+    }
+
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupStartupHooks()
+        this.setupOnDemandContentScriptInjection()
         this.setupCommands()
         this.setupUninstallURL()
+        this.setupExtUpdateHandling()
     }
 
     setupAlarms(alarms: AlarmsConfig) {

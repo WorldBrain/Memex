@@ -5,8 +5,23 @@ import CopyPasterBackground from '.'
 
 export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
-export const ROAM_MD_TEMPLATE: Template = {
+export const JUST_URL: Template = {
     id: 1,
+    title: 'Page URL',
+    isFavourite: false,
+    code: `{{{PageUrl}}}`,
+}
+
+export const URL_AND_TITLE: Template = {
+    id: 2,
+    title: 'Page URL & Title',
+    isFavourite: false,
+    code: `{{{PageTitle}}}
+{{{PageUrl}}}`,
+}
+
+export const ROAM_MD_TEMPLATE: Template = {
+    id: 3,
     title: 'Roam Markdown',
     isFavourite: false,
     code: `[[{{{PageTitle}}}]]
@@ -19,20 +34,20 @@ export const ROAM_MD_TEMPLATE: Template = {
 }
 
 export const NOTION_MD_TEMPLATE: Template = {
-    id: 2,
+    id: 4,
     title: 'Notion Markdown',
     isFavourite: false,
     code: `[{{{PageTitle}}}]({{{PageUrl}}})
 {{#Notes}}
 - {{{NoteHighlight}}}
-  {{{NoteTags}}}
+  {{{NoteSpaces}}}
   {{{NoteText}}}
 {{/Notes}}
 `,
 }
 
 export const HTML_TEMPLATE: Template = {
-    id: 3,
+    id: 5,
     title: 'HTML',
     isFavourite: false,
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
@@ -51,7 +66,13 @@ export const HTML_TEMPLATE: Template = {
 `,
 }
 
-const DEFAULT_TEMPLATES = [HTML_TEMPLATE, ROAM_MD_TEMPLATE, NOTION_MD_TEMPLATE]
+const DEFAULT_TEMPLATES = [
+    HTML_TEMPLATE,
+    ROAM_MD_TEMPLATE,
+    NOTION_MD_TEMPLATE,
+    JUST_URL,
+    URL_AND_TITLE,
+]
 
 export default async function insertDefaultTemplates({
     copyPaster,

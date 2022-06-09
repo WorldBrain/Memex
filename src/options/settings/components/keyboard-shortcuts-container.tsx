@@ -13,10 +13,12 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-
-const styles = require('./settings.css')
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -27,16 +29,30 @@ async function writeShortcutState(state: State) {
 
 export interface Props {
     shortcutsData: ShortcutElData[]
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
-export interface State extends BaseKeyboardShortcuts {}
+export interface State extends BaseKeyboardShortcuts {
+    shouldShowTagsUIs: boolean
+}
 
 class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
-    static defaultProps: Pick<Props, 'shortcutsData'> = {
+    static defaultProps: Pick<Props, 'shortcutsData' | 'syncSettingsBG'> = {
         shortcutsData: shortcuts,
+        syncSettingsBG: runInBackground(),
+    }
+
+    private syncSettings: SyncSettingsStore<'extension'>
+
+    constructor(props: Props) {
+        super(props)
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: props.syncSettingsBG,
+        })
     }
 
     state: State = {
+        shouldShowTagsUIs: false,
         shortcutsEnabled: true,
         link: { shortcut: 'l', enabled: true },
         openDashboard: { shortcut: 'd', enabled: true },
@@ -45,14 +61,20 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         createAnnotation: { shortcut: 'a', enabled: true },
         createHighlight: { shortcut: 'n', enabled: true },
         addTag: { shortcut: 't', enabled: true },
-        addComment: { shortcut: 'c', enabled: true },
-        addToCollection: { shortcut: 'u', enabled: true },
+        addComment: { shortcut: 'e', enabled: true },
+        addToCollection: { shortcut: 'c', enabled: true },
         createBookmark: { shortcut: 'b', enabled: true },
     }
 
     async componentDidMount() {
         const keyboardShortcutsState = await getKeyboardShortcutsState()
-        this.setState(keyboardShortcutsState)
+        const areTagsMigrated = await this.syncSettings.extension.get(
+            'areTagsMigratedToSpaces',
+        )
+        this.setState({
+            ...keyboardShortcutsState,
+            shouldShowTagsUIs: !areTagsMigrated,
+        })
     }
 
     handleEnabledToggle = async (e) => {
@@ -104,7 +126,10 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     renderCheckboxes() {
         return this.props.shortcutsData.map(({ id, name, text, subText }) => {
-            if (this.state[name]) {
+            if (
+                this.state[name] &&
+                !(id === 'add-tag-shortcut' && !this.state.shouldShowTagsUIs)
+            ) {
                 return (
                     <CheckBoxRow>
                         <Checkbox

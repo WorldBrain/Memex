@@ -25,7 +25,10 @@ import {
 import { downloadClientUpdates } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { cloudDataToReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/utils'
+import {
+    cloudDataToReadwiseHighlight,
+    formatReadwiseHighlightTag,
+} from '@worldbrain/memex-common/lib/readwise-integration/utils'
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
@@ -3281,6 +3284,181 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 5 })
             })
 
+            it('should add annotation spaces, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testAnnotListEntries =
+                    remoteData.personalAnnotationListEntry
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalList',
+                        'personalAnnotationListEntry',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
+                        [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
+                        [DataChangeType.Create, 'personalList', testLists.first.id],
+                        [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotListEntries.first.id],
+                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [testAnnotations.first],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalAnnotationListEntry: [testAnnotListEntries.first],
+                    personalList: [testLists.first],
+                    personalReadwiseAction: [testReadwiseActions.first],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customLists',
+                        object: LOCAL_TEST_DATA_V24.customLists.first
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'annotListEntries',
+                        object: LOCAL_TEST_DATA_V24.annotationListEntries.first
+                    },
+                ], { skip: 2 })
+            })
+
+            it('should remove annotation spaces, triggering readwise action create', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                    testDownload,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.second,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .deleteOneObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testAnnotListEntries =
+                    remoteData.personalAnnotationListEntry
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const testReadwiseActions = remoteData.personalReadwiseAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalAnnotation',
+                        'personalAnnotationSelector',
+                        'personalList',
+                        'personalAnnotationListEntry',
+                        'personalReadwiseAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
+                        [DataChangeType.Create, 'personalList', testLists.first.id],
+                        [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotListEntries.first.id],
+                        [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotListEntries.second.id],
+                        [DataChangeType.Delete, 'personalAnnotationListEntry', testAnnotListEntries.first.id, {
+                            url: LOCAL_TEST_DATA_V24.annotationListEntries.first.url,
+                            listId: LOCAL_TEST_DATA_V24.annotationListEntries.first.listId,
+                        }],
+                    ], { skipChanges: 6, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.first, testMetadata.second],
+                    personalContentLocator: [testLocators.first, testLocators.second],
+                    personalAnnotation: [testAnnotations.first, testAnnotations.second],
+                    personalAnnotationSelector: [testSelectors.first],
+                    personalAnnotationListEntry: [testAnnotListEntries.second],
+                    personalList: [testLists.first],
+                    personalReadwiseAction: [testReadwiseActions.first, testReadwiseActions.second],
+                })
+
+                // prettier-ignore
+                await testDownload([
+                    { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
+                        url: LOCAL_TEST_DATA_V24.annotationListEntries.first.url,
+                        listId: LOCAL_TEST_DATA_V24.annotationListEntries.first.listId,
+                    } },
+                ], { skip: 6 })
+            })
+
             it('should create annotations, triggering readwise highlight upload', async () => {
                 const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
@@ -3309,12 +3487,14 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    lists: [],
                     tags: [],
                 })
                 const secondHighlight = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.second,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    lists: [],
                     tags: [],
                 })
 
@@ -3359,6 +3539,7 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    lists: [],
                     tags: [],
                 })
 
@@ -3399,6 +3580,7 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    lists: [],
                     tags: [],
                 })
                 const highlightWithTags = cloudDataToReadwiseHighlight({
@@ -3407,6 +3589,7 @@ describe('Personal cloud translation layer', () => {
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     tags: [testTags.firstAnnotationTag],
+                    lists: [],
                 })
 
                 testFetches([highlight, highlightWithTags])
@@ -3458,6 +3641,7 @@ describe('Personal cloud translation layer', () => {
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     tags: [],
+                    lists: [],
                 })
                 const firstHighlightWithTags = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.first,
@@ -3465,18 +3649,21 @@ describe('Personal cloud translation layer', () => {
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     tags: [testTags.firstAnnotationTag],
+                    lists: [],
                 })
                 const secondHighlight = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.second,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     tags: [],
+                    lists: [],
                 })
                 const secondHighlightWithTags = cloudDataToReadwiseHighlight({
                     annotation: testAnnotations.second,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
                     tags: [testTags.secondAnnotationTag],
+                    lists: [],
                 })
 
                 testFetches([
@@ -3493,7 +3680,148 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual([])
             })
 
-            it('should add annotation tags, with spaces, triggering readwise highlight upload, substituting hyphens for spaces', async () => {
+            it('should add annotation spaces, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+
+                const highlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    lists: [],
+                    tags: [],
+                })
+                const highlightWithLists = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                    lists: [testLists.first],
+                })
+
+                testFetches([highlight, highlightWithLists])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({ user: TEST_USER.id }),
+                ).toEqual([])
+            })
+
+            it('should remove annotation spaces, triggering readwise highlight upload', async () => {
+                const { setups, serverStorage, testFetches } = await setup({
+                    runReadwiseTrigger: true,
+                })
+                await insertTestPages(setups[0].storageManager)
+                await insertReadwiseAPIKey(
+                    serverStorage.storageManager,
+                    TEST_USER.id,
+                )
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                await setups[0].storageManager
+                    .collection('annotations')
+                    .createObject(LOCAL_TEST_DATA_V24.annotations.second)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.second,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .deleteOneObject(
+                        LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    )
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = REMOTE_TEST_DATA_V24
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testLists = remoteData.personalList
+                const testAnnotations = remoteData.personalAnnotation
+                const testSelectors = remoteData.personalAnnotationSelector
+                const firstHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                    lists: [],
+                })
+                const firstHighlightWithLists = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.first,
+                    selector: testSelectors.first,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                    lists: [testLists.first],
+                })
+                const secondHighlight = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                    lists: [],
+                })
+                const secondHighlightWithLists = cloudDataToReadwiseHighlight({
+                    annotation: testAnnotations.second,
+                    locator: testLocators.first as any,
+                    metadata: testMetadata.first,
+                    tags: [],
+                    lists: [testLists.first],
+                })
+
+                testFetches([
+                    firstHighlight,
+                    secondHighlight,
+                    firstHighlightWithLists,
+                    secondHighlightWithLists,
+                    firstHighlight,
+                ])
+                expect(
+                    await serverStorage.storageManager
+                        .collection('personalReadwiseAction')
+                        .findAllObjects({ user: TEST_USER.id }),
+                ).toEqual([])
+            })
+
+            it('should trigger readwise highlight re-uploads upon annotation tags and spaces adds, substituting hyphens for spaces', async () => {
                 const { setups, serverStorage, testFetches } = await setup({
                     runReadwiseTrigger: true,
                 })
@@ -3503,7 +3831,13 @@ describe('Personal cloud translation layer', () => {
                     TEST_USER.id,
                 )
                 const testTagWithSpaces = 'test tag spaces'
-                const testTagWithHypens = testTagWithSpaces.replace(' ', '-')
+                const testListWithSpaces = 'test list spaces'
+                const testTagWithHypens = formatReadwiseHighlightTag(
+                    testTagWithSpaces,
+                )
+                const testListWithHypens = formatReadwiseHighlightTag(
+                    testListWithSpaces,
+                )
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3511,6 +3845,20 @@ describe('Personal cloud translation layer', () => {
                     url: LOCAL_TEST_DATA_V24.annotations.first.url,
                     name: testTagWithSpaces,
                 })
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject({
+                        id: 20220509,
+                        name: testListWithSpaces,
+                        createdAt: new Date(),
+                    })
+                await setups[0].storageManager
+                    .collection('annotListEntries')
+                    .createObject({
+                        listId: 20220509,
+                        createdAt: new Date(),
+                        url: LOCAL_TEST_DATA_V24.annotations.first.url,
+                    })
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
                 const remoteData = REMOTE_TEST_DATA_V24
@@ -3524,6 +3872,7 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
+                    lists: [],
                     tags: [],
                 })
                 const highlightWithTags = cloudDataToReadwiseHighlight({
@@ -3531,10 +3880,25 @@ describe('Personal cloud translation layer', () => {
                     selector: testSelectors.first,
                     locator: testLocators.first as any,
                     metadata: testMetadata.first,
-                    tags: [{ name: testTagWithHypens } as any],
+                    lists: [],
+                    tags: [{ name: testTagWithSpaces }],
                 })
+                const highlightWithTagsAndSpaces = cloudDataToReadwiseHighlight(
+                    {
+                        annotation: testAnnotations.first,
+                        selector: testSelectors.first,
+                        locator: testLocators.first as any,
+                        metadata: testMetadata.first,
+                        lists: [{ name: testListWithSpaces }],
+                        tags: [{ name: testTagWithSpaces }],
+                    },
+                )
 
-                testFetches([highlight, highlightWithTags])
+                testFetches([
+                    highlight,
+                    highlightWithTags,
+                    highlightWithTagsAndSpaces,
+                ])
                 expect(
                     await serverStorage.storageManager
                         .collection('personalReadwiseAction')
@@ -3576,6 +3940,7 @@ describe('Personal cloud translation layer', () => {
                     locator: testLocators.first as any,
                     metadata: titlelessMetadata,
                     tags: [],
+                    lists: [],
                 })
 
                 testFetches([highlight])

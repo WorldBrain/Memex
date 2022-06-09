@@ -1,4 +1,4 @@
-import { isListNameUnique, filterListsByQuery, ListsState } from './util'
+import { filterListsByQuery, ListsState } from './util'
 
 const testData: ListsState = {
     listData: {
@@ -52,30 +52,6 @@ const testData: ListsState = {
 }
 
 describe('dashboard list sidebar util tests', () => {
-    const localListData = testData.localLists.allListIds.map(
-        (id) => testData.listData[id],
-    )
-    it('should be able to determine if a given list name is unique compared with existing lists', () => {
-        for (const { name: existingName } of localListData) {
-            expect(isListNameUnique(existingName, testData)).toBe(false)
-        }
-
-        expect(isListNameUnique('new-name', testData)).toBe(true)
-        expect(isListNameUnique('test', testData)).toBe(true)
-        expect(isListNameUnique('test-9', testData)).toBe(true)
-        expect(isListNameUnique('test-1123', testData)).toBe(true)
-    })
-
-    it('should be able to skip lists upon specification, for the purpose of editing list names', () => {
-        for (const { name: existingName, id } of localListData) {
-            expect(
-                isListNameUnique(existingName, testData, {
-                    listIdToSkip: id,
-                }),
-            ).toBe(true)
-        }
-    })
-
     it('should be able to filter lists by name query', () => {
         const testLocalListIds = [0, 1, 2, 3]
 

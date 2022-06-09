@@ -45,6 +45,8 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
                     ? 'createSharedAnnotation'
                     : key === 'createHighlight'
                     ? 'createSharedHighlight'
+                    : key === 'addToCollection'
+                    ? 'createSharedAnnotationAndAddToCollection'
                     : undefined,
         }
     }

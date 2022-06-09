@@ -144,7 +144,7 @@ export class DashboardContainer extends StatefulUIElement<
         const { listsSidebar } = this.state
 
         if (
-            !listsSidebar.selectedListId ||
+            listsSidebar.selectedListId == null ||
             Object.values(SPECIAL_LIST_IDS).includes(
                 listsSidebar.selectedListId,
             )
@@ -242,29 +242,30 @@ export class DashboardContainer extends StatefulUIElement<
                     : undefined,
             onRenameClick: () =>
                 this.processEvent('setEditingListId', { listId }),
-            onDeleteClick: () =>
-                this.processEvent('setDeletingListId', { listId }),
-            onShareClick: () => this.processEvent('setShareListId', { listId }),
+            onDeleteClick: (e) => {
+                e.stopPropagation()
+                this.processEvent('setDeletingListId', { listId })
+            },
+            onSpaceShare: (remoteListId) =>
+                this.processEvent('setListRemoteId', {
+                    localListId: listId,
+                    remoteListId,
+                }),
             services: {
                 ...this.props.services,
                 contentSharing: this.props.contentShareBG,
             },
             shareList: async () => {
-                const {
-                    remoteListId,
-                } = await this.props.contentShareBG.shareList({ listId })
                 await this.processEvent('shareList', {
                     listId,
-                    remoteId: remoteListId,
                 })
-                return { listId: remoteListId }
             },
         }))
     }
 
     private renderFiltersBar() {
         const { searchBG } = this.props
-        const { searchFilters } = this.state
+        const { searchFilters, searchResults } = this.state
 
         const toggleTagsFilter = () =>
             this.processEvent('toggleShowTagPicker', {
@@ -278,6 +279,10 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('toggleShowDomainPicker', {
                 isActive: !searchFilters.isDomainFilterActive,
             })
+        const toggleSpacesFilter = () =>
+            this.processEvent('toggleShowSpacePicker', {
+                isActive: !searchFilters.isSpaceFilterActive,
+            })
 
         return (
             <FiltersBar
@@ -285,10 +290,13 @@ export class DashboardContainer extends StatefulUIElement<
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
                 showDatesFilter={searchFilters.isDateFilterActive}
+                showSpaceFilter={searchFilters.isSpaceFilterActive}
                 showDomainsFilter={searchFilters.isDomainFilterActive}
-                toggleTagsFilter={toggleTagsFilter}
-                toggleDatesFilter={toggleDatesFilter}
                 toggleDomainsFilter={toggleDomainsFilter}
+                toggleSpaceFilter={toggleSpacesFilter}
+                toggleDatesFilter={toggleDatesFilter}
+                toggleTagsFilter={toggleTagsFilter}
+                areSpacesFiltered={searchFilters.spacesIncluded.length > 0}
                 areTagsFiltered={searchFilters.tagsIncluded.length > 0}
                 areDatesFiltered={
                     searchFilters.dateTo != null ||
@@ -337,29 +345,46 @@ export class DashboardContainer extends StatefulUIElement<
                             domains: updatePickerValues(args)(args.selected),
                         }),
                 }}
-                tagPickerProps={{
-                    onClickOutside: toggleTagsFilter,
-                    onEscapeKeyDown: toggleTagsFilter,
-                    initialSelectedEntries: () => searchFilters.tagsIncluded,
-                    queryEntries: (query) =>
-                        searchBG.suggest({
-                            query,
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
+                tagPickerProps={
+                    searchResults.shouldShowTagsUIs && {
+                        onClickOutside: toggleTagsFilter,
+                        onEscapeKeyDown: toggleTagsFilter,
+                        initialSelectedEntries: () =>
+                            searchFilters.tagsIncluded,
+                        queryEntries: (query) =>
+                            searchBG.suggest({
+                                query,
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                            }),
+                        loadDefaultSuggestions: () =>
+                            searchBG.extendedSuggest({
+                                type: 'tag',
+                                limit: FILTER_PICKERS_LIMIT,
+                                notInclude: [
+                                    ...searchFilters.tagsIncluded,
+                                    ...searchFilters.tagsExcluded,
+                                ],
+                            }),
+                        onUpdateEntrySelection: (args) =>
+                            this.processEvent('setTagsIncluded', {
+                                tags: updatePickerValues(args)(args.selected),
+                            }),
+                    }
+                }
+                spacePickerProps={{
+                    spacesBG: this.props.listsBG,
+                    onClickOutside: toggleSpacesFilter,
+                    onEscapeKeyDown: toggleSpacesFilter,
+                    contentSharingBG: this.props.contentShareBG,
+                    createNewEntry: () => undefined,
+                    initialSelectedEntries: () => searchFilters.spacesIncluded,
+                    selectEntry: (spaceId) =>
+                        this.processEvent('addIncludedSpace', {
+                            spaceId,
                         }),
-                    loadDefaultSuggestions: () =>
-                        searchBG.extendedSuggest({
-                            type: 'tag',
-                            limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.tagsIncluded,
-                                ...searchFilters.tagsExcluded,
-                            ],
-                        }),
-                    onUpdateEntrySelection: (args) =>
-                        this.processEvent('setTagsIncluded', {
-                            tags: updatePickerValues(args)(args.selected),
-                        }),
+                    unselectEntry: (spaceId) =>
+                        this.processEvent('delIncludedSpace', { spaceId }),
                 }}
             />
         )
@@ -493,7 +518,7 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
-                        cancelAddNewList: () =>
+                        cancelAddNewList: (shouldSave) =>
                             this.processEvent('cancelListCreate', null),
                         onExpandBtnClick: () =>
                             this.processEvent('setLocalListsExpanded', {
@@ -550,8 +575,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderSearchResults() {
-        const { searchResults, listsSidebar } = this.state
-        const { searchFilters } = this.state
+        const { searchResults, listsSidebar, searchFilters } = this.state
 
         return (
             <SearchResultsContainer

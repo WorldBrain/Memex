@@ -12,9 +12,7 @@ import {
     PAGE_SIZE,
     STORAGE_KEYS,
     PAGE_SEARCH_DUMMY_DAY,
-    NON_UNIQ_LIST_NAME_ERR_MSG,
     MISSING_PDF_QUERY_PARAM,
-    EMPTY_LIST_NAME_ERR_MSG,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import { ListData } from './lists-sidebar/types'
@@ -25,7 +23,7 @@ import {
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType } from './search-results/types'
-import { isListNameUnique, filterListsByQuery } from './lists-sidebar/util'
+import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import { mergeNormalizedStates } from 'src/common-ui/utils'
 import {
@@ -44,6 +42,7 @@ import { isDuringInstall } from 'src/overview/onboarding/utils'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
+import { validateListName } from 'src/custom-lists/ui/utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -86,7 +85,9 @@ export const removeAllResultOccurrencesOfPage = (
 
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
-    syncSettings: SyncSettingsStore<'contentSharing' | 'dashboard'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'dashboard' | 'extension'
+    >
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -136,6 +137,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
+                shouldShowTagsUIs: false,
                 showOnboardingMsg: false,
                 areResultsExhausted: false,
                 shouldFormsAutoFocus: false,
@@ -166,9 +168,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 domainsExcluded: [],
                 domainsIncluded: [],
                 isDateFilterActive: false,
+                isSpaceFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
+                spacesIncluded: [],
                 tagsExcluded: [],
                 tagsIncluded: [],
                 dateFromInput: '',
@@ -247,20 +251,23 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
 
         const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
-        const listsSidebarLocked = await this.syncSettings.dashboard.get(
-            'listSidebarLocked',
-        )
-        const onboardingMsgSeen = await this.syncSettings.dashboard.get(
-            'onboardingMsgSeen',
-        )
-        const subBannerShownAfter = await this.syncSettings.dashboard.get(
-            'subscribeBannerShownAfter',
-        )
+        const [
+            listsSidebarLocked,
+            onboardingMsgSeen,
+            subBannerShownAfter,
+            areTagsMigrated,
+        ] = await Promise.all([
+            this.syncSettings.dashboard.get('listSidebarLocked'),
+            this.syncSettings.dashboard.get('onboardingMsgSeen'),
+            this.syncSettings.dashboard.get('subscribeBannerShownAfter'),
+            this.syncSettings.extension.get('areTagsMigratedToSpaces'),
+        ])
 
         const mutation: UIMutation<State> = {
             isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
                 isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: {
@@ -475,7 +482,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
-        const skipMutation: UIMutation<State['searchFilters']> = {
+        const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
                 : { $set: 0 },
@@ -492,7 +499,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 const searchState = this.withMutation(previousState, {
-                    searchFilters: skipMutation,
+                    searchFilters,
                 })
                 let {
                     noteData,
@@ -529,7 +536,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
 
                 this.emitMutation({
-                    searchFilters: skipMutation,
+                    searchFilters,
                     searchResults: {
                         areResultsExhausted: {
                             $set: resultsExhausted,
@@ -834,7 +841,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         const page = previousState.searchResults.pageData.byId[event.pageId]
         event.dataTransfer.setData(
             'text/plain',
-            JSON.stringify({ fullPageUrl: page.fullUrl }),
+            JSON.stringify({
+                fullPageUrl: page.fullUrl,
+                normalizedPageUrl: page.normalizedUrl,
+            }),
         )
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageId } },
@@ -2132,7 +2142,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchFilters: {
                 isTagFilterActive: { $set: event.isActive },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+            },
+        })
+    }
+
+    toggleShowSpacePicker: EventHandler<'toggleShowSpacePicker'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            searchFilters: {
+                isSpaceFilterActive: { $set: event.isActive },
+                isDomainFilterActive: { $set: false },
+                isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2143,8 +2167,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDateFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
                 isDomainFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2155,8 +2180,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             searchFilters: {
                 isDomainFilterActive: { $set: event.isActive },
-                isTagFilterActive: { $set: false },
+                isSpaceFilterActive: { $set: false },
                 isDateFilterActive: { $set: false },
+                isTagFilterActive: { $set: false },
             },
         })
     }
@@ -2189,6 +2215,50 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateTo: { $set: event.value } },
+        })
+    }
+
+    setSpacesIncluded: EventHandler<'setSpacesIncluded'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $set: event.spaceIds },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    addIncludedSpace: EventHandler<'addIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $push: [event.spaceId] },
+                searchFiltersOpen: { $set: true },
+            },
+        })
+    }
+
+    delIncludedSpace: EventHandler<'delIncludedSpace'> = async ({
+        event,
+        previousState,
+    }) => {
+        const index = previousState.searchFilters.spacesIncluded.findIndex(
+            (spaceId) => spaceId === event.spaceId,
+        )
+
+        if (index === -1) {
+            return
+        }
+
+        await this.mutateAndTriggerSearch(previousState, {
+            searchFilters: {
+                spacesIncluded: { $splice: [[index, 1]] },
+                searchFiltersOpen: { $set: true },
+            },
         })
     }
 
@@ -2431,16 +2501,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const newListName = event.value.trim()
+        const validationResult = validateListName(
+            newListName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+        )
 
-        if (!newListName.length) {
-            return
-        }
-
-        if (!isListNameUnique(newListName, previousState.listsSidebar)) {
+        if (validationResult.valid === false) {
             this.emitMutation({
                 listsSidebar: {
                     addListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                        $set: validationResult.reason,
                     },
                 },
             })
@@ -2527,9 +2603,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
     }) => {
-        const { fullPageUrl } = JSON.parse(
+        const { fullPageUrl, normalizedPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
-        )
+        ) as { fullPageUrl: string; normalizedPageUrl: string }
+
+        if (!fullPageUrl || !normalizedPageUrl) {
+            return
+        }
 
         this.options.analytics.trackEvent({
             category: 'Collections',
@@ -2551,6 +2631,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [normalizedPageUrl]: {
+                            lists: {
+                                $apply: (lists: number[]) =>
+                                    lists.includes(event.listId)
+                                        ? lists
+                                        : [...lists, event.listId],
+                            },
+                        },
+                    },
+                },
+            },
         })
 
         setTimeout(
@@ -2568,7 +2662,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                listData: {
+                    [event.localListId]: {
+                        remoteId: { $set: event.remoteListId },
+                    },
+                },
+            },
+        })
+    }
+
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const { remoteListId } = await this.options.contentShareBG.shareList({
+            listId: event.listId,
+        })
+
         const memberAnnotParentPageIds = new Set<string>()
         const memberPrivateAnnotIds = new Set<string>()
         for (const noteData of Object.values(
@@ -2613,7 +2726,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 listData: {
                     [event.listId]: {
-                        remoteId: { $set: event.remoteId },
+                        remoteId: { $set: remoteListId },
                     },
                 },
             },
@@ -2634,37 +2747,42 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         if (newName === oldName) {
             return
-        } else if (!newName.length) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: EMPTY_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-        } else if (
-            !isListNameUnique(newName, previousState.listsSidebar, {
-                listIdToSkip: listId,
-            })
-        ) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
-                    },
-                },
-            })
-        } else {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: { $set: null },
-                    listData: {
-                        [listId]: { name: { $set: newName } },
-                    },
-                },
-            })
         }
+        const validationResult = validateListName(
+            newName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+            {
+                listIdToSkip: listId,
+            },
+        )
+
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                listsSidebar: {
+                    editListErrorMessage: {
+                        $set: validationResult.reason,
+                    },
+                },
+            })
+            return
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                editListErrorMessage: { $set: null },
+                listData: {
+                    [listId]: { name: { $set: newName } },
+                },
+            },
+        })
     }
+
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
         previousState,
@@ -2682,10 +2800,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const newName = previousState.listsSidebar.listData[listId].name
 
-        if (!newName.length) {
-            return
-        }
-
         if (newName === oldName) {
             this.emitMutation({
                 listsSidebar: {
@@ -2695,47 +2809,58 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (
-            !isListNameUnique(newName, previousState.listsSidebar, {
+        const validationResult = validateListName(
+            newName,
+            previousState.listsSidebar.localLists.allListIds.reduce(
+                (acc, listId) => [
+                    ...acc,
+                    previousState.listsSidebar.listData[listId],
+                ],
+                [],
+            ),
+            {
                 listIdToSkip: listId,
-            })
-        ) {
+            },
+        )
+
+        if (validationResult.valid === false) {
             this.emitMutation({
                 listsSidebar: {
                     editListErrorMessage: {
-                        $set: NON_UNIQ_LIST_NAME_ERR_MSG,
+                        $set: validationResult.reason,
                     },
                 },
             })
-        } else {
-            await executeUITask(
-                this,
-                (taskState) => ({
-                    listsSidebar: { listEditState: { $set: taskState } },
-                }),
-                async () => {
-                    await this.options.listsBG.updateListName({
-                        id: listId,
-                        oldName,
-                        newName,
-                    })
-
-                    await this.changeListName({
-                        event,
-                        previousState,
-                    })
-
-                    this.emitMutation({
-                        listsSidebar: {
-                            editingListId: { $set: undefined },
-                            editListErrorMessage: {
-                                $set: null,
-                            },
-                        },
-                    })
-                },
-            )
+            return
         }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listEditState: { $set: taskState } },
+            }),
+            async () => {
+                await this.options.listsBG.updateListName({
+                    id: listId,
+                    oldName,
+                    newName,
+                })
+
+                await this.changeListName({
+                    event,
+                    previousState,
+                })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        editingListId: { $set: undefined },
+                        editListErrorMessage: {
+                            $set: null,
+                        },
+                    },
+                })
+            },
+        )
     }
 
     cancelListEdit: EventHandler<'cancelListEdit'> = async ({
@@ -2788,7 +2913,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : event.listId
 
         this.emitMutation({
-            listsSidebar: { showMoreMenuListId: { $set: listIdToSet } },
+            listsSidebar: {
+                showMoreMenuListId: { $set: listIdToSet },
+                editingListId: { $set: listIdToSet },
+            },
         })
     }
 
@@ -2885,6 +3013,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             allListIds: { $set: localListIds },
                         },
                         listData: { $unset: [listId] },
+                        selectedListId: { $set: undefined },
                     },
                 })
             },

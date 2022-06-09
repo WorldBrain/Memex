@@ -1955,7 +1955,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     identifier,
                                     fingerprints,
                                 } = await indexTestFingerprintedPdf(setup, {
-                                    expectedServerId: 1338,
                                     tabId,
                                 })
                                 await setup.backgroundModules.customLists.insertPageToList(

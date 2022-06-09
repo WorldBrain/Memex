@@ -28,6 +28,8 @@ export const SETTING_NAMES: SyncSettingNames = {
     extension: {
         blocklist: FEATURE_PREFIX.EXTENSION + 'blocklist',
         keyboardShortcuts: FEATURE_PREFIX.EXTENSION + 'keyboard_shortcuts',
+        areTagsMigratedToSpaces:
+            FEATURE_PREFIX.EXTENSION + 'are_tags_migrated_to_spaces',
         shouldTrackAnalytics:
             FEATURE_PREFIX.EXTENSION + 'should_track_analytics',
     },

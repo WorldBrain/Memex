@@ -29,4 +29,12 @@ export interface InPageUIContentScriptRemoteInterface
         pageAnnotations: Annotation[],
     ): Promise<void>
     removeHighlights(): Promise<void>
+
+    teardownContentScripts(): Promise<void>
+
+    /**
+     * Acts as a way for the BG script to check if the content script is
+     * available on a given tab. Should throw error if not.
+     */
+    ping(): Promise<true>
 }
