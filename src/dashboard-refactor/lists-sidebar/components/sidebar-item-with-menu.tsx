@@ -100,6 +100,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     toggleMenu={this.props.onMoreActionClick}
                     editableProps={this.props.editableProps!}
                     isMenuDisplayed={this.props.isMenuDisplayed}
+                    onDeleteSpaceIntent={this.props.onDeleteClick}
                     onSpaceShare={onSpaceShare}
                 />
             )
