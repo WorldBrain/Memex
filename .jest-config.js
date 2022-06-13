@@ -1,4 +1,4 @@
-const { jsWithTs: tsjPreset } = require('ts-jest/presets')
+// const { jsWithTs: tsjPreset } = require('ts-jest/presets')
 const externalTsModules = require('./build/external').externalTsModules
 
 const externalTsModuleMappings = {}
@@ -10,18 +10,13 @@ for (const [alias, relPath] of Object.entries(externalTsModules)) {
 }
 
 module.exports = {
-    globals: {
-        'ts-jest': {
-            tsConfig: 'tsconfig.jest.json',
-            babelConfig: true,
-        },
-        browser: {},
-    },
+    preset: 'ts-jest/presets/js-with-ts',
     testMatch: ['<rootDir>/src/**/*.test.(js|jsx|ts|tsx)'],
     rootDir: '.',
-    transform: {
-        ...tsjPreset.transform,
-    },
+    // transform: {
+    //     ...tsjPreset.transform,
+    // },
+    testEnvironment: 'jsdom',
     modulePaths: ['<rootDir>'],
     moduleNameMapper: {
         '\\.(css|less)$': 'identity-obj-proxy',
