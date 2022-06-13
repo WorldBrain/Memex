@@ -4267,9 +4267,7 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorageManager,
                     getPersonalWhere,
-                    personalDataChanges,
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
