@@ -21,7 +21,10 @@ import type {
 import type { Annotation } from 'src/annotations/types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
-import { initNormalizedState, mergeNormalizedStates } from 'src/common-ui/utils'
+import {
+    initNormalizedState,
+    mergeNormalizedStates,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export const notesTypeToString = (type: NotesType): string => {

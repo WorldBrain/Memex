@@ -1,9 +1,5 @@
 import type Storex from '@worldbrain/storex'
 import type { Page } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
-import type {
-    Tag,
-    List,
-} from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/meta-picker/types'
 import type { Note } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/types'
 
 import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
@@ -22,7 +18,7 @@ import type {
     AnnotationPrivacyLevel,
     SharedListMetadata,
 } from 'src/content-sharing/background/types'
-import type { Visit, Bookmark } from 'src/search'
+import type { Visit, Bookmark, Tag } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export function getTemplateDataFetchers({
@@ -64,7 +60,10 @@ export function getTemplateDataFetchers({
             return spacesForUrls
         }
 
-        const lists: List[] = await storageManager
+        const lists: {
+            id: number
+            name: string
+        }[] = await storageManager
             .collection('customLists')
             .findObjects({ id: { $in: [...uniqueListIds] } })
 

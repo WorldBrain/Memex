@@ -2,10 +2,10 @@ import { makeSingleDeviceUILogicTestFactory } from 'src/tests/ui-logic-tests'
 import { setupTest, setPageSearchResult } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import {
-    EMPTY_LIST_NAME_ERR_MSG,
-    NON_UNIQ_LIST_NAME_ERR_MSG,
-    BAD_CHAR_LIST_NAME_ERR_MSG,
-} from 'src/custom-lists/ui/constants'
+    EMPTY_SPACE_NAME_ERR_MSG,
+    NON_UNIQ_SPACE_NAME_ERR_MSG,
+    BAD_CHAR_SPACE_NAME_ERR_MSG,
+} from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 describe('Dashboard lists sidebar logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -268,7 +268,7 @@ describe('Dashboard lists sidebar logic', () => {
             value: '    ',
         })
         expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
-            EMPTY_LIST_NAME_ERR_MSG,
+            EMPTY_SPACE_NAME_ERR_MSG,
         )
         expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
             expect.objectContaining({
@@ -281,7 +281,7 @@ describe('Dashboard lists sidebar logic', () => {
             value: nameB,
         })
         expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
-            NON_UNIQ_LIST_NAME_ERR_MSG,
+            NON_UNIQ_SPACE_NAME_ERR_MSG,
         )
         expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
             expect.objectContaining({
@@ -294,7 +294,7 @@ describe('Dashboard lists sidebar logic', () => {
             value: nameA + '[ ( {',
         })
         expect(searchResults.state.listsSidebar.editListErrorMessage).toEqual(
-            BAD_CHAR_LIST_NAME_ERR_MSG,
+            BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
         expect(searchResults.state.listsSidebar.listData[listIdA]).toEqual(
             expect.objectContaining({
@@ -320,19 +320,19 @@ describe('Dashboard lists sidebar logic', () => {
 
         await searchResults.processEvent('confirmListCreate', { value: 'test' })
         expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
-            NON_UNIQ_LIST_NAME_ERR_MSG,
+            NON_UNIQ_SPACE_NAME_ERR_MSG,
         )
 
         await searchResults.processEvent('confirmListCreate', { value: '    ' })
         expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
-            EMPTY_LIST_NAME_ERR_MSG,
+            EMPTY_SPACE_NAME_ERR_MSG,
         )
 
         await searchResults.processEvent('confirmListCreate', {
             value: 'test [ ( {',
         })
         expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
-            BAD_CHAR_LIST_NAME_ERR_MSG,
+            BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
 
         await searchResults.processEvent('confirmListCreate', {

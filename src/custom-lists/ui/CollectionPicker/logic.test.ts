@@ -8,11 +8,10 @@ import * as DATA from './logic.test.data'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import delay from 'src/util/delay'
 import {
-    EMPTY_LIST_NAME_ERR_MSG,
-    BAD_CHAR_LIST_NAME_ERR_MSG,
-    NON_UNIQ_LIST_NAME_ERR_MSG,
-} from '../constants'
-import { PageList } from 'src/custom-lists/background/types'
+    EMPTY_SPACE_NAME_ERR_MSG,
+    NON_UNIQ_SPACE_NAME_ERR_MSG,
+    BAD_CHAR_SPACE_NAME_ERR_MSG,
+} from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 async function insertTestData({
     storageManager,
@@ -319,14 +318,16 @@ describe('SpacePickerLogic', () => {
             entryPickerLogic.validateEntry('test test $test %🤣😁 😅😁'),
         ).not.toThrowError()
         expect(() => entryPickerLogic.validateEntry('   ')).toThrowError(
-            'Space Picker Validation: ' + EMPTY_LIST_NAME_ERR_MSG,
+            'Space Picker Validation: ' + EMPTY_SPACE_NAME_ERR_MSG,
         )
         expect(() => entryPickerLogic.validateEntry(' test []  ')).toThrowError(
-            'Space Picker Validation: ' + BAD_CHAR_LIST_NAME_ERR_MSG,
+            'Space Picker Validation: ' + BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
         expect(() =>
             entryPickerLogic.validateEntry(DATA.TEST_LIST_SUGGESTIONS[0].name),
-        ).toThrowError('Space Picker Validation: ' + NON_UNIQ_LIST_NAME_ERR_MSG)
+        ).toThrowError(
+            'Space Picker Validation: ' + NON_UNIQ_SPACE_NAME_ERR_MSG,
+        )
     })
 
     it('should show default entries again after clearing the search query', async ({
@@ -459,7 +460,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_LIST_SUGGESTIONS[4],
         ])
         expect(testLogic.state.renameListErrorMessage).toEqual(
-            NON_UNIQ_LIST_NAME_ERR_MSG,
+            NON_UNIQ_SPACE_NAME_ERR_MSG,
         )
 
         // Attempt to use a list name with invalid characters - also should set error
@@ -483,7 +484,7 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_LIST_SUGGESTIONS[4],
         ])
         expect(testLogic.state.renameListErrorMessage).toEqual(
-            BAD_CHAR_LIST_NAME_ERR_MSG,
+            BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
 
         await testLogic.processEvent('renameList', {

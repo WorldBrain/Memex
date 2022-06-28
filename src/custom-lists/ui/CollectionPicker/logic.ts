@@ -8,7 +8,7 @@ import type {
     PageList,
 } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { validateListName } from '../utils'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -51,7 +51,7 @@ export type SpacePickerEvent = UIEvent<{
     setListRemoteId: { localListId: number; remoteListId: string }
     toggleEntryContextMenu: { listId: number }
     updateContextMenuPosition: { x?: number; y?: number }
-    validateListName: { listId: number; name: string }
+    validateSpaceName: { listId: number; name: string }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
     newEntryPress: { entry: string }
@@ -295,8 +295,8 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    private _validateListName(listId: number, name: string): boolean {
-        const validationResult = validateListName(
+    private _validateSpaceName(listId: number, name: string): boolean {
+        const validationResult = validateSpaceName(
             name,
             this.defaultEntries.map((entry) => ({
                 id: entry.localId,
@@ -317,15 +317,17 @@ export default class SpacePickerLogic extends UILogic<
         return validationResult.valid
     }
 
-    validateListName: EventHandler<'validateListName'> = async ({ event }) => {
-        this._validateListName(event.listId, event.name)
+    validateSpaceName: EventHandler<'validateSpaceName'> = async ({
+        event,
+    }) => {
+        this._validateSpaceName(event.listId, event.name)
     }
 
     renameList: EventHandler<'renameList'> = async ({
         event,
         previousState,
     }) => {
-        if (!this._validateListName(event.listId, event.name)) {
+        if (!this._validateSpaceName(event.listId, event.name)) {
             return
         }
 
@@ -340,7 +342,7 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        const validationResult = validateListName(
+        const validationResult = validateSpaceName(
             event.name,
             this.defaultEntries.map((entry) => ({
                 id: entry.localId,
@@ -688,7 +690,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     validateEntry = (entry: string) => {
-        const validationResult = validateListName(
+        const validationResult = validateSpaceName(
             entry,
             this.defaultEntries.map((e) => ({ id: e.localId, name: e.name })),
         )

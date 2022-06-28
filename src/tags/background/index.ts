@@ -8,7 +8,6 @@ import { initErrHandler } from 'src/search/storage'
 import SearchBackground from 'src/search/background'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { updateSuggestionsCache } from '../utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 
@@ -160,16 +159,16 @@ export default class TagsBackground {
         added?: string
         removed?: string
     }) => {
-        return updateSuggestionsCache({
-            ...args,
-            suggestionLimit: limitSuggestionsStorageLength,
-            getCache: async () => {
-                const suggestions = await this.localStorage.get('suggestions')
-                return suggestions ?? []
-            },
-            setCache: (suggestions: string[]) =>
-                this.localStorage.set('suggestions', suggestions),
-        })
+        // return updateSuggestionsCache({
+        //     ...args,
+        //     suggestionLimit: limitSuggestionsStorageLength,
+        //     getCache: async () => {
+        //         const suggestions = await this.localStorage.get('suggestions')
+        //         return suggestions ?? []
+        //     },
+        //     setCache: (suggestions: string[]) =>
+        //         this.localStorage.set('suggestions', suggestions),
+        // })
     }
 
     delTag = async ({ tag, url }: { tag: string; url: string }) => {

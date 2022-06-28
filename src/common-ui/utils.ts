@@ -1,5 +1,3 @@
-import type { NormalizedState } from './types'
-
 export interface InsertTabProps {
     el: HTMLInputElement | HTMLTextAreaElement
     tabStr?: '  ' | '    ' | '\t'
@@ -73,22 +71,4 @@ export function insertIndentedNewLine({ el }: InsertTabProps) {
 
     el.selectionStart = selectionStartNew
     el.selectionEnd = selectionEndNew
-}
-
-export const initNormalizedState = <T>(): NormalizedState<T> => ({
-    allIds: [],
-    byId: {},
-})
-
-export const mergeNormalizedStates = <T>(
-    ...toMerge: NormalizedState<T>[]
-): NormalizedState<T> => {
-    const merged: NormalizedState<T> = initNormalizedState()
-
-    for (const state of toMerge) {
-        merged.allIds = [...new Set([...merged.allIds, ...state.allIds])]
-        merged.byId = { ...merged.byId, ...state.byId }
-    }
-
-    return merged
 }

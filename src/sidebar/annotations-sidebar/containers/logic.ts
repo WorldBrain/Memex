@@ -27,7 +27,7 @@ import { DEF_RESULT_LIMIT } from '../constants'
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { CachedAnnotation } from 'src/annotations/annotations-cache'
-import { initNormalizedState } from 'src/common-ui/utils'
+import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,

@@ -25,7 +25,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import { NoResultsType } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
-import { mergeNormalizedStates } from 'src/common-ui/utils'
+import { mergeNormalizedStates } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
@@ -42,7 +42,7 @@ import { isDuringInstall } from 'src/overview/onboarding/utils'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
-import { validateListName } from 'src/custom-lists/ui/utils'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -2501,7 +2501,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const newListName = event.value.trim()
-        const validationResult = validateListName(
+        const validationResult = validateSpaceName(
             newListName,
             previousState.listsSidebar.localLists.allListIds.reduce(
                 (acc, listId) => [
@@ -2748,7 +2748,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (newName === oldName) {
             return
         }
-        const validationResult = validateListName(
+        const validationResult = validateSpaceName(
             newName,
             previousState.listsSidebar.localLists.allListIds.reduce(
                 (acc, listId) => [
@@ -2809,7 +2809,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const validationResult = validateListName(
+        const validationResult = validateSpaceName(
             newName,
             previousState.listsSidebar.localLists.allListIds.reduce(
                 (acc, listId) => [

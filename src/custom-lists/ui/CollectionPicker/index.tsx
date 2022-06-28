@@ -23,7 +23,7 @@ import {
 } from 'src/util/remote-functions-background'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { validateListName } from '../utils'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 
 class SpacePicker extends StatefulUIElement<
@@ -63,7 +63,7 @@ class SpacePicker extends StatefulUIElement<
             }),
         )
 
-        return validateListName(this.state.newEntryName, otherLists).valid
+        return validateSpaceName(this.state.newEntryName, otherLists).valid
     }
 
     private get selectedDisplayEntries(): Array<{

@@ -15,7 +15,7 @@ import type {
 import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { updateSuggestionsCache } from 'src/tags/utils'
+import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 import { ServerStorageModules } from 'src/storage/types'

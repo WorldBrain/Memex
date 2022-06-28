@@ -1,8 +1,10 @@
 import type { RootState } from './types'
 import type { BackgroundSearchParams } from 'src/search/background/types'
-import type { NormalizedState } from 'src/common-ui/types'
 import type { PageResult } from './search-results/types'
-import { initNormalizedState } from 'src/common-ui/utils'
+import {
+    initNormalizedState,
+    NormalizedState,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 export const updatePickerValues = <T extends string | number>(event: {
     added?: T
