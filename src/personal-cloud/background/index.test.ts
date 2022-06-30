@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { setupSyncBackgroundTest } from './index.tests'
+import { setupSyncBackgroundTest, BASE_TIMESTAMP } from './index.tests'
 import { StorexPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
@@ -16,11 +16,6 @@ import {
     TEST_PDF_PAGE_TEXTS,
 } from 'src/tests/test.data'
 import { blobToJson } from 'src/util/blob-utils'
-import { Annotation } from '../../annotations/types'
-import {
-    PersonalCloudErrorType,
-    DataChangeType,
-} from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 
 describe('Personal cloud', () => {
     const testFullPage = async (testOptions: {
@@ -411,7 +406,21 @@ describe('Personal cloud', () => {
             id: 1,
             name: 'list 1',
         })
+
+        expect(
+            await setups[1].backgroundModules.personalCloud.options.settingStore.get(
+                'lastSeen',
+            ),
+        ).toEqual(null)
+
         await waitForSync()
+
+        expect(
+            await setups[1].backgroundModules.personalCloud.options.settingStore.get(
+                'lastSeen',
+            ),
+        ).toEqual(BASE_TIMESTAMP)
+
         await assertCacheEntries([1])
 
         await setups[0].backgroundModules.customLists.createCustomList({
@@ -419,6 +428,13 @@ describe('Personal cloud', () => {
             name: 'list 2',
         })
         await waitForSync()
+
+        expect(
+            await setups[1].backgroundModules.personalCloud.options.settingStore.get(
+                'lastSeen',
+            ),
+        ).toEqual(BASE_TIMESTAMP + 1)
+
         await assertCacheEntries([2, 1])
 
         await setups[0].backgroundModules.customLists.updateList({
@@ -427,6 +443,13 @@ describe('Personal cloud', () => {
             newName: 'list 1 updated',
         })
         await waitForSync()
+
+        expect(
+            await setups[1].backgroundModules.personalCloud.options.settingStore.get(
+                'lastSeen',
+            ),
+        ).toEqual(BASE_TIMESTAMP + 2)
+
         await assertCacheEntries([2, 1]) // Updates should not affect cache
 
         await setups[0].backgroundModules.customLists.createCustomList({
@@ -434,6 +457,13 @@ describe('Personal cloud', () => {
             name: 'list 3',
         })
         await waitForSync()
+
+        expect(
+            await setups[1].backgroundModules.personalCloud.options.settingStore.get(
+                'lastSeen',
+            ),
+        ).toEqual(BASE_TIMESTAMP + 3)
+
         await assertCacheEntries([3, 2, 1])
     })
 })

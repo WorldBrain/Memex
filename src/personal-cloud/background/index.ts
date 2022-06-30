@@ -278,15 +278,19 @@ export class PersonalCloudBackground {
     }
 
     async integrateAllUpdates(): Promise<void> {
-        const updateBatch = await this.options.backend.bulkDownloadUpdates()
-        return this.integrateUpdates(updateBatch)
+        const { backend, settingStore } = this.options
+        const { batch, lastSeen } = await backend.bulkDownloadUpdates()
+        await this.integrateUpdates(batch)
+        await settingStore.set('lastSeen', lastSeen)
     }
 
     async integrateContinuously() {
+        const { backend, settingStore } = this.options
         try {
-            for await (const updates of this.options.backend.streamUpdates()) {
+            for await (const { batch, lastSeen } of backend.streamUpdates()) {
                 try {
-                    await this.integrateUpdates(updates)
+                    await this.integrateUpdates(batch)
+                    await settingStore.set('lastSeen', lastSeen)
                 } catch (err) {
                     if (this.strictErrorReporting) {
                         this._integrationError = err

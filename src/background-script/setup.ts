@@ -455,11 +455,12 @@ export function createBackgroundModules(options: {
         backend:
             options.personalCloudBackend ??
             new FirestorePersonalCloudBackend({
+                getFirebase,
+                getServerStorageManager,
                 personalCloudService: firebaseService<PersonalCloudService>(
                     'personalCloud',
                     callFirebaseFunction,
                 ),
-                getServerStorageManager,
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
@@ -475,10 +476,8 @@ export function createBackgroundModules(options: {
                         .doc(currentUser.id)
                         .collection('objects')
                 },
-                getLastUpdateSeenTime: () =>
+                getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
-                setLastUpdateSeenTime: (lastSeen) =>
-                    personalCloudSettingStore.set('lastSeen', lastSeen),
                 getDeviceId: async () => personalCloud.deviceId!,
                 getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
             }),
