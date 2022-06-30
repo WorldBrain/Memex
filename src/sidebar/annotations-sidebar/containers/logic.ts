@@ -144,14 +144,6 @@ export class SidebarContainerLogic extends UILogic<
                     },
                     getSharedAnnotationLinkID: ({ id }) =>
                         typeof id === 'string' ? id : id.toString(),
-                    getOrCreateConversationThread: async ({
-                        annotationReference,
-                        ...params
-                    }) =>
-                        options.contentConversationsBG.getOrCreateThread({
-                            ...params,
-                            sharedAnnotationReference: annotationReference,
-                        }),
                     getRepliesByAnnotation: async ({
                         annotationReference,
                         sharedListReference,

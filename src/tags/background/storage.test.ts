@@ -82,7 +82,7 @@ describe('Tags background interface', () => {
     })
 })
 
-describe('Tag Cache', () => {
+describe.skip('Tag Cache', () => {
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
             includePostSyncProcessor: true,
@@ -91,7 +91,7 @@ describe('Tag Cache', () => {
         return { tagsModule }
     }
 
-    describe('modifies cache', () => {
+    describe.skip('modifies cache', () => {
         test('add tags', async () => {
             const { tagsModule } = await setupTest()
             const { tag, url } = DATA.TAGS_1
