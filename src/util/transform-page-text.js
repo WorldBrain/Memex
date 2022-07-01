@@ -1,10 +1,9 @@
 import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
 import sw from 'remove-stopwords'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 import rmDiacritics from './remove-diacritics'
 
-import { DEFAULT_TERM_SEPARATOR } from 'src/search/util'
-
-const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
+const termSeparator = DEFAULT_TERM_SEPARATOR
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
@@ -49,7 +48,7 @@ const splitDashes = (text = '') => {
 
     // Split up dash-words, deriving new words to add to the text
     const newWords = matches
-        .map(match => match.split('-'))
+        .map((match) => match.split('-'))
         .reduce((a, b) => [...a, ...b])
         .join(' ')
 

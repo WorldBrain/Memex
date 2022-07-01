@@ -79,6 +79,8 @@ class EntryRow extends React.Component<Props> {
             contextMenuBtnRef,
         } = this.props
 
+        console.log(resultItem['props'].children)
+
         return (
             <Row
                 onClick={this.handleEntryPress}
@@ -86,6 +88,7 @@ class EntryRow extends React.Component<Props> {
                 onMouseLeave={this.handleMouseOut}
                 isFocused={focused}
                 id={id}
+                title={resultItem['props'].children}
             >
                 <NameWrapper>
                     {resultItem}
@@ -178,6 +181,8 @@ export const IconStyleWrapper = styled.div`
     display: flex;
     grid-gap: 10px;
     align-items: center;
+    flex: 1;
+    justify-content: flex-end;
 `
 
 const Row = styled.div`
@@ -187,6 +192,7 @@ const Row = styled.div`
     transition: background 0.3s;
     height: 40px;
     width: 100%;
+    max-width: 260px;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;
@@ -203,8 +209,9 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 80%;
+    max-width: 70%;
     font-size: 14px;
+    width: 100%;
 `
 
 export default EntryRow

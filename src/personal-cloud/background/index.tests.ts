@@ -21,6 +21,8 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
+export const BASE_TIMESTAMP = 555
+
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
 type SyncTestSequence = SyncTestStep[]
@@ -282,7 +284,7 @@ export async function setupSyncBackgroundTest(
     const serverStorage = await getServerStorage()
     const cloudHub = new PersonalCloudHub()
 
-    let now = 555
+    let now = BASE_TIMESTAMP
     const getNow = () => now++
     const setups: BackgroundIntegrationTestSetup[] = []
     for (let i = 0; i < options.deviceCount; ++i) {

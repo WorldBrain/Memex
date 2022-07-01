@@ -10,7 +10,7 @@ import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnalyticsEvents } from 'src/analytics/types'
-import type { NormalizedState } from 'src/common-ui/types'
+import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type {
     AnnotationSharingState,
     AnnotationSharingStates,
