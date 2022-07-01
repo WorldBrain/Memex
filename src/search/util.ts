@@ -1,7 +1,7 @@
 import Storex from '@worldbrain/storex'
 import { AnnotsByPageUrl, PageUrlsByDay } from './background/types'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
-export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
 export const collections = (db: Storex) => Object.keys(db.registry.collections)

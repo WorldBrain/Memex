@@ -14,6 +14,7 @@ import { SuggestPlugin } from 'src/search/plugins'
 import { SuggestResult } from 'src/search/types'
 import { PageList, PageListEntry } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
 export default class CustomListStorage extends StorageModule {
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
@@ -416,11 +417,14 @@ export default class CustomListStorage extends StorageModule {
         query: string
         limit?: number
     }): Promise<PageList[]> {
+        // Ensure any term delimiters replaced with spaces
+        const formattedQuery = query.replace(DEFAULT_TERM_SEPARATOR, ' ')
+
         const suggestions: SuggestResult<string, number> = await this.operation(
             SuggestPlugin.SUGGEST_OBJS_OP_ID,
             {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                query: { nameTerms: query },
+                query: { nameTerms: formattedQuery },
                 options: {
                     multiEntryAssocField: 'name',
                     includePks: true,
