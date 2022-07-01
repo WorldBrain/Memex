@@ -12,6 +12,7 @@ import {
     NON_UNIQ_SPACE_NAME_ERR_MSG,
     BAD_CHAR_SPACE_NAME_ERR_MSG,
 } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 async function insertTestData({
     storageManager,
