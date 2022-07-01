@@ -667,7 +667,15 @@ export default class SpacePickerLogic extends UILogic<
 
     newEntryPress: EventHandler<'newEntryPress'> = async ({
         event: { entry },
+        previousState,
     }) => {
+        // NOTE: This is here as the enter press event from the context menu to confirm a space rename
+        //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
+        //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
+        if (previousState.contextMenuListId != null) {
+            return
+        }
+
         entry = this.validateEntry(entry)
         const listId = await this.createAndDisplayNewList(entry)
         await this.dependencies.selectEntry(listId)
