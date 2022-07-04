@@ -124,4 +124,9 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             .collection('customLists')
             .updateOneObject({ id: listId }, { name })
     }
+
+    console.log('# removed duplicate local spaces: ', listIdsToDelete.size)
+    console.log('# renamed duplicate shared spaces: ', listIdsToRename.size)
+    console.log('# updated page entries: ', pageEntriesToMove.length)
+    console.log('# updated annotation entries: ', annotEntriesToMove.length)
 }
