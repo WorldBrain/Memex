@@ -165,8 +165,8 @@ describe('duped tag space removal', () => {
             expect.objectContaining({ id: 4, name: 'test c (duplicate #1)', createdAt: new Date('2022-07-04') }),
             expect.objectContaining({ id: 5, name: 'test c (duplicate #2)', createdAt: new Date('2022-07-05') }),
             expect.objectContaining({ id: 6, name: 'test c', createdAt: new Date('2022-07-03') }),
-            expect.objectContaining({ id: 7, name: 'test d (duplicated #1)', createdAt: new Date('2022-07-03') }),
-            expect.objectContaining({ id: 10, name: 'test d', createdAt: new Date('2022-07-03') }),
+            expect.objectContaining({ id: 7, name: 'test d (duplicate #1)', createdAt: new Date('2022-07-04') }),
+            expect.objectContaining({ id: 10, name: 'test d', createdAt: new Date('2022-07-02') }),
         ])
     })
 
@@ -257,7 +257,7 @@ describe('duped tag space removal', () => {
         expect(await storageManager.collection('customLists').findAllObjects({})).toEqual([
             expect.objectContaining({ id: 2, name: 'test a', createdAt: new Date('2022-07-05') }),
             expect.objectContaining({ id: 3, name: 'test b', createdAt: new Date('2022-07-04') }),
-            expect.objectContaining({ id: 5, name: 'test c (duplicate #1)', createdAt: new Date('2022-07-04') }),
+            expect.objectContaining({ id: 5, name: 'test c (duplicate #1)', createdAt: new Date('2022-07-05 ') }),
             expect.objectContaining({ id: 6, name: 'test c', createdAt: new Date('2022-07-03') }),
         ])
         // prettier-ignore
