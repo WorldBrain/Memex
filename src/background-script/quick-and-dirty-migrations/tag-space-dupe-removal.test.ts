@@ -82,7 +82,7 @@ describe('duped tag space removal', () => {
             expect.objectContaining({ id: 6, name: 'test c', createdAt: new Date('2022-07-03') }),
         ])
 
-        await removeDupeSpaces({ storageManager })
+        await removeDupeSpaces({ storageManager, silenceLogging: true })
 
         // prettier-ignore
         expect(await storageManager.collection('customLists').findAllObjects({})).toEqual([
@@ -115,7 +115,7 @@ describe('duped tag space removal', () => {
             expect.objectContaining({ id: 6, name: 'test c', createdAt: new Date('2022-07-03') }),
         ])
 
-        await removeDupeSpaces({ storageManager })
+        await removeDupeSpaces({ storageManager, silenceLogging: true })
 
         // prettier-ignore
         expect(await storageManager.collection('customLists').findAllObjects({})).toEqual([
@@ -156,7 +156,7 @@ describe('duped tag space removal', () => {
             expect.objectContaining({ id: 10, name: 'test d', createdAt: new Date('2022-07-02') }),
         ])
 
-        await removeDupeSpaces({ storageManager })
+        await removeDupeSpaces({ storageManager, silenceLogging: true })
 
         // prettier-ignore
         expect(await storageManager.collection('customLists').findAllObjects({})).toEqual([
@@ -251,13 +251,13 @@ describe('duped tag space removal', () => {
             expect.objectContaining({ listId: 6, url: 'test.com/d#1117' }),
         ]))
 
-        await removeDupeSpaces({ storageManager })
+        await removeDupeSpaces({ storageManager, silenceLogging: true })
 
         // prettier-ignore
         expect(await storageManager.collection('customLists').findAllObjects({})).toEqual([
             expect.objectContaining({ id: 2, name: 'test a', createdAt: new Date('2022-07-05') }),
             expect.objectContaining({ id: 3, name: 'test b', createdAt: new Date('2022-07-04') }),
-            expect.objectContaining({ id: 5, name: 'test c (duplicate #1)', createdAt: new Date('2022-07-05 ') }),
+            expect.objectContaining({ id: 5, name: 'test c (duplicate #1)', createdAt: new Date('2022-07-05') }),
             expect.objectContaining({ id: 6, name: 'test c', createdAt: new Date('2022-07-03') }),
         ])
         // prettier-ignore
@@ -380,7 +380,7 @@ describe('duped tag space removal', () => {
                 .findAllObjects({}),
         ).toEqual(expectedAnnotEntries)
 
-        await removeDupeSpaces({ storageManager })
+        await removeDupeSpaces({ storageManager, silenceLogging: true })
 
         expect(
             await storageManager.collection('customLists').findAllObjects({}),

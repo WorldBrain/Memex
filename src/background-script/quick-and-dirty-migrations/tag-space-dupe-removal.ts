@@ -5,18 +5,13 @@ import type { AnnotListEntry } from 'src/annotations/types'
 
 interface Dependencies {
     storageManager: StorageManager
+    silenceLogging?: boolean
 }
 
-export async function removeDupeSpaces({ storageManager }: Dependencies) {
-    const customLists: PageList[] = await storageManager
-        .collection('customLists')
-        .findAllObjects({})
-    const metadata: SharedListMetadata[] = await storageManager
-        .collection('sharedListMetadata')
-        .findAllObjects({
-            localId: { $in: customLists.map((list) => list.id) },
-        })
-
+export async function removeDupeSpaces({
+    storageManager,
+    silenceLogging,
+}: Dependencies) {
     const listIdsToDelete = new Set<number>()
     const listIdsToRename = new Map<number, string>()
     const pageEntriesToMove: PageListEntry[] = []
@@ -33,19 +28,27 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             .map((id) => listsById.get(id))
             .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
-    // index IDs by name
+    const customLists: PageList[] = await storageManager
+        .collection('customLists')
+        .findAllObjects({})
+    const metadata: SharedListMetadata[] = await storageManager
+        .collection('sharedListMetadata')
+        .findAllObjects({
+            localId: { $in: customLists.map((list) => list.id) },
+        })
+
+    // Create look-up indices for the existing data, to make it easier to calc things later
     for (const list of customLists) {
         listsById.set(list.id, list)
 
         const existingIds = listIdsByName.get(list.name) ?? []
         listIdsByName.set(list.name, [...existingIds, list.id])
     }
-
     for (const data of metadata) {
         sharedIds.add(data.localId)
     }
 
-    // For those with multiple IDs: look up share links, choose ones to keep
+    // For those spaces that have the same names: figure out which ones to keep (are shared OR pick oldest)
     for (const [name, listIds] of listIdsByName) {
         if (listIds.length < 2) {
             continue
@@ -55,17 +58,16 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             listIds.filter((id) => sharedIds.has(id)),
         ).map((list) => list.id)
 
-        // If no shared lists to keep, keep the oldest one
+        // If no shared lists, just keep the oldest one
         if (idsToKeep.length === 0) {
             idsToKeep.push(sortByOldestList(listIds)[0].id)
         }
 
-        // Find list entries for the lists that will be delated
-        const idsToDelete = listIds.filter((id) => !idsToKeep.includes(id))
-
         const mainListId = idsToKeep[0] // We might be keeping multiple lists. Pick the oldest one as the "main" list
 
-        // Grab all the entries and repoint them at the main list
+        const idsToDelete = listIds.filter((id) => !idsToKeep.includes(id))
+
+        // Grab all the entries for each list and set them up for deletion and repointing at the "main" list
         for (const id of idsToDelete) {
             listIdsToDelete.add(id)
 
@@ -91,7 +93,7 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             )
         }
 
-        // Set up lists for renaming
+        // Set up extra lists for renaming (these will be kept because they're shared)
         idsToKeep
             .slice(1)
             .forEach((id, i) =>
@@ -99,7 +101,7 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             )
     }
 
-    // Delete the lists
+    // Perform the needed DB deletions and updates
     await storageManager
         .collection('customLists')
         .deleteObjects({ id: { $in: [...listIdsToDelete] } })
@@ -125,8 +127,10 @@ export async function removeDupeSpaces({ storageManager }: Dependencies) {
             .updateOneObject({ id: listId }, { name })
     }
 
-    console.log('# removed duplicate local spaces: ', listIdsToDelete.size)
-    console.log('# renamed duplicate shared spaces: ', listIdsToRename.size)
-    console.log('# updated page entries: ', pageEntriesToMove.length)
-    console.log('# updated annotation entries: ', annotEntriesToMove.length)
+    if (!silenceLogging) {
+        console.log('# removed duplicate local spaces: ', listIdsToDelete.size)
+        console.log('# renamed duplicate shared spaces: ', listIdsToRename.size)
+        console.log('# updated page entries: ', pageEntriesToMove.length)
+        console.log('# updated annotation entries: ', annotEntriesToMove.length)
+    }
 }
