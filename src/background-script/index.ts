@@ -12,6 +12,7 @@ import * as utils from './utils'
 import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
+import { removeDupeSpaces } from './quick-and-dirty-migrations/tag-space-dupe-removal'
 import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
@@ -80,6 +81,9 @@ class BackgroundScript {
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
         }
+
+        window['___removeDupeSpaces'] = () =>
+            removeDupeSpaces({ storageManager: deps.storageManager })
     }
 
     get defaultUninstallURL() {
