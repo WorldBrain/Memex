@@ -314,6 +314,18 @@ export default class CustomListStorage extends StorageModule {
         })
     }
 
+    async fetchPageListEntriesByUrl({
+        normalizedPageUrl,
+    }: {
+        normalizedPageUrl: string
+    }) {
+        const pageListEntries: PageListEntry[] = await this.operation(
+            'findListEntriesByUrl',
+            { url: normalizedPageUrl },
+        )
+        return pageListEntries
+    }
+
     async fetchListPageEntriesByUrls({
         listId,
         normalizedPageUrls,
