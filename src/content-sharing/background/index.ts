@@ -563,7 +563,7 @@ export default class ContentSharingBackground {
                 keepListsIfUnsharing: params.keepListsIfUnsharing,
             },
         )
-        return { sharingState }
+        return { sharingState, remoteId: sharingState.remoteId }
     }
 
     deleteAnnotationPrivacyLevel: ContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
