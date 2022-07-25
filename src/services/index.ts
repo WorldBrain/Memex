@@ -25,7 +25,7 @@ export async function createServices(options: {
         return {
             auth,
             contentSharing: new ContentSharingService({
-                storage: { contentSharing: storageModules.contentSharing },
+                serverStorage: storageModules.contentSharing,
             }),
             contentConversations: new ContentConversationsService({
                 services: { auth },
@@ -53,7 +53,7 @@ export async function createServices(options: {
     return {
         auth: authDeps.authService,
         contentSharing: new ContentSharingService({
-            storage: { contentSharing: storageModules.contentSharing },
+            serverStorage: storageModules.contentSharing,
         }),
         contentConversations: new ContentConversationsService({
             services: { auth: authDeps.authService },

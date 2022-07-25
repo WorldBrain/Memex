@@ -1,9 +1,8 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
-import { ContentSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
+import { ListSharingServiceInterface } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
-export interface ContentSharingInterface
-    extends ContentSharingServiceInterface {
+export interface ContentSharingInterface extends ListSharingServiceInterface {
     shareList(options: {
         listId: number
     }): Promise<{
