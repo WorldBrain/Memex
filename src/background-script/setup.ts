@@ -478,6 +478,8 @@ export function createBackgroundModules(options: {
                 },
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
+                // NOTE: this is for retrospective collection sync, which is currently unused in the extension
+                getLastCollectionDataProcessedTime: async () => 0,
                 getDeviceId: async () => personalCloud.deviceId!,
                 getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
             }),
