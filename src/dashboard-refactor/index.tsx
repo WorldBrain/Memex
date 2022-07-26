@@ -1123,7 +1123,7 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                     services={{
                         ...this.props.services,
-                        contentSharing: this.props.contentShareBG,
+                        listKeys: this.props.contentShareBG,
                     }}
                 />
             )

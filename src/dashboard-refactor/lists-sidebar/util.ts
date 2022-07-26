@@ -27,7 +27,9 @@ export const shareListAndAllEntries = (
     contentShareBG: ContentSharingInterface,
     listId: number,
 ) => async (): Promise<{ listId: string }> => {
-    const { remoteListId } = await contentShareBG.shareList({ listId })
+    const { remoteListId } = await contentShareBG.shareList({
+        localListId: listId,
+    })
 
     return { listId: remoteListId }
 }

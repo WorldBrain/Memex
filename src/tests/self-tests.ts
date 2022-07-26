@@ -215,7 +215,7 @@ export function createSelfTests(options: {
                 )
                 await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                     {
-                        annotation: publicAnnotation2,
+                        annotationUrl: publicAnnotation2,
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     },
                 )
@@ -236,7 +236,7 @@ export function createSelfTests(options: {
                 )
                 await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                     {
-                        annotation: publicAnnotation3,
+                        annotationUrl: publicAnnotation3,
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     },
                 )
@@ -259,7 +259,7 @@ export function createSelfTests(options: {
                 )
                 await backgroundModules.contentSharing.setAnnotationPrivacyLevel(
                     {
-                        annotation: publicAnnotation4,
+                        annotationUrl: publicAnnotation4,
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     },
                 )
@@ -310,7 +310,7 @@ export function createSelfTests(options: {
             if (shouldTest('share') || shouldTest('pdf.online.share')) {
                 remoteListId1 = (
                     await backgroundModules.contentSharing.shareList({
-                        listId: testListId1,
+                        localListId: testListId1,
                     })
                 ).remoteListId
                 console.log('Shared test list #1, remote ID:', remoteListId1)
@@ -318,7 +318,7 @@ export function createSelfTests(options: {
                 const {
                     remoteListId: remoteListId2,
                 } = await backgroundModules.contentSharing.shareList({
-                    listId: testListId2,
+                    localListId: testListId2,
                 })
                 console.log('Shared test list #2, remote ID:', remoteListId2)
 

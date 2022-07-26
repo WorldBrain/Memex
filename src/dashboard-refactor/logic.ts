@@ -2679,7 +2679,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
         const { remoteListId } = await this.options.contentShareBG.shareList({
-            listId: event.listId,
+            localListId: event.listId,
         })
 
         const memberAnnotParentPageIds = new Set<string>()

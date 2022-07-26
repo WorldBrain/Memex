@@ -131,7 +131,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         await executeUITask(this, 'inviteLinksLoadState', async () => {
             if (remoteListId == null) {
                 const shareResult = await contentSharingBG.shareList({
-                    listId: localListId,
+                    localListId,
                 })
                 remoteListId = shareResult.remoteListId
                 onSpaceShare?.(remoteListId)

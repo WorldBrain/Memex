@@ -67,7 +67,7 @@ async function setupTest(options: {
 
     const shareTestList = async () => {
         const listShareResult = await contentSharing.shareList({
-            listId: testData.localListId,
+            localListId: testData.localListId,
         })
         testData.remoteListId = listShareResult.remoteListId
         return listShareResult.remoteListId

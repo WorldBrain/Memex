@@ -94,7 +94,7 @@ export async function createAnnotation({
             }
 
             await contentSharingBG.setAnnotationPrivacyLevel({
-                annotation: annotationUrl,
+                annotationUrl,
                 privacyLevel: shareOptsToPrivacyLvl(shareOpts),
             })
 
@@ -153,7 +153,7 @@ export async function updateAnnotation({
                     }),
                 !shareOpts?.skipPrivacyLevelUpdate &&
                     contentSharingBG.setAnnotationPrivacyLevel({
-                        annotation: annotationData.localId,
+                        annotationUrl: annotationData.localId,
                         privacyLevel: shareOptsToPrivacyLvl(shareOpts),
                         keepListsIfUnsharing,
                     }),

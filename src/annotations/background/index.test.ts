@@ -56,7 +56,7 @@ const createAnnotationStep = (args?: {
         )
         if (args?.protectAnnotation) {
             await contentSharing(setup).setAnnotationPrivacyLevel({
-                annotation: annotUrl,
+                annotationUrl: annotUrl,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
         }
