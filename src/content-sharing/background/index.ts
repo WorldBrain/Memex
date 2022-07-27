@@ -47,6 +47,7 @@ export default class ContentSharingBackground {
                 Pick<ServerStorageModules, 'contentSharing'>
             >
             generateServerId: GenerateServerID
+            waitForSync: () => Promise<void>
         },
     ) {
         this.storage = new ContentSharingClientStorage({
@@ -101,6 +102,7 @@ export default class ContentSharingBackground {
         })
         this.listSharingService = new ListSharingService({
             storage: this.storage,
+            waitForSync: options.waitForSync,
             generateServerId: options.generateServerId,
             listKeysService: options.services.contentSharing,
             annotationSharingService: this.annotationSharingService,

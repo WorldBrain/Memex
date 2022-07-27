@@ -362,28 +362,6 @@ export function createBackgroundModules(options: {
     }
     const userMessages = options.userMessageService
 
-    const contentSharing = new ContentSharingBackground({
-        backend:
-            options.contentSharingBackend ??
-            firebaseService<ContentSharingBackend>(
-                'personalCloud',
-                callFirebaseFunction,
-            ),
-        remoteEmitter: createRemoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
-        }),
-        activityStreams,
-        storageManager,
-        customListsBG: customLists,
-        annotations: directLinking.annotationStorage,
-        auth,
-        analytics: options.analyticsManager,
-        getServerStorage,
-        services: options.services,
-        captureException: options.captureException,
-        generateServerId,
-    })
-
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
         { prefix: 'readwise.' },
@@ -402,12 +380,6 @@ export function createBackgroundModules(options: {
                 'fullUrl',
                 'fullTitle',
             ),
-    })
-
-    const copyPaster = new CopyPasterBackground({
-        storageManager,
-        contentSharing,
-        search,
     })
 
     const localExtSettingStore = new BrowserSettingsStore<
@@ -573,6 +545,35 @@ export function createBackgroundModules(options: {
             }
         },
         getServerStorageManager,
+    })
+
+    const contentSharing = new ContentSharingBackground({
+        backend:
+            options.contentSharingBackend ??
+            firebaseService<ContentSharingBackend>(
+                'personalCloud',
+                callFirebaseFunction,
+            ),
+        remoteEmitter: createRemoteEventEmitter('contentSharing', {
+            broadcastToTabs: true,
+        }),
+        waitForSync: () => personalCloud.actionQueue.waitForSync(),
+        activityStreams,
+        storageManager,
+        customListsBG: customLists,
+        annotations: directLinking.annotationStorage,
+        auth,
+        analytics: options.analyticsManager,
+        getServerStorage,
+        services: options.services,
+        captureException: options.captureException,
+        generateServerId,
+    })
+
+    const copyPaster = new CopyPasterBackground({
+        storageManager,
+        contentSharing,
+        search,
     })
 
     const bgScript = new BackgroundScript({
