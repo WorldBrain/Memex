@@ -102,6 +102,7 @@ export default class ContentSharingBackground {
         this.listSharingService = new ListSharingService({
             storage: this.storage,
             generateServerId: options.generateServerId,
+            listKeysService: options.services.contentSharing,
             annotationSharingService: this.annotationSharingService,
             listStorage: {
                 getList: (listId) =>

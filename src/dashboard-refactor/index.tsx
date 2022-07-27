@@ -1106,27 +1106,27 @@ export class DashboardContainer extends StatefulUIElement<
         if (modalsState.shareListId) {
             const listData = listsSidebar.listData[modalsState.shareListId]
 
-            return (
-                <ListShareModal
-                    defaultAddLinkRole={
-                        listData.remoteId
-                            ? SharedListRoleID.ReadWrite
-                            : SharedListRoleID.Commenter
-                    }
-                    listId={listData.remoteId}
-                    shareList={shareListAndAllEntries(
-                        this.props.contentShareBG,
-                        listData.id,
-                    )}
-                    onCloseRequested={() =>
-                        this.processEvent('setShareListId', {})
-                    }
-                    services={{
-                        ...this.props.services,
-                        listKeys: this.props.contentShareBG,
-                    }}
-                />
-            )
+            // TODO: Fix up the list sharing calls if we ever bring this back (don't need to generate keys)
+            return null
+            // <ListShareModal
+            //     defaultAddLinkRole={
+            //         listData.remoteId
+            //             ? SharedListRoleID.ReadWrite
+            //             : SharedListRoleID.Commenter
+            //     }
+            //     listId={listData.remoteId}
+            //     shareList={shareListAndAllEntries(
+            //         this.props.contentShareBG,
+            //         listData.id,
+            //     )}
+            //     onCloseRequested={() =>
+            //         this.processEvent('setShareListId', {})
+            //     }
+            //     services={{
+            //         ...this.props.services,
+            //         listKeys: this.props.contentShareBG,
+            //     }}
+            // />
         }
 
         if (modalsState.showSubscription) {
