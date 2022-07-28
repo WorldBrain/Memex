@@ -278,6 +278,7 @@ export function createBackgroundModules(options: {
 
     const activityIndicator = new ActivityIndicatorBackground({
         services: options.services,
+        syncSettings: syncSettingsStore,
         getActivityStreamsStorage: async () =>
             (await options.getServerStorage()).storageModules.activityStreams,
     })
@@ -558,7 +559,6 @@ export function createBackgroundModules(options: {
             broadcastToTabs: true,
         }),
         waitForSync: () => personalCloud.actionQueue.waitForSync(),
-        activityStreams,
         storageManager,
         customListsBG: customLists,
         annotations: directLinking.annotationStorage,

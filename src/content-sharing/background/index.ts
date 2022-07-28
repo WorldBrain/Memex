@@ -12,10 +12,9 @@ import type { Analytics } from 'src/analytics/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
 import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import type ActivityStreamsBackground from 'src/activity-streams/background'
 import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
-import type { ContentSharingInterface, AnnotationSharingStates } from './types'
+import type { ContentSharingInterface } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
 import AnnotationStorage from 'src/annotations/background/storage'
@@ -39,7 +38,6 @@ export default class ContentSharingBackground {
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
-            activityStreams: Pick<ActivityStreamsBackground, 'backend'>
             services: Pick<Services, 'contentSharing'>
             captureException?: (e: Error) => void
             remoteEmitter: RemoteEventEmitter<'contentSharing'>

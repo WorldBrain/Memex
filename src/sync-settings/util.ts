@@ -14,6 +14,9 @@ export const createSyncSettingsStore = <
     syncSettingsBG: RemoteSyncSettingsInterface | SyncSettingsBackground
 }): SyncSettingsStore<T> =>
     ({
+        activityIndicator: new BrowserSettingsStore(args.syncSettingsBG, {
+            prefix: FEATURE_PREFIX.ACTIVITY_INDICATOR,
+        }),
         inPageUI: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.IN_PAGE_UI,
         }),
