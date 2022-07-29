@@ -2995,6 +2995,155 @@ describe('Personal cloud translation layer', () => {
             ], { skip: 0 })
         })
 
+        describe(`translation layer twitter integration`, () => {
+            it('should trigger twitter action create on creation of twitter status pages with missing titles', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.twitter_a)
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.twitter_b)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTwitterActions = remoteData.personalTwitterAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
+                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.twitter_a, testMetadata.twitter_b],
+                    personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
+                    personalTwitterAction: [testTwitterActions.first, testTwitterActions.second],
+                })
+            })
+
+            it('should NOT trigger twitter action create on creation of twitter status pages without missing titles', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+
+                const testTitleA = 'X on Twitter: "cool stuff"'
+                const testTitleB = 'X on Twitter: "more cool stuff"'
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_a,
+                        fullTitle: testTitleA,
+                    })
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_b,
+                        fullTitle: testTitleB,
+                    })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
+                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [{ ...testMetadata.twitter_a, title: testTitleA }, { ...testMetadata.twitter_b, title: testTitleB }],
+                    personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
+                    personalTwitterAction: [],
+                })
+            })
+
+            it('should NOT trigger twitter action create on creation of non-status twitter pages', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+                await insertTestPages(setups[0].storageManager)
+
+                const url = 'twitter.com/zzzzz'
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_a,
+                        url,
+                        fullUrl: 'https://' + url,
+                        canonicalUrl: 'https://' + url,
+                    })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTwitterActions = remoteData.personalTwitterAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.twitter_a],
+                    personalContentLocator: [{
+                        ...testLocators.twitter_a,
+                        location: url,
+                        originalLocation: 'https://' + url,
+                    }],
+                    personalTwitterAction: [],
+                })
+            })
+        })
+
         describe(`translation layer readwise integration`, () => {
             it('should create annotations, triggering readwise action create', async () => {
                 const {
