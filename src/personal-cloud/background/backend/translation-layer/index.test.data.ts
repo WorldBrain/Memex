@@ -458,7 +458,7 @@ const REMOTE_METADATA_V24 = {
         description: LOCAL_TEST_DATA_V24.pages.fourth.description ?? null,
     },
     twitter_a: {
-        id: 4,
+        id: 1,
         createdWhen: 598,
         updatedWhen: 598,
         user: TEST_USER.id,
@@ -469,7 +469,7 @@ const REMOTE_METADATA_V24 = {
         description: LOCAL_TEST_DATA_V24.pages.twitter_a.description ?? null,
     },
     twitter_b: {
-        id: 5,
+        id: 2,
         createdWhen: 599,
         updatedWhen: 599,
         user: TEST_USER.id,
@@ -634,7 +634,7 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprintScheme,
     },
     twitter_a: {
-        id: 8,
+        id: 1,
         createdWhen: 598,
         updatedWhen: 598,
         user: TEST_USER.id,
@@ -652,7 +652,7 @@ const REMOTE_LOCATORS_V24 = {
         localId: null,
     },
     twitter_b: {
-        id: 9,
+        id: 2,
         createdWhen: 599,
         updatedWhen: 599,
         user: TEST_USER.id,
@@ -1134,7 +1134,7 @@ export const REMOTE_TEST_DATA_V24 = {
     personalTwitterAction: {
         first: {
             id: 1,
-            personalContentLocator: REMOTE_LOCATORS_V24.twitter_a.id,
+            personalContentMetadata: REMOTE_METADATA_V24.twitter_a.id,
             createdWhen: new Date(1625634720653),
             updatedWhen: new Date(1625634720653),
             user: TEST_USER.id,
@@ -1142,7 +1142,7 @@ export const REMOTE_TEST_DATA_V24 = {
         },
         second: {
             id: 2,
-            personalContentLocator: REMOTE_LOCATORS_V24.twitter_b.id,
+            personalContentMetadata: REMOTE_METADATA_V24.twitter_b.id,
             createdWhen: new Date(1625634720654),
             updatedWhen: new Date(1625634720654),
             user: TEST_USER.id,

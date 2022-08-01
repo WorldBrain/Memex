@@ -3002,7 +3002,6 @@ describe('Personal cloud translation layer', () => {
                     serverIdCapturer,
                     serverStorage,
                 } = await setup()
-                await insertTestPages(setups[0].storageManager)
 
                 await setups[0].storageManager
                     .collection('pages')
@@ -3034,7 +3033,7 @@ describe('Personal cloud translation layer', () => {
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
-                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    ], { skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.twitter_a, testMetadata.twitter_b],
                     personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
                     personalTwitterAction: [testTwitterActions.first, testTwitterActions.second],
@@ -3047,7 +3046,6 @@ describe('Personal cloud translation layer', () => {
                     serverIdCapturer,
                     serverStorage,
                 } = await setup()
-                await insertTestPages(setups[0].storageManager)
 
                 const testTitleA = 'X on Twitter: "cool stuff"'
                 const testTitleB = 'X on Twitter: "more cool stuff"'
@@ -3086,7 +3084,7 @@ describe('Personal cloud translation layer', () => {
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
-                    ], { skipChanges: 4, skipAssertTimestamp: true }),
+                    ], {  skipAssertTimestamp: true }),
                     personalContentMetadata: [{ ...testMetadata.twitter_a, title: testTitleA }, { ...testMetadata.twitter_b, title: testTitleB }],
                     personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
                     personalTwitterAction: [],
@@ -3099,7 +3097,6 @@ describe('Personal cloud translation layer', () => {
                     serverIdCapturer,
                     serverStorage,
                 } = await setup()
-                await insertTestPages(setups[0].storageManager)
 
                 const url = 'twitter.com/zzzzz'
                 await setups[0].storageManager
@@ -3132,8 +3129,8 @@ describe('Personal cloud translation layer', () => {
                     ...dataChangesAndUsage(remoteData, [
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
-                    ], { skipChanges: 4, skipAssertTimestamp: true }),
-                    personalContentMetadata: [testMetadata.twitter_a],
+                    ], { skipAssertTimestamp: true }),
+                    personalContentMetadata: [{ ...testMetadata.twitter_a, canonicalUrl: 'https://' + url }],
                     personalContentLocator: [{
                         ...testLocators.twitter_a,
                         location: url,
