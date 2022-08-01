@@ -28,13 +28,17 @@ async function setupTest(opts: {
         setups: [context],
     } = await setupSyncBackgroundTest({ deviceCount: 1 })
 
+    const twitterAPI = new MemoryTwitterAPI({
+        testTweetData: opts.testTweetData ?? TEST_TWEET_A,
+        errorOnGetTweet: opts.simulateAPIError,
+    })
+
+    await twitterAPI.setupAuth('test-key', 'test-secret')
+
     const processor = new TwitterActionProcessor({
-        twitterAPI: new MemoryTwitterAPI({
-            testTweetData: opts.testTweetData ?? TEST_TWEET_A,
-            errorOnGetTweet: opts.simulateAPIError,
-        }),
         captureException: opts.captureException ?? (async () => {}),
         storageManager: serverStorage.storageManager,
+        twitterAPI,
         userId,
     })
     return { processor, storage: serverStorage, context, userId }
