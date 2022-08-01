@@ -19,6 +19,7 @@ const TEST_TWEET_A: TweetData = {
 
 async function setupTest(opts: {
     captureException?: ExceptionCapturer
+    simulateAPIError?: boolean
     testTweetData?: TweetData
 }) {
     const {
@@ -28,7 +29,10 @@ async function setupTest(opts: {
     } = await setupSyncBackgroundTest({ deviceCount: 1 })
 
     const processor = new TwitterActionProcessor({
-        twitterAPI: new MemoryTwitterAPI(opts.testTweetData ?? TEST_TWEET_A),
+        twitterAPI: new MemoryTwitterAPI({
+            testTweetData: opts.testTweetData ?? TEST_TWEET_A,
+            errorOnGetTweet: opts.simulateAPIError,
+        }),
         captureException: opts.captureException ?? (async () => {}),
         storageManager: serverStorage.storageManager,
         userId,
@@ -40,10 +44,10 @@ describe('Translation-layer Twitter integration tests', () => {
     it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata', async () => {
         let capturedException: Error | null = null
         const { processor, storage, userId } = await setupTest({
+            testTweetData: TEST_TWEET_A,
             captureException: async (e) => {
                 capturedException = e
             },
-            testTweetData: TEST_TWEET_A,
         })
 
         const normalizedUrl = 'twitter.com/user/status/123123123'
@@ -145,5 +149,106 @@ describe('Translation-layer Twitter integration tests', () => {
         ).toEqual([
             expect.objectContaining({ title: tweetDataToTitle(TEST_TWEET_A) }),
         ])
+    })
+
+    it('should fail gracefully, capturing exceptions in case of Twitter API errors', async () => {
+        let capturedException: Error | null = null
+        const { processor, storage, userId } = await setupTest({
+            simulateAPIError: true,
+            testTweetData: TEST_TWEET_A,
+            captureException: async (e) => {
+                capturedException = e
+            },
+        })
+
+        const normalizedUrl = 'twitter.com/user/status/123123123'
+
+        const {
+            object: contentMetadata,
+        } = await storage.storageManager
+            .collection('personalContentMetadata')
+            .createObject({
+                id: 1,
+                canonicalUrl: normalizedUrl,
+                title: null,
+                lang: null,
+                user: userId,
+                description: null,
+                createdByDevice: null,
+                createdWhen: 1659333625307,
+                updatedWhen: 1659333625307,
+            })
+
+        await storage.storageManager
+            .collection('personalContentLocator')
+            .createObject({
+                id: 1,
+                personalContentMetadata: contentMetadata!.id,
+                locationType: ContentLocatorType.Remote,
+                locationScheme: LocationSchemeType.NormalizedUrlV1,
+                format: ContentLocatorFormat.HTML,
+                location: normalizedUrl,
+                originalLocation: 'https://' + normalizedUrl,
+                version: 0,
+                valid: true,
+                primary: true,
+                contentSize: null,
+                fingerprint: null,
+                lastVisited: 0,
+                localId: null,
+                user: userId,
+                createdByDevice: null,
+                createdWhen: 1659333625307,
+                updatedWhen: 1659333625307,
+            })
+
+        const twitterAction = {
+            id: 1,
+            user: userId,
+            createdWhen: 1659333625307,
+            updatedWhen: 1659333625307,
+            personalContentMetadata: contentMetadata!.id,
+        }
+        await storage.storageManager
+            .collection('personalTwitterAction')
+            .createObject(twitterAction)
+
+        expect(capturedException).toBeNull()
+
+        await processor.processTwitterAction(twitterAction)
+
+        expect(capturedException).not.toBeNull()
+        expect(capturedException.message).toEqual('simulated API error')
+    })
+
+    it('should fail gracefully, capturing exceptions in case of data errors', async () => {
+        let capturedException: Error | null = null
+        const { processor, storage, userId } = await setupTest({
+            simulateAPIError: true,
+            testTweetData: TEST_TWEET_A,
+            captureException: async (e) => {
+                capturedException = e
+            },
+        })
+
+        const twitterAction = {
+            id: 1,
+            user: userId,
+            createdWhen: 1659333625307,
+            updatedWhen: 1659333625307,
+            personalContentMetadata: 1, // NOTE: This doesn't exist in the DB!
+        }
+        await storage.storageManager
+            .collection('personalTwitterAction')
+            .createObject(twitterAction)
+
+        expect(capturedException).toBeNull()
+
+        await processor.processTwitterAction(twitterAction)
+
+        expect(capturedException).not.toBeNull()
+        expect(capturedException.message).toEqual(
+            'Could not derive tweet ID from stored data',
+        )
     })
 })
