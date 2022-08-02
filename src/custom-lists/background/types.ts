@@ -21,6 +21,11 @@ export interface PageListEntry {
     fullUrl: string
 }
 
+export interface ListDescription {
+    listId: number
+    description: string
+}
+
 export interface SharedAnnotationList {
     id: string
     name: string

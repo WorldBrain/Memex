@@ -11,12 +11,13 @@ import {
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
-import { SuggestResult } from 'src/search/types'
-import { PageList, PageListEntry } from './types'
+import type { SuggestResult } from 'src/search/types'
+import type { PageList, PageListEntry, ListDescription } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
 export default class CustomListStorage extends StorageModule {
+    static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
@@ -43,6 +44,10 @@ export default class CustomListStorage extends StorageModule {
                 },
                 createListEntry: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
+                    operation: 'createObject',
+                },
+                createListDescription: {
+                    collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'createObject',
                 },
                 countListEntries: {
@@ -119,6 +124,16 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObjects',
                     args: { name: { $in: '$name:string[]' } },
                 },
+                findListDescriptionByList: {
+                    collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
+                    operation: 'findObject',
+                    args: { listId: '$listId:pk' },
+                },
+                findListDescriptionsByLists: {
+                    collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
+                    operation: 'findObjects',
+                    args: { listId: { $in: '$listIds:array' } },
+                },
                 updateListName: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'updateObject',
@@ -131,6 +146,14 @@ export default class CustomListStorage extends StorageModule {
                             searchableName: '$name:string',
                             // updatedAt: '$updatedAt:any',
                         },
+                    ],
+                },
+                updateListDescription: {
+                    collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
+                    operation: 'updateObject',
+                    args: [
+                        { listId: '$listId:pk' },
+                        { description: '$description:string' },
                     ],
                 },
                 deleteList: {
@@ -147,6 +170,11 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'deleteObjects',
                     args: { listId: '$listId:pk', pageUrl: '$pageUrl:string' },
+                },
+                deleteListDescription: {
+                    collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
+                    operation: 'deleteObject',
+                    args: { listId: '$listId:pk' },
                 },
                 [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
                     operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
@@ -172,6 +200,16 @@ export default class CustomListStorage extends StorageModule {
             pages,
             active,
         }
+    }
+
+    async createListDescription({
+        listId,
+        description,
+    }: {
+        listId: number
+        description: string
+    }): Promise<void> {
+        await this.operation('createListDescription', { listId, description })
     }
 
     async createInboxListIfAbsent({
@@ -205,6 +243,12 @@ export default class CustomListStorage extends StorageModule {
 
     countInboxUnread(): Promise<number> {
         return this.countListEntries(SPECIAL_LIST_IDS.INBOX)
+    }
+
+    async fetchListDescriptionByList(
+        listId: number,
+    ): Promise<ListDescription | null> {
+        return this.operation('findListDescriptionByList', { listId })
     }
 
     async fetchAllLists({
@@ -381,6 +425,16 @@ export default class CustomListStorage extends StorageModule {
         })
     }
 
+    async updateListDescription({
+        listId,
+        description,
+    }: {
+        listId: number
+        description: string
+    }): Promise<void> {
+        await this.operation('updateListDescription', { listId, description })
+    }
+
     async removeList({ id }: { id: number }) {
         const pages = await this.operation('deleteListEntriesByListId', {
             listId: id,
@@ -420,6 +474,10 @@ export default class CustomListStorage extends StorageModule {
         pageUrl: string
     }) {
         return this.operation('deleteListEntriesById', { listId, pageUrl })
+    }
+
+    async deleteListDescription({ listId }: { listId: number }): Promise<void> {
+        await this.operation('deleteListDescription', { listId })
     }
 
     async suggestLists({
