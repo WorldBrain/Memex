@@ -45,7 +45,7 @@ export class HelpMenu extends React.PureComponent<Props> {
     render() {
         return (
             <HoverBox
-                position={'absolute'}
+                position={'fixed'}
                 right={'20px'}
                 bottom={'60px'}
                 padding={'10px'}
