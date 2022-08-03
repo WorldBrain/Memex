@@ -362,6 +362,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 let localLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
+                    includeDescriptions: true,
                 })
 
                 const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
@@ -392,6 +393,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         id: list.id,
                         name: list.name,
                         isOwnedList: true,
+                        description: list.description,
                     }
                 }
 
@@ -425,7 +427,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const followedLists = await listsBG.fetchAllFollowedLists({
+                const followedLists = await listsBG.fetchCollaborativeLists({
                     limit: 1000,
                 })
                 const followedListIds: number[] = []
@@ -2964,6 +2966,30 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 showMoreMenuListId: { $set: undefined },
             },
+        })
+    }
+
+    updateSelectedListDescription: EventHandler<
+        'updateSelectedListDescription'
+    > = async ({ event, previousState }) => {
+        const { selectedListId } = previousState.listsSidebar
+        if (!selectedListId) {
+            throw new Error('No selected list ID set to update description')
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                listData: {
+                    [selectedListId]: {
+                        description: { $set: event.description },
+                    },
+                },
+            },
+        })
+
+        await this.options.listsBG.updateListDescription({
+            description: event.description,
+            listId: selectedListId,
         })
     }
 

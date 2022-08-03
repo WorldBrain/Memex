@@ -1,105 +1,174 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import Button from '@worldbrain/memex-common/lib/common-ui/components/button'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { ButtonTooltip } from 'src/common-ui/components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import MemexEditor from '@worldbrain/memex-common/lib/editor'
 
 export interface Props {
     listName: string
     remoteLink?: string
     localListId: number
+    description?: string
+    isOwnedList?: boolean
+    saveDescription: (description: string) => void
     onAddContributorsClick?: React.MouseEventHandler
 }
 
-export default class ListDetails extends PureComponent<Props> {
-    render() {
+interface State {
+    description: string
+    isEditingDescription: boolean
+}
+
+export default class ListDetails extends PureComponent<Props, State> {
+    state: State = {
+        isEditingDescription: false,
+        description: this.props.description ?? '',
+    }
+
+    private handleDescriptionSave() {
+        this.setState({ isEditingDescription: false })
+        this.props.saveDescription(this.state.description)
+    }
+
+    private handleDescriptionInputKeyDown: React.KeyboardEventHandler = (e) => {
+        if (e.key === 'Escape') {
+            this.setState({ isEditingDescription: false })
+            return
+        }
+
+        if (navigator.platform === 'MacIntel') {
+            if (e.key === 'Enter' && e.metaKey) {
+                this.handleDescriptionSave()
+                return
+            }
+        } else {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                this.handleDescriptionSave()
+                return
+            }
+        }
+    }
+
+    private renderDescription() {
+        if (this.state.isEditingDescription) {
+            return (
+                <MemexEditor
+                    autoFocus
+                    markdownContent={this.state.description}
+                    onKeyDown={this.handleDescriptionInputKeyDown}
+                    placeholder="Write a description for this Space"
+                    onContentUpdate={(description) =>
+                        this.setState({ description })
+                    }
+                />
+            )
+        }
+
+        const maybeRenderTooltip = (children: JSX.Element) =>
+            this.props.isOwnedList ? (
+                children
+            ) : (
+                <ButtonTooltip
+                    position="bottom"
+                    tooltipText="It isn't yet possible to edit descriptions of Spaces that aren't yours"
+                >
+                    {children}
+                </ButtonTooltip>
+            )
+
         return (
             <>
-                {this.props.listName && (
-                    <TopBarContainer top="10px" bottom="20px">
-                        <Container center={!this.props.remoteLink}>
-                            <DetailsContainer>
-                                <SectionTitle>
-                                    {this.props.listName}
-                                </SectionTitle>
-                                {this.props.remoteLink && (
-                                    <InfoText>
-                                        Only your own contributions to this
-                                        space are visible locally. To see all,
-                                        open the{' '}
-                                        <a
-                                            target="_blank"
-                                            href={this.props.remoteLink}
-                                        >
-                                            web view{' '}
-                                        </a>
-                                    </InfoText>
-                                )}
-                            </DetailsContainer>
-                            <BtnsContainer>
-                                {this.props.remoteLink ? (
-                                    <>
-                                        <Margin right="10px">
-                                            <ButtonTooltip
-                                                tooltipText="Invite people to this Space"
-                                                position="bottom"
-                                            >
-                                                <Icon
-                                                    height="19px"
-                                                    filePath={icons.peopleFine}
-                                                    color="purple"
-                                                    onClick={
-                                                        this.props
-                                                            .onAddContributorsClick
-                                                    }
-                                                />
-                                            </ButtonTooltip>
-                                        </Margin>
-                                        <PrimaryAction
-                                            onClick={() =>
-                                                window.open(
-                                                    this.props.remoteLink,
-                                                )
-                                            }
-                                            label="Open Web View"
-                                            fontSize={'14px'}
-                                        />
-                                    </>
-                                ) : (
+                <DescriptionText>{this.props.description}</DescriptionText>
+                {maybeRenderTooltip(
+                    <PrimaryAction
+                        disabled={!this.props.isOwnedList}
+                        label="Edit Space Description"
+                        fontSize="14px"
+                        onClick={() =>
+                            this.setState({ isEditingDescription: true })
+                        }
+                    />,
+                )}
+            </>
+        )
+    }
+
+    render() {
+        return (
+            <TopBarContainer top="10px" bottom="20px">
+                <Container center={!this.props.remoteLink}>
+                    <DetailsContainer>
+                        <SectionTitle>{this.props.listName}</SectionTitle>
+                        {this.props.remoteLink && (
+                            <InfoText>
+                                Only your own contributions to this space are
+                                visible locally. To see all, open the{' '}
+                                <a target="_blank" href={this.props.remoteLink}>
+                                    web view{' '}
+                                </a>
+                            </InfoText>
+                        )}
+                        <DescriptionContainer>
+                            {this.renderDescription()}
+                        </DescriptionContainer>
+                    </DetailsContainer>
+                    <BtnsContainer>
+                        {this.props.remoteLink ? (
+                            <>
+                                <Margin right="10px">
                                     <ButtonTooltip
                                         tooltipText="Invite people to this Space"
                                         position="bottom"
                                     >
-                                        <PrimaryAction
+                                        <Icon
+                                            height="19px"
+                                            filePath={icons.peopleFine}
+                                            color="purple"
                                             onClick={
                                                 this.props
                                                     .onAddContributorsClick
                                             }
-                                            label={
-                                                <ShareCollectionBtn>
-                                                    <Icon
-                                                        height="14px"
-                                                        filePath={icons.link}
-                                                        color="white"
-                                                        hoverOff
-                                                    />
-                                                    <ShareCollectionBtnLabel>
-                                                        Share Space
-                                                    </ShareCollectionBtnLabel>
-                                                </ShareCollectionBtn>
-                                            }
                                         />
                                     </ButtonTooltip>
-                                )}
-                            </BtnsContainer>
-                        </Container>
-                    </TopBarContainer>
-                )}{' '}
-            </>
+                                </Margin>
+                                <PrimaryAction
+                                    onClick={() =>
+                                        window.open(this.props.remoteLink)
+                                    }
+                                    label="Open Web View"
+                                    fontSize={'14px'}
+                                />
+                            </>
+                        ) : (
+                            <ButtonTooltip
+                                tooltipText="Invite people to this Space"
+                                position="bottom"
+                            >
+                                <PrimaryAction
+                                    onClick={this.props.onAddContributorsClick}
+                                    label={
+                                        <ShareCollectionBtn>
+                                            <Icon
+                                                height="14px"
+                                                filePath={icons.link}
+                                                color="white"
+                                                hoverOff
+                                            />
+                                            <ShareCollectionBtnLabel>
+                                                Share Space
+                                            </ShareCollectionBtnLabel>
+                                        </ShareCollectionBtn>
+                                    }
+                                />
+                            </ButtonTooltip>
+                        )}
+                    </BtnsContainer>
+                </Container>
+            </TopBarContainer>
         )
     }
 }
@@ -172,3 +241,7 @@ const Note = styled.span`
     font-size: 12px;
     color: ${fonts.primary.colors.secondary};
 `
+
+const DescriptionContainer = styled.div``
+
+const DescriptionText = styled.div``

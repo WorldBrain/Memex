@@ -161,6 +161,12 @@ export class DashboardContainer extends StatefulUIElement<
             remoteLink,
             listName: listData.name,
             localListId: listData.id,
+            isOwnedList: listData.isOwnedList,
+            description: listData.description,
+            saveDescription: (description) =>
+                this.processEvent('updateSelectedListDescription', {
+                    description,
+                }),
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {

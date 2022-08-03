@@ -255,15 +255,31 @@ export default class CustomListStorage extends StorageModule {
         limit,
         skip,
         skipMobileList,
+        includeDescriptions,
     }: {
         limit: number
         skip: number
         skipMobileList?: boolean
+        includeDescriptions?: boolean
     }) {
-        const lists = await this.operation('findLists', {
+        const lists: PageList[] = await this.operation('findLists', {
             limit,
             skip,
         })
+
+        if (includeDescriptions) {
+            const descriptions: ListDescription[] = await this.operation(
+                'findListDescriptionsByLists',
+                { listIds: lists.map((list) => list.id) },
+            )
+            const descriptionsById = descriptions.reduce(
+                (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
+                {},
+            )
+            for (const list of lists) {
+                list.description = descriptionsById[list.id]
+            }
+        }
 
         const prepared = lists.map((list) => this.prepareList(list))
 
@@ -425,14 +441,18 @@ export default class CustomListStorage extends StorageModule {
         })
     }
 
-    async updateListDescription({
+    async createOrUpdateListDescription({
         listId,
         description,
     }: {
         listId: number
         description: string
     }): Promise<void> {
-        await this.operation('updateListDescription', { listId, description })
+        const existing = await this.fetchListDescriptionByList(listId)
+        await this.operation(
+            existing ? 'updateListDescription' : 'createListDescription',
+            { listId, description },
+        )
     }
 
     async removeList({ id }: { id: number }) {

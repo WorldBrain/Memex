@@ -20,19 +20,13 @@ describe('Dashboard Refactor misc logic', () => {
         const { searchResults } = await setupTest(device)
 
         const listNames = ['testA', 'testB']
+        const testDescription = 'this is a very interesting list'
         const listIds = await device.backgroundModules.customLists.createCustomLists(
             { names: listNames },
         )
-        const expectedListData = {
-            [listIds[0]]: expect.objectContaining({
-                id: listIds[0],
-                name: listNames[0],
-            }),
-            [listIds[1]]: expect.objectContaining({
-                id: listIds[1],
-                name: listNames[1],
-            }),
-        }
+        await device.backgroundModules.customLists.storage.createListDescription(
+            { listId: listIds[0], description: testDescription },
+        )
 
         expect(
             searchResults.state.listsSidebar.localLists.loadingState,
@@ -50,9 +44,22 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResults.state.listsSidebar.localLists.loadingState,
         ).toEqual('success')
-        expect(searchResults.state.listsSidebar.listData).toEqual(
-            expectedListData,
-        )
+        expect(searchResults.state.listsSidebar.listData).toEqual({
+            [listIds[0]]: expect.objectContaining({
+                id: listIds[0],
+                name: listNames[0],
+                isOwnedList: true,
+                remoteId: undefined,
+                description: testDescription,
+            }),
+            [listIds[1]]: expect.objectContaining({
+                id: listIds[1],
+                name: listNames[1],
+                isOwnedList: true,
+                remoteId: undefined,
+                description: undefined,
+            }),
+        })
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
         ).toEqual(listIds)
