@@ -331,6 +331,7 @@ const EditDescriptionButton = styled.div`
     border: none;
     background: none;
     padding: 8px 10px 8px 0px;
+    cursor: pointer;
 `
 
 const DescriptionEditorContainer = styled.div`
