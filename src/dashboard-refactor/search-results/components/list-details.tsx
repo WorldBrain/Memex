@@ -161,7 +161,11 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 this.setState({ isEditingDescription: true })
                             }
                             heightAndWidth="20px"
-                            color={'lighterText'}
+                            color={
+                                this.props.isOwnedList
+                                    ? 'purple'
+                                    : 'lighterText'
+                            }
                             icon={'edit'}
                         />
                     </Margin>,
