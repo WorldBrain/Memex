@@ -1622,6 +1622,7 @@ describe('Personal cloud translation layer', () => {
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
+                    'sharedList',
                     'personalList',
                     'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
@@ -1633,6 +1634,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
                 ], { skipChanges: 0 }),
                 personalBlockStats: [],
+                sharedList: [],
                 personalList: [testLists.first, testLists.second],
                 personalListDescription: [testListDescriptions.first, testListDescriptions.second],
             })
@@ -1644,6 +1646,114 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.second },
             ], { skip: 0 })
+        })
+
+        it('should create custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListShares = remoteData.personalListShare
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'sharedList',
+                    'personalList',
+                    'personalListDescription',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalListShare', testListShares.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
+                ], { skipChanges: 0 }),
+                personalBlockStats: [],
+                sharedList: [expect.objectContaining({ description: LOCAL_TEST_DATA_V24.customListDescriptions.first.description })],
+                personalList: [testLists.first, testLists.second],
+                personalListDescription: [testListDescriptions.first, testListDescriptions.second],
+            })
+        })
+
+        it('should create custom list descriptions for lists, then share one of them, setting the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListShares = remoteData.personalListShare
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'sharedList',
+                    'personalList',
+                    'personalListDescription',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
+                    [DataChangeType.Create, 'personalListShare', testListShares.first.id],
+                ], { skipChanges: 0 }),
+                personalBlockStats: [],
+                sharedList: [expect.objectContaining({ description: LOCAL_TEST_DATA_V24.customListDescriptions.first.description })],
+                personalList: [testLists.first, testLists.second],
+                personalListDescription: [testListDescriptions.first, testListDescriptions.second],
+            })
         })
 
         it('should update custom list descriptions', async () => {
@@ -1690,12 +1800,14 @@ describe('Personal cloud translation layer', () => {
                     'personalDataChange',
                     'personalBlockStats',
                     'personalListDescription',
+                    'sharedList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
                     [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
                 ], { skipChanges: 4 }),
                 personalBlockStats: [],
+                sharedList: [],
                 personalListDescription: [{ ...testListDescriptions.first, description: updatedDescription }, testListDescriptions.second],
             })
 
@@ -1714,6 +1826,65 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 4 },
             )
+        })
+
+        it('should update custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const updatedDescription = 'Updated list description'
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .updateOneObject(
+                    {
+                        listId:
+                            LOCAL_TEST_DATA_V24.customListDescriptions.first
+                                .listId,
+                    },
+                    { description: updatedDescription },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalListDescription',
+                    'sharedList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
+                ], { skipChanges: 5 }),
+                personalBlockStats: [],
+                personalListDescription: [{ ...testListDescriptions.first, description: updatedDescription }, testListDescriptions.second],
+                sharedList: [expect.objectContaining({ description: updatedDescription })],
+            })
         })
 
         it('should delete custom list descriptions', async () => {
