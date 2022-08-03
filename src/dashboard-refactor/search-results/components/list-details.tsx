@@ -282,7 +282,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                 {this.state.description.length > 0 ? (
                     <ReferencesContainer>
                         References
-                        <Margin top="5px" bottom="15px" width="unset">
+                        <Margin top="5px" bottom="5px" width="unset">
                             {this.props.remoteLink && (
                                 <InfoText>
                                     Only your own contributions to this space
@@ -338,6 +338,7 @@ const DescriptionEditorContainer = styled.div`
     border-radius: 6px;
     box-shadow: 0px 3px 7px -6px #d0d0d057;
     background: white;
+    margin-top: 5px;
 
     & > div:first-child {
         & > div {
