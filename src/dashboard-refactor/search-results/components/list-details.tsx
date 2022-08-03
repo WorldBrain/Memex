@@ -183,19 +183,6 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 <SectionTitle>
                                     {this.props.listName}
                                 </SectionTitle>
-                                {this.props.remoteLink && (
-                                    <InfoText>
-                                        Only your own contributions to this
-                                        space are visible locally. To see all,
-                                        open the{' '}
-                                        <a
-                                            target="_blank"
-                                            href={this.props.remoteLink}
-                                        >
-                                            web view{' '}
-                                        </a>
-                                    </InfoText>
-                                )}
                             </DetailsContainer>
                             <BtnsContainer>
                                 {this.EditButton()}
@@ -293,7 +280,23 @@ export default class ListDetails extends PureComponent<Props, State> {
                     )}
                 </TopBarContainer>
                 {this.state.description.length > 0 ? (
-                    <ReferencesContainer>References</ReferencesContainer>
+                    <ReferencesContainer>
+                        References
+                        <Margin top="5px" bottom="15px" width="unset">
+                            {this.props.remoteLink && (
+                                <InfoText>
+                                    Only your own contributions to this space
+                                    are visible locally. To see all, open the{' '}
+                                    <a
+                                        target="_blank"
+                                        href={this.props.remoteLink}
+                                    >
+                                        web view{' '}
+                                    </a>
+                                </InfoText>
+                            )}
+                        </Margin>
+                    </ReferencesContainer>
                 ) : (
                     <></>
                 )}
@@ -313,10 +316,13 @@ const TitleContainer = styled.div`
 const ReferencesContainer = styled.div`
     width: 100%;
     font-weight: lighter;
-    font-size: 16px;
+    font-size: 20px;
     color: #96a0b5;
-    margin-top: 22px;
+    margin-top: 20px;
     padding-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 `
 
 const EditDescriptionButton = styled.div`
