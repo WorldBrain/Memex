@@ -13,7 +13,6 @@ import SearchResultsContainer from './search-results'
 import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { Props as ListSidebarItemProps } from './lists-sidebar/components/sidebar-item-with-menu'
-import { shareListAndAllEntries } from './lists-sidebar/util'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
@@ -1112,27 +1111,31 @@ export class DashboardContainer extends StatefulUIElement<
         if (modalsState.shareListId) {
             const listData = listsSidebar.listData[modalsState.shareListId]
 
-            // TODO: Fix up the list sharing calls if we ever bring this back (don't need to generate keys)
-            return null
-            // <ListShareModal
-            //     defaultAddLinkRole={
-            //         listData.remoteId
-            //             ? SharedListRoleID.ReadWrite
-            //             : SharedListRoleID.Commenter
-            //     }
-            //     listId={listData.remoteId}
-            //     shareList={shareListAndAllEntries(
-            //         this.props.contentShareBG,
-            //         listData.id,
-            //     )}
-            //     onCloseRequested={() =>
-            //         this.processEvent('setShareListId', {})
-            //     }
-            //     services={{
-            //         ...this.props.services,
-            //         listKeys: this.props.contentShareBG,
-            //     }}
-            // />
+            return (
+                <ListShareModal
+                    listId={listData.remoteId}
+                    shareList={async () => {
+                        const localListId = listData.id
+                        const shareResult = await this.props.contentShareBG.shareList(
+                            {
+                                localListId,
+                            },
+                        )
+                        await this.processEvent('setListRemoteId', {
+                            localListId,
+                            remoteListId: shareResult.remoteListId,
+                        })
+                        return shareResult
+                    }}
+                    onCloseRequested={() =>
+                        this.processEvent('setShareListId', {})
+                    }
+                    services={{
+                        ...this.props.services,
+                        listKeys: this.props.contentShareBG,
+                    }}
+                />
+            )
         }
 
         if (modalsState.showSubscription) {

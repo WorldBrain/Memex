@@ -1,5 +1,4 @@
 import type { RootState } from './types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 export type ListsState = Pick<
     RootState,
@@ -21,15 +20,4 @@ export const filterListsByQuery = (
         localListIds: localLists.allListIds.filter(filterBySearchStr),
         followedListIds: followedLists.allListIds.filter(filterBySearchStr),
     }
-}
-
-export const shareListAndAllEntries = (
-    contentShareBG: ContentSharingInterface,
-    listId: number,
-) => async (): Promise<{ listId: string }> => {
-    const { remoteListId } = await contentShareBG.shareList({
-        localListId: listId,
-    })
-
-    return { listId: remoteListId }
 }

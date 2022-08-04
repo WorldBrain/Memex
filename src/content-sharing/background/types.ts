@@ -8,7 +8,7 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 
 export interface ContentSharingInterface
     extends ListSharingServiceInterface,
-        Pick<ListKeysServiceInterface, 'getExistingKeyLinksForList'>,
+        ListKeysServiceInterface,
         Pick<
             AnnotationSharingServiceInterface,
             | 'shareAnnotation'
