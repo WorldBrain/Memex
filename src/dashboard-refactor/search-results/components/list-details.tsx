@@ -32,32 +32,44 @@ interface State {
 
 export default class ListDetails extends PureComponent<Props, State> {
     state: State = {
-        isEditingDescription: false,
         description: this.props.description ?? '',
+        isEditingDescription: false,
         showQuickTutorial: false,
     }
 
     static MOD_KEY = getKeyName({ key: 'mod' })
 
-    private handleDescriptionSave() {
-        this.props.saveDescription(this.state.description)
-        this.setState({ isEditingDescription: false })
+    componentWillUpdate(nextProps: Props) {
+        if (this.props.localListId !== nextProps.localListId) {
+            this.setState({
+                description: nextProps.description ?? '',
+                isEditingDescription: false,
+                showQuickTutorial: false,
+            })
+        }
+    }
+
+    private finishEdit(args: { shouldSave?: boolean }) {
+        if (args.shouldSave) {
+            this.props.saveDescription(this.state.description)
+        }
+        this.setState({ isEditingDescription: false, showQuickTutorial: false })
     }
 
     private handleDescriptionInputKeyDown: React.KeyboardEventHandler = (e) => {
         if (e.key === 'Escape') {
-            this.setState({ isEditingDescription: false })
+            this.finishEdit({ shouldSave: false })
             return
         }
 
         if (navigator.platform === 'MacIntel') {
             if (e.key === 'Enter' && e.metaKey) {
-                this.handleDescriptionSave()
+                this.finishEdit({ shouldSave: true })
                 return
             }
         } else {
             if (e.key === 'Enter' && e.ctrlKey) {
-                this.handleDescriptionSave()
+                this.finishEdit({ shouldSave: true })
                 return
             }
         }
@@ -98,7 +110,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 position="bottom"
                             >
                                 <SaveBtn
-                                    onClick={() => this.handleDescriptionSave()}
+                                    onClick={() =>
+                                        this.finishEdit({ shouldSave: true })
+                                    }
                                 >
                                     Save
                                 </SaveBtn>
