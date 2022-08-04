@@ -31,13 +31,14 @@ interface State {
 }
 
 export default class ListDetails extends PureComponent<Props, State> {
+    static MOD_KEY = getKeyName({ key: 'mod' })
+
+    private formattingHelpBtn = React.createRef<HTMLElement>()
     state: State = {
         description: this.props.description ?? '',
         isEditingDescription: false,
         showQuickTutorial: false,
     }
-
-    static MOD_KEY = getKeyName({ key: 'mod' })
 
     componentWillUpdate(nextProps: Props) {
         if (this.props.localListId !== nextProps.localListId) {
@@ -78,6 +79,7 @@ export default class ListDetails extends PureComponent<Props, State> {
     private renderMarkdownHelpButton() {
         return (
             <MarkdownButtonContainer
+                ref={this.formattingHelpBtn}
                 onClick={() =>
                     this.setState({
                         showQuickTutorial: !this.state.showQuickTutorial,
@@ -135,56 +137,36 @@ export default class ListDetails extends PureComponent<Props, State> {
             )
         }
 
-        return (
-            <>
-                <DescriptionText>{this.props.description}</DescriptionText>
-            </>
-        )
+        return <DescriptionText>{this.props.description}</DescriptionText>
     }
 
     private EditButton() {
-        const maybeRenderTooltip = (children: JSX.Element) =>
-            this.props.isOwnedList ? (
-                <ButtonTooltip
-                    position="bottom"
-                    tooltipText={<span>Edit Space Description</span>}
-                >
-                    {children}
-                </ButtonTooltip>
-            ) : (
-                <ButtonTooltip
-                    position="bottom"
-                    tooltipText={
-                        <span>
-                            It isn't yet possible to edit descriptions
-                            <br /> of Spaces that aren't yours
-                        </span>
-                    }
-                >
-                    {children}
-                </ButtonTooltip>
-            )
+        const tooltipText = this.props.isOwnedList ? (
+            <span>Edit Space Description</span>
+        ) : (
+            <span>
+                It isn't yet possible to edit descriptions <br /> of Spaces that
+                aren't yours
+            </span>
+        )
+
         return (
-            <>
-                {maybeRenderTooltip(
-                    <Margin right={'10px'}>
-                        <Icon
-                            hoverOff={!this.props.isOwnedList}
-                            onClick={() =>
-                                this.props.isOwnedList &&
-                                this.setState({ isEditingDescription: true })
-                            }
-                            heightAndWidth="20px"
-                            color={
-                                this.props.isOwnedList
-                                    ? 'purple'
-                                    : 'lighterText'
-                            }
-                            icon={'edit'}
-                        />
-                    </Margin>,
-                )}
-            </>
+            <ButtonTooltip position="bottom" tooltipText={tooltipText}>
+                <Margin right={'10px'}>
+                    <Icon
+                        hoverOff={!this.props.isOwnedList}
+                        onClick={() =>
+                            this.props.isOwnedList &&
+                            this.setState({ isEditingDescription: true })
+                        }
+                        heightAndWidth="20px"
+                        color={
+                            this.props.isOwnedList ? 'purple' : 'lighterText'
+                        }
+                        icon={'edit'}
+                    />
+                </Margin>
+            </ButtonTooltip>
         )
     }
 
@@ -193,7 +175,7 @@ export default class ListDetails extends PureComponent<Props, State> {
             <>
                 <TopBarContainer top="10px" bottom="10px">
                     <Container
-                        hasDescription={this.state.description.length > 0}
+                        hasDescription={this.props.description?.length > 0}
                         center={!this.props.remoteLink}
                     >
                         <TitleContainer>
@@ -261,7 +243,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                             </BtnsContainer>
                         </TitleContainer>
                         {this.props.isOwnedList &&
-                            this.state.description.length === 0 &&
+                            !this.props.description?.length &&
                             !this.state.isEditingDescription && (
                                 <>
                                     <EditDescriptionButton
@@ -280,24 +262,32 @@ export default class ListDetails extends PureComponent<Props, State> {
                         {this.renderDescription()}
                     </DescriptionContainer>
                     {this.state.showQuickTutorial && (
-                        <HoverBox
-                            top={'260px'}
-                            right={'420px'}
-                            width="430px"
-                            position={'sticky'}
-                            height="430px"
-                            overflow="scroll"
+                        <ClickAway
+                            ignoreClickOnElement={
+                                this.formattingHelpBtn.current
+                            }
+                            onClickAway={() =>
+                                this.setState({ showQuickTutorial: false })
+                            }
                         >
-                            <QuickTutorial
-                                markdownHelpOnTop={true}
-                                getKeyboardShortcutsState={
-                                    getKeyboardShortcutsState
-                                }
-                            />
-                        </HoverBox>
+                            <HoverBox
+                                top={'260px'}
+                                right={'420px'}
+                                width="430px"
+                                height="430px"
+                                overflow="scroll"
+                            >
+                                <QuickTutorial
+                                    markdownHelpOnTop={true}
+                                    getKeyboardShortcutsState={
+                                        getKeyboardShortcutsState
+                                    }
+                                />
+                            </HoverBox>
+                        </ClickAway>
                     )}
                 </TopBarContainer>
-                {this.state.description.length > 0 ? (
+                {this.props.description?.length > 0 && (
                     <ReferencesContainer>
                         References
                         <Margin top="5px" bottom="5px" width="unset">
@@ -315,8 +305,6 @@ export default class ListDetails extends PureComponent<Props, State> {
                             )}
                         </Margin>
                     </ReferencesContainer>
-                ) : (
-                    <></>
                 )}
             </>
         )
