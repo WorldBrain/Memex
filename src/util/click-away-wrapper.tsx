@@ -1,8 +1,8 @@
 import React, { MouseEventHandler } from 'react'
-import ReactDOM from 'react-dom'
 
 export interface Props {
     onClickAway: MouseEventHandler
+    ignoreClickOnElement?: HTMLElement
 }
 
 /**
@@ -40,7 +40,10 @@ export class ClickAway extends React.Component<Props> {
         }
 
         // console.log(domNode, event.target)
-        if (!domNode.contains(event.target)) {
+        if (
+            !domNode.contains(event.target) &&
+            !this.props.ignoreClickOnElement?.contains(event.target)
+        ) {
             this.props.onClickAway?.(event)
         }
     }
