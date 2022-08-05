@@ -5292,6 +5292,7 @@ function makeAnnotationFromWebUiTest(options: {
 
             storageHooksChangeWatcher.setUp({
                 fetch: fakeFetch.fetch,
+                captureException: async (err) => undefined, // TODO: implement
                 getCurrentUserReference: async () => ({
                     type: 'user-reference',
                     id: (await context.setup.authService.getCurrentUser()).id,

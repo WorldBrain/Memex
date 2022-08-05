@@ -320,6 +320,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
     serverIdCapturer.setup(serverStorage.storageManager)
     storageHooksChangeWatcher.setUp({
         fetch: fakeFetch.fetch,
+        captureException: async (err) => undefined, // TODO: implement
         serverStorageManager: serverStorage.storageManager,
         getCurrentUserReference: async () => ({
             id: userId,
