@@ -180,7 +180,7 @@ export default class Ribbon extends Component<Props, State> {
                         spacesBG={this.props.spacesBG}
                         contentSharingBG={this.props.contentSharingBG}
                         actOnAllTabs={this.props.lists.listAllTabs}
-                        initialSelectedEntries={
+                        initialSelectedListIds={
                             this.props.lists.fetchInitialListSelections
                         }
                         onEscapeKeyDown={this.hideListPicker}

@@ -347,7 +347,7 @@ export class AnnotationsSidebarContainer<
             spacesBG: customLists,
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
-            initialSelectedEntries: () => annotation.lists ?? [],
+            initialSelectedListIds: () => annotation.lists ?? [],
             onSubmit: async () => {
                 await this.processEvent('resetListPickerAnnotationId', {})
 

@@ -2801,11 +2801,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newName = previousState.listsSidebar.listData[listId].name
 
         if (newName === oldName) {
-            this.emitMutation({
-                listsSidebar: {
-                    editingListId: { $set: undefined },
-                },
-            })
             return
         }
 
@@ -2853,7 +2848,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 this.emitMutation({
                     listsSidebar: {
-                        editingListId: { $set: undefined },
                         editListErrorMessage: {
                             $set: null,
                         },

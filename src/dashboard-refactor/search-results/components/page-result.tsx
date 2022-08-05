@@ -120,7 +120,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 })
                             }
                             createNewEntry={this.props.createNewList}
-                            initialSelectedEntries={() => this.props.lists}
+                            initialSelectedListIds={() => this.props.lists}
                             onClickOutside={this.props.onListPickerBtnClick}
                         />
                     </HoverBox>

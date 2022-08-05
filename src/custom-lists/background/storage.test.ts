@@ -21,6 +21,7 @@ async function insertTestData({
     await customLists.createCustomList(DATA.LIST_1)
     await customLists.createCustomList(DATA.LIST_2)
     await customLists.createCustomList(DATA.LIST_3)
+    await customLists.createCustomList(DATA.LIST_4)
     // await customLists.createCustomList(DATA.MOBILE_LIST)
 
     const lists = storageManager.collection('customLists')
@@ -35,6 +36,10 @@ async function insertTestData({
     await lists.updateOneObject(
         { name: DATA.LIST_3.name },
         { nameTerms: DATA.LIST_3_TERMS },
+    )
+    await lists.updateOneObject(
+        { name: DATA.LIST_4.name },
+        { nameTerms: DATA.LIST_4_TERMS },
     )
 
     await customLists.insertPageToList(DATA.PAGE_ENTRY_1)
@@ -166,6 +171,28 @@ describe('Custom List Integrations', () => {
                     name: listNames[2],
                     searchableName: listNames[2],
                     nameTerms: listNames[2].split(' '),
+                }),
+            ])
+        })
+
+        test('should be able to index space name terms split by forward slash', async () => {
+            const { customLists, storageManager } = await setupTest({
+                skipTestData: true,
+            })
+
+            const listName = 'ok the/at/test list'
+
+            await customLists.createCustomList({ name: listName })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    name: listName,
+                    searchableName: listName,
+                    nameTerms: ['ok', 'the', 'at', 'test', 'list'],
                 }),
             ])
         })
@@ -376,7 +403,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(4)
+            expect(lists.length).toBe(5)
         })
 
         test('fetch all lists, skipping mobile list', async () => {
@@ -387,7 +414,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(3)
+            expect(lists.length).toBe(4)
         })
 
         test('fetch pages associated with list', async () => {
@@ -425,6 +452,12 @@ describe('Custom List Integrations', () => {
             expect(
                 await customLists.searchForListSuggestions({ query: 'ipsum' }),
             ).toEqual([expect.objectContaining(cutTimestamp(DATA.LIST_1))])
+
+            expect(
+                await customLists.searchForListSuggestions({
+                    query: 'env/transport',
+                }),
+            ).toEqual([expect.objectContaining(cutTimestamp(DATA.LIST_4))])
         })
 
         test('Case insensitive name search', async () => {

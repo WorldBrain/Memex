@@ -93,12 +93,14 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
         const distinctTerms = searchQuery.split(/\s+/).filter(Boolean)
         const whereClause = db.table<S, P>(collection).where(indexName)
 
-        let coll =
+        const shouldIgnoreCase =
             options.ignoreCase &&
             options.ignoreCase.length &&
             options.ignoreCase[0] === indexName
-                ? whereClause.startsWithAnyOfIgnoreCase(distinctTerms)
-                : whereClause.startsWithAnyOf(distinctTerms)
+
+        let coll = shouldIgnoreCase
+            ? whereClause.startsWithAnyOfIgnoreCase(distinctTerms)
+            : whereClause.startsWithAnyOf(distinctTerms)
 
         if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
             throw new InvalidFindOptsError(
@@ -112,19 +114,37 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
             coll = coll.reverse()
         }
 
-        let suggestions: any[] = []
-        const _pks: any[] = []
-        if (options.multiEntryAssocField) {
-            const records = await coll.distinct().toArray()
-            records.forEach((record) => {
-                _pks.push(record['id'])
-                suggestions.push(record[options.multiEntryAssocField])
-            })
-        } else {
-            suggestions = await coll.uniqueKeys()
-        }
+        let suggestions: S[] = []
+        const pks: any[] = []
 
-        const pks = options.includePks ? _pks : []
+        const suggestionField = options.multiEntryAssocField ?? indexName
+
+        const lowerCaseIfNeeded = (s: string) =>
+            shouldIgnoreCase ? s.toLocaleLowerCase() : s
+
+        const suggestionIncludesAllTerms = (record: S) =>
+            distinctTerms.reduce((acc, term) => {
+                const suggestionText = record[suggestionField]
+                if (suggestionText && typeof suggestionText === 'string') {
+                    return (
+                        acc &&
+                        lowerCaseIfNeeded(suggestionText).includes(
+                            lowerCaseIfNeeded(term),
+                        )
+                    )
+                }
+                return false
+            }, true)
+
+        const records = await coll
+            .distinct()
+            .and(suggestionIncludesAllTerms)
+            .toArray()
+
+        records.forEach((record) => {
+            pks.push(record['id'])
+            suggestions.push(record[suggestionField])
+        })
 
         return suggestions.map((suggestion: S, i) => ({
             suggestion,

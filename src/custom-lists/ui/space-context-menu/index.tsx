@@ -24,6 +24,7 @@ export interface Props extends Dependencies {
     fixedPositioning?: boolean
     editableProps: Omit<EditableMenuItemProps, 'nameValue' | 'onNameChange'>
     onDeleteSpaceConfirm?: React.MouseEventHandler
+    onDeleteSpaceIntent?: React.MouseEventHandler
     onClose: (saveChanges?: boolean) => void
 }
 
@@ -214,14 +215,14 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
+        const deleteHandler =
+            this.props.onDeleteSpaceIntent ??
+            wrapClick(() => this.processEvent('deleteSpace', null))
+
         return (
             <>
                 {this.renderShareLinks()}
-                <MenuButton
-                    onClick={wrapClick(() =>
-                        this.processEvent('deleteSpace', null),
-                    )}
-                >
+                <MenuButton onClick={deleteHandler}>
                     <Margin horizontal="10px">
                         <Icon heightAndWidth="14px" path={icons.trash} />
                     </Margin>

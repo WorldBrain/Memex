@@ -1,9 +1,9 @@
 import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
+import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
 import transformPageText from 'src/util/transform-page-text'
 import * as constants from '../overview/search-bar/constants'
 import { splitInputIntoTerms } from '../overview/search-bar/utils'
-import { DEFAULT_TERM_SEPARATOR } from './util'
 
 class QueryBuilder {
     /**

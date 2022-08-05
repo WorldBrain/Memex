@@ -214,7 +214,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     noteData.isListPickerShown && (
                         <HoverBox withRelativeContainer>
                             <CollectionPicker
-                                initialSelectedEntries={() => listsToDisplay}
+                                initialSelectedListIds={() => listsToDisplay}
                                 onClickOutside={
                                     interactionProps.onListPickerBtnClick
                                 }
@@ -265,7 +265,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 }
                                 postShareHook={interactionProps.updateShareInfo}
                                 spacePickerProps={{
-                                    initialSelectedEntries: () =>
+                                    initialSelectedListIds: () =>
                                         listsToDisplay,
                                     selectEntry: (listId, options) =>
                                         interactionProps.updateLists({
