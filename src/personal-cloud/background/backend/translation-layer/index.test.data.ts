@@ -82,6 +82,29 @@ const LOCAL_PAGES_V24 = {
         canonicalUrl: 'https://memex.cloud/ct/test2.pdf',
         description: undefined,
     },
+    twitter_a: {
+        url: 'twitter.com/zzzzz/status/1111011338575481374',
+        fullUrl: 'https://twitter.com/zzzzz/status/1111011338575481374',
+        domain: 'twitter.com',
+        hostname: 'twitter.com',
+        fullTitle: 'twitter.com/zzzzz/status/1111011338575481374',
+        text: '',
+        lang: undefined,
+        canonicalUrl: 'https://twitter.com/zzzzz/status/1111011338575481374',
+        description: undefined,
+    },
+    twitter_b: {
+        url: 'mobile.twitter.com/zzzzz/status/1111011338575481355',
+        fullUrl: 'https://mobile.twitter.com/zzzzz/status/1111011338575481355',
+        domain: 'twitter.com',
+        hostname: 'mobile.twitter.com',
+        fullTitle: 'mobile.twitter.com/zzzzz/status/1111011338575481355',
+        text: '',
+        lang: undefined,
+        canonicalUrl:
+            'https://mobile.twitter.com/zzzzz/status/1111011338575481355',
+        description: undefined,
+    },
 }
 
 const LOCAL_ANNOTATIONS_V24 = {
@@ -311,6 +334,16 @@ export const LOCAL_TEST_DATA_V24 = {
         },
     },
     customLists: LOCAL_LISTS_V24,
+    customListDescriptions: {
+        first: {
+            listId: LOCAL_LISTS_V24.first.id,
+            description: 'test description first list',
+        },
+        second: {
+            listId: LOCAL_LISTS_V24.second.id,
+            description: 'test description second list',
+        },
+    },
     sharedListMetadata: {
         first: {
             localId: LOCAL_LISTS_V24.first.id,
@@ -433,6 +466,28 @@ const REMOTE_METADATA_V24 = {
         title: LOCAL_TEST_DATA_V24.pages.fourth.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.fourth.lang ?? null,
         description: LOCAL_TEST_DATA_V24.pages.fourth.description ?? null,
+    },
+    twitter_a: {
+        id: 1,
+        createdWhen: 598,
+        updatedWhen: 598,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        canonicalUrl: LOCAL_TEST_DATA_V24.pages.twitter_a.canonicalUrl,
+        title: LOCAL_TEST_DATA_V24.pages.twitter_a.fullTitle,
+        lang: LOCAL_TEST_DATA_V24.pages.twitter_a.lang ?? null,
+        description: LOCAL_TEST_DATA_V24.pages.twitter_a.description ?? null,
+    },
+    twitter_b: {
+        id: 2,
+        createdWhen: 599,
+        updatedWhen: 599,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        canonicalUrl: LOCAL_TEST_DATA_V24.pages.twitter_b.canonicalUrl,
+        title: LOCAL_TEST_DATA_V24.pages.twitter_b.fullTitle,
+        lang: LOCAL_TEST_DATA_V24.pages.twitter_b.lang ?? null,
+        description: LOCAL_TEST_DATA_V24.pages.twitter_b.description ?? null,
     },
 }
 
@@ -587,6 +642,42 @@ const REMOTE_LOCATORS_V24 = {
         fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprint,
         fingerprintScheme:
             LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprintScheme,
+    },
+    twitter_a: {
+        id: 1,
+        createdWhen: 598,
+        updatedWhen: 598,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.twitter_a.id,
+        format: ContentLocatorFormat.HTML,
+        location: LOCAL_TEST_DATA_V24.pages.twitter_a.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.twitter_a.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: 0,
+        localId: null,
+    },
+    twitter_b: {
+        id: 2,
+        createdWhen: 599,
+        updatedWhen: 599,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.twitter_b.id,
+        format: ContentLocatorFormat.HTML,
+        location: LOCAL_TEST_DATA_V24.pages.twitter_b.url,
+        locationScheme: LocationSchemeType.NormalizedUrlV1,
+        locationType: ContentLocatorType.Remote,
+        originalLocation: LOCAL_TEST_DATA_V24.pages.twitter_b.fullUrl,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: 0,
+        localId: null,
     },
 }
 
@@ -905,6 +996,28 @@ export const REMOTE_TEST_DATA_V24 = {
         },
     },
     personalList: REMOTE_LISTS_V24,
+    personalListDescription: {
+        first: {
+            id: 1,
+            personalList: REMOTE_LISTS_V24.first.id,
+            description:
+                LOCAL_TEST_DATA_V24.customListDescriptions.first.description,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        second: {
+            id: 2,
+            personalList: REMOTE_LISTS_V24.second.id,
+            description:
+                LOCAL_TEST_DATA_V24.customListDescriptions.second.description,
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            createdWhen: 566,
+            updatedWhen: 566,
+        },
+    },
     personalListShare: {
         first: {
             id: 1,
@@ -1044,6 +1157,24 @@ export const REMOTE_TEST_DATA_V24 = {
         second: {
             id: 2,
             personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+            createdWhen: new Date(1625634720654),
+            updatedWhen: new Date(1625634720654),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+    },
+    personalTwitterAction: {
+        first: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.twitter_a.id,
+            createdWhen: new Date(1625634720653),
+            updatedWhen: new Date(1625634720653),
+            user: TEST_USER.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+        second: {
+            id: 2,
+            personalContentMetadata: REMOTE_METADATA_V24.twitter_b.id,
             createdWhen: new Date(1625634720654),
             updatedWhen: new Date(1625634720654),
             user: TEST_USER.id,

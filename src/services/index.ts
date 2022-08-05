@@ -10,7 +10,7 @@ import {
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 import { ServerStorage } from 'src/storage/types'
 import { Services } from './types'
-import ContentSharingService from './content-sharing'
+import ListKeysService from './content-sharing'
 import ContentConversationsService from './content-conversations'
 
 export async function createServices(options: {
@@ -24,8 +24,8 @@ export async function createServices(options: {
 
         return {
             auth,
-            contentSharing: new ContentSharingService({
-                storage: { contentSharing: storageModules.contentSharing },
+            contentSharing: new ListKeysService({
+                serverStorage: storageModules.contentSharing,
             }),
             contentConversations: new ContentConversationsService({
                 services: { auth },
@@ -52,8 +52,8 @@ export async function createServices(options: {
 
     return {
         auth: authDeps.authService,
-        contentSharing: new ContentSharingService({
-            storage: { contentSharing: storageModules.contentSharing },
+        contentSharing: new ListKeysService({
+            serverStorage: storageModules.contentSharing,
         }),
         contentConversations: new ContentConversationsService({
             services: { auth: authDeps.authService },

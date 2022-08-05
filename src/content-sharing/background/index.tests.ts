@@ -95,7 +95,7 @@ export class SharingTestHelper {
             remoteListId,
             annotationSharingStates,
         } = await setup.backgroundModules.contentSharing.shareList({
-            listId: this.lists[options.id].localId,
+            localListId: this.lists[options.id].localId,
         })
         expect(remoteListId).toBeDefined()
         this.lists[options.id].remoteId = remoteListId
@@ -262,18 +262,15 @@ export class SharingTestHelper {
             expectedSharingState: AnnotationSharingState
         },
     ) {
-        const {
-            remoteId,
-            sharingState,
-        } = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
+        const sharingState = await setup.backgroundModules.contentSharing.setAnnotationPrivacyLevel(
             {
                 keepListsIfUnsharing: options.keepListsIfUnsharing,
-                annotation: this.annotations[options.id].localId,
+                annotationUrl: this.annotations[options.id].localId,
                 privacyLevel: options.level,
             },
         )
-        if (remoteId) {
-            this.annotations[options.id].remoteId = remoteId
+        if (sharingState.remoteId) {
+            this.annotations[options.id].remoteId = sharingState.remoteId
         }
         this._expectAnnotationSharingState(
             sharingState,
@@ -290,12 +287,12 @@ export class SharingTestHelper {
         },
     ) {
         const localId = this.annotations[options.id].localId
-        const {
-            sharingState,
-        } = await setup.backgroundModules.contentSharing.shareAnnotation({
-            annotationUrl: localId,
-            shareToLists: options.shareToLists,
-        })
+        const sharingState = await setup.backgroundModules.contentSharing.shareAnnotation(
+            {
+                annotationUrl: localId,
+                shareToLists: options.shareToLists,
+            },
+        )
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
             {
                 localIds: [localId],

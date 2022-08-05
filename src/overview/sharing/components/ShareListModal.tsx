@@ -90,7 +90,7 @@ class ShareListModal extends Component<Props, State> {
         })
         try {
             const { remoteListId } = await this.props.contentSharing.shareList({
-                listId: this.props.list.id,
+                localListId: this.props.list.id,
             })
             this.setState({
                 entriesUploadState: 'success',

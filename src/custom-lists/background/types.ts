@@ -21,6 +21,11 @@ export interface PageListEntry {
     fullUrl: string
 }
 
+export interface ListDescription {
+    listId: number
+    description: string
+}
+
 export interface SharedAnnotationList {
     id: string
     name: string
@@ -83,6 +88,7 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
         skipMobileList?: boolean
+        includeDescriptions?: boolean
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>
     fetchListByName(args: { name: string }): Promise<PageList>

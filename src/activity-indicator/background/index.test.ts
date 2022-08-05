@@ -155,7 +155,6 @@ describe('Activity indicator background tests', () => {
 
     it('should be able to mark activities as seen', async () => {
         const {
-            getServerStorage,
             activityIndicatorBG,
             services: { auth },
         } = await setupTest()
@@ -165,28 +164,18 @@ describe('Activity indicator background tests', () => {
             'password',
         )
 
-        const timestamp = 1
-        const user = await auth.getCurrentUser()
-        const serverStorage = await getServerStorage()
-
         expect(
-            await serverStorage.storageModules.activityStreams.retrieveHomeFeedTimestamp(
-                {
-                    user: { type: 'user-reference', id: user.id },
-                },
-            ),
+            await activityIndicatorBG[
+                'options'
+            ].syncSettings.activityIndicator.get('feedHasActivity'),
         ).toEqual(null)
 
-        await activityIndicatorBG.markActivitiesAsSeen(timestamp)
+        await activityIndicatorBG.markActivitiesAsSeen()
 
         expect(
-            await serverStorage.storageModules.activityStreams.retrieveHomeFeedTimestamp(
-                {
-                    user: { type: 'user-reference', id: user.id },
-                },
-            ),
-        ).toEqual({
-            timestamp,
-        })
+            await activityIndicatorBG[
+                'options'
+            ].syncSettings.activityIndicator.get('feedHasActivity'),
+        ).toEqual(false)
     })
 })

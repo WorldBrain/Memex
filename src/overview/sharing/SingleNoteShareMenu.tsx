@@ -108,10 +108,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             skipPrivacyLevelUpdate: true,
         })
 
-        const {
-            sharingState,
-        } = await contentSharingBG.setAnnotationPrivacyLevel({
-            annotation: annotationUrl,
+        const sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+            annotationUrl,
             privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare: true,
                 isBulkShareProtected,
@@ -150,16 +148,16 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             async () => {
                 this.setState({ showLink: false })
 
-                const {
-                    sharingState,
-                } = await contentSharingBG.setAnnotationPrivacyLevel({
-                    annotation: annotationUrl,
-                    keepListsIfUnsharing: options.keepListsIfUnsharing,
-                    privacyLevel: shareOptsToPrivacyLvl({
-                        shouldShare: false,
-                        isBulkShareProtected: options.isBulkShareProtected,
-                    }),
-                })
+                const sharingState = await contentSharingBG.setAnnotationPrivacyLevel(
+                    {
+                        annotationUrl,
+                        keepListsIfUnsharing: options.keepListsIfUnsharing,
+                        privacyLevel: shareOptsToPrivacyLvl({
+                            shouldShare: false,
+                            isBulkShareProtected: options.isBulkShareProtected,
+                        }),
+                    },
+                )
 
                 this.props.postShareHook?.(sharingState, {
                     keepListsIfUnsharing: options.keepListsIfUnsharing,

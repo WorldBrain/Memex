@@ -320,6 +320,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
     serverIdCapturer.setup(serverStorage.storageManager)
     storageHooksChangeWatcher.setUp({
         fetch: fakeFetch.fetch,
+        captureException: async (err) => undefined, // TODO: implement
         serverStorageManager: serverStorage.storageManager,
         getCurrentUserReference: async () => ({
             id: userId,
@@ -1591,7 +1592,7 @@ describe('Personal cloud translation layer', () => {
             )
         })
 
-        it('should delete custom lists', async () => {
+        it('should create custom list descriptions', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -1604,15 +1605,17 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('customLists')
                 .createObject(LOCAL_TEST_DATA_V24.customLists.second)
-            await setups[0].backgroundModules.personalCloud.waitForSync()
-
             await setups[0].storageManager
-                .collection('customLists')
-                .deleteObjects({})
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
             const testLists = remoteData.personalList
+            const testListDescriptions = remoteData.personalListDescription
 
             // prettier-ignore
             expect(
@@ -1620,22 +1623,323 @@ describe('Personal cloud translation layer', () => {
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
+                    'sharedList',
                     'personalList',
+                    'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...dataChangesAndUsage(remoteData, [
-                    [DataChangeType.Delete, 'personalList', testLists.first.id, { id: testLists.first.localId }],
-                    [DataChangeType.Delete, 'personalList', testLists.second.id, { id: testLists.second.localId }],
-                ], { skipChanges: 2 }),
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
+                ], { skipChanges: 0 }),
                 personalBlockStats: [],
-                personalList: [],
+                sharedList: [],
+                personalList: [testLists.first, testLists.second],
+                personalListDescription: [testListDescriptions.first, testListDescriptions.second],
             })
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: { id: LOCAL_TEST_DATA_V24.customLists.first.id } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: { id: LOCAL_TEST_DATA_V24.customLists.second.id } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.second },
             ], { skip: 0 })
+        })
+
+        it('should create custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListShares = remoteData.personalListShare
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'sharedList',
+                    'personalList',
+                    'personalListDescription',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalListShare', testListShares.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
+                ], { skipChanges: 0 }),
+                personalBlockStats: [],
+                sharedList: [expect.objectContaining({ description: LOCAL_TEST_DATA_V24.customListDescriptions.first.description })],
+                personalList: [testLists.first, testLists.second],
+                personalListDescription: [testListDescriptions.first, testListDescriptions.second],
+            })
+        })
+
+        it('should create custom list descriptions for lists, then share one of them, setting the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListShares = remoteData.personalListShare
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'sharedList',
+                    'personalList',
+                    'personalListDescription',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Create, 'personalList', testLists.first.id],
+                    [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
+                    [DataChangeType.Create, 'personalListDescription', testListDescriptions.second.id],
+                    [DataChangeType.Create, 'personalListShare', testListShares.first.id],
+                ], { skipChanges: 0 }),
+                personalBlockStats: [],
+                sharedList: [expect.objectContaining({ description: LOCAL_TEST_DATA_V24.customListDescriptions.first.description })],
+                personalList: [testLists.first, testLists.second],
+                personalListDescription: [testListDescriptions.first, testListDescriptions.second],
+            })
+        })
+
+        it('should update custom list descriptions', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const updatedDescription = 'Updated list description'
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .updateOneObject(
+                    {
+                        listId:
+                            LOCAL_TEST_DATA_V24.customListDescriptions.first
+                                .listId,
+                    },
+                    { description: updatedDescription },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalListDescription',
+                    'sharedList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
+                ], { skipChanges: 4 }),
+                personalBlockStats: [],
+                sharedList: [],
+                personalListDescription: [{ ...testListDescriptions.first, description: updatedDescription }, testListDescriptions.second],
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListDescriptions',
+                        object: {
+                            listId:
+                                LOCAL_TEST_DATA_V24.customListDescriptions.first
+                                    .listId,
+                            description: updatedDescription,
+                        },
+                    },
+                ],
+                { skip: 4 },
+            )
+        })
+
+        it('should update custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const updatedDescription = 'Updated list description'
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .updateOneObject(
+                    {
+                        listId:
+                            LOCAL_TEST_DATA_V24.customListDescriptions.first
+                                .listId,
+                    },
+                    { description: updatedDescription },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalListDescription',
+                    'sharedList',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
+                ], { skipChanges: 5 }),
+                personalBlockStats: [],
+                personalListDescription: [{ ...testListDescriptions.first, description: updatedDescription }, testListDescriptions.second],
+                sharedList: [expect.objectContaining({ description: updatedDescription })],
+            })
+        })
+
+        it('should delete custom list descriptions', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorage,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.first)
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .createObject(LOCAL_TEST_DATA_V24.customListDescriptions.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            await setups[0].storageManager
+                .collection('customListDescriptions')
+                .deleteObjects({})
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListDescriptions = remoteData.personalListDescription
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents(serverStorage.storageManager, [
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalListDescription',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...dataChangesAndUsage(remoteData, [
+                    [DataChangeType.Delete, 'personalListDescription', testListDescriptions.first.id, { listId: LOCAL_TEST_DATA_V24.customListDescriptions.first.listId }],
+                    [DataChangeType.Delete, 'personalListDescription', testListDescriptions.second.id, { listId: LOCAL_TEST_DATA_V24.customListDescriptions.second.listId }],
+                ], { skipChanges: 4 }),
+                personalBlockStats: [],
+                personalListDescription: [],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'customListDescriptions', where: { listId: LOCAL_TEST_DATA_V24.customListDescriptions.first.listId } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'customListDescriptions', where: { listId: LOCAL_TEST_DATA_V24.customListDescriptions.second.listId } },
+            ], { skip: 2 })
         })
 
         it('should create page list entries', async () => {
@@ -2993,6 +3297,152 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.first.key } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.second.key } },
             ], { skip: 0 })
+        })
+
+        describe(`translation layer twitter integration`, () => {
+            it('should trigger twitter action create on creation of twitter status pages with missing titles', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.twitter_a)
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject(LOCAL_TEST_DATA_V24.pages.twitter_b)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTwitterActions = remoteData.personalTwitterAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
+                    ], { skipAssertTimestamp: true }),
+                    personalContentMetadata: [testMetadata.twitter_a, testMetadata.twitter_b],
+                    personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
+                    personalTwitterAction: [testTwitterActions.first, testTwitterActions.second],
+                })
+            })
+
+            it('should NOT trigger twitter action create on creation of twitter status pages without missing titles', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+
+                const testTitleA = 'X on Twitter: "cool stuff"'
+                const testTitleB = 'X on Twitter: "more cool stuff"'
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_a,
+                        fullTitle: testTitleA,
+                    })
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_b,
+                        fullTitle: testTitleB,
+                    })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_b.id],
+                    ], {  skipAssertTimestamp: true }),
+                    personalContentMetadata: [{ ...testMetadata.twitter_a, title: testTitleA }, { ...testMetadata.twitter_b, title: testTitleB }],
+                    personalContentLocator: [testLocators.twitter_a, testLocators.twitter_b],
+                    personalTwitterAction: [],
+                })
+            })
+
+            it('should NOT trigger twitter action create on creation of non-status twitter pages', async () => {
+                const {
+                    setups,
+                    serverIdCapturer,
+                    serverStorage,
+                } = await setup()
+
+                const url = 'twitter.com/zzzzz'
+                await setups[0].storageManager
+                    .collection('pages')
+                    .createObject({
+                        ...LOCAL_TEST_DATA_V24.pages.twitter_a,
+                        url,
+                        fullUrl: 'https://' + url,
+                        canonicalUrl: 'https://' + url,
+                    })
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+
+                const remoteData = serverIdCapturer.mergeIds(
+                    REMOTE_TEST_DATA_V24,
+                )
+                const testMetadata = remoteData.personalContentMetadata
+                const testLocators = remoteData.personalContentLocator
+                const testTwitterActions = remoteData.personalTwitterAction
+
+                // prettier-ignore
+                expect(
+                    await getDatabaseContents(serverStorage.storageManager, [
+                        // 'dataUsageEntry',
+                        'personalDataChange',
+                        'personalContentMetadata',
+                        'personalContentLocator',
+                        'personalTwitterAction',
+                    ], { getWhere: getPersonalWhere }),
+                ).toEqual({
+                    ...dataChangesAndUsage(remoteData, [
+                        [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
+                        [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
+                    ], { skipAssertTimestamp: true }),
+                    personalContentMetadata: [{ ...testMetadata.twitter_a, canonicalUrl: 'https://' + url }],
+                    personalContentLocator: [{
+                        ...testLocators.twitter_a,
+                        location: url,
+                        originalLocation: 'https://' + url,
+                    }],
+                    personalTwitterAction: [],
+                })
+            })
         })
 
         describe(`translation layer readwise integration`, () => {

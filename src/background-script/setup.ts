@@ -278,6 +278,7 @@ export function createBackgroundModules(options: {
 
     const activityIndicator = new ActivityIndicatorBackground({
         services: options.services,
+        syncSettings: syncSettingsStore,
         getActivityStreamsStorage: async () =>
             (await options.getServerStorage()).storageModules.activityStreams,
     })
@@ -362,28 +363,6 @@ export function createBackgroundModules(options: {
     }
     const userMessages = options.userMessageService
 
-    const contentSharing = new ContentSharingBackground({
-        backend:
-            options.contentSharingBackend ??
-            firebaseService<ContentSharingBackend>(
-                'personalCloud',
-                callFirebaseFunction,
-            ),
-        remoteEmitter: createRemoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
-        }),
-        activityStreams,
-        storageManager,
-        customListsBG: customLists,
-        annotations: directLinking.annotationStorage,
-        auth,
-        analytics: options.analyticsManager,
-        getServerStorage,
-        services: options.services,
-        captureException: options.captureException,
-        generateServerId,
-    })
-
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
         { prefix: 'readwise.' },
@@ -402,12 +381,6 @@ export function createBackgroundModules(options: {
                 'fullUrl',
                 'fullTitle',
             ),
-    })
-
-    const copyPaster = new CopyPasterBackground({
-        storageManager,
-        contentSharing,
-        search,
     })
 
     const localExtSettingStore = new BrowserSettingsStore<
@@ -478,6 +451,8 @@ export function createBackgroundModules(options: {
                 },
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
+                // NOTE: this is for retrospective collection sync, which is currently unused in the extension
+                getLastCollectionDataProcessedTime: async () => 0,
                 getDeviceId: async () => personalCloud.deviceId!,
                 getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
             }),
@@ -571,6 +546,34 @@ export function createBackgroundModules(options: {
             }
         },
         getServerStorageManager,
+    })
+
+    const contentSharing = new ContentSharingBackground({
+        backend:
+            options.contentSharingBackend ??
+            firebaseService<ContentSharingBackend>(
+                'personalCloud',
+                callFirebaseFunction,
+            ),
+        remoteEmitter: createRemoteEventEmitter('contentSharing', {
+            broadcastToTabs: true,
+        }),
+        waitForSync: () => personalCloud.actionQueue.waitForSync(),
+        storageManager,
+        customListsBG: customLists,
+        annotations: directLinking.annotationStorage,
+        auth,
+        analytics: options.analyticsManager,
+        getServerStorage,
+        services: options.services,
+        captureException: options.captureException,
+        generateServerId,
+    })
+
+    const copyPaster = new CopyPasterBackground({
+        storageManager,
+        contentSharing,
+        search,
     })
 
     const bgScript = new BackgroundScript({

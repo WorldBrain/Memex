@@ -5,6 +5,7 @@ export const COLLECTION_NAMES = {
 }
 
 export const FEATURE_PREFIX = {
+    ACTIVITY_INDICATOR: '@ActivityIndicator-',
     SEARCH_INJECTION: '@SearchInjection-',
     CONTENT_SHARING: '@ContentSharing-',
     PDF_INTEGRATION: '@PDFIntegration-',
@@ -15,6 +16,9 @@ export const FEATURE_PREFIX = {
 }
 
 export const SETTING_NAMES: SyncSettingNames = {
+    activityIndicator: {
+        feedHasActivity: FEATURE_PREFIX.ACTIVITY_INDICATOR + 'feedHasActivity',
+    },
     contentSharing: {
         lastSharedAnnotationTimestamp:
             FEATURE_PREFIX.CONTENT_SHARING + 'lastSharedAnnotationTimestamp',

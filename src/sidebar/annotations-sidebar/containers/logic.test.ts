@@ -2155,9 +2155,7 @@ describe('SidebarContainerLogic', () => {
             const localListId = await sharingTestData.createContentSharingTestList(
                 device,
             )
-            await contentSharing.shareList({
-                listId: localListId,
-            })
+            await contentSharing.shareList({ localListId })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
             const annotationUrl = await directLinking.createAnnotation(
                 {} as any,
@@ -2301,9 +2299,7 @@ describe('SidebarContainerLogic', () => {
             const localListId = await sharingTestData.createContentSharingTestList(
                 device,
             )
-            await contentSharing.shareList({
-                listId: localListId,
-            })
+            await contentSharing.shareList({ localListId })
             const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
 
             // This annotation will be shared
@@ -2348,7 +2344,7 @@ describe('SidebarContainerLogic', () => {
                 shareToLists: true,
             })
             await contentSharing.setAnnotationPrivacyLevel({
-                annotation: annotationUrl2,
+                annotationUrl: annotationUrl2,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
             await contentSharing.waitForSync()

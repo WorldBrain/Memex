@@ -301,13 +301,11 @@ export default class AnnotationStorage extends StorageModule {
     async insertAnnotToList({ listId, url }: AnnotListEntry) {
         await this.getListById({ listId })
 
-        const { object } = await this.operation('createAnnotationForList', {
+        await this.operation('createAnnotationForList', {
             listId,
             url,
             createdAt: new Date(),
         })
-
-        return [object.listId, object.url]
     }
 
     async ensureAnnotInList({ listId, url }: AnnotListEntry) {

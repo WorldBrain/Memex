@@ -1,8 +1,10 @@
-import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
+import ActivityIndicatorService from '@worldbrain/memex-common/lib/activity-streams/services/activity-indicator'
+import type ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import * as Raven from 'src/util/raven'
 
-import { Services } from 'src/services/types'
+import type { Services } from 'src/services/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 
 export type ActivityStatus =
     | 'has-unseen'
@@ -16,14 +18,30 @@ export interface ActivityIndicatorInterface {
 }
 
 export default class ActivityIndicatorBackground {
+    private service: ActivityIndicatorService
     remoteFunctions: ActivityIndicatorInterface
 
     constructor(
         private options: {
             getActivityStreamsStorage: () => Promise<ActivityStreamsStorage>
             services: Pick<Services, 'activityStreams' | 'auth'>
+            syncSettings: SyncSettingsStore<'activityIndicator'>
         },
     ) {
+        this.service = new ActivityIndicatorService({
+            authService: options.services.auth,
+            activityStreamsService: options.services.activityStreams,
+            getActivityStreamsStorage: options.getActivityStreamsStorage,
+            getStatusCacheFlag: () =>
+                options.syncSettings.activityIndicator.get('feedHasActivity'),
+            setStatusCacheFlag: (hasActivity) =>
+                options.syncSettings.activityIndicator.set(
+                    'feedHasActivity',
+                    hasActivity,
+                ),
+            captureError: (error) => Raven.captureException(error),
+        })
+
         this.remoteFunctions = {
             checkActivityStatus: this.checkActivityStatus,
             markActivitiesAsSeen: this.markActivitiesAsSeen,
@@ -35,55 +53,25 @@ export default class ActivityIndicatorBackground {
     }
 
     checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
-        const { activityStreams, auth } = this.options.services
-
-        const user = await auth.getCurrentUser()
-        if (!user) {
-            return 'not-logged-in'
-        }
-
-        const storage = await this.options.getActivityStreamsStorage()
-
-        try {
-            const [serviceResult, storageResult] = await Promise.all([
-                activityStreams.getHomeFeedInfo(),
-                storage.retrieveHomeFeedTimestamp({
-                    user: { type: 'user-reference', id: user.id },
-                }),
-            ])
-
-            if (!serviceResult?.latestActivityTimestamp) {
-                return 'all-seen'
-            }
-
-            if (!storageResult?.timestamp) {
-                return 'has-unseen'
-            }
-
-            return serviceResult.latestActivityTimestamp >
-                storageResult.timestamp
-                ? 'has-unseen'
-                : 'all-seen'
-        } catch (err) {
-            console.error(err)
-            Raven.captureException(err)
-            return 'error'
-        }
+        return this.service.checkActivityStatus()
     }
 
-    markActivitiesAsSeen = async (timestamp = Date.now()) => {
-        const { auth } = this.options.services
+    markActivitiesAsSeen = async () => {
+        return this.service.markActivitiesAsSeen()
 
-        const user = await auth.getCurrentUser()
-        if (!user) {
-            throw new Error('Cannot mark activities as seen if not logged in')
-        }
+        // Below is the old implementation (not used since first implemented)
+        // const { auth } = this.options.services
 
-        const storage = await this.options.getActivityStreamsStorage()
+        // const user = await auth.getCurrentUser()
+        // if (!user) {
+        //     throw new Error('Cannot mark activities as seen if not logged in')
+        // }
 
-        await storage.updateHomeFeedTimestamp({
-            timestamp,
-            user: { id: user.id, type: 'user-reference' },
-        })
+        // const storage = await this.options.getActivityStreamsStorage()
+
+        // await storage.updateHomeFeedTimestamp({
+        //     timestamp,
+        //     user: { id: user.id, type: 'user-reference' },
+        // })
     }
 }
