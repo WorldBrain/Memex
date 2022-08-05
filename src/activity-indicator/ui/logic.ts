@@ -1,7 +1,5 @@
 import { UILogic, UIEventHandler, UIEvent } from 'ui-logic-core'
 import type { ActivityIndicatorInterface } from '../background'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from '../constants'
 
 export interface Dependencies {
     activityIndicatorBG: Pick<
@@ -42,33 +40,18 @@ export default class Logic extends UILogic<State, Events> {
     ///// FOR THE INSTANCE OF THE SIDEBAR, DON'T FORGET TO UPDATE IT TOO!
 
     init: EventHandler<'init'> = async () => {
-        const hasActivityStored = await getLocalStorage(
-            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
-        )
-        if (hasActivityStored === true) {
-            this.emitMutation({
-                hasFeedActivity: { $set: true },
-            })
-        } else {
-            const activityStatus = await this.dependencies.activityIndicatorBG.checkActivityStatus()
-            await setLocalStorage(
-                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
-                activityStatus === 'has-unseen',
-            )
-            this.emitMutation({
-                hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-            })
-        }
+        const activityStatus = await this.dependencies.activityIndicatorBG.checkActivityStatus()
+
+        this.emitMutation({
+            hasFeedActivity: { $set: activityStatus === 'has-unseen' },
+        })
     }
 
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({
         previousState,
     }) => {
         this.dependencies.openFeedUrl()
-
-        if (previousState.hasFeedActivity) {
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
-            this.emitMutation({ hasFeedActivity: { $set: false } })
-        }
+        this.emitMutation({ hasFeedActivity: { $set: false } })
+        await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
     }
 }

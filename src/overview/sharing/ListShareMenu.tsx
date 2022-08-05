@@ -66,7 +66,9 @@ export default class ListShareMenu extends React.Component<Props, State> {
     private shareList = async () => {
         const { contentSharingBG, listId } = this.props
 
-        const { remoteListId } = await contentSharingBG.shareList({ listId })
+        const { remoteListId } = await contentSharingBG.shareList({
+            localListId: listId,
+        })
 
         this.setState({
             link: getListShareUrl({ remoteListId }),

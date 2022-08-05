@@ -129,44 +129,22 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         let remoteListId = this.dependencies.remoteListId
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
-            if (remoteListId == null) {
-                const shareResult = await contentSharingBG.shareList({
-                    listId: localListId,
-                })
-                remoteListId = shareResult.remoteListId
-                onSpaceShare?.(remoteListId)
-            }
-
-            const [commenterLink, contributorLink] = await Promise.all(
-                [SharedListRoleID.Commenter, SharedListRoleID.ReadWrite].map(
-                    (roleID) =>
-                        contentSharingBG.generateKeyLink({
-                            key: { roleID },
-                            listReference: {
-                                id: remoteListId,
-                                type: 'shared-list-reference',
-                            },
-                        }),
-                ),
-            )
+            const shareResult = await contentSharingBG.shareList({
+                localListId,
+            })
+            remoteListId = shareResult.remoteListId
+            onSpaceShare?.(remoteListId)
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },
-                inviteLinks: {
-                    $set: [
-                        {
-                            link: commenterLink.link,
-                            roleID: SharedListRoleID.Commenter,
-                        },
-                        {
-                            link: contributorLink.link,
-                            roleID: SharedListRoleID.ReadWrite,
-                        },
-                    ],
-                },
+                inviteLinks: { $set: shareResult.links },
             })
 
-            await copyToClipboard(contributorLink.link)
+            const linkToCopy =
+                shareResult.links[1]?.link ?? shareResult.links[0]?.link
+            if (linkToCopy != null) {
+                await copyToClipboard(linkToCopy)
+            }
         })
 
         setTimeout(

@@ -121,7 +121,7 @@ describe('Annotations search', () => {
             name: DATA.coll2,
         })
 
-        await contentSharingBg.shareList({ listId: coll1Id })
+        await contentSharingBg.shareList({ localListId: coll1Id })
 
         await customListsBg.insertPageToList({
             id: coll2Id,

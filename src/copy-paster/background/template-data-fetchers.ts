@@ -1,6 +1,4 @@
 import type Storex from '@worldbrain/storex'
-import type { Page } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
-import type { Note } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/page-editor/types'
 
 import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
 import type ContentSharingBackground from 'src/content-sharing/background'
@@ -18,7 +16,7 @@ import type {
     AnnotationPrivacyLevel,
     SharedListMetadata,
 } from 'src/content-sharing/background/types'
-import type { Visit, Bookmark, Tag } from 'src/search'
+import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export function getTemplateDataFetchers({
@@ -117,7 +115,7 @@ export function getTemplateDataFetchers({
             }, {})
         },
         getNotes: async (annotationUrls) => {
-            const notes: Note[] = await storageManager
+            const notes: Annotation[] = await storageManager
                 .collection('annotations')
                 .findObjects({ url: { $in: annotationUrls } })
 
@@ -136,7 +134,7 @@ export function getTemplateDataFetchers({
             )
         },
         getNoteIdsForPages: async (normalizedPageUrls) => {
-            const notes: Note[] = await storageManager
+            const notes: Annotation[] = await storageManager
                 .collection('annotations')
                 .findObjects({ pageUrl: { $in: normalizedPageUrls } })
 

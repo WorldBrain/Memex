@@ -67,7 +67,7 @@ async function setupTest(options: {
 
     const shareTestList = async () => {
         const listShareResult = await contentSharing.shareList({
-            listId: testData.localListId,
+            localListId: testData.localListId,
         })
         testData.remoteListId = listShareResult.remoteListId
         return listShareResult.remoteListId
@@ -5292,6 +5292,7 @@ function makeAnnotationFromWebUiTest(options: {
 
             storageHooksChangeWatcher.setUp({
                 fetch: fakeFetch.fetch,
+                captureException: async (err) => undefined, // TODO: implement
                 getCurrentUserReference: async () => ({
                     type: 'user-reference',
                     id: (await context.setup.authService.getCurrentUser()).id,

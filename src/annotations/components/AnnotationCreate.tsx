@@ -294,9 +294,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     render() {
-        const setPickerShown = (isTagPickerShown: boolean) =>
-            this.setState({ isTagPickerShown })
-
         return (
             <>
                 <TextBoxContainerStyled>

@@ -18,6 +18,7 @@ export interface ListData {
     id: number
     name: string
     remoteId?: string
+    description?: string
     isOwnedList?: boolean
     wasPageDropped?: boolean
 }
@@ -86,6 +87,8 @@ export type Events = UIEvent<{
 
     confirmListDelete: null
     cancelListDelete: null
+
+    updateSelectedListDescription: { description: string }
 
     clickFeedActivityIndicator: null
 }>

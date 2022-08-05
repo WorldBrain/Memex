@@ -16,6 +16,9 @@ export interface SyncSetting {
 export interface RemoteSyncSettingsInterface extends LimitedBrowserStorage {}
 
 export interface SyncSettingsByFeature {
+    activityIndicator: {
+        feedHasActivity: boolean
+    }
     contentSharing: {
         lastSharedAnnotationTimestamp: number
     }

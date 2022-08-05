@@ -197,6 +197,70 @@ describe('Custom List Integrations', () => {
             ])
         })
 
+        test("should be able to edit a space's description", async () => {
+            const { customLists, storageManager } = await setupTest({
+                skipTestData: true,
+            })
+
+            const listName = 'test list'
+            const description = 'test list description'
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('customListDescriptions')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await customLists.fetchAllLists({
+                    skipMobileList: true,
+                    includeDescriptions: true,
+                }),
+            ).toEqual([])
+
+            const listId = await customLists.createCustomList({
+                name: listName,
+            })
+            await customLists.updateListDescription({ listId, description })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                expect.objectContaining({
+                    id: listId,
+                    name: listName,
+                }),
+            ])
+            expect(
+                await storageManager
+                    .collection('customListDescriptions')
+                    .findAllObjects({}),
+            ).toEqual([
+                {
+                    listId,
+                    description,
+                },
+            ])
+            expect(
+                await customLists.fetchAllLists({
+                    skipMobileList: true,
+                    includeDescriptions: true,
+                }),
+            ).toEqual([
+                expect.objectContaining({
+                    id: listId,
+                    name: listName,
+                    description,
+                }),
+            ])
+        })
+
         test('should not recreate inbox list if already exists', async () => {
             const { customLists } = await setupTest({ skipTestData: true })
 

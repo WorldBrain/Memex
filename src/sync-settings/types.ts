@@ -9,4 +9,5 @@ export interface SyncSettingsStoreInterface {
     contentSharing: SettingStore<SyncSettingsByFeature['contentSharing']>
     pdfIntegration: SettingStore<SyncSettingsByFeature['pdfIntegration']>
     searchInjection: SettingStore<SyncSettingsByFeature['searchInjection']>
+    activityIndicator: SettingStore<SyncSettingsByFeature['activityIndicator']>
 }

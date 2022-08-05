@@ -72,7 +72,6 @@ export default class CustomListBackground {
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
-            updateListDescription: async () => {},
             removeList: this.removeList,
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
@@ -94,6 +93,7 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
 
@@ -325,7 +325,7 @@ export default class CustomListBackground {
         return this.fetchListsFromReferences(sharedListReferences)
     }
 
-    fetchCollaborativeLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
+    fetchCollaborativeLists: RemoteCollectionsInterface['fetchCollaborativeLists'] = async ({
         skip = 0,
         limit = 20,
     }) => {
@@ -333,12 +333,14 @@ export default class CustomListBackground {
         return this.fetchListsFromReferences(collabListReferences)
     }
 
-    fetchAllLists = async ({
+    fetchAllLists: RemoteCollectionsInterface['fetchAllLists'] = async ({
         skip = 0,
         limit = 2000,
         skipMobileList = false,
+        includeDescriptions,
     }): Promise<PageList[]> => {
         return this.storage.fetchAllLists({
+            includeDescriptions,
             skipMobileList,
             limit,
             skip,
@@ -683,6 +685,16 @@ export default class CustomListBackground {
                 }),
             ),
         )
+    }
+
+    updateListDescription: RemoteCollectionsInterface['updateListDescription'] = async ({
+        description,
+        listId,
+    }) => {
+        await this.storage.createOrUpdateListDescription({
+            description,
+            listId,
+        })
     }
 
     updateListForPage: RemoteCollectionsInterface['updateListForPage'] = async ({
