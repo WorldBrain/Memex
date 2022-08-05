@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.2.24",
+    "version": "3.2.25",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -11,7 +11,7 @@
         "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
-        "watch:prod": "npm run build:clean && webpack --watch --env.prod",
+        "watch:prod": "npm run build:clean &&    webpack --watch --env.prod",
         "watch:notif": "webpack --watch --env.notifs",
         "watch:clean": "npm run cache:clean && npm run watch:notif",
         "cache:clean": "rimraf ./node_modules/.cache",
