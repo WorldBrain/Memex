@@ -4,6 +4,7 @@ import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 describe('Dashboard Refactor misc logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -66,6 +67,117 @@ describe('Dashboard Refactor misc logic', () => {
         expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
             listIds,
         )
+    })
+
+    it('should be able to load followed lists during init logic', async ({
+        device,
+    }) => {
+        device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
+            false
+        device.backgroundModules.backupModule.getBackupTimes = async () => ({
+            lastBackup: null,
+            nextBackup: null,
+        })
+        const { searchResults } = await setupTest(device, { withAuth: true })
+
+        const {
+            storageModules: { activityFollows, contentSharing },
+        } = await device.getServerStorage()
+        const user = await device.authService.getCurrentUser()
+        const userReferenceA: UserReference = {
+            id: user.id,
+            type: 'user-reference',
+        }
+        const userReferenceB: UserReference = {
+            id: 'test-user-2',
+            type: 'user-reference',
+        }
+
+        const sharedListARef = await contentSharing.createSharedList({
+            userReference: userReferenceB,
+            listData: { title: 'testA' },
+        })
+        await contentSharing.createSharedList({
+            userReference: userReferenceB,
+            listData: { title: 'testB' },
+        })
+        const sharedListCRef = await contentSharing.createSharedList({
+            userReference: userReferenceB,
+            listData: { title: 'testC' },
+        })
+
+        await activityFollows.storeFollow({
+            objectId: sharedListARef.id as string,
+            collection: 'sharedList',
+            userReference: userReferenceA,
+        })
+        await activityFollows.storeFollow({
+            objectId: sharedListCRef.id as string,
+            collection: 'sharedList',
+            userReference: userReferenceA,
+        })
+        const [
+            sharedListAData,
+            sharedListCData,
+        ] = await contentSharing.getListsByReferences([
+            sharedListARef,
+            sharedListCRef,
+        ])
+
+        expect(searchResults.state.listsSidebar.listData).toEqual({})
+        expect(
+            searchResults.state.listsSidebar.localLists.loadingState,
+        ).toEqual('pristine')
+        expect(
+            searchResults.state.listsSidebar.localLists.filteredListIds,
+        ).toEqual([])
+        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
+            [],
+        )
+        expect(
+            searchResults.state.listsSidebar.followedLists.loadingState,
+        ).toEqual('pristine')
+        expect(
+            searchResults.state.listsSidebar.followedLists.filteredListIds,
+        ).toEqual([])
+        expect(
+            searchResults.state.listsSidebar.followedLists.allListIds,
+        ).toEqual([])
+
+        await searchResults.processEvent('init', null)
+
+        expect(searchResults.state.listsSidebar.listData).toEqual({
+            [sharedListAData.createdWhen]: {
+                id: sharedListAData.createdWhen,
+                name: 'testA',
+                remoteId: sharedListARef.id,
+                isOwnedList: false,
+            },
+            [sharedListCData.createdWhen]: {
+                id: sharedListCData.createdWhen,
+                name: 'testC',
+                remoteId: sharedListCRef.id,
+                isOwnedList: false,
+            },
+        })
+        expect(
+            searchResults.state.listsSidebar.localLists.loadingState,
+        ).toEqual('success')
+        expect(
+            searchResults.state.listsSidebar.localLists.filteredListIds,
+        ).toEqual([])
+        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
+            [],
+        )
+        expect(
+            searchResults.state.listsSidebar.followedLists.loadingState,
+        ).toEqual('success')
+        expect(
+            searchResults.state.listsSidebar.followedLists.filteredListIds,
+        ).toEqual([sharedListAData.createdWhen, sharedListCData.createdWhen])
+        expect(
+            searchResults.state.listsSidebar.followedLists.allListIds,
+        ).toEqual([sharedListAData.createdWhen, sharedListCData.createdWhen])
     })
 
     it('should trigger search during init logic', async ({ device }) => {

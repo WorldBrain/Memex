@@ -427,7 +427,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                const followedLists = await listsBG.fetchCollaborativeLists({
+                const followedLists = await listsBG.fetchAllFollowedLists({
                     limit: 1000,
                 })
                 const followedListIds: number[] = []
