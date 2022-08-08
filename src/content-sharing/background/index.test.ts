@@ -2027,10 +2027,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
 
                                 const serverStorage = await setup.getServerStorage()
-                                const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
+                                const listReferenceA = await serverStorage.storageModules.contentSharing.createSharedList(
                                     {
                                         listData: {
-                                            title: 'Test list',
+                                            title: 'Test list A',
                                         },
                                         userReference: {
                                             type: 'user-reference',
@@ -2038,18 +2038,46 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 )
+                                const listReferenceB = await serverStorage.storageModules.contentSharing.createSharedList(
+                                    {
+                                        listData: {
+                                            title: 'Test list B',
+                                            description:
+                                                'Test list B description',
+                                        },
+                                        userReference: {
+                                            type: 'user-reference',
+                                            id: 'someone-else',
+                                        },
+                                    },
+                                )
+
                                 const {
-                                    keyString,
+                                    keyString: keyStringA,
                                 } = await serverStorage.storageModules.contentSharing.createListKey(
                                     {
                                         key: { roleID: SharedListRoleID.Admin },
-                                        listReference,
+                                        listReference: listReferenceA,
                                     },
                                 )
                                 await setup.backgroundModules.contentSharing.options.backend.processListKey(
                                     {
-                                        keyString,
-                                        listId: listReference.id,
+                                        keyString: keyStringA,
+                                        listId: listReferenceA.id,
+                                    },
+                                )
+                                const {
+                                    keyString: keyStringB,
+                                } = await serverStorage.storageModules.contentSharing.createListKey(
+                                    {
+                                        key: { roleID: SharedListRoleID.Admin },
+                                        listReference: listReferenceB,
+                                    },
+                                )
+                                await setup.backgroundModules.contentSharing.options.backend.processListKey(
+                                    {
+                                        keyString: keyStringB,
+                                        listId: listReferenceB.id,
                                     },
                                 )
 
@@ -2063,8 +2091,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 expect(customLists).toEqual([
                                     expect.objectContaining({
-                                        name: 'Test list',
+                                        id: customLists[0].id,
+                                        name: 'Test list A',
                                     }),
+                                    expect.objectContaining({
+                                        id: customLists[1].id,
+                                        name: 'Test list B',
+                                    }),
+                                ])
+                                expect(
+                                    await setup.storageManager.operation(
+                                        'findObjects',
+                                        'customListDescriptions',
+                                        {},
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId: customLists[1].id,
+                                        description: 'Test list B description',
+                                    },
                                 ])
                                 expect(
                                     await setup.storageManager.operation(
@@ -2075,7 +2120,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).toEqual([
                                     {
                                         localId: customLists[0].id,
-                                        remoteId: listReference.id.toString(),
+                                        remoteId: listReferenceA.id.toString(),
+                                    },
+                                    {
+                                        localId: customLists[1].id,
+                                        remoteId: listReferenceB.id.toString(),
                                     },
                                 ])
                             },
