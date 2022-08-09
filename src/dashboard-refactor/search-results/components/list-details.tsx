@@ -18,8 +18,8 @@ export interface Props {
     listName: string
     remoteLink?: string
     localListId: number
-    description?: string
     isOwnedList?: boolean
+    description: string | null
     saveDescription: (description: string) => void
     onAddContributorsClick?: React.MouseEventHandler
 }

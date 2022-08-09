@@ -446,6 +446,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         id: localId,
                         name: list.name,
                         remoteId: list.remoteId,
+                        description: list.description,
                         isOwnedList: list.isOwned,
                     }
                 }

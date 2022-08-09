@@ -284,6 +284,7 @@ export default class CustomListBackground {
             .map((sharedList) => ({
                 isOwned: sharedList.creator.id === currentUser.id,
                 remoteId: sharedList.reference.id as string,
+                description: sharedList.description,
                 id: sharedList.createdWhen,
                 name: sharedList.title,
                 isFollowed: true,
