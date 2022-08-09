@@ -69,7 +69,7 @@ describe('Dashboard Refactor misc logic', () => {
         )
     })
 
-    it('should be able to load followed lists during init logic', async ({
+    it('should be able to load followed + joined lists, after local lists, during init logic', async ({
         device,
     }) => {
         device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
@@ -95,7 +95,7 @@ describe('Dashboard Refactor misc logic', () => {
 
         const sharedListARef = await contentSharing.createSharedList({
             userReference: userReferenceB,
-            listData: { title: 'testA' },
+            listData: { title: 'testA', description: 'test A description' },
         })
         await contentSharing.createSharedList({
             userReference: userReferenceB,
@@ -116,6 +116,21 @@ describe('Dashboard Refactor misc logic', () => {
             collection: 'sharedList',
             userReference: userReferenceA,
         })
+
+        // Create local data for list A, simulating a joined list (followed + local data)
+        await device.storageManager.collection('customLists').createObject({
+            id: 123,
+            name: 'testA',
+            searchableName: 'testA',
+            createdAt: new Date(),
+        })
+        await device.storageManager
+            .collection('sharedListMetadata')
+            .createObject({
+                localId: 123,
+                remoteId: sharedListARef.id,
+            })
+
         const [
             sharedListAData,
             sharedListCData,
@@ -147,17 +162,21 @@ describe('Dashboard Refactor misc logic', () => {
         await searchResults.processEvent('init', null)
 
         expect(searchResults.state.listsSidebar.listData).toEqual({
-            [sharedListAData.createdWhen]: {
-                id: sharedListAData.createdWhen,
+            [123]: {
+                id: 123,
                 name: 'testA',
                 remoteId: sharedListARef.id,
+                description: 'test A description',
                 isOwnedList: false,
+                isJoinedList: true,
             },
             [sharedListCData.createdWhen]: {
                 id: sharedListCData.createdWhen,
                 name: 'testC',
                 remoteId: sharedListCRef.id,
+                description: null,
                 isOwnedList: false,
+                isJoinedList: false,
             },
         })
         expect(
@@ -165,19 +184,19 @@ describe('Dashboard Refactor misc logic', () => {
         ).toEqual('success')
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
-        ).toEqual([])
-        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
-            [],
-        )
+        ).toEqual([123])
+        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual([
+            123,
+        ])
         expect(
             searchResults.state.listsSidebar.followedLists.loadingState,
         ).toEqual('success')
         expect(
             searchResults.state.listsSidebar.followedLists.filteredListIds,
-        ).toEqual([sharedListAData.createdWhen, sharedListCData.createdWhen])
+        ).toEqual([sharedListCData.createdWhen])
         expect(
             searchResults.state.listsSidebar.followedLists.allListIds,
-        ).toEqual([sharedListAData.createdWhen, sharedListCData.createdWhen])
+        ).toEqual([sharedListCData.createdWhen])
     })
 
     it('should trigger search during init logic', async ({ device }) => {

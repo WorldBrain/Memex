@@ -20,6 +20,7 @@ export interface ListData {
     remoteId?: string
     description?: string
     isOwnedList?: boolean
+    isJoinedList?: boolean
     wasPageDropped?: boolean
 }
 

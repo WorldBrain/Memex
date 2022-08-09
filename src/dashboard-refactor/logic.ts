@@ -225,7 +225,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             const localListsResult = await this.loadLocalListsData(nextState)
             nextState = localListsResult.nextState
             await Promise.all([
-                this.loadRemoteListsData(localListsResult.remoteToLocalIdDict),
+                this.loadRemoteListsData(
+                    nextState,
+                    localListsResult.remoteToLocalIdDict,
+                ),
                 this.getFeedActivityStatus(),
                 this.getInboxUnreadCount(),
                 this.runSearch(nextState),
@@ -414,9 +417,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    private async loadRemoteListsData(remoteToLocalIdDict: {
-        [remoteId: string]: number
-    }) {
+    private async loadRemoteListsData(
+        previousState: State,
+        remoteToLocalIdDict: {
+            [remoteId: string]: number
+        },
+    ) {
         const { listsBG } = this.options
 
         await executeUITask(
@@ -448,6 +454,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         remoteId: list.remoteId,
                         description: list.description,
                         isOwnedList: list.isOwned,
+                        // NOTE: this condition assumes that local lists are loaded in state already (joined lists have local data + are "followed")
+                        isJoinedList:
+                            previousState.listsSidebar.listData[localId] !=
+                            null,
                     }
                 }
 

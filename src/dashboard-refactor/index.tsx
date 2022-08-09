@@ -161,6 +161,7 @@ export class DashboardContainer extends StatefulUIElement<
             listName: listData.name,
             localListId: listData.id,
             isOwnedList: listData.isOwnedList,
+            isJoinedList: listData.isJoinedList,
             description: listData.description ?? null,
             saveDescription: (description) =>
                 this.processEvent('updateSelectedListDescription', {

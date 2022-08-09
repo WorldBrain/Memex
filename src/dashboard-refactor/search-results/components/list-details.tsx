@@ -19,6 +19,7 @@ export interface Props {
     remoteLink?: string
     localListId: number
     isOwnedList?: boolean
+    isJoinedList?: boolean
     description: string | null
     saveDescription: (description: string) => void
     onAddContributorsClick?: React.MouseEventHandler
@@ -140,7 +141,12 @@ export default class ListDetails extends PureComponent<Props, State> {
         return <DescriptionText>{this.props.description}</DescriptionText>
     }
 
-    private EditButton() {
+    private renderEditButton() {
+        // If followed list, don't allow editing
+        if (!this.props.isOwnedList && !this.props.isJoinedList) {
+            return null
+        }
+
         const tooltipText = this.props.isOwnedList ? (
             <span>Edit Space Description</span>
         ) : (
@@ -185,7 +191,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 </SectionTitle>
                             </DetailsContainer>
                             <BtnsContainer>
-                                {this.EditButton()}
+                                {this.renderEditButton()}
                                 {this.props.remoteLink ? (
                                     <>
                                         <Margin right="10px">
