@@ -221,6 +221,19 @@ function createStorageManager(
     },
 ) {
     const storageManager = new StorageManager({ backend })
+    setupServerStorageManagerMiddleware(storageManager, options)
+    return storageManager
+}
+
+export function setupServerStorageManagerMiddleware(
+    storageManager: StorageManager,
+    options?: {
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+    },
+) {
     const middleware: StorageMiddleware[] = [
         createOperationLoggingMiddleware({
             shouldLog: () => shouldLogOperations,
@@ -235,7 +248,6 @@ function createStorageManager(
         )
     }
     storageManager.setMiddleware(middleware)
-    return storageManager
 }
 
 function getFirebaseOperationExecuter(storageManager: StorageManager) {

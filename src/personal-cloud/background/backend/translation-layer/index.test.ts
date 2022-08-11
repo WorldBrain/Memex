@@ -32,6 +32,10 @@ import {
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
+import {
+    initSqlUsage,
+    InitSqlUsageParams,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -133,16 +137,21 @@ class IdCapturer {
     }
 }
 
-async function getDatabaseContents(
+async function getCrossDatabaseContents(
     storageManager: StorageManager,
+    getSqlStorageMananager: () => Promise<StorageManager>,
     collections: string[],
     options?: { getWhere?(collection: string): any },
 ) {
     const contents: { [collection: string]: any[] } = {}
     await Promise.all(
         collections.map(async (collection) => {
+            const manager =
+                (collection.startsWith('personal') &&
+                    (await getSqlStorageMananager?.())) ||
+                storageManager
             contents[collection] = (
-                await storageManager
+                await manager
                     .collection(collection)
                     .findObjects(options?.getWhere?.(collection) ?? {}, {
                         order: [['createdWhen', 'asc']],
@@ -151,12 +160,6 @@ async function getDatabaseContents(
         }),
     )
     return contents
-}
-
-function getPersonalWhere(collection: string) {
-    if (collection.startsWith('personal')) {
-        return { user: TEST_USER.id }
-    }
 }
 
 type DataChange = [
@@ -168,6 +171,7 @@ type DataChange = [
 
 function dataChanges(
     remoteData: typeof REMOTE_TEST_DATA_V24,
+    userId: number | string,
     changes: DataChange[],
     options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
 ) {
@@ -193,7 +197,7 @@ function dataChanges(
                     ? expect.anything()
                     : now,
                 createdByDevice: remoteData.personalDeviceInfo.first.id,
-                user: TEST_USER.id,
+                user: userId,
                 type: change[0],
                 collection: change[1],
                 objectId: change[2],
@@ -203,74 +207,13 @@ function dataChanges(
     ]
 }
 
-function dataUsage(
-    remoteData: typeof REMOTE_TEST_DATA_V24,
-    changes: DataChange[],
-    options?: {
-        skipChanges?: number
-        skippedUpdates?: number
-        skipAssertTimestamp?: boolean
-    },
-) {
-    let now = 554
-    const advance = () => {
-        ++now
-    }
-    const skip = (options?.skipChanges ?? 0) - (options?.skippedUpdates ?? 0)
-    const usageEntries: any[] = []
-    for (let i = 0; i < skip; ++i) {
-        advance()
-        usageEntries.push(expect.anything())
-    }
-    for (let i = 0; i < options?.skippedUpdates ?? 0; ++i) {
-        advance()
-    }
-
-    for (const change of changes) {
-        advance()
-
-        if (change[0] === DataChangeType.Modify) {
-            continue
-        }
-
-        usageEntries.push({
-            id: expect.anything(),
-            createdWhen: options?.skipAssertTimestamp ? expect.anything() : now,
-            createdByDevice: remoteData.personalDeviceInfo.first.id,
-            user: TEST_USER.id,
-            action:
-                change[0] === DataChangeType.Create
-                    ? DataUsageAction.Create
-                    : DataUsageAction.Delete,
-            collection: change[1],
-            objectId: change[2],
-        })
-    }
-
-    return usageEntries
-}
-
-function dataChangesAndUsage(
-    remoteData: typeof REMOTE_TEST_DATA_V24,
-    changes: DataChange[],
-    options?: {
-        skipChanges?: number
-        skippedUpdates?: number
-        skipAssertTimestamp?: boolean
-    },
-) {
-    return {
-        // dataUsageEntry: dataUsage(remoteData, changes, options),
-        personalDataChange: dataChanges(remoteData, changes, options),
-    }
-}
-
-function blockStats(params: { usedBlocks: number }) {
+function blockStats(params: { userId: number | string; usedBlocks: number }) {
     return {
         id: expect.anything(),
+        createdWhen: expect.any(Number),
         usedBlocks: params.usedBlocks,
         lastChange: expect.any(Number),
-        user: TEST_USER.id,
+        user: params.userId,
     }
 }
 
@@ -293,6 +236,16 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 const id = collectionIds[idIndex]
                 tagConnection.objectId = id
             }
+
+            if (sqlUserId) {
+                for (const objects of Object.values(params.merged)) {
+                    for (const object of Object.values(objects)) {
+                        if ('user' in object) {
+                            object.user = sqlUserId
+                        }
+                    }
+                }
+            }
         },
     })
 
@@ -303,6 +256,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         setups,
         userId,
         serverStorage,
+        getSqlStorageMananager,
         getNow,
     } = await setupSyncBackgroundTest({
         deviceCount: 2,
@@ -317,11 +271,25 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
               },
     })
 
-    serverIdCapturer.setup(serverStorage.storageManager)
+    let sqlUserId: number | string | undefined
+    if (getSqlStorageMananager) {
+        const initDeps: InitSqlUsageParams = {
+            storageManager: serverStorage.storageManager,
+            getSqlStorageMananager,
+            userId: TEST_USER.id,
+        }
+        await initSqlUsage(initDeps)
+        sqlUserId = initDeps.userId
+    }
+
+    const serverStorageManager =
+        (await getSqlStorageMananager?.()) ?? serverStorage.storageManager
+    serverIdCapturer.setup(serverStorageManager)
     storageHooksChangeWatcher.setUp({
         fetch: fakeFetch.fetch,
         captureException: async (err) => undefined, // TODO: implement
-        serverStorageManager: serverStorage.storageManager,
+        serverStorageManager,
+        getSqlStorageMananager,
         getCurrentUserReference: async () => ({
             id: userId,
             type: 'user-reference',
@@ -331,10 +299,44 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         },
     })
 
+    const getPersonalWhere = (collection: string) => {
+        if (collection.startsWith('personal')) {
+            return { user: sqlUserId ?? TEST_USER.id }
+        }
+    }
     return {
         serverIdCapturer,
         setups,
-        serverStorage,
+        serverStorageManager,
+        getPersonalWhere,
+        personalDataChanges: (
+            remoteData: typeof REMOTE_TEST_DATA_V24,
+            changes: DataChange[],
+            options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+        ) => ({
+            personalDataChange: dataChanges(
+                remoteData,
+                sqlUserId ?? TEST_USER.id,
+                changes,
+                options,
+            ),
+        }),
+        personalBlockStats: (params: { usedBlocks: number }) =>
+            blockStats({
+                ...params,
+                userId: sqlUserId ?? TEST_USER.id,
+            }),
+        getDatabaseContents: async (
+            collections: string[],
+            options?: { getWhere?(collection: string): any },
+        ) => {
+            return getCrossDatabaseContents(
+                serverStorage.storageManager,
+                getSqlStorageMananager,
+                collections,
+                options,
+            )
+        },
         testDownload: async (
             expected: PersonalCloudUpdateBatch,
             downloadOptions?: {
@@ -352,6 +354,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 clientSchemaVersion,
                 userId: TEST_USER.id,
                 storageManager: serverStorage.storageManager,
+                getSqlStorageMananager,
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules
                         .personalCloud.deviceId,
@@ -400,12 +403,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 26`, () => {
         it('should not download updates uploaded from the same device', async () => {
-            const {
-                setups,
-                serverIdCapturer,
-                serverStorage,
-                testDownload,
-            } = await setup()
+            const { setups, testDownload } = await setup()
             await insertTestPages(setups[0].storageManager)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
@@ -417,7 +415,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -429,7 +431,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -437,13 +439,13 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                 ]),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
@@ -458,7 +460,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -476,7 +482,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -484,10 +490,10 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [
                     {
                         ...testMetadata.first,
@@ -513,7 +519,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -528,7 +538,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -536,13 +546,13 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 1 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 1 })],
                 personalContentMetadata: [testMetadata.second],
                 personalContentLocator: [testLocators.second],
             })
@@ -556,7 +566,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
 
@@ -585,7 +599,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -593,7 +607,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
@@ -606,7 +620,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
                 ]),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
                 personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
             })
@@ -628,7 +642,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
 
@@ -656,7 +674,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -664,7 +682,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
@@ -681,7 +699,7 @@ describe('Personal cloud translation layer', () => {
                     }],
 
                 ], { skipChanges: 0 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
             })
@@ -699,7 +717,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -715,7 +737,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -724,10 +746,10 @@ describe('Personal cloud translation layer', () => {
                     'personalBookmark',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalBookmark', testBookmarks.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: [testBookmarks.first]
@@ -742,7 +764,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -763,7 +789,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -772,10 +798,10 @@ describe('Personal cloud translation layer', () => {
                     'personalBookmark',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalBookmark', testBookmarks.first.id, changeInfo],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalBookmark: []
@@ -790,7 +816,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -806,7 +836,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -815,11 +845,11 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Create, 'personalContentRead', testReads.first.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -837,7 +867,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             const updatedDuration =
@@ -864,7 +898,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -873,10 +907,10 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentRead', testReads.first.id],
-                ], { skipChanges: 6, skippedUpdates: 1 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                ], { skipChanges: 6 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [
                     { ...testLocators.first, lastVisited: LOCAL_TEST_DATA_V24.visits.first.time },
@@ -903,7 +937,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
 
@@ -927,7 +965,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -936,7 +974,7 @@ describe('Personal cloud translation layer', () => {
                     'personalContentRead',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentLocator', testLocators.first.id],
                     [DataChangeType.Delete, 'personalContentRead', testReads.first.id, {
                         url: LOCAL_TEST_DATA_V24.visits.first.url,
@@ -947,8 +985,8 @@ describe('Personal cloud translation layer', () => {
                         url: LOCAL_TEST_DATA_V24.visits.second.url,
                         time: LOCAL_TEST_DATA_V24.visits.second.time,
                     }],
-                ], { skipChanges: 8, skippedUpdates: 2 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                ], { skipChanges: 8 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalContentRead: [],
@@ -981,7 +1019,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1001,7 +1043,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1011,12 +1053,12 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1034,7 +1076,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1059,7 +1105,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1069,10 +1115,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [{ ...testAnnotations.first, comment: updatedComment, updatedWhen: lastEdited.getTime() }],
@@ -1099,7 +1145,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1123,7 +1173,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1133,12 +1183,12 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationSelector',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.first.id, { url: LOCAL_TEST_DATA_V24.annotations.first.url }],
                     [DataChangeType.Delete, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Delete, 'personalAnnotation', testAnnotations.second.id, { url: LOCAL_TEST_DATA_V24.annotations.second.url }],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [],
@@ -1156,7 +1206,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1196,7 +1250,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1208,13 +1262,13 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1245,7 +1299,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1284,7 +1342,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1296,12 +1354,12 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1328,7 +1386,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1380,7 +1442,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1393,11 +1455,11 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotation',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                     [DataChangeType.Modify, 'personalAnnotationPrivacyLevel', testPrivacyLevels.first.id],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -1426,7 +1488,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1463,7 +1529,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1474,10 +1540,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationPrivacyLevel'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationPrivacyLevel', testPrivacyLevels.second.id, changeInfo],
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -1495,7 +1561,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1511,14 +1581,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                 ], { skipChanges: 0 }),
@@ -1537,7 +1607,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1562,14 +1636,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalList', testLists.first.id],
                 ], { skipChanges: 2 }),
                 personalBlockStats: [],
@@ -1596,7 +1670,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1619,7 +1697,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1628,7 +1706,7 @@ describe('Personal cloud translation layer', () => {
                     'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                     [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
@@ -1653,8 +1731,10 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                personalDataChanges,
                 testDownload,
+                getDatabaseContents,
+                getPersonalWhere,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1680,7 +1760,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1689,7 +1769,7 @@ describe('Personal cloud translation layer', () => {
                     'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                     [DataChangeType.Create, 'personalListShare', testListShares.first.id],
@@ -1707,7 +1787,9 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                getDatabaseContents,
+                getPersonalWhere,
+                personalDataChanges,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1734,7 +1816,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1743,7 +1825,7 @@ describe('Personal cloud translation layer', () => {
                     'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
                     [DataChangeType.Create, 'personalListDescription', testListDescriptions.first.id],
@@ -1761,7 +1843,9 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                getDatabaseContents,
+                getPersonalWhere,
+                personalDataChanges,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1796,7 +1880,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1804,7 +1888,7 @@ describe('Personal cloud translation layer', () => {
                     'sharedList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
                 ], { skipChanges: 4 }),
                 personalBlockStats: [],
@@ -1833,7 +1917,9 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                getDatabaseContents,
+                getPersonalWhere,
+                personalDataChanges,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1871,7 +1957,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents( [
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1879,7 +1965,7 @@ describe('Personal cloud translation layer', () => {
                     'sharedList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalListDescription', testListDescriptions.first.id],
                 ], { skipChanges: 5 }),
                 personalBlockStats: [],
@@ -1892,7 +1978,9 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                getDatabaseContents,
+                getPersonalWhere,
+                personalDataChanges,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -1920,14 +2008,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents( [
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalListDescription',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListDescription', testListDescriptions.first.id, { listId: LOCAL_TEST_DATA_V24.customListDescriptions.first.listId }],
                     [DataChangeType.Delete, 'personalListDescription', testListDescriptions.second.id, { listId: LOCAL_TEST_DATA_V24.customListDescriptions.second.listId }],
                 ], { skipChanges: 4 }),
@@ -1946,7 +2034,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -1968,7 +2060,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -1977,11 +2069,11 @@ describe('Personal cloud translation layer', () => {
                     'personalListEntry'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListEntry', testListEntries.first.id],
                     [DataChangeType.Create, 'personalListEntry', testListEntries.second.id],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.first, testListEntries.second],
@@ -1998,7 +2090,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2028,7 +2124,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2037,10 +2133,10 @@ describe('Personal cloud translation layer', () => {
                     'personalListEntry'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListEntry', testListEntries.first.id, changeInfo],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalListEntry: [testListEntries.second],
@@ -2056,7 +2152,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2073,7 +2173,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2081,7 +2181,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListShare', testListShares.first.id],
                 ], { skipChanges: 1 }),
                 personalBlockStats: [],
@@ -2099,7 +2199,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2123,7 +2227,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2131,7 +2235,7 @@ describe('Personal cloud translation layer', () => {
                     'personalList',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalListShare', testListShares.first.id, changeInfo],
                 ], { skipChanges: 2 }),
                 personalBlockStats: [],
@@ -2149,7 +2253,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2170,17 +2278,17 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalAnnotationListEntry',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotationListEntries.first.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalAnnotationListEntry: [testAnnotationListEntries.first],
             })
 
@@ -2194,7 +2302,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2223,17 +2335,17 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalAnnotationListEntry',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationListEntry', testAnnotationListEntries.first.id, changeInfo],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalAnnotationListEntry: [],
             })
 
@@ -2247,7 +2359,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2279,7 +2395,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2290,11 +2406,11 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.first.id],
                     [DataChangeType.Create, 'personalAnnotationShare', testAnnotationShares.second.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2313,7 +2429,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2360,7 +2480,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2371,11 +2491,11 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalAnnotationShare', testAnnotationShares.second.id],
 
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2403,7 +2523,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2443,7 +2567,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2454,10 +2578,10 @@ describe('Personal cloud translation layer', () => {
                     'personalAnnotationShare'
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalAnnotationShare', testAnnotationShares.second.id, changeInfo],
                 ], { skipChanges: 9 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2475,7 +2599,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2494,7 +2622,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2504,11 +2632,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -2524,7 +2652,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2547,7 +2679,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2557,11 +2689,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstPageTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondPageTag.id],
                 ], { skipChanges: 5 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTag: [testTags.firstPageTag],
@@ -2589,7 +2721,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2615,7 +2751,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2625,10 +2761,10 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [testConnections.secondPageTag],
@@ -2645,7 +2781,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2668,7 +2808,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2678,11 +2818,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstPageTag.id, LOCAL_TEST_DATA_V24.tags.firstPageTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstPageTag.id],
                 ], { skipChanges: 6 }),
-                personalBlockStats: [blockStats({ usedBlocks: 2 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalTagConnection: [],
@@ -2699,7 +2839,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2723,7 +2867,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2735,13 +2879,13 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                     [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                 ], { skipChanges: 4 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -2765,7 +2909,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2796,7 +2944,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2808,12 +2956,12 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
                     [DataChangeType.Create, 'personalTagConnection', testConnections.secondAnnotationTag.id],
                 ], { skipChanges: 7 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2843,7 +2991,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2877,7 +3029,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2889,10 +3041,10 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                 ], { skipChanges: 10 }),
-                personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first, testAnnotations.second],
@@ -2910,7 +3062,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await insertTestPages(setups[0].storageManager)
@@ -2938,7 +3094,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
@@ -2950,11 +3106,11 @@ describe('Personal cloud translation layer', () => {
                     'personalTagConnection',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTagConnection', testConnections.firstAnnotationTag.id, LOCAL_TEST_DATA_V24.tags.firstAnnotationTag],
                     [DataChangeType.Delete, 'personalTag', testTags.firstAnnotationTag.id],
                 ], { skipChanges: 8 }),
-                personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
                 personalContentLocator: [testLocators.first, testLocators.second],
                 personalAnnotation: [testAnnotations.first],
@@ -2972,7 +3128,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -2988,14 +3148,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Create, 'personalTextTemplate', testTemplates.second.id],
                 ], { skipChanges: 0 }),
@@ -3013,7 +3173,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -3044,14 +3208,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.first.id],
                     [DataChangeType.Modify, 'personalTextTemplate', testTemplates.second.id],
                 ], { skipChanges: 2 }),
@@ -3092,7 +3256,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -3112,14 +3280,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalTextTemplate',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.first.id, { id: LOCAL_TEST_DATA_V24.templates.first.id }],
                     [DataChangeType.Delete, 'personalTextTemplate', testTemplates.second.id, { id: LOCAL_TEST_DATA_V24.templates.second.id }],
                 ], { skipChanges: 2 }),
@@ -3137,7 +3305,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -3156,14 +3328,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -3184,7 +3356,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -3213,14 +3389,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -3243,7 +3419,11 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorage,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
                 testDownload,
             } = await setup()
             await setups[0].storageManager
@@ -3273,14 +3453,14 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(
-                await getDatabaseContents(serverStorage.storageManager, [
+                await getDatabaseContents([
                     // 'dataUsageEntry',
                     'personalDataChange',
                     'personalBlockStats',
                     'personalMemexSetting',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                ...dataChangesAndUsage(remoteData, [
+                ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.first.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.second.id],
                     [DataChangeType.Create, 'personalMemexSetting', testSettings.third.id],
@@ -3304,7 +3484,9 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    getDatabaseContents,
+                    personalDataChanges,
+                    getPersonalWhere,
                 } = await setup()
 
                 await setups[0].storageManager
@@ -3324,7 +3506,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3332,7 +3514,7 @@ describe('Personal cloud translation layer', () => {
                         'personalTwitterAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
@@ -3348,7 +3530,9 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    getDatabaseContents,
+                    personalDataChanges,
+                    getPersonalWhere,
                 } = await setup()
 
                 const testTitleA = 'X on Twitter: "cool stuff"'
@@ -3375,7 +3559,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents( [
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3383,7 +3567,7 @@ describe('Personal cloud translation layer', () => {
                         'personalTwitterAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_b.id],
@@ -3399,7 +3583,9 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    getDatabaseContents,
+                    personalDataChanges,
+                    getPersonalWhere,
                 } = await setup()
 
                 const url = 'twitter.com/zzzzz'
@@ -3422,7 +3608,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents( [
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3430,7 +3616,7 @@ describe('Personal cloud translation layer', () => {
                         'personalTwitterAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalContentMetadata', testMetadata.twitter_a.id],
                         [DataChangeType.Create, 'personalContentLocator', testLocators.twitter_a.id],
                     ], { skipAssertTimestamp: true }),
@@ -3450,14 +3636,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3477,7 +3663,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3487,7 +3673,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
@@ -3510,14 +3696,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3542,7 +3728,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3552,7 +3738,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
                     ], { skipChanges: 6, skipAssertTimestamp: true }),
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
@@ -3582,14 +3768,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3614,7 +3800,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3626,7 +3812,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
@@ -3656,14 +3842,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3700,7 +3886,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3712,7 +3898,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                         [DataChangeType.Create, 'personalTag', testTags.firstAnnotationTag.id],
                         [DataChangeType.Create, 'personalTagConnection', testConnections.firstAnnotationTag.id],
@@ -3738,14 +3924,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3773,7 +3959,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3785,7 +3971,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.first.id],
                         [DataChangeType.Create, 'personalAnnotationSelector', testSelectors.first.id],
                         [DataChangeType.Create, 'personalList', testLists.first.id],
@@ -3820,14 +4006,14 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3869,7 +4055,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         // 'dataUsageEntry',
                         'personalDataChange',
                         'personalContentMetadata',
@@ -3881,7 +4067,7 @@ describe('Personal cloud translation layer', () => {
                         'personalReadwiseAction',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    ...dataChangesAndUsage(remoteData, [
+                    ...personalDataChanges(remoteData, [
                         [DataChangeType.Create, 'personalAnnotation', testAnnotations.second.id],
                         [DataChangeType.Create, 'personalList', testLists.first.id],
                         [DataChangeType.Create, 'personalAnnotationListEntry', testAnnotListEntries.first.id],
@@ -3902,22 +4088,25 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 await testDownload([
-                    { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
-                        url: LOCAL_TEST_DATA_V24.annotationListEntries.first.url,
-                        listId: LOCAL_TEST_DATA_V24.annotationListEntries.first.listId,
-                    } },
+                    {
+                        type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
+                            url: LOCAL_TEST_DATA_V24.annotationListEntries.first.url,
+                            listId: LOCAL_TEST_DATA_V24.annotationListEntries.first.listId,
+                        }
+                    },
                 ], { skip: 6 })
             })
 
             it('should create annotations, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3950,21 +4139,22 @@ describe('Personal cloud translation layer', () => {
 
                 testFetches([firstHighlight, secondHighlight])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should update annotation notes, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -3995,21 +4185,22 @@ describe('Personal cloud translation layer', () => {
 
                 testFetches([highlight, { ...highlight, note: updatedComment }])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should add annotation tags, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -4044,21 +4235,22 @@ describe('Personal cloud translation layer', () => {
 
                 testFetches([highlight, highlightWithTags])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should remove annotation tags, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -4124,21 +4316,22 @@ describe('Personal cloud translation layer', () => {
                     firstHighlight,
                 ])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should add annotation spaces, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -4178,21 +4371,22 @@ describe('Personal cloud translation layer', () => {
 
                 testFetches([highlight, highlightWithLists])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should remove annotation spaces, triggering readwise highlight upload', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
                     .collection('annotations')
                     .createObject(LOCAL_TEST_DATA_V24.annotations.first)
@@ -4265,21 +4459,22 @@ describe('Personal cloud translation layer', () => {
                     firstHighlight,
                 ])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should trigger readwise highlight re-uploads upon annotation tags and spaces adds, substituting hyphens for spaces', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
                 await insertTestPages(setups[0].storageManager)
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const testTagWithSpaces = 'test tag spaces'
                 const testListWithSpaces = 'test list spaces'
                 const testTagWithHypens = formatReadwiseHighlightTag(
@@ -4350,20 +4545,21 @@ describe('Personal cloud translation layer', () => {
                     highlightWithTagsAndSpaces,
                 ])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
             })
 
             it('should add annotation to page without title, triggering readwise highlight upload, substituting URL for title', async () => {
-                const { setups, serverStorage, testFetches } = await setup({
+                const {
+                    setups,
+                    serverStorageManager,
+                    testFetches,
+                } = await setup({
                     runReadwiseTrigger: true,
                 })
-                await insertReadwiseAPIKey(
-                    serverStorage.storageManager,
-                    TEST_USER.id,
-                )
+                await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const {
                     fullTitle,
                     ...titlelessPage
@@ -4395,7 +4591,7 @@ describe('Personal cloud translation layer', () => {
 
                 testFetches([highlight])
                 expect(
-                    await serverStorage.storageManager
+                    await serverStorageManager
                         .collection('personalReadwiseAction')
                         .findAllObjects({ user: TEST_USER.id }),
                 ).toEqual([])
@@ -4407,7 +4603,11 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4460,7 +4660,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -4477,7 +4677,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
                     personalList: [testLists.first],
@@ -4533,7 +4733,9 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    getPersonalWhere,
+                    personalBlockStats,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4586,7 +4788,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -4603,7 +4805,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
                     personalList: [testLists.first],
@@ -4659,7 +4861,11 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4718,7 +4924,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -4735,7 +4941,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
                     personalList: [testLists.first],
@@ -4792,7 +4998,11 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4852,7 +5062,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -4869,7 +5079,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 4 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
                     personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
                     personalList: [testLists.first],
@@ -4926,7 +5136,11 @@ describe('Personal cloud translation layer', () => {
                 const {
                     setups,
                     serverIdCapturer,
-                    serverStorage,
+                    serverStorageManager,
+                    getPersonalWhere,
+                    personalDataChanges,
+                    personalBlockStats,
+                    getDatabaseContents,
                     testDownload,
                 } = await setup()
                 await insertTestPages(setups[0].storageManager)
@@ -4987,7 +5201,7 @@ describe('Personal cloud translation layer', () => {
 
                 // prettier-ignore
                 expect(
-                    await getDatabaseContents(serverStorage.storageManager, [
+                    await getDatabaseContents([
                         'personalBlockStats',
                         'personalContentMetadata',
                         'personalContentLocator',
@@ -5004,7 +5218,7 @@ describe('Personal cloud translation layer', () => {
                         'sharedContentLocator',
                     ], { getWhere: getPersonalWhere }),
                 ).toEqual({
-                    personalBlockStats: [blockStats({ usedBlocks: 3 })],
+                    personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second],
                     personalContentLocator: [testLocators.first, testLocators.second],
                     personalList: [testLists.first],

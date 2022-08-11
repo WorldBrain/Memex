@@ -61,6 +61,7 @@ export interface IntegrationTestStep<StepContext> {
 
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
+    getSqlStorageMananager?(): Promise<StorageManager>
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
     browserAPIs: Browser
