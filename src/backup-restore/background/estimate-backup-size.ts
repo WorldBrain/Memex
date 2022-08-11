@@ -10,7 +10,7 @@ export interface SizeEst {
 
 const estimateBackupSize = ({
     storageManager,
-    indexedDB = window.indexedDB,
+    indexedDB = globalThis.indexedDB,
     dbName = 'memex',
     estimateBoost = 20,
 }: {
@@ -29,7 +29,7 @@ const estimateBackupSize = ({
         const storeNames = deriveStoreNames(storageManager)
         const req = indexedDB.open(dbName)
 
-        req.onsuccess = async function() {
+        req.onsuccess = async function () {
             const db = this.result
 
             for (const store of storeNames) {
@@ -40,7 +40,7 @@ const estimateBackupSize = ({
             resolve(applyEstBoost(totalSize, estimateBoost))
         }
 
-        req.onerror = function() {
+        req.onerror = function () {
             reject(this.error)
         }
     })
@@ -57,7 +57,7 @@ const calcStoreSize = (db: IDBDatabase, storeName: string) =>
             .objectStore(storeName)
             .openCursor()
 
-        cursorReq.onsuccess = function() {
+        cursorReq.onsuccess = function () {
             const cursor = this.result as IDBCursor
 
             // Cursor exhausted
@@ -75,7 +75,7 @@ const calcStoreSize = (db: IDBDatabase, storeName: string) =>
             cursor.continue()
         }
 
-        cursorReq.onerror = function() {
+        cursorReq.onerror = function () {
             reject(this.error)
         }
     })

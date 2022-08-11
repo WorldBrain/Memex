@@ -1,5 +1,5 @@
 import kebabCase from 'lodash/kebabCase'
-import { browser, Browser } from 'webextension-polyfill-ts'
+import browser, { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'

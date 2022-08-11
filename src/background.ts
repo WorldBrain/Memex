@@ -1,5 +1,5 @@
 import 'core-js'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
@@ -174,15 +174,15 @@ export async function main() {
     })
     __debugCounter++
 
-    // Attach interesting features onto global window scope for interested users
-    window['getDb'] = getDb
-    window['storageMan'] = storageManager
-    window['bgModules'] = backgroundModules
-    window['analytics'] = analytics
-    window['dataSeeders'] = setupDataSeeders(storageManager)
-    window['setStorageLoggingEnabled'] = setStorageLoggingEnabled
+    // Attach interesting features onto global globalThis scope for interested users
+    globalThis['getDb'] = getDb
+    globalThis['storageMan'] = storageManager
+    globalThis['bgModules'] = backgroundModules
+    globalThis['analytics'] = analytics
+    globalThis['dataSeeders'] = setupDataSeeders(storageManager)
+    globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
-    window['selfTests'] = createSelfTests({
+    globalThis['selfTests'] = createSelfTests({
         backgroundModules,
         storageManager,
         persistentStorageManager,

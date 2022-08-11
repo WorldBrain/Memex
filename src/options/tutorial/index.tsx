@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { browser, Tabs } from 'webextension-polyfill-ts'
+import browser, { Tabs } from 'webextension-polyfill'
 
 import { remoteFunction } from '../../util/webextensionRPC'
 
@@ -19,7 +19,7 @@ class Tutorial extends PureComponent<Props> {
 
     private processEventRPC = remoteFunction('processEvent')
 
-    private openNewUrl = url => () => {
+    private openNewUrl = (url) => () => {
         this.processEventRPC({ type: EVENT_NAMES.OPEN_URL_FEATURE })
 
         this.props.tabs.create({ url })

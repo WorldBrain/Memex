@@ -1,4 +1,4 @@
-import { Notifications } from 'webextension-polyfill-ts'
+import { Notifications } from 'webextension-polyfill'
 
 // Chrome allows some extra notif opts that the standard web ext API doesn't support
 export interface NotifOpts extends Notifications.CreateNotificationOptions {

@@ -122,7 +122,7 @@ export default class ImportItemCreator {
      * @param {any} allowTypes
      */
     async initData(blobUrl?, allowTypes?) {
-        this.existingDataReady = new Promise(async (resolve, reject) => {
+        this.existingDataReady = new Promise<void>(async (resolve, reject) => {
             try {
                 this._isBlacklisted = await checkWithBlacklist()
 

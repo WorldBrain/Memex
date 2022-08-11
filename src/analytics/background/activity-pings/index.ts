@@ -118,6 +118,6 @@ export default class ActivityPings {
         return needed
     }
 
-    _setInterval = bindMethod(window, 'setInterval')
+    _setInterval = bindMethod(globalThis, 'setInterval')
     _getNow = () => Date.now()
 }

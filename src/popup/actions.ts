@@ -1,4 +1,4 @@
-import { browser, Tabs } from 'webextension-polyfill-ts'
+import browser, { Tabs } from 'webextension-polyfill'
 import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'

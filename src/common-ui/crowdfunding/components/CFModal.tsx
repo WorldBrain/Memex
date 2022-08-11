@@ -1,5 +1,5 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
-import { browser, Tabs } from 'webextension-polyfill-ts'
+import browser, { Tabs } from 'webextension-polyfill'
 
 import { remoteFunction } from '../../../util/webextensionRPC'
 import { Overlay } from '../../components'

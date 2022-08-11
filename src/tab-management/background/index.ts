@@ -1,6 +1,6 @@
+import { Tabs, Browser } from 'webextension-polyfill'
 import { EventEmitter } from 'events'
 import type TypedEventEmitter from 'typed-emitter'
-import type { Tabs, Browser } from 'webextension-polyfill-ts'
 
 import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'

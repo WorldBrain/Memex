@@ -1,4 +1,4 @@
-import type { Runtime } from 'webextension-polyfill-ts'
+import type { Runtime } from 'webextension-polyfill'
 import { PDF_VIEWER_HTML } from './constants'
 
 export const constructPDFViewerUrl = (

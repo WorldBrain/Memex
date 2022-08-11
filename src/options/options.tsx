@@ -25,7 +25,7 @@ setupRpcConnection({ sideName: 'extension-page-options', role: 'content' })
 
 const store = configureStore({ ReduxDevTools })
 
-window.store = store
+;(window as any).store = store
 
 const routeData = {
     services: createUIServices(),

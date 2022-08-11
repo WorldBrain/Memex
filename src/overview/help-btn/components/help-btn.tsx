@@ -1,5 +1,5 @@
 import React from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { HelpMenu, Props as HelpMenuProps } from './help-menu'
 import { menuItems } from '../menu-items'

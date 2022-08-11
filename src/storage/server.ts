@@ -60,7 +60,7 @@ export function createLazyServerStorage(
     let serverStoragePromise: Promise<ServerStorage>
 
     try {
-        window['setServerStorageLoggingEnabled'] = (value: boolean) =>
+        globalThis['setServerStorageLoggingEnabled'] = (value: boolean) =>
             (shouldLogOperations = value)
     } catch (e) {}
 

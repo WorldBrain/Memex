@@ -282,7 +282,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     watchForReanchors = (highlights: Highlight[], onClick) => {
         if (!this.observer) {
             // @ts-ignore
-            const pdfViewer = window.PDFViewerApplication?.pdfViewer
+            const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
 
             if (pdfViewer) {
                 this.observer = new MutationObserver(

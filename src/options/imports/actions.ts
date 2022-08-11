@@ -78,7 +78,7 @@ let port
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async (dispatch) => {
-    port = window['browser'].runtime.connect({
+    port = globalThis['browser'].runtime.connect({
         name: IMPORT_CONN_NAME,
     })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))

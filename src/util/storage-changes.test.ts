@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { StorageAreaName } from './storage-changes'
@@ -12,7 +12,7 @@ describe('Storage changes listeners manager', () => {
         storage: browser.storage,
     })
 
-    storageAreas.forEach(areaName =>
+    storageAreas.forEach((areaName) =>
         describe(`${areaName} storage`, () => {
             beforeEach(() => storageChangesManager.resetListeners())
 

@@ -5,7 +5,7 @@ import createNotif from 'src/util/notifications'
 import internalAnalytics from 'src/analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { NotifDefinition } from '../types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import StorageManager from '@worldbrain/storex'
 import type { RemoteNotificationsInterface } from './types'
 

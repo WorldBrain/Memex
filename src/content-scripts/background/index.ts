@@ -1,7 +1,7 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill-ts'
+import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
 
 export class ContentScriptsBackground {

@@ -1,4 +1,4 @@
-import { Tabs, Browser, Bookmarks } from 'webextension-polyfill-ts'
+import { Tabs, Browser, Bookmarks } from 'webextension-polyfill'
 import Storex from '@worldbrain/storex'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 import { TabManager } from 'src/tab-management/background/tab-manager'

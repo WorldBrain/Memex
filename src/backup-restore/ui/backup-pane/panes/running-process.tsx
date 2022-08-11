@@ -46,7 +46,9 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        window['browser'].runtime.onMessage.addListener(this.messageListener)
+        globalThis['browser'].runtime.onMessage.addListener(
+            this.messageListener,
+        )
 
         const info = await remoteFunction(this.props.functionNames.info)()
         if (info) {
@@ -77,7 +79,9 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     componentWillUnmount() {
-        window['browser'].runtime.onMessage.removeListener(this.messageListener)
+        globalThis['browser'].runtime.onMessage.removeListener(
+            this.messageListener,
+        )
     }
 
     startRestore = async () => {

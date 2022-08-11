@@ -1,4 +1,4 @@
-import { Tabs, ContextMenus, browser } from 'webextension-polyfill-ts'
+import browser, { Tabs, ContextMenus } from 'webextension-polyfill'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'

@@ -2,9 +2,7 @@ import expect from 'expect'
 import { remoteFunction, fakeRemoteFunctions } from './webextensionRPC'
 
 describe('remoteFunction', () => {
-    const jest =
-        (typeof window !== 'undefined' ? window : global)['jest'] ||
-        require('jest-mock')
+    const jest = globalThis['jest'] || require('jest-mock')
 
     beforeEach(() => {
         if (global) {

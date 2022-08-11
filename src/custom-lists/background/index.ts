@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'

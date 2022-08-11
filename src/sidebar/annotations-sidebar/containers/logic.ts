@@ -34,8 +34,8 @@ import {
 } from 'src/sync-settings/util'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import browser from 'webextension-polyfill'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import {
     AnnotationPrivacyState,

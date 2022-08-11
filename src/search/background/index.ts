@@ -1,5 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type { Browser } from 'webextension-polyfill-ts'
+import type { Browser } from 'webextension-polyfill'
 
 // import * as index from '..'
 import SearchStorage from './storage'

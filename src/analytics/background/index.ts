@@ -1,4 +1,4 @@
-import { Storage } from 'webextension-polyfill-ts'
+import { Storage } from 'webextension-polyfill'
 import { updateLastActive } from '../utils'
 import { AnalyticsInterface } from './types'
 import { bindMethod } from 'src/util/functions'

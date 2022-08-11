@@ -4,7 +4,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './tooltip.css'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 const highlighter = browser.runtime.getURL('/img/highlighterSmall.svg')
 const annotations = browser.runtime.getURL('/img/comment_empty.svg')

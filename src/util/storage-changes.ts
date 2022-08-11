@@ -1,4 +1,4 @@
-import { Storage } from 'webextension-polyfill-ts'
+import { Storage } from 'webextension-polyfill'
 
 export interface StorageChanges {
     [key: string]: Storage.StorageChange
@@ -29,7 +29,11 @@ export class StorageChangesManager {
         this.listeners = new Map<
             StorageAreaName,
             Map<string, StorageKeyListener>
-        >([['sync', new Map()], ['local', new Map()], ['managed', new Map()]])
+        >([
+            ['sync', new Map()],
+            ['local', new Map()],
+            ['managed', new Map()],
+        ])
     }
 
     /**

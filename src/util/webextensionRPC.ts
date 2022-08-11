@@ -19,7 +19,7 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { EventEmitter } from 'events'
 import { PortBasedRPCManager, RpcSideName, RpcRole } from 'src/util/rpc/rpc'
 import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
@@ -184,9 +184,9 @@ export function remoteFunction(
 // === Executing side ===
 
 const remotelyCallableFunctions =
-    typeof window !== 'undefined' ? window['remoteFunctions'] || {} : {}
-if (typeof window !== 'undefined') {
-    window['remoteFunctions'] = remotelyCallableFunctions
+    typeof globalThis !== 'undefined' ? globalThis['remoteFunctions'] || {} : {}
+if (typeof globalThis !== 'undefined') {
+    globalThis['remoteFunctions'] = remotelyCallableFunctions
 }
 
 export function setupRemoteFunctionsImplementations<T>(

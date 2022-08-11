@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'

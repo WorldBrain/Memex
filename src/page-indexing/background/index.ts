@@ -237,25 +237,26 @@ export class PageIndexingBackground {
         // TODO: Try and simplify this logic. Essentially, it was easily possible to get into states where the resolvable would
         //  never get resolved (tab where the content-script doesn't run, and thus doesn't call initContentIdentifier), so solving
         //  that by throwing an error after a timeout.
-        let winner: 'resolvable' | 'timeout'
+        const resolvable = new Promise<['resolved', ContentIdentifier]>(
+            async (resolve) => {
+                const identifier = await this._resolvableForIdentifierTabPage(
+                    params,
+                )
+                resolve(['resolved', identifier])
+            },
+        )
 
-        const resolvable = new Promise<ContentIdentifier>(async (resolve) => {
-            const identifier = await this._resolvableForIdentifierTabPage(
-                params,
-            )
-            winner = winner ?? 'resolvable'
-            resolve(identifier)
-        })
-
-        const timeout = new Promise<ContentIdentifier>((resolve) =>
+        const timeout = new Promise<['timeout']>((resolve) =>
             setTimeout(() => {
-                winner = winner ?? 'timeout'
-                resolve()
+                resolve(['timeout'])
             }, params.timeout ?? 2500),
         )
 
-        const contentIdentifier = await Promise.race([resolvable, timeout])
-        if (winner === 'timeout') {
+        const [result, contentIdentifier] = await Promise.race([
+            resolvable,
+            timeout,
+        ])
+        if (result === 'timeout') {
             throw new Error('Could not resolve identifier in time')
         }
         return contentIdentifier

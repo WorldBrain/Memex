@@ -309,7 +309,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const [visits, bms] = await Promise.all([visitQueryP, bmQueryP])
 
         const visitMap = new Map<string, number>()
-        for (const [time, url] of visits) {
+        for (const [time, url] of visits as Array<[number, string]>) {
             if (upperTimeBound && time > upperTimeBound) {
                 continue
             }

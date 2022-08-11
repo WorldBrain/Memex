@@ -255,7 +255,7 @@ export class BackupBackgroundModule {
     setupRequestInterceptor(backupBackend: BackupBackend = null) {
         const backend = backupBackend || this.backend
         setupRequestInterceptors({
-            webRequest: window['browser'].webRequest,
+            webRequest: globalThis['browser'].webRequest,
             handleLoginRedirectedBack: backend
                 ? backend.handleLoginRedirectedBack.bind(backend)
                 : null,

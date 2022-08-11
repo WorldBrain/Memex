@@ -37,7 +37,7 @@ export default class BackupProcedure {
     info: BackupProgressInfo
     events: EventEmitter
 
-    pausePromise?: Promise<null> // only set if paused, resolved when pause ends
+    pausePromise?: Promise<void> // only set if paused, resolved when pause ends
     resolvePausePromise?: () => void // only set if paused
 
     constructor({
@@ -73,7 +73,7 @@ export default class BackupProcedure {
         }
 
         this.info.state = 'paused'
-        this.pausePromise = new Promise((resolve) => {
+        this.pausePromise = new Promise<void>((resolve) => {
             this.resolvePausePromise = resolve
         })
         this.events.emit('info', this.info)

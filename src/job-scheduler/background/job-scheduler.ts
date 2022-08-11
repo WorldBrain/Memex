@@ -1,4 +1,4 @@
-import { Alarms, Storage } from 'webextension-polyfill-ts'
+import { Alarms, Storage } from 'webextension-polyfill'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
