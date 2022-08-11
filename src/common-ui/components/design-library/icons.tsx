@@ -142,3 +142,5 @@ export const newFeed = null
 export const checkedRound = null
 export const bell = null
 export const arrowDown = null
+export const youtubeLogo = null
+export const spotifyLogo = null
