@@ -103,6 +103,7 @@
         "openpgp": "^4.6.2",
         "page-metadata-parser": "^1.1.4",
         "pdfjs-dist": "WorldBrain/pdfjs-dist#fix/annot-shifts",
+        "pluralize": "^8.0.0",
         "polished": "^4.0.3",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",
