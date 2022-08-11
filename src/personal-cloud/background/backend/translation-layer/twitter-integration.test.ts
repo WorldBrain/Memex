@@ -10,6 +10,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { TweetData } from '@worldbrain/memex-common/lib/twitter-integration/api/types'
 import { tweetDataToTitle } from '@worldbrain/memex-common/lib/twitter-integration/utils'
+import { createUploadStorageUtils } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/storage-utils'
 
 const TEST_TWEET_A: TweetData = {
     name: 'Test User',
@@ -39,7 +40,12 @@ async function setupTest(opts: {
         captureException: opts.captureException ?? (async () => {}),
         storageManager: serverStorage.storageManager,
         twitterAPI,
-        userId,
+        storageUtils: await createUploadStorageUtils({
+            storageManager: context.storageManager,
+            getNow: () => Date.now(),
+            deviceId: null,
+            userId,
+        }),
     })
     return { processor, storage: serverStorage, context, userId }
 }
