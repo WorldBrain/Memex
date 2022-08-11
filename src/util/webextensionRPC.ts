@@ -306,7 +306,11 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                         })
                     } catch (err) {
                         console.error(
-                            `Remote event emitter "${moduleName}" failed to emit event "${eventName}" to tab ${tabId}:\n\tError message: "${err.message}"`,
+                            `Remote event emitter "${moduleName}" failed to emit event "${String(
+                                eventName,
+                            )}" to tab ${tabId}:\n\tError message: "${
+                                err.message
+                            }"`,
                         )
                     }
                 }
@@ -324,7 +328,9 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                 })
             } catch (err) {
                 console.error(
-                    `Remote event emitter "${moduleName}" failed to emit event "${eventName}":\n\tError message: "${err.message}"`,
+                    `Remote event emitter "${moduleName}" failed to emit event "${String(
+                        eventName,
+                    )}":\n\tError message: "${err.message}"`,
                 )
             }
         },

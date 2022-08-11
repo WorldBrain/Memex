@@ -2380,13 +2380,14 @@ describe('SidebarContainerLogic', () => {
                 false
             device.backgroundModules.contentConversations.remoteFunctions.getThreadsForSharedAnnotations = async () =>
                 DATA.ANNOTATION_THREADS
-            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () => [
-                DATA.SHARED_ANNOTATIONS[0],
-                DATA.SHARED_ANNOTATIONS[1],
-                DATA.SHARED_ANNOTATIONS[2],
-                DATA.SHARED_ANNOTATIONS[3],
-                DATA.SHARED_ANNOTATIONS[4],
-            ]
+            device.backgroundModules.directLinking.remoteFunctions.getSharedAnnotations = async () =>
+                [
+                    DATA.SHARED_ANNOTATIONS[0],
+                    DATA.SHARED_ANNOTATIONS[1],
+                    DATA.SHARED_ANNOTATIONS[2],
+                    DATA.SHARED_ANNOTATIONS[3],
+                    DATA.SHARED_ANNOTATIONS[4],
+                ] as any
 
             await device.storageManager.collection('customLists').createObject({
                 id: 0,
