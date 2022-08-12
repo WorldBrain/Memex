@@ -520,7 +520,7 @@ export class SelectionModifiers {
 
     static _lastWhitespace(current: SelectionState, cursorToMove: string) {
         const lastWhitespaces: RegExpMatchArray = matchAll(
-            current.text.substr(0, current.selection[cursorToMove] - 1),
+            current.text.substring(0, current.selection[cursorToMove] - 1),
             /(\s)/gm,
         )
         const lastWhitespaceArray = [...lastWhitespaces]
@@ -532,7 +532,7 @@ export class SelectionModifiers {
 
     static _nextWhitespace(current: SelectionState, cursorToMove: string) {
         const nextWhitespaces = matchAll(
-            current.text.substr(current.selection[cursorToMove] + 1),
+            current.text.slice(current.selection[cursorToMove] + 1),
             /(\s)/gm,
         )
         const nextWhitespaceArray = [...nextWhitespaces] as RegExpMatchArray
@@ -617,7 +617,7 @@ export class SelectionModifiers {
     static _distanceFromNewLine(current: SelectionState): number {
         // find either a newline or the start if no prev newline
         const lastNewline = current.text
-            .substr(0, current.selection.end)
+            .slice(0, current.selection.end)
             .lastIndexOf('\n')
         return lastNewline === -1
             ? current.selection.end
@@ -627,14 +627,14 @@ export class SelectionModifiers {
     static _indexOfPreviousLine(current: SelectionState): number {
         // find either a newline or the start if no prev newline
         let previousNewLine = current.text
-            .substr(0, current.selection.end)
+            .slice(0, current.selection.end)
             .lastIndexOf('\n')
         if (previousNewLine === -1) {
             return 0
         } else {
             // If we're on a newline boundary, actually find the one before
             previousNewLine = current.text
-                .substr(0, previousNewLine)
+                .slice(0, previousNewLine)
                 .lastIndexOf('\n')
         }
 

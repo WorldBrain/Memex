@@ -68,7 +68,7 @@ class NotificationContainer extends Component<Props> {
             ' ',
             this.props.messageCharLimit,
         )
-        const trunctatedText = message.substr(0, lastSpaceBeforeCutoff) + '...'
+        const trunctatedText = message.substring(0, lastSpaceBeforeCutoff) + '...'
         return trunctatedText
     }
 
