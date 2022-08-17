@@ -11,7 +11,7 @@
         "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
-        "watch:mv3": "npm run build:clean && MANIFEST_VERSION=3 webpack --watch",
+        "watch:mv3": "npm run build:clean && MANIFEST_VERSION=3 webpack --watch --env.notifs",
         "watch:prod": "npm run build:clean && webpack --watch --env.prod",
         "watch:notif": "webpack --watch --env.notifs",
         "watch:clean": "npm run cache:clean && npm run watch:notif",

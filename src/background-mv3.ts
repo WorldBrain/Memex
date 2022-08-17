@@ -2,12 +2,15 @@ import browser, { Runtime } from 'webextension-polyfill'
 import { initializeApp } from 'firebase-new/app'
 import { getAuth, onAuthStateChanged } from 'firebase-new/auth'
 import { getFirestore, doc, onSnapshot } from 'firebase-new/firestore'
+import { getToken } from 'firebase-new/messaging'
+import { onBackgroundMessage, getMessaging } from 'firebase-new/messaging/sw'
 import {
     setupRpcConnection,
     makeRemotelyCallable,
     remoteFunction,
 } from './util/webextensionRPC'
 // import { getFirebase } from './util/firebase-app-initialized'
+declare var self: ServiceWorkerGlobalScope
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_MEMEX_API_KEY,
@@ -23,9 +26,40 @@ const firebaseConfig = {
 // we have to register all event listeners (including RPC handlers)
 // in the first tick, meaning before awaiting any async functions
 function main() {
+    console.log('starting background worker')
     const app = initializeApp(firebaseConfig)
     const auth = getAuth(app)
     const firestore = getFirestore(app)
+    const messaging = getMessaging(app)
+
+    browser.runtime.onInstalled.addListener(async (details) => {
+        console.log('ext install event fired:', details)
+
+        const val = await getToken(messaging, {
+            serviceWorkerRegistration: self.registration,
+            vapidKey: '',
+        })
+        console.log('got token:', val)
+    })
+
+    self.addEventListener('install', async (event) => {
+        console.log('install SW event fired:', event)
+    })
+
+    self.addEventListener('activate', (event) => {
+        console.log('activation SW event fired:', event)
+    })
+
+    self.addEventListener('push', (event) => {
+        console.log('push SW event fired:', event)
+    })
+
+    onBackgroundMessage(messaging, (payload) => {
+        console.log(
+            '[firebase-messaging-test] Received background message ',
+            payload,
+        )
+    })
 
     let port: Runtime.Port
     browser.runtime.onConnect.addListener((newPort) => {
@@ -57,20 +91,22 @@ function main() {
             },
         )
     })
-    // setupRpcConnection({ sideName: 'background', role: 'background' })
-    // makeRemotelyCallable({
-    //     confirmBackgroundScriptLoaded: async () => {
-    //     },
-    //     testCallable: async ({ tab }) => {
-    //         console.log('loaded', tab)
-    //         if (!tab?.id) {
-    //             return
-    //         }
-    //         await browser.storage.local.set({ testLoadedTab: tab.id })
-    //         console.log(auth.currentUser);
-    //         (globalThis as any)['firebase'] = firebase
-    //     }
-    // }, { insertExtraArg: true })
+    setupRpcConnection({ sideName: 'background', role: 'background' })
+    makeRemotelyCallable(
+        {
+            confirmBackgroundScriptLoaded: async () => {},
+            testCallable: async ({ tab }) => {
+                console.log('loaded', tab)
+                if (!tab?.id) {
+                    return
+                }
+                await browser.storage.local.set({ testLoadedTab: tab.id })
+                console.log(auth.currentUser)
+                // ;(globalThis as any)['firebase'] = firebase
+            },
+        },
+        { insertExtraArg: true },
+    )
 
     // browser.alarms.create('test', { periodInMinutes: 5 })
     // browser.alarms.onAlarm.addListener(async (alarm) => {

@@ -113,6 +113,7 @@
             "ES2020",
             "dom",
             "dom.iterable",
+            "WebWorker",
             "esnext.asynciterable"
         ]
     },
