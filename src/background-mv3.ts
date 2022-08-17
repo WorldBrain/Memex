@@ -1,9 +1,9 @@
 import browser, { Runtime } from 'webextension-polyfill'
-import { initializeApp } from 'firebase-new/app'
-import { getAuth, onAuthStateChanged } from 'firebase-new/auth'
-import { getFirestore, doc, onSnapshot } from 'firebase-new/firestore'
-import { getToken } from 'firebase-new/messaging'
-import { onBackgroundMessage, getMessaging } from 'firebase-new/messaging/sw'
+import { initializeApp } from 'firebase/app'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
+import { getToken } from 'firebase/messaging'
+import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import {
     setupRpcConnection,
     makeRemotelyCallable,

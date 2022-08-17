@@ -73,13 +73,9 @@ export function createSelfTests(options: {
         const authService = backgroundModules.auth
             .authService as WorldbrainAuthService
         try {
-            await authService.firebase
-                .auth()
-                .signInWithEmailAndPassword(email, 'testing')
+            await authService.loginWithEmailAndPassword(email, 'testing')
         } catch (e) {
-            await authService.firebase
-                .auth()
-                .createUserWithEmailAndPassword(email, 'testing')
+            await authService.signupWithEmailAndPassword(email, 'testing')
         }
         const user = await authService.getCurrentUser()
         if (!user) {

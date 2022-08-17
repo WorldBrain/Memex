@@ -20,7 +20,6 @@ import {
 } from './utils'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import {
-    AuthRemoteEvents,
     AuthRemoteFunctionsInterface,
     AuthSettings,
     AuthBackendFunctions,
@@ -33,7 +32,8 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import firebase from 'firebase'
+import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
+import type { FirebaseError } from 'firebase/app'
 
 export class AuthBackground {
     authService: AuthService
@@ -43,7 +43,6 @@ export class AuthBackground {
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
     getUserManagement: () => Promise<UserStorage>
-    private _firebase: typeof firebase
 
     private _userProfile?: Promise<User>
 
@@ -194,12 +193,12 @@ export class AuthBackground {
         }
     }
 
-    sendPasswordResetEmailProcess = async (email) => {
-        return firebase.auth().sendPasswordResetEmail(email)
+    sendPasswordResetEmailProcess = async (email: string) => {
+        await sendPasswordResetEmail(getAuth(), email)
     }
 
-    changeEmailProcess = async (email) => {
-        return firebase.auth().currentUser.updateEmail(email)
+    changeEmailProcess = async (email: string) => {
+        await updateEmail(getAuth().currentUser, email)
     }
 
     registerRemoteEmitter() {
@@ -280,7 +279,7 @@ export class AuthBackground {
             )
             return { result: { status: 'authenticated' } }
         } catch (e) {
-            const firebaseError: firebase.FirebaseError = e
+            const firebaseError: FirebaseError = e
             if (firebaseError.code === 'auth/invalid-email') {
                 return { result: { status: 'error', reason: 'invalid-email' } }
             }

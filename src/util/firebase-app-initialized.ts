@@ -1,7 +1,7 @@
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import 'firebase/functions'
-import 'firebase/firestore'
+import firebase from 'firebase/compat/app'
+import 'firebase/compat/auth'
+import 'firebase/compat/functions'
+import 'firebase/compat/firestore'
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_MEMEX_API_KEY,
