@@ -7,7 +7,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 
 import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
-import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
+// import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
 const styles = require('./StatusOverlay.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
 import {
@@ -124,7 +124,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                     )}
                     <div className={styles.statusSection}>
                         <div className={styles.syncSection}>
-                            <SyncNowOverlayPaneContainer />
+                            {/* <SyncNowOverlayPaneContainer /> */}
                         </div>
                         <WhiteSpacer20 />
                         <div className={styles.backupSection}>

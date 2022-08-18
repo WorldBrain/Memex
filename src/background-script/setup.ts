@@ -3,7 +3,6 @@ import browser, { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
@@ -28,8 +27,6 @@ import {
 } from 'src/imports/background/state-manager'
 import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
-import SyncBackground from 'src/sync/background'
-import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
@@ -37,7 +34,6 @@ import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
 import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
-import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
@@ -117,13 +113,11 @@ export interface BackgroundModules {
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
     syncSettings: SyncSettingsBackground
-    sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
     inPageUI: InPageUIBackground
     features: FeatureOptIns
     featuresBeta: FeaturesBeta
-    pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
@@ -145,7 +139,6 @@ export function createBackgroundModules(options: {
     services: Services
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
-    signalTransportFactory: SignalTransportFactory
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -159,8 +152,6 @@ export function createBackgroundModules(options: {
     analyticsManager: Analytics
     captureException?: typeof captureException
     userMessageService?: UserMessageService
-    disableSyncEnryption?: boolean
-    getIceServers?: () => Promise<string[]>
     getNow?: () => number
     fetch?: typeof fetch
     generateServerId?: (collectionName: string) => number | string
@@ -396,25 +387,10 @@ export function createBackgroundModules(options: {
     const storePageContent = async (content: PipelineRes): Promise<void> => {
         await pages.createOrUpdatePage(content)
     }
-    const pageFetchBacklog = new PageFetchBacklogBackground({
-        storageManager,
-        connectivityChecker,
-        fetchPageData: options.fetchPageDataProcessor,
-        storePageContent,
-    })
 
     async function createInboxEntry(fullPageUrl: string) {
         await customLists.createInboxListEntry({ fullUrl: fullPageUrl })
     }
-
-    const postReceiveProcessor =
-        options.fetchPageDataProcessor != null
-            ? new PostReceiveProcessor({
-                  pages,
-                  pageFetchBacklog,
-                  fetchPageData: options.fetchPageDataProcessor,
-              }).processor
-            : undefined
 
     const personalCloudSettingStore = new BrowserSettingsStore<
         LocalPersonalCloudSettings
@@ -631,19 +607,6 @@ export function createBackgroundModules(options: {
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
-        sync: new SyncBackground({
-            signalTransportFactory: options.signalTransportFactory,
-            disableEncryption: options.disableSyncEnryption,
-            getSharedSyncLog: async () =>
-                (await options.getServerStorage()).storageModules.sharedSyncLog,
-            getIceServers: options.getIceServers,
-            browserAPIs: options.browserAPIs,
-            appVersion: process.env.VERSION,
-            auth: auth.authService,
-            postReceiveProcessor,
-            storageManager,
-            analytics,
-        }),
         storexHub: new StorexHubBackground({
             storageManager,
             localBrowserStorage: options.browserAPIs.storage.local,
@@ -699,7 +662,6 @@ export function createBackgroundModules(options: {
         featuresBeta: new FeaturesBeta(),
         pages,
         bgScript,
-        pageFetchBacklog,
         contentScripts: new ContentScriptsBackground({
             webNavigation: options.browserAPIs.webNavigation,
             getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
@@ -758,7 +720,6 @@ export async function setupBackgroundModules(
     backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.inPageUI.setupRemoteFunctions()
     backgroundModules.bgScript.setupAlarms(alarms)
-    backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
@@ -772,7 +733,6 @@ export async function setupBackgroundModules(
     await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
-    backgroundModules.sync.registerRemoteEmitter()
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
@@ -784,7 +744,6 @@ export function getBackgroundStorageModules(
     backgroundModules: BackgroundModules,
 ): { [moduleName: string]: StorageModule } {
     return {
-        pageFetchBacklog: backgroundModules.pageFetchBacklog.storage,
         annotations: backgroundModules.directLinking.annotationStorage,
         readwiseAction:
             backgroundModules.readwise.__deprecatedActionQueue.storage,
@@ -796,8 +755,6 @@ export function getBackgroundStorageModules(
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
-        clientSyncLog: backgroundModules.sync.clientSyncLog,
-        syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,

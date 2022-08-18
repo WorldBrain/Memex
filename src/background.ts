@@ -22,7 +22,6 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
@@ -87,7 +86,6 @@ export async function main() {
     const backgroundModules = createBackgroundModules({
         services,
         getServerStorage,
-        signalTransportFactory: createFirebaseSignalTransport,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageDataProcessor,
@@ -95,14 +93,6 @@ export async function main() {
         captureException,
         storageManager,
         persistentStorageManager,
-        getIceServers: async () => {
-            const firebase = await getFirebase()
-            const generateToken = firebase
-                .functions()
-                .httpsCallable('generateTwilioNTSToken')
-            const response = await generateToken({})
-            return response.data.iceServers
-        },
         callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
             const firebase = getFirebase()
             const callable = firebase.functions().httpsCallable(name)
@@ -161,7 +151,6 @@ export async function main() {
         },
         notifications: { create: createNotification } as any,
         bookmarks: backgroundModules.bookmarks.remoteFunctions,
-        sync: backgroundModules.sync.remoteFunctions,
         features: backgroundModules.features,
         featuresBeta: backgroundModules.featuresBeta,
         tags: backgroundModules.tags.remoteFunctions,
@@ -194,10 +183,10 @@ export async function main() {
     __debugCounter++
 }
 
-main().catch((err) =>
-    captureException(
-        new Error(
-            `Error occurred during background script setup: ${err.message} - debug counter: ${__debugCounter}`,
-        ),
-    ),
-)
+main().catch((err) => {
+    const error = new Error(
+        `Error occurred during background script setup: ${err.message} - debug counter: ${__debugCounter}`,
+    )
+    captureException(error)
+    throw error
+})

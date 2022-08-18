@@ -4,7 +4,6 @@ import expect from 'expect'
 import fetchMock from 'fetch-mock'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -51,7 +50,6 @@ fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
-    signalTransportFactory?: SignalTransportFactory
     getServerStorage?: () => Promise<ServerStorage>
     personalCloudBackend?: PersonalCloudBackend
     browserLocalStorage?: MemoryBrowserStorage
@@ -179,10 +177,8 @@ export async function setupBackgroundIntegrationTest(
         getServerStorage,
         browserAPIs,
         tabManager: options?.tabManager,
-        signalTransportFactory: options?.signalTransportFactory,
         fetchPageDataProcessor,
         auth,
-        disableSyncEnryption: !options?.enableSyncEncyption,
         services,
         fetch,
         userMessageService: userMessages,
@@ -217,7 +213,6 @@ export async function setupBackgroundIntegrationTest(
         }),
         generateServerId: () => nextServerId++,
     })
-    backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections({
         storageManager,

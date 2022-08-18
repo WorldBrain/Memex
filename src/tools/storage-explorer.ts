@@ -64,7 +64,6 @@ async function main() {
     const backgroundModules = createBackgroundModules({
         getServerStorage: () => Promise.reject(), // FIXME
         services,
-        signalTransportFactory: null,
         analyticsManager: null,
         storageManager,
         persistentStorageManager,
