@@ -15,6 +15,15 @@ import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
 import * as backupStorage from '../backup-restore/background/storage'
+import { getAuth } from 'firebase/auth'
+import { Timestamp } from 'firebase/firestore'
+import {
+    getStorage,
+    ref,
+    uploadString,
+    uploadBytes,
+    getDownloadURL,
+} from 'firebase/storage'
 import {
     registerModuleMapCollections,
     StorageModule,
@@ -404,7 +413,14 @@ export function createBackgroundModules(options: {
         backend:
             options.personalCloudBackend ??
             new FirestorePersonalCloudBackend({
-                getFirebase,
+                firebase: {
+                    ref,
+                    getAuth,
+                    getStorage,
+                    uploadBytes,
+                    uploadString,
+                    getDownloadURL,
+                },
                 getServerStorageManager,
                 personalCloudService: firebaseService<PersonalCloudService>(
                     'personalCloud',
@@ -413,17 +429,35 @@ export function createBackgroundModules(options: {
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
-                getUserChangesReference: async () => {
-                    const currentUser = await auth.authService.getCurrentUser()
+                onUserChanges: (signalChanges, lastProcessed) => {
+                    const currentUser = getAuth().currentUser
                     if (!currentUser) {
                         return null
                     }
                     const firebase = getFirebase()
                     const firestore = firebase.firestore()
-                    return firestore
+
+                    firestore
                         .collection('personalDataChange')
-                        .doc(currentUser.id)
+                        .doc(currentUser.uid)
                         .collection('objects')
+                        .where(
+                            'createdWhen',
+                            '>',
+                            Timestamp.fromMillis(lastProcessed),
+                        )
+                        .onSnapshot((snapshot) => {
+                            const deviceId = personalCloud.deviceId
+                            const changes = snapshot
+                                .docChanges()
+                                .filter(
+                                    (change) =>
+                                        change.type === 'added' &&
+                                        change.doc.data()['createdByDevice'] !==
+                                            deviceId,
+                                )
+                            signalChanges(changes.length)
+                        })
                 },
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
