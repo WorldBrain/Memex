@@ -93,7 +93,7 @@ import {
 import { BrowserSettingsStore } from 'src/util/settings'
 import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
-import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
+import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
@@ -412,7 +412,7 @@ export function createBackgroundModules(options: {
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??
-            new FirestorePersonalCloudBackend({
+            new FirebasePersonalCloudBackend({
                 firebase: {
                     ref,
                     getAuth,
