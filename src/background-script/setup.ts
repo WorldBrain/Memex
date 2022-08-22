@@ -15,6 +15,7 @@ import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
 import * as backupStorage from '../backup-restore/background/storage'
+import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import { getAuth } from 'firebase/auth'
 import { Timestamp } from 'firebase/firestore'
 import {
@@ -434,30 +435,38 @@ export function createBackgroundModules(options: {
                     if (!currentUser) {
                         return null
                     }
-                    const firebase = getFirebase()
-                    const firestore = firebase.firestore()
 
-                    firestore
-                        .collection('personalDataChange')
-                        .doc(currentUser.uid)
-                        .collection('objects')
-                        .where(
-                            'createdWhen',
-                            '>',
-                            Timestamp.fromMillis(lastProcessed),
-                        )
-                        .onSnapshot((snapshot) => {
-                            const deviceId = personalCloud.deviceId
-                            const changes = snapshot
-                                .docChanges()
-                                .filter(
-                                    (change) =>
-                                        change.type === 'added' &&
-                                        change.doc.data()['createdByDevice'] !==
-                                            deviceId,
-                                )
-                            signalChanges(changes.length)
-                        })
+                    const messaging = getMessaging()
+                    onBackgroundMessage(messaging, (payload) => {
+                        if (payload.data?.type === 'downloadClientChanges') {
+                            signalChanges(Number(payload.data.changeCount) ?? 0)
+                        }
+                    })
+
+                    // const firebase = getFirebase()
+                    // const firestore = firebase.firestore()
+
+                    // firestore
+                    //     .collection('personalDataChange')
+                    //     .doc(currentUser.uid)
+                    //     .collection('objects')
+                    //     .where(
+                    //         'createdWhen',
+                    //         '>',
+                    //         Timestamp.fromMillis(lastProcessed),
+                    //     )
+                    //     .onSnapshot((snapshot) => {
+                    //         const deviceId = personalCloud.deviceId
+                    //         const changes = snapshot
+                    //             .docChanges()
+                    //             .filter(
+                    //                 (change) =>
+                    //                     change.type === 'added' &&
+                    //                     change.doc.data()['createdByDevice'] !==
+                    //                         deviceId,
+                    //             )
+                    //         signalChanges(changes.length)
+                    //     })
                 },
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
