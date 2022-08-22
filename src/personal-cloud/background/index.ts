@@ -1,7 +1,7 @@
 import type Dexie from 'dexie'
 import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
     getCurrentSchemaVersion,
     isTermsField,
@@ -31,7 +31,7 @@ import {
     PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
     PASSIVE_DATA_CUTOFF_DATE,
 } from './constants'
-import {
+import type {
     ActionExecutor,
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
@@ -41,12 +41,14 @@ import { prepareDataMigration } from 'src/personal-cloud/storage/migration-prepa
 import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
-import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { Runtime } from 'webextension-polyfill'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
+    runtimeAPI: Runtime.Static
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
@@ -117,6 +119,9 @@ export class PersonalCloudBackground {
     }
 
     private setupEventListeners() {
+        this.options.runtimeAPI.onStartup.addListener(async () => {
+            await this.integrateAllUpdates()
+        })
         this.actionQueue.events.on('statsChanged', (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,

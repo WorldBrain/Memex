@@ -410,6 +410,7 @@ export function createBackgroundModules(options: {
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
+        runtimeAPI: browser.runtime,
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??

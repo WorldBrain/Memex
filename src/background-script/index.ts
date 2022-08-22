@@ -194,9 +194,10 @@ class BackgroundScript {
     }
 
     private setupStartupHooks() {
-        this.deps.runtimeAPI.onStartup.addListener(async () => {
-            this.deps.bgModules.tabManagement.trackExistingTabs()
-        })
+        // TODO mv3: figure out where this comes into play
+        // this.deps.runtimeAPI.onStartup.addListener(async () => {
+        //     this.deps.bgModules.tabManagement.trackExistingTabs()
+        // })
     }
 
     private async ___runTagsMigration() {
