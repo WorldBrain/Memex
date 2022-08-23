@@ -1,4 +1,6 @@
+import { getToken } from 'firebase/messaging'
 import { httpsCallable, getFunctions } from 'firebase/functions'
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/firebase-functions/client'
 import MemoryStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
@@ -8,12 +10,14 @@ import {
     DevAuthState,
 } from 'src/authentication/background/setup'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
-import { ServerStorage } from 'src/storage/types'
-import { Services } from './types'
+import type { ServerStorage } from 'src/storage/types'
+import type { Services } from './types'
 import ListKeysService from './content-sharing'
 import ContentConversationsService from './content-conversations'
+import type { LoginHooks } from '@worldbrain/memex-common/lib/authentication/types'
 
 export async function createServices(options: {
+    manifestVersion: '2' | '3'
     backend: 'firebase' | 'memory'
     getServerStorage: () => Promise<ServerStorage>
 }): Promise<Services> {
@@ -44,7 +48,31 @@ export async function createServices(options: {
         }
     }
 
+    const loginHooks: LoginHooks =
+        options.manifestVersion === '3'
+            ? {
+                  onPostLogin: async (user) => {
+                      const token = await getToken(getMessaging(), {
+                          vapidKey: process.env.FCM_VAPID_KEY,
+                      })
+                      await storageModules.userManagement.addUserFCMRegistrationToken(
+                          { id: user.id, type: 'user-reference' },
+                          token,
+                      )
+                  },
+                  onPostLogout: async () => {
+                      const token = await getToken(getMessaging(), {
+                          vapidKey: process.env.FCM_VAPID_KEY,
+                      })
+                      await storageModules.userManagement.deleteUserFCMRegistrationToken(
+                          token,
+                      )
+                  },
+              }
+            : {}
+
     const authDeps = createAuthDependencies({
+        loginHooks,
         redirectUrl: subscriptionRedirect,
         devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
     })

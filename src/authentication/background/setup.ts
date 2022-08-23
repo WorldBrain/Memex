@@ -1,4 +1,7 @@
-import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
+    AuthService,
+    LoginHooks,
+} from '@worldbrain/memex-common/lib/authentication/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
@@ -24,9 +27,10 @@ export type DevAuthState =
     | 'user_subscription_expired'
     | 'user_subscription_expires_60s'
 
-export function createAuthDependencies(options?: {
+export function createAuthDependencies(options: {
     devAuthState?: DevAuthState
     redirectUrl: string
+    loginHooks?: LoginHooks
 }): {
     authService: AuthService
     subscriptionService: SubscriptionsService
@@ -35,13 +39,16 @@ export function createAuthDependencies(options?: {
     if (devAuthState === '' || devAuthState === 'staging') {
         return {
             authService: new WorldbrainAuthService({
-                getAuth,
-                getFunctions,
-                httpsCallable,
-                signInWithCustomToken,
-                sendPasswordResetEmail,
-                signInWithEmailAndPassword,
-                createUserWithEmailAndPassword,
+                ...(options.loginHooks ?? {}),
+                firebase: {
+                    getAuth,
+                    getFunctions,
+                    httpsCallable,
+                    signInWithCustomToken,
+                    sendPasswordResetEmail,
+                    signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword,
+                },
             }),
             subscriptionService: new WorldbrainSubscriptionsService(
                 getFirebase(),

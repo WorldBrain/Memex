@@ -80,6 +80,7 @@ export async function main() {
     const services = await createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
+        manifestVersion: '2',
     })
     __debugCounter++
 

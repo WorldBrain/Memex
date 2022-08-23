@@ -55,6 +55,7 @@ async function main() {
     const services = await createServices({
         backend: 'memory',
         getServerStorage: () => Promise.reject(), // FIXME
+        manifestVersion: '2',
     })
 
     const storageManager = initStorex()

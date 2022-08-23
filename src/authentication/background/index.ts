@@ -42,7 +42,6 @@ export class AuthBackground {
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
-    getUserManagement: () => Promise<UserStorage>
 
     private _userProfile?: Promise<User>
 
@@ -61,7 +60,6 @@ export class AuthBackground {
         this.backendFunctions = options.backendFunctions
         this.subscriptionService = options.subscriptionService
         this.scheduleJob = options.scheduleJob
-        this.getUserManagement = options.getUserManagement
         this.settings = new BrowserSettingsStore<AuthSettings>(
             options.localStorageArea,
             {
@@ -121,7 +119,7 @@ export class AuthBackground {
                 if (!user) {
                     return null
                 }
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 this._userProfile = userManagement.getUser({
                     type: 'user-reference',
                     id: user.id,
@@ -129,7 +127,7 @@ export class AuthBackground {
                 return this._userProfile
             },
             getUserByReference: async (reference) => {
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 return userManagement.getUser(reference)
             },
             updateUserProfile: async (updates) => {
@@ -139,11 +137,11 @@ export class AuthBackground {
                 }
                 delete this._userProfile
 
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 await userManagement.updateUser(
                     { type: 'user-reference', id: user.id },
                     {},
-                    updates,
+                    { displayName: updates.displayName },
                 )
             },
         }
@@ -259,7 +257,7 @@ export class AuthBackground {
         }
 
         if (options.displayName) {
-            const userManagement = await this.getUserManagement()
+            const userManagement = await this.options.getUserManagement()
             await userManagement.updateUser(
                 { type: 'user-reference', id: user.id },
                 { knownStatus: 'new' },
