@@ -93,7 +93,7 @@ export function createLazyServerStorage(
                 operationExecuter: operationExecuter('contentConversations'),
                 ...options,
             })
-            const userManagement = new UserStorage({
+            const users = new UserStorage({
                 storageManager,
                 operationExecuter: operationExecuter('users'),
             })
@@ -109,10 +109,10 @@ export function createLazyServerStorage(
                 operationExecuter: operationExecuter('activityFollows'),
             })
             const serverStorage: ServerStorage = {
-                storageManager,
-                storageModules: {
+                manager: storageManager,
+                modules: {
                     sharedSyncLog,
-                    userManagement,
+                    users,
                     contentSharing,
                     activityStreams,
                     activityFollows,
@@ -122,7 +122,7 @@ export function createLazyServerStorage(
             }
             registerModuleMapCollections(
                 storageManager.registry,
-                serverStorage.storageModules,
+                serverStorage.modules,
             )
             await storageManager.finishInitialization()
 

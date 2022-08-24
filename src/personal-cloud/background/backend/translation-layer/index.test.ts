@@ -274,7 +274,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
     let sqlUserId: number | string | undefined
     if (getSqlStorageMananager) {
         const initDeps: InitSqlUsageParams = {
-            storageManager: serverStorage.storageManager,
+            storageManager: serverStorage.manager,
             getSqlStorageMananager,
             userId: TEST_USER.id,
         }
@@ -283,7 +283,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
     }
 
     const serverStorageManager =
-        (await getSqlStorageMananager?.()) ?? serverStorage.storageManager
+        (await getSqlStorageMananager?.()) ?? serverStorage.manager
     serverIdCapturer.setup(serverStorageManager)
     storageHooksChangeWatcher.setUp({
         fetch: fakeFetch.fetch,
@@ -331,7 +331,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
             options?: { getWhere?(collection: string): any },
         ) => {
             return getCrossDatabaseContents(
-                serverStorage.storageManager,
+                serverStorage.manager,
                 getSqlStorageMananager,
                 collections,
                 options,
@@ -353,7 +353,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 startTime: 0,
                 clientSchemaVersion,
                 userId: TEST_USER.id,
-                storageManager: serverStorage.storageManager,
+                storageManager: serverStorage.manager,
                 getSqlStorageMananager,
                 deviceId:
                     setups[downloadOptions?.deviceIndex ?? 1].backgroundModules

@@ -38,7 +38,7 @@ async function setupTest(opts: {
 
     const processor = new TwitterActionProcessor({
         captureException: opts.captureException ?? (async () => {}),
-        storageManager: serverStorage.storageManager,
+        storageManager: serverStorage.manager,
         twitterAPI,
         storageUtils: await createUploadStorageUtils({
             storageManager: context.storageManager,
@@ -62,9 +62,7 @@ describe('Translation-layer Twitter integration tests', () => {
 
         const normalizedUrl = 'twitter.com/user/status/123123123'
 
-        const {
-            object: contentMetadata,
-        } = await storage.storageManager
+        const { object: contentMetadata } = await storage.manager
             .collection('personalContentMetadata')
             .createObject({
                 id: 1,
@@ -78,7 +76,7 @@ describe('Translation-layer Twitter integration tests', () => {
                 updatedWhen: 1659333625307,
             })
 
-        await storage.storageManager
+        await storage.manager
             .collection('personalContentLocator')
             .createObject({
                 id: 1,
@@ -108,23 +106,23 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: contentMetadata!.id,
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
         expect(capturedException).toBeNull()
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalDataChange')
                 .findAllObjects({}),
         ).toEqual([])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalTwitterAction')
                 .findAllObjects({}),
         ).toEqual([twitterAction])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalContentMetadata')
                 .findAllObjects({}),
         ).toEqual([expect.objectContaining({ title: null })])
@@ -133,7 +131,7 @@ describe('Translation-layer Twitter integration tests', () => {
 
         expect(capturedException).toBeNull()
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalDataChange')
                 .findAllObjects({}),
         ).toEqual([
@@ -148,12 +146,12 @@ describe('Translation-layer Twitter integration tests', () => {
             },
         ])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalTwitterAction')
                 .findAllObjects({}),
         ).toEqual([])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalContentMetadata')
                 .findAllObjects({}),
         ).toEqual([
@@ -173,9 +171,7 @@ describe('Translation-layer Twitter integration tests', () => {
 
         const normalizedUrl = 'twitter.com/user/status/123123123'
 
-        const {
-            object: contentMetadata,
-        } = await storage.storageManager
+        const { object: contentMetadata } = await storage.manager
             .collection('personalContentMetadata')
             .createObject({
                 id: 1,
@@ -189,7 +185,7 @@ describe('Translation-layer Twitter integration tests', () => {
                 updatedWhen: 1659333625307,
             })
 
-        await storage.storageManager
+        await storage.manager
             .collection('personalContentLocator')
             .createObject({
                 id: 1,
@@ -219,7 +215,7 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: contentMetadata!.id,
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
@@ -248,7 +244,7 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: 1, // NOTE: This doesn't exist in the DB!
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 

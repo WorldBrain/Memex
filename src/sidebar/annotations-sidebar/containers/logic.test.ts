@@ -2209,7 +2209,7 @@ describe('SidebarContainerLogic', () => {
 
             const serverStorage = await device.getServerStorage()
             expect(
-                await serverStorage.storageManager
+                await serverStorage.manager
                     .collection('sharedAnnotation')
                     .findObjects({}),
             ).toEqual([

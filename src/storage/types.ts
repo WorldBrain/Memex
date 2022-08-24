@@ -1,23 +1,12 @@
-import StorageManager from '@worldbrain/storex'
-import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
-import { ContentSharingStorage } from 'src/content-sharing/background/storage'
-import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
-import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
-import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
-import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
-import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import type StorageManager from '@worldbrain/storex'
+import type { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
+import type { FunctionsBackendStorageModules } from '@worldbrain/memex-common/lib/firebase-backend/types'
 
-export type ServerStorageModules = {
-    contentConversations: ContentConversationStorage
-    activityFollows: ActivityFollowsStorage
-    activityStreams: ActivityStreamsStorage
-    contentSharing: ContentSharingStorage
-    sharedSyncLog: SharedSyncLogStorage
-    userManagement: UserStorage
-    personalCloud: PersonalCloudStorage
-}
+export type ServerStorageModules = FunctionsBackendStorageModules
 
-export interface ServerStorage {
-    storageManager: StorageManager
-    storageModules: ServerStorageModules
+export type ServerStorage = {
+    manager: StorageManager
+    modules: ServerStorageModules & {
+        sharedSyncLog: SharedSyncLogStorage
+    }
 }

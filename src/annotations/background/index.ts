@@ -56,7 +56,7 @@ export default class DirectLinkingBackground {
             normalizeUrl?: URLNormalizer
             analytics: Analytics
             getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'contentSharing' | 'userManagement'>
+                Pick<ServerStorageModules, 'contentSharing' | 'users'>
             >
             preAnnotationDelete(params: {
                 annotationUrl: string
@@ -459,10 +459,7 @@ export default class DirectLinkingBackground {
         _,
         { sharedAnnotationReferences, withCreatorData },
     ) => {
-        const {
-            contentSharing,
-            userManagement,
-        } = await this.options.getServerStorage()
+        const { users, contentSharing } = await this.options.getServerStorage()
 
         const annotationsById = await contentSharing.getAnnotations({
             references: sharedAnnotationReferences,
@@ -473,7 +470,7 @@ export default class DirectLinkingBackground {
             const uniqueCreatorIds = new Set(
                 Object.values(annotationsById).map((annot) => annot.creator.id),
             )
-            creatorData = await userManagement
+            creatorData = await users
                 .getUsersPublicDetails(
                     [...uniqueCreatorIds].map((id) => ({
                         type: 'user-reference',

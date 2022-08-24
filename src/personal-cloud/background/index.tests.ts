@@ -363,8 +363,8 @@ export async function setupSyncBackgroundTest(
             manifestVersion: '2',
         })
         const personalCloudBackend = new StorexPersonalCloudBackend({
-            storageManager: serverStorage.storageManager,
-            storageModules: serverStorage.storageModules,
+            storageManager: serverStorage.manager,
+            storageModules: serverStorage.modules,
             getSqlStorageMananager,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
             services,

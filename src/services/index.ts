@@ -21,7 +21,7 @@ export async function createServices(options: {
     backend: 'firebase' | 'memory'
     getServerStorage: () => Promise<ServerStorage>
 }): Promise<Services> {
-    const { storageModules } = await options.getServerStorage()
+    const { modules: storageModules } = await options.getServerStorage()
     if (options.backend === 'memory') {
         const auth = new MemoryAuthService()
 
@@ -41,7 +41,7 @@ export async function createServices(options: {
                 storage: {
                     contentConversations: storageModules.contentConversations,
                     contentSharing: storageModules.contentSharing,
-                    users: storageModules.userManagement,
+                    users: storageModules.users,
                 },
                 getCurrentUserId: async () => (await auth.getCurrentUser()).id,
             }),
@@ -55,7 +55,7 @@ export async function createServices(options: {
                       const token = await getToken(getMessaging(), {
                           vapidKey: process.env.FCM_VAPID_KEY,
                       })
-                      await storageModules.userManagement.addUserFCMRegistrationToken(
+                      await storageModules.users.addUserFCMRegistrationToken(
                           { id: user.id, type: 'user-reference' },
                           token,
                       )
@@ -64,7 +64,7 @@ export async function createServices(options: {
                       const token = await getToken(getMessaging(), {
                           vapidKey: process.env.FCM_VAPID_KEY,
                       })
-                      await storageModules.userManagement.deleteUserFCMRegistrationToken(
+                      await storageModules.users.deleteUserFCMRegistrationToken(
                           token,
                       )
                   },

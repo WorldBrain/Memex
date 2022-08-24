@@ -83,7 +83,7 @@ export function createSelfTests(options: {
         }
 
         const serverStorage = await options.getServerStorage()
-        await serverStorage.storageModules.userManagement.ensureUser(
+        await serverStorage.modules.users.ensureUser(
             {
                 displayName: `Test user (${email})`,
             },
@@ -118,7 +118,7 @@ export function createSelfTests(options: {
 
             const serverStorage = await options.getServerStorage()
             console.log('server storage:', serverStorage)
-            await clearDb(serverStorage.storageManager, {
+            await clearDb(serverStorage.manager, {
                 getWhere: async (collectionName) => {
                     if (!collectionName.startsWith('personal')) {
                         return null
@@ -133,7 +133,7 @@ export function createSelfTests(options: {
                     ) {
                         return null
                     }
-                    const objects = (await serverStorage.storageManager
+                    const objects = (await serverStorage.manager
                         .collection(collectionName)
                         .findObjects({
                             user: user.id,
@@ -318,18 +318,16 @@ export function createSelfTests(options: {
                 })
                 console.log('Shared test list #2, remote ID:', remoteListId2)
 
-                await serverStorage.storageModules.contentSharing.ensurePageInfo(
-                    {
-                        creatorReference: {
-                            type: 'user-reference',
-                            id: user.id,
-                        },
-                        pageInfo: {
-                            normalizedUrl: normalizedTestPageUrl,
-                            originalUrl: testPageUrl,
-                        },
+                await serverStorage.modules.contentSharing.ensurePageInfo({
+                    creatorReference: {
+                        type: 'user-reference',
+                        id: user.id,
                     },
-                )
+                    pageInfo: {
+                        normalizedUrl: normalizedTestPageUrl,
+                        originalUrl: testPageUrl,
+                    },
+                })
                 if (shouldTest('share.note')) {
                     await backgroundModules.contentSharing.shareAnnotation({
                         annotationUrl: publicAnnotationUrl,
@@ -364,7 +362,7 @@ export function createSelfTests(options: {
                 }
 
                 if (shouldTest('share.incoming.note')) {
-                    await serverStorage.storageModules.contentSharing.createAnnotations(
+                    await serverStorage.modules.contentSharing.createAnnotations(
                         {
                             annotationsByPage: {
                                 [normalizedTestPageUrl]: [
@@ -444,7 +442,7 @@ export function createSelfTests(options: {
             console.log('Waited for sync to cloud from this device')
 
             if (shouldTest('share.incoming.note')) {
-                const sharedAnnotationEntries = await serverStorage.storageModules.contentSharing.getAnnotationListEntries(
+                const sharedAnnotationEntries = await serverStorage.modules.contentSharing.getAnnotationListEntries(
                     {
                         listReference: {
                             type: 'shared-list-reference',
@@ -462,7 +460,7 @@ export function createSelfTests(options: {
             ) {
                 backgroundModules.auth.authService.signOut()
                 await ensureTestUser('two@test.com')
-                await serverStorage.storageModules.activityFollows.storeFollow({
+                await serverStorage.modules.activityFollows.storeFollow({
                     collection: 'sharedList',
                     objectId: remoteListId1,
                     userReference: {

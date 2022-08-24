@@ -182,9 +182,9 @@ export function createBackgroundModules(options: {
 
     const { storageManager } = options
     const getServerStorage = async () =>
-        (await options.getServerStorage()).storageModules
+        (await options.getServerStorage()).modules
     const getServerStorageManager = async () =>
-        (await options.getServerStorage()).storageManager
+        (await options.getServerStorage()).manager
 
     const syncSettings = new SyncSettingsBackground({
         storageManager,
@@ -281,7 +281,7 @@ export function createBackgroundModules(options: {
         services: options.services,
         syncSettings: syncSettingsStore,
         getActivityStreamsStorage: async () =>
-            (await options.getServerStorage()).storageModules.activityStreams,
+            (await options.getServerStorage()).modules.activityStreams,
     })
 
     const directLinking = new DirectLinkingBackground({
@@ -327,8 +327,7 @@ export function createBackgroundModules(options: {
                     callFirebaseFunction('registerBetaUser', params),
             },
             getUserManagement: async () =>
-                (await options.getServerStorage()).storageModules
-                    .userManagement,
+                (await options.getServerStorage()).modules.users,
         })
 
     const activityStreams = new ActivityStreamsBackground({
@@ -440,7 +439,7 @@ export function createBackgroundModules(options: {
                     const messaging = getMessaging()
                     onBackgroundMessage(messaging, (payload) => {
                         if (payload.data?.type === 'downloadClientChanges') {
-                            signalChanges(Number(payload.data.changeCount) ?? 0)
+                            signalChanges(0) // TODO: Implement change count
                         }
                     })
 
@@ -480,7 +479,7 @@ export function createBackgroundModules(options: {
         createDeviceId: async (userId) => {
             const uaParser = new UAParser(options.userAgentString)
             const serverStorage = await options.getServerStorage()
-            const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
+            const device = await serverStorage.modules.personalCloud.createDeviceInfo(
                 {
                     device: {
                         type: PersonalDeviceType.DesktopBrowser,

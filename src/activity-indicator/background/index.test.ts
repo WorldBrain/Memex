@@ -62,13 +62,13 @@ describe('Activity indicator background tests', () => {
         )
 
         // Set up pre-req data
-        const { storageModules } = await getServerStorage()
+        const { modules: storageModules } = await getServerStorage()
 
-        await storageModules.userManagement.ensureUser(
+        await storageModules.users.ensureUser(
             { displayName: userAReference.id as string },
             userAReference,
         )
-        await storageModules.userManagement.ensureUser(
+        await storageModules.users.ensureUser(
             { displayName: userBReference.id as string },
             userBReference,
         )

@@ -111,8 +111,7 @@ export async function setupBackgroundIntegrationTest(
         backendFunctions: {
             registerBetaUser: async () => {},
         },
-        getUserManagement: async () =>
-            (await getServerStorage()).storageModules.userManagement,
+        getUserManagement: async () => (await getServerStorage()).modules.users,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
@@ -189,9 +188,9 @@ export async function setupBackgroundIntegrationTest(
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
-                storageManager: serverStorage.storageManager,
-                storageModules: serverStorage.storageModules,
                 services,
+                storageManager: serverStorage.manager,
+                storageModules: serverStorage.modules,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
                 view: new PersonalCloudHub().getView(),
                 getUserId: async () =>
@@ -205,9 +204,9 @@ export async function setupBackgroundIntegrationTest(
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
-            storageManager: serverStorage.storageManager,
-            activityFollows: serverStorage.storageModules.activityFollows,
-            contentSharing: serverStorage.storageModules.contentSharing,
+            storageManager: serverStorage.manager,
+            activityFollows: serverStorage.modules.activityFollows,
+            contentSharing: serverStorage.modules.contentSharing,
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
             userMessages,

@@ -1,5 +1,5 @@
 import ActivityIndicatorService from '@worldbrain/memex-common/lib/activity-streams/services/activity-indicator'
-import type ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
+import type { ActivityStreamsStorage } from '@worldbrain/memex-common/lib/activity-streams/storage/types'
 import * as Raven from 'src/util/raven'
 
 import type { Services } from 'src/services/types'
