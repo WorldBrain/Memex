@@ -32,7 +32,6 @@ import { TabManager } from 'src/tab-management/background/tab-manager'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
@@ -46,7 +45,6 @@ import { Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 fetchMock.restore()
-
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
@@ -205,11 +203,9 @@ export async function setupBackgroundIntegrationTest(
             }),
         contentSharingBackend: new ContentSharingBackend({
             storageManager: serverStorage.manager,
-            activityFollows: serverStorage.modules.activityFollows,
-            contentSharing: serverStorage.modules.contentSharing,
+            storageModules: serverStorage.modules,
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
-            userMessages,
         }),
         generateServerId: () => nextServerId++,
     })

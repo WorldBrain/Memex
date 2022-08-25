@@ -51,7 +51,17 @@ async function setupTest(opts: {
 }
 
 describe('Translation-layer Twitter integration tests', () => {
-    it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata', async () => {
+    it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata - and send off an FCM message to tell clients to sync', async () => {
+        const fcmTokens = ['test-device-1', 'test-device-2']
+        let sentToDevices: { tokens: string[]; message: any }
+        jest.mock('firebase-admin', () => ({
+            messaging: () => ({
+                sendToDevice: async (tokens: string[], message: any) => {
+                    sentToDevices = { tokens, message }
+                },
+            }),
+        }))
+
         let capturedException: Error | null = null
         const { processor, storage, userId } = await setupTest({
             testTweetData: TEST_TWEET_A,
@@ -59,6 +69,16 @@ describe('Translation-layer Twitter integration tests', () => {
                 capturedException = e
             },
         })
+
+        for (const token of fcmTokens) {
+            await storage.manager
+                .collection('userFCMRegistration')
+                .createObject({
+                    token,
+                    createdWhen: Date.now(),
+                    user: userId,
+                })
+        }
 
         const normalizedUrl = 'twitter.com/user/status/123123123'
 
@@ -110,6 +130,7 @@ describe('Translation-layer Twitter integration tests', () => {
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
+        expect(sentToDevices).toEqual({ tokens: [], message: {} })
         expect(capturedException).toBeNull()
         expect(
             await storage.manager
@@ -129,6 +150,10 @@ describe('Translation-layer Twitter integration tests', () => {
 
         await processor.processTwitterAction(twitterAction)
 
+        expect(sentToDevices).toEqual({
+            tokens: fcmTokens,
+            message: { data: { type: 'downloadClientChanges' } },
+        })
         expect(capturedException).toBeNull()
         expect(
             await storage.manager

@@ -17,7 +17,6 @@ import * as backup from '../backup-restore/background'
 import * as backupStorage from '../backup-restore/background/storage'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import { getAuth } from 'firebase/auth'
-import { Timestamp } from 'firebase/firestore'
 import {
     getStorage,
     ref,
