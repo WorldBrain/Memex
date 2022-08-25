@@ -1,11 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type {
-    Alarms,
-    Runtime,
-    Commands,
-    Storage,
-    Tabs,
-} from 'webextension-polyfill'
+import type { Alarms, Runtime, Storage, Tabs } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
@@ -55,7 +49,6 @@ interface Dependencies {
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
-    commandsAPI: Commands.Static
     alarmsAPI: Alarms.Static
     tabsAPI: Tabs.Static
     storageManager: Storex
@@ -90,20 +83,6 @@ class BackgroundScript {
         return process.env.NODE_ENV === 'production'
             ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/uninstall'
             : 'https://us-central1-worldbrain-staging.cloudfunctions.net/uninstall'
-    }
-
-    /**
-     * Set up custom commands defined in the manifest.
-     * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
-     */
-    private setupCommands() {
-        this.deps.commandsAPI.onCommand.addListener((command) => {
-            switch (command) {
-                case 'openOverview':
-                    return utils.openOverview()
-                default:
-            }
-        })
     }
 
     private async runOnboarding() {
@@ -323,7 +302,6 @@ class BackgroundScript {
         this.setupInstallHooks()
         this.setupStartupHooks()
         this.setupOnDemandContentScriptInjection()
-        this.setupCommands()
         this.setupUninstallURL()
         this.setupExtUpdateHandling()
     }

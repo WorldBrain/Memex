@@ -597,7 +597,6 @@ export function createBackgroundModules(options: {
     const bgScript = new BackgroundScript({
         storageChangesMan: options.localStorageChangesManager,
         urlNormalizer: normalizeUrl,
-        commandsAPI: browser.commands,
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
         alarmsAPI: browser.alarms,
