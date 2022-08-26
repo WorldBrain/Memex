@@ -28,7 +28,6 @@ import { JobDefinition } from 'src/job-scheduler/background/types'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
-import { TabManager } from 'src/tab-management/background/tab-manager'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
@@ -47,7 +46,6 @@ import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
-    tabManager?: TabManager
     getServerStorage?: () => Promise<ServerStorage>
     personalCloudBackend?: PersonalCloudBackend
     browserLocalStorage?: MemoryBrowserStorage
@@ -174,7 +172,6 @@ export async function setupBackgroundIntegrationTest(
         localStorageChangesManager: null,
         getServerStorage,
         browserAPIs,
-        tabManager: options?.tabManager,
         fetchPageDataProcessor,
         auth,
         services,

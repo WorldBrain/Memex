@@ -25,11 +25,9 @@ import TabManagementBackground from './tab-management/background'
 import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
-import { TabManager } from './tab-management/background/tab-manager'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
-        tabManager: new TabManager(),
         browserAPIs: browser,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),

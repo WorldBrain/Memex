@@ -69,7 +69,6 @@ import {
     remoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
-import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
@@ -156,7 +155,6 @@ export function createBackgroundModules(options: {
     personalCloudBackend?: PersonalCloudBackend
     contentSharingBackend?: ContentSharingBackend
     fetchPageDataProcessor?: FetchPageProcessor
-    tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
@@ -194,9 +192,7 @@ export function createBackgroundModules(options: {
         syncSettingsBG: syncSettings,
     })
 
-    const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
-        tabManager,
         browserAPIs: options.browserAPIs,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
@@ -229,7 +225,6 @@ export function createBackgroundModules(options: {
     const bookmarks = new BookmarksBackground({
         storageManager,
         pages,
-        tabManager,
         analytics,
         browserAPIs: options.browserAPIs,
     })

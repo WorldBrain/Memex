@@ -6,7 +6,6 @@ import { acts as bookmarkActs } from './bookmark-button'
 import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
-import { TabManagementInterface } from 'src/tab-management/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
@@ -18,29 +17,23 @@ const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const isURLBlacklistedRPC = remoteFunction('isURLBlacklisted')
 
-const tabs = runInBackground<TabManagementInterface<'caller'>>()
 const bookmarks = runInBackground<BookmarksInterface>()
 
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
-const getCurrentTab = async () => {
-    let currentTab
-    if (browser.tabs) {
-        ;[currentTab] = await browser.tabs.query({
-            active: true,
-            currentWindow: true,
-        })
-    } else {
-        const url = window.location.href
-        if (url) {
-            currentTab = await tabs.fetchTabByUrl(url)
-        }
+const getCurrentTab = async (): Promise<Tabs.Tab & { originalUrl: string }> => {
+    const [currentTab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+    })
+
+    return {
+        ...currentTab,
+        originalUrl: currentTab.url,
+        url: getUnderlyingResourceUrl(currentTab.url),
     }
-    currentTab.originalUrl = currentTab.url
-    currentTab.url = getUnderlyingResourceUrl(currentTab.url)
-    return currentTab as Tabs.Tab & { originalUrl: string }
 }
 
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
@@ -59,7 +52,6 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 
 async function init() {
     const currentTab = await getCurrentTab()
-    const tabUrl = currentTab?.url
 
     // If we can't get the tab data, then can't init action button states
     if (
