@@ -14,7 +14,6 @@ import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/
 import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
-    createDirectLink: RemotePositionalFunction<Role, any[], any>
     getAllAnnotationsByUrl: RemotePositionalFunction<
         Role,
         [AnnotSearchParams] | [AnnotSearchParams, boolean],
@@ -68,7 +67,6 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAnnotationTags: RemotePositionalFunction<Role, any[], any>
     addAnnotationTag: RemotePositionalFunction<Role, any[], any>
     delAnnotationTag: RemotePositionalFunction<Role, any[], any>
-    followAnnotationRequest: RemotePositionalFunction<Role, any[], any>
     toggleSidebarOverlay: RemoteFunction<Role, { activeUrl: string }, any>
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>

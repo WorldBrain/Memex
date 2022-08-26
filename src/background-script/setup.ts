@@ -745,7 +745,6 @@ export async function setupBackgroundModules(
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
-    backgroundModules.directLinking.setupRequestInterceptor()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()

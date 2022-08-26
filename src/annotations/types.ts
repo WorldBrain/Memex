@@ -91,14 +91,6 @@ export interface StoredAnnotationRequestMap {
     [tabId: string]: StoredAnnotationRequest
 }
 
-export type AnnotationSender = ({
-    annotation,
-    tabId,
-}: {
-    annotation: Annotation
-    tabId: number
-}) => void
-
 export type TextTruncator = (
     text: string,
     opts?: { maxLength?: number; maxLineBreaks?: number },
