@@ -2,9 +2,7 @@ import React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import { runInBackground } from 'src/util/webextensionRPC'
-import NotificationContainer, {
-    selectors as notifs,
-} from '../../../notifications'
+import { selectors as notifs } from '../../../notifications'
 import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
@@ -12,7 +10,6 @@ import ResultList from './ResultListContainer'
 import DeprecatedSearchWarning, {
     shouldShowDeprecatedSearchWarning,
 } from './DeprecatedSearchWarning'
-import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -218,18 +215,12 @@ class ResultsContainer extends React.Component<Props, State> {
     render() {
         return (
             <div className={styles.main}>
-                {this.props.showInbox ? (
-                    <NotificationContainer />
-                ) : (
-                    <>
-                        <SearchTypeSwitch
-                            copyPaster={this.props.copyPaster}
-                            showSocialSearch={this.state.showSocialSearch}
-                        />
-                        {this.renderDeprecatedSearchWarning()}
-                        {this.renderContent()}
-                    </>
-                )}
+                <SearchTypeSwitch
+                    copyPaster={this.props.copyPaster}
+                    showSocialSearch={this.state.showSocialSearch}
+                />
+                {this.renderDeprecatedSearchWarning()}
+                {this.renderContent()}
             </div>
         )
     }

@@ -1,6 +1,6 @@
 import React from 'react'
 import browser from 'webextension-polyfill'
-import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
@@ -10,13 +10,10 @@ import { getLocalStorage } from '../utils'
 import Notification from './Notification'
 import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
-import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import type { SearchEngineName, ResultItemProps } from '../types'
-import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
@@ -52,10 +49,8 @@ interface State {
 }
 
 class Container extends React.Component<Props, State> {
-    trackEvent: any
     readNotification: any
     fetchNotifById: any
-    processEvent: any
     openOverviewRPC: any
     syncSettings: Props['syncSettings']
 
@@ -70,10 +65,8 @@ class Container extends React.Component<Props, State> {
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
         this.handleClickTick = this.handleClickTick.bind(this)
-        this.trackEvent = remoteFunction('trackEvent')
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
-        this.processEvent = remoteFunction('processEvent')
         this.openOverviewRPC = remoteFunction('openOverviewTab')
         this.syncSettings = props.syncSettings
     }
@@ -127,7 +120,6 @@ class Container extends React.Component<Props, State> {
         } catch (e) {
             const searchRes = []
             const searchResDocs = searchRes.slice(0, limit)
-            console.log(e)
             this.setState({
                 searchResults: searchResDocs,
             })
@@ -155,10 +147,7 @@ class Container extends React.Component<Props, State> {
         })
     }
 
-    handleResultLinkClick = () =>
-        this.processEvent({
-            type: EVENT_NAMES.CLICK_RESULT_LINK,
-        })
+    handleResultLinkClick = () => {}
 
     renderResultItems() {
         if (!this.state.searchResults) {
@@ -274,12 +263,6 @@ class Container extends React.Component<Props, State> {
         // Triggering the Removed text UI to pop up
         await this._persistEnabledChange(false)
 
-        this.trackEvent({
-            category: 'Search integration',
-            action: 'Disabled',
-            name: 'Content script',
-        })
-
         this.setState({
             removed: true,
             dropdown: false,
@@ -305,13 +288,6 @@ class Container extends React.Component<Props, State> {
     }
 
     async handleClickTick() {
-        this.processEvent({
-            type: EVENT_NAMES.READ_NOTIFICATION_SEARCH_ENGINE,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
         await this.readNotification(this.state.notification.id)
 
         this.setState({
@@ -319,32 +295,7 @@ class Container extends React.Component<Props, State> {
         })
     }
 
-    handleToggleStorageOption(action, value) {
-        this.processEvent({
-            type: EVENT_NAMES.TOGGLE_STORAGE_SEARCH_ENGINE,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
-        action = {
-            ...action,
-            value,
-        }
-
-        actionRegistry[action.type]({
-            definition: action,
-        })
-    }
-
     handleClickOpenNewTabButton(url) {
-        this.processEvent({
-            type: EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON_SEARCH,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
         window.open(url, '_blank').focus()
     }
 
@@ -380,23 +331,13 @@ class Container extends React.Component<Props, State> {
                 <OptIn fromSearch label={buttons[0].label}>
                     <ToggleSwitch
                         defaultValue
-                        onChange={(val) =>
-                            this.handleToggleStorageOption(action, val)
-                        }
+                        onChange={(val) => {}}
                         fromSearch
                     />
                 </OptIn>
             )
         } else {
-            return (
-                <ActionButton
-                    handleClick={actionRegistry[action.type]({
-                        definition: action,
-                    })}
-                >
-                    {` ${buttons[0].label} `}
-                </ActionButton>
-            )
+            return null
         }
     }
 

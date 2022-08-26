@@ -7,12 +7,8 @@ import { acts as tooltipActs } from '../../tooltips'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { actions as onboardingActs } from '../../onboarding'
 import Header, { Props } from './Header'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
-const processEventRPC = remoteFunction('processEvent')
-
-const mapState = state => ({
+const mapState = (state) => ({
     unreadNotifCount: notifs.unreadNotifCount(state),
     showUnreadCount: notifs.showUnreadCount(state),
     showInbox: notifs.showInbox(state),
@@ -21,13 +17,13 @@ const mapState = state => ({
     showClearFiltersBtn: selectors.showClearFiltersBtn(state),
 })
 
-const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
+const mapDispatch: (dispatch: any) => Partial<Props> = (dispatch) => ({
     toggleInbox: () => dispatch(notifActs.toggleInbox()),
-    onQueryChange: e => {
+    onQueryChange: (e) => {
         const el = e.target as HTMLInputElement
         dispatch(acts.setQueryTagsDomains(el.value, false))
     },
-    onQueryKeyDown: e => {
+    onQueryKeyDown: (e) => {
         if (e.key === 'Enter') {
             const el = e.target as HTMLInputElement
             dispatch(acts.setQueryTagsDomains(el.value, true))
@@ -40,12 +36,9 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         dispatch(tooltipActs.resetTooltips())
         // Tick off Power Search onboarding stage
         dispatch(onboardingActs.setPowerSearchDone())
-        processEventRPC({
-            type: EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING,
-        })
         dispatch(filterActs.toggleFilterBar())
     },
-    clearFilters: e => {
+    clearFilters: (e) => {
         e.stopPropagation()
 
         dispatch(filterActs.resetFilters())
@@ -54,7 +47,4 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(Header)
+export default connect(mapState, mapDispatch)(Header)

@@ -5,14 +5,12 @@ import qs from 'query-string'
 import moment from 'moment'
 
 import analytics from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
 import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
 import checkBrowser from './util/check-browser'
-import { EVENT_NAMES } from './analytics/internal/constants'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import { combineSearchIndex } from './search/search-index'
 import { getDb } from './search'
@@ -116,13 +114,6 @@ export async function main() {
                     : 'failViaOmnibar',
             name: queryFiltersDisplay(queryFilters),
             value: searchResults.totalCount,
-        })
-
-        internalAnalytics.processEvent({
-            type:
-                searchResults.totalCount > 0
-                    ? EVENT_NAMES.SUCCESSFUL_OMNIBAR_SEARCH
-                    : EVENT_NAMES.UNSUCCESSFUL_OMNIBAR_SEARCH,
         })
 
         // A subsequent search could have already started and finished while we

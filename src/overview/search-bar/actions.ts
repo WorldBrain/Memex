@@ -12,13 +12,11 @@ import {
     selectors as filters,
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
-import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { stripTagPattern, splitInputIntoTerms } from './utils'
 import { BackgroundSearchParams } from 'src/search/background/types'
 
-const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
 const socialSearchRPC = remoteFunction('searchSocial')
@@ -79,10 +77,6 @@ export const setQueryTagsDomains: (
                 })
             }
         })
-    }
-
-    if (input.length > 0) {
-        processEventRPC({ type: EVENT_NAMES.NLP_SEARCH })
     }
 
     dispatch(resultsActs.setLoading(true))

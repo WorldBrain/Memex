@@ -6,14 +6,11 @@ import classnames from 'classnames'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import analytics from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 import './datepicker-overrides.css'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
 
-const processEvent = remoteFunction('processEvent')
 const styles = require('./DateRangeSelection.css')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
@@ -147,12 +144,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
 
         analytics.trackEvent({ category: 'SearchFilters', action })
 
-        processEvent({
-            type: isStartDate
-                ? EVENT_NAMES.DATEPICKER_NLP_START_DATE
-                : EVENT_NAMES.DATEPICKER_NLP_END_DATE,
-        })
-
         // Get the time from the NLP query, if it could be parsed
         if (nlpDate != null) {
             return nlpDate.getTime()
@@ -231,16 +222,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
             action = isStartDate ? 'clearStartDateFilter' : 'clearEndDateFilter'
         }
         analytics.trackEvent({ category: 'SearchFilters', action })
-
-        processEvent({
-            type: date
-                ? isStartDate
-                    ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
-                    : EVENT_NAMES.DATEPICKER_DROPDOWN_END
-                : isStartDate
-                ? EVENT_NAMES.DATEPICKER_CLEAR_START
-                : EVENT_NAMES.DATEPICKER_CLEAR_END,
-        })
 
         const updateDate = isStartDate
             ? this.props.onStartDateChange

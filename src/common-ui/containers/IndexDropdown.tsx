@@ -85,7 +85,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private delTagRPC
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
-    private processEvent
     private inputEl: HTMLInputElement
     private fetchUserSuggestionsRPC
     private fetchHashtagSuggestionsRPC
@@ -97,7 +96,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
-        this.processEvent = remoteFunction('processEvent')
         this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
         this.fetchHashtagSuggestionsRPC = remoteFunction(
             'fetchHashtagSuggestions',
@@ -210,21 +208,6 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         // Make first letter capital
         const sourceType = source.charAt(0).toUpperCase() + source.substr(1)
-
-        // Only for add and remove from the popup or overview, we have already covered filter in overview
-        if (this.allowIndexUpdate) {
-            if (hover) {
-                this.processEvent({
-                    type: isAdded ? 'add' + sourceType : 'delete' + sourceType,
-                })
-            } else {
-                this.processEvent({
-                    type: isAdded
-                        ? 'addPopup' + sourceType
-                        : 'deletePopup' + sourceType,
-                })
-            }
-        }
     }
     /**
      * Selector for derived display tags state

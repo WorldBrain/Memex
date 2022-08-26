@@ -5,7 +5,6 @@ import thunk from 'redux-thunk'
 import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
-import * as privacy from './privacy'
 import * as pdfs from './PDF'
 import * as settings from './settings'
 import * as overviewPage from '../overview'
@@ -28,7 +27,6 @@ const rootReducer = combineReducers({
     auth: authReducer,
     blacklist: blacklist.reducer,
     imports: imports.reducer,
-    privacy: privacy.reducer,
     pdfs: pdfs.reducer,
     settings: settings.reducer,
     onboarding,

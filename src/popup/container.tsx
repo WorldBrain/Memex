@@ -29,7 +29,6 @@ import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
-import { EVENT_NAMES } from '../analytics/internal/constants'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
@@ -39,7 +38,6 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
-import { ToggleSwitchButton } from './components/ToggleSwitchButton'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
@@ -100,8 +98,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         await this.props.initState()
     }
 
-    processAnalyticsEvent = remoteFunction('processEvent')
-
     closePopup = () => window.close()
 
     onSearchEnter: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -110,10 +106,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             analytics.trackEvent({
                 category: 'Search',
                 action: 'searchViaPopup',
-            })
-
-            this.processAnalyticsEvent({
-                type: EVENT_NAMES.SEARCH_POPUP,
             })
 
             const queryFilters = extractQueryFilters(this.props.searchValue)

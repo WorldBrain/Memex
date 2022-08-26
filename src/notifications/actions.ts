@@ -1,13 +1,9 @@
 import { createAction } from 'redux-act'
-import browser from 'webextension-polyfill'
 
 import { remoteFunction } from '../util/webextensionRPC'
 import * as selectors from './selectors'
 import * as constants from './constants'
 import { NotifDefinition } from './types'
-import * as storageKeys from './storage-keys-notif'
-
-import { EVENT_NAMES } from '../analytics/internal/constants'
 
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
@@ -33,28 +29,10 @@ const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
 const fetchUnreadCount = remoteFunction('fetchUnreadCount')
 const readNotification = remoteFunction('readNotification')
-const processEvent = remoteFunction('processEvent')
 
 export const init = () => async (dispatch, getState) => {
-    const storage = await initStorageValue()
-
-    dispatch(setStorageKeys(storage))
+    // dispatch(setStorageKeys(storage))
     dispatch(handleResults())
-}
-
-export const initStorageValue = async () => {
-    const keys = {}
-    for (const key of Object.keys(storageKeys)) {
-        const value = (await browser.storage.local.get(storageKeys[key]))[
-            storageKeys[key]
-        ]
-
-        // Special case for SHOULD_TRACK_STORAGE_KEY, becuase the default value is not false
-        keys[storageKeys[key]] =
-            key === 'SHOULD_TRACK_STORAGE_KEY' ? value === true : value
-    }
-
-    return keys
 }
 
 export const handleResults = () => async (dispatch, getState) => {
@@ -114,13 +92,6 @@ export const handleReadNotif = (notification) => async (dispatch, getState) => {
         }
     })
 
-    processEvent({
-        type: EVENT_NAMES.READ_NOTIFICATION_OVERVIEW,
-        details: {
-            notificationId: notification.id,
-        },
-    })
-
     dispatch(handleReadNotification(Number(index)))
 }
 
@@ -141,10 +112,6 @@ export const handleMoreResult = () => async (dispatch, getState) => {
         ),
     }
 
-    processEvent({
-        type: EVENT_NAMES.READ_NOTIFICATION_PAGINATION,
-    })
-
     dispatch(appendResult(readNotifications))
     dispatch(setLoading(false))
 }
@@ -164,12 +131,6 @@ export const updateUnreadNotif = () => async (dispatch, getState) => {
 
 export const toggleInboxMid = () => (dispatch, getState) => {
     const showInbox = selectors.showInbox(getState())
-
-    processEvent({
-        type: !showInbox
-            ? EVENT_NAMES.OPEN_INBOX_OVERVIEW
-            : EVENT_NAMES.CLOSE_INBOX_OVERVIEW,
-    })
 
     dispatch(toggleInbox())
 }

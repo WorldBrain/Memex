@@ -49,7 +49,7 @@ export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
-    initSentry({ storageChangesManager: localStorageChangesManager })
+    initSentry({})
 
     if (process.env.USE_FIREBASE_EMULATOR === 'true') {
         const firebase = getFirebase()

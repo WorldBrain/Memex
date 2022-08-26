@@ -5,7 +5,6 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 
@@ -16,9 +15,6 @@ function deriveDomain(url: string) {
 
 const addToBlacklistRPC: (url: string) => Promise<void> = remoteFunction(
     'addToBlacklist',
-)
-const processEventRPC: (args: any) => Promise<void> = remoteFunction(
-    'processEvent',
 )
 
 const deletePagesRPC = remoteFunction('delPages')
@@ -50,12 +46,6 @@ export const addURLToBlacklist: (flag: boolean) => Thunk = (
         action: isDomainChoice
             ? 'createDomainEntryViaPopup'
             : 'createSiteEntryViaPopup',
-    })
-
-    processEventRPC({
-        type: isDomainChoice
-            ? EVENT_NAMES.BLACKLIST_DOMAIN
-            : EVENT_NAMES.BLACKLIST_SITE,
     })
 
     let url = popup.url(state)

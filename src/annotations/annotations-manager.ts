@@ -1,5 +1,4 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
 import { BackgroundSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
@@ -8,7 +7,6 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 
 export default class AnnotationsManager implements AnnotationsManagerInterface {
     private _isSetUp = false
-    _processEventRPC: (...args: any[]) => Promise<any>
     _createAnnotationRPC: (...args: any[]) => Promise<any>
     _addAnnotationTagRPC: (...args: any[]) => Promise<any>
     _getAllAnnotationsByUrlRPC: (...args: any[]) => Promise<any>
@@ -25,7 +23,6 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         }
         this._isSetUp = true
 
-        this._processEventRPC = remoteFunction('processEvent')
         this._createAnnotationRPC = remoteFunction('createAnnotation')
         this._addAnnotationTagRPC = remoteFunction('addAnnotationTag')
         this._getAllAnnotationsByUrlRPC = remoteFunction(
@@ -61,7 +58,6 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         isSocialPost?: boolean
     }) => {
         this._setupRPC()
-        this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
         if (tags && tags.length) {
             analytics.trackEvent({
@@ -162,7 +158,6 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
     public deleteAnnotation = async (url: string, isSocialPost?: boolean) => {
         this._setupRPC()
 
-        await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url, isSocialPost)
     }
 

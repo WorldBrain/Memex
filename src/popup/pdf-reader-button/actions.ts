@@ -4,15 +4,12 @@ import {
     getTooltipState,
     setTooltipState,
 } from '../../in-page-ui/tooltip/utils'
-import { remoteFunction, runInTabViaBg } from '../../util/webextensionRPC'
+import { runInTabViaBg } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import analytics from 'src/analytics'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-
-const processEventRPC = remoteFunction('processEvent')
 
 export const setTooltipFlag = createAction<boolean>('tooltip/setTooltipFlag')
 
@@ -27,12 +24,6 @@ export const toggleTooltipFlag: () => Thunk = () => async (
 ) => {
     const state = getState()
     const wasEnabled = selectors.isTooltipEnabled(state)
-
-    processEventRPC({
-        type: wasEnabled
-            ? EVENT_NAMES.DISABLE_TOOLTIP_POPUP
-            : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
-    })
 
     if (wasEnabled) {
         analytics.trackEvent({

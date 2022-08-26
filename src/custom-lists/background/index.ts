@@ -3,8 +3,6 @@ import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
-import internalAnalytics from '../../analytics/internal'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
@@ -456,9 +454,6 @@ export default class CustomListBackground {
         id?: number
         createdAt?: Date
     }): Promise<number> => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.CREATE_COLLECTION,
-        })
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
@@ -506,10 +501,6 @@ export default class CustomListBackground {
             )
         }
 
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
-        })
-
         if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
@@ -546,20 +537,12 @@ export default class CustomListBackground {
     }
 
     removeList = async ({ id }: { id: number }) => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_COLLECTION,
-        })
-
         return this.storage.removeList({
             id,
         })
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {
-        await internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
-        })
-
         await this.options.removeChildAnnotationsFromList(url, id)
 
         return this.storage.removePageFromList({
