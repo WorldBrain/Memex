@@ -1,21 +1,22 @@
 // tslint:disable:no-console
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import Queue, { Options as QueueOpts } from 'queue'
 
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { BackupInfoStorage } from './storage'
-import { BackupBackend } from './backend'
+import type { BackupBackend } from './backend'
 import { BackendSelect } from './backend-select'
 import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
 import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup-restore/background/procedures/ui-communication'
-import NotificationBackground from 'src/notifications/background'
+import type NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
-import { SearchIndex } from 'src/search'
+import type { SearchIndex } from 'src/search'
 import * as Raven from 'src/util/raven'
-import { BackupInterface } from './types'
+import type { BackupInterface } from './types'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export * from './backend'
 
@@ -37,11 +38,12 @@ export class BackupBackgroundModule {
     )
 
     uiTabId?: any
-    automaticBackupTimeout?: any
+    automaticBackupTimeout: number | null = null
     automaticBackupEnabled?: boolean
     scheduledAutomaticBackupTimestamp?: number
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
+    jobScheduler: JobScheduler
 
     constructor(options: {
         storageManager: Storex
@@ -50,6 +52,7 @@ export class BackupBackgroundModule {
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
         notifications: NotificationBackground
+        jobScheduler: JobScheduler
         checkAuthorizedForAutoBackup: () => Promise<boolean>
     }) {
         options.createQueue = options.createQueue || Queue
@@ -58,6 +61,7 @@ export class BackupBackgroundModule {
             concurrency: 1,
         }
 
+        this.jobScheduler = options.jobScheduler
         this.storageManager = options.storageManager
         this.storage = new BackupStorage({
             storageManager: options.storageManager,
@@ -300,7 +304,7 @@ export class BackupBackgroundModule {
 
     scheduleAutomaticBackup() {
         if (
-            this.automaticBackupTimeout ||
+            this.automaticBackupTimeout != null ||
             (this.backupProcedure && this.backupProcedure.running)
         ) {
             return
@@ -309,14 +313,17 @@ export class BackupBackgroundModule {
         const msUntilNextBackup = 1000 * 60 * 15
         // const msUntilNextBackup = 1000 * 30
         this.scheduledAutomaticBackupTimestamp = Date.now() + msUntilNextBackup
-        this.automaticBackupTimeout = setTimeout(() => {
-            this.doBackup()
-        }, msUntilNextBackup)
+        this.jobScheduler.scheduleJobOnce({
+            name: 'automated-legacy-data-backup',
+            when: Date.now() + msUntilNextBackup,
+            job: () => this.doBackup(),
+        })
+        this.automaticBackupTimeout = -1
     }
 
     clearAutomaticBackupTimeout() {
-        if (this.automaticBackupTimeout) {
-            clearTimeout(this.automaticBackupTimeout)
+        if (this.automaticBackupTimeout != null) {
+            this.jobScheduler.clearScheduledJob('automated-legacy-data-backup')
             this.automaticBackupTimeout = null
         }
     }

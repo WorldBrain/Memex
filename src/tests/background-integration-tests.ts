@@ -42,6 +42,8 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
@@ -92,28 +94,6 @@ export async function setupBackgroundIntegrationTest(
             manifestVersion: '2',
         }))
 
-    const auth: AuthBackground = new AuthBackground({
-        authService: services.auth,
-        subscriptionService: services.subscriptions,
-        remoteEmitter: { emit: async () => {} },
-        scheduleJob: (job: JobDefinition) => {
-            console['info'](
-                'Running job immediately while in testing, job:',
-                job,
-            )
-            console['info'](`Ran job ${job.name} returned:`, job.job())
-        },
-        localStorageArea: browserLocalStorage,
-        backendFunctions: {
-            registerBetaUser: async () => {},
-        },
-        getUserManagement: async () => (await getServerStorage()).modules.users,
-    })
-    const analyticsManager = new AnalyticsManager({
-        backend: new FakeAnalytics(),
-        shouldTrack: async () => true,
-    })
-
     const browserAPIs = ({
         webNavigation: {
             onHistoryStateUpdated: { addListener: () => {} },
@@ -151,6 +131,27 @@ export async function setupBackgroundIntegrationTest(
             },
         },
     } as any) as Browser
+
+    const jobScheduler = new JobScheduler({
+        alarmsAPI: new MockAlarmsApi() as any,
+        storageAPI: browserAPIs.storage,
+    })
+
+    const auth: AuthBackground = new AuthBackground({
+        jobScheduler,
+        authService: services.auth,
+        subscriptionService: services.subscriptions,
+        remoteEmitter: { emit: async () => {} },
+        localStorageArea: browserLocalStorage,
+        backendFunctions: {
+            registerBetaUser: async () => {},
+        },
+        getUserManagement: async () => (await getServerStorage()).modules.users,
+    })
+    const analyticsManager = new AnalyticsManager({
+        backend: new FakeAnalytics(),
+        shouldTrack: async () => true,
+    })
 
     const fetchPageDataProcessor = options?.includePostSyncProcessor
         ? new MockFetchPageDataProcessor()

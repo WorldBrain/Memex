@@ -309,12 +309,10 @@ export function createBackgroundModules(options: {
         options.auth ||
         new AuthBackground({
             authService: options.services.auth,
+            jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),
             subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
-            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
-                jobScheduler.scheduler,
-            ),
             backendFunctions: {
                 registerBetaUser: async (params) =>
                     callFirebaseFunction('registerBetaUser', params),
@@ -402,7 +400,9 @@ export function createBackgroundModules(options: {
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
+        getServerStorageManager,
         runtimeAPI: browser.runtime,
+        jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??
@@ -557,7 +557,6 @@ export function createBackgroundModules(options: {
                 )
             }
         },
-        getServerStorageManager,
     })
 
     const contentSharing = new ContentSharingBackground({
@@ -636,6 +635,7 @@ export function createBackgroundModules(options: {
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
+            jobScheduler: jobScheduler.scheduler,
             backupInfoStorage: new backupStorage.LocalBackupInfoStorage(),
             notifications,
             checkAuthorizedForAutoBackup: async () =>

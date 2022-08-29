@@ -140,4 +140,8 @@ export class JobScheduler {
             when: job.when,
         })
     }
+
+    async clearScheduledJob(name: string) {
+        await this.props.alarmsAPI.clear(name)
+    }
 }

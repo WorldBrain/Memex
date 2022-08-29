@@ -25,7 +25,6 @@ import {
     AuthBackendFunctions,
     EmailPasswordCredentials,
 } from './types'
-import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
@@ -34,6 +33,7 @@ import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
 import type { FirebaseError } from 'firebase/app'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export class AuthBackground {
     authService: AuthService
@@ -41,7 +41,6 @@ export class AuthBackground {
     settings: SettingStore<AuthSettings>
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
-    scheduleJob: (job: JobDefinition) => void
 
     private _userProfile?: Promise<User>
 
@@ -52,14 +51,13 @@ export class AuthBackground {
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
             getUserManagement: () => Promise<UserStorage>
-            scheduleJob: (job: JobDefinition) => void
             remoteEmitter: RemoteEventEmitter<'auth'>
+            jobScheduler: JobScheduler
         },
     ) {
         this.authService = options.authService
         this.backendFunctions = options.backendFunctions
         this.subscriptionService = options.subscriptionService
-        this.scheduleJob = options.scheduleJob
         this.settings = new BrowserSettingsStore<AuthSettings>(
             options.localStorageArea,
             {
@@ -171,7 +169,7 @@ export class AuthBackground {
                     ).toLocaleString()}`,
                 )
 
-            this.scheduleJob({
+            this.options.jobScheduler.scheduleJobOnce({
                 name: 'user-subscription-expiry-refresh',
                 when,
                 job: async () => {
@@ -183,7 +181,7 @@ export class AuthBackground {
                 },
             })
         } else {
-            this.scheduleJob({
+            this.options.jobScheduler.scheduleJobOnce({
                 name: 'user-subscription-expiry-refresh',
                 when: Date.now(),
                 job: () => null,
