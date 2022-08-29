@@ -1,4 +1,5 @@
 import pick from 'lodash/pick'
+import type { Storage } from 'webextension-polyfill'
 import type StorageManager from '@worldbrain/storex'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
@@ -23,12 +24,13 @@ import AnnotationSharingService from '@worldbrain/memex-common/lib/content-shari
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
 
 export default class ContentSharingBackground {
+    static REMOTE_PAGE_ID_LOOKUP_CACHE_NAME =
+        '@ContentSharingBG-remote_page_id_lookup_cache'
+
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
-
-    _ensuredPages: { [normalizedUrl: string]: string } = {}
 
     constructor(
         public options: {
@@ -38,9 +40,10 @@ export default class ContentSharingBackground {
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
+            storageAPI: Storage.Static
             services: Pick<Services, 'contentSharing'>
-            captureException?: (e: Error) => void
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
+            captureException?: (e: Error) => void
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
             >
@@ -310,6 +313,34 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
+    private async cacheRemotePageId(
+        normalizedPageUrl: string,
+        remoteId: string,
+    ): Promise<void> {
+        const { storageAPI } = this.options
+
+        const lookupCache: { [normalizedUrl: string]: string } =
+            (await storageAPI.local.get(
+                ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
+            )) ?? {}
+        await storageAPI.local.set({
+            [ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME]: {
+                ...lookupCache,
+                [normalizedPageUrl]: remoteId,
+            },
+        })
+    }
+
+    private async lookupRemotePageIdInCache(
+        normalizedPageUrl: string,
+    ): Promise<string | null> {
+        const lookupCache: { [normalizedUrl: string]: string } =
+            (await this.options.storageAPI.local.get(
+                ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
+            )) ?? {}
+        return lookupCache[normalizedPageUrl] ?? null
+    }
+
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
         normalizedPageUrl,
     ) => {
@@ -320,8 +351,12 @@ export default class ContentSharingBackground {
                 `Tried to execute sharing action without being authenticated`,
             )
         }
-        if (this._ensuredPages[normalizedPageUrl]) {
-            return this._ensuredPages[normalizedPageUrl]
+
+        let remotePageId = await this.lookupRemotePageIdInCache(
+            normalizedPageUrl,
+        )
+        if (remotePageId != null) {
+            return remotePageId
         }
 
         const userReference = {
@@ -336,9 +371,9 @@ export default class ContentSharingBackground {
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
         })
-        const id = contentSharing.getSharedPageInfoLinkID(reference)
-        this._ensuredPages[normalizedPageUrl] = id
-        return id
+        remotePageId = contentSharing.getSharedPageInfoLinkID(reference)
+        await this.cacheRemotePageId(normalizedPageUrl, remotePageId)
+        return remotePageId
     }
 
     unshareAnnotationsFromAllLists: ContentSharingInterface['unshareAnnotationsFromAllLists'] = async (

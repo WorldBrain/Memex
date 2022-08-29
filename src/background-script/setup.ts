@@ -571,6 +571,7 @@ export function createBackgroundModules(options: {
         }),
         waitForSync: () => personalCloud.actionQueue.waitForSync(),
         storageManager,
+        storageAPI: browser.storage,
         customListsBG: customLists,
         annotations: directLinking.annotationStorage,
         auth,
