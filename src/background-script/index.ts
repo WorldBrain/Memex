@@ -1,5 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type { Alarms, Runtime, Storage, Tabs } from 'webextension-polyfill'
+import type { Runtime, Storage, Tabs } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
@@ -7,7 +7,6 @@ import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { removeDupeSpaces } from './quick-and-dirty-migrations/tag-space-dupe-removal'
-import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
@@ -49,7 +48,6 @@ interface Dependencies {
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
-    alarmsAPI: Alarms.Static
     tabsAPI: Tabs.Static
     storageManager: Storex
     bgModules: Pick<
@@ -65,7 +63,6 @@ interface Dependencies {
 }
 
 class BackgroundScript {
-    private alarmsListener: (alarm: Alarms.Alarm) => void
     private remoteFunctions: RemoteBGScriptInterface
 
     constructor(public deps: Dependencies) {
@@ -304,31 +301,6 @@ class BackgroundScript {
         this.setupOnDemandContentScriptInjection()
         this.setupUninstallURL()
         this.setupExtUpdateHandling()
-    }
-
-    setupAlarms(alarms: AlarmsConfig) {
-        const alarmListeners = new Map()
-
-        for (const [name, { listener, ...alarmInfo }] of Object.entries(
-            alarms,
-        )) {
-            this.deps.alarmsAPI.create(name, alarmInfo)
-            alarmListeners.set(name, listener)
-        }
-
-        this.alarmsListener = ({ name }) => {
-            const listener = alarmListeners.get(name)
-            if (typeof listener === 'function') {
-                listener(this)
-            }
-        }
-
-        this.deps.alarmsAPI.onAlarm.addListener(this.alarmsListener)
-    }
-
-    clearAlarms() {
-        this.deps.alarmsAPI.clearAll()
-        this.deps.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
     }
 
     private chooseTabOpenFn = (params?: OpenTabParams) =>

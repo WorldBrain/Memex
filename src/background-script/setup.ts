@@ -37,7 +37,6 @@ import {
 import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import BackgroundScript from '.'
-import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
@@ -594,7 +593,6 @@ export function createBackgroundModules(options: {
         urlNormalizer: normalizeUrl,
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
-        alarmsAPI: browser.alarms,
         tabsAPI: browser.tabs,
         localExtSettingStore,
         syncSettingsStore,
@@ -754,7 +752,6 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.inPageUI.setupRemoteFunctions()
-    backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
