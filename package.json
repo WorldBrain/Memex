@@ -95,7 +95,7 @@
         "lodash": "^4.17.4",
         "marked": "^4.0.2",
         "moment": "^2.18.1",
-        "moment-timezone": "^0.5.14",
+        "moment-timezone": "^0.5.35",
         "mousetrap": "^1.6.5",
         "mustache": "^4.0.1",
         "normalize-url": "^4.3.0",
