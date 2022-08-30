@@ -18,12 +18,13 @@ import type { ServerStorageModules } from 'src/storage/types'
 import type { ContentSharingInterface } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
-import AnnotationStorage from 'src/annotations/background/storage'
+import type AnnotationStorage from 'src/annotations/background/storage'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
 
 export default class ContentSharingBackground {
+    static ONE_WEEK_MS = 604800000
     static REMOTE_PAGE_ID_LOOKUP_CACHE_NAME =
         '@ContentSharingBG-remote_page_id_lookup_cache'
 
@@ -313,20 +314,28 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
+    private async getRemotePageIdLookupCache(): Promise<{
+        [normalizedUrl: string]: { remoteId: string; asOf: number }
+    }> {
+        const {
+            [ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME]: lookupCache,
+        } = await this.options.storageAPI.local.get(
+            ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
+        )
+
+        return lookupCache ?? {}
+    }
+
     private async cacheRemotePageId(
         normalizedPageUrl: string,
         remoteId: string,
     ): Promise<void> {
-        const { storageAPI } = this.options
+        const lookupCache = await this.getRemotePageIdLookupCache()
 
-        const lookupCache: { [normalizedUrl: string]: string } =
-            (await storageAPI.local.get(
-                ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
-            )) ?? {}
-        await storageAPI.local.set({
+        await this.options.storageAPI.local.set({
             [ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME]: {
                 ...lookupCache,
-                [normalizedPageUrl]: remoteId,
+                [normalizedPageUrl]: { remoteId, asOf: Date.now() },
             },
         })
     }
@@ -334,11 +343,16 @@ export default class ContentSharingBackground {
     private async lookupRemotePageIdInCache(
         normalizedPageUrl: string,
     ): Promise<string | null> {
-        const lookupCache: { [normalizedUrl: string]: string } =
-            (await this.options.storageAPI.local.get(
-                ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
-            )) ?? {}
-        return lookupCache[normalizedPageUrl] ?? null
+        const lookupCache = await this.getRemotePageIdLookupCache()
+        const contents = lookupCache[normalizedPageUrl]
+        if (
+            !contents ||
+            Date.now() - contents.asOf > ContentSharingBackground.ONE_WEEK_MS
+        ) {
+            return null
+        }
+
+        return contents.remoteId
     }
 
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
