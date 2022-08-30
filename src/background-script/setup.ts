@@ -254,6 +254,7 @@ export function createBackgroundModules(options: {
     const pdfBg = new PDFBackground({
         webRequestAPI: options.browserAPIs.webRequest,
         runtimeAPI: options.browserAPIs.runtime,
+        storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         syncSettings: syncSettingsStore,
     })
