@@ -383,6 +383,7 @@ export function createBackgroundModules(options: {
 
     const connectivityChecker = new ConnectivityCheckerBackground({
         xhr: new XMLHttpRequest(),
+        jobScheduler: jobScheduler.scheduler,
     })
 
     const storePageContent = async (content: PipelineRes): Promise<void> => {

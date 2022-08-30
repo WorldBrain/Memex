@@ -1,4 +1,6 @@
 import expect from 'expect'
+import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
 
 import { ConnectivityCheckerBackground } from '.'
 
@@ -28,10 +30,18 @@ export class MockXHR {
 }
 
 function setupTest({ xhr }: { xhr: any }) {
-    const background = new ConnectivityCheckerBackground({ xhr, target: '' })
+    const jobScheduler = new JobScheduler({
+        alarmsAPI: new MockAlarmsApi() as any,
+        storageAPI: { local: { get: () => {}, set: () => {} } } as any,
+    })
+    const background = new ConnectivityCheckerBackground({
+        xhr,
+        target: '',
+        jobScheduler,
+    })
 
     // Set up spy
-    background.emit = eventName =>
+    background.emit = (eventName) =>
         (background['lastEventEmitted'] = eventName) as any
 
     return { background }
