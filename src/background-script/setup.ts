@@ -101,6 +101,7 @@ import type { ReadwiseSettings } from 'src/readwise-integration/background/types
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import DeprecatedStorageModules from './deprecated-storage-modules'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -777,11 +778,12 @@ export async function setupBackgroundModules(
 
 export function getBackgroundStorageModules(
     backgroundModules: BackgroundModules,
+    __deprecatedModules: DeprecatedStorageModules,
 ): { [moduleName: string]: StorageModule } {
     return {
+        pageFetchBacklog: __deprecatedModules.pageFetchBacklogStorage,
         annotations: backgroundModules.directLinking.annotationStorage,
-        readwiseAction:
-            backgroundModules.readwise.__deprecatedActionQueueStorage,
+        readwiseAction: __deprecatedModules.readwiseActionQueueStorage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,
         bookmarks: backgroundModules.bookmarks.storage,
@@ -790,6 +792,8 @@ export function getBackgroundStorageModules(
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
+        clientSyncLog: __deprecatedModules.clientSyncLogStorage,
+        syncInfo: __deprecatedModules.syncInfoStorage,
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
@@ -813,9 +817,13 @@ export function registerBackgroundModuleCollections(options: {
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
 }) {
+    const deprecatedModules = new DeprecatedStorageModules(options)
     registerModuleMapCollections(
         options.storageManager.registry,
-        getBackgroundStorageModules(options.backgroundModules),
+        getBackgroundStorageModules(
+            options.backgroundModules,
+            deprecatedModules,
+        ),
     )
     registerModuleMapCollections(
         options.persistentStorageManager.registry,
