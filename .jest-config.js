@@ -1,4 +1,4 @@
-// const { jsWithTs: tsjPreset } = require('ts-jest/presets')
+const { jsWithTs: tsjPreset } = require('ts-jest/presets')
 const externalTsModules = require('./build/external').externalTsModules
 
 const externalTsModuleMappings = {}
@@ -10,13 +10,13 @@ for (const [alias, relPath] of Object.entries(externalTsModules)) {
 }
 
 module.exports = {
-    preset: 'ts-jest/presets/js-with-ts',
     testMatch: ['<rootDir>/src/**/*.test.(js|jsx|ts|tsx)'],
     rootDir: '.',
-    // transform: {
-    //     ...tsjPreset.transform,
-    // },
+    transform: {
+        ...tsjPreset.transform,
+    },
     testEnvironment: 'jsdom',
+    transformIgnorePatterns: ['/node_modules/(?!(firebase|@firebase)/)'],
     modulePaths: ['<rootDir>'],
     moduleNameMapper: {
         '\\.(css|less)$': 'identity-obj-proxy',
@@ -24,6 +24,7 @@ module.exports = {
     },
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
     setupFiles: ['jest-webextension-mock', './setupJest.js'],
+    resolver: '<rootDir>/jest.resolver.js',
     unmockedModulePathPatterns: [
         '<rootDir>/node_modules/react',
         '<rootDir>/node_modules/react-dom',
