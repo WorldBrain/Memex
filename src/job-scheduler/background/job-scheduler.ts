@@ -37,9 +37,9 @@ export class JobScheduler {
     private getTimeoutKey = async (key: string): Promise<number> => {
         const {
             [this.props.storagePrefix + key]: timeToRun,
-        } = await this.props.storageAPI.local.get({
-            [this.props.storagePrefix + key]: JobScheduler.NOT_SET,
-        })
+        } = await this.props.storageAPI.local.get(
+            this.props.storagePrefix + key,
+        )
 
         return timeToRun
     }

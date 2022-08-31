@@ -107,6 +107,8 @@ export async function setupBackgroundIntegrationTest(
         },
         alarms: {
             onAlarm: { addListener: () => {} },
+            create: () => null,
+            clear: () => null,
         },
         tabs: {
             query: () => [],
@@ -117,6 +119,7 @@ export async function setupBackgroundIntegrationTest(
         },
         runtime: {
             getURL: () => '',
+            onStartup: { addListener: () => {} },
         },
         extension: {
             getURL: () => '',
@@ -133,7 +136,7 @@ export async function setupBackgroundIntegrationTest(
     } as any) as Browser
 
     const jobScheduler = new JobScheduler({
-        alarmsAPI: new MockAlarmsApi() as any,
+        alarmsAPI: browserAPIs.alarms,
         storageAPI: browserAPIs.storage,
     })
 
@@ -146,7 +149,7 @@ export async function setupBackgroundIntegrationTest(
         backendFunctions: {
             registerBetaUser: async () => {},
         },
-        getUserManagement: async () => (await getServerStorage()).modules.users,
+        getUserManagement: async () => serverStorage.modules.users,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),

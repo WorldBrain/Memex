@@ -1,5 +1,5 @@
 import kebabCase from 'lodash/kebabCase'
-import browser, { Browser } from 'webextension-polyfill'
+import type { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
@@ -404,7 +404,7 @@ export function createBackgroundModules(options: {
         storageManager,
         syncSettingsStore,
         getServerStorageManager,
-        runtimeAPI: browser.runtime,
+        runtimeAPI: options.browserAPIs.runtime,
         jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
         backend:
@@ -574,7 +574,7 @@ export function createBackgroundModules(options: {
         }),
         waitForSync: () => personalCloud.actionQueue.waitForSync(),
         storageManager,
-        storageAPI: browser.storage,
+        storageAPI: options.browserAPIs.storage,
         customListsBG: customLists,
         annotations: directLinking.annotationStorage,
         auth,
@@ -594,9 +594,9 @@ export function createBackgroundModules(options: {
     const bgScript = new BackgroundScript({
         storageChangesMan: options.localStorageChangesManager,
         urlNormalizer: normalizeUrl,
-        runtimeAPI: browser.runtime,
-        storageAPI: browser.storage,
-        tabsAPI: browser.tabs,
+        runtimeAPI: options.browserAPIs.runtime,
+        storageAPI: options.browserAPIs.storage,
+        tabsAPI: options.browserAPIs.tabs,
         localExtSettingStore,
         syncSettingsStore,
         storageManager,
