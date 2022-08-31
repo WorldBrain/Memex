@@ -615,12 +615,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (user != null) {
             this.emitMutation({ currentUser: { $set: user } })
 
-            const userProfile = await authBG.getUserProfile()
-            if (!userProfile?.displayName?.length) {
-                this.emitMutation({
-                    modals: { showDisplayNameSetup: { $set: true } },
-                })
-                return false
+            // TODO mv3: ensure the display name is on the user obj from the first call in real build
+            if (!user.displayName?.length) {
+                const userProfile = await authBG.getUserProfile()
+                if (!userProfile?.displayName?.length) {
+                    this.emitMutation({
+                        modals: { showDisplayNameSetup: { $set: true } },
+                    })
+                    return false
+                }
             }
 
             return true

@@ -312,11 +312,16 @@ export class SidebarContainerLogic extends UILogic<
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const userProfile = await auth.getUserProfile()
-            if (!userProfile?.displayName?.length) {
-                setDisplayNameModalShown?.(true)
-                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
-                return false
+            // TODO mv3: ensure the display name is on the user obj from the first call in real build
+            if (!user.displayName?.length) {
+                const userProfile = await auth.getUserProfile()
+                if (!userProfile?.displayName?.length) {
+                    setDisplayNameModalShown?.(true)
+                    this.emitMutation({
+                        showDisplayNameSetupModal: { $set: true },
+                    })
+                    return false
+                }
             }
 
             setLoginModalShown?.(false)
