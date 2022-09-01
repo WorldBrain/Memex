@@ -31,4 +31,13 @@ module.exports = {
         '<rootDir>/node_modules/react-addons-test-utils',
         '<rootDir>/node_modules/fbjs',
     ],
+    globals: {
+        'ts-jest': {
+            // This apparently speeds things up, at the expense of type-checking
+            // https://github.com/kulshekhar/ts-jest/issues/259#issuecomment-888978737
+            isolatedModules: true,
+        },
+    },
+    // Enable this to get type-checking back (maybe when we get CI set up again)
+    // maxWorkers: 1,
 }
