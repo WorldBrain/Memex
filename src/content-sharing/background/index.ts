@@ -379,6 +379,11 @@ export default class ContentSharingBackground {
         }
 
         const page = await this.storage.getPage(normalizedPageUrl)
+        if (page == null) {
+            throw new Error(
+                'No local page data exists for the given normalized page URL',
+            )
+        }
 
         const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
