@@ -51,6 +51,10 @@ export default class TabManagementBackground {
             //     this.setTabAsIndexable,
             // ),
         }
+
+        options.browserAPIs.tabs.onRemoved.addListener((tabId) =>
+            this.events.emit('tabRemoved', { tabId }),
+        )
     }
 
     static isTabLoaded = (tab: Tabs.Tab) => tab.status === 'complete'

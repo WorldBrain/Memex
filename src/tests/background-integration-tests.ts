@@ -113,6 +113,7 @@ export async function setupBackgroundIntegrationTest(
         tabs: {
             query: () => [],
             get: () => null,
+            onRemoved: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},
