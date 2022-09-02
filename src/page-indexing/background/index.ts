@@ -49,6 +49,8 @@ import {
 import type { BrowserSettingsStore } from 'src/util/settings'
 
 interface ContentInfo {
+    /** Timestamp in ms of when this data was stored. */
+    asOf: number
     locators: ContentLocator[]
     primaryIdentifier: ContentIdentifier // this is the one we store in the DB
     aliasIdentifiers: ContentIdentifier[] // these are the ones of the other URLs pointing to the primaryNormalizedUrl
@@ -62,6 +64,8 @@ export interface LocalPageIndexingSettings {
 }
 
 export class PageIndexingBackground {
+    static ONE_WEEK_MS = 604800000
+
     storage: PageStorage
     persistentStorage: PersistentPageStorage
     fetch?: typeof fetch
@@ -146,7 +150,10 @@ export class PageIndexingBackground {
             locators: ContentLocator[]
         }
 
-        if (!contentInfo) {
+        if (
+            !contentInfo ||
+            Date.now() - contentInfo.asOf > PageIndexingBackground.ONE_WEEK_MS
+        ) {
             stored = await this.storage.getContentIdentifier({
                 fingerprints: params.fingerprints,
             })
@@ -158,6 +165,7 @@ export class PageIndexingBackground {
                     fullUrl: `https://${generatedNormalizedUrl}`,
                 }
                 contentInfo = {
+                    asOf: Date.now(),
                     primaryIdentifier: generatedIdentifier,
                     locators: [],
                     aliasIdentifiers: [regularIdentifier],
@@ -168,6 +176,7 @@ export class PageIndexingBackground {
                 contentInfo = pageContentInfo[
                     stored.identifier.normalizedUrl
                 ] ?? {
+                    asOf: Date.now(),
                     primaryIdentifier: stored.identifier,
                     locators: stored.locators,
                     aliasIdentifiers: stored.locators.map((locator) => ({
