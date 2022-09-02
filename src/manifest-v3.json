@@ -30,8 +30,10 @@
     "omnibox": {
         "keyword": "m"
     },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: file:"
+    },
     "permissions": [
-        "<all_urls>",
         "alarms",
         "idle",
         "bookmarks",
@@ -44,5 +46,23 @@
         "storage",
         "webRequest",
         "declarativeNetRequest"
+    ],
+    "host_permissions": ["<all_urls>"],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/lib/pdf.worker.min.js",
+                "/img/*",
+                "/content_script*.css",
+                "/fonts/*",
+                "content_script_*.js",
+                "file:/*",
+                "chrome-extension:/*",
+                "blob:*",
+                "data:*",
+                "filesystem:/*"
+            ],
+            "matches": ["<all_urls>"]
+        }
     ]
 }
