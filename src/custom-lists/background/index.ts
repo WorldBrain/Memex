@@ -202,7 +202,7 @@ export default class CustomListBackground {
             return true
         })
 
-        const fingerprints = this.options.pages.getContentFingerprints({
+        const fingerprints = await this.options.pages.getContentFingerprints({
             normalizedUrl: normalizedPageUrl,
         })
 

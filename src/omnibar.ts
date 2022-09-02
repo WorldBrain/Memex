@@ -23,6 +23,7 @@ import TabManagementBackground from './tab-management/background'
 import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
+import { BrowserSettingsStore } from './util/settings'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
@@ -38,6 +39,10 @@ export async function main() {
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
         persistentStorageManager: createPersistentStorageManager(),
+        pageIndexingSettingsStore: new BrowserSettingsStore(
+            browser.storage.local,
+            { prefix: 'pageIndexing.' },
+        ),
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,

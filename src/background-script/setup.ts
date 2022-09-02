@@ -212,15 +212,19 @@ export function createBackgroundModules(options: {
     })
 
     const pages = new PageIndexingBackground({
-        storageManager,
         persistentStorageManager: options.persistentStorageManager,
         fetchPageData: options.fetchPageDataProcessor,
+        pageIndexingSettingsStore: new BrowserSettingsStore(
+            options.browserAPIs.storage.local,
+            { prefix: 'pageIndexing.' },
+        ),
         createInboxEntry,
+        storageManager,
         tabManagement,
         getNow,
     })
-    tabManagement.events.on('tabRemoved', (event) => {
-        pages.handleTabClose(event)
+    tabManagement.events.on('tabRemoved', async (event) => {
+        await pages.handleTabClose(event)
     })
     const bookmarks = new BookmarksBackground({
         storageManager,
