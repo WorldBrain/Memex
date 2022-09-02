@@ -5099,15 +5099,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     })
 
                                 expect(
-                                    (
-                                        await setup.browserAPIs.storage.local.get(
-                                            ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
-                                        )
-                                    )[
-                                        ContentSharingBackground
-                                            .REMOTE_PAGE_ID_LOOKUP_CACHE_NAME
-                                    ],
-                                ).toEqual(undefined)
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
+                                ).toEqual(null)
                                 expect(
                                     await serverStorage.modules.contentSharing.getPageInfoByCreatorAndUrl(
                                         {
@@ -5122,14 +5117,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
 
                                 expect(
-                                    (
-                                        await setup.browserAPIs.storage.local.get(
-                                            ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
-                                        )
-                                    )[
-                                        ContentSharingBackground
-                                            .REMOTE_PAGE_ID_LOOKUP_CACHE_NAME
-                                    ],
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
                                 ).toEqual({
                                     [normalizedPageUrl]: {
                                         remoteId: remotePageId,
@@ -5173,14 +5163,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ),
                                 ).toEqual(remotePageId)
                                 expect(
-                                    (
-                                        await setup.browserAPIs.storage.local.get(
-                                            ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
-                                        )
-                                    )[
-                                        ContentSharingBackground
-                                            .REMOTE_PAGE_ID_LOOKUP_CACHE_NAME
-                                    ],
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
                                 ).toEqual({
                                     [normalizedPageUrl]: {
                                         remoteId: remotePageId,

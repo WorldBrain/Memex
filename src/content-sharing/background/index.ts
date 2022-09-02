@@ -1,5 +1,4 @@
 import pick from 'lodash/pick'
-import type { Storage } from 'webextension-polyfill'
 import type StorageManager from '@worldbrain/storex'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
@@ -22,11 +21,16 @@ import type AnnotationStorage from 'src/annotations/background/storage'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
+import type { BrowserSettingsStore } from 'src/util/settings'
+
+export interface LocalContentSharingSettings {
+    remotePageIdLookup: {
+        [normalizedUrl: string]: { remoteId: string; asOf: number }
+    }
+}
 
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
-    static REMOTE_PAGE_ID_LOOKUP_CACHE_NAME =
-        '@ContentSharingBG-remote_page_id_lookup_cache'
 
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
@@ -41,9 +45,11 @@ export default class ContentSharingBackground {
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
-            storageAPI: Storage.Static
             services: Pick<Services, 'contentSharing'>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
+            contentSharingSettingsStore: BrowserSettingsStore<
+                LocalContentSharingSettings
+            >
             captureException?: (e: Error) => void
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
@@ -314,15 +320,12 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    private async getRemotePageIdLookupCache(): Promise<{
-        [normalizedUrl: string]: { remoteId: string; asOf: number }
-    }> {
-        const {
-            [ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME]: lookupCache,
-        } = await this.options.storageAPI.local.get(
-            ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME,
+    private async getRemotePageIdLookupCache(): Promise<
+        LocalContentSharingSettings['remotePageIdLookup']
+    > {
+        const lookupCache = await this.options.contentSharingSettingsStore.get(
+            'remotePageIdLookup',
         )
-
         return lookupCache ?? {}
     }
 
@@ -332,12 +335,13 @@ export default class ContentSharingBackground {
     ): Promise<void> {
         const lookupCache = await this.getRemotePageIdLookupCache()
 
-        await this.options.storageAPI.local.set({
-            [ContentSharingBackground.REMOTE_PAGE_ID_LOOKUP_CACHE_NAME]: {
+        await this.options.contentSharingSettingsStore.set(
+            'remotePageIdLookup',
+            {
                 ...lookupCache,
                 [normalizedPageUrl]: { remoteId, asOf: Date.now() },
             },
-        })
+        )
     }
 
     private async lookupRemotePageIdInCache(
