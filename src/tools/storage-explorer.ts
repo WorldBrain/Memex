@@ -11,6 +11,7 @@ import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fe
 import { createServices } from 'src/services'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import DeprecatedStorageModules from 'src/background-script/deprecated-storage-modules'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -81,7 +82,10 @@ async function main() {
         fetchPageDataProcessor: new MockFetchPageDataProcessor(),
         callFirebaseFunction: () => null as any,
     })
-    const storageModules = getBackgroundStorageModules(backgroundModules)
+    const storageModules = getBackgroundStorageModules(
+        backgroundModules,
+        new DeprecatedStorageModules({ storageManager }),
+    )
 
     const display = console['log'].bind(console) // Circumvent linter
     if (args.command === 'list-operations') {
