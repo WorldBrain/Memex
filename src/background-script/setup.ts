@@ -711,8 +711,14 @@ export function createBackgroundModules(options: {
             webNavigation: options.browserAPIs.webNavigation,
             getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
             getTab: bindMethod(options.browserAPIs.tabs, 'get'),
-            injectScriptInTab: (tabId, injection) =>
-                options.browserAPIs.tabs.executeScript(tabId, injection),
+            injectScriptInTab: (tabId, file) =>
+                // Manifest v2:
+                // options.browserAPIs.tabs.executeScript(tabId, file),
+                // Manifest v3:
+                options.browserAPIs.scripting.executeScript({
+                    target: { tabId },
+                    files: [file],
+                }),
             browserAPIs: options.browserAPIs,
         }),
         inPageUI: new InPageUIBackground({

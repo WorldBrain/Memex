@@ -38,7 +38,12 @@ export default class TabManagementBackground {
         private options: {
             browserAPIs: Pick<
                 Browser,
-                'tabs' | 'runtime' | 'webNavigation' | 'storage' | 'windows'
+                | 'tabs'
+                | 'runtime'
+                | 'webNavigation'
+                | 'storage'
+                | 'windows'
+                | 'scripting'
             >
             extractRawPageContent(tabId: number): Promise<RawPageContent>
         },
@@ -137,15 +142,21 @@ export default class TabManagementBackground {
             return
         }
 
-        for (const file of CONTENT_SCRIPTS) {
-            await this.options.browserAPIs.tabs
-                .executeScript(tab.id, { file, runAt: 'document_idle' })
-                .catch((err) => {
-                    const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
-                    captureException(new Error(message))
-                    console.error(message)
-                })
-        }
+        // Manifest v3:
+        await this.options.browserAPIs.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: CONTENT_SCRIPTS,
+        })
+        // Manifest v2:
+        // for (const file of CONTENT_SCRIPTS) {
+        //     await this.options.browserAPIs.tabs
+        //         .executeScript(tab.id, { file, runAt: 'document_idle' })
+        //         .catch((err) => {
+        //             const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
+        //             captureException(new Error(message))
+        //             console.error(message)
+        //         })
+        // }
     }
 
     /**
