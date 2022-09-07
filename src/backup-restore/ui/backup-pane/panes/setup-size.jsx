@@ -34,7 +34,7 @@ export default class OnboardingSizeContainer extends React.Component {
             console.error(e)
         }
         this.setState({
-            isAuthenticated: await localStorage.getItem('drive-token-access'),
+            // isAuthenticated: await localStorage.getItem('drive-token-access'),
             backendLocation: await remoteFunction('getBackendLocation')(),
         })
     }

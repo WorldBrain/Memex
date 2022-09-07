@@ -226,7 +226,7 @@ export default class BackupProcedure {
             events.emit('info', { info })
         }
 
-        await localStorage.removeItem('backup.onboarding.running-backup')
+        // await localStorage.removeItem('backup.onboarding.running-backup')
         console.log('finished incremental backup')
     }
 
@@ -323,6 +323,7 @@ export default class BackupProcedure {
 }
 
 export function _shouldStoreBlobs() {
-    const pref = localStorage.getItem('backup.save-blobs')
-    return pref !== 'false'
+    // const pref = localStorage.getItem('backup.save-blobs')
+    // return pref !== 'false'
+    return false
 }

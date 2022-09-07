@@ -40,7 +40,7 @@ import BackgroundScript from '.'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
-import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
+// import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
@@ -124,7 +124,7 @@ export interface BackgroundModules {
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
     inPageUI: InPageUIBackground
-    features: FeatureOptIns
+    // features: FeatureOptIns
     featuresBeta: FeaturesBeta
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
@@ -703,7 +703,7 @@ export function createBackgroundModules(options: {
                 )
             },
         }),
-        features: new FeatureOptIns(),
+        // features: new FeatureOptIns(),
         featuresBeta: new FeaturesBeta(),
         pages,
         bgScript,

@@ -199,11 +199,12 @@ export class LocalBackupInfoStorage implements BackupInfoStorage {
     // }
 
     async storeDate(key: BackupInfoKey, time: Date) {
-        localStorage.setItem(key, time ? JSON.stringify(time.getTime()) : null)
+        // localStorage.setItem(key, time ? JSON.stringify(time.getTime()) : null)
     }
 
     async retrieveDate(key: BackupInfoKey): Promise<Date | null> {
-        const value = localStorage.getItem(key)
+        // const value = localStorage.getItem(key)
+        const value = JSON.stringify(new Date())
         if (!value) {
             return null
         }
@@ -217,7 +218,7 @@ export class LocalBackupInfoStorage implements BackupInfoStorage {
             lastProblemNotifShown: true,
         }
         for (const key of Object.keys(keys)) {
-            localStorage.removeItem(key)
+            // localStorage.removeItem(key)
         }
     }
 }

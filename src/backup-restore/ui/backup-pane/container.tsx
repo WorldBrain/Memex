@@ -83,7 +83,7 @@ export default class BackupSettingsContainer extends Component<Props> {
     async componentDidMount() {
         const state = await logic.getInitialState({
             analytics,
-            localStorage,
+            localStorage: {} as any,
             remoteFunction,
         })
         this.setState(state)
@@ -112,7 +112,7 @@ export default class BackupSettingsContainer extends Component<Props> {
             screenConfig,
             eventProcessor: logic.processEvent,
             dependencies: {
-                localStorage,
+                localStorage: {} as any,
                 analytics,
                 remoteFunction,
             },

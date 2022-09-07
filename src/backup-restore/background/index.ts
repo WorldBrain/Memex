@@ -20,6 +20,7 @@ import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export * from './backend'
 
+// TODO mv3: move web API localStorage usages to web ext API equivalent
 export class BackupBackgroundModule {
     storageManager: Storex
     searchIndex: SearchIndex
@@ -199,7 +200,7 @@ export class BackupBackgroundModule {
                     return this.estimateInitialBackupSize()
                 },
                 setBackupBlobs: (info, saveBlobs) => {
-                    localStorage.setItem('backup.save-blobs', saveBlobs)
+                    // localStorage.setItem('backup.save-blobs', saveBlobs)
                 },
 
                 forgetAllChanges: async () => {
@@ -285,17 +286,18 @@ export class BackupBackgroundModule {
     }
 
     async isAutomaticBackupEnabled() {
-        return (
-            localStorage.getItem('backup.automatic-backups-enabled') === 'true'
-        )
+        return false
+        // return (
+        //     localStorage.getItem('backup.automatic-backups-enabled') === 'true'
+        // )
     }
 
     async enableAutomaticBackup() {
-        localStorage.setItem('backup.automatic-backups-enabled', 'true')
+        // localStorage.setItem('backup.automatic-backups-enabled', 'true')
     }
 
     async disableAutomaticBackup() {
-        localStorage.setItem('backup.automatic-backups-enabled', 'false')
+        // localStorage.setItem('backup.automatic-backups-enabled', 'false')
     }
 
     async scheduleAutomaticBackupIfEnabled() {
@@ -418,7 +420,7 @@ export class BackupBackgroundModule {
         }
         this.backupProcedure.events.once('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
-            localStorage.setItem('progress-successful', 'true')
+            // localStorage.setItem('progress-successful', 'true')
 
             this.backupInfoStorage.storeDate('lastBackupFinish', new Date())
             always()

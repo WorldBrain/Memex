@@ -13,3 +13,26 @@ export interface BackupInterface<Role extends RemoteFunctionRole> {
     getBackupTimes: RemotePositionalFunction<Role, [], BackupTimes>
     startBackup: RemotePositionalFunction<Role, [], void>
 }
+
+export interface LocalBackupSettings {
+    saveBlobs: any
+    lastBackup: Date
+    accessTokenExpiry: Date
+    lastBackupFinished: Date
+    lastProblemNotifShown: Date
+
+    accessToken: string
+    refreshToken: string
+    backendLocation: string
+
+    isOnboarding: boolean
+    runningBackup: boolean
+    runningRestore: boolean
+    progressSuccess: boolean
+    hasInitialBackup: boolean
+    driveAuthenticated: boolean
+    progressSuccessful: boolean
+    backupIsAuthenticating: boolean
+    restoreIsAuthenticating: boolean
+    automaticBackupsEnabled: boolean
+}

@@ -127,26 +127,28 @@ export class LocalStorageDriveTokenStore implements DriveTokenStore {
     }
 
     async storeAccessToken(token: string, expiryDate: Date): Promise<any> {
-        localStorage.setItem(this.prefix + 'access', token)
-        localStorage.setItem(
-            this.prefix + 'access-expiry',
-            expiryDate.getTime().toString(),
-        )
+        // localStorage.setItem(this.prefix + 'access', token)
+        // localStorage.setItem(
+        //     this.prefix + 'access-expiry',
+        //     expiryDate.getTime().toString(),
+        // )
     }
 
     async retrieveAccessToken() {
-        const expiryString = localStorage.getItem(this.prefix + 'access-expiry')
-        return {
-            token: localStorage.getItem(this.prefix + 'access'),
-            expiryDate: expiryString && new Date(parseFloat(expiryString)),
-        }
+        // const expiryString = localStorage.getItem(this.prefix + 'access-expiry')
+        // return {
+        //     token: localStorage.getItem(this.prefix + 'access'),
+        //     expiryDate: expiryString && new Date(parseFloat(expiryString)),
+        // }
+        return { token: '', expiryDate: new Date() }
     }
 
     async storeRefreshToken(token: string) {
-        localStorage.setItem(this.prefix + 'refresh', token)
+        // localStorage.setItem(this.prefix + 'refresh', token)
     }
 
     async retrieveRefreshToken() {
-        return localStorage.getItem(this.prefix + 'refresh')
+        // return localStorage.getItem(this.prefix + 'refresh')
+        return ''
     }
 }
