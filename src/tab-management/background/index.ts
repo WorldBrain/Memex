@@ -11,7 +11,7 @@ import type { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import type { LoggableTabChecker } from 'src/activity-logger/background/types'
 import { isLoggable } from 'src/activity-logger'
-import { blacklist } from 'src/blacklist/background'
+// import { blacklist } from 'src/blacklist/background'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isExtensionTab } from '../utils'
@@ -169,7 +169,10 @@ export default class TabManagementBackground {
             return false
         }
 
-        const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
-        return !isBlacklisted({ url })
+        return true
+
+        // TODO mv3: make blacklist work again
+        // const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
+        // return !isBlacklisted({ url })
     }
 }

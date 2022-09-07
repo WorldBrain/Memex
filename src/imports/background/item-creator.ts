@@ -67,7 +67,8 @@ export default class ImportItemCreator {
     _histKeys
     _completedServicesKeys
     existingDataReady
-    _isBlacklisted
+    // TODO mv3: fix blacklist
+    _isBlacklisted = (a: any) => false
     _servicesData
 
     /**
@@ -124,7 +125,7 @@ export default class ImportItemCreator {
     async initData(blobUrl?, allowTypes?) {
         this.existingDataReady = new Promise<void>(async (resolve, reject) => {
             try {
-                this._isBlacklisted = await checkWithBlacklist()
+                // this._isBlacklisted = await checkWithBlacklist()
 
                 // Grab existing data keys from DB
                 const keySets = await this._existingKeys()
