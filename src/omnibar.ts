@@ -38,7 +38,12 @@ export async function main() {
         storageManager,
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
-        persistentStorageManager: createPersistentStorageManager(),
+        persistentStorageManager: createPersistentStorageManager({
+            idbImplementation: {
+                factory: self.indexedDB,
+                range: self.IDBKeyRange,
+            },
+        }),
         pageIndexingSettingsStore: new BrowserSettingsStore(
             browser.storage.local,
             { prefix: 'pageIndexing.' },

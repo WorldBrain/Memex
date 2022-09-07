@@ -1,7 +1,6 @@
-import StorageManager from '@worldbrain/storex'
-import { BackgroundModules } from 'src/background-script/setup'
-import {
-    StorageDiff,
+import type StorageManager from '@worldbrain/storex'
+import type { BackgroundModules } from 'src/background-script/setup'
+import type {
     StorageCollectionDiff,
     StorageChangeDetector,
 } from './storage-change-detector'
@@ -12,14 +11,14 @@ import {
     registerBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
 } from './background-integration-tests'
-import MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { ServerStorage } from 'src/storage/types'
-import { Browser } from 'webextension-polyfill'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import type MemoryBrowserStorage from 'src/util/tests/browser-storage'
+import type { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import type { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import type { ServerStorage } from 'src/storage/types'
+import type { Browser } from 'webextension-polyfill'
+import type { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import fetchMock from 'fetch-mock'
-import { Services } from 'src/services/types'
+import type { AuthServices, Services } from 'src/services/types'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -66,6 +65,7 @@ export interface BackgroundIntegrationTestSetup {
     backgroundModules: BackgroundModules
     browserAPIs: Browser
     services: Services
+    authServices: AuthServices
     fetchPageDataProcessor: MockFetchPageDataProcessor | null
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector

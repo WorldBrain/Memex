@@ -1,11 +1,11 @@
-import {
+import type {
     UserPlan,
     Claims,
     UserFeature,
     SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { SettingStore } from 'src/util/settings'
-import { AuthSettings } from './types'
+import type { SettingStore } from 'src/util/settings'
+import type { AuthSettings } from './types'
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (

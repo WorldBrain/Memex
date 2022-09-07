@@ -8,7 +8,7 @@ import Logic from './logic'
 import type { State, Event } from './types'
 
 async function setupTest(
-    { backgroundModules, services, createElement }: UILogicTestDevice,
+    { backgroundModules, authServices, createElement }: UILogicTestDevice,
     args?: {
         browser?: 'chrome' | 'firefox'
         isLoggedOut?: boolean
@@ -17,7 +17,7 @@ async function setupTest(
     },
 ) {
     if (!args?.isLoggedOut) {
-        await services.auth.loginWithEmailAndPassword(
+        await authServices.auth.loginWithEmailAndPassword(
             TEST_USER.email,
             'password',
         )

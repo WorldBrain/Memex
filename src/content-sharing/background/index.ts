@@ -45,7 +45,7 @@ export default class ContentSharingBackground {
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
-            services: Pick<Services, 'contentSharing'>
+            servicesPromise: Promise<Pick<Services, 'contentSharing'>>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
             contentSharingSettingsStore: BrowserSettingsStore<
                 LocalContentSharingSettings
@@ -108,51 +108,63 @@ export default class ContentSharingBackground {
                     }),
             },
         })
-        this.listSharingService = new ListSharingService({
-            storage: this.storage,
-            waitForSync: options.waitForSync,
-            generateServerId: options.generateServerId,
-            listKeysService: options.services.contentSharing,
-            annotationSharingService: this.annotationSharingService,
-            listStorage: {
-                getList: (listId) =>
-                    options.customListsBG.storage.fetchListById(listId),
-                getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
-                    options.customListsBG.storage.fetchListPageEntriesByUrls({
+
+        options.servicesPromise.then((services) => {
+            this.listSharingService = new ListSharingService({
+                storage: this.storage,
+                waitForSync: options.waitForSync,
+                generateServerId: options.generateServerId,
+                listKeysService: services.contentSharing,
+                annotationSharingService: this.annotationSharingService,
+                listStorage: {
+                    getList: (listId) =>
+                        options.customListsBG.storage.fetchListById(listId),
+                    getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
+                        options.customListsBG.storage.fetchListPageEntriesByUrls(
+                            {
+                                listId,
+                                normalizedPageUrls,
+                            },
+                        ),
+                    insertPageToList: ({
                         listId,
-                        normalizedPageUrls,
-                    }),
-                insertPageToList: ({
-                    listId,
-                    fullPageUrl,
-                    normalizedPageUrl,
-                }) =>
-                    options.customListsBG.storage.insertPageToList({
-                        listId,
-                        fullUrl: fullPageUrl,
-                        pageUrl: normalizedPageUrl,
-                    }),
-            },
-            annotationStorage: {
-                getAnnotations: (annotationUrls) =>
-                    options.annotations.getAnnotations(annotationUrls),
-                getEntriesByList: (listId) =>
-                    options.annotations.findListEntriesByList({ listId }),
-                insertAnnotationToList: async (entry) =>
-                    options.annotations.insertAnnotToList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
-                removeAnnotationFromList: async (entry) =>
-                    options.annotations.removeAnnotFromList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
-            },
+                        fullPageUrl,
+                        normalizedPageUrl,
+                    }) =>
+                        options.customListsBG.storage.insertPageToList({
+                            listId,
+                            fullUrl: fullPageUrl,
+                            pageUrl: normalizedPageUrl,
+                        }),
+                },
+                annotationStorage: {
+                    getAnnotations: (annotationUrls) =>
+                        options.annotations.getAnnotations(annotationUrls),
+                    getEntriesByList: (listId) =>
+                        options.annotations.findListEntriesByList({ listId }),
+                    insertAnnotationToList: async (entry) =>
+                        options.annotations.insertAnnotToList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
+                    removeAnnotationFromList: async (entry) =>
+                        options.annotations.removeAnnotFromList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
+                },
+            })
         })
 
         this.remoteFunctions = {
-            ...options.services.contentSharing,
+            getExistingKeyLinksForList: async (...args) => {
+                const { contentSharing } = await options.servicesPromise
+                return contentSharing.getExistingKeyLinksForList(...args)
+            },
+            deleteKeyLink: async (...args) => {
+                const { contentSharing } = await options.servicesPromise
+                return contentSharing.deleteKeyLink(...args)
+            },
             shareList: this.shareList,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
@@ -253,6 +265,7 @@ export default class ContentSharingBackground {
     }
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
+        await this.options.servicesPromise
         return this.listSharingService.shareList(options)
     }
 

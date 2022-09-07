@@ -36,6 +36,11 @@ import { createServices } from './services'
 import initSentry, { captureException } from 'src/util/raven'
 import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
+import { createAuthServices } from './services/local-services'
+import {
+    SharedListKey,
+    SharedListRoleID,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 
 let __debugCounter = 0
 
@@ -76,16 +81,28 @@ export async function main() {
     })
 
     const storageManager = initStorex()
-    const persistentStorageManager = createPersistentStorageManager()
-    const services = await createServices({
+    const persistentStorageManager = createPersistentStorageManager({
+        idbImplementation: {
+            factory: self.indexedDB,
+            range: self.IDBKeyRange,
+        },
+    })
+    const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
         manifestVersion: '2',
     })
+    const servicesPromise = createServices({
+        backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
+        getServerStorage,
+        manifestVersion: '2',
+        authService: authServices.auth,
+    })
     __debugCounter++
 
     const backgroundModules = createBackgroundModules({
-        services,
+        authServices,
+        servicesPromise,
         getServerStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
@@ -101,6 +118,7 @@ export async function main() {
             return result.data as Promise<Returns>
         },
     })
+
     __debugCounter++
     registerBackgroundModuleCollections({
         storageManager,
@@ -109,18 +127,15 @@ export async function main() {
     })
 
     await storageManager.finishInitialization()
-    __debugCounter++
     await persistentStorageManager.finishInitialization()
     __debugCounter++
+    __debugCounter++
 
-    const { setStorageLoggingEnabled } = await setStorageMiddleware(
-        storageManager,
-        {
-            storexHub: backgroundModules.storexHub,
-            contentSharing: backgroundModules.contentSharing,
-            personalCloud: backgroundModules.personalCloud,
-        },
-    )
+    const { setStorageLoggingEnabled } = setStorageMiddleware(storageManager, {
+        storexHub: backgroundModules.storexHub,
+        contentSharing: backgroundModules.contentSharing,
+        personalCloud: backgroundModules.personalCloud,
+    })
     __debugCounter++
     await setupBackgroundModules(backgroundModules, storageManager)
     __debugCounter++
@@ -152,7 +167,7 @@ export async function main() {
         },
         notifications: { create: createNotification } as any,
         bookmarks: backgroundModules.bookmarks.remoteFunctions,
-        features: backgroundModules.features,
+        // features: backgroundModules.features,
         featuresBeta: backgroundModules.featuresBeta,
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
@@ -162,6 +177,17 @@ export async function main() {
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
+    __debugCounter++
+
+    const services = await servicesPromise
+    services.contentSharing.preKeyGeneration = async (params: {
+        key: Pick<SharedListKey, 'roleID' | 'disabled'>
+    }) => {
+        if (params.key.roleID > SharedListRoleID.Commenter) {
+            await backgroundModules.personalCloud.waitForSync()
+        }
+    }
+
     __debugCounter++
 
     // Attach interesting features onto global globalThis scope for interested users

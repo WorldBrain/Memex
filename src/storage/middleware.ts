@@ -7,7 +7,7 @@ import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watc
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import { WATCHED_COLLECTIONS } from './constants'
 
-export async function setStorageMiddleware(
+export function setStorageMiddleware(
     storageManager: StorageManager,
     options: {
         storexHub?: StorexHubBackground

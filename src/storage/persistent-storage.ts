@@ -4,12 +4,12 @@ import {
     IndexedDbImplementation,
 } from '@worldbrain/storex-backend-dexie'
 
-export function createPersistentStorageManager(options?: {
-    idbImplementation?: IndexedDbImplementation
+export function createPersistentStorageManager(options: {
+    idbImplementation: IndexedDbImplementation
 }) {
     const backend = new DexieStorageBackend({
         dbName: 'memexPersistent',
-        idbImplementation: options?.idbImplementation,
+        idbImplementation: options.idbImplementation,
     })
 
     return new StorageManager({ backend })

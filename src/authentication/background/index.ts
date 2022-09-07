@@ -34,6 +34,7 @@ import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
 import type { FirebaseError } from 'firebase/app'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import type { AuthServices } from 'src/services/types'
 
 export class AuthBackground {
     authService: AuthService
@@ -46,8 +47,7 @@ export class AuthBackground {
 
     constructor(
         public options: {
-            authService: AuthService
-            subscriptionService: SubscriptionsService
+            authServices: AuthServices
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
             getUserManagement: () => Promise<UserStorage>
@@ -55,9 +55,9 @@ export class AuthBackground {
             jobScheduler: JobScheduler
         },
     ) {
-        this.authService = options.authService
+        this.authService = options.authServices.auth
         this.backendFunctions = options.backendFunctions
-        this.subscriptionService = options.subscriptionService
+        this.subscriptionService = options.authServices.subscriptions
         this.settings = new BrowserSettingsStore<AuthSettings>(
             options.localStorageArea,
             {

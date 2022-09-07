@@ -6,12 +6,14 @@ async function setupTest() {
     const {
         backgroundModules,
         getServerStorage,
+        authServices,
         services,
     } = await setupBackgroundIntegrationTest()
 
     return {
         activityIndicatorBG: backgroundModules.activityIndicator,
         getServerStorage,
+        authServices,
         services,
     }
 }
@@ -20,7 +22,7 @@ describe('Activity indicator background tests', () => {
     it('should signal on checking for unseen activities when logged out', async () => {
         const {
             activityIndicatorBG,
-            services: { auth },
+            authServices: { auth },
         } = await setupTest()
 
         auth.signOut()
@@ -34,7 +36,8 @@ describe('Activity indicator background tests', () => {
         const {
             activityIndicatorBG,
             getServerStorage,
-            services: { activityStreams, auth },
+            services: { activityStreams },
+            authServices: { auth },
         } = await setupTest()
 
         const loginTestUser = ({ id }: UserReference) => {
@@ -156,7 +159,7 @@ describe('Activity indicator background tests', () => {
     it('should be able to mark activities as seen', async () => {
         const {
             activityIndicatorBG,
-            services: { auth },
+            authServices: { auth },
         } = await setupTest()
 
         await (auth as MemoryAuthService).loginWithEmailAndPassword(

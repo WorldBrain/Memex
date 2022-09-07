@@ -31,6 +31,7 @@ import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/st
 import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import { createAuthServices } from 'src/services/local-services'
 
 export const BASE_TIMESTAMP = 555
 
@@ -357,10 +358,16 @@ export async function setupSyncBackgroundTest(
     }
 
     for (let i = 0; i < options.deviceCount; ++i) {
+        const authServices = createAuthServices({
+            backend: 'memory',
+            getServerStorage,
+            manifestVersion: '2',
+        })
         const services = await createServices({
             backend: 'memory',
             getServerStorage,
             manifestVersion: '2',
+            authService: authServices.auth,
         })
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.manager,

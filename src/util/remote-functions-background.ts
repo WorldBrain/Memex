@@ -23,7 +23,7 @@ export interface RemoteFunctionImplementations<
     auth: AuthRemoteFunctionsInterface
     analytics: AnalyticsInterface
     subscription: SubscriptionsService
-    features: FeaturesInterface
+    // features: FeaturesInterface
     featuresBeta: FeaturesBetaInterface
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
@@ -42,7 +42,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     bookmarks: runInBackground(),
     auth: runInBackground(),
     subscription: runInBackground(),
-    features: runInBackground(),
+    // features: runInBackground(),
     featuresBeta: runInBackground(),
     tags: runInBackground(),
     collections: runInBackground(),
@@ -57,7 +57,8 @@ export const notifications = remoteFunctions.notifications
 export const bookmarks = remoteFunctions.bookmarks
 export const auth = remoteFunctions.auth
 export const subscription = remoteFunctions.subscription
-export const features = remoteFunctions.features
+// export const features = remoteFunctions.features
+export const features = {} as any
 export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections

@@ -72,8 +72,8 @@ class BackgroundScript {
             openLearnMoreTab: this.openLearnMorePage,
         }
 
-        window['___removeDupeSpaces'] = () =>
-            removeDupeSpaces({ storageManager: deps.storageManager })
+        // window['___removeDupeSpaces'] = () =>
+        // removeDupeSpaces({ storageManager: deps.storageManager })
     }
 
     get defaultUninstallURL() {

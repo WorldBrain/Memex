@@ -1,6 +1,5 @@
 import React from 'react'
 import onClickOutside from 'react-onclickoutside'
-import { features } from 'src/util/remote-functions-background'
 
 import Tooltip from './tooltip'
 import {

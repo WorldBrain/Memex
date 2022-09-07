@@ -3,7 +3,7 @@ import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
-import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+// import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
 
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
@@ -28,7 +28,8 @@ export class InPageUIBackground {
             ),
         }
 
-        this.setupContextMenuEntries()
+        // TODO mv3: make this work
+        // this.setupContextMenuEntries()
     }
 
     setupRemoteFunctions() {
@@ -36,19 +37,20 @@ export class InPageUIBackground {
     }
 
     private async getHighlightContextMenuTitle(): Promise<string> {
-        const {
-            shortcutsEnabled,
-            createHighlight,
-        } = await getKeyboardShortcutsState()
+        // const {
+        //     shortcutsEnabled,
+        //     createHighlight,
+        // } = await getKeyboardShortcutsState()
         const baseTitle = 'Highlight with Memex'
+        return baseTitle
 
-        if (!createHighlight.shortcut.length) {
-            return baseTitle
-        } else if (!shortcutsEnabled || !createHighlight.enabled) {
-            return `${baseTitle} -- ${createHighlight.shortcut} (disabled)`
-        }
+        // if (!createHighlight.shortcut.length) {
+        //     return baseTitle
+        // } else if (!shortcutsEnabled || !createHighlight.enabled) {
+        //     return `${baseTitle} -- ${createHighlight.shortcut} (disabled)`
+        // }
 
-        return `${baseTitle} (${createHighlight.shortcut})`
+        // return `${baseTitle} (${createHighlight.shortcut})`
     }
 
     async setupContextMenuEntries() {

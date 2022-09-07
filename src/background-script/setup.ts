@@ -42,7 +42,7 @@ import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
 // import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
-import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
+// import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
@@ -73,7 +73,7 @@ import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { SyncSettingsBackground } from 'src/sync-settings/background'
-import { Services } from 'src/services/types'
+import { AuthServices, Services } from 'src/services/types'
 import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -109,7 +109,7 @@ export interface BackgroundModules {
     notifications: NotificationBackground
     social: SocialBackground
     pdfBg: PDFBackground
-    connectivityChecker: ConnectivityCheckerBackground
+    // connectivityChecker: ConnectivityCheckerBackground
     activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -144,7 +144,8 @@ const globalFetch: typeof fetch =
 export function createBackgroundModules(options: {
     storageManager: StorageManager
     persistentStorageManager: StorageManager
-    services: Services
+    authServices: AuthServices
+    servicesPromise: Promise<Services>
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
     localStorageChangesManager: StorageChangesManager
@@ -277,7 +278,8 @@ export function createBackgroundModules(options: {
     const social = new SocialBackground({ storageManager })
 
     const activityIndicator = new ActivityIndicatorBackground({
-        services: options.services,
+        authServices: options.authServices,
+        servicesPromise: options.servicesPromise,
         syncSettings: syncSettingsStore,
         getActivityStreamsStorage: async () =>
             (await options.getServerStorage()).modules.activityStreams,
@@ -305,7 +307,7 @@ export function createBackgroundModules(options: {
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
         getServerStorage,
-        services: options.services,
+        authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
         ),
@@ -314,10 +316,9 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
-            authService: options.services.auth,
+            authServices: options.authServices,
             jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),
-            subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
             backendFunctions: {
                 registerBetaUser: async (params) =>
@@ -386,10 +387,10 @@ export function createBackgroundModules(options: {
         prefix: 'localSettings.',
     })
 
-    const connectivityChecker = new ConnectivityCheckerBackground({
-        xhr: new XMLHttpRequest(),
-        jobScheduler: jobScheduler.scheduler,
-    })
+    // const connectivityChecker = new ConnectivityCheckerBackground({
+    //     xhr: new XMLHttpRequest(),
+    //     jobScheduler: jobScheduler.scheduler,
+    // })
 
     const storePageContent = async (content: PipelineRes): Promise<void> => {
         await pages.createOrUpdatePage(content)
@@ -587,7 +588,7 @@ export function createBackgroundModules(options: {
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
-        services: options.services,
+        servicesPromise: options.servicesPromise,
         captureException: options.captureException,
         generateServerId,
     })
@@ -618,19 +619,13 @@ export function createBackgroundModules(options: {
         },
     })
 
-    options.services.contentSharing.preKeyGeneration = async (params) => {
-        if (params.key.roleID > SharedListRoleID.Commenter) {
-            await personalCloud.waitForSync()
-        }
-    }
-
     return {
         auth,
         social,
         analytics,
         jobScheduler,
         notifications,
-        connectivityChecker,
+        // connectivityChecker,
         readable: reader,
         pdfBg,
         directLinking,
@@ -732,7 +727,7 @@ export function createBackgroundModules(options: {
         contentSharing,
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
-            services: options.services,
+            servicesPromise: options.servicesPromise,
         }),
     }
 }
@@ -755,8 +750,9 @@ export async function setupBackgroundModules(
         bookmarks: backgroundModules.bookmarks,
     })
 
+    // TODO mv3: migrate web req APIs
+    // backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.auth.registerRemoteEmitter()
-    backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
@@ -775,11 +771,12 @@ export async function setupBackgroundModules(
     backgroundModules.contentConversations.setupRemoteFunctions()
     backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
+    backgroundModules.backupModule.storage.setupChangeTracking()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
-    backgroundModules.backupModule.storage.setupChangeTracking()
 
-    await backgroundModules.pdfBg.setupRequestInterceptors()
+    // TODO mv3: migrate web req APIs
+    // await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
 

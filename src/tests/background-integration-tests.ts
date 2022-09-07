@@ -44,6 +44,7 @@ import { Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
+import { createAuthServices } from 'src/services/local-services'
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
@@ -86,12 +87,18 @@ export async function setupBackgroundIntegrationTest(
         options?.getServerStorage ?? createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
 
+    const authServices = createAuthServices({
+        backend: 'memory',
+        getServerStorage,
+        manifestVersion: '2',
+    })
     const services =
         options?.services ??
         (await createServices({
             backend: 'memory',
             getServerStorage,
             manifestVersion: '2',
+            authService: authServices.auth,
         }))
 
     const browserAPIs = ({
@@ -143,8 +150,7 @@ export async function setupBackgroundIntegrationTest(
 
     const auth: AuthBackground = new AuthBackground({
         jobScheduler,
-        authService: services.auth,
-        subscriptionService: services.subscriptions,
+        authServices,
         remoteEmitter: { emit: async () => {} },
         localStorageArea: browserLocalStorage,
         backendFunctions: {
@@ -179,7 +185,8 @@ export async function setupBackgroundIntegrationTest(
         browserAPIs,
         fetchPageDataProcessor,
         auth,
-        services,
+        servicesPromise: new Promise((res) => res(services)),
+        authServices,
         fetch,
         userMessageService: userMessages,
         callFirebaseFunction: (name, ...args) => {
@@ -264,8 +271,9 @@ export async function setupBackgroundIntegrationTest(
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
-        authService: services.auth as MemoryAuthService,
-        subscriptionService: services.subscriptions as MemorySubscriptionsService,
+        authServices,
+        authService: authServices.auth as MemoryAuthService,
+        subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
         getServerStorage,
         browserAPIs,
         fetchPageDataProcessor,
