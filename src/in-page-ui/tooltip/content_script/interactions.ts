@@ -92,7 +92,6 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 _setCloseMessageShown()
             }
         },
-        isFeatureEnabled: params.isFeatureEnabled,
     })
 
     setupTooltipTrigger(() => {

@@ -47,7 +47,6 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
-import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
@@ -251,8 +250,6 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
-                isFeatureEnabled: (feature) =>
-                    runInBackground<FeaturesInterface>().getFeature(feature),
             })
             components.tooltip?.resolve()
         },

@@ -20,7 +20,6 @@ import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
 } from 'src/in-page-ui/tooltip/types'
-import { UserFeatureOptIn } from 'src/features/background/feature-opt-ins'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -28,12 +27,10 @@ export interface Props extends AnnotationFunctions {
     createAndCopyDirectLink: any
     openSettings: any
     destroyTooltip: any
-    isFeatureEnabled(feature: UserFeatureOptIn): Promise<boolean>
 }
 
 interface TooltipContainerState {
     showTooltip: boolean
-    showCreateLink: boolean
     showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
     tooltipState: 'copied' | 'running' | 'pristine' | 'done'
@@ -42,7 +39,6 @@ interface TooltipContainerState {
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
         showTooltip: false,
-        showCreateLink: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
     }
@@ -50,9 +46,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     async componentDidMount() {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
-        this.setState({
-            showCreateLink: await this.props.isFeatureEnabled('DirectLink'),
-        })
     }
 
     componentWillUnmount() {
@@ -156,11 +149,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             case 'pristine':
                 return (
                     <InitialComponent
-                        createLink={
-                            this.state.showCreateLink
-                                ? this.createLink
-                                : undefined
-                        }
                         createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
                         closeTooltip={this.closeTooltip}

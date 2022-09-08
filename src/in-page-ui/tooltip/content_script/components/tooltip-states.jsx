@@ -36,7 +36,6 @@ const AnnotationTooltipText = styled.span`
 `
 
 export const InitialComponent = ({
-    createLink,
     createHighlight,
     createAnnotation,
     closeTooltip,
@@ -78,16 +77,6 @@ export const InitialComponent = ({
                 />
             </ButtonTooltip>
         </ButtonDiv>
-        {/* {createLink && (
-            <ButtonTooltip
-                tooltipText="Create Link to Highlight"
-                position="bottomHighlighter"
-            >
-                <div className={styles.button} onClick={createLink}>
-                    <img src={share} className={styles.buttonImg} />
-                </div>
-            </ButtonTooltip>
-        )} */}
         <ButtonDiv onClick={closeTooltip}>
             <ButtonTooltip
                 tooltipText={
@@ -112,7 +101,6 @@ export const InitialComponent = ({
 )
 
 InitialComponent.propTypes = {
-    createLink: PropTypes.func,
     createHighlight: PropTypes.func.isRequired,
     createAnnotation: PropTypes.func.isRequired,
     closeTooltip: PropTypes.func.isRequired,
