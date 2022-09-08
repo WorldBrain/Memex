@@ -70,6 +70,7 @@ class BackgroundScript {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
+            confirmBackgroundScriptLoaded: async () => {},
         }
 
         // window['___removeDupeSpaces'] = () =>

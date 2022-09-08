@@ -218,16 +218,11 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         this.setupRemoteEventListeners()
-        console.log(1)
 
         await loadInitial(this, async () => {
-            console.log(2)
             let nextState = await this.loadAuthStates(previousState)
-            console.log(3)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-            console.log(4)
             const localListsResult = await this.loadLocalListsData(nextState)
-            console.log(5)
             nextState = localListsResult.nextState
             await Promise.all([
                 this.loadRemoteListsData(
@@ -519,7 +514,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const searchState = this.withMutation(previousState, {
                     searchFilters,
                 })
-                console.log('before search')
                 let {
                     noteData,
                     pageData,
@@ -530,7 +524,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(searchState)
                         : await this.searchNotes(searchState)
-                console.log('post search:', noteData, pageData, results)
 
                 let noResultsType: NoResultsType = null
                 if (

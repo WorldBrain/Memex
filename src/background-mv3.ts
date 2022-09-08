@@ -1,13 +1,6 @@
-import browser, { Runtime } from 'webextension-polyfill'
-import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
-import { getToken } from 'firebase/messaging'
-import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
+import browser from 'webextension-polyfill'
 import {
     setupRpcConnection,
-    makeRemotelyCallable,
-    remoteFunction,
     setupRemoteFunctionsImplementations,
 } from './util/webextensionRPC'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
@@ -37,25 +30,15 @@ import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 // declare var self: ServiceWorkerGlobalScope
 
-const firebaseConfig = {
-    apiKey: process.env.FIREBASE_MEMEX_API_KEY,
-    authDomain: process.env.FIREBASE_MEMEX_AUTH_DOMAIN,
-    databaseURL: process.env.FIREBASE_MEMEX_DATABSE_URL,
-    projectId: process.env.FIREBASE_MEMEX_PROJECT_ID,
-    messagingSenderId: process.env.FIREBASE_MEMEX_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_MEMEX_APP_ID,
-    measurementId: process.env.FIREBASE_MEMEX_MEASUREMENT_ID,
-    storageBucket: process.env.FIREBASE_MEMEX_STORAGE_BUCKET,
-}
-
-// we have to register all event listeners (including RPC handlers)
-// in the first tick, meaning before awaiting any async functions
 async function main() {
     console.log('starting background worker')
-    const app = initializeApp(firebaseConfig)
-    const auth = getAuth(app)
-    const firestore = getFirestore(app)
-    const messaging = getMessaging(app)
+    const rpcManager = setupRpcConnection({
+        sideName: 'background',
+        role: 'background',
+        paused: true,
+    })
+
+    const firebase = getFirebase()
 
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
@@ -63,7 +46,7 @@ async function main() {
     initSentry({})
 
     if (process.env.USE_FIREBASE_EMULATOR === 'true') {
-        // TODO: FB emulator setup
+        // TODO mv3: FB emulator setup
     }
 
     const getServerStorage = createLazyServerStorage(
@@ -108,7 +91,6 @@ async function main() {
         storageManager,
         persistentStorageManager,
         callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
-            const firebase = getFirebase()
             const callable = firebase.functions().httpsCallable(name)
             const result = await callable(...args)
             return result.data as Promise<Returns>
@@ -159,6 +141,7 @@ async function main() {
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
+    rpcManager.unpause()
 
     // browser.runtime.onInstalled.addListener(async (details) => {
     //     console.log('ext install event fired:', details)
@@ -220,21 +203,6 @@ async function main() {
     //     )
     // })
     // setupRpcConnection({ sideName: 'background', role: 'background' })
-    // makeRemotelyCallable(
-    //     {
-    //         confirmBackgroundScriptLoaded: async () => {},
-    //         testCallable: async ({ tab }) => {
-    //             console.log('loaded', tab)
-    //             if (!tab?.id) {
-    //                 return
-    //             }
-    //             await browser.storage.local.set({ testLoadedTab: tab.id })
-    //             console.log(auth.currentUser)
-    //             // ;(globalThis as any)['firebase'] = firebase
-    //         },
-    //     },
-    //     { insertExtraArg: true },
-    // )
 
     // browser.alarms.create('test', { periodInMinutes: 5 })
     // browser.alarms.onAlarm.addListener(async (alarm) => {
