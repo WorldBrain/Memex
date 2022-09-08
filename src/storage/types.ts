@@ -6,6 +6,7 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 
 export type ServerStorageModules = {
     contentConversations: ContentConversationStorage
@@ -15,6 +16,7 @@ export type ServerStorageModules = {
     sharedSyncLog: SharedSyncLogStorage
     userManagement: UserStorage
     personalCloud: PersonalCloudStorage
+    discord: DiscordStorage
 }
 
 export interface ServerStorage {

@@ -123,6 +123,7 @@ export function createLazyServerStorage(
                     activityFollows,
                     contentConversations,
                     personalCloud,
+                    discord,
                 },
             }
             registerModuleMapCollections(
