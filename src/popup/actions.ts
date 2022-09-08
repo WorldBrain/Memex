@@ -5,7 +5,6 @@ import { Thunk } from './types'
 import { acts as bookmarkActs } from './bookmark-button'
 import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
-import { acts as blacklistActs } from './blacklist-button'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { PageIndexingInterface } from 'src/page-indexing/background/types'
@@ -15,7 +14,6 @@ const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
-const isURLBlacklistedRPC = remoteFunction('isURLBlacklisted')
 
 const bookmarks = runInBackground<BookmarksInterface>()
 
@@ -82,9 +80,6 @@ export const initState: () => Thunk = () => async (dispatch) => {
     }
 
     await dispatch(setTabAndUrl(currentTab.id, fullUrl))
-
-    const isBlacklisted = await isURLBlacklistedRPC(fullUrl)
-    dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
 
     try {
         await dispatch(setTabIsBookmarked(fullUrl))

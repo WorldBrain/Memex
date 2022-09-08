@@ -16,12 +16,6 @@ import {
     OPTIONS_URL,
     LEARN_MORE_URL,
 } from 'src/constants'
-
-// TODO: pass these deps down via constructor
-// import {
-//     constants as blacklistConsts,
-//     blacklist,
-// } from 'src/blacklist/background'
 import analytics from 'src/analytics'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
@@ -90,10 +84,6 @@ class BackgroundScript {
     }
 
     async handleInstallLogic(now = Date.now()) {
-        // TODO mv3: make blacklist work again
-        // Ensure default blacklist entries are stored (before doing anything else)
-        // await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
-
         analytics.trackEvent({ category: 'Global', action: 'installExtension' })
 
         await this.runOnboarding()

@@ -29,7 +29,6 @@ import {
     StorageModule,
 } from '@worldbrain/storex-pattern-modules'
 import { firebaseService } from '@worldbrain/memex-common/lib/firebase-backend/services/client'
-import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 import {
     setImportStateManager,
     ImportStateManager,
@@ -96,7 +95,6 @@ import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/ut
 import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
@@ -773,7 +771,6 @@ export async function setupBackgroundModules(
     backgroundModules.syncSettings.setupRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
     setupNotificationClickListener()
-    setupBlacklistRemoteFunctions()
 
     // TODO mv3: migrate web req APIs
     // await backgroundModules.pdfBg.setupRequestInterceptors()

@@ -67,8 +67,6 @@ export default class ImportItemCreator {
     _histKeys
     _completedServicesKeys
     existingDataReady
-    // TODO mv3: fix blacklist
-    _isBlacklisted = (a: any) => false
     _servicesData
 
     /**
@@ -162,7 +160,7 @@ export default class ImportItemCreator {
 
         for (const item of items) {
             // Exclude item if any of the standard checks fail
-            if (!isLoggable(item) || this._isBlacklisted(item)) {
+            if (!isLoggable(item)) {
                 continue
             }
 
