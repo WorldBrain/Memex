@@ -3,13 +3,9 @@ import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 
-import { setupScrollReporter } from 'src/activity-logger/content_script'
+// import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
-import {
-    loadAnnotationWhenReady,
-    setupRemoteDirectLinkFunction,
-} from 'src/annotations/content_script'
 import {
     remoteFunction,
     runInBackground,
@@ -41,7 +37,6 @@ import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
-import { TabManagementInterface } from 'src/tab-management/background/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
@@ -310,9 +305,7 @@ export async function main(
     })
 
     // 6. Setup other interactions with this page (things that always run)
-    setupScrollReporter()
-    loadAnnotationWhenReady()
-    setupRemoteDirectLinkFunction({ highlightRenderer })
+    // setupScrollReporter()
     initKeyboardShortcuts({
         inPageUI,
         createHighlight: annotationsFunctions.createHighlight({
