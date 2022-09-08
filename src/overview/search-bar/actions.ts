@@ -130,7 +130,6 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
-        base64Img: !fromOverview,
         usersInc: filters.usersInc(state),
         usersExc: filters.usersExc(state),
         hashtagsInc: filters.hashtagsInc(state),
