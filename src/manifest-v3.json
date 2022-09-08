@@ -12,6 +12,14 @@
     "background": {
         "service_worker": "background.js"
     },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["lib/browser-polyfill.js", "content_script.js"],
+            "css": ["/content_script.css"],
+            "run_at": "document_end"
+        }
+    ],
     "applications": {
         "gecko": {
             "id": "info@worldbrain.io"
