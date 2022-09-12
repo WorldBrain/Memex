@@ -640,7 +640,10 @@ export function createBackgroundModules(options: {
             storageManager,
             searchIndex: search.searchIndex,
             jobScheduler: jobScheduler.scheduler,
-            backupInfoStorage: new backupStorage.LocalBackupInfoStorage(),
+            localBackupSettings: new BrowserSettingsStore(
+                options.browserAPIs.storage.local,
+                { prefix: 'localBackup.' },
+            ),
             notifications,
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),

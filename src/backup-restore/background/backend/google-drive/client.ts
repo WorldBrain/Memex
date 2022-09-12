@@ -1,6 +1,6 @@
-import { DriveTokenManager } from './token-manager'
-import { setLocalStorage, setLocalStorageTyped } from 'src/util/storage'
-import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
+import type { DriveTokenManager } from './token-manager'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from '../../types'
 
 export class GoogleDriveClient {
     private idCache: {
@@ -8,7 +8,12 @@ export class GoogleDriveClient {
     } = {}
     private baseUrl = 'https://www.googleapis.com'
 
-    constructor(private tokenManager: DriveTokenManager) {}
+    constructor(
+        private deps: {
+            tokenManager: DriveTokenManager
+            localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+        },
+    ) {}
 
     isIdCacheEmpty(parentId) {
         return !this.idCache[parentId]
@@ -23,7 +28,7 @@ export class GoogleDriveClient {
         fileName: string
         object: object
     }) {
-        await this.tokenManager.refreshAccessToken()
+        await this.deps.tokenManager.refreshAccessToken()
 
         const {
             id: collectionFolderId,
@@ -79,7 +84,7 @@ export class GoogleDriveClient {
         folderName: string
         fileName: string
     }) {
-        await this.tokenManager.refreshAccessToken()
+        await this.deps.tokenManager.refreshAccessToken()
 
         const collectionFolderId = await this.getFolderChildId(
             'appDataFolder',
@@ -188,7 +193,7 @@ export class GoogleDriveClient {
     }
 
     async _request(path, options: any = {}): Promise<any> {
-        const accessToken = await this.tokenManager.getAccessToken()
+        const accessToken = await this.deps.tokenManager.getAccessToken()
         options.headers = options.headers || {}
         options.headers['Authorization'] = `Bearer ${accessToken}`
 
@@ -217,10 +222,11 @@ export class GoogleDriveClient {
                 'Something went wrong making a request to Drive:',
                 response,
             )
-            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                state: 'fail',
-                backupId: 'drive_size_empty',
-            })
+            await this.deps.localBackupSettings.set('backupStatus', 'fail')
+            await this.deps.localBackupSettings.set(
+                'backupStatusId',
+                'drive_size_empty',
+            )
             throw new Error('Error during request to Drive')
         }
         return options.json ? response.json() : response

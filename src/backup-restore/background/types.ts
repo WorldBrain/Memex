@@ -20,6 +20,13 @@ export interface LocalBackupSettings {
     accessTokenExpiry: Date
     lastBackupFinished: Date
     lastProblemNotifShown: Date
+    backupStatus: 'success' | 'fail' | 'no_backup'
+    backupStatusId:
+        | 'backup_error'
+        | 'drive_size_empty'
+        | 'auto_backup_expired'
+        | 'success'
+        | 'no_backup'
 
     accessToken: string
     refreshToken: string
@@ -28,7 +35,6 @@ export interface LocalBackupSettings {
     isOnboarding: boolean
     runningBackup: boolean
     runningRestore: boolean
-    progressSuccess: boolean
     hasInitialBackup: boolean
     driveAuthenticated: boolean
     progressSuccessful: boolean

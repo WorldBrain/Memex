@@ -1,3 +1,6 @@
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from '../../types'
+
 export class DriveTokenManager {
     public tokenStore: DriveTokenStore
     private accessToken: string
@@ -120,35 +123,31 @@ export interface DriveTokenStore {
 }
 
 export class LocalStorageDriveTokenStore implements DriveTokenStore {
-    prefix: string
-
-    constructor({ prefix }: { prefix: string }) {
-        this.prefix = prefix
-    }
+    constructor(
+        private deps: {
+            localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+            prefix: string
+        },
+    ) {}
 
     async storeAccessToken(token: string, expiryDate: Date): Promise<any> {
-        // localStorage.setItem(this.prefix + 'access', token)
-        // localStorage.setItem(
-        //     this.prefix + 'access-expiry',
-        //     expiryDate.getTime().toString(),
-        // )
+        await this.deps.localBackupSettings.set('accessToken', token)
+        await this.deps.localBackupSettings.set('accessTokenExpiry', expiryDate)
     }
 
     async retrieveAccessToken() {
-        // const expiryString = localStorage.getItem(this.prefix + 'access-expiry')
-        // return {
-        //     token: localStorage.getItem(this.prefix + 'access'),
-        //     expiryDate: expiryString && new Date(parseFloat(expiryString)),
-        // }
-        return { token: '', expiryDate: new Date() }
+        const token = await this.deps.localBackupSettings.get('accessToken')
+        const expiryDate = await this.deps.localBackupSettings.get(
+            'accessTokenExpiry',
+        )
+        return { token, expiryDate }
     }
 
     async storeRefreshToken(token: string) {
-        // localStorage.setItem(this.prefix + 'refresh', token)
+        await this.deps.localBackupSettings.set('refreshToken', token)
     }
 
     async retrieveRefreshToken() {
-        // return localStorage.getItem(this.prefix + 'refresh')
-        return ''
+        return this.deps.localBackupSettings.get('refreshToken')
     }
 }

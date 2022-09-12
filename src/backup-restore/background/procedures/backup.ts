@@ -1,16 +1,16 @@
 // tslint:disable:no-console
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import * as Raven from 'src/util/raven'
 import { EventEmitter } from 'events'
 
-import BackupStorage, { BackupInfoStorage } from '../storage'
+import type BackupStorage from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
-import { getLocalStorageTyped, setLocalStorageTyped } from 'src/util/storage'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
-import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from '../types'
 
 const pickBy = require('lodash/pickBy')
 
@@ -28,8 +28,8 @@ export default class BackupProcedure {
     storageManager: Storex
     storage: BackupStorage
     backend: BackupBackend
-    lastBackupStorage: BackupInfoStorage
     currentSchemaVersion: number
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
 
     running: boolean
     completionPromise?: Promise<void> // only set after first run
@@ -41,19 +41,19 @@ export default class BackupProcedure {
     resolvePausePromise?: () => void // only set if paused
 
     constructor({
+        localBackupSettings,
         storageManager,
         storage,
-        lastBackupStorage,
         backend,
     }: {
+        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
         storageManager: Storex
         storage: BackupStorage
-        lastBackupStorage: BackupInfoStorage
         backend: BackupBackend
     }) {
+        this.localBackupSettings = localBackupSettings
         this.storageManager = storageManager
         this.storage = storage
-        this.lastBackupStorage = lastBackupStorage
         this.backend = backend
         this.currentSchemaVersion = getCurrentSchemaVersion(
             storageManager,
@@ -115,7 +115,7 @@ export default class BackupProcedure {
         })
 
         const procedure = async () => {
-            const lastBackupTime = await this.lastBackupStorage.retrieveDate(
+            const lastBackupTime = await this.localBackupSettings.get(
                 'lastBackup',
             )
 
@@ -141,7 +141,7 @@ export default class BackupProcedure {
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, this.events)
             if (process.env.STORE_BACKUP_TIME !== 'false') {
-                await this.lastBackupStorage.storeDate('lastBackup', backupTime)
+                await this.localBackupSettings.set('lastBackup', backupTime)
             }
         }
 
@@ -153,10 +153,14 @@ export default class BackupProcedure {
                         this.events.emit('success')
                     }
                     // Set backup status for notification in search bar
-                    await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                        state: 'success',
-                        backupId: 'success',
-                    })
+                    await this.localBackupSettings.set(
+                        'backupStatus',
+                        'success',
+                    )
+                    await this.localBackupSettings.set(
+                        'backupStatusId',
+                        'success',
+                    )
 
                     this.reset()
                     resolveCompletionPromise()
@@ -171,17 +175,22 @@ export default class BackupProcedure {
                     console.error(e.stack)
 
                     // Set backup status for notification in search bar
-                    const getState = await getLocalStorageTyped(
-                        BACKUP_STORAGE_KEY,
+                    const backupStatus = await this.localBackupSettings.get(
+                        'backupStatus',
                     )
+
                     if (
-                        getState.state === 'success' ||
-                        getState.state === 'no_backup'
+                        backupStatus === 'success' ||
+                        backupStatus === 'no_backup'
                     ) {
-                        await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                            state: 'fail',
-                            backupId: 'backup_error',
-                        })
+                        await this.localBackupSettings.set(
+                            'backupStatus',
+                            'fail',
+                        )
+                        await this.localBackupSettings.set(
+                            'backupStatusId',
+                            'backup_error',
+                        )
                     }
                     if (this.events) {
                         this.events.emit('fail', e)
@@ -226,7 +235,7 @@ export default class BackupProcedure {
             events.emit('info', { info })
         }
 
-        // await localStorage.removeItem('backup.onboarding.running-backup')
+        await this.localBackupSettings.remove('runningBackup')
         console.log('finished incremental backup')
     }
 
@@ -258,11 +267,14 @@ export default class BackupProcedure {
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
             await new Promise((resolve) => setTimeout(resolve, 500))
         } else {
+            const shouldStoreBlobs = !!(await this.localBackupSettings.get(
+                'saveBlobs',
+            ))
             await this.backend.backupChanges({
                 changes: batch.changes,
                 events,
                 currentSchemaVersion: this.currentSchemaVersion,
-                options: { storeBlobs: _shouldStoreBlobs() },
+                options: { storeBlobs: shouldStoreBlobs },
             })
         }
         // console.log('uploaded batch, removing affected items from log')
@@ -320,10 +332,4 @@ export default class BackupProcedure {
 
         return info
     }
-}
-
-export function _shouldStoreBlobs() {
-    // const pref = localStorage.getItem('backup.save-blobs')
-    // return pref !== 'false'
-    return false
 }

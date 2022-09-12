@@ -6,6 +6,8 @@ import {
     separateDataFromImageChanges,
     shouldWriteImages,
 } from 'src/backup-restore/background/backend/utils'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from '../../types'
 
 export { LocalStorageDriveTokenStore } from './token-manager'
 
@@ -23,8 +25,10 @@ export class DriveBackupBackend extends BackupBackend {
     constructor({
         tokenStore,
         memexCloudOrigin,
+        localBackupSettings,
         scope = DEFAULT_AUTH_SCOPE,
     }: {
+        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
         tokenStore: DriveTokenStore
         memexCloudOrigin: string
         scope?: string
@@ -36,7 +40,10 @@ export class DriveBackupBackend extends BackupBackend {
             tokenStore,
             memexCloudOrigin,
         })
-        this.client = new GoogleDriveClient(this.tokenManager)
+        this.client = new GoogleDriveClient({
+            tokenManager: this.tokenManager,
+            localBackupSettings,
+        })
         this.memexCloudOrigin = memexCloudOrigin
     }
 
