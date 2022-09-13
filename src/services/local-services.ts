@@ -11,11 +11,20 @@ import type { LoginHooks } from '@worldbrain/memex-common/lib/authentication/typ
 import type { ServerStorage } from 'src/storage/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 
-export function createAuthServices(options: {
-    manifestVersion: '2' | '3'
-    backend: 'firebase' | 'memory'
-    getServerStorage: () => Promise<ServerStorage>
-}): AuthServices {
+export function createAuthServices(
+    options: {
+        backend: 'firebase' | 'memory'
+        getServerStorage: () => Promise<ServerStorage>
+    } & (
+        | {
+              manifestVersion: '2'
+          }
+        | {
+              manifestVersion: '3'
+              serviceWorkerRegistration: ServiceWorkerRegistration
+          }
+    ),
+): AuthServices {
     if (options.backend === 'memory') {
         return {
             auth: new MemoryAuthService(),
@@ -30,6 +39,8 @@ export function createAuthServices(options: {
                       const { modules } = await options.getServerStorage()
                       const token = await getToken(getMessaging(), {
                           vapidKey: process.env.FCM_VAPID_KEY,
+                          serviceWorkerRegistration:
+                              options.serviceWorkerRegistration,
                       })
                       await modules.users.addUserFCMRegistrationToken(
                           { id: user.id, type: 'user-reference' },
@@ -40,6 +51,8 @@ export function createAuthServices(options: {
                       const { modules } = await options.getServerStorage()
                       const token = await getToken(getMessaging(), {
                           vapidKey: process.env.FCM_VAPID_KEY,
+                          serviceWorkerRegistration:
+                              options.serviceWorkerRegistration,
                       })
                       await modules.users.deleteUserFCMRegistrationToken(token)
                   },

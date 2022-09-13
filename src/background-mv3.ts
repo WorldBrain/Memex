@@ -27,9 +27,14 @@ import analytics from './analytics'
 import { setStorageMiddleware } from './storage/middleware'
 import { setStorex } from './search/get-db'
 import { createAuthServices } from './services/local-services'
-import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type {
+    DexieStorageBackend,
+    IndexedDbImplementation,
+} from '@worldbrain/storex-backend-dexie'
 
-// declare var self: ServiceWorkerGlobalScope
+declare var self: ServiceWorkerGlobalScope & {
+    IDBKeyRange: IndexedDbImplementation['range']
+}
 
 // TODO mv3: remove this once firebase/storage is updated to use fetch API
 global['XMLHttpRequest'] = XMLHttpRequest
@@ -75,6 +80,7 @@ async function main() {
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
         manifestVersion: '3',
+        serviceWorkerRegistration: self.registration,
     })
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
