@@ -62,7 +62,6 @@ async function main() {
     const servicesPromise = createServices({
         backend: 'memory',
         getServerStorage: () => Promise.reject(), // FIXME
-        manifestVersion: '2',
         authService: authServices.auth,
     })
 

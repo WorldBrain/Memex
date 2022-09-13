@@ -95,7 +95,6 @@ export async function main() {
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
-        manifestVersion: '2',
         authService: authServices.auth,
     })
     __debugCounter++

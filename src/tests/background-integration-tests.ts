@@ -97,7 +97,6 @@ export async function setupBackgroundIntegrationTest(
         (await createServices({
             backend: 'memory',
             getServerStorage,
-            manifestVersion: '2',
             authService: authServices.auth,
         }))
 

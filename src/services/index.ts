@@ -9,7 +9,6 @@ import type { AuthService } from '@worldbrain/memex-common/lib/authentication/ty
 
 export async function createServices(options: {
     authService: AuthService
-    manifestVersion: '2' | '3'
     backend: 'firebase' | 'memory'
     getServerStorage: () => Promise<ServerStorage>
 }): Promise<Services> {

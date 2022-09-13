@@ -231,8 +231,6 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
 
-        console.log(new Date(lastSuccessfulSyncDate).getTime())
-
         if (new Date(lastSuccessfulSyncDate).getTime() === 0) {
             return null
         }

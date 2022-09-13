@@ -74,12 +74,11 @@ async function main() {
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
-        manifestVersion: '2',
+        manifestVersion: '3',
     })
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
-        manifestVersion: '2',
         authService: authServices.auth,
     })
 

@@ -366,7 +366,6 @@ export async function setupSyncBackgroundTest(
         const services = await createServices({
             backend: 'memory',
             getServerStorage,
-            manifestVersion: '2',
             authService: authServices.auth,
         })
         const personalCloudBackend = new StorexPersonalCloudBackend({
