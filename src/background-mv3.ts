@@ -1,4 +1,5 @@
 import browser from 'webextension-polyfill'
+import XMLHttpRequest from 'sw-xhr'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
@@ -29,6 +30,9 @@ import { createAuthServices } from './services/local-services'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 // declare var self: ServiceWorkerGlobalScope
+
+// TODO mv3: remove this once firebase/storage is updated to use fetch API
+global['XMLHttpRequest'] = XMLHttpRequest
 
 async function main() {
     console.log('starting background worker')
@@ -142,6 +146,12 @@ async function main() {
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
     rpcManager.unpause()
+
+    const services = await servicesPromise
+    global['bgModules'] = backgroundModules
+    global['bgServices'] = services
+    global['storageManager'] = storageManager
+    global['persistentStorageManager'] = persistentStorageManager
 
     // browser.runtime.onInstalled.addListener(async (details) => {
     //     console.log('ext install event fired:', details)
