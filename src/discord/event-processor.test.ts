@@ -71,11 +71,17 @@ describe('Discord event processor', () => {
         })
         await context.assertData({
             users: [1],
-            pages: [],
+            pages: [
+                {
+                    userId: 1,
+                    messageId: 1,
+                    normalizedUrls: ['memex.garden'],
+                },
+            ],
             replies: [
                 {
                     messageId: 1,
-                    replies: [2, 3],
+                    replyIds: [2, 3],
                 },
             ],
         })
@@ -100,11 +106,17 @@ describe('Discord event processor', () => {
         })
         await context.assertData({
             users: [1],
-            pages: [],
+            pages: [
+                {
+                    userId: 1,
+                    messageId: 1,
+                    normalizedUrls: ['memex.garden', 'notion.so'],
+                },
+            ],
             replies: [
                 {
                     messageId: 1,
-                    replies: [2, 3],
+                    replyIds: [2, 3],
                 },
             ],
         })
@@ -117,22 +129,28 @@ describe('Discord event processor', () => {
             content: 'Hey, check this out: https://memex.garden/',
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 2,
             content: `I'm replying to that`,
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 3,
             content: `I'm replying to that too!`,
         })
         await context.assertData({
             users: [1],
-            pages: [],
+            pages: [
+                {
+                    userId: 1,
+                    messageId: 1,
+                    normalizedUrls: ['memex.garden'],
+                },
+            ],
             replies: [
                 {
                     messageId: 1,
-                    replies: [2, 3],
+                    replyIds: [2, 3],
                 },
             ],
         })
@@ -146,22 +164,28 @@ describe('Discord event processor', () => {
                 'Hey, check this out: https://memex.garden/. Also interesting: https://notion.so/',
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 2,
             content: `I'm replying to that`,
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 3,
             content: `I'm replying to that too!`,
         })
         await context.assertData({
             users: [1],
-            pages: [],
+            pages: [
+                {
+                    userId: 1,
+                    messageId: 1,
+                    normalizedUrls: ['memex.garden', 'notion.so'],
+                },
+            ],
             replies: [
                 {
                     messageId: 1,
-                    replies: [2, 3],
+                    replyIds: [2, 3],
                 },
             ],
         })
@@ -174,31 +198,43 @@ describe('Discord event processor', () => {
             content: 'Hey, check this out: https://memex.garden/',
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 2,
             content: `I'm replying to that`,
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 3,
             content: `Posting https://another.link/, just to confuse you`,
         })
         await context.postMessage({
-            channelId: 1,
+            channelId: { message: 1 },
             messageId: 4,
             content: `This should show up as a reply to both messages`,
         })
         await context.assertData({
             users: [1],
-            pages: [],
+            pages: [
+                {
+                    userId: 1,
+                    messageId: 1,
+                    normalizedUrls: ['memex.garden'],
+                },
+                {
+                    userId: 1,
+                    messageId: 3,
+                    originalMessageId: 1,
+                    normalizedUrls: ['another.link'],
+                },
+            ],
             replies: [
                 {
                     messageId: 1,
-                    replies: [2, 3, 4],
+                    replyIds: [2, 3, 4],
                 },
                 {
                     messageId: 3,
-                    replies: [4],
+                    replyIds: [4],
                 },
             ],
         })
