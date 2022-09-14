@@ -12,4 +12,4 @@ export function staticFilesToPatterns(filesDict = {}) {
 
 export const doesFileExist = (path) => fs.existsSync(path)
 
-export const buildingManifestV3 = process.env.MANIFEST_VERSION === '3'
+export const buildingManifestV3 = process.env.MANIFEST_VERSION !== '2'
