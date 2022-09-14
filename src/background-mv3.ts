@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill'
-import XMLHttpRequest from 'sw-xhr'
+import XMLHttpRequest from 'xhr-shim'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
