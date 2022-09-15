@@ -14,8 +14,6 @@ import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
-import * as backupStorage from '../backup-restore/background/storage'
-import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import { getAuth } from 'firebase/auth'
 import {
     getStorage,
@@ -429,44 +427,6 @@ export function createBackgroundModules(options: {
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
                 userChanges: () => authChanges(auth.authService),
-                onUserChanges: (signalChanges, lastProcessed) => {
-                    const currentUser = getAuth().currentUser
-                    if (!currentUser) {
-                        return null
-                    }
-
-                    const messaging = getMessaging()
-                    onBackgroundMessage(messaging, (payload) => {
-                        if (payload.data?.type === 'downloadClientChanges') {
-                            signalChanges(0) // TODO: Implement change count
-                        }
-                    })
-
-                    // const firebase = getFirebase()
-                    // const firestore = firebase.firestore()
-
-                    // firestore
-                    //     .collection('personalDataChange')
-                    //     .doc(currentUser.uid)
-                    //     .collection('objects')
-                    //     .where(
-                    //         'createdWhen',
-                    //         '>',
-                    //         Timestamp.fromMillis(lastProcessed),
-                    //     )
-                    //     .onSnapshot((snapshot) => {
-                    //         const deviceId = personalCloud.deviceId
-                    //         const changes = snapshot
-                    //             .docChanges()
-                    //             .filter(
-                    //                 (change) =>
-                    //                     change.type === 'added' &&
-                    //                     change.doc.data()['createdByDevice'] !==
-                    //                         deviceId,
-                    //             )
-                    //         signalChanges(changes.length)
-                    //     })
-                },
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
                 // NOTE: this is for retrospective collection sync, which is currently unused in the extension

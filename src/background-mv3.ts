@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
+import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
@@ -120,6 +121,13 @@ async function main() {
     // NOTE: This is a hack to manually init Dexie, which is synchronous, before needing to do the async storex init calls.
     //  Doing this as all event listeners need to be set up synchronously, before any async logic happens. AND to avoid needing to update storex yet.
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
+
+    // Set up incoming FCM handling logic (same thing as SW `push` event)
+    onBackgroundMessage(getMessaging(), (payload) => {
+        if (payload.data?.type === 'downloadClientChanges') {
+            backgroundModules.personalCloud.triggerSyncContinuation()
+        }
+    })
 
     await setupBackgroundModules(backgroundModules, storageManager)
 

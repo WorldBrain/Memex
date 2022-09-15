@@ -194,6 +194,10 @@ export class PersonalCloudBackground {
         }
     }
 
+    triggerSyncContinuation() {
+        this.options.backend.triggerSyncContinuation()
+    }
+
     async setup() {
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
