@@ -43,18 +43,14 @@
     },
     "permissions": [
         "alarms",
-        "idle",
         "bookmarks",
         "history",
-        "contextMenus",
-        "tabs",
         "scripting",
+        "tabs",
+        "unlimitedStorage",
         "webNavigation",
         "notifications",
-        "unlimitedStorage",
-        "storage",
-        "webRequest",
-        "declarativeNetRequest"
+        "storage"
     ],
     "host_permissions": ["<all_urls>"],
     "web_accessible_resources": [
