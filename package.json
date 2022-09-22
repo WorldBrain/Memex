@@ -278,7 +278,7 @@
         "selenium-webdriver": "^4.0.0-alpha.7",
         "sign-addon": "^0.3.0",
         "sinon": "^6.1.5",
-        "sqlite3": "^4.1.0",
+        "sqlite3": "^5.1.1",
         "string-replace-loader": "^2.3.0",
         "style-loader": "^0.21.0",
         "stylelint": "^9.2.1",
