@@ -11,7 +11,7 @@ async function setupTest() {
     } = await setupBackgroundIntegrationTest()
 
     return {
-        activityIndicatorBG: backgroundModules.activityIndicator,
+        backgroundModules,
         getServerStorage,
         authServices,
         services,
@@ -21,20 +21,20 @@ async function setupTest() {
 describe('Activity indicator background tests', () => {
     it('should signal on checking for unseen activities when logged out', async () => {
         const {
-            activityIndicatorBG,
+            backgroundModules,
             authServices: { auth },
         } = await setupTest()
 
         auth.signOut()
 
-        expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
-            'not-logged-in',
-        )
+        expect(
+            await backgroundModules.activityIndicator.checkActivityStatus(),
+        ).toEqual('not-logged-in')
     })
 
     it('should be able to check for unseen activities', async () => {
         const {
-            activityIndicatorBG,
+            backgroundModules,
             getServerStorage,
             services: { activityStreams },
             authServices: { auth },
@@ -60,9 +60,9 @@ describe('Activity indicator background tests', () => {
         await loginTestUser(userAReference)
 
         // Not yet any activity
-        expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
-            'all-seen',
-        )
+        expect(
+            await backgroundModules.activityIndicator.checkActivityStatus(),
+        ).toEqual('all-seen')
 
         // Set up pre-req data
         const { modules: storageModules } = await getServerStorage()
@@ -93,11 +93,20 @@ describe('Activity indicator background tests', () => {
             feeds: { home: true },
         })
 
+        const sharedListReference = await storageModules.contentSharing.createSharedList(
+            { userReference: userAReference, listData: { title: 'test list' } },
+        )
+        await activityStreams.followEntity({
+            entityType: 'sharedList',
+            entity: sharedListReference,
+            feeds: { home: true },
+        })
+
         const {
             sharedAnnotationReferences,
         } = await storageModules.contentSharing.createAnnotations({
             creator: userAReference,
-            listReferences: [],
+            listReferences: [sharedListReference],
             annotationsByPage: {
                 ['test.com']: [
                     {
@@ -117,6 +126,7 @@ describe('Activity indicator background tests', () => {
             },
             feeds: { home: true },
         })
+
         const {
             reference: replyReference,
             threadReference,
@@ -125,7 +135,7 @@ describe('Activity indicator background tests', () => {
             annotationReference: sharedAnnotationReferences['test.com#123'],
             normalizedPageUrl: 'test.com',
             pageCreatorReference: userAReference,
-            sharedListReference: null, // TODO: maybe update test to use lists
+            sharedListReference,
             userReference: userBReference,
             reply: { content: 'TEST' },
         })
@@ -146,19 +156,39 @@ describe('Activity indicator background tests', () => {
         // Log back in as original user (annotation author), to check their activity status
         await loginTestUser(userAReference)
 
-        expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
-            'has-unseen',
-        )
+        // NOTE: Checking pending sync counts here to ensure no noop sync entries get created just for checking
+        expect(
+            backgroundModules.personalCloud.actionQueue.pendingActionCount,
+        ).toBe(1)
+        expect(
+            await backgroundModules.activityIndicator.checkActivityStatus(),
+        ).toEqual('has-unseen')
 
-        await activityIndicatorBG.markActivitiesAsSeen()
-        expect(await activityIndicatorBG.checkActivityStatus()).toEqual(
-            'all-seen',
-        )
+        await backgroundModules.activityIndicator.markActivitiesAsSeen()
+
+        expect(
+            backgroundModules.personalCloud.actionQueue.pendingActionCount,
+        ).toBe(3)
+        expect(
+            await backgroundModules.activityIndicator.checkActivityStatus(),
+        ).toEqual('all-seen')
+        expect(
+            backgroundModules.personalCloud.actionQueue.pendingActionCount,
+        ).toBe(3)
+
+        // Checking again, when nothing should have changed, should not write to storage again (to avoid creating a noop sync entry)
+        expect(
+            await backgroundModules.activityIndicator.checkActivityStatus(),
+        ).toEqual('all-seen')
+
+        expect(
+            backgroundModules.personalCloud.actionQueue.pendingActionCount,
+        ).toBe(3)
     })
 
     it('should be able to mark activities as seen', async () => {
         const {
-            activityIndicatorBG,
+            backgroundModules,
             authServices: { auth },
         } = await setupTest()
 
@@ -168,15 +198,15 @@ describe('Activity indicator background tests', () => {
         )
 
         expect(
-            await activityIndicatorBG[
+            await backgroundModules.activityIndicator[
                 'options'
             ].syncSettings.activityIndicator.get('feedHasActivity'),
         ).toEqual(null)
 
-        await activityIndicatorBG.markActivitiesAsSeen()
+        await backgroundModules.activityIndicator.markActivitiesAsSeen()
 
         expect(
-            await activityIndicatorBG[
+            await backgroundModules.activityIndicator[
                 'options'
             ].syncSettings.activityIndicator.get('feedHasActivity'),
         ).toEqual(false)
