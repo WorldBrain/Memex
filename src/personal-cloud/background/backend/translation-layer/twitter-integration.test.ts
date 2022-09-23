@@ -11,6 +11,7 @@ import {
 import type { TweetData } from '@worldbrain/memex-common/lib/twitter-integration/api/types'
 import { tweetDataToTitle } from '@worldbrain/memex-common/lib/twitter-integration/utils'
 import { createUploadStorageUtils } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/storage-utils'
+import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
 
 const TEST_TWEET_A: TweetData = {
     name: 'Test User',
@@ -152,7 +153,7 @@ describe('Translation-layer Twitter integration tests', () => {
 
         expect(sentToDevices).toEqual({
             tokens: fcmTokens,
-            message: { data: { type: 'downloadClientChanges' } },
+            message: { data: { type: FCM_SYNC_TRIGGER_MSG } },
         })
         expect(capturedException).toBeNull()
         expect(
