@@ -1,5 +1,3 @@
-import { getToken } from 'firebase/messaging'
-import { getMessaging } from 'firebase/messaging/sw'
 import type { AuthServices } from './types'
 import {
     createAuthDependencies,
@@ -7,24 +5,13 @@ import {
 } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import type { LoginHooks } from '@worldbrain/memex-common/lib/authentication/types'
 import type { ServerStorage } from 'src/storage/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 
-export function createAuthServices(
-    options: {
-        backend: 'firebase' | 'memory'
-        getServerStorage: () => Promise<ServerStorage>
-    } & (
-        | {
-              manifestVersion: '2'
-          }
-        | {
-              manifestVersion: '3'
-              serviceWorkerRegistration: ServiceWorkerRegistration
-          }
-    ),
-): AuthServices {
+export function createAuthServices(options: {
+    backend: 'firebase' | 'memory'
+    getServerStorage: () => Promise<ServerStorage>
+}): AuthServices {
     if (options.backend === 'memory') {
         return {
             auth: new MemoryAuthService(),
@@ -32,32 +19,7 @@ export function createAuthServices(
         }
     }
 
-    const loginHooks: LoginHooks = {}
-    if (options.manifestVersion === '3') {
-        const getFCMToken = () =>
-            getToken(getMessaging(), {
-                vapidKey: process.env.FCM_VAPID_KEY,
-                serviceWorkerRegistration: options.serviceWorkerRegistration,
-            })
-
-        loginHooks.onPostLogin = async (user) => {
-            const { modules } = await options.getServerStorage()
-            const token = await getFCMToken()
-            await modules.users.addUserFCMRegistrationToken(
-                { id: user.id, type: 'user-reference' },
-                token,
-            )
-        }
-
-        loginHooks.onPostLogout = async () => {
-            const { modules } = await options.getServerStorage()
-            const token = await getFCMToken()
-            await modules.users.deleteUserFCMRegistrationToken(token)
-        }
-    }
-
     const authDeps = createAuthDependencies({
-        loginHooks,
         redirectUrl: subscriptionRedirect,
         devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
     })

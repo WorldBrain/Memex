@@ -163,6 +163,7 @@ export function createBackgroundModules(options: {
         name: ModuleName,
         options?: { broadcastToTabs?: boolean },
     ): RemoteEventEmitter<ModuleName>
+    getFCMRegistrationToken?: () => Promise<string>
     userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
@@ -316,6 +317,7 @@ export function createBackgroundModules(options: {
             jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),
             localStorageArea: options.browserAPIs.storage.local,
+            getFCMRegistrationToken: options.getFCMRegistrationToken,
             backendFunctions: {
                 registerBetaUser: async (params) =>
                     callFirebaseFunction('registerBetaUser', params),

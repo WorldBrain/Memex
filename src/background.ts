@@ -90,7 +90,6 @@ export async function main() {
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
-        manifestVersion: '2',
     })
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',

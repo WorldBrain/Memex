@@ -48,11 +48,12 @@ export class AuthBackground {
     constructor(
         public options: {
             authServices: AuthServices
+            jobScheduler: JobScheduler
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
-            getUserManagement: () => Promise<UserStorage>
             remoteEmitter: RemoteEventEmitter<'auth'>
-            jobScheduler: JobScheduler
+            getUserManagement: () => Promise<UserStorage>
+            getFCMRegistrationToken?: () => Promise<string>
         },
     ) {
         this.authService = options.authServices.auth
@@ -228,6 +229,18 @@ export class AuthBackground {
                 'onAuthStateChanged',
                 userWithClaims,
             )
+
+            if (this.options.getFCMRegistrationToken != null) {
+                const userManagement = await this.options.getUserManagement()
+                const token = await this.options.getFCMRegistrationToken()
+                await userManagement.addUserFCMRegistrationToken(
+                    {
+                        type: 'user-reference',
+                        id: user.id,
+                    },
+                    token,
+                )
+            }
         })
     }
 

@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
+import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
 import {
@@ -82,8 +83,6 @@ async function main() {
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         getServerStorage,
-        manifestVersion: '3',
-        serviceWorkerRegistration: self.registration,
     })
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
@@ -107,6 +106,11 @@ async function main() {
             const result = await callable(...args)
             return result.data as Promise<Returns>
         },
+        getFCMRegistrationToken: () =>
+            getToken(getMessaging(), {
+                vapidKey: process.env.FCM_VAPID_KEY,
+                serviceWorkerRegistration: self.registration,
+            }),
     })
     registerBackgroundModuleCollections({
         storageManager,

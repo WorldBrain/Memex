@@ -361,7 +361,6 @@ export async function setupSyncBackgroundTest(
         const authServices = createAuthServices({
             backend: 'memory',
             getServerStorage,
-            manifestVersion: '2',
         })
         const services = await createServices({
             backend: 'memory',

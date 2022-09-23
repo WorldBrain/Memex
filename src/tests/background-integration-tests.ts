@@ -90,7 +90,6 @@ export async function setupBackgroundIntegrationTest(
     const authServices = createAuthServices({
         backend: 'memory',
         getServerStorage,
-        manifestVersion: '2',
     })
     const services =
         options?.services ??
