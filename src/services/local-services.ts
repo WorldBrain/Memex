@@ -32,32 +32,29 @@ export function createAuthServices(
         }
     }
 
-    const loginHooks: LoginHooks =
-        options.manifestVersion === '3'
-            ? {
-                  onPostLogin: async (user) => {
-                      const { modules } = await options.getServerStorage()
-                      const token = await getToken(getMessaging(), {
-                          vapidKey: process.env.FCM_VAPID_KEY,
-                          serviceWorkerRegistration:
-                              options.serviceWorkerRegistration,
-                      })
-                      await modules.users.addUserFCMRegistrationToken(
-                          { id: user.id, type: 'user-reference' },
-                          token,
-                      )
-                  },
-                  onPostLogout: async () => {
-                      const { modules } = await options.getServerStorage()
-                      const token = await getToken(getMessaging(), {
-                          vapidKey: process.env.FCM_VAPID_KEY,
-                          serviceWorkerRegistration:
-                              options.serviceWorkerRegistration,
-                      })
-                      await modules.users.deleteUserFCMRegistrationToken(token)
-                  },
-              }
-            : {}
+    const loginHooks: LoginHooks = {}
+    if (options.manifestVersion === '3') {
+        const getFCMToken = () =>
+            getToken(getMessaging(), {
+                vapidKey: process.env.FCM_VAPID_KEY,
+                serviceWorkerRegistration: options.serviceWorkerRegistration,
+            })
+
+        loginHooks.onPostLogin = async (user) => {
+            const { modules } = await options.getServerStorage()
+            const token = await getFCMToken()
+            await modules.users.addUserFCMRegistrationToken(
+                { id: user.id, type: 'user-reference' },
+                token,
+            )
+        }
+
+        loginHooks.onPostLogout = async () => {
+            const { modules } = await options.getServerStorage()
+            const token = await getFCMToken()
+            await modules.users.deleteUserFCMRegistrationToken(token)
+        }
+    }
 
     const authDeps = createAuthDependencies({
         loginHooks,
