@@ -81,14 +81,12 @@ export class PersonalCloudBackground {
     reportExecutingAction?: (action: PersonalCloudAction) => void
     remoteFunctions: PersonalCloudRemoteInterface
     emitEvents = true
-    debug = false
+    debug = process.env.NODE_ENV === 'development'
 
     strictErrorReporting = false
     _integrationError?: Error
 
     stats: PersonalCloudStats = {
-        // countingDownloads: false,
-        // countingUploads: true,
         pendingDownloads: 0,
         pendingUploads: 0,
     }
@@ -137,17 +135,18 @@ export class PersonalCloudBackground {
                 pendingUploads: stats.pendingActionCount,
             })
         })
-        this.options.backend.events.on('incomingChangesPending', (event) => {
-            this._modifyStats({
-                pendingDownloads:
-                    this.stats.pendingDownloads + event.changeCountDelta,
-            })
-        })
-        this.options.backend.events.on('incomingChangesProcessed', (event) => {
-            this._modifyStats({
-                pendingDownloads: this.stats.pendingDownloads - event.count,
-            })
-        })
+        // TODO: re-implement pending download count
+        // this.options.backend.events.on('incomingChangesPending', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads:
+        //             this.stats.pendingDownloads + event.changeCountDelta,
+        //     })
+        // })
+        // this.options.backend.events.on('incomingChangesProcessed', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads: this.stats.pendingDownloads - event.count,
+        //     })
+        // })
     }
 
     private prepareDataMigration = async () => {
@@ -332,11 +331,13 @@ export class PersonalCloudBackground {
     }
 
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
+        this.options.remoteEventEmitter.emit('downloadStarted')
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
             await this.integrateUpdate(update)
         }
         releaseMutex()
+        this.options.remoteEventEmitter.emit('downloadStopped')
     }
 
     async integrateUpdate(update: PersonalCloudUpdate) {

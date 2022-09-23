@@ -324,6 +324,8 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
                         <InfoText> pending local changes</InfoText>
                     </Row>
+                    {/*
+                    TODO: Re-implement this
                     <Row>
                         <SectionCircle>
                             {pendingRemoteChangeCount < 0
@@ -331,7 +333,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 : pendingRemoteChangeCount}
                         </SectionCircle>
                         <InfoText> pending remote changes</InfoText>
-                    </Row>
+                    </Row> */}
                 </RowContainer>
                 <Separator />
                 <BottomRow>

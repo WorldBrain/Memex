@@ -102,8 +102,19 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
-                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    // TODO: re-implement pending download count
+                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
                 },
+            })
+        })
+        this.personalCloudEvents.on('downloadStarted', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            })
+        })
+        this.personalCloudEvents.on('downloadStopped', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 0 } },
             })
         })
     }
