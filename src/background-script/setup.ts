@@ -680,7 +680,7 @@ export function createBackgroundModules(options: {
             browserAPIs: options.browserAPIs,
         }),
         inPageUI: new InPageUIBackground({
-            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            tabsAPI: options.browserAPIs.tabs,
             contextMenuAPI: options.browserAPIs.contextMenus,
         }),
         copyPaster,

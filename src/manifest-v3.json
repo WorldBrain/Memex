@@ -47,6 +47,7 @@
         "history",
         "scripting",
         "tabs",
+        "contextMenus",
         "unlimitedStorage",
         "webNavigation",
         "notifications",

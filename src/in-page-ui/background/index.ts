@@ -1,4 +1,4 @@
-import browser, { Tabs, ContextMenus } from 'webextension-polyfill'
+import type { Tabs, ContextMenus } from 'webextension-polyfill'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
@@ -11,7 +11,7 @@ export const CONTEXT_MENU_HIGHLIGHT_ID =
     CONTEXT_MENU_ID_PREFIX + 'createHighlight'
 
 export interface Props {
-    queryTabs: Tabs.Static['query']
+    tabsAPI: Tabs.Static
     contextMenuAPI: ContextMenus.Static
 }
 
@@ -28,8 +28,7 @@ export class InPageUIBackground {
             ),
         }
 
-        // TODO mv3: make this work
-        // this.setupContextMenuEntries()
+        this.setupContextMenuEntries()
     }
 
     setupRemoteFunctions() {
@@ -37,6 +36,7 @@ export class InPageUIBackground {
     }
 
     private async getHighlightContextMenuTitle(): Promise<string> {
+        // TODO mv3: figure out why BG Service Worker crashes when this fn's invoked (or find another way to get same shortcut data)
         // const {
         //     shortcutsEnabled,
         //     createHighlight,
@@ -53,13 +53,20 @@ export class InPageUIBackground {
         // return `${baseTitle} (${createHighlight.shortcut})`
     }
 
-    async setupContextMenuEntries() {
+    setupContextMenuEntries() {
         this.options.contextMenuAPI.create({
             id: CONTEXT_MENU_HIGHLIGHT_ID,
-            title: await this.getHighlightContextMenuTitle(),
+            title: 'Highlight with Memex',
             contexts: ['selection'],
-            onclick: (_, tab) => this.createHighlightInTab(tab.id),
         })
+
+        this.options.contextMenuAPI.onClicked.addListener(
+            ({ menuItemId }, tab) => {
+                if (menuItemId === CONTEXT_MENU_HIGHLIGHT_ID) {
+                    return this.createHighlightInTab(tab.id)
+                }
+            },
+        )
     }
 
     async updateContextMenuEntries() {
@@ -69,12 +76,15 @@ export class InPageUIBackground {
     }
 
     async openDashboard() {
-        await browser.tabs.create({ url: OVERVIEW_URL })
+        await this.options.tabsAPI.create({ url: OVERVIEW_URL })
     }
 
     async showSidebar() {
         const currentTab = (
-            await this.options.queryTabs({ active: true, currentWindow: true })
+            await this.options.tabsAPI.query({
+                active: true,
+                currentWindow: true,
+            })
         )[0]
         runInTab<InPageUIContentScriptRemoteInterface>(
             currentTab.id,
