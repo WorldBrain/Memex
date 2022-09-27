@@ -1,9 +1,10 @@
-import {
+import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
-import { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
-import { Annotation } from 'src/annotations/types'
+import type { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
+import type { Annotation } from 'src/annotations/types'
+import type { ExtractedPDFData } from 'src/page-analysis/background/content-extraction/types'
 
 export interface InPageUIContentScriptRemoteInterface
     extends AnnotationFunctions {
@@ -37,4 +38,8 @@ export interface InPageUIContentScriptRemoteInterface
      * available on a given tab. Should throw error if not.
      */
     ping(): Promise<true>
+}
+
+export interface InPDFPageUIContentScriptRemoteInterface {
+    extractPDFContents(): Promise<ExtractedPDFData | null>
 }

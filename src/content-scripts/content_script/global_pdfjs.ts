@@ -1,12 +1,18 @@
+import browser from 'webextension-polyfill'
+import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import * as Global from './global'
 import {
     FingerprintSchemeType,
     ContentFingerprint,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { GetContentFingerprints } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import browser, { Browser } from 'webextension-polyfill'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from 'src/sidebar/annotations-sidebar/constants'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
+import { extractDataFromPDFDocument } from 'src/pdf/util'
+
+// TODO: Properly type the PDFjs-provided globals
 
 const waitForDocument = async () => {
     while (true) {
@@ -39,6 +45,22 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     (inPageUI) => {
+        makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
+            extractPDFContents: async () => {
+                const searchParams = new URLSearchParams(location.search)
+                const filePath = searchParams.get('file')
+
+                if (!filePath?.length) {
+                    return null
+                }
+
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                return extractDataFromPDFDocument(pdf, document.title)
+            },
+        })
+
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
 
