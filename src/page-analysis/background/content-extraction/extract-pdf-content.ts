@@ -6,6 +6,9 @@ import { loadBlob } from 'src/imports/background/utils'
 import type { RawPdfPageContent } from 'src/page-analysis/types'
 import { extractDataFromPDFDocument } from 'src/pdf/util'
 
+// NOTE: This is the old mv2 logic where PDF data got fetched then processed in the BG.
+//  It moved to happen in the content script as PDFJS's getDocument no longer works in BG Service Worker
+
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(
     pdfData: ArrayBuffer,

@@ -1,12 +1,13 @@
-import { RawPageContent } from 'src/page-analysis/types'
-import extractPdfContent from './extract-pdf-content'
 import extractHtmlContent from './extract-html-content'
 import transformPageHTML from 'src/util/transform-page-html'
-import { PageContent } from 'src/search'
+import { runInTab } from 'src/util/webextensionRPC'
+import type { PageContent } from 'src/search'
+import type { RawPageContent } from 'src/page-analysis/types'
+import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 
 export default function extractPageMetadataFromRawContent(
     rawContent: RawPageContent,
-    options?: { fetch?: typeof fetch },
+    options?: { fetch?: typeof fetch; tabId?: number },
 ): Promise<
     PageContent & {
         pdfMetadata?: { [key: string]: any }
@@ -14,7 +15,9 @@ export default function extractPageMetadataFromRawContent(
     }
 > {
     if (rawContent.type === 'pdf') {
-        return extractPdfContent(rawContent, options)
+        return runInTab<InPDFPageUIContentScriptRemoteInterface>(
+            options!.tabId!,
+        ).extractPDFContents()
     } else {
         return extractHtmlContent(rawContent)
     }

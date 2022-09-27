@@ -1,7 +1,7 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
-import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
+// import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
 import extractRawPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractPageMetadataFromRawContent, {
     getPageFullText,
@@ -64,13 +64,15 @@ const fetchPageData: FetchPageData = ({
     // Check if pdf and run code for pdf instead
     if (isFullUrlPDF(url)) {
         run = async () => {
-            if (opts.includePageContent) {
-                const content = await extractPdfContent({ url, type: 'pdf' })
-                return {
-                    pdfFingerprints: content.pdfMetadata.fingerprints,
-                    content,
-                }
-            }
+            // TODO: PDFs can no longer be processed in the BG SW, thus can't be remotely fetched like this
+            return {}
+            // if (opts.includePageContent) {
+            //     const content = await extractPdfContent({ url, type: 'pdf' }, { tabId })
+            //     return {
+            //         pdfFingerprints: content.pdfMetadata.fingerprints,
+            //         content,
+            //     }
+            // }
         }
         cancel = () => undefined
     } else {
