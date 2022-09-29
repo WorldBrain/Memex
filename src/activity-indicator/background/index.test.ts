@@ -1,31 +1,26 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 async function setupTest() {
     const {
         backgroundModules,
         getServerStorage,
-        authServices,
+        authService,
         services,
     } = await setupBackgroundIntegrationTest()
 
     return {
         backgroundModules,
         getServerStorage,
-        authServices,
+        authService,
         services,
     }
 }
 
 describe('Activity indicator background tests', () => {
     it('should signal on checking for unseen activities when logged out', async () => {
-        const {
-            backgroundModules,
-            authServices: { auth },
-        } = await setupTest()
-
-        auth.signOut()
+        const { backgroundModules, authService } = await setupTest()
+        authService.signOut()
 
         expect(
             await backgroundModules.activityIndicator.checkActivityStatus(),
@@ -37,12 +32,12 @@ describe('Activity indicator background tests', () => {
             backgroundModules,
             getServerStorage,
             services: { activityStreams },
-            authServices: { auth },
+            authService,
         } = await setupTest()
 
         const loginTestUser = ({ id }: UserReference) => {
-            auth.signOut()
-            return (auth as MemoryAuthService).loginWithEmailAndPassword(
+            authService.signOut()
+            return authService.loginWithEmailAndPassword(
                 id as string,
                 'password',
             )
@@ -187,15 +182,9 @@ describe('Activity indicator background tests', () => {
     })
 
     it('should be able to mark activities as seen', async () => {
-        const {
-            backgroundModules,
-            authServices: { auth },
-        } = await setupTest()
+        const { backgroundModules, authService } = await setupTest()
 
-        await (auth as MemoryAuthService).loginWithEmailAndPassword(
-            'test',
-            'password',
-        )
+        await authService.loginWithEmailAndPassword('test', 'password')
 
         expect(
             await backgroundModules.activityIndicator[

@@ -30,8 +30,10 @@ export async function createServices(options: {
                     contentSharing: storageModules.contentSharing,
                     users: storageModules.users,
                 },
-                getCurrentUserId: async () =>
-                    (await options.authService.getCurrentUser()).id,
+                getCurrentUserId: async () => {
+                    const currentUser = await options.authService.getCurrentUser()
+                    return currentUser?.id ?? null
+                },
             }),
         }
     }

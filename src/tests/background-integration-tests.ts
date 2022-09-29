@@ -122,6 +122,8 @@ export async function setupBackgroundIntegrationTest(
         },
         contextMenus: {
             create: () => {},
+            update: () => {},
+            onClicked: { addListener: () => {} },
         },
         runtime: {
             getURL: () => '',
@@ -246,7 +248,7 @@ export async function setupBackgroundIntegrationTest(
         },
     }
 
-    await setStorageMiddleware(storageManager, {
+    setStorageMiddleware(storageManager, {
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
         personalCloud: backgroundModules.personalCloud,
@@ -269,7 +271,6 @@ export async function setupBackgroundIntegrationTest(
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
-        authServices,
         authService: authServices.auth as MemoryAuthService,
         subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
         getServerStorage,

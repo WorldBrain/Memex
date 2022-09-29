@@ -12,7 +12,6 @@ import {
     setupBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyTestServerStorage } from 'src/storage/server'
 import {
@@ -274,7 +273,6 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
-        withTestUser?: boolean
         superuser?: boolean
         serverChangeWatchSettings?: Omit<
             ChangeWatchMiddlewareSettings,
@@ -395,10 +393,7 @@ export async function setupSyncBackgroundTest(
         )
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
         setup.backgroundModules.personalCloud.strictErrorReporting = true
-
-        const memoryAuth = setup.backgroundModules.auth
-            .authService as MemoryAuthService
-        await memoryAuth.setUser({ ...TEST_USER })
+        setup.authService.setUser({ ...TEST_USER })
         setups.push(setup)
     }
 
