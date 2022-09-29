@@ -555,7 +555,7 @@ export class PersonalCloudBackground {
                         type: PersonalCloudActionType.ExecuteClientInstructions,
                         clientInstructions,
                     },
-                    { queueInteraction: 'queue-and-return' },
+                    { queueInteraction: 'skip-queue' },
                 )
             }
         } else if (
