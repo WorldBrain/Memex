@@ -176,6 +176,7 @@ export async function setupBackgroundIntegrationTest(
     let nextServerId = 1337
     const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
+        manifestVersion: '3',
         getNow,
         storageManager,
         persistentStorageManager,

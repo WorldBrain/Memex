@@ -9,7 +9,7 @@ export class ContentScriptsBackground {
 
     constructor(
         private options: {
-            injectScriptInTab: (tabId: number, file: string) => void
+            injectScriptInTab: (tabId: number, file: string) => Promise<void>
             getTab: Tabs.Static['get']
             getURL: Runtime.Static['getURL']
             webNavigation: WebNavigation.Static
@@ -47,7 +47,7 @@ export class ContentScriptsBackground {
     injectContentScriptComponent: ContentScriptsInterface<
         'provider'
     >['injectContentScriptComponent'] = async ({ tab }, { component }) => {
-        this.options.injectScriptInTab(
+        await this.options.injectScriptInTab(
             tab.id,
             `/content_script_${component}.js`,
         )

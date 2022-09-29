@@ -138,6 +138,7 @@ const globalFetch: typeof fetch =
     typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null
 
 export function createBackgroundModules(options: {
+    manifestVersion: '2' | '3'
     storageManager: StorageManager
     persistentStorageManager: StorageManager
     authServices: AuthServices
@@ -192,6 +193,7 @@ export function createBackgroundModules(options: {
 
     const tabManagement = new TabManagementBackground({
         browserAPIs: options.browserAPIs,
+        manifestVersion: options.manifestVersion,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
     })
@@ -666,18 +668,22 @@ export function createBackgroundModules(options: {
         pages,
         bgScript,
         contentScripts: new ContentScriptsBackground({
-            webNavigation: options.browserAPIs.webNavigation,
-            getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
-            getTab: bindMethod(options.browserAPIs.tabs, 'get'),
-            injectScriptInTab: (tabId, file) =>
-                // Manifest v2:
-                // options.browserAPIs.tabs.executeScript(tabId, file),
-                // Manifest v3:
-                options.browserAPIs.scripting.executeScript({
-                    target: { tabId },
-                    files: [file],
-                }),
             browserAPIs: options.browserAPIs,
+            webNavigation: options.browserAPIs.webNavigation,
+            getTab: bindMethod(options.browserAPIs.tabs, 'get'),
+            getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
+            injectScriptInTab: async (tabId, file) => {
+                if (options.manifestVersion === '3') {
+                    await options.browserAPIs.scripting.executeScript({
+                        target: { tabId },
+                        files: [file],
+                    })
+                } else {
+                    await options.browserAPIs.tabs.executeScript(tabId, {
+                        file,
+                    })
+                }
+            },
         }),
         inPageUI: new InPageUIBackground({
             tabsAPI: options.browserAPIs.tabs,

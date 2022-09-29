@@ -15,7 +15,7 @@ import createNotification from 'src/util/notifications'
 // Features that auto-setup
 import './analytics/background'
 import './imports/background'
-import './omnibar'
+// import './omnibar'
 import analytics from './analytics'
 import {
     createBackgroundModules,
@@ -50,6 +50,7 @@ export async function main() {
         role: 'background',
         paused: true,
     })
+    const firebase = getFirebase()
 
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
@@ -57,7 +58,6 @@ export async function main() {
     initSentry({})
 
     if (process.env.USE_FIREBASE_EMULATOR === 'true') {
-        const firebase = getFirebase()
         firebase.firestore().settings({
             host: 'localhost:8080',
             ssl: false,
@@ -99,6 +99,7 @@ export async function main() {
     __debugCounter++
 
     const backgroundModules = createBackgroundModules({
+        manifestVersion: '2',
         authServices,
         servicesPromise,
         getServerStorage,
@@ -110,7 +111,6 @@ export async function main() {
         storageManager,
         persistentStorageManager,
         callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
-            const firebase = getFirebase()
             const callable = firebase.functions().httpsCallable(name)
             const result = await callable(...args)
             return result.data as Promise<Returns>
@@ -213,5 +213,5 @@ main().catch((err) => {
         `Error occurred during background script setup: ${err.message} - debug counter: ${__debugCounter}`,
     )
     captureException(error)
-    throw error
+    throw err
 })

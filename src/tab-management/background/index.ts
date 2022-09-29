@@ -36,6 +36,7 @@ export default class TabManagementBackground {
 
     constructor(
         private options: {
+            manifestVersion: '2' | '3'
             browserAPIs: Pick<
                 Browser,
                 | 'tabs'
@@ -142,21 +143,28 @@ export default class TabManagementBackground {
             return
         }
 
-        // Manifest v3:
-        await this.options.browserAPIs.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: CONTENT_SCRIPTS,
-        })
-        // Manifest v2:
-        // for (const file of CONTENT_SCRIPTS) {
-        //     await this.options.browserAPIs.tabs
-        //         .executeScript(tab.id, { file, runAt: 'document_idle' })
-        //         .catch((err) => {
-        //             const message = `Cannot inject content-script "${file}" into page "${tab.url}" - reason: ${err.message}`
-        //             captureException(new Error(message))
-        //             console.error(message)
-        //         })
-        // }
+        if (this.options.manifestVersion === '3') {
+            await this.options.browserAPIs.scripting
+                .executeScript({
+                    target: { tabId: tab.id },
+                    files: CONTENT_SCRIPTS,
+                })
+                .catch(this.handleContentScriptInjectionError(tab))
+        } else {
+            for (const file of CONTENT_SCRIPTS) {
+                await this.options.browserAPIs.tabs
+                    .executeScript(tab.id, { file, runAt: 'document_idle' })
+                    .catch(this.handleContentScriptInjectionError(tab))
+            }
+        }
+    }
+
+    private handleContentScriptInjectionError = (tab: Tabs.Tab) => (
+        err: Error,
+    ) => {
+        const message = `Cannot inject content-scripts into page "${tab.url}" - reason: ${err.message}`
+        captureException(new Error(message))
+        console.error(message)
     }
 
     /**

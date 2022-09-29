@@ -69,6 +69,7 @@ async function main() {
         idbImplementation: inMemory(),
     })
     const backgroundModules = createBackgroundModules({
+        manifestVersion: '3',
         getServerStorage: () => Promise.reject(), // FIXME
         authServices,
         servicesPromise,

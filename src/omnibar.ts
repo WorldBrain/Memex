@@ -27,6 +27,7 @@ import { BrowserSettingsStore } from './util/settings'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
+        manifestVersion: '3',
         browserAPIs: browser,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
