@@ -115,6 +115,39 @@ export async function main() {
             const result = await callable(...args)
             return result.data as Promise<Returns>
         },
+        setupSyncTriggerListener: (lastProcessedTime, deviceId, onChanges) => {
+            const currentUser = firebase.auth().currentUser
+            if (!currentUser) {
+                return null
+            }
+
+            const unsubscribe = firebase
+                .firestore()
+                .collection('personalDataChange')
+                .doc(currentUser.uid)
+                .collection('objects')
+                .where(
+                    'createdWhen',
+                    '>',
+                    firebase.firestore.Timestamp.fromMillis(lastProcessedTime),
+                )
+                .onSnapshot((snapshot) => {
+                    const changes = snapshot
+                        .docChanges()
+                        .filter(
+                            (change) =>
+                                change.type === 'added' &&
+                                change.doc.data()['createdByDevice'] !==
+                                    deviceId,
+                        )
+                    if (!changes.length) {
+                        return
+                    }
+                    onChanges(changes.length)
+                })
+
+            return { unsubscribe }
+        },
     })
 
     __debugCounter++

@@ -165,6 +165,12 @@ export function createBackgroundModules(options: {
         options?: { broadcastToTabs?: boolean },
     ): RemoteEventEmitter<ModuleName>
     getFCMRegistrationToken?: () => Promise<string>
+    // NOTE: Currently only used in MV2 builds, allowing us to trigger sync on Firestore changes
+    setupSyncTriggerListener?: (
+        lastProcessedTime: number,
+        deviceId: string | number,
+        onChanges: (changeCount: number) => void,
+    ) => { unsubscribe: () => void }
     userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
@@ -405,6 +411,7 @@ export function createBackgroundModules(options: {
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -437,6 +444,7 @@ export function createBackgroundModules(options: {
                 getLastCollectionDataProcessedTime: async () => 0,
                 getDeviceId: async () => personalCloud.deviceId!,
                 getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
+                setupSyncTriggerListener: options.setupSyncTriggerListener,
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
         createDeviceId: async (userId) => {
