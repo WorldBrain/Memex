@@ -626,7 +626,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (user != null) {
             this.emitMutation({ currentUser: { $set: user } })
 
-            // TODO mv3: ensure the display name is on the user obj from the first call in real build
             if (!user.displayName?.length) {
                 const userProfile = await authBG.getUserProfile()
                 if (!userProfile?.displayName?.length) {

@@ -9,7 +9,6 @@ export interface ActivityLoggerInterface {
 
 export type TabIndexer = (tab: Tabs.Tab) => Promise<void>
 
-export type LoggableTabChecker = (tab: Tabs.Tab) => Promise<boolean>
 export type VisitInteractionUpdater = (
     interalTab: TabState,
     searchIndex: SearchIndex,

@@ -6,12 +6,9 @@ import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'
 import { registerRemoteFunctions, runInTab } from 'src/util/webextensionRPC'
 import type { TabManagementInterface } from './types'
-import { resolvablePromise } from 'src/util/resolvable'
 import type { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
-import type { LoggableTabChecker } from 'src/activity-logger/background/types'
 import { isLoggable } from 'src/activity-logger'
-// import { blacklist } from 'src/blacklist/background'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isExtensionTab } from '../utils'
@@ -137,9 +134,11 @@ export default class TabManagementBackground {
     }
 
     async injectContentScripts(tab: Tabs.Tab) {
-        const isLoggable = await this.shouldLogTab(tab)
-
-        if (!isLoggable || isExtensionTab({ url: tab.url! })) {
+        if (
+            tab.url == null ||
+            !isLoggable({ url: tab.url }) ||
+            isExtensionTab({ url: tab.url! })
+        ) {
             return
         }
 
@@ -165,22 +164,5 @@ export default class TabManagementBackground {
         const message = `Cannot inject content-scripts into page "${tab.url}" - reason: ${err.message}`
         captureException(new Error(message))
         console.error(message)
-    }
-
-    /**
-     * Combines all "loggable" conditions for logging on given tab data to determine
-     * whether or not a tab should be logged.
-     */
-    shouldLogTab: LoggableTabChecker = async function ({ url }) {
-        // Short-circuit before async logic, if possible
-        if (!url || !isLoggable({ url })) {
-            return false
-        }
-
-        return true
-
-        // TODO mv3: make blacklist work again
-        // const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
-        // return !isBlacklisted({ url })
     }
 }

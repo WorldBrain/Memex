@@ -161,13 +161,6 @@ class BackgroundScript {
         })
     }
 
-    private setupStartupHooks() {
-        // TODO mv3: figure out where this comes into play
-        // this.deps.runtimeAPI.onStartup.addListener(async () => {
-        //     this.deps.bgModules.tabManagement.trackExistingTabs()
-        // })
-    }
-
     private async ___runTagsMigration() {
         await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
             bgModules: this.deps.bgModules,
@@ -289,7 +282,6 @@ class BackgroundScript {
 
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
-        this.setupStartupHooks()
         this.setupOnDemandContentScriptInjection()
         this.setupUninstallURL()
         this.setupExtUpdateHandling()

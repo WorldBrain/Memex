@@ -74,8 +74,6 @@ export async function main(
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
     setupPageContentRPC()
-    // TODO mv3: figure out if this is actually needed
-    // runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
     const pageInfo = new PageInfo(params)
 

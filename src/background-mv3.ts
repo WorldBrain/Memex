@@ -40,7 +40,7 @@ declare var self: ServiceWorkerGlobalScope & {
     IDBKeyRange: IndexedDbImplementation['range']
 }
 
-// TODO mv3: remove this once firebase/storage is updated to use fetch API
+// TODO mv3: remove this once firebase/storage is updated to use fetch API: https://github.com/firebase/firebase-js-sdk/issues/6595
 global['XMLHttpRequest'] = XMLHttpRequest
 
 async function main() {
