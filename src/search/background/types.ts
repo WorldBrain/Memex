@@ -58,8 +58,6 @@ export interface AnnotSearchParams {
     includeDirectLinks?: boolean
     /** Denotes whether or not to return the assoc. pages with matched annots. */
     includePageResults?: boolean
-    /** If set, encodes any images as base64 strings rather than Object URL refs. */
-    base64Img?: boolean
 }
 
 export interface PageSearchParams
@@ -100,7 +98,6 @@ export interface BackgroundSearchParams {
 
     startDate?: number | Date
     endDate?: number | Date
-    base64Img?: boolean
     usersInc?: any
     usersExc?: any
     hashtagsInc?: any

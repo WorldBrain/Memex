@@ -34,8 +34,8 @@ import {
 } from 'src/sync-settings/util'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
+import browser from 'webextension-polyfill'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import {
     AnnotationPrivacyState,
@@ -312,11 +312,15 @@ export class SidebarContainerLogic extends UILogic<
 
         const user = await auth.getCurrentUser()
         if (user != null) {
-            const userProfile = await auth.getUserProfile()
-            if (!userProfile?.displayName?.length) {
-                setDisplayNameModalShown?.(true)
-                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
-                return false
+            if (!user.displayName?.length) {
+                const userProfile = await auth.getUserProfile()
+                if (!userProfile?.displayName?.length) {
+                    setDisplayNameModalShown?.(true)
+                    this.emitMutation({
+                        showDisplayNameSetupModal: { $set: true },
+                    })
+                    return false
+                }
             }
 
             setLoginModalShown?.(false)

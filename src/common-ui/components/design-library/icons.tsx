@@ -1,12 +1,12 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
-export const logoSmall = browser.extension.getURL(
+export const logoSmall = browser.runtime.getURL(
     '/img/worldbrain-logo-narrow-bw-48.png',
 )
-export const logoHorizontal = browser.extension.getURL(
+export const logoHorizontal = browser.runtime.getURL(
     '/img/memexLogoHorizontal.png',
 )
-export const settings = browser.extension.getURL('/img/settings.svg')
+export const settings = browser.runtime.getURL('/img/settings.svg')
 
 export const atSign = browser.runtime.getURL('/img/atSign.svg')
 export const check = browser.runtime.getURL('/img/check.svg')

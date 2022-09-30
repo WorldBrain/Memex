@@ -1,13 +1,8 @@
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
-
 import { getLocalStorage } from 'src/util/storage'
 import { FLOWS, STAGES, STORAGE_KEYS } from 'src/overview/onboarding/constants'
 import * as utils from 'src/overview/onboarding/utils'
 
 import { destroyRootElement } from 'src/toolbar-notification/content_script/rendering'
-
-const processEventRPC = remoteFunction('processEvent')
 
 /**
  * Conditionally trigger after highlight message during onboarding.
@@ -32,9 +27,6 @@ export const conditionallyShowHighlightNotification = async ({
     // So hack to destroy it using private method.
     toolbarNotifications._destroyRootElement()
 
-    processEventRPC({
-        type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
-    })
     await utils.setOnboardingStage(
         FLOWS.annotation,
         STAGES.annotation.notifiedSelectOption,
@@ -49,10 +41,6 @@ export const conditionallyShowHighlightNotification = async ({
 const handler = (toolbarNotifications) => async () => {
     toolbarNotifications._destroyRootElement()
     toolbarNotifications.showToolbarNotification('go-to-dashboard')
-
-    processEventRPC({
-        type: EVENT_NAMES.POWERSEARCH_BROWSE_PAGE,
-    })
 }
 
 /**

@@ -103,7 +103,7 @@ export const SHARED_ANNOTATIONS: Array<
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
-        selector: {} as any,
+        selector: '',
     },
     {
         reference: { type: 'shared-annotation-reference', id: '2' },

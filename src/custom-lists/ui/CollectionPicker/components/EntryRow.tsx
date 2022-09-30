@@ -79,8 +79,6 @@ class EntryRow extends React.Component<Props> {
             contextMenuBtnRef,
         } = this.props
 
-        console.log(resultItem['props'].children)
-
         return (
             <Row
                 onClick={this.handleEntryPress}

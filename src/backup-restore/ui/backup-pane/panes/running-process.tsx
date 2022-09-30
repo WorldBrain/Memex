@@ -1,19 +1,14 @@
 import React from 'react'
+import styled from 'styled-components'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { setLocalStorageTyped } from 'src/util/storage'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
-import MovingDotsLabel from '../../../../common-ui/components/moving-dots-label'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import { FailedOverlay } from '../components/overlays'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import {
-    WhiteSpacer10,
-    WhiteSpacer20,
-    WhiteSpacer30,
-} from 'src/common-ui/components/design-library/typography'
-import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
-import styled from 'styled-components'
+import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 const overviewStyles = require('src/backup-restore/ui/styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -31,6 +26,7 @@ interface Props {
     eventMessageName: string
     preparingStepLabel: string
     synchingStepLabel: string
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     renderHeader: () => any
     renderFailMessage: (errorId: string) => any
     renderSuccessMessage: () => any
@@ -46,7 +42,9 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        window['browser'].runtime.onMessage.addListener(this.messageListener)
+        globalThis['browser'].runtime.onMessage.addListener(
+            this.messageListener,
+        )
 
         const info = await remoteFunction(this.props.functionNames.info)()
         if (info) {
@@ -77,7 +75,9 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     componentWillUnmount() {
-        window['browser'].runtime.onMessage.removeListener(this.messageListener)
+        globalThis['browser'].runtime.onMessage.removeListener(
+            this.messageListener,
+        )
     }
 
     startRestore = async () => {
@@ -101,21 +101,23 @@ export default class RunningProcess extends React.Component<Props> {
                 info: event.info || this.state.info,
             })
         } else if (event.type === 'success') {
-            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                state: 'success',
-                backupId: 'success',
-            })
+            await this.props.localBackupSettings.set('backupStatus', 'success')
+            await this.props.localBackupSettings.set(
+                'backupStatusId',
+                'success',
+            )
             this.setState({ status: 'success' })
             localStorage.setItem('progress-successful', 'true')
         } else if (event.type === 'fail') {
             const errorId = await remoteFunction(
                 this.props.functionNames.sendNotif,
             )('error')
-            await setLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                state: 'fail',
-                backupId:
-                    errorId === 'backup_error' ? errorId : 'drive_size_empty',
-            })
+            await this.props.localBackupSettings.set('backupStatus', 'fail')
+            await this.props.localBackupSettings.set(
+                'backupStatusId',
+                errorId === 'backup_error' ? errorId : 'drive_size_empty',
+            )
+
             // Set the status as fail and also update the info as to
             // what the reason of the failure was
             let overlay = null

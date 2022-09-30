@@ -14,7 +14,7 @@ import {
 } from 'src/page-analysis/background/types'
 import { IndexPageArgs } from './types'
 import { PipelineRes } from 'src/search'
-import { Storage } from 'webextension-polyfill-ts'
+import { Storage } from 'webextension-polyfill'
 
 const APP_NAME = 'io.worldbrain.memex'
 

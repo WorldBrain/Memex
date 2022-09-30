@@ -4,7 +4,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './tooltip.css'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 const highlighter = browser.runtime.getURL('/img/highlighterSmall.svg')
 const annotations = browser.runtime.getURL('/img/comment_empty.svg')
@@ -36,7 +36,6 @@ const AnnotationTooltipText = styled.span`
 `
 
 export const InitialComponent = ({
-    createLink,
     createHighlight,
     createAnnotation,
     closeTooltip,
@@ -78,16 +77,6 @@ export const InitialComponent = ({
                 />
             </ButtonTooltip>
         </ButtonDiv>
-        {/* {createLink && (
-            <ButtonTooltip
-                tooltipText="Create Link to Highlight"
-                position="bottomHighlighter"
-            >
-                <div className={styles.button} onClick={createLink}>
-                    <img src={share} className={styles.buttonImg} />
-                </div>
-            </ButtonTooltip>
-        )} */}
         <ButtonDiv onClick={closeTooltip}>
             <ButtonTooltip
                 tooltipText={
@@ -112,7 +101,6 @@ export const InitialComponent = ({
 )
 
 InitialComponent.propTypes = {
-    createLink: PropTypes.func,
     createHighlight: PropTypes.func.isRequired,
     createAnnotation: PropTypes.func.isRequired,
     closeTooltip: PropTypes.func.isRequired,

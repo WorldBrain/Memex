@@ -1,4 +1,4 @@
-import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
+import { WebNavigation, Tabs } from 'webextension-polyfill'
 import {
     RemoteFunctionRole,
     RemoteFunctionWithExtraArgs,
@@ -7,14 +7,8 @@ import {
 import Tab from './tab-state'
 
 export interface TabManagementInterface<Role extends RemoteFunctionRole> {
-    fetchTab: RemoteFunctionWithoutExtraArgs<Role, number, Tab>
-    fetchTabByUrl: RemoteFunctionWithoutExtraArgs<Role, string, Tab>
-    setTabAsIndexable: RemoteFunctionWithExtraArgs<Role, void>
-    confirmBackgroundScriptLoaded: RemoteFunctionWithoutExtraArgs<
-        Role,
-        void,
-        any
-    >
+    // fetchTabByUrl: RemoteFunctionWithoutExtraArgs<Role, string, Tab>
+    // setTabAsIndexable: RemoteFunctionWithExtraArgs<Role, void>
 }
 
 export type NavState = Partial<WebNavigation.OnCommittedDetailsType> & {

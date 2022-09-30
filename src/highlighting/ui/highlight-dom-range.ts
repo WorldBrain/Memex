@@ -204,7 +204,7 @@ const getFirstTextNode = (node: Node) => {
         return node
     }
     const document: Document = node.ownerDocument
-    const walker: TreeWalker = document.createTreeWalker(
+    const walker: TreeWalker = (document.createTreeWalker as any)(
         node,
         NodeFilter.SHOW_TEXT,
         null,

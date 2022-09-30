@@ -55,5 +55,5 @@ export const main: TooltipScriptMain = async (options) => {
     })
 }
 
-const registry = window['contentScriptRegistry'] as ContentScriptRegistry
+const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
 registry.registerTooltipScript(main)

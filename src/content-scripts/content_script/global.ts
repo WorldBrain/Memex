@@ -3,13 +3,9 @@ import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 
-import { setupScrollReporter } from 'src/activity-logger/content_script'
+// import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
-import {
-    loadAnnotationWhenReady,
-    setupRemoteDirectLinkFunction,
-} from 'src/annotations/content_script'
 import {
     remoteFunction,
     runInBackground,
@@ -41,13 +37,11 @@ import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
-import { TabManagementInterface } from 'src/tab-management/background/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
-import type { FeaturesInterface } from 'src/features/background/feature-opt-ins'
 import { setupPdfViewerListeners } from './pdf-detection'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
@@ -80,7 +74,6 @@ export async function main(
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
     setupPageContentRPC()
-    runInBackground<TabManagementInterface<'caller'>>().setTabAsIndexable()
 
     const pageInfo = new PageInfo(params)
 
@@ -250,8 +243,6 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
-                isFeatureEnabled: (feature) =>
-                    runInBackground<FeaturesInterface>().getFeature(feature),
             })
             components.tooltip?.resolve()
         },
@@ -263,7 +254,7 @@ export async function main(
         },
     }
 
-    window['contentScriptRegistry'] = contentScriptRegistry
+    globalThis['contentScriptRegistry'] = contentScriptRegistry
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
@@ -312,9 +303,7 @@ export async function main(
     })
 
     // 6. Setup other interactions with this page (things that always run)
-    setupScrollReporter()
-    loadAnnotationWhenReady()
-    setupRemoteDirectLinkFunction({ highlightRenderer })
+    // setupScrollReporter()
     initKeyboardShortcuts({
         inPageUI,
         createHighlight: annotationsFunctions.createHighlight({

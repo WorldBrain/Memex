@@ -46,20 +46,30 @@ import {
     remoteFunctionWithExtraArgs,
     registerRemoteFunctions,
 } from '../../util/webextensionRPC'
+import type { BrowserSettingsStore } from 'src/util/settings'
 
 interface ContentInfo {
+    /** Timestamp in ms of when this data was stored. */
+    asOf: number
     locators: ContentLocator[]
     primaryIdentifier: ContentIdentifier // this is the one we store in the DB
     aliasIdentifiers: ContentIdentifier[] // these are the ones of the other URLs pointing to the primaryNormalizedUrl
 }
+
+export interface LocalPageIndexingSettings {
+    /** Remember which pages are already indexed in which tab, so we only add one visit per page + tab. */
+    indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } }
+    /** Will contain multiple entries for the same content info because of multiple normalized URLs pointing to one. */
+    pageContentInfo: { [normalizedUrl: string]: ContentInfo }
+}
+
 export class PageIndexingBackground {
+    static ONE_WEEK_MS = 604800000
+
     storage: PageStorage
     persistentStorage: PersistentPageStorage
     fetch?: typeof fetch
     remoteFunctions: PageIndexingInterface<'provider'>
-
-    // Remember which pages are already indexed in which tab, so we only add one visit per page + tab
-    indexedTabPages: { [tabId: number]: { [fullPageUrl: string]: true } } = {}
 
     _identifiersForTabPages: {
         [tabId: number]: {
@@ -67,16 +77,14 @@ export class PageIndexingBackground {
         }
     } = {}
 
-    contentInfo: {
-        // will contain multiple entries for the same content info because of multiple normalized URLs pointing to one
-        [normalizedUrl: string]: ContentInfo
-    } = {}
-
     constructor(
         public options: {
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             persistentStorageManager: StorageManager
+            pageIndexingSettingsStore: BrowserSettingsStore<
+                LocalPageIndexingSettings
+            >
             fetchPageData?: FetchPageProcessor
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
@@ -134,13 +142,18 @@ export class PageIndexingBackground {
             return regularIdentifier
         }
 
-        let contentInfo = this.contentInfo[regularNormalizedUrl]
+        const pageContentInfo = await this.getContentInfoForPages()
+
+        let contentInfo = pageContentInfo[regularNormalizedUrl]
         let stored: {
             identifier: ContentIdentifier
             locators: ContentLocator[]
         }
 
-        if (!contentInfo) {
+        if (
+            !contentInfo ||
+            Date.now() - contentInfo.asOf > PageIndexingBackground.ONE_WEEK_MS
+        ) {
             stored = await this.storage.getContentIdentifier({
                 fingerprints: params.fingerprints,
             })
@@ -152,6 +165,7 @@ export class PageIndexingBackground {
                     fullUrl: `https://${generatedNormalizedUrl}`,
                 }
                 contentInfo = {
+                    asOf: Date.now(),
                     primaryIdentifier: generatedIdentifier,
                     locators: [],
                     aliasIdentifiers: [regularIdentifier],
@@ -159,9 +173,10 @@ export class PageIndexingBackground {
             } else {
                 // Stored content ID exists for these fingerprints, so attempt grabbing info
                 //   from cache using the stored ID, or seed it if miss
-                contentInfo = this.contentInfo[
+                contentInfo = pageContentInfo[
                     stored.identifier.normalizedUrl
                 ] ?? {
+                    asOf: Date.now(),
                     primaryIdentifier: stored.identifier,
                     locators: stored.locators,
                     aliasIdentifiers: stored.locators.map((locator) => ({
@@ -172,10 +187,14 @@ export class PageIndexingBackground {
             }
         }
 
-        this.contentInfo[regularNormalizedUrl] = contentInfo
-        this.contentInfo[
+        pageContentInfo[regularNormalizedUrl] = contentInfo
+        pageContentInfo[
             contentInfo.primaryIdentifier.normalizedUrl
         ] = contentInfo
+        await this.options.pageIndexingSettingsStore.set(
+            'pageContentInfo',
+            pageContentInfo,
+        )
 
         // Keep track of the orig ID passed into this function, as an alias ID of the main content info
         if (
@@ -237,34 +256,56 @@ export class PageIndexingBackground {
         // TODO: Try and simplify this logic. Essentially, it was easily possible to get into states where the resolvable would
         //  never get resolved (tab where the content-script doesn't run, and thus doesn't call initContentIdentifier), so solving
         //  that by throwing an error after a timeout.
-        let winner: 'resolvable' | 'timeout'
+        const resolvable = new Promise<['resolved', ContentIdentifier]>(
+            async (resolve) => {
+                const identifier = await this._resolvableForIdentifierTabPage(
+                    params,
+                )
+                resolve(['resolved', identifier])
+            },
+        )
 
-        const resolvable = new Promise<ContentIdentifier>(async (resolve) => {
-            const identifier = await this._resolvableForIdentifierTabPage(
-                params,
-            )
-            winner = winner ?? 'resolvable'
-            resolve(identifier)
-        })
-
-        const timeout = new Promise<ContentIdentifier>((resolve) =>
+        const timeout = new Promise<['timeout']>((resolve) =>
             setTimeout(() => {
-                winner = winner ?? 'timeout'
-                resolve()
+                resolve(['timeout'])
             }, params.timeout ?? 2500),
         )
 
-        const contentIdentifier = await Promise.race([resolvable, timeout])
-        if (winner === 'timeout') {
+        const [result, contentIdentifier] = await Promise.race([
+            resolvable,
+            timeout,
+        ])
+        if (result === 'timeout') {
             throw new Error('Could not resolve identifier in time')
         }
         return contentIdentifier
     }
 
-    getContentFingerprints(
+    private async getContentInfoForPages(): Promise<
+        LocalPageIndexingSettings['pageContentInfo']
+    > {
+        return (
+            (await this.options.pageIndexingSettingsStore.get(
+                'pageContentInfo',
+            )) ?? {}
+        )
+    }
+
+    private async getIndexedTabPages(): Promise<
+        LocalPageIndexingSettings['indexedTabPages']
+    > {
+        return (
+            (await this.options.pageIndexingSettingsStore.get(
+                'indexedTabPages',
+            )) ?? {}
+        )
+    }
+
+    async getContentFingerprints(
         contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,
     ) {
-        return this.contentInfo[contentIdentifier.normalizedUrl]?.locators.map(
+        const contentInfo = await this.getContentInfoForPages()
+        return contentInfo[contentIdentifier.normalizedUrl]?.locators.map(
             (locator): ContentFingerprint => ({
                 fingerprintScheme: locator.fingerprintScheme,
                 fingerprint: locator.fingerprint,
@@ -397,9 +438,10 @@ export class PageIndexingBackground {
     ) {
         const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
+        const pageContentInfo = await this.getContentInfoForPages()
 
-        const contentIdentifier = this.contentInfo[pageData.url]
-            ?.primaryIdentifier
+        const contentIdentifier =
+            pageContentInfo[pageData.url]?.primaryIdentifier
         if (contentIdentifier) {
             pageData.fullUrl = contentIdentifier.fullUrl
             pageData.url = contentIdentifier.normalizedUrl
@@ -427,7 +469,8 @@ export class PageIndexingBackground {
     }
 
     async storeLocators(identifier: ContentIdentifier) {
-        const contentInfo = this.contentInfo[identifier.normalizedUrl]
+        const pageContentInfo = await this.getContentInfoForPages()
+        const contentInfo = pageContentInfo[identifier.normalizedUrl]
         if (!contentInfo) {
             return
         }
@@ -446,10 +489,10 @@ export class PageIndexingBackground {
             )
         }
 
-        const needsIndexing = !this.isTabPageIndexed({
+        const needsIndexing = !(await this.isTabPageIndexed({
             tabId: props.tabId,
             fullPageUrl: props.fullUrl,
-        })
+        }))
         if (!needsIndexing) {
             return null
         }
@@ -579,7 +622,8 @@ export class PageIndexingBackground {
             return foundTabId
         }
 
-        const contentInfo = this.contentInfo[normalizeUrl(fullUrl)]
+        const pageContentInfo = await this.getContentInfoForPages()
+        const contentInfo = pageContentInfo[normalizeUrl(fullUrl)]
         for (const locator of contentInfo?.locators ?? []) {
             foundTabId = await this.options.tabManagement.findTabIdByFullUrl(
                 locator.originalLocation,
@@ -625,11 +669,15 @@ export class PageIndexingBackground {
         }
     }
 
-    isTabPageIndexed(params: { tabId: number; fullPageUrl: string }) {
-        return this.indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
+    private async isTabPageIndexed(params: {
+        tabId: number
+        fullPageUrl: string
+    }): Promise<boolean> {
+        const indexedTabPages = await this.getIndexedTabPages()
+        return indexedTabPages[params.tabId]?.[params.fullPageUrl] ?? false
     }
 
-    private markTabPageAsIndexed({
+    private async markTabPageAsIndexed({
         tabId,
         fullPageUrl,
     }: {
@@ -640,12 +688,23 @@ export class PageIndexingBackground {
             return
         }
 
-        this.indexedTabPages[tabId] = this.indexedTabPages[tabId] || {}
-        this.indexedTabPages[tabId][fullPageUrl] = true
+        const indexedTabPages = await this.getIndexedTabPages()
+        indexedTabPages[tabId] = indexedTabPages[tabId] ?? {}
+        indexedTabPages[tabId][fullPageUrl] = true
+        await this.options.pageIndexingSettingsStore.set(
+            'indexedTabPages',
+            indexedTabPages,
+        )
     }
 
-    handleTabClose(event: { tabId: number }) {
-        delete this.indexedTabPages[event.tabId]
+    async handleTabClose(event: { tabId: number }) {
+        const indexedTabPages = await this.getIndexedTabPages()
+        delete indexedTabPages[event.tabId]
+        await this.options.pageIndexingSettingsStore.set(
+            'indexedTabPages',
+            indexedTabPages,
+        )
+
         delete this._identifiersForTabPages[event.tabId]
     }
 

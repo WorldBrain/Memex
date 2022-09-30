@@ -1,3 +1,5 @@
+import { buildingManifestV3 } from './util'
+
 /**
  * Everything in here gets injected into the generated HTML as link/script tags.
  * See: https://github.com/jharris4/html-webpack-include-assets-plugin#example
@@ -34,8 +36,8 @@ function injectContentScripts(content) {
  */
 export const copyPatterns = [
     {
-        from: 'src/manifest.json',
-        to: '.',
+        from: buildingManifestV3 ? 'src/manifest-v3.json' : 'src/manifest.json',
+        to: './manifest.json',
         transform: transformManifestVersion,
     },
     { from: 'img', to: 'img' },

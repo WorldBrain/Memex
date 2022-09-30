@@ -10,6 +10,8 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { TweetData } from '@worldbrain/memex-common/lib/twitter-integration/api/types'
 import { tweetDataToTitle } from '@worldbrain/memex-common/lib/twitter-integration/utils'
+import { createUploadStorageUtils } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/storage-utils'
+import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
 
 const TEST_TWEET_A: TweetData = {
     name: 'Test User',
@@ -37,15 +39,30 @@ async function setupTest(opts: {
 
     const processor = new TwitterActionProcessor({
         captureException: opts.captureException ?? (async () => {}),
-        storageManager: serverStorage.storageManager,
+        storageManager: serverStorage.manager,
         twitterAPI,
-        userId,
+        storageUtils: await createUploadStorageUtils({
+            storageManager: context.storageManager,
+            getNow: () => Date.now(),
+            deviceId: null,
+            userId,
+        }),
     })
     return { processor, storage: serverStorage, context, userId }
 }
 
 describe('Translation-layer Twitter integration tests', () => {
-    it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata', async () => {
+    it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata - and send off an FCM message to tell clients to sync', async () => {
+        const fcmTokens = ['test-device-1', 'test-device-2']
+        let sentToDevices: { tokens: string[]; message: any }
+        jest.mock('firebase-admin', () => ({
+            messaging: () => ({
+                sendToDevice: async (tokens: string[], message: any) => {
+                    sentToDevices = { tokens, message }
+                },
+            }),
+        }))
+
         let capturedException: Error | null = null
         const { processor, storage, userId } = await setupTest({
             testTweetData: TEST_TWEET_A,
@@ -54,11 +71,19 @@ describe('Translation-layer Twitter integration tests', () => {
             },
         })
 
+        for (const token of fcmTokens) {
+            await storage.manager
+                .collection('userFCMRegistration')
+                .createObject({
+                    token,
+                    createdWhen: Date.now(),
+                    user: userId,
+                })
+        }
+
         const normalizedUrl = 'twitter.com/user/status/123123123'
 
-        const {
-            object: contentMetadata,
-        } = await storage.storageManager
+        const { object: contentMetadata } = await storage.manager
             .collection('personalContentMetadata')
             .createObject({
                 id: 1,
@@ -72,7 +97,7 @@ describe('Translation-layer Twitter integration tests', () => {
                 updatedWhen: 1659333625307,
             })
 
-        await storage.storageManager
+        await storage.manager
             .collection('personalContentLocator')
             .createObject({
                 id: 1,
@@ -102,32 +127,37 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: contentMetadata!.id,
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
+        expect(sentToDevices).toEqual({ tokens: [], message: {} })
         expect(capturedException).toBeNull()
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalDataChange')
                 .findAllObjects({}),
         ).toEqual([])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalTwitterAction')
                 .findAllObjects({}),
         ).toEqual([twitterAction])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalContentMetadata')
                 .findAllObjects({}),
         ).toEqual([expect.objectContaining({ title: null })])
 
         await processor.processTwitterAction(twitterAction)
 
+        expect(sentToDevices).toEqual({
+            tokens: fcmTokens,
+            message: { data: { type: FCM_SYNC_TRIGGER_MSG } },
+        })
         expect(capturedException).toBeNull()
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalDataChange')
                 .findAllObjects({}),
         ).toEqual([
@@ -142,12 +172,12 @@ describe('Translation-layer Twitter integration tests', () => {
             },
         ])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalTwitterAction')
                 .findAllObjects({}),
         ).toEqual([])
         expect(
-            await storage.storageManager
+            await storage.manager
                 .collection('personalContentMetadata')
                 .findAllObjects({}),
         ).toEqual([
@@ -167,9 +197,7 @@ describe('Translation-layer Twitter integration tests', () => {
 
         const normalizedUrl = 'twitter.com/user/status/123123123'
 
-        const {
-            object: contentMetadata,
-        } = await storage.storageManager
+        const { object: contentMetadata } = await storage.manager
             .collection('personalContentMetadata')
             .createObject({
                 id: 1,
@@ -183,7 +211,7 @@ describe('Translation-layer Twitter integration tests', () => {
                 updatedWhen: 1659333625307,
             })
 
-        await storage.storageManager
+        await storage.manager
             .collection('personalContentLocator')
             .createObject({
                 id: 1,
@@ -213,7 +241,7 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: contentMetadata!.id,
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
@@ -242,7 +270,7 @@ describe('Translation-layer Twitter integration tests', () => {
             updatedWhen: 1659333625307,
             personalContentMetadata: 1, // NOTE: This doesn't exist in the DB!
         }
-        await storage.storageManager
+        await storage.manager
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 

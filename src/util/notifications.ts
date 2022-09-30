@@ -1,4 +1,4 @@
-import { Notifications, browser } from 'webextension-polyfill-ts'
+import browser, { Notifications } from 'webextension-polyfill'
 
 import {
     CreateNotification,

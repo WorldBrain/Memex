@@ -46,3 +46,6 @@
 [submodule "external/ui-logic"]
 	path = external/ui-logic
 	url = https://github.com/ShishKabab/ui-logic.git
+[submodule "external/@worldbrain/storex-backend-sql"]
+	path = external/@worldbrain/storex-backend-sql
+	url = git@github.com:WorldBrain/storex-backend-sql.git

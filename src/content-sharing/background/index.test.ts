@@ -2,7 +2,6 @@ import expect from 'expect'
 import type StorageManager from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
@@ -14,10 +13,13 @@ import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integra
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
-import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
-import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharingTestHelper } from './index.tests'
+import ContentSharingBackground from '.'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
+import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -55,11 +57,7 @@ async function setupTest(options: {
     await personalCloud.startSync()
 
     const serverStorage = await setup.getServerStorage()
-    await serverStorage.storageManager.operation(
-        'createObject',
-        'user',
-        TEST_USER,
-    )
+    await serverStorage.manager.operation('createObject', 'user', TEST_USER)
 
     if (options.createTestList) {
         testData.localListId = await data.createContentSharingTestList(setup)
@@ -84,7 +82,7 @@ async function setupTest(options: {
             opts?.skipOrdering ? undefined : { order: [['id', 'asc']] },
         )
 
-    const getShared = getFromDB(serverStorage.storageManager)
+    const getShared = getFromDB(serverStorage.manager)
     const getLocal = getFromDB(setup.storageManager)
 
     return {
@@ -2027,7 +2025,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
 
                                 const serverStorage = await setup.getServerStorage()
-                                const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
+                                const listReference = await serverStorage.modules.contentSharing.createSharedList(
                                     {
                                         listData: {
                                             title: 'Test list',
@@ -2040,7 +2038,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 )
                                 const {
                                     keyString,
-                                } = await serverStorage.storageModules.contentSharing.createListKey(
+                                } = await serverStorage.modules.contentSharing.createListKey(
                                     {
                                         key: { roleID: SharedListRoleID.Admin },
                                         listReference,
@@ -5065,6 +5063,129 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                 }
             },
         ),
+        backgroundIntegrationTest(
+            'should cache remote page IDs upon fetch from server, and use that cache on subsequent lookups',
+            { skipConflictTests: true },
+            () => {
+                const helper = new SharingTestHelper()
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await setupTest({ setup })
+
+                                const serverStorage = await setup.getServerStorage()
+
+                                const normalizedPageUrl = normalizeUrl(
+                                    data.PAGE_1_DATA.pageDoc.url,
+                                )
+                                const creatorReference: UserReference = {
+                                    type: 'user-reference',
+                                    id: TEST_USER.id,
+                                }
+
+                                // Ensure page exists locally
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .createObject({
+                                        url: normalizedPageUrl,
+                                        fullUrl: data.PAGE_1_DATA.pageDoc.url,
+                                        fullTitle:
+                                            data.PAGE_1_DATA.pageDoc.content
+                                                .title,
+                                        text: '',
+                                    })
+
+                                expect(
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
+                                ).toEqual(null)
+                                expect(
+                                    await serverStorage.modules.contentSharing.getPageInfoByCreatorAndUrl(
+                                        {
+                                            creatorReference,
+                                            normalizedUrl: normalizedPageUrl,
+                                        },
+                                    ),
+                                ).toEqual(null)
+
+                                const remotePageId = await setup.backgroundModules.contentSharing.ensureRemotePageId(
+                                    normalizedPageUrl,
+                                )
+
+                                expect(
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
+                                ).toEqual({
+                                    [normalizedPageUrl]: {
+                                        remoteId: remotePageId,
+                                        asOf: expect.any(Number),
+                                    },
+                                })
+                                expect(
+                                    await serverStorage.modules.contentSharing.getPageInfoByCreatorAndUrl(
+                                        {
+                                            creatorReference,
+                                            normalizedUrl: normalizedPageUrl,
+                                        },
+                                    ),
+                                ).toEqual(
+                                    expect.objectContaining({
+                                        pageInfo: expect.objectContaining({
+                                            normalizedUrl: normalizedPageUrl,
+                                        }),
+                                        creatorReference: {
+                                            id: creatorReference.id,
+                                            type: creatorReference.type,
+                                        },
+                                        reference: {
+                                            type: 'shared-page-info-reference',
+                                            id: Number(remotePageId),
+                                        },
+                                    }),
+                                )
+
+                                // Removing data from server storage to demonstrate the cache is still used in favor of server storage
+                                await serverStorage.modules.contentSharing.deletePageInfo(
+                                    {
+                                        id: remotePageId,
+                                        type: 'shared-page-info-reference',
+                                    },
+                                )
+
+                                expect(
+                                    await setup.backgroundModules.contentSharing.ensureRemotePageId(
+                                        normalizedPageUrl,
+                                    ),
+                                ).toEqual(remotePageId)
+                                expect(
+                                    await setup.backgroundModules.contentSharing.options.contentSharingSettingsStore.get(
+                                        'remotePageIdLookup',
+                                    ),
+                                ).toEqual({
+                                    [normalizedPageUrl]: {
+                                        remoteId: remotePageId,
+                                        asOf: expect.any(Number),
+                                    },
+                                })
+                                expect(
+                                    await serverStorage.modules.contentSharing.getPageInfoByCreatorAndUrl(
+                                        {
+                                            creatorReference,
+                                            normalizedUrl: normalizedPageUrl,
+                                        },
+                                    ),
+                                ).toEqual(null)
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
     ],
     { includePostSyncProcessor: true },
 )
@@ -5298,7 +5419,7 @@ function makeAnnotationFromWebUiTest(options: {
                     id: (await context.setup.authService.getCurrentUser()).id,
                 }),
                 serverStorageManager: (await context.setup.getServerStorage())
-                    .storageManager,
+                    .manager,
                 services: context.setup.services,
             })
             await setupPreTest(context)
@@ -5316,7 +5437,7 @@ function makeAnnotationFromWebUiTest(options: {
 
                     const serverStorage = await setup.getServerStorage()
                     if (!options.ownPage) {
-                        await serverStorage.storageModules.contentSharing.ensurePageInfo(
+                        await serverStorage.modules.contentSharing.ensurePageInfo(
                             {
                                 creatorReference: {
                                     type: 'user-reference',
@@ -5339,7 +5460,7 @@ function makeAnnotationFromWebUiTest(options: {
                             emailVerified: true,
                         }
                         setup.authService.setUser(userTwo)
-                        await serverStorage.storageManager.operation(
+                        await serverStorage.manager.operation(
                             'createObject',
                             'user',
                             userTwo,
@@ -5350,7 +5471,7 @@ function makeAnnotationFromWebUiTest(options: {
                     const dummyLocalId = 'aaa'
                     const {
                         sharedAnnotationReferences,
-                    } = await serverStorage.storageModules.contentSharing.createAnnotations(
+                    } = await serverStorage.modules.contentSharing.createAnnotations(
                         {
                             annotationsByPage: {
                                 [normalizeUrl(

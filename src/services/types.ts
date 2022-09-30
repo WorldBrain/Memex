@@ -5,9 +5,12 @@ import type { ListKeysServiceInterface } from '@worldbrain/memex-common/lib/cont
 import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
 
 export interface Services {
-    auth: AuthService
-    subscriptions: SubscriptionsService
     activityStreams: ActivityStreamsService
     contentSharing: ListKeysServiceInterface
     contentConversations: ContentConversationsServiceInterface
+}
+
+export interface AuthServices {
+    auth: AuthService
+    subscriptions: SubscriptionsService
 }

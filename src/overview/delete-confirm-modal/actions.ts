@@ -6,7 +6,6 @@ import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
 import { acts as resultsActs, selectors as results } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 
@@ -18,7 +17,6 @@ export const hide = createAction('deleteConf/hide')
 export const reset = createAction('deleteConf/reset')
 export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 
-const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
 const deleteSocialPagesRPC = remoteFunction('delSocialPages')
 
@@ -29,10 +27,6 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Pages',
         action: 'deleteViaOverview',
-    })
-
-    processEventRPC({
-        type: EVENT_NAMES.DELETE_RESULT,
     })
 
     try {

@@ -1,6 +1,5 @@
 import { ThunkAction } from 'redux-thunk'
 
-import { State as BlacklistBtnState } from './blacklist-button/reducer'
 import { State as BookmarkBtnState } from './bookmark-button/reducer'
 import { State as TagsBtnState } from './tags-button/reducer'
 import { State as CollectionsBtnState } from './collections-button/reducer'
@@ -12,7 +11,6 @@ import { State as PopupState } from './reducer'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
 export interface RootState {
-    blacklistBtn?: BlacklistBtnState
     bookmarkBtn?: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState

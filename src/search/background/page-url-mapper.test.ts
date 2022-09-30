@@ -51,14 +51,13 @@ describe('Page URL Mapper storex plugin', () => {
         // Simulates non-terms search
         const nonTermsSearchResults = await findMatchingPages(storageManager)(
             [DATA.PAGE_1.url, DATA.PAGE_2.url, DATA.PAGE_3.url],
-            { base64Img: true },
+            {},
         )
 
         // Simulates terms search (latest times already retrieved in search process)
         const termsSearchResults = await findMatchingPages(storageManager)(
             [DATA.PAGE_1.url, DATA.PAGE_2.url, DATA.PAGE_3.url],
             {
-                base64Img: true,
                 latestTimes: [DATA.BOOKMARK_1, DATA.BOOKMARK_2, DATA.VISIT_3],
             },
         )

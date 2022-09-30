@@ -1,7 +1,7 @@
 import type Dexie from 'dexie'
 import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
     getCurrentSchemaVersion,
     isTermsField,
@@ -31,7 +31,7 @@ import {
     PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
     PASSIVE_DATA_CUTOFF_DATE,
 } from './constants'
-import {
+import type {
     ActionExecutor,
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
@@ -41,12 +41,15 @@ import { prepareDataMigration } from 'src/personal-cloud/storage/migration-prepa
 import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
-import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { Runtime } from 'webextension-polyfill'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
+    runtimeAPI: Runtime.Static
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
@@ -63,6 +66,7 @@ export interface PersonalCloudBackgroundOptions {
         updates: { [key: string]: any }
     }): Promise<void>
     getServerStorageManager(): Promise<StorageManager>
+    jobScheduler: JobScheduler
 }
 
 export class PersonalCloudBackground {
@@ -77,14 +81,12 @@ export class PersonalCloudBackground {
     reportExecutingAction?: (action: PersonalCloudAction) => void
     remoteFunctions: PersonalCloudRemoteInterface
     emitEvents = true
-    debug = false
+    debug = process.env.NODE_ENV === 'development'
 
     strictErrorReporting = false
     _integrationError?: Error
 
     stats: PersonalCloudStats = {
-        // countingDownloads: false,
-        // countingUploads: true,
         pendingDownloads: 0,
         pendingUploads: 0,
     }
@@ -97,6 +99,14 @@ export class PersonalCloudBackground {
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
+            setTimeout: (job, timeout) => {
+                options.jobScheduler.scheduleJobOnce({
+                    name: 'personal-cloud-action-queue-retry',
+                    when: Date.now() + timeout,
+                    job,
+                })
+                return -1
+            },
         })
 
         this.setupEventListeners()
@@ -117,22 +127,26 @@ export class PersonalCloudBackground {
     }
 
     private setupEventListeners() {
+        this.options.runtimeAPI.onStartup.addListener(async () => {
+            await this.startSync()
+        })
         this.actionQueue.events.on('statsChanged', (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,
             })
         })
-        this.options.backend.events.on('incomingChangesPending', (event) => {
-            this._modifyStats({
-                pendingDownloads:
-                    this.stats.pendingDownloads + event.changeCountDelta,
-            })
-        })
-        this.options.backend.events.on('incomingChangesProcessed', (event) => {
-            this._modifyStats({
-                pendingDownloads: this.stats.pendingDownloads - event.count,
-            })
-        })
+        // TODO: re-implement pending download count
+        // this.options.backend.events.on('incomingChangesPending', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads:
+        //             this.stats.pendingDownloads + event.changeCountDelta,
+        //     })
+        // })
+        // this.options.backend.events.on('incomingChangesProcessed', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads: this.stats.pendingDownloads - event.count,
+        //     })
+        // })
     }
 
     private prepareDataMigration = async () => {
@@ -177,6 +191,10 @@ export class PersonalCloudBackground {
         if (await this.isCloudSyncEnabled()) {
             await this.startSync()
         }
+    }
+
+    triggerSyncContinuation() {
+        this.options.backend.triggerSyncContinuation()
     }
 
     async setup() {
@@ -313,11 +331,13 @@ export class PersonalCloudBackground {
     }
 
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
+        this.options.remoteEventEmitter.emit('downloadStarted')
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
             await this.integrateUpdate(update)
         }
         releaseMutex()
+        this.options.remoteEventEmitter.emit('downloadStopped')
     }
 
     async integrateUpdate(update: PersonalCloudUpdate) {
@@ -510,9 +530,9 @@ export class PersonalCloudBackground {
 
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
         if (!this.deviceId) {
-            console.warn(
-                'Tried to execute action without deviceId, so pausing the action queue',
-            )
+            // console.warn(
+            //     'Tried to execute action without deviceId, so pausing the action queue',
+            // )
             return { pauseAndRetry: true }
         }
         this._debugLog('Executing action', action)
@@ -535,7 +555,7 @@ export class PersonalCloudBackground {
                         type: PersonalCloudActionType.ExecuteClientInstructions,
                         clientInstructions,
                     },
-                    { queueInteraction: 'queue-and-return' },
+                    { queueInteraction: 'skip-queue' },
                 )
             }
         } else if (

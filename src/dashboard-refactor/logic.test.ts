@@ -81,7 +81,7 @@ describe('Dashboard Refactor misc logic', () => {
         const { searchResults } = await setupTest(device, { withAuth: true })
 
         const {
-            storageModules: { activityFollows, contentSharing },
+            modules: { activityFollows, contentSharing },
         } = await device.getServerStorage()
         const user = await device.authService.getCurrentUser()
         const userReferenceA: UserReference = {

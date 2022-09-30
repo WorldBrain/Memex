@@ -1,9 +1,4 @@
-import moment from 'moment'
-
 import type { RootState } from '../../types'
-
-const getDaysSinceDate = (date: Date | null): number =>
-    date == null ? 0 : moment().diff(moment(date), 'days')
 
 export const deriveStatusIconColor = ({
     currentUser,

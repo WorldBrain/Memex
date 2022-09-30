@@ -8,15 +8,17 @@ export default class ContentConversationsBackground {
 
     constructor(
         private options: {
-            services: Pick<Services, 'contentConversations'>
+            servicesPromise: Promise<Pick<Services, 'contentConversations'>>
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentConversations'>
             >
         },
     ) {
         this.remoteFunctions = {
-            submitReply: async (params) =>
-                options.services.contentConversations.submitReply(params),
+            submitReply: async (params) => {
+                const { contentConversations } = await options.servicesPromise
+                return contentConversations.submitReply(params)
+            },
             getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
                 sharedListReference,

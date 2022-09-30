@@ -18,11 +18,6 @@
         "default_title": "Memex",
         "default_popup": "./popup.html"
     },
-    "commands": {
-        "openOverview": {
-            "description": "Open Search Overview"
-        }
-    },
     "applications": {
         "gecko": {
             "id": "info@worldbrain.io"

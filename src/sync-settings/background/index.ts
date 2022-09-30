@@ -1,5 +1,5 @@
 import StorageManager from '@worldbrain/storex'
-import type { Storage } from 'webextension-polyfill-ts'
+import type { Storage } from 'webextension-polyfill'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type { SyncSettingValue, RemoteSyncSettingsInterface } from './types'
 import SyncSettingsStorage from './storage'

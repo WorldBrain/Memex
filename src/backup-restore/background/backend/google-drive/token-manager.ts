@@ -1,10 +1,13 @@
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from '../../types'
+
 export class DriveTokenManager {
     public tokenStore: DriveTokenStore
     private accessToken: string
     public memexCloudOrigin: string
     private refreshToken: string
     private tokenExpiryDate: Date
-    private initializationPromise: Promise<any>
+    private initializationPromise: Promise<void>
 
     constructor({
         tokenStore,
@@ -15,27 +18,29 @@ export class DriveTokenManager {
     }) {
         this.memexCloudOrigin = memexCloudOrigin
         this.tokenStore = tokenStore
-        this.initializationPromise = new Promise(async (resolve, reject) => {
-            try {
-                const {
-                    token: accessToken,
-                    expiryDate,
-                } = await this.tokenStore.retrieveAccessToken()
-                if (accessToken) {
-                    this.accessToken = accessToken
-                    this.tokenExpiryDate = expiryDate
-                }
+        this.initializationPromise = new Promise<void>(
+            async (resolve, reject) => {
+                try {
+                    const {
+                        token: accessToken,
+                        expiryDate,
+                    } = await this.tokenStore.retrieveAccessToken()
+                    if (accessToken) {
+                        this.accessToken = accessToken
+                        this.tokenExpiryDate = expiryDate
+                    }
 
-                const refreshToken = await this.tokenStore.retrieveRefreshToken()
-                if (refreshToken) {
-                    this.refreshToken = refreshToken
-                }
+                    const refreshToken = await this.tokenStore.retrieveRefreshToken()
+                    if (refreshToken) {
+                        this.refreshToken = refreshToken
+                    }
 
-                resolve()
-            } catch (err) {
-                reject(err)
-            }
-        })
+                    resolve()
+                } catch (err) {
+                    reject(err)
+                }
+            },
+        )
     }
 
     async getAccessToken() {
@@ -118,33 +123,31 @@ export interface DriveTokenStore {
 }
 
 export class LocalStorageDriveTokenStore implements DriveTokenStore {
-    prefix: string
-
-    constructor({ prefix }: { prefix: string }) {
-        this.prefix = prefix
-    }
+    constructor(
+        private deps: {
+            localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+            prefix: string
+        },
+    ) {}
 
     async storeAccessToken(token: string, expiryDate: Date): Promise<any> {
-        localStorage.setItem(this.prefix + 'access', token)
-        localStorage.setItem(
-            this.prefix + 'access-expiry',
-            expiryDate.getTime().toString(),
-        )
+        await this.deps.localBackupSettings.set('accessToken', token)
+        await this.deps.localBackupSettings.set('accessTokenExpiry', expiryDate)
     }
 
     async retrieveAccessToken() {
-        const expiryString = localStorage.getItem(this.prefix + 'access-expiry')
-        return {
-            token: localStorage.getItem(this.prefix + 'access'),
-            expiryDate: expiryString && new Date(parseFloat(expiryString)),
-        }
+        const token = await this.deps.localBackupSettings.get('accessToken')
+        const expiryDate = await this.deps.localBackupSettings.get(
+            'accessTokenExpiry',
+        )
+        return { token, expiryDate }
     }
 
     async storeRefreshToken(token: string) {
-        localStorage.setItem(this.prefix + 'refresh', token)
+        await this.deps.localBackupSettings.set('refreshToken', token)
     }
 
     async retrieveRefreshToken() {
-        return localStorage.getItem(this.prefix + 'refresh')
+        return this.deps.localBackupSettings.get('refreshToken')
     }
 }

@@ -1,16 +1,21 @@
 import expect from 'expect'
 import { fakeRemoteFunctions } from 'src/util/webextensionRPC'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
-import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { FakeAnalytics } from 'src/analytics/mock'
+import { BrowserSettingsStore } from 'src/util/settings'
+import MemoryBrowserStorage from 'src/util/tests/browser-storage'
+import { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 function setupTest() {
-    const localStorage = new MemoryLocalStorage()
+    const localBackupSettings = new BrowserSettingsStore<LocalBackupSettings>(
+        new MemoryBrowserStorage(),
+        { prefix: 'localBackup.' },
+    )
     const analytics = new FakeAnalytics()
     const triggerEvent = async (state, event, { remoteFunctions }) => {
         const result = await logic.processEvent({
+            localBackupSettings,
             state,
-            localStorage,
             analytics,
             event,
             remoteFunction: fakeRemoteFunctions(remoteFunctions),
@@ -20,16 +25,16 @@ function setupTest() {
         }
         return result
     }
-    return { localStorage, analytics, triggerEvent }
+    return { localBackupSettings, analytics, triggerEvent }
 }
 
 describe('Backup settings container logic', () => {
     it('should be able to guide the user through the onboarding flow', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -65,9 +70,7 @@ describe('Backup settings container logic', () => {
                 screen: 'onboarding-where',
             }),
         )
-        expect(localStorage.popChanges()).toEqual([
-            { type: 'set', key: 'backup.onboarding', value: true },
-        ])
+        expect(await localBackupSettings.get('isOnboarding')).toEqual(true)
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
@@ -137,7 +140,7 @@ describe('Backup settings container logic', () => {
         // // User tries to log in
         // const loginResult = await logic.processEvent({
         //     state: firstSessionState,
-        //     localStorage,
+        //     localBackupSettings,
         //     analytics,
         //     event: { type: 'onLoginRequested' },
         //     remoteFunction: fakeRemoteFunctions({
@@ -156,7 +159,7 @@ describe('Backup settings container logic', () => {
         //         },
         //     },
         // ])
-        // expect(localStorage.popChanges()).toEqual([
+        // expect(localBackupSettings.popChanges()).toEqual([
         //     {
         //         type: 'set',
         //         key: 'backup.onboarding.authenticating',
@@ -164,13 +167,13 @@ describe('Backup settings container logic', () => {
         //     },
         // ])
 
-        // localStorage.setItem('drive-token-access', 'bla token')
-        // localStorage.popChanges()
+        // localBackupSettings.setItem('drive-token-access', 'bla token')
+        // localBackupSettings.popChanges()
 
         // // User lands back on the backup settings page after logging in
         // const secondSessionState = await logic.getInitialState({
         //     analytics,
-        //     localStorage,
+        //     localBackupSettings,
         //     remoteFunction: fakeRemoteFunctions({
         //         isBackupBackendAuthenticated: () => true,
         //         hasInitialBackup: () => false,
@@ -185,7 +188,7 @@ describe('Backup settings container logic', () => {
         //         screen: 'running-backup',
         //     }),
         // )
-        // expect(localStorage.popChanges()).toEqual([
+        // expect(localBackupSettings.popChanges()).toEqual([
         //     { type: 'remove', key: 'backup.onboarding' },
         //     { type: 'remove', key: 'backup.onboarding.authenticating' },
         // ])
@@ -211,11 +214,11 @@ describe('Backup settings container logic', () => {
     })
 
     it('should be to able to backup through local server', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -284,7 +287,7 @@ describe('Backup settings container logic', () => {
 
         // // Remove previous analytics and local storage events
         // analytics.popNew()
-        // localStorage.popChanges()
+        // localBackupSettings.popChanges()
 
         // await triggerEvent(
         //     firstSessionState,
@@ -329,12 +332,12 @@ describe('Backup settings container logic', () => {
     })
 
     it('should be able to guide the user through the restore flow when they try to restore without being logged in', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -377,20 +380,15 @@ describe('Backup settings container logic', () => {
         expect(choiceResult).toEqual({
             redirect: { to: 'gdrive-login' },
         })
-        expect(localStorage.popChanges()).toEqual([
-            {
-                type: 'set',
-                key: 'backup.restore.authenticating',
-                value: true,
-            },
-        ])
+        expect(
+            await localBackupSettings.get('restoreIsAuthenticating'),
+        ).toEqual(true)
 
-        localStorage.setItem('drive-token-access', 'bla token')
-        localStorage.popChanges()
+        await localBackupSettings.set('accessToken', 'bla token')
 
         const secondSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
@@ -404,21 +402,18 @@ describe('Backup settings container logic', () => {
                 screen: 'restore-running',
             }),
         )
-        expect(localStorage.popChanges()).toEqual([
-            {
-                type: 'remove',
-                key: 'backup.restore.authenticating',
-            },
-        ])
+        expect(
+            await localBackupSettings.get('restoreIsAuthenticating'),
+        ).toEqual(null)
     })
 
     it('should be able to handle a Drive login cancel during restore flow', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -460,17 +455,13 @@ describe('Backup settings container logic', () => {
         expect(choiceResult).toEqual({
             redirect: { to: 'gdrive-login' },
         })
-        expect(localStorage.popChanges()).toEqual([
-            {
-                type: 'set',
-                key: 'backup.restore.authenticating',
-                value: true,
-            },
-        ])
+        expect(
+            await localBackupSettings.get('restoreIsAuthenticating'),
+        ).toEqual(true)
 
         const secondSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -484,21 +475,18 @@ describe('Backup settings container logic', () => {
                 screen: 'restore-where',
             }),
         )
-        expect(localStorage.popChanges()).toEqual([
-            {
-                type: 'remove',
-                key: 'backup.restore.authenticating',
-            },
-        ])
+        expect(
+            await localBackupSettings.get('restoreIsAuthenticating'),
+        ).toEqual(null)
     })
 
     it('should be able to guide the user through the restore flow when they try to restore while being logged in', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
@@ -545,12 +533,12 @@ describe('Backup settings container logic', () => {
     })
 
     it('should be able to guide the user through the restore flow when using local', async () => {
-        const { localStorage, analytics, triggerEvent } = setupTest()
+        const { localBackupSettings, analytics, triggerEvent } = setupTest()
 
         let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
-            localStorage,
+            localBackupSettings,
             remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
@@ -625,7 +613,7 @@ describe('Backup settings container logic helpers', () => {
                     events: { bla: true },
                 },
                 dependencies: {
-                    localStorage: 'localStorage',
+                    localBackupSettings: {} as any,
                     remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
@@ -643,7 +631,7 @@ describe('Backup settings container logic helpers', () => {
                     args: {
                         state: {},
                         event: { type: 'bla' },
-                        localStorage: 'localStorage',
+                        localBackupSettings: {},
                         remoteFunction: 'remoteFunction',
                         analytics: 'analytics',
                     },
@@ -662,7 +650,7 @@ describe('Backup settings container logic helpers', () => {
                     events: { bla: { argument: 'arg' } },
                 },
                 dependencies: {
-                    localStorage: 'localStorage',
+                    localBackupSettings: {} as any,
                     remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
@@ -680,7 +668,7 @@ describe('Backup settings container logic helpers', () => {
                     args: {
                         state: {},
                         event: { type: 'bla', arg: 'foo' },
-                        localStorage: 'localStorage',
+                        localBackupSettings: {},
                         remoteFunction: 'remoteFunction',
                         analytics: 'analytics',
                     },

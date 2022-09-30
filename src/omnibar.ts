@@ -5,14 +5,12 @@ import qs from 'query-string'
 import moment from 'moment'
 
 import analytics from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
 import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
 import checkBrowser from './util/check-browser'
-import { EVENT_NAMES } from './analytics/internal/constants'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 import { combineSearchIndex } from './search/search-index'
 import { getDb } from './search'
@@ -22,14 +20,14 @@ import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { PageIndexingBackground } from './page-indexing/background'
 import TabManagementBackground from './tab-management/background'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
-import { TabManager } from './tab-management/background/tab-manager'
+import { BrowserSettingsStore } from './util/settings'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
-        tabManager: new TabManager(),
+        manifestVersion: '3',
         browserAPIs: browser,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
@@ -41,7 +39,16 @@ export async function main() {
         storageManager,
         getNow: () => Date.now(),
         createInboxEntry: () => undefined,
-        persistentStorageManager: createPersistentStorageManager(),
+        persistentStorageManager: createPersistentStorageManager({
+            idbImplementation: {
+                factory: self.indexedDB,
+                range: self.IDBKeyRange,
+            },
+        }),
+        pageIndexingSettingsStore: new BrowserSettingsStore(
+            browser.storage.local,
+            { prefix: 'pageIndexing.' },
+        ),
     })
     registerModuleMapCollections(storageManager.registry, {
         pages: pages.storage,
@@ -65,7 +72,7 @@ export async function main() {
     }
 
     function setOmniboxMessage(text) {
-        window['browser'].omnibox.setDefaultSuggestion({
+        globalThis['browser'].omnibox.setDefaultSuggestion({
             description: text,
         })
     }
@@ -118,13 +125,6 @@ export async function main() {
                     : 'failViaOmnibar',
             name: queryFiltersDisplay(queryFilters),
             value: searchResults.totalCount,
-        })
-
-        internalAnalytics.processEvent({
-            type:
-                searchResults.totalCount > 0
-                    ? EVENT_NAMES.SUCCESSFUL_OMNIBAR_SEARCH
-                    : EVENT_NAMES.UNSUCCESSFUL_OMNIBAR_SEARCH,
         })
 
         // A subsequent search could have already started and finished while we
@@ -180,17 +180,17 @@ export async function main() {
 
         switch (disposition) {
             case 'currentTab':
-                window['browser'].tabs.update({
+                globalThis['browser'].tabs.update({
                     url,
                 })
                 break
             case 'newForegroundTab':
-                window['browser'].tabs.create({
+                globalThis['browser'].tabs.create({
                     url,
                 })
                 break
             case 'newBackgroundTab':
-                window['browser'].tabs.create({
+                globalThis['browser'].tabs.create({
                     url,
                     active: false,
                 })
@@ -200,10 +200,10 @@ export async function main() {
         }
     }
 
-    window['browser'].omnibox.onInputChanged.addListener(
+    globalThis['browser'].omnibox.onInputChanged.addListener(
         debounce(500)(makeSuggestion),
     )
-    window['browser'].omnibox.onInputEntered.addListener(acceptInput)
+    globalThis['browser'].omnibox.onInputEntered.addListener(acceptInput)
 }
 
 main()

@@ -1,6 +1,6 @@
 import { getFirebase } from 'src/util/firebase-app-initialized'
-import 'firebase/database'
-import 'firebase/firestore'
+import 'firebase/compat/database'
+import 'firebase/compat/firestore'
 import StorageManager, { StorageBackend } from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import {
@@ -61,7 +61,7 @@ export function createLazyServerStorage(
     let serverStoragePromise: Promise<ServerStorage>
 
     try {
-        window['setServerStorageLoggingEnabled'] = (value: boolean) =>
+        globalThis['setServerStorageLoggingEnabled'] = (value: boolean) =>
             (shouldLogOperations = value)
     } catch (e) {}
 
@@ -94,7 +94,7 @@ export function createLazyServerStorage(
                 operationExecuter: operationExecuter('contentConversations'),
                 ...options,
             })
-            const userManagement = new UserStorage({
+            const users = new UserStorage({
                 storageManager,
                 operationExecuter: operationExecuter('users'),
             })
@@ -114,10 +114,10 @@ export function createLazyServerStorage(
                 operationExecuter: operationExecuter('discord'),
             })
             const serverStorage: ServerStorage = {
-                storageManager,
-                storageModules: {
+                manager: storageManager,
+                modules: {
                     sharedSyncLog,
-                    userManagement,
+                    users,
                     contentSharing,
                     activityStreams,
                     activityFollows,
@@ -128,7 +128,7 @@ export function createLazyServerStorage(
             }
             registerModuleMapCollections(
                 storageManager.registry,
-                serverStorage.storageModules,
+                serverStorage.modules,
             )
             await storageManager.finishInitialization()
 
@@ -227,6 +227,19 @@ function createStorageManager(
     },
 ) {
     const storageManager = new StorageManager({ backend })
+    setupServerStorageManagerMiddleware(storageManager, options)
+    return storageManager
+}
+
+export function setupServerStorageManagerMiddleware(
+    storageManager: StorageManager,
+    options?: {
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+    },
+) {
     const middleware: StorageMiddleware[] = [
         createOperationLoggingMiddleware({
             shouldLog: () => shouldLogOperations,
@@ -241,7 +254,6 @@ function createStorageManager(
         )
     }
     storageManager.setMiddleware(middleware)
-    return storageManager
 }
 
 function getFirebaseOperationExecuter(storageManager: StorageManager) {

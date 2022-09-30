@@ -4,7 +4,7 @@ import {
     UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event, AuthDialogMode } from './types'
-import { EmailPasswordCredentials } from 'src/authentication/background/types'
+import type { EmailPasswordCredentials } from 'src/authentication/background/types'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,

@@ -1,7 +1,7 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill-ts'
+import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
 
 export class ContentScriptsBackground {
@@ -9,10 +9,7 @@ export class ContentScriptsBackground {
 
     constructor(
         private options: {
-            injectScriptInTab: (
-                tabId: number,
-                options: { file: string },
-            ) => void
+            injectScriptInTab: (tabId: number, file: string) => Promise<void>
             getTab: Tabs.Static['get']
             getURL: Runtime.Static['getURL']
             webNavigation: WebNavigation.Static
@@ -50,9 +47,10 @@ export class ContentScriptsBackground {
     injectContentScriptComponent: ContentScriptsInterface<
         'provider'
     >['injectContentScriptComponent'] = async ({ tab }, { component }) => {
-        this.options.injectScriptInTab(tab.id, {
-            file: `/content_script_${component}.js`,
-        })
+        await this.options.injectScriptInTab(
+            tab.id,
+            `/content_script_${component}.js`,
+        )
     }
 
     private handleHistoryStateUpdate = async ({

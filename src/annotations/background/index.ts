@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill'
 import {
     normalizeUrl,
     isFullUrl,
@@ -11,21 +11,16 @@ import {
     remoteFunction,
     runInTab,
 } from 'src/util/webextensionRPC'
-import DirectLinkingBackend from './backend'
-import { setupRequestInterceptor } from './redirect'
-import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import type { Annotation, AnnotationSender } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import type { AnnotationInterface, CreateAnnotationParams } from './types'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
-import { BrowserSettingsStore } from 'src/util/settings'
-import { TagsSettings } from 'src/tags/background/types'
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { Analytics } from 'src/analytics/types'
@@ -39,24 +34,20 @@ interface TabArg {
 
 export default class DirectLinkingBackground {
     remoteFunctions: AnnotationInterface<'provider'>
-    private backend: DirectLinkingBackend
     annotationStorage: AnnotationStorage
-    private sendAnnotation: AnnotationSender
-    private requests: AnnotationRequests
     private socialBg: SocialBG
     private _normalizeUrl: URLNormalizer
-    private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
         private options: {
-            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
+            browserAPIs: Pick<Browser, 'tabs'>
             storageManager: Storex
             pages: PageIndexingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
             getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'contentSharing' | 'userManagement'>
+                Pick<ServerStorageModules, 'contentSharing' | 'users'>
             >
             preAnnotationDelete(params: {
                 annotationUrl: string
@@ -64,7 +55,6 @@ export default class DirectLinkingBackground {
         },
     ) {
         this.socialBg = options.socialBg
-        this.backend = new DirectLinkingBackend()
 
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
@@ -72,20 +62,7 @@ export default class DirectLinkingBackground {
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl
 
-        this.sendAnnotation = ({ tabId, annotation }) => {
-            options.browserAPIs.tabs.sendMessage(tabId, {
-                type: 'direct-link',
-                annotation,
-            })
-        }
-
-        this.requests = new AnnotationRequests(
-            this.backend,
-            this.sendAnnotation,
-        )
-
         this.remoteFunctions = {
-            createDirectLink: this.createDirectLink.bind(this),
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
             listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
             createAnnotation: this.createAnnotation.bind(this),
@@ -97,7 +74,6 @@ export default class DirectLinkingBackground {
             addAnnotationTag: this.addTagForAnnotation.bind(this),
             delAnnotationTag: this.delTagForAnnotation.bind(this),
             updateAnnotationBookmark: this.updateAnnotationBookmark.bind(this),
-            followAnnotationRequest: this.followAnnotationRequest.bind(this),
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
@@ -107,22 +83,10 @@ export default class DirectLinkingBackground {
             getSharedAnnotations: this.getSharedAnnotations,
             getListIdsForAnnotation: this.getListIdsForAnnotation,
         }
-
-        this.localStorage = new BrowserSettingsStore<TagsSettings>(
-            options.browserAPIs.storage.local,
-            { prefix: 'tags_' },
-        )
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
-    }
-
-    setupRequestInterceptor() {
-        setupRequestInterceptor({
-            requests: this.requests,
-            webRequest: this.options.browserAPIs.webRequest,
-        })
     }
 
     async _triggerSidebar(functionName, ...args) {
@@ -258,25 +222,6 @@ export default class DirectLinkingBackground {
                 this.annotationStorage.removeAnnotFromList({ listId, url }),
             ),
         )
-    }
-
-    followAnnotationRequest({ tab }: TabArg) {
-        this.requests.followAnnotationRequest(tab.id)
-    }
-
-    createDirectLink = async ({ tab }: TabArg, request) => {
-        const pageTitle = tab.title
-        const result = await this.backend.createDirectLink(request)
-        await this.annotationStorage.createAnnotation({
-            pageTitle,
-            pageUrl: this._normalizeUrl(getUnderlyingResourceUrl(tab.url)),
-            body: request.anchor.quote,
-            url: result.url,
-            selector: request.anchor,
-            comment: '',
-        })
-
-        return result
     }
 
     listAnnotationsByPageUrl = async (
@@ -459,10 +404,7 @@ export default class DirectLinkingBackground {
         _,
         { sharedAnnotationReferences, withCreatorData },
     ) => {
-        const {
-            contentSharing,
-            userManagement,
-        } = await this.options.getServerStorage()
+        const { users, contentSharing } = await this.options.getServerStorage()
 
         const annotationsById = await contentSharing.getAnnotations({
             references: sharedAnnotationReferences,
@@ -473,7 +415,7 @@ export default class DirectLinkingBackground {
             const uniqueCreatorIds = new Set(
                 Object.values(annotationsById).map((annot) => annot.creator.id),
             )
-            creatorData = await userManagement
+            creatorData = await users
                 .getUsersPublicDetails(
                     [...uniqueCreatorIds].map((id) => ({
                         type: 'user-reference',

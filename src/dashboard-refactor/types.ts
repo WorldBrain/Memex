@@ -1,4 +1,4 @@
-import type { Browser } from 'webextension-polyfill-ts'
+import type { Browser } from 'webextension-polyfill'
 import type { UIEvent } from 'ui-logic-core'
 import type { TaskState } from 'ui-logic-core/lib/types'
 

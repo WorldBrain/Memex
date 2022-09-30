@@ -6,17 +6,14 @@ import {
 import Logic from './logic'
 
 async function setupTest(
-    { backgroundModules, services, createElement }: UILogicTestDevice,
+    { backgroundModules, authService, createElement }: UILogicTestDevice,
     args?: {
         isLoggedIn?: boolean
         onDashboardNav?: () => void
     },
 ) {
     if (args?.isLoggedIn) {
-        await services.auth.loginWithEmailAndPassword(
-            TEST_USER.email,
-            'password',
-        )
+        await authService.loginWithEmailAndPassword(TEST_USER.email, 'password')
     }
 
     const _logic = new Logic({

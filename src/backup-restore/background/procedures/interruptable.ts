@@ -1,7 +1,7 @@
 export default class Interruptable {
     cancelled: boolean = false
     paused: boolean = false
-    private pausePromise?: Promise<null> // only set if paused, resolved when pause ends
+    private pausePromise?: Promise<void> // only set if paused, resolved when pause ends
     private resolvePausePromise?: () => void // only set if paused
 
     async cancel() {
@@ -14,7 +14,7 @@ export default class Interruptable {
         }
 
         this.paused = true
-        this.pausePromise = new Promise(resolve => {
+        this.pausePromise = new Promise<void>((resolve) => {
             this.resolvePausePromise = resolve
         })
     }

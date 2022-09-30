@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
@@ -92,7 +92,6 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 _setCloseMessageShown()
             }
         },
-        isFeatureEnabled: params.isFeatureEnabled,
     })
 
     setupTooltipTrigger(() => {

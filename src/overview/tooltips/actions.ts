@@ -5,38 +5,29 @@ import { FLOWS, STAGES } from '../onboarding/constants'
 import { fetchOnboardingStage, setOnboardingStage } from '../onboarding/utils'
 import { TOOLTIPS } from './constants'
 
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
-
-const processEventRPC = remoteFunction('processEvent')
-
 export const setWhichTooltip = createAction<number>('tooltips/setTooltip')
 export const resetWhichTooltip = createAction('tooltip/resetWhichTooltip')
 export const setShowTooltip = createAction<boolean>('tooltips/setShowTooltip')
 
-export const initOnboardingTooltips = (index = 0) => dispatch => {
+export const initOnboardingTooltips = (index = 0) => (dispatch) => {
     dispatch(setShowTooltip(true))
     dispatch(processAndSetWhichTooltip(index))
 }
 
-export const fetchOnboardingState = () => async dispatch => {
+export const fetchOnboardingState = () => async (dispatch) => {
     const onboardingState = await fetchOnboardingStage(FLOWS.powerSearch)
 }
 
-export const processAndSetWhichTooltip = (whichTooltip: number) => dispatch => {
+export const processAndSetWhichTooltip = (whichTooltip: number) => (
+    dispatch,
+) => {
     // Fetch tooltip name, generalized to be used with different dispatched actions
     const tooltipName = TOOLTIPS[whichTooltip]
-    processEventRPC({
-        type: EVENT_NAMES.SET_TOOLTIP,
-        details: {
-            tooltip: tooltipName,
-        },
-    })
 
     dispatch(setWhichTooltip(whichTooltip))
 }
 
-export const setTooltip = (tooltip: string) => dispatch => {
+export const setTooltip = (tooltip: string) => (dispatch) => {
     const index = TOOLTIPS.indexOf(tooltip)
     if (index === -1) {
         return
@@ -46,11 +37,8 @@ export const setTooltip = (tooltip: string) => dispatch => {
 /**
  * Temporarily removes tooltip by setting tooltip to 'none'
  */
-export const closeTooltip = () => async dispatch => {
+export const closeTooltip = () => async (dispatch) => {
     dispatch(resetWhichTooltip())
-    processEventRPC({
-        type: EVENT_NAMES.CLOSE_TOOLTIP,
-    })
     await setOnboardingStage(FLOWS.powerSearch, STAGES.unvisited)
 }
 
@@ -87,7 +75,7 @@ export const previousTooltip = () => (dispatch, getState) => {
 /**
  * Resets all tooltip states.
  */
-export const resetTooltips = () => dispatch => {
+export const resetTooltips = () => (dispatch) => {
     dispatch(setShowTooltip(false))
     dispatch(resetWhichTooltip())
 }

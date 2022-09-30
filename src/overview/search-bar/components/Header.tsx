@@ -113,7 +113,7 @@ class Header extends PureComponent<Props> {
                         </div>
                     </div>
                     <div className={styles.links}>
-                        <BackupStatus />
+                        {/* <BackupStatus localBackupSettings={} /> */}
                         {/*<InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}

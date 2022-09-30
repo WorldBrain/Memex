@@ -1,10 +1,8 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
-import internalAnalytics from '../../analytics/internal'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
@@ -19,7 +17,7 @@ import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/sugge
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 import { ServerStorageModules } from 'src/storage/types'
-import { Services } from 'src/services/types'
+import type { AuthServices } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
@@ -45,7 +43,7 @@ export default class CustomListBackground {
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
-            services: Pick<Services, 'auth'>
+            authServices: Pick<AuthServices, 'auth'>
             // TODO: the fact this needs to be passed down tells me this ideally should be done at a higher level (content sharing BG?)
             removeChildAnnotationsFromList: (
                 normalizedPageUrl: string,
@@ -110,7 +108,7 @@ export default class CustomListBackground {
     private fetchOwnListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -127,7 +125,7 @@ export default class CustomListBackground {
     private fetchFollowedListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { activityFollows } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -155,7 +153,7 @@ export default class CustomListBackground {
     private fetchCollaborativeListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -204,7 +202,7 @@ export default class CustomListBackground {
             return true
         })
 
-        const fingerprints = this.options.pages.getContentFingerprints({
+        const fingerprints = await this.options.pages.getContentFingerprints({
             normalizedUrl: normalizedPageUrl,
         })
 
@@ -263,7 +261,7 @@ export default class CustomListBackground {
     private fetchListsFromReferences = async (
         references: SharedListReference[],
     ): Promise<PageList[]> => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const sharedLists = await contentSharing.getListsByReferences(
@@ -295,7 +293,7 @@ export default class CustomListBackground {
     fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({
         remoteListId,
     }) => {
-        const currentUser = await this.options.services.auth.getCurrentUser()
+        const currentUser = await this.options.authServices.auth.getCurrentUser()
         if (!currentUser) {
             return null
         }
@@ -456,9 +454,6 @@ export default class CustomListBackground {
         id?: number
         createdAt?: Date
     }): Promise<number> => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.CREATE_COLLECTION,
-        })
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
@@ -506,10 +501,6 @@ export default class CustomListBackground {
             )
         }
 
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
-        })
-
         if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
@@ -546,20 +537,12 @@ export default class CustomListBackground {
     }
 
     removeList = async ({ id }: { id: number }) => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_COLLECTION,
-        })
-
         return this.storage.removeList({
             id,
         })
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {
-        await internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
-        })
-
         await this.options.removeChildAnnotationsFromList(url, id)
 
         return this.storage.removePageFromList({

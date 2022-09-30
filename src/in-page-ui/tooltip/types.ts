@@ -15,7 +15,6 @@ export type TooltipInPageUIInterface = Pick<
 export interface TooltipDependencies extends AnnotationFunctions {
     inPageUI: SharedInPageUIInterface
     toolbarNotifications: ToolbarNotificationsInterface
-    isFeatureEnabled(feature: UserFeatureOptIn): Promise<boolean>
 }
 
 export interface AnnotationFunctions {

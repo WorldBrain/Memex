@@ -3,10 +3,6 @@ import { createAction } from 'redux-act'
 import analytics from 'src/analytics'
 import { CMDS, IMPORT_CONN_NAME, IMPORT_TYPE } from './constants'
 import * as selectors from './selectors'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
-
-const processEvent = remoteFunction('processEvent')
 
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
@@ -78,7 +74,7 @@ let port
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async (dispatch) => {
-    port = window['browser'].runtime.connect({
+    port = globalThis['browser'].runtime.connect({
         name: IMPORT_CONN_NAME,
     })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
@@ -138,10 +134,6 @@ export const stop = makePortMessagingThunk({
             category: 'Imports',
             action: 'cancel',
         })
-
-        processEvent({
-            type: EVENT_NAMES.CANCEL_IMPORT,
-        })
     },
 })
 
@@ -152,10 +144,6 @@ export const pause = makePortMessagingThunk({
         analytics.trackEvent({
             category: 'Imports',
             action: 'pause',
-        })
-
-        processEvent({
-            type: EVENT_NAMES.PAUSE_IMPORT,
         })
     },
 })
@@ -168,10 +156,6 @@ export const resume = makePortMessagingThunk({
             category: 'Imports',
             action: 'resume',
         })
-
-        processEvent({
-            type: EVENT_NAMES.RESUME_IMPORT,
-        })
     },
 })
 
@@ -182,10 +166,6 @@ export const finish = makePortMessagingThunk({
         analytics.trackEvent({
             category: 'Imports',
             action: 'finish',
-        })
-
-        processEvent({
-            type: EVENT_NAMES.FINISH_IMPORT,
         })
     },
 })
@@ -198,10 +178,6 @@ export const start = () => (dispatch, getState) => {
         action: 'start',
         name: selectors.allowTypesString(state),
         value: selectors.concurrency(state),
-    })
-
-    processEvent({
-        type: EVENT_NAMES.START_IMPORT,
     })
 
     const allowTypes = selectors.allowTypes(state)

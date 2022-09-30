@@ -38,6 +38,12 @@
             "@worldbrain/storex-backend-typeorm/lib/*": [
                 "external/@worldbrain/storex-backend-typeorm/ts/*"
             ],
+            "@worldbrain/storex-backend-sql": [
+                "external/@worldbrain/storex-backend-sql/ts"
+            ],
+            "@worldbrain/storex-backend-sql/lib/*": [
+                "external/@worldbrain/storex-backend-sql/ts/*"
+            ],
             "@worldbrain/storex-pattern-modules": [
                 "external/@worldbrain/storex-pattern-modules/ts"
             ],
@@ -107,6 +113,7 @@
             "ES2020",
             "dom",
             "dom.iterable",
+            "WebWorker",
             "esnext.asynciterable"
         ]
     },

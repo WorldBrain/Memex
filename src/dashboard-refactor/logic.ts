@@ -102,8 +102,19 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
-                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    // TODO: re-implement pending download count
+                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
                 },
+            })
+        })
+        this.personalCloudEvents.on('downloadStarted', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            })
+        })
+        this.personalCloudEvents.on('downloadStopped', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 0 } },
             })
         })
     }
@@ -615,12 +626,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (user != null) {
             this.emitMutation({ currentUser: { $set: user } })
 
-            const userProfile = await authBG.getUserProfile()
-            if (!userProfile?.displayName?.length) {
-                this.emitMutation({
-                    modals: { showDisplayNameSetup: { $set: true } },
-                })
-                return false
+            if (!user.displayName?.length) {
+                const userProfile = await authBG.getUserProfile()
+                if (!userProfile?.displayName?.length) {
+                    this.emitMutation({
+                        modals: { showDisplayNameSetup: { $set: true } },
+                    })
+                    return false
+                }
             }
 
             return true

@@ -908,7 +908,7 @@ export const REMOTE_TEST_DATA_V24 = {
             updatedWhen: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first.createdWhen.getTime(),
         },
         second: {
-            id: 1,
+            id: 2,
             localId: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.id,
             privacyLevel:
                 LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second.privacyLevel,

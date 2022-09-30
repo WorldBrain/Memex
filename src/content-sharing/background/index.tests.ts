@@ -1,6 +1,5 @@
 import expect from 'expect'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
-import { PageDoc } from 'src/search'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import orderBy from 'lodash/orderBy'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -737,7 +736,8 @@ export class SharingTestHelper {
     ) {
         await setup.backgroundModules.personalCloud.waitForSync()
         const serverStorage = await setup.getServerStorage()
-        const { storageManager } = db === 'local' ? setup : serverStorage
+        const storageManager =
+            db === 'local' ? setup.storageManager : serverStorage.manager
         const objects = await storageManager.operation(
             'findObjects',
             collection,

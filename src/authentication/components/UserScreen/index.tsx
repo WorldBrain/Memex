@@ -1,5 +1,4 @@
 import * as React from 'react'
-import 'firebase/auth'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import AccountInfo from 'src/authentication/components/AccountInfo'
 import AuthDialog from 'src/authentication/components/AuthDialog'
@@ -15,7 +14,6 @@ import type { State, Event, Dependencies } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
-import { auth } from 'firebase-admin'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 // interface Props {

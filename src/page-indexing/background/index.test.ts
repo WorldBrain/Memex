@@ -19,12 +19,7 @@ describe('Page indexing background', () => {
             fingerprints,
         } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
-        await setup.backgroundModules.bookmarks.addBookmark({
-            url: identifier.normalizedUrl,
-            fullUrl: identifier.fullUrl,
-            tabId,
-        })
-        const common = {
+        const commonLocator = {
             contentSize,
             fingerprintScheme: FingerprintSchemeType.PdfV1,
             format: ContentLocatorFormat.PDF,
@@ -38,6 +33,55 @@ describe('Page indexing background', () => {
             valid: true,
             version: 0,
         }
+
+        const expectedContentInfo = expect.objectContaining({
+            asOf: expect.any(Number),
+            primaryIdentifier: {
+                normalizedUrl: commonLocator.normalizedUrl,
+                fullUrl: 'https://' + commonLocator.normalizedUrl,
+            },
+            aliasIdentifiers: [
+                {
+                    normalizedUrl: normalizeUrl(url),
+                    fullUrl: url,
+                },
+            ],
+            locators: [
+                {
+                    fingerprint: fingerprints[0].fingerprint,
+                    ...commonLocator,
+                },
+                {
+                    fingerprint: fingerprints[1].fingerprint,
+                    ...commonLocator,
+                },
+            ],
+        })
+
+        expect(
+            await setup.backgroundModules.pages.options.pageIndexingSettingsStore.get(
+                'pageContentInfo',
+            ),
+        ).toEqual({
+            [normalizeUrl(url)]: expectedContentInfo,
+            [commonLocator.normalizedUrl]: expectedContentInfo,
+        })
+
+        await setup.backgroundModules.bookmarks.addBookmark({
+            url: identifier.normalizedUrl,
+            fullUrl: identifier.fullUrl,
+            tabId,
+        })
+
+        expect(
+            await setup.backgroundModules.pages.options.pageIndexingSettingsStore.get(
+                'pageContentInfo',
+            ),
+        ).toEqual({
+            [normalizeUrl(url)]: expectedContentInfo,
+            [commonLocator.normalizedUrl]: expectedContentInfo,
+        })
+
         expect(
             await setup.storageManager
                 .collection('locators')
@@ -46,13 +90,13 @@ describe('Page indexing background', () => {
             {
                 id: 1,
                 fingerprint: fingerprints[0].fingerprint,
-                ...common,
+                ...commonLocator,
             },
             {
                 id: 2,
                 contentSize,
                 fingerprint: fingerprints[1].fingerprint,
-                ...common,
+                ...commonLocator,
             },
         ])
         expect(
@@ -91,12 +135,7 @@ describe('Page indexing background', () => {
             fingerprints,
         } = await indexTestFingerprintedPdf(setup, { fullUrl: url, tabId })
 
-        await setup.backgroundModules.bookmarks.addBookmark({
-            url: identifier.normalizedUrl,
-            fullUrl: identifier.fullUrl,
-            tabId,
-        })
-        const common = {
+        const commonLocator = {
             contentSize,
             fingerprintScheme: FingerprintSchemeType.PdfV1,
             format: ContentLocatorFormat.PDF,
@@ -110,6 +149,55 @@ describe('Page indexing background', () => {
             valid: true,
             version: 0,
         }
+
+        const expectedContentInfo = expect.objectContaining({
+            asOf: expect.any(Number),
+            primaryIdentifier: {
+                normalizedUrl: commonLocator.normalizedUrl,
+                fullUrl: 'https://' + commonLocator.normalizedUrl,
+            },
+            aliasIdentifiers: [
+                {
+                    normalizedUrl: normalizeUrl(url),
+                    fullUrl: url,
+                },
+            ],
+            locators: [
+                {
+                    fingerprint: fingerprints[0].fingerprint,
+                    ...commonLocator,
+                },
+                {
+                    fingerprint: fingerprints[1].fingerprint,
+                    ...commonLocator,
+                },
+            ],
+        })
+
+        expect(
+            await setup.backgroundModules.pages.options.pageIndexingSettingsStore.get(
+                'pageContentInfo',
+            ),
+        ).toEqual({
+            [normalizeUrl(url)]: expectedContentInfo,
+            [commonLocator.normalizedUrl]: expectedContentInfo,
+        })
+
+        await setup.backgroundModules.bookmarks.addBookmark({
+            url: identifier.normalizedUrl,
+            fullUrl: identifier.fullUrl,
+            tabId,
+        })
+
+        expect(
+            await setup.backgroundModules.pages.options.pageIndexingSettingsStore.get(
+                'pageContentInfo',
+            ),
+        ).toEqual({
+            [normalizeUrl(url)]: expectedContentInfo,
+            [commonLocator.normalizedUrl]: expectedContentInfo,
+        })
+
         expect(
             await setup.storageManager
                 .collection('locators')
@@ -118,13 +206,13 @@ describe('Page indexing background', () => {
             {
                 id: 1,
                 fingerprint: fingerprints[0].fingerprint,
-                ...common,
+                ...commonLocator,
             },
             {
                 id: 2,
                 contentSize,
                 fingerprint: fingerprints[1].fingerprint,
-                ...common,
+                ...commonLocator,
             },
         ])
         expect(

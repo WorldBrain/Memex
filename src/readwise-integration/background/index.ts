@@ -18,9 +18,7 @@ import {
     remoteFunctionWithoutExtraArgs,
     registerRemoteFunctions,
 } from 'src/util/webextensionRPC'
-import type { Page, Tag } from 'src/search'
-import ActionQueue from '@worldbrain/memex-common/lib/action-queue'
-import { STORAGE_VERSIONS } from 'src/storage/constants'
+import type { Page } from 'src/search'
 import type DirectLinkingBackground from 'src/annotations/background'
 import type CustomListBackground from 'src/custom-lists/background'
 
@@ -33,7 +31,6 @@ type GetPageData = (normalizedUrl: string) => Promise<PageData>
 type GetAnnotationTags = (annotationUrl: string) => Promise<string[]>
 
 export class ReadwiseBackground {
-    __deprecatedActionQueue: ActionQueue<any>
     remoteFunctions: ReadwiseInterface<'provider'>
     readwiseAPI: ReadwiseAPI
     private _apiKey: string | null = null
@@ -50,15 +47,6 @@ export class ReadwiseBackground {
     ) {
         this.readwiseAPI = new HTTPReadwiseAPI({
             fetch: options.fetch,
-        })
-
-        // NOTE: This needs to stay here doing nothing as it serves as the Storex collection definition, which needs to stay around in the registry to generate the correct Dexie schema
-        this.__deprecatedActionQueue = new ActionQueue({
-            storageManager: options.storageManager,
-            collectionName: 'readwiseAction',
-            versions: { initial: STORAGE_VERSIONS[22].version },
-            retryIntervalInMs: 1000,
-            executeAction: async () => {},
         })
 
         this.remoteFunctions = {

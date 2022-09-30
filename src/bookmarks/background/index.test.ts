@@ -1,5 +1,5 @@
 import expect from 'expect'
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs } from 'webextension-polyfill'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,

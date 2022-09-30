@@ -4,6 +4,8 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
 export interface PersonalCloudBackgroundEvents {
+    downloadStarted(): void
+    downloadStopped(): void
     cloudStatsUpdated(event: { stats: PersonalCloudStats }): void
 }
 export type PersonalCloudAction =

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { getLocalStorageTyped, LocalStorageTypes } from 'src/util/storage'
 import StatusBar from './components/StatusBar'
 import { BACKUP_STATUS_MESSAGES as messages } from '../../../notifications/constants'
 import {
@@ -9,9 +8,11 @@ import {
     BackupStatusType,
     BackupTimes,
 } from 'src/backup-restore/types'
-import { BACKUP_STORAGE_KEY } from 'src/backup-restore/constants'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 interface Props {
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     checkedIcon: string
     backupUrl: string
 }
@@ -49,7 +50,7 @@ class BackupStatusBar extends Component<Props, State> {
         backupStatus: {
             state: 'no_backup',
             backupId: 'no_backup',
-        } as LocalStorageTypes['backup-status'],
+        } as any,
         hasInitialBackup: false,
         isAutomaticBackupEnabled: false,
         isAutomaticBackupAllowed: false,
@@ -68,10 +69,12 @@ class BackupStatusBar extends Component<Props, State> {
             backupTimes: await remoteFunction('getBackupTimes')(),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup: await remoteFunction('hasInitialBackup')(),
-            backupStatus: await getLocalStorageTyped(BACKUP_STORAGE_KEY, {
-                state: 'no_backup',
-                backupId: 'no_backup',
-            }),
+            backupStatus: {
+                state: await this.props.localBackupSettings.get('backupStatus'),
+                backupId: await this.props.localBackupSettings.get(
+                    'backupStatusId',
+                ),
+            },
         })
     }
 

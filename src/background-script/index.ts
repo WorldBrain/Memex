@@ -1,11 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type {
-    Alarms,
-    Runtime,
-    Commands,
-    Storage,
-    Tabs,
-} from 'webextension-polyfill-ts'
+import type { Runtime, Storage, Tabs } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
@@ -13,7 +7,6 @@ import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { removeDupeSpaces } from './quick-and-dirty-migrations/tag-space-dupe-removal'
-import type { AlarmsConfig } from './alarms'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
@@ -23,12 +16,6 @@ import {
     OPTIONS_URL,
     LEARN_MORE_URL,
 } from 'src/constants'
-
-// TODO: pass these deps down via constructor
-import {
-    constants as blacklistConsts,
-    blacklist,
-} from 'src/blacklist/background'
 import analytics from 'src/analytics'
 import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { BrowserSettingsStore } from 'src/util/settings'
@@ -55,8 +42,6 @@ interface Dependencies {
     storageChangesMan: StorageChangesManager
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
-    commandsAPI: Commands.Static
-    alarmsAPI: Alarms.Static
     tabsAPI: Tabs.Static
     storageManager: Storex
     bgModules: Pick<
@@ -72,7 +57,6 @@ interface Dependencies {
 }
 
 class BackgroundScript {
-    private alarmsListener: (alarm: Alarms.Alarm) => void
     private remoteFunctions: RemoteBGScriptInterface
 
     constructor(public deps: Dependencies) {
@@ -80,30 +64,17 @@ class BackgroundScript {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
+            confirmBackgroundScriptLoaded: async () => {},
         }
 
-        window['___removeDupeSpaces'] = () =>
-            removeDupeSpaces({ storageManager: deps.storageManager })
+        // window['___removeDupeSpaces'] = () =>
+        // removeDupeSpaces({ storageManager: deps.storageManager })
     }
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
             ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/uninstall'
             : 'https://us-central1-worldbrain-staging.cloudfunctions.net/uninstall'
-    }
-
-    /**
-     * Set up custom commands defined in the manifest.
-     * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
-     */
-    private setupCommands() {
-        this.deps.commandsAPI.onCommand.addListener((command) => {
-            switch (command) {
-                case 'openOverview':
-                    return utils.openOverview()
-                default:
-            }
-        })
     }
 
     private async runOnboarding() {
@@ -113,9 +84,6 @@ class BackgroundScript {
     }
 
     async handleInstallLogic(now = Date.now()) {
-        // Ensure default blacklist entries are stored (before doing anything else)
-        await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
-
         analytics.trackEvent({ category: 'Global', action: 'installExtension' })
 
         await this.runOnboarding()
@@ -190,12 +158,6 @@ class BackgroundScript {
                     break
                 default:
             }
-        })
-    }
-
-    private setupStartupHooks() {
-        this.deps.runtimeAPI.onStartup.addListener(async () => {
-            this.deps.bgModules.tabManagement.trackExistingTabs()
         })
     }
 
@@ -320,36 +282,9 @@ class BackgroundScript {
 
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
-        this.setupStartupHooks()
         this.setupOnDemandContentScriptInjection()
-        this.setupCommands()
         this.setupUninstallURL()
         this.setupExtUpdateHandling()
-    }
-
-    setupAlarms(alarms: AlarmsConfig) {
-        const alarmListeners = new Map()
-
-        for (const [name, { listener, ...alarmInfo }] of Object.entries(
-            alarms,
-        )) {
-            this.deps.alarmsAPI.create(name, alarmInfo)
-            alarmListeners.set(name, listener)
-        }
-
-        this.alarmsListener = ({ name }) => {
-            const listener = alarmListeners.get(name)
-            if (typeof listener === 'function') {
-                listener(this)
-            }
-        }
-
-        this.deps.alarmsAPI.onAlarm.addListener(this.alarmsListener)
-    }
-
-    clearAlarms() {
-        this.deps.alarmsAPI.clearAll()
-        this.deps.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
     }
 
     private chooseTabOpenFn = (params?: OpenTabParams) =>
