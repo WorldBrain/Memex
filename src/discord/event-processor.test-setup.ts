@@ -16,7 +16,7 @@ export async function setupDiscordTestContext(options: {
     const getServerStorage = createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
     if (options.withDefaultList) {
-        const listReference = await serverStorage.storageModules.contentSharing.createSharedList(
+        const listReference = await serverStorage.modules.contentSharing.createSharedList(
             {
                 userReference: { type: 'user-reference', id: TEST_USER.id },
                 listData: {
@@ -25,21 +25,17 @@ export async function setupDiscordTestContext(options: {
             },
         )
         sharedLists[1] = listReference.id
-        await serverStorage.storageManager.operation(
-            'createObject',
-            'discordList',
-            {
-                guildId: makeId('gld', 1),
-                channelId: makeId('chl', 1),
-                channelName: 'Channel 1',
-                enabled: true,
-                sharedList: listReference.id,
-            },
-        )
+        await serverStorage.manager.operation('createObject', 'discordList', {
+            guildId: makeId('gld', 1),
+            channelId: makeId('chl', 1),
+            channelName: 'Channel 1',
+            enabled: true,
+            sharedList: listReference.id,
+        })
     }
 
     const eventProcessor = createDiscordEventProcessor({
-        storage: { manager: serverStorage.storageManager },
+        storage: { manager: serverStorage.manager },
         getNow: () => Date.now(),
     })
 
@@ -89,7 +85,7 @@ export async function setupDiscordTestContext(options: {
             }>
         }) => {
             const sharedListId = sharedLists[1]
-            const storedUsers = await serverStorage.storageManager.operation(
+            const storedUsers = await serverStorage.manager.operation(
                 'findObjects',
                 'user',
                 {},
@@ -103,7 +99,7 @@ export async function setupDiscordTestContext(options: {
                 })),
             )
 
-            const storedMessages: any[] = await serverStorage.storageManager.operation(
+            const storedMessages: any[] = await serverStorage.manager.operation(
                 'findObjects',
                 'discordMessage',
                 {},
@@ -156,7 +152,7 @@ export async function setupDiscordTestContext(options: {
                 storedMessages.filter((msg) => msg.type === 'reply'),
             ).toEqual(expectedReplyMessages)
 
-            const storedListEntries = await serverStorage.storageManager.operation(
+            const storedListEntries = await serverStorage.manager.operation(
                 'findObjects',
                 'sharedListEntry',
                 {},
@@ -179,7 +175,7 @@ export async function setupDiscordTestContext(options: {
             }
             expect(storedListEntries).toEqual(expectedListEntres)
 
-            const storedAnnotations = await serverStorage.storageManager.operation(
+            const storedAnnotations = await serverStorage.manager.operation(
                 'findObjects',
                 'sharedAnnotation',
                 {},
@@ -211,7 +207,7 @@ export async function setupDiscordTestContext(options: {
                 ),
             )
 
-            const storedAnnotationEntries = await serverStorage.storageManager.operation(
+            const storedAnnotationEntries = await serverStorage.manager.operation(
                 'findObjects',
                 'sharedAnnotationListEntry',
                 {},
