@@ -1,45 +1,71 @@
 import flatten from 'lodash/flatten'
-import fromPairs from 'lodash/fromPairs'
 import expect from 'expect'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
-import { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
+import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
+import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
+
+export const makeId = (
+    type: 'chl' | 'msg' | 'gld' | 'usr' | 'avt',
+    id: number,
+) => `${type}-${id}`
 
 export async function setupDiscordTestContext(options: {
-    withDefaultList: boolean
+    withDefaultList?: boolean
+    defaultListEnabled?: boolean
 }) {
-    const makeId = (type: string, id: number) => `${type}-${id}`
     const messages: { [messageId: number]: DiscordMessageCreateInfo } = {}
     const sharedLists: { [listId: number]: number | string } = {}
+    let defaultGuildId: string
+    let defaultChannelId: string
+    let defaultChannelName: string
 
     const getServerStorage = createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
+
     if (options.withDefaultList) {
-        const listReference = await serverStorage.modules.contentSharing.createSharedList(
+        defaultGuildId = makeId('gld', 1)
+        defaultChannelId = makeId('chl', 1)
+        defaultChannelName = 'Channel 1'
+        const sharedListReference = await serverStorage.modules.contentSharing.createSharedList(
             {
-                userReference: { type: 'user-reference', id: TEST_USER.id },
+                userReference: {
+                    type: 'user-reference',
+                    id: DISCORD_LIST_USER_ID,
+                },
                 listData: {
-                    title: 'Channel 1',
+                    title: defaultChannelName,
                 },
             },
         )
-        sharedLists[1] = listReference.id
-        await serverStorage.manager.operation('createObject', 'discordList', {
-            guildId: makeId('gld', 1),
-            channelId: makeId('chl', 1),
-            channelName: 'Channel 1',
-            enabled: true,
-            sharedList: listReference.id,
+        await serverStorage.modules.discord.createDiscordList({
+            guildId: defaultGuildId,
+            channelId: defaultChannelId,
+            channelName: defaultChannelName,
+            isEnabled: options.defaultListEnabled ?? false,
+            sharedListReference,
         })
+        sharedLists[1] = sharedListReference.id
     }
 
     const eventProcessor = createDiscordEventProcessor({
-        storage: { manager: serverStorage.manager },
+        storage: serverStorage,
         getNow: () => Date.now(),
     })
 
+    const channelManager = new DiscordChannelManager({
+        storageModules: serverStorage.modules,
+    })
+
     return {
+        defaultListDetails: options.withDefaultList && {
+            guildId: defaultGuildId,
+            channelId: defaultChannelId,
+            channelName: defaultChannelName,
+        },
+        serverStorage,
+        channelManager,
         postMessage: async (params: {
             messageId: number
             content: string
@@ -101,7 +127,7 @@ export async function setupDiscordTestContext(options: {
 
             const storedMessages: any[] = await serverStorage.manager.operation(
                 'findObjects',
-                'discordMessage',
+                'discordEvent',
                 {},
                 { sort: [['createdWhen', 'asc']] },
             )
@@ -144,6 +170,7 @@ export async function setupDiscordTestContext(options: {
                             originalChannelId: origMsg.reference.channelId,
                             originalMessageId: origMsg.reference.messageId,
                             sharedList: sharedListId,
+                            normalizedPageUrl: undefined,
                         }
                     })
                 }),
