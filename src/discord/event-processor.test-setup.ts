@@ -5,11 +5,40 @@ import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/chan
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
 import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
+import type { ServerStorageModules } from 'src/storage/types'
 
 export const makeId = (
     type: 'chl' | 'msg' | 'gld' | 'usr' | 'avt',
     id: number,
 ) => `${type}-${id}`
+
+export async function createTestList(
+    storageModules: ServerStorageModules,
+    data: {
+        channelId: string
+        channelName: string
+        guildId: string
+        isEnabled: boolean
+    },
+) {
+    const sharedListReference = await storageModules.contentSharing.createSharedList(
+        {
+            userReference: {
+                type: 'user-reference',
+                id: DISCORD_LIST_USER_ID,
+            },
+            listData: { title: data.channelName },
+        },
+    )
+    const discordListReference = await storageModules.discord.createDiscordList(
+        {
+            ...data,
+            sharedListReference,
+        },
+    )
+
+    return { sharedListReference, discordListReference }
+}
 
 export async function setupDiscordTestContext(options: {
     withDefaultList?: boolean
@@ -28,24 +57,15 @@ export async function setupDiscordTestContext(options: {
         defaultGuildId = makeId('gld', 1)
         defaultChannelId = makeId('chl', 1)
         defaultChannelName = 'Channel 1'
-        const sharedListReference = await serverStorage.modules.contentSharing.createSharedList(
+        const { sharedListReference } = await createTestList(
+            serverStorage.modules,
             {
-                userReference: {
-                    type: 'user-reference',
-                    id: DISCORD_LIST_USER_ID,
-                },
-                listData: {
-                    title: defaultChannelName,
-                },
+                channelId: defaultChannelId,
+                channelName: defaultChannelName,
+                guildId: defaultGuildId,
+                isEnabled: options.defaultListEnabled ?? false,
             },
         )
-        await serverStorage.modules.discord.createDiscordList({
-            guildId: defaultGuildId,
-            channelId: defaultChannelId,
-            channelName: defaultChannelName,
-            isEnabled: options.defaultListEnabled ?? false,
-            sharedListReference,
-        })
         sharedLists[1] = sharedListReference.id
     }
 
