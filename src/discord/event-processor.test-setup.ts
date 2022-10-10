@@ -3,42 +3,12 @@ import expect from 'expect'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
 import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
-import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
 import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
-import type { ServerStorageModules } from 'src/storage/types'
 
 export const makeId = (
     type: 'chl' | 'msg' | 'gld' | 'usr' | 'avt',
     id: number,
 ) => `${type}-${id}`
-
-export async function createTestList(
-    storageModules: ServerStorageModules,
-    data: {
-        channelId: string
-        channelName: string
-        guildId: string
-        isEnabled: boolean
-    },
-) {
-    const sharedListReference = await storageModules.contentSharing.createSharedList(
-        {
-            userReference: {
-                type: 'user-reference',
-                id: DISCORD_LIST_USER_ID,
-            },
-            listData: { title: data.channelName },
-        },
-    )
-    const discordListReference = await storageModules.discord.createDiscordList(
-        {
-            ...data,
-            sharedListReference,
-        },
-    )
-
-    return { sharedListReference, discordListReference }
-}
 
 export async function setupDiscordTestContext(options: {
     withDefaultList?: boolean
@@ -47,27 +17,12 @@ export async function setupDiscordTestContext(options: {
     const messages: { [messageId: number]: DiscordMessageCreateInfo } = {}
     const sharedLists: { [listId: number]: number | string } = {}
     let defaultGuildId: string
+    let defaultGuildName: string
     let defaultChannelId: string
     let defaultChannelName: string
 
     const getServerStorage = createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
-
-    if (options.withDefaultList) {
-        defaultGuildId = makeId('gld', 1)
-        defaultChannelId = makeId('chl', 1)
-        defaultChannelName = 'Channel 1'
-        const { sharedListReference } = await createTestList(
-            serverStorage.modules,
-            {
-                channelId: defaultChannelId,
-                channelName: defaultChannelName,
-                guildId: defaultGuildId,
-                isEnabled: options.defaultListEnabled ?? false,
-            },
-        )
-        sharedLists[1] = sharedListReference.id
-    }
 
     const eventProcessor = createDiscordEventProcessor({
         storage: serverStorage,
@@ -78,9 +33,32 @@ export async function setupDiscordTestContext(options: {
         storageModules: serverStorage.modules,
     })
 
+    if (options.withDefaultList) {
+        defaultGuildId = makeId('gld', 1)
+        defaultGuildName = 'Guild 1'
+        defaultChannelId = makeId('chl', 1)
+        defaultChannelName = 'Channel 1'
+
+        const { memexSocialLink } = await channelManager.enableChannel({
+            channelId: defaultChannelId,
+            channelName: defaultChannelName,
+            guildId: defaultGuildId,
+            guildName: defaultGuildName,
+        })
+        if (!options.defaultListEnabled) {
+            await channelManager.disableChannel({
+                channelId: defaultChannelId,
+                guildId: defaultGuildId,
+            })
+        }
+
+        sharedLists[1] = Number(memexSocialLink.split('/c/')[1])
+    }
+
     return {
         defaultListDetails: options.withDefaultList && {
             guildId: defaultGuildId,
+            guildName: defaultGuildName,
             channelId: defaultChannelId,
             channelName: defaultChannelName,
         },

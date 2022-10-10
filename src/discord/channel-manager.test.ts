@@ -2,8 +2,9 @@ import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
 import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
 
 const missingGuildId = makeId('gld', 99)
+const missingGuildName = 'test guild'
 const missingChannelId = makeId('chl', 99)
-const missingChannelName = 'test'
+const missingChannelName = 'test channel'
 
 describe('Discord channel management module', () => {
     it('should create a new sharedList and enabled discordList when enabling a channel that does not yet exist in the DB, returning memex.social link to the sharedList', async () => {
@@ -26,6 +27,7 @@ describe('Discord channel management module', () => {
             await channelManager.enableChannel({
                 channelName: missingChannelName,
                 channelId: missingChannelId,
+                guildName: missingGuildName,
                 guildId: missingGuildId,
             }),
         ).toEqual({
@@ -44,6 +46,7 @@ describe('Discord channel management module', () => {
                 updatedWhen: expect.any(Number),
                 title: missingChannelName,
                 description: null,
+                platform: 'discord',
             },
         ])
         expect(
@@ -55,6 +58,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: sharedLists[0].id,
                 guildId: missingGuildId,
+                guildName: missingGuildName,
                 channelId: missingChannelId,
                 channelName: missingChannelName,
                 enabled: true,
@@ -78,6 +82,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: false,
@@ -88,6 +93,7 @@ describe('Discord channel management module', () => {
             await channelManager.enableChannel({
                 channelName: defaultListDetails.channelName,
                 channelId: defaultListDetails.channelId,
+                guildName: defaultListDetails.guildName,
                 guildId: defaultListDetails.guildId,
             }),
         ).toEqual({
@@ -104,6 +110,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: true,
@@ -115,6 +122,7 @@ describe('Discord channel management module', () => {
             await channelManager.enableChannel({
                 channelName: defaultListDetails.channelName,
                 channelId: defaultListDetails.channelId,
+                guildName: defaultListDetails.guildName,
                 guildId: defaultListDetails.guildId,
             }),
         ).toEqual({
@@ -131,6 +139,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: true,
@@ -157,6 +166,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: true,
@@ -179,6 +189,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: false,
@@ -202,6 +213,7 @@ describe('Discord channel management module', () => {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
+                guildName: defaultListDetails.guildName,
                 channelId: defaultListDetails.channelId,
                 channelName: defaultListDetails.channelName,
                 enabled: false,
@@ -250,6 +262,7 @@ describe('Discord channel management module', () => {
         )
 
         const guildId = makeId('gld', 999)
+        const guildName = 'test guild'
         const channelIds = [...Array(10).keys()]
         const channelIdxToLink = new Map<number, string>()
 
@@ -258,6 +271,7 @@ describe('Discord channel management module', () => {
         for (const i of channelIds) {
             const { memexSocialLink } = await channelManager.enableChannel({
                 guildId,
+                guildName,
                 channelId: makeId('chl', i),
                 channelName: String(i),
             })
