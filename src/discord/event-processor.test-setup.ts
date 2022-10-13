@@ -66,6 +66,7 @@ export async function setupDiscordTestContext(options: {
         channelManager,
         postMessage: async (params: {
             messageId: number
+            discordMessageLink: string
             content: string
             userId?: number
             guildId?: number
@@ -89,6 +90,7 @@ export async function setupDiscordTestContext(options: {
                     username: `User ${params.userId ?? 1}`,
                 },
                 content: params.content,
+                discordMessageLink: params.discordMessageLink,
                 replyTo: repliedToInfo && repliedToInfo.reference,
                 repliedToUser: repliedToInfo && repliedToInfo.author,
             }
@@ -99,13 +101,16 @@ export async function setupDiscordTestContext(options: {
             users: number[]
             pages: Array<{
                 userId: number
+                pageId: number
                 messageId: number
-                originalMessageId?: number
-                normalizedUrls: string[]
+                normalizedUrl: string
+                /** Denotes whether this page is only here for the purposes of test setup's data model */
+                doesNotExistInDB?: boolean
+                // originalMessageId?: number
             }>
-            replies: Array<{
-                messageId: number
-                replyIds: number[]
+            annotations: Array<{
+                pageId: number
+                comment: string
             }>
         }) => {
             const sharedListId = sharedLists[1]
@@ -130,52 +135,51 @@ export async function setupDiscordTestContext(options: {
                 { sort: [['createdWhen', 'asc']] },
             )
 
-            const expectedLinkMessages: any[] = flatten(
-                data.pages.map((page) => {
-                    const msg = messages[page.messageId]
-                    const origMsg =
-                        messages[page.originalMessageId ?? page.messageId]
-                    return page.normalizedUrls.map((normalizedPageUrl) => ({
-                        id: expect.anything(),
-                        createdWhen: expect.any(Number),
-                        type: 'link',
-                        guildId: msg.reference.guildId,
-                        channelId: msg.reference.channelId,
-                        messageId: msg.reference.messageId,
-                        originalChannelId: origMsg.reference.channelId,
-                        originalMessageId: origMsg.reference.messageId,
-                        normalizedPageUrl,
-                        sharedList: sharedListId,
-                    }))
-                }),
-            )
+            const expectedLinkMessages: any[] = data.pages.map((page) => {
+                const msg = messages[page.messageId]
+                // const origMsg =
+                //     messages[page.originalMessageId ?? page.messageId]
+                return {
+                    id: expect.anything(),
+                    createdWhen: expect.any(Number),
+                    type: 'link',
+                    guildId: msg.reference.guildId,
+                    channelId: msg.reference.channelId,
+                    messageId: msg.reference.messageId,
+                    // originalChannelId: origMsg.reference.channelId,
+                    // originalMessageId: origMsg.reference.messageId,
+                    normalizedPageUrl: page.normalizedUrl,
+                    sharedList: sharedListId,
+                }
+            })
             expect(storedMessages.filter((msg) => msg.type === 'link')).toEqual(
                 expectedLinkMessages,
             )
 
-            const expectedReplyMessages: any[] = flatten(
-                data.replies.map((reply) => {
-                    const origMsg = messages[reply.messageId]
-                    return reply.replyIds.map((replyId) => {
-                        const replyMsg = messages[replyId]
-                        return {
-                            id: expect.anything(),
-                            createdWhen: expect.any(Number),
-                            type: 'reply',
-                            guildId: replyMsg.reference.guildId,
-                            channelId: replyMsg.reference.channelId,
-                            messageId: replyMsg.reference.messageId,
-                            originalChannelId: origMsg.reference.channelId,
-                            originalMessageId: origMsg.reference.messageId,
-                            sharedList: sharedListId,
-                            normalizedPageUrl: undefined,
-                        }
-                    })
-                }),
-            )
-            expect(
-                storedMessages.filter((msg) => msg.type === 'reply'),
-            ).toEqual(expectedReplyMessages)
+            // We're no longer concerned about reply messages
+            // const expectedReplyMessages: any[] = flatten(
+            //     data.annotations.map((reply) => {
+            //         const origMsg = messages[reply.messageId]
+            //         return reply.replyIds.map((replyId) => {
+            //             const replyMsg = messages[replyId]
+            //             return {
+            //                 id: expect.anything(),
+            //                 createdWhen: expect.any(Number),
+            //                 type: 'reply',
+            //                 guildId: replyMsg.reference.guildId,
+            //                 channelId: replyMsg.reference.channelId,
+            //                 messageId: replyMsg.reference.messageId,
+            //                 originalChannelId: origMsg.reference.channelId,
+            //                 originalMessageId: origMsg.reference.messageId,
+            //                 sharedList: sharedListId,
+            //                 normalizedPageUrl: undefined,
+            //             }
+            //         })
+            //     }),
+            // )
+            // expect(
+            //     storedMessages.filter((msg) => msg.type === 'reply'),
+            // ).toEqual(expectedReplyMessages)
 
             const storedListEntries = await serverStorage.manager.operation(
                 'findObjects',
@@ -183,22 +187,23 @@ export async function setupDiscordTestContext(options: {
                 {},
                 { sort: [['createdWhen', 'asc']] },
             )
-            const expectedListEntres: any[] = []
+            const expectedListEntries: any[] = []
             for (const page of data.pages) {
-                for (const normalizedPageUrl of page.normalizedUrls) {
-                    expectedListEntres.push({
-                        id: expect.anything(),
-                        creator: `discord:usr-${page.userId}`,
-                        createdWhen: expect.any(Number),
-                        updatedWhen: expect.any(Number),
-                        entryTitle: normalizedPageUrl,
-                        normalizedUrl: normalizedPageUrl,
-                        originalUrl: `https://${normalizedPageUrl}/`,
-                        sharedList: sharedListId,
-                    })
+                if (page.doesNotExistInDB) {
+                    continue
                 }
+                expectedListEntries.push({
+                    id: expect.anything(),
+                    creator: `discord:usr-${page.userId}`,
+                    createdWhen: expect.any(Number),
+                    updatedWhen: expect.any(Number),
+                    entryTitle: page.normalizedUrl,
+                    normalizedUrl: page.normalizedUrl,
+                    originalUrl: `https://${page.normalizedUrl}/`,
+                    sharedList: sharedListId,
+                })
             }
-            expect(storedListEntries).toEqual(expectedListEntres)
+            expect(storedListEntries).toEqual(expectedListEntries)
 
             const storedAnnotations = await serverStorage.manager.operation(
                 'findObjects',
@@ -207,29 +212,20 @@ export async function setupDiscordTestContext(options: {
                 { sort: [['createdWhen', 'asc']] },
             )
             expect(storedAnnotations).toEqual(
-                flatten(
-                    flatten(
-                        data.replies.map((reply) =>
-                            reply.replyIds.map((replyId) => {
-                                const page = data.pages.find(
-                                    (page) =>
-                                        page.messageId === reply.messageId,
-                                )
-                                return page.normalizedUrls.map(
-                                    (normalizedUrl) => ({
-                                        id: expect.anything(),
-                                        creator: `discord:usr-${page.userId}`,
-                                        normalizedPageUrl: normalizedUrl,
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        comment: messages[replyId].content,
-                                    }),
-                                )
-                            }),
-                        ),
-                    ),
-                ),
+                data.annotations.map((annotation) => {
+                    const page = data.pages.find(
+                        (page) => page.pageId === annotation.pageId,
+                    )
+                    return {
+                        id: expect.anything(),
+                        creator: `discord:usr-${page.userId}`,
+                        normalizedPageUrl: page.normalizedUrl,
+                        createdWhen: expect.any(Number),
+                        uploadedWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                        comment: messages[page.messageId].content,
+                    }
+                }),
             )
 
             const storedAnnotationEntries = await serverStorage.manager.operation(
@@ -241,31 +237,22 @@ export async function setupDiscordTestContext(options: {
             let annotationCounter = 0
             expect(storedAnnotationEntries).toEqual(
                 flatten(
-                    flatten(
-                        data.replies.map((reply) =>
-                            reply.replyIds.map((replyId) => {
-                                const page = data.pages.find(
-                                    (page) =>
-                                        page.messageId === reply.messageId,
-                                )
-                                return page.normalizedUrls.map(
-                                    (normalizedUrl) => ({
-                                        id: expect.anything(),
-                                        creator: `discord:usr-${page.userId}`,
-                                        normalizedPageUrl: normalizedUrl,
-                                        createdWhen: expect.any(Number),
-                                        uploadedWhen: expect.any(Number),
-                                        updatedWhen: expect.any(Number),
-                                        sharedList: sharedListId,
-                                        sharedAnnotation:
-                                            storedAnnotations[
-                                                annotationCounter++
-                                            ].id,
-                                    }),
-                                )
-                            }),
-                        ),
-                    ),
+                    data.annotations.map((annotation) => {
+                        const page = data.pages.find(
+                            (page) => page.pageId === annotation.pageId,
+                        )
+                        return {
+                            id: expect.anything(),
+                            creator: `discord:usr-${page.userId}`,
+                            normalizedPageUrl: page.normalizedUrl,
+                            createdWhen: expect.any(Number),
+                            uploadedWhen: expect.any(Number),
+                            updatedWhen: expect.any(Number),
+                            sharedList: sharedListId,
+                            sharedAnnotation:
+                                storedAnnotations[annotationCounter++].id,
+                        }
+                    }),
                 ),
             )
         },
