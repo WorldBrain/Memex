@@ -93,6 +93,24 @@ describe('Discord event processor', () => {
         })
     })
 
+    it('should do nothing when posting a message with a link to a disabled channel', async () => {
+        const context = await setupDiscordTestContext({
+            withDefaultList: true,
+            defaultListEnabled: false,
+        })
+        const message = {
+            messageId: 1,
+            content: 'Hey, check this out: https://memex.garden/',
+            discordMessageLink: createDiscordLink(1),
+        }
+        await context.postMessage(message)
+        await context.assertData({
+            users: [],
+            pages: [],
+            annotations: [],
+        })
+    })
+
     it('should create page list entries and annotations containing the same message content when posting multiple links to a channel in the same message', async () => {
         const context = await setupDiscordTestContext({
             withDefaultList: true,
@@ -254,7 +272,7 @@ describe('Discord event processor', () => {
         })
     })
 
-    // Below are tests for the original implementation plan
+    // Below are tests for the original implementation plan incorporating replies
     // it.skip('should post annotations when replies are posted to a link in a channel', async () => {
     //     const context = await setupDiscordTestContext({
     //         withDefaultList: true,

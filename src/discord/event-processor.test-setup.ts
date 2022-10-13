@@ -156,31 +156,6 @@ export async function setupDiscordTestContext(options: {
                 expectedLinkMessages,
             )
 
-            // We're no longer concerned about reply messages
-            // const expectedReplyMessages: any[] = flatten(
-            //     data.annotations.map((reply) => {
-            //         const origMsg = messages[reply.messageId]
-            //         return reply.replyIds.map((replyId) => {
-            //             const replyMsg = messages[replyId]
-            //             return {
-            //                 id: expect.anything(),
-            //                 createdWhen: expect.any(Number),
-            //                 type: 'reply',
-            //                 guildId: replyMsg.reference.guildId,
-            //                 channelId: replyMsg.reference.channelId,
-            //                 messageId: replyMsg.reference.messageId,
-            //                 originalChannelId: origMsg.reference.channelId,
-            //                 originalMessageId: origMsg.reference.messageId,
-            //                 sharedList: sharedListId,
-            //                 normalizedPageUrl: undefined,
-            //             }
-            //         })
-            //     }),
-            // )
-            // expect(
-            //     storedMessages.filter((msg) => msg.type === 'reply'),
-            // ).toEqual(expectedReplyMessages)
-
             const storedListEntries = await serverStorage.manager.operation(
                 'findObjects',
                 'sharedListEntry',
