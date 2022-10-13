@@ -104,6 +104,7 @@ export async function setupDiscordTestContext(options: {
                 pageId: number
                 messageId: number
                 normalizedUrl: string
+                hasBeenUpdated?: boolean
                 /** Denotes whether this page is only here for the purposes of test setup's data model */
                 doesNotExistInDB?: boolean
                 // originalMessageId?: number
@@ -162,23 +163,29 @@ export async function setupDiscordTestContext(options: {
                 {},
                 { sort: [['createdWhen', 'asc']] },
             )
-            const expectedListEntries: any[] = []
-            for (const page of data.pages) {
-                if (page.doesNotExistInDB) {
-                    continue
-                }
-                expectedListEntries.push({
-                    id: expect.anything(),
-                    creator: `discord:usr-${page.userId}`,
-                    createdWhen: expect.any(Number),
-                    updatedWhen: expect.any(Number),
-                    entryTitle: page.normalizedUrl,
-                    normalizedUrl: page.normalizedUrl,
-                    originalUrl: `https://${page.normalizedUrl}/`,
-                    sharedList: sharedListId,
+            data.pages
+                .filter((page) => !page.doesNotExistInDB)
+                .forEach((page, i) => {
+                    if (page.hasBeenUpdated) {
+                        expect(storedListEntries[i].updatedWhen).not.toEqual(
+                            storedListEntries[i].createdWhen,
+                        )
+                    } else {
+                        expect(storedListEntries[i].updatedWhen).toEqual(
+                            storedListEntries[i].createdWhen,
+                        )
+                    }
+                    expect(storedListEntries[i]).toEqual({
+                        id: expect.anything(),
+                        creator: `discord:usr-${page.userId}`,
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                        entryTitle: page.normalizedUrl,
+                        normalizedUrl: page.normalizedUrl,
+                        originalUrl: `https://${page.normalizedUrl}/`,
+                        sharedList: sharedListId,
+                    })
                 })
-            }
-            expect(storedListEntries).toEqual(expectedListEntries)
 
             const storedAnnotations = await serverStorage.manager.operation(
                 'findObjects',

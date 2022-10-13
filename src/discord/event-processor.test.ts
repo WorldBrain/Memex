@@ -244,6 +244,7 @@ describe('Discord event processor', () => {
                     pageId: 1,
                     messageId: 1,
                     normalizedUrl: 'memex.garden',
+                    hasBeenUpdated: true,
                 },
                 {
                     userId: 1,
