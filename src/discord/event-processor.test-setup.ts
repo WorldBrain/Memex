@@ -205,7 +205,7 @@ export async function setupDiscordTestContext(options: {
                         createdWhen: expect.any(Number),
                         uploadedWhen: expect.any(Number),
                         updatedWhen: expect.any(Number),
-                        comment: messages[page.messageId].content,
+                        comment: annotation.comment,
                     }
                 }),
             )

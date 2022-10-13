@@ -1,12 +1,8 @@
+import { createAnnotationFromMessage } from '@worldbrain/memex-common/lib/discord/utils'
 import { setupDiscordTestContext } from './event-processor.test-setup'
 
 const createDiscordLink = (messageId: number) =>
-    `https://discord.com/channels/1027462501660622868/1027462501660622871/${messageId}`
-const createAnnotationText = (
-    originalMessageContent: string,
-    discordLink: string,
-) => `Original Discord Message ([Jump there](${discordLink})):
-"${originalMessageContent}"`
+    `https://discord.com/channels/1027/1028/${messageId}`
 
 describe('Discord event processor', () => {
     it('should ignore messages that do not contain links', async () => {
@@ -50,7 +46,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         message.content,
                         message.discordMessageLink,
                     ),
@@ -84,7 +80,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         message.content,
                         message.discordMessageLink,
                     ),
@@ -142,14 +138,14 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         message.content,
                         message.discordMessageLink,
                     ),
                 },
                 {
                     pageId: 2,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         message.content,
                         message.discordMessageLink,
                     ),
@@ -188,7 +184,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         linkMessage.content,
                         linkMessage.discordMessageLink,
                     ),
@@ -227,7 +223,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         messageA.content,
                         messageA.discordMessageLink,
                     ),
@@ -257,14 +253,14 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         messageA.content,
                         messageA.discordMessageLink,
                     ),
                 },
                 {
                     pageId: 2,
-                    comment: createAnnotationText(
+                    comment: createAnnotationFromMessage(
                         messageB.content,
                         messageB.discordMessageLink,
                     ),
