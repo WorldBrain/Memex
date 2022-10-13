@@ -1,5 +1,7 @@
 import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
 import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
+import { getListShareUrl } from 'src/content-sharing/utils'
+import type { DiscordList } from '@worldbrain/memex-common/lib/discord/types'
 
 const missingGuildId = makeId('gld', 99)
 const missingGuildName = 'test guild'
@@ -73,11 +75,14 @@ describe('Discord channel management module', () => {
             defaultListDetails,
         } = await setupDiscordTestContext({ withDefaultList: true })
 
-        expect(
-            await serverStorage.manager
-                .collection('discordList')
-                .findAllObjects({}),
-        ).toEqual([
+        const discordLists: DiscordList[] = await serverStorage.manager
+            .collection('discordList')
+            .findAllObjects({})
+        const memexSocialLink = getListShareUrl({
+            remoteListId: discordLists[0].sharedList,
+        })
+
+        expect(discordLists).toEqual([
             {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
@@ -96,10 +101,7 @@ describe('Discord channel management module', () => {
                 guildName: defaultListDetails.guildName,
                 guildId: defaultListDetails.guildId,
             }),
-        ).toEqual({
-            changed: true,
-            memexSocialLink: expect.any(String),
-        })
+        ).toEqual({ changed: true, memexSocialLink })
 
         expect(
             await serverStorage.manager
@@ -125,10 +127,7 @@ describe('Discord channel management module', () => {
                 guildName: defaultListDetails.guildName,
                 guildId: defaultListDetails.guildId,
             }),
-        ).toEqual({
-            changed: false,
-            memexSocialLink: expect.any(String),
-        })
+        ).toEqual({ changed: false, memexSocialLink })
 
         expect(
             await serverStorage.manager
@@ -157,11 +156,14 @@ describe('Discord channel management module', () => {
             defaultListEnabled: true,
         })
 
-        expect(
-            await serverStorage.manager
-                .collection('discordList')
-                .findAllObjects({}),
-        ).toEqual([
+        const discordLists: DiscordList[] = await serverStorage.manager
+            .collection('discordList')
+            .findAllObjects({})
+        const memexSocialLink = getListShareUrl({
+            remoteListId: discordLists[0].sharedList,
+        })
+
+        expect(discordLists).toEqual([
             {
                 id: expect.any(Number),
                 sharedList: expect.any(Number),
@@ -178,7 +180,7 @@ describe('Discord channel management module', () => {
                 channelId: defaultListDetails.channelId,
                 guildId: defaultListDetails.guildId,
             }),
-        ).toEqual({ changed: true })
+        ).toEqual({ changed: true, memexSocialLink })
 
         expect(
             await serverStorage.manager
@@ -202,7 +204,7 @@ describe('Discord channel management module', () => {
                 channelId: defaultListDetails.channelId,
                 guildId: defaultListDetails.guildId,
             }),
-        ).toEqual({ changed: false })
+        ).toEqual({ changed: false, memexSocialLink })
 
         expect(
             await serverStorage.manager
@@ -242,7 +244,7 @@ describe('Discord channel management module', () => {
                 channelId: missingChannelId,
                 guildId: missingGuildId,
             }),
-        ).toEqual({ changed: false })
+        ).toEqual({ changed: false, memexSocialLink: null })
 
         expect(
             await serverStorage.manager
@@ -256,21 +258,24 @@ describe('Discord channel management module', () => {
         ).toEqual([])
     })
 
-    it('should be able to list all enabled discordLists, with their memex.social links to the associated sharedLists', async () => {
+    it('should be able to list all enabled discordLists for a given guild, with their memex.social links to the associated sharedLists', async () => {
         const { channelManager, serverStorage } = await setupDiscordTestContext(
             {},
         )
 
-        const guildId = makeId('gld', 999)
+        const guildIdA = makeId('gld', 998)
+        const guildIdB = makeId('gld', 999)
         const guildName = 'test guild'
         const channelIds = [...Array(10).keys()]
         const channelIdxToLink = new Map<number, string>()
 
-        expect(await channelManager.listEnabledChannels()).toEqual([])
+        expect(
+            await channelManager.listEnabledChannels({ guildId: guildIdA }),
+        ).toEqual([])
 
         for (const i of channelIds) {
             const { memexSocialLink } = await channelManager.enableChannel({
-                guildId,
+                guildId: guildIdA,
                 guildName,
                 channelId: makeId('chl', i),
                 channelName: String(i),
@@ -278,7 +283,18 @@ describe('Discord channel management module', () => {
             channelIdxToLink.set(i, memexSocialLink)
         }
 
-        expect(await channelManager.listEnabledChannels()).toEqual(
+        const {
+            memexSocialLink: guildBSocialLink,
+        } = await channelManager.enableChannel({
+            guildId: guildIdB,
+            guildName: 'test guild 2',
+            channelId: makeId('chl', 999),
+            channelName: 'test channel guild 2',
+        })
+
+        expect(
+            await channelManager.listEnabledChannels({ guildId: guildIdA }),
+        ).toEqual(
             channelIds.map((i) => ({
                 channelId: makeId('chl', i),
                 memexSocialLink: channelIdxToLink.get(i),
@@ -288,13 +304,15 @@ describe('Discord channel management module', () => {
         for (const i of channelIds) {
             if (i % 2 === 0) {
                 await channelManager.disableChannel({
-                    guildId,
+                    guildId: guildIdA,
                     channelId: makeId('chl', i),
                 })
             }
         }
 
-        expect(await channelManager.listEnabledChannels()).toEqual(
+        expect(
+            await channelManager.listEnabledChannels({ guildId: guildIdA }),
+        ).toEqual(
             channelIds
                 .filter((v, i) => i % 2 !== 0)
                 .map((i) => ({
@@ -302,5 +320,14 @@ describe('Discord channel management module', () => {
                     memexSocialLink: channelIdxToLink.get(i),
                 })),
         )
+
+        expect(
+            await channelManager.listEnabledChannels({ guildId: guildIdB }),
+        ).toEqual([
+            {
+                channelId: makeId('chl', 999),
+                memexSocialLink: guildBSocialLink,
+            },
+        ])
     })
 })
