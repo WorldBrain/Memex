@@ -46,16 +46,13 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        message.content,
-                        message.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(message),
                 },
             ],
         })
     })
 
-    it('should should not create duplicate page list entries and annotations when posting multiple of the same links in the same message', async () => {
+    it('should not create duplicate page list entries and annotations when posting multiple of the same links in the same message', async () => {
         const context = await setupDiscordTestContext({
             withDefaultList: true,
             defaultListEnabled: true,
@@ -80,10 +77,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        message.content,
-                        message.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(message),
                 },
             ],
         })
@@ -138,17 +132,11 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        message.content,
-                        message.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(message),
                 },
                 {
                     pageId: 2,
-                    comment: createAnnotationFromMessage(
-                        message.content,
-                        message.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(message),
                 },
             ],
         })
@@ -184,10 +172,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        linkMessage.content,
-                        linkMessage.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(linkMessage),
                 },
             ],
         })
@@ -223,10 +208,7 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        messageA.content,
-                        messageA.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(messageA),
                 },
             ],
         })
@@ -253,17 +235,11 @@ describe('Discord event processor', () => {
             annotations: [
                 {
                     pageId: 1,
-                    comment: createAnnotationFromMessage(
-                        messageA.content,
-                        messageA.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(messageA),
                 },
                 {
                     pageId: 2,
-                    comment: createAnnotationFromMessage(
-                        messageB.content,
-                        messageB.discordMessageLink,
-                    ),
+                    comment: createAnnotationFromMessage(messageB),
                 },
             ],
         })
