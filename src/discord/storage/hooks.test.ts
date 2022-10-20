@@ -179,6 +179,107 @@ describe('Discord integration data fetch tests', () => {
                 entryTitle: testTitle,
             }),
         ])
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+    })
+
+    it('should not attempt fetch if sharedListEntry title already different to the URL when processing discordEventAction', async () => {
+        const {
+            storageManager,
+            actionProcessor,
+            eventProcessor,
+            fetchMock,
+        } = await setupTest({ withDefaultList: true })
+
+        const testTitle = 'My test title'
+        fetchMock.mock('*', 200, {
+            response: `<html><head><title>${testTitle}</title></head><body>Hi</body></html>`,
+        })
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await eventProcessor.processMessageCreate({
+            author: defaultDiscordUser,
+            content: 'test message with link: http://test.com',
+            discordMessageLink: 'https://discord.com/blah',
+            reference: {
+                channelId: defaultChannelId,
+                guildId: defaultGuildId,
+                messageId: 'message-1',
+            },
+        })
+
+        const [discordEventActionA] = (await storageManager
+            .collection('discordEventAction')
+            .findAllObjects({})) as [DiscordEventAction]
+
+        expect(discordEventActionA).toEqual({
+            id: expect.any(Number),
+            discordEvent: expect.any(Number),
+        })
+
+        expect(
+            await storageManager
+                .collection('sharedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'test.com',
+                entryTitle: 'test.com',
+            }),
+        ])
+        expect(fetchMock.calls().length).toBe(0)
+
+        await actionProcessor.processDiscordEventAction(discordEventActionA)
+
+        expect(
+            await storageManager
+                .collection('sharedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'test.com',
+                entryTitle: testTitle,
+            }),
+        ])
+        expect(fetchMock.calls().length).toBe(1)
+
+        await eventProcessor.processMessageCreate({
+            author: defaultDiscordUser,
+            content: 'another test message with the same link: http://test.com',
+            discordMessageLink: 'https://discord.com/blah-2',
+            reference: {
+                channelId: defaultChannelId,
+                guildId: defaultGuildId,
+                messageId: 'message-2',
+            },
+        })
+
+        const [discordEventActionB] = (await storageManager
+            .collection('discordEventAction')
+            .findAllObjects({})) as [DiscordEventAction]
+
+        expect(discordEventActionB).toEqual({
+            id: expect.any(Number),
+            discordEvent: expect.any(Number),
+        })
+
+        await actionProcessor.processDiscordEventAction(discordEventActionB)
+
+        expect(fetchMock.calls().length).toBe(1)
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
     })
 
     it('should not write anything if unable to extract title from fetched data when processing a discordEventAction', async () => {
@@ -239,6 +340,12 @@ describe('Discord integration data fetch tests', () => {
                 .collection('sharedListEntry')
                 .findAllObjects({}),
         ).toEqual(sharedListEntriesPre)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
     })
 
     it('should throw an error when processing discordEventAction when fetch is unsuccessful', async () => {
@@ -279,5 +386,11 @@ describe('Discord integration data fetch tests', () => {
             error = err
         }
         expect(error).not.toBe(null)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
     })
 })
