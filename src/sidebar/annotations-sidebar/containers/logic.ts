@@ -482,7 +482,6 @@ export class SidebarContainerLogic extends UILogic<
                 activeShareMenuAnnotationId: { $set: undefined },
             }),
         }
-
         this.emitMutation(mutation)
     }
 
@@ -737,6 +736,19 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
+            const isolatedViewID = previousState?.isolatedView
+
+            if (isolatedViewID) {
+                const remoteListId = await this.options.contentSharing.getLocalListId(
+                    { remoteListId: isolatedViewID },
+                )
+                if (remoteListId) {
+                    commentBox.lists.push(Number(remoteListId))
+                }
+            }
+
+            debugger
+
             const nextAnnotation = await this.options.annotationsCache.create(
                 {
                     url: annotationUrl,
@@ -751,17 +763,17 @@ export class SidebarContainerLogic extends UILogic<
                     isBulkShareProtected: event.isProtected,
                 },
             )
-            // check if annotation has lists with remoteId and reload them
+
             // for (const listName of nextAnnotation.lists) {
-            //     const list = await this.options.customLists.fetchListByName({
-            //         name: listName,
+            //     const list = await this.options.customLists.fetchListById({
+            //         id: listName,
             //     })
             //     if (list.remoteId) {
             //         // Want to update the list with the new page comment / note, the following isn't enough though
-            //         // await this.processUIEvent('loadFollowedLists', {
-            //         //     previousState: previousState,
-            //         //     event: null,
-            //         // })
+            //         await this.processUIEvent('loadFollowedLists', {
+            //             previousState: previousState,
+            //             event: null,
+            //         })
             //     }
             // }
         })
@@ -847,6 +859,7 @@ export class SidebarContainerLogic extends UILogic<
     updateNewPageCommentLists: EventHandler<
         'updateNewPageCommentLists'
     > = async ({ event, previousState }) => {
+        debugger
         this.emitMutation({
             commentBox: { lists: { $set: event.lists } },
         })

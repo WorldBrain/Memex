@@ -277,6 +277,7 @@ export class AnnotationsSidebarContainer<
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
         const { tags, customLists, contentSharing } = this.props
+        const isolatedView = this.state?.isolatedView
         return {
             onCommentChange: (comment) =>
                 this.processEvent('changeNewPageCommentText', { comment }),
@@ -287,6 +288,7 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('saveNewPageComment', {
                     shouldShare,
                     isProtected,
+                    isolatedView
                 }),
             tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
             addPageToList: (listId) =>

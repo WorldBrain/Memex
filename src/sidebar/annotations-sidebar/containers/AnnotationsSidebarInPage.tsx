@@ -19,12 +19,14 @@ import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { SidebarContainerLogic } from './logic'
+import styled, { css } from 'styled-components'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightInteractionsInterface
 }
+
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
@@ -50,7 +52,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
                 }),
-        })
+        });
     }
 
     componentDidMount() {
@@ -77,9 +79,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     private setupEventForwarding() {
         const { inPageUI, highlighter, events: sidebarEvents } = this.props
 
+        // Reaction
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
+        // Reactee
         sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
@@ -302,4 +306,27 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             />
         )
     }
+
+    render(): JSX.Element {
+        if (this.state.showState === "hidden" && this.state?.isolatedView) {
+            return (
+                <IsolatedViewPill onClick={()=> {this.showSidebar()}}>{this.state?.isolatedView}</IsolatedViewPill>
+            );
+        }
+        else {
+            return super.render();
+        }
+    }
 }
+
+
+const IsolatedViewPill = styled.div`
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    color: white;
+    font-size: 50;
+    width: 200px;
+    height: 60px;
+    background: brown
+`

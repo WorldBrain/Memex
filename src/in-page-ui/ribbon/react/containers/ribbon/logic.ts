@@ -368,6 +368,7 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+        debugger
 
         await this.dependencies.annotationsCache.create(
             {

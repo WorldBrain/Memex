@@ -175,6 +175,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const anchor = await extractAnchorFromSelection(selection)
         const body = anchor ? anchor.quote : ''
 
+        debugger
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body,

@@ -6,6 +6,7 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
+//Add here as well
 export interface ContentSharingInterface
     extends ListSharingServiceInterface,
         Pick<
@@ -44,6 +45,7 @@ export interface ContentSharingInterface
     getRemoteListIds(options: {
         localListIds: number[]
     }): Promise<{ [localListId: string]: string | null }>
+    getLocalListId(options: { remoteListId: string }): Promise<string>
     getAllRemoteLists(): Promise<
         Array<{ localId: number; remoteId: string; name: string }>
     >

@@ -210,7 +210,11 @@ interface SidebarEvents {
     changeNewPageCommentText: { comment: string }
     cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
+    saveNewPageComment: {
+        shouldShare: boolean
+        isProtected?: boolean
+        isolatedView?: string
+    }
     cancelNewPageComment: null
     updateNewPageCommentTags: { tags: string[] }
     updateNewPageCommentLists: { lists: number[] }

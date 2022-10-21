@@ -193,6 +193,11 @@ export default class ContentSharingBackground {
                     localIds: callOptions.localListIds,
                 })
             },
+            getLocalListId: async (callOptions) => {
+                return this.storage.getLocalListId({
+                    remoteId: callOptions.remoteListId,
+                })
+            },
             getRemoteAnnotationIds: async (callOptions) => {
                 return this.storage.getRemoteAnnotationIds({
                     localIds: callOptions.annotationUrls,
@@ -217,6 +222,7 @@ export default class ContentSharingBackground {
             deleteAnnotationShare: this.deleteAnnotationShare,
             canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
             canWriteToSharedList: this.canWriteToSharedList,
+            //Create a new function here to make it available in the UI components
         }
     }
 

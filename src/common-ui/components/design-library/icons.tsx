@@ -119,6 +119,7 @@ export const link = browser.runtime.getURL('/img/link.svg')
 
 export const hamburger = browser.runtime.getURL('/img/hamburger.svg')
 export const doubleArrow = browser.runtime.getURL('/img/doubleArrow.svg')
+export const arrowBack = browser.runtime.getURL('/img/arrowBack.svg')
 
 export const webLogo = browser.runtime.getURL('/img/web-logo.svg')
 export const mediumLogo = browser.runtime.getURL('/img/medium-logo.svg')
