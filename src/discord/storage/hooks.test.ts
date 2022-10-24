@@ -1,7 +1,8 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { DiscordEventActionProcessor } from '@worldbrain/memex-common/lib/discord/storage/hooks'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
-import {
+import type {
+    DiscordEvent,
     DiscordEventAction,
     DiscordUser,
 } from '@worldbrain/memex-common/lib/discord/types'
@@ -46,6 +47,18 @@ async function setupTest(ops: { withDefaultList: boolean }) {
         fetchMock: setup.fetch,
         actionProcessor,
         eventProcessor,
+        // TODO: find better way of asserting error (couldn't get `expect().toThrow()` to work)
+        assertErrorIsThrownOnActionProcessingAttempt: async (
+            action: DiscordEventAction,
+        ) => {
+            let error: Error = null
+            try {
+                await actionProcessor.processDiscordEventAction(action)
+            } catch (err) {
+                error = err
+            }
+            expect(error).not.toBe(null)
+        },
     }
 }
 
@@ -74,6 +87,10 @@ describe('Discord integration data fetch tests', () => {
             },
         })
 
+        const [discordEvent] = (await storageManager
+            .collection('discordEvent')
+            .findAllObjects({})) as [DiscordEvent]
+
         expect(
             await storageManager
                 .collection('discordEventAction')
@@ -81,7 +98,7 @@ describe('Discord integration data fetch tests', () => {
         ).toEqual([
             {
                 id: expect.any(Number),
-                discordEvent: expect.any(Number),
+                discordEvent: discordEvent.id,
             },
         ])
     })
@@ -274,6 +291,16 @@ describe('Discord integration data fetch tests', () => {
 
         await actionProcessor.processDiscordEventAction(discordEventActionB)
 
+        expect(
+            await storageManager
+                .collection('sharedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                normalizedUrl: 'test.com',
+                entryTitle: testTitle,
+            }),
+        ])
         expect(fetchMock.calls().length).toBe(1)
         expect(
             await storageManager
@@ -354,6 +381,7 @@ describe('Discord integration data fetch tests', () => {
             actionProcessor,
             eventProcessor,
             fetchMock,
+            assertErrorIsThrownOnActionProcessingAttempt,
         } = await setupTest({ withDefaultList: true })
 
         fetchMock.mock('*', 404)
@@ -379,13 +407,89 @@ describe('Discord integration data fetch tests', () => {
             .collection('discordEventAction')
             .findAllObjects({})) as [DiscordEventAction]
 
-        let error: Error = null
-        try {
-            await actionProcessor.processDiscordEventAction(discordEventAction)
-        } catch (err) {
-            error = err
+        await assertErrorIsThrownOnActionProcessingAttempt(discordEventAction)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+    })
+
+    it('should throw an error when processing discordEventAction with a discordEvent not of `link` type or no associated discordEvent / discordList', async () => {
+        const {
+            storageManager,
+            eventProcessor,
+            assertErrorIsThrownOnActionProcessingAttempt,
+        } = await setupTest({ withDefaultList: true })
+
+        const messageCreateInfo = {
+            author: defaultDiscordUser,
+            content: 'test message with link: http://test.com',
+            discordMessageLink: 'https://discord.com/blah',
+            reference: {
+                channelId: defaultChannelId,
+                guildId: defaultGuildId,
+                messageId: 'message-1',
+            },
         }
-        expect(error).not.toBe(null)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await eventProcessor.processMessageCreate(messageCreateInfo)
+
+        const [discordEventActionA] = (await storageManager
+            .collection('discordEventAction')
+            .findAllObjects({})) as [DiscordEventAction]
+
+        // Delete associated discordEvent to verify it errors out on processing attempt
+        await storageManager.collection('discordEvent').deleteObjects({})
+
+        await assertErrorIsThrownOnActionProcessingAttempt(discordEventActionA)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await eventProcessor.processMessageCreate(messageCreateInfo)
+
+        const [discordEventActionB] = (await storageManager
+            .collection('discordEventAction')
+            .findAllObjects({})) as [DiscordEventAction]
+
+        // Update associated discordEvent to be non-link type to verify it errors out on processing attempt
+        await storageManager
+            .collection('discordEvent')
+            .updateOneObject(
+                { id: discordEventActionB.discordEvent },
+                { type: 'reply' },
+            )
+
+        await assertErrorIsThrownOnActionProcessingAttempt(discordEventActionB)
+
+        expect(
+            await storageManager
+                .collection('discordEventAction')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await storageManager.collection('discordEvent').deleteObjects({})
+        await eventProcessor.processMessageCreate(messageCreateInfo)
+
+        const [discordEventActionC] = (await storageManager
+            .collection('discordEventAction')
+            .findAllObjects({})) as [DiscordEventAction]
+
+        // Delete associated discordList to verify it errors out on processing attempt
+        await storageManager.collection('discordList').deleteObjects({})
+
+        await assertErrorIsThrownOnActionProcessingAttempt(discordEventActionC)
 
         expect(
             await storageManager
