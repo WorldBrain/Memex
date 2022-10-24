@@ -57,7 +57,6 @@ describe('Discord channel management module', () => {
                 .findAllObjects({}),
         ).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: sharedLists[0].id,
                 guildId: missingGuildId,
                 guildName: missingGuildName,
@@ -79,12 +78,11 @@ describe('Discord channel management module', () => {
             .collection('discordList')
             .findAllObjects({})
         const memexSocialLink = getListShareUrl({
-            remoteListId: discordLists[0].sharedList,
+            remoteListId: discordLists[0].sharedList.toString(),
         })
 
         expect(discordLists).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
@@ -109,7 +107,6 @@ describe('Discord channel management module', () => {
                 .findAllObjects({}),
         ).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
@@ -135,7 +132,6 @@ describe('Discord channel management module', () => {
                 .findAllObjects({}),
         ).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
@@ -160,12 +156,11 @@ describe('Discord channel management module', () => {
             .collection('discordList')
             .findAllObjects({})
         const memexSocialLink = getListShareUrl({
-            remoteListId: discordLists[0].sharedList,
+            remoteListId: discordLists[0].sharedList.toString(),
         })
 
         expect(discordLists).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
@@ -188,7 +183,6 @@ describe('Discord channel management module', () => {
                 .findAllObjects({}),
         ).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
@@ -212,7 +206,6 @@ describe('Discord channel management module', () => {
                 .findAllObjects({}),
         ).toEqual([
             {
-                id: expect.any(Number),
                 sharedList: expect.any(Number),
                 guildId: defaultListDetails.guildId,
                 guildName: defaultListDetails.guildName,
