@@ -217,6 +217,14 @@ export default class ContentSharingBackground {
             deleteAnnotationShare: this.deleteAnnotationShare,
             canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
             canWriteToSharedList: this.canWriteToSharedList,
+            // TODO: properly implement these 3 (via listKeys service)
+            generateKeyLink: async () => {
+                return { link: '', roleID: SharedListRoleID.Commenter }
+            },
+            hasCurrentKey: () => false,
+            processCurrentKey: async () => {
+                return { result: 'denied' }
+            },
         }
     }
 
