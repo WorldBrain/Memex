@@ -416,7 +416,7 @@ describe('Discord integration data fetch tests', () => {
         ).toEqual([])
     })
 
-    it('should throw an error when processing discordEventAction with a discordEvent not of `link` type or no associated discordEvent / discordList', async () => {
+    it('should throw an error when processing discordEventAction with a discordEvent not of `link` type or no associated discordEvent', async () => {
         const {
             storageManager,
             eventProcessor,
@@ -472,24 +472,6 @@ describe('Discord integration data fetch tests', () => {
             )
 
         await assertErrorIsThrownOnActionProcessingAttempt(discordEventActionB)
-
-        expect(
-            await storageManager
-                .collection('discordEventAction')
-                .findAllObjects({}),
-        ).toEqual([])
-
-        await storageManager.collection('discordEvent').deleteObjects({})
-        await eventProcessor.processMessageCreate(messageCreateInfo)
-
-        const [discordEventActionC] = (await storageManager
-            .collection('discordEventAction')
-            .findAllObjects({})) as [DiscordEventAction]
-
-        // Delete associated discordList to verify it errors out on processing attempt
-        await storageManager.collection('discordList').deleteObjects({})
-
-        await assertErrorIsThrownOnActionProcessingAttempt(discordEventActionC)
 
         expect(
             await storageManager
