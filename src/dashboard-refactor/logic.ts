@@ -135,6 +135,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             loadState: 'pristine',
             isCloudEnabled: true,
             currentUser: null,
+            sidebarWidth: '200px',
             modals: {
                 showLogin: false,
                 showSubscription: false,

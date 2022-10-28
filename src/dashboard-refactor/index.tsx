@@ -1,10 +1,11 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
 import type { UIMutation } from 'ui-logic-core'
-
+import colors from 'src/dashboard-refactor/colors'
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies, ListSource } from './types'
@@ -19,6 +20,7 @@ import SubscribeModal from 'src/authentication/components/Subscription/Subscribe
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
+import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import {
@@ -58,6 +60,10 @@ import {
 import type { ListDetailsGetter } from 'src/annotations/types'
 
 export interface Props extends DashboardDependencies {}
+
+export interface State extends RootState {
+    sidebarWidth: string
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -119,6 +125,8 @@ export class DashboardContainer extends StatefulUIElement<
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
+
+    private SidebarContainer = React.createRef()
 
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
@@ -1183,15 +1191,93 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
+        const style = {
+            display:
+                !listsSidebar.isSidebarPeeking && !listsSidebar.isSidebarLocked
+                    ? 'none'
+                    : 'flex',
+            top: listsSidebar.isSidebarPeeking ? '20px' : '0',
+            height: listsSidebar.isSidebarPeeking ? '90vh' : '100vh',
+            position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
+        }
+
+        const isPeeking = listsSidebar.isSidebarPeeking
+
         return (
             <Container>
-                {this.renderHeader()}
-                {this.renderFiltersBar()}
-                <Margin bottom="5px" />
-                {this.renderListsSidebar()}
-                {mode === 'locate-pdf'
-                    ? this.renderPdfLocator()
-                    : this.renderSearchResults()}
+                <MainFrame>
+                    <PeekTrigger
+                        onMouseEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                        onDragEnter={() => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                    />
+                    <ListSidebarContent
+                        ref={this.SidebarContainer}
+                        style={style}
+                        size={{
+                            height: listsSidebar.isSidebarPeeking
+                                ? '90vh'
+                                : '100vh',
+                        }}
+                        peeking={listsSidebar.isSidebarPeeking}
+                        position={{
+                            x:
+                                listsSidebar.isSidebarLocked &&
+                                `$sizeConstants.header.heightPxpx`,
+                        }}
+                        locked={listsSidebar.isSidebarLocked}
+                        onMouseEnter={() => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                        onMouseLeave={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking: false,
+                            })
+                        }}
+                        default={{ width: 200 }}
+                        resizeHandleClasses={{
+                            right: 'sidebarResizeHandleSidebar',
+                        }}
+                        resizeGrid={[1, 0]}
+                        dragAxis={'none'}
+                        minWidth={'200px'}
+                        maxWidth={'500px'}
+                        disableDragging={'true'}
+                        enableResizing={{
+                            top: false,
+                            right: true,
+                            bottom: false,
+                            left: false,
+                            topRight: false,
+                            bottomRight: false,
+                            bottomLeft: false,
+                            topLeft: false,
+                        }}
+                        onResize={(e, direction, ref, delta, position) => {
+                            this.setState({ sidebarWidth: ref.style.width })
+                        }}
+                    >
+                        {this.renderListsSidebar()}
+                    </ListSidebarContent>
+                    <MainContent>
+                        {this.renderHeader()}
+                        {this.renderFiltersBar()}
+                        {mode === 'locate-pdf'
+                            ? this.renderPdfLocator()
+                            : this.renderSearchResults()}
+                    </MainContent>
+                </MainFrame>
+
+                {/* <Margin bottom="5px" /> */}
                 {this.renderModals()}
                 <NotesSidebar
                     tags={this.props.tagsBG}
@@ -1238,6 +1324,64 @@ const GlobalStyle = createGlobalStyle`
     }
 `
 
+const ListSidebarContent = styled(Rnd)<{
+    locked: boolean
+    peeking: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    z-index: 3000;
+    z-index: 1000000000000000;
+    left: 0px;
+    background: blue;
+
+    ${(props) =>
+        props.locked &&
+        css`
+            height: 100%;
+            background-color: ${colors.white};
+            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
+            padding-top: ${sizeConstants.header.heightPx}px;
+        `}
+    ${(props) =>
+        props.peeking &&
+        css`
+            position: fixed;
+            height: max-content;
+            background-color: ${colors.white};
+            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            margin-top: 50px;
+            margin-bottom: 9px;
+            height: 90vh;
+            top: 20px;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+        `}
+    ${(props) =>
+        !props.peeking &&
+        !props.locked &&
+        css`
+            display: none;
+        `}
+`
+
+// const ListSidebarContent = styled.div`
+//     width: fit-content;
+//     block-size: fit-content;
+// `
+const MainContent = styled.div`
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+`
+
+const MainFrame = styled.div`
+    display: flex;
+    flex-direction: row;
+`
+
 const Container = styled.div`
 display: flex;
 flex-direction: column;
@@ -1249,4 +1393,11 @@ height: 100%;
     & * {
         font-family: 'Inter', sans-serif;,
     }
+`
+
+const PeekTrigger = styled.div`
+    height: 100vh;
+    width: 10px;
+    position: fixed;
+    background: transparent;
 `

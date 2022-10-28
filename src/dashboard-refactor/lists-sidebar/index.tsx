@@ -22,8 +22,9 @@ import { createGlobalStyle } from 'styled-components'
 import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import blacklist from 'src/options/blacklist'
 
-const Sidebar = styled(Rnd)<{
+const Sidebar = styled.div<{
     locked: boolean
     peeking: boolean
 }>`
@@ -31,28 +32,29 @@ const Sidebar = styled(Rnd)<{
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
-    width: 200px;
+    width: 100%;
 
     ${(props) =>
         props.locked &&
         css`
             height: 100%;
             background-color: ${colors.white};
-            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
-            padding-top: ${sizeConstants.header.heightPx}px;
+            /* border-right: solid 1px ${(props) =>
+                props.theme.colors.lineGrey}; */
         `}
     ${(props) =>
         props.peeking &&
         css`
             height: max-content;
             background-color: ${colors.white};
-            box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
-            margin-top: 50px;
+            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            /* margin-top: 50px; */
             margin-bottom: 9px;
             height: 90vh;
             top: 20px;
             border-top-right-radius: 3px;
             border-bottom-right-radius: 3px;
+            position: sticky;
         `}
     ${(props) =>
         !props.peeking &&
@@ -63,15 +65,16 @@ const Sidebar = styled(Rnd)<{
 `
 
 const Container = styled.div`
-    position: fixed;
+    position: absolute;
     z-index: 2147483645;
+    width: 100%;
 `
 
 const PeekTrigger = styled.div`
     height: 100vh;
     width: 10px;
     position: fixed;
-    background: transparent;
+    background: red;
 `
 
 const TopGroup = styled.div`
@@ -120,11 +123,12 @@ const NoCollectionsMessage = styled.div`
 const GlobalStyle = createGlobalStyle`
 
     .sidebarResizeHandleSidebar {
-        width: 4px !important;
+        width: 6px !important;
         height: 100% !important;
+        right: -3px !important;
 
         &:hover {
-            background: #5671cf30;
+            background: #5671cf30 !important;
         }
     }
 `
@@ -197,7 +201,7 @@ export default class ListsSidebar extends PureComponent<
     }
 
     state = {
-        sidebarWidth: '250px',
+        sidebarWidth: '100%',
     }
 
     render() {
@@ -211,25 +215,23 @@ export default class ListsSidebar extends PureComponent<
 
         const style = {
             display: !isSidebarPeeking && !isSidebarLocked ? 'none' : 'flex',
-            top: '100',
+            top: '20',
             height: isSidebarPeeking ? '90vh' : '100vh',
+            width: '98%',
         }
 
         return (
             <Container
-                onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
+            // onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
             >
                 <GlobalStyle />
-                <PeekTrigger
-                    onMouseEnter={this.props.peekState.setSidebarPeekState(
-                        true,
-                    )}
-                    onDragEnter={this.props.peekState.setSidebarPeekState(true)}
-                />
                 <Sidebar
                     ref={this.SidebarContainer}
                     style={style}
-                    size={{ height: isSidebarPeeking ? '90vh' : '100vh' }}
+                    size={{
+                        width: '90%',
+                        height: isSidebarPeeking ? '90vh' : '100vh',
+                    }}
                     peeking={isSidebarPeeking}
                     position={{
                         x:
@@ -237,32 +239,32 @@ export default class ListsSidebar extends PureComponent<
                             `$sizeConstants.header.heightPxpx`,
                     }}
                     locked={isSidebarLocked}
-                    onMouseEnter={
-                        isSidebarPeeking &&
-                        this.props.peekState.setSidebarPeekState(true)
-                    }
-                    default={{ width: 200 }}
-                    resizeHandleClasses={{
-                        right: 'sidebarResizeHandleSidebar',
-                    }}
+                    // onMouseEnter={
+                    //     isSidebarPeeking &&
+                    //     this.props.peekState.setSidebarPeekState(true)
+                    // }
+                    width={'100%'}
+                    // resizeHandleClasses={{
+                    //     right: 'sidebarResizeHandleSidebar',
+                    // }}
                     resizeGrid={[1, 0]}
                     dragAxis={'none'}
                     minWidth={'200px'}
                     maxWidth={'500px'}
                     disableDragging={'true'}
-                    enableResizing={{
-                        top: false,
-                        right: true,
-                        bottom: false,
-                        left: false,
-                        topRight: false,
-                        bottomRight: false,
-                        bottomLeft: false,
-                        topLeft: false,
-                    }}
-                    onResize={(e, direction, ref, delta, position) => {
-                        this.setState({ sidebarWidth: ref.style.width })
-                    }}
+                    // enableResizing={this.props.peekState && {
+                    //     top: false,
+                    //     right: true,
+                    //     bottom: false,
+                    //     left: false,
+                    //     topRight: false,
+                    //     bottomRight: false,
+                    //     bottomLeft: false,
+                    //     topLeft: false,
+                    // }}
+                    // onResize={(e, direction, ref, delta, position) => {
+                    //     this.setState({ sidebarWidth: ref.style.width })
+                    // }}
                 >
                     <BottomGroup sidebarWidth={this.state.sidebarWidth}>
                         <Margin vertical="10px">
