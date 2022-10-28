@@ -31,6 +31,7 @@ import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { createAuthServices } from 'src/services/local-services'
+import { MockPushMessagingService } from 'src/tests/push-messaging'
 
 export const BASE_TIMESTAMP = 555
 
@@ -307,6 +308,7 @@ export async function setupSyncBackgroundTest(
 
     let now = BASE_TIMESTAMP
     const getNow = () => now++
+    const pushMessagingService = new MockPushMessagingService()
     const setups: BackgroundIntegrationTestSetup[] = []
 
     let getSqlStorageMananager: () => Promise<StorageManager> | undefined
@@ -370,7 +372,10 @@ export async function setupSyncBackgroundTest(
             storageModules: serverStorage.modules,
             getSqlStorageMananager,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
-            services,
+            services: {
+                activityStreams: services.activityStreams,
+                pushMessaging: pushMessagingService,
+            },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
             getUserId: async () => userId,
@@ -388,6 +393,7 @@ export async function setupSyncBackgroundTest(
                 ...options,
                 services,
                 getServerStorage,
+                pushMessagingService,
                 personalCloudBackend,
             },
         )

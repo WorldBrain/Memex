@@ -45,6 +45,8 @@ import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
 import { createAuthServices } from 'src/services/local-services'
+import { MockPushMessagingService } from './push-messaging'
+import type { PushMessagingServiceInterface } from '@worldbrain/memex-common/lib/push-messaging/types'
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
@@ -58,6 +60,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     startWithSyncDisabled?: boolean
     useDownloadTranslationLayer?: boolean
     services?: Services
+    pushMessagingService?: PushMessagingServiceInterface
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -196,7 +199,10 @@ export async function setupBackgroundIntegrationTest(
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
-                services,
+                services: {
+                    activityStreams: services.activityStreams,
+                    pushMessaging: new MockPushMessagingService(),
+                },
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
@@ -266,6 +272,8 @@ export async function setupBackgroundIntegrationTest(
     setStorex(storageManager)
 
     return {
+        pushMessagingService:
+            options.pushMessagingService ?? new MockPushMessagingService(),
         storageManager,
         persistentStorageManager,
         backgroundModules,

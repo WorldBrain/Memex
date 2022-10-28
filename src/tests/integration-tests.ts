@@ -17,8 +17,9 @@ import type { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/su
 import type { ServerStorage } from 'src/storage/types'
 import type { Browser } from 'webextension-polyfill'
 import type { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
-import fetchMock from 'fetch-mock'
+import type fetchMock from 'fetch-mock'
 import type { Services } from 'src/services/types'
+import type { MockPushMessagingService } from './push-messaging'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -69,6 +70,7 @@ export interface BackgroundIntegrationTestSetup {
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger
+    pushMessagingService: MockPushMessagingService
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
     getServerStorage(): Promise<ServerStorage>
