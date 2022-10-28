@@ -15,7 +15,7 @@ const arrowStyles = `
 `
 
 export const Container = styled.div`
-    height: 80px;
+    height: 44px;
     width: 60px;
     border: none;
     position: relative;

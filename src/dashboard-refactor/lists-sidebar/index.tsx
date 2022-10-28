@@ -218,6 +218,7 @@ export default class ListsSidebar extends PureComponent<
             top: '20',
             height: isSidebarPeeking ? '90vh' : '100vh',
             width: '98%',
+            background: 'transparent',
         }
 
         return (

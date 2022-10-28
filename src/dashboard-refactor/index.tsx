@@ -20,6 +20,7 @@ import SubscribeModal from 'src/authentication/components/Subscription/Subscribe
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
+import SidebarToggle from './header/sidebar-toggle'
 import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
@@ -59,7 +60,7 @@ import {
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
 
-export interface Props extends DashboardDependencies {}
+export interface Props extends DashboardDependencies { }
 
 export interface State extends RootState {
     sidebarWidth: string
@@ -97,27 +98,27 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openFeed'
         | 'openCollectionPage'
     > = {
-        analytics,
-        copyToClipboard,
-        document: window.document,
-        location: window.location,
-        localStorage: browser.storage.local,
-        contentConversationsBG: runInBackground(),
-        activityIndicatorBG: runInBackground(),
-        personalCloudBG: runInBackground(),
-        contentShareBG: runInBackground(),
-        syncSettingsBG: runInBackground(),
-        annotationsBG: runInBackground(),
-        pdfViewerBG: runInBackground(),
-        searchBG: runInBackground(),
-        backupBG: runInBackground(),
-        listsBG: runInBackground(),
-        tagsBG: runInBackground(),
-        authBG: runInBackground(),
-        openFeed: () => window.open(getFeedUrl(), '_blank'),
-        openCollectionPage: (remoteListId) =>
-            window.open(getListShareUrl({ remoteListId }), '_blank'),
-    }
+            analytics,
+            copyToClipboard,
+            document: window.document,
+            location: window.location,
+            localStorage: browser.storage.local,
+            contentConversationsBG: runInBackground(),
+            activityIndicatorBG: runInBackground(),
+            personalCloudBG: runInBackground(),
+            contentShareBG: runInBackground(),
+            syncSettingsBG: runInBackground(),
+            annotationsBG: runInBackground(),
+            pdfViewerBG: runInBackground(),
+            searchBG: runInBackground(),
+            backupBG: runInBackground(),
+            listsBG: runInBackground(),
+            tagsBG: runInBackground(),
+            authBG: runInBackground(),
+            openFeed: () => window.open(getFeedUrl(), '_blank'),
+            openCollectionPage: (remoteListId) =>
+                window.open(getListShareUrl({ remoteListId }), '_blank'),
+        }
 
     private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
@@ -177,9 +178,9 @@ export class DashboardContainer extends StatefulUIElement<
                 }),
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
-                      this.processEvent('setShareListId', {
-                          listId: listData.id,
-                      })
+                    this.processEvent('setShareListId', {
+                        listId: listData.id,
+                    })
                 : undefined,
         }
     }
@@ -229,13 +230,13 @@ export class DashboardContainer extends StatefulUIElement<
                 onSelection:
                     source === 'followed-lists'
                         ? () =>
-                              this.props.openCollectionPage(
-                                  listsSidebar.listData[listId].remoteId,
-                              )
+                            this.props.openCollectionPage(
+                                listsSidebar.listData[listId].remoteId,
+                            )
                         : () =>
-                              this.processEvent('setSelectedListId', {
-                                  listId: listsSidebar.listData[listId].id,
-                              }),
+                            this.processEvent('setSelectedListId', {
+                                listId: listsSidebar.listData[listId].id,
+                            }),
             },
             editableProps: {
                 changeListName: (value) =>
@@ -248,11 +249,11 @@ export class DashboardContainer extends StatefulUIElement<
             },
             onMoreActionClick:
                 source !== 'followed-lists' &&
-                listsSidebar.listData[listId].isOwnedList
+                    listsSidebar.listData[listId].isOwnedList
                     ? () =>
-                          this.processEvent('setShowMoreMenuListId', {
-                              listId: listsSidebar.listData[listId].id,
-                          })
+                        this.processEvent('setShowMoreMenuListId', {
+                            listId: listsSidebar.listData[listId].id,
+                        })
                     : undefined,
             onRenameClick: () =>
                 this.processEvent('setEditingListId', { listId }),
@@ -1191,6 +1192,26 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
+        const lockedState = {
+            isSidebarLocked: listsSidebar.isSidebarLocked,
+            toggleSidebarLockedState: () =>
+                this.processEvent('setSidebarLocked', {
+                    isLocked: !listsSidebar.isSidebarLocked,
+                }),
+        }
+
+        const sidebarToggleHoverState = {
+            isHovered: listsSidebar.isSidebarToggleHovered,
+            onHoverEnter: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: true,
+                }),
+            onHoverLeave: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: false,
+                }),
+        }
+
         const style = {
             display:
                 !listsSidebar.isSidebarPeeking && !listsSidebar.isSidebarLocked
@@ -1205,6 +1226,17 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <Container>
+                <SidebarHeaderContainer>
+                    <SidebarToggleBox>
+                        <SidebarToggle
+                            sidebarLockedState={lockedState}
+                            hoverState={sidebarToggleHoverState}
+                        />
+                        <ActivityIndicator
+                            hasActivities={listsSidebar.hasFeedActivity}
+                        />
+                    </SidebarToggleBox>
+                </SidebarHeaderContainer>
                 <MainFrame>
                     <PeekTrigger
                         onMouseEnter={(isPeeking) => {
@@ -1243,13 +1275,13 @@ export class DashboardContainer extends StatefulUIElement<
                                 isPeeking: false,
                             })
                         }}
-                        default={{ width: 200 }}
+                        default={{ width: 250 }}
                         resizeHandleClasses={{
                             right: 'sidebarResizeHandleSidebar',
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'200px'}
+                        minWidth={'250px'}
                         maxWidth={'500px'}
                         disableDragging={'true'}
                         enableResizing={{
@@ -1324,7 +1356,7 @@ const GlobalStyle = createGlobalStyle`
     }
 `
 
-const ListSidebarContent = styled(Rnd)<{
+const ListSidebarContent = styled(Rnd) <{
     locked: boolean
     peeking: boolean
 }>`
@@ -1332,7 +1364,7 @@ const ListSidebarContent = styled(Rnd)<{
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
-    z-index: 1000000000000000;
+    z-index: 250000;
     left: 0px;
     background: blue;
 
@@ -1340,7 +1372,8 @@ const ListSidebarContent = styled(Rnd)<{
         props.locked &&
         css`
             height: 100%;
-            background-color: ${colors.white};
+            background-color: ${(props) =>
+                props.theme.colors.backgroundColorDarker};
             border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
             padding-top: ${sizeConstants.header.heightPx}px;
         `}
@@ -1349,14 +1382,15 @@ const ListSidebarContent = styled(Rnd)<{
         css`
             position: fixed;
             height: max-content;
-            background-color: ${colors.white};
+            background-color: ${(props) =>
+                props.theme.colors.backgroundColorDarker};
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;
+            margin-left: 10px;
             height: 90vh;
             top: 20px;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
+            border-radius: 8px;
         `}
     ${(props) =>
         !props.peeking &&
@@ -1383,12 +1417,12 @@ const MainFrame = styled.div`
 `
 
 const Container = styled.div`
-display: flex;
-flex-direction: column;
-width: fill-available;
-background-color: ${(props) => props.theme.colors.backgroundColor};
-min-height: 100vh;
-height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
+    min-height: 100vh;
+    height: 100%;
 
     & * {
         font-family: 'Satoshi', sans-serif;,
@@ -1400,4 +1434,42 @@ const PeekTrigger = styled.div`
     width: 10px;
     position: fixed;
     background: transparent;
+`
+
+const SidebarToggleBox = styled(Margin)`
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+`
+
+const ActivityIndicator = styled.div<{ hasActivities }>`
+    border-radius: 20px;
+    height: 10px;
+    width: 10px;
+    margin-left: -24px;
+    border: ${(props) =>
+        props.hasActivities
+            ? '2px solid' + props.theme.colors.purple
+            : '1px solid' + props.theme.colors.lightgrey};
+    background: ${(props) => props.hasActivities && props.theme.colors.purple};
+`
+
+const SidebarHeaderContainer = styled.div`
+    height: 100%;
+    width: ${sizeConstants.listsSidebar.widthPx}px;
+    display: flex;
+    position: sticky;
+    top: 0px;
+    z-index: 10000000000000;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+
+    & div {
+        justify-content: flex-start;
+    }
 `
