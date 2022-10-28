@@ -21,6 +21,7 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 import {
     ChangeWatchMiddleware,
     ChangeWatchMiddlewareSettings,
@@ -108,6 +109,10 @@ export function createLazyServerStorage(
                 storageManager,
                 operationExecuter: operationExecuter('activityFollows'),
             })
+            const discord = new DiscordStorage({
+                storageManager,
+                operationExecuter: operationExecuter('discord'),
+            })
             const serverStorage: ServerStorage = {
                 manager: storageManager,
                 modules: {
@@ -118,6 +123,7 @@ export function createLazyServerStorage(
                     activityFollows,
                     contentConversations,
                     personalCloud,
+                    discord,
                 },
             }
             registerModuleMapCollections(

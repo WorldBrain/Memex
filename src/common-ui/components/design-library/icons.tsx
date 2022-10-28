@@ -8,6 +8,7 @@ export const logoHorizontal = browser.runtime.getURL(
 )
 export const settings = browser.runtime.getURL('/img/settings.svg')
 
+export const discord = browser.runtime.getURL('/img/discord.svg')
 export const atSign = browser.runtime.getURL('/img/atSign.svg')
 export const check = browser.runtime.getURL('/img/check.svg')
 export const multiEdit = browser.runtime.getURL('/img/multiEdit.svg')
