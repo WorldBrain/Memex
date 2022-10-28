@@ -10,7 +10,11 @@ export interface ContentSharingInterface
     extends ListSharingServiceInterface,
         Pick<
             ListKeysServiceInterface,
-            'deleteKeyLink' | 'getExistingKeyLinksForList'
+            | 'deleteKeyLink'
+            | 'getExistingKeyLinksForList'
+            | 'hasCurrentKey'
+            | 'processCurrentKey'
+            | 'generateKeyLink'
         >,
         Pick<
             AnnotationSharingServiceInterface,
