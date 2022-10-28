@@ -107,7 +107,7 @@ const SearchInput = styled(TextInputControlled)`
     display: flex;
     flex: 1;
     color: ${(props) => props.theme.colors.normalText};
-    font-family: 'Inter'
+    font-family: 'Satoshi'
     font-size: 14px;
     height: fill-available;
     width: fill-available;

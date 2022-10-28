@@ -52,7 +52,7 @@ const NoResults = styled.p`
 
 const NoResultsBox = styled.div`
     text-align: center
-    font-family: 'Inter',
+    font-family: 'Satoshi',
     font-style: normal;
     font-size: 12px;
     padding: 15px 10px;

@@ -1032,7 +1032,7 @@ const ContainerStyled = styled.div`
     background: ${(props) => props.theme.colors.backgroundColor};
     transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 
     &:: -webkit-scrollbar {
         display: none;

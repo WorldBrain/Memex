@@ -240,7 +240,7 @@ const ListSpaceContainer = styled.div`
     cursor: pointer;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 `
 
 const ListPillSettingButton = styled.button`

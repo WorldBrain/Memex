@@ -30,7 +30,7 @@ const ButtonDiv = styled.button`
 
 const AnnotationTooltipText = styled.span`
     font-size: 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     font-style: unset;
     letter-spacing: 0.3px;
 `

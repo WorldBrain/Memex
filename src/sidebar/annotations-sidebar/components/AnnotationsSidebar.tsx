@@ -1611,7 +1611,7 @@ const annotationCardStyle = css`
 `
 
 const NewAnnotationSection = styled.section`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     height: auto;
     background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
@@ -1632,7 +1632,7 @@ const NewAnnotationSeparator = styled.div`
 `
 
 const AnnotationsSectionStyled = styled.section`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     background: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: column;

@@ -3,9 +3,10 @@
 }
 
 .button {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     padding: 8px 20px;
-    color: white !important; /* stylelint-disable */
+    color: white !important;
+    /* stylelint-disable */
     width: fit-content;
     border-radius: 2px;
     cursor: pointer !important;

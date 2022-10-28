@@ -670,7 +670,7 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;

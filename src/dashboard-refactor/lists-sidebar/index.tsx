@@ -96,7 +96,7 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
 `
 
 const NoCollectionsMessage = styled.div`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     display: grid;
     grid-auto-flow: column;
     grid-gap: 10px;
@@ -147,7 +147,7 @@ const InfoText = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
     font-size: 14px;
     font-weight: 300;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 `
 
 const Link = styled.span`
