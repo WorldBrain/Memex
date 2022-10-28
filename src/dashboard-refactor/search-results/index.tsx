@@ -742,14 +742,14 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
                             <RightSideButton>
-                                {this.renderListShareBtn()}
+                                {/* {this.renderListShareBtn()}
                                 <SearchCopyPaster
                                     {...this.props.searchCopyPasterProps}
                                 />
                                 <ExpandAllNotes
                                     isEnabled={this.props.areAllNotesShown}
                                     onClick={this.props.onShowAllNotesClick}
-                                />
+                                /> */}
                             </RightSideButton>
                         }
                     />
@@ -769,13 +769,12 @@ const ResultsMessage = styled.div`
 `
 
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 96%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    width: 100%;
+
     padding: 0px 15px;
-    height: 40px;
+    height: 50px;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 2147483639;
-    margin-top: -6px;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};

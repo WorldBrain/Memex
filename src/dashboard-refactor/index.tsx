@@ -60,7 +60,7 @@ import {
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
 
-export interface Props extends DashboardDependencies { }
+export interface Props extends DashboardDependencies {}
 
 export interface State extends RootState {
     sidebarWidth: string
@@ -98,27 +98,27 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openFeed'
         | 'openCollectionPage'
     > = {
-            analytics,
-            copyToClipboard,
-            document: window.document,
-            location: window.location,
-            localStorage: browser.storage.local,
-            contentConversationsBG: runInBackground(),
-            activityIndicatorBG: runInBackground(),
-            personalCloudBG: runInBackground(),
-            contentShareBG: runInBackground(),
-            syncSettingsBG: runInBackground(),
-            annotationsBG: runInBackground(),
-            pdfViewerBG: runInBackground(),
-            searchBG: runInBackground(),
-            backupBG: runInBackground(),
-            listsBG: runInBackground(),
-            tagsBG: runInBackground(),
-            authBG: runInBackground(),
-            openFeed: () => window.open(getFeedUrl(), '_blank'),
-            openCollectionPage: (remoteListId) =>
-                window.open(getListShareUrl({ remoteListId }), '_blank'),
-        }
+        analytics,
+        copyToClipboard,
+        document: window.document,
+        location: window.location,
+        localStorage: browser.storage.local,
+        contentConversationsBG: runInBackground(),
+        activityIndicatorBG: runInBackground(),
+        personalCloudBG: runInBackground(),
+        contentShareBG: runInBackground(),
+        syncSettingsBG: runInBackground(),
+        annotationsBG: runInBackground(),
+        pdfViewerBG: runInBackground(),
+        searchBG: runInBackground(),
+        backupBG: runInBackground(),
+        listsBG: runInBackground(),
+        tagsBG: runInBackground(),
+        authBG: runInBackground(),
+        openFeed: () => window.open(getFeedUrl(), '_blank'),
+        openCollectionPage: (remoteListId) =>
+            window.open(getListShareUrl({ remoteListId }), '_blank'),
+    }
 
     private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
@@ -178,9 +178,9 @@ export class DashboardContainer extends StatefulUIElement<
                 }),
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
-                    this.processEvent('setShareListId', {
-                        listId: listData.id,
-                    })
+                      this.processEvent('setShareListId', {
+                          listId: listData.id,
+                      })
                 : undefined,
         }
     }
@@ -230,13 +230,13 @@ export class DashboardContainer extends StatefulUIElement<
                 onSelection:
                     source === 'followed-lists'
                         ? () =>
-                            this.props.openCollectionPage(
-                                listsSidebar.listData[listId].remoteId,
-                            )
+                              this.props.openCollectionPage(
+                                  listsSidebar.listData[listId].remoteId,
+                              )
                         : () =>
-                            this.processEvent('setSelectedListId', {
-                                listId: listsSidebar.listData[listId].id,
-                            }),
+                              this.processEvent('setSelectedListId', {
+                                  listId: listsSidebar.listData[listId].id,
+                              }),
             },
             editableProps: {
                 changeListName: (value) =>
@@ -249,11 +249,11 @@ export class DashboardContainer extends StatefulUIElement<
             },
             onMoreActionClick:
                 source !== 'followed-lists' &&
-                    listsSidebar.listData[listId].isOwnedList
+                listsSidebar.listData[listId].isOwnedList
                     ? () =>
-                        this.processEvent('setShowMoreMenuListId', {
-                            listId: listsSidebar.listData[listId].id,
-                        })
+                          this.processEvent('setShowMoreMenuListId', {
+                              listId: listsSidebar.listData[listId].id,
+                          })
                     : undefined,
             onRenameClick: () =>
                 this.processEvent('setEditingListId', { listId }),
@@ -412,6 +412,7 @@ export class DashboardContainer extends StatefulUIElement<
             listsSidebar,
             currentUser,
             syncMenu,
+            searchResults,
         } = this.state
         const syncStatusIconState = deriveStatusIconColor(this.state)
         return (
@@ -427,6 +428,20 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query }),
                     onInputClear: () =>
                         this.processEvent('setSearchQuery', { query: '' }),
+                }}
+                searchCopyPasterProps={{
+                    searchType: searchResults.searchType,
+                    searchParams: stateToSearchParams(this.state),
+                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
+                    isCopyPasterBtnShown: true,
+                    hideCopyPaster: () =>
+                        this.processEvent('setSearchCopyPasterShown', {
+                            isShown: false,
+                        }),
+                    toggleCopyPaster: () =>
+                        this.processEvent('setSearchCopyPasterShown', {
+                            isShown: !searchResults.isSearchCopyPasterShown,
+                        }),
                 }}
                 sidebarLockedState={{
                     isSidebarLocked: listsSidebar.isSidebarLocked,
@@ -1356,7 +1371,7 @@ const GlobalStyle = createGlobalStyle`
     }
 `
 
-const ListSidebarContent = styled(Rnd) <{
+const ListSidebarContent = styled(Rnd)<{
     locked: boolean
     peeking: boolean
 }>`

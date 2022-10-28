@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, ReactElement } from 'react'
 import styled from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -80,6 +80,13 @@ const StyledIcon = styled(Icon)`
     opacity: 0.7;
     cursor: pointer;
 `
+
+const ActionButtons = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 15px;
+`
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
@@ -87,6 +94,8 @@ export interface SearchBarProps {
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
     onInputClear(): void
+    CopyPasterButton: ReactElement
+    ExpandButton: ReactElement
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -112,6 +121,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             searchFiltersOpen,
             searchQuery,
             onSearchFiltersOpen,
+            CopyPasterButton,
+            ExpandButton,
         } = this.props
         return (
             <Margin vertical="auto">
@@ -149,26 +160,33 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                         />
                     </FullWidthMargin>
                 </SearchBarContainer>
-                <FilterButton left="15px" onClick={onSearchFiltersOpen}>
-                    {searchFiltersOpen ? (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={'Clear Filters'}
-                        >
-                            <Icon path={icons.removeX} heightAndWidth="16px" />
-                        </ButtonTooltip>
-                    ) : (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={'Apply Filters'}
-                        >
-                            <Icon
-                                path={icons.filterIcon}
-                                heightAndWidth="20px"
-                            />
-                        </ButtonTooltip>
-                    )}
-                </FilterButton>
+                <ActionButtons>
+                    <FilterButton left="15px" onClick={onSearchFiltersOpen}>
+                        {searchFiltersOpen ? (
+                            <ButtonTooltip
+                                position={'bottom'}
+                                tooltipText={'Clear Filters'}
+                            >
+                                <Icon
+                                    path={icons.removeX}
+                                    heightAndWidth="16px"
+                                />
+                            </ButtonTooltip>
+                        ) : (
+                            <ButtonTooltip
+                                position={'bottom'}
+                                tooltipText={'Apply Filters'}
+                            >
+                                <Icon
+                                    path={icons.filterIcon}
+                                    heightAndWidth="20px"
+                                />
+                            </ButtonTooltip>
+                        )}
+                    </FilterButton>
+                    {CopyPasterButton}
+                    {ExpandButton}
+                </ActionButtons>
             </Margin>
         )
     }

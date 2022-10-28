@@ -12,7 +12,11 @@ import Margin from '../components/Margin'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import type { SidebarLockedState } from '../lists-sidebar/types'
 import type { HoverState } from '../types'
+import ExpandAllNotes from '../search-results/components/expand-all-notes'
 import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
+import SearchCopyPaster, {
+    Props as SearchCopyPasterProps,
+} from '../search-results/components/search-copy-paster'
 
 const Container = styled.div`
     height: ${sizeConstants.header.heightPx}px;
@@ -24,11 +28,9 @@ const Container = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) =>
-        props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.backgroundColor};
     z-index: 2147483646;
-    box-shadow: 0px 1px 0px ${(props) =>
-        props.theme.colors.lineGrey};
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
 `
 
 const SearchSection = styled(Margin)`
@@ -52,7 +54,7 @@ const SettingsSection = styled(Margin)`
 
     &:hover {
         background-color: ${(props) =>
-        props.theme.colors.backgroundColorDarker};
+            props.theme.colors.backgroundColorDarker};
     }
 `
 
@@ -83,7 +85,7 @@ const SyncStatusHeaderBox = styled.div`
 
     &:hover {
         background-color: ${(props) =>
-        props.theme.colors.backgroundColorDarker};
+            props.theme.colors.backgroundColorDarker};
     }
 
     @media screen and (max-width: 768px) {
@@ -109,6 +111,8 @@ const SyncStatusHeaderText = styled.span<{
     }
 `
 
+const ActionButtons = styled.div``
+
 // const PlaceholderContainer = styled.div`
 //     left: 150px;
 // `
@@ -123,7 +127,13 @@ export interface HeaderProps {
     activityStatus?: boolean
 }
 
-export default class Header extends PureComponent<HeaderProps> {
+export type Props = HeaderProps & {
+    searchCopyPasterProps: SearchCopyPasterProps
+    areAllNotesShown: boolean
+    onShowAllNotesClick: React.MouseEventHandler
+}
+
+export default class Header extends PureComponent<Props> {
     static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
 
     render() {
@@ -131,13 +141,25 @@ export default class Header extends PureComponent<HeaderProps> {
             searchBarProps,
             syncStatusIconState,
             syncStatusMenuProps,
+            searchCopyPasterProps,
             selectedListName: selectedList,
         } = this.props
         return (
             <Container>
                 {/* <PlaceholderContainer /> */}
                 <SearchSection vertical="auto" left="24px">
-                    <SearchBar {...searchBarProps} />
+                    <SearchBar
+                        {...searchBarProps}
+                        CopyPasterButton={
+                            <SearchCopyPaster {...searchCopyPasterProps} />
+                        }
+                        ExpandButton={
+                            <ExpandAllNotes
+                                isEnabled={this.props.areAllNotesShown}
+                                onClick={this.props.onShowAllNotesClick}
+                            />
+                        }
+                    />
                 </SearchSection>
                 <RightHeader>
                     <SyncStatusHeaderBox
