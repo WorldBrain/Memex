@@ -1259,7 +1259,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 isPeeking,
                             })
                         }}
-                        onDragEnter={() => {
+                        onDragEnter={(isPeeking) => {
                             this.processEvent('setSidebarPeeking', {
                                 isPeeking,
                             })
@@ -1381,7 +1381,6 @@ const ListSidebarContent = styled(Rnd)<{
     z-index: 3000;
     z-index: 250000;
     left: 0px;
-    background: blue;
 
     ${(props) =>
         props.locked &&
@@ -1406,6 +1405,8 @@ const ListSidebarContent = styled(Rnd)<{
             height: 90vh;
             top: 20px;
             border-radius: 8px;
+            animation: slide-in ease-in-out;
+            animation-duration: 0.15s;
         `}
     ${(props) =>
         !props.peeking &&
@@ -1413,6 +1414,18 @@ const ListSidebarContent = styled(Rnd)<{
         css`
             display: none;
         `}
+
+
+        @keyframes slide-in {
+            0% { 
+                left: -200px;
+                opacity: 0%;
+            }
+            100% { 
+                left: 0px;
+                opacity: 100%;
+            }
+        }
 `
 
 // const ListSidebarContent = styled.div`
@@ -1424,11 +1437,15 @@ const MainContent = styled.div`
     align-items: center;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    height: 100%;
 `
 
 const MainFrame = styled.div`
     display: flex;
     flex-direction: row;
+    min-height: 100vh;
+    height: 100%;
 `
 
 const Container = styled.div`
@@ -1466,9 +1483,7 @@ const ActivityIndicator = styled.div<{ hasActivities }>`
     width: 10px;
     margin-left: -24px;
     border: ${(props) =>
-        props.hasActivities
-            ? '2px solid' + props.theme.colors.purple
-            : '1px solid' + props.theme.colors.lightgrey};
+        props.hasActivities && '2px solid' + props.theme.colors.purple};
     background: ${(props) => props.hasActivities && props.theme.colors.purple};
 `
 

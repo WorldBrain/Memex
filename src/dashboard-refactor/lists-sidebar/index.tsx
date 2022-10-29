@@ -33,6 +33,7 @@ const Sidebar = styled.div<{
     justify-content: start;
     z-index: 3000;
     width: 100%;
+    background: red;
 
     ${(props) =>
         props.locked &&
@@ -62,12 +63,25 @@ const Sidebar = styled.div<{
         css`
             display: none;
         `}
+
+        @keyframes slide-in {
+            0% { 
+                left: -200px;
+                opacity: 0%;
+            }
+            100% { 
+                left: 0px;
+                opacity: 100%;
+            }
+        }
 `
 
 const Container = styled.div`
     position: absolute;
     z-index: 2147483645;
     width: 100%;
+    display: flex;
+    justify-content: center;
 `
 
 const PeekTrigger = styled.div`
@@ -77,8 +91,16 @@ const PeekTrigger = styled.div`
     background: red;
 `
 
+const Separator = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+
+    &::last-child {
+        border-top: 'unset';
+    }
+`
+
 const TopGroup = styled.div`
-    border-top: 1px solid ${colors.lightGrey};
+    /* border-top: 1px solid ${(props) => props.theme.colors.lineGrey}; */
 `
 const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-y: scroll;
@@ -217,7 +239,7 @@ export default class ListsSidebar extends PureComponent<
             display: !isSidebarPeeking && !isSidebarLocked ? 'none' : 'flex',
             top: '20',
             height: isSidebarPeeking ? '90vh' : '100vh',
-            width: '98%',
+            width: '96%',
             background: 'transparent',
         }
 
@@ -276,6 +298,30 @@ export default class ListsSidebar extends PureComponent<
                                 {this.renderLists(
                                     [
                                         {
+                                            name: 'Activity Feed',
+                                            listId: SPECIAL_LIST_IDS.INBOX + 2,
+                                            hasActivity: this.props
+                                                .hasFeedActivity,
+                                            selectedState: {
+                                                isSelected: false,
+                                                onSelection: this.props
+                                                    .openFeedUrl,
+                                            },
+                                        },
+                                    ],
+                                    false,
+                                )}
+                            </ListsSidebarGroup>
+                        </Margin>
+                        <Separator />
+                        <Margin vertical="10px">
+                            <ListsSidebarGroup
+                                isExpanded
+                                loadingState="success"
+                            >
+                                {this.renderLists(
+                                    [
+                                        {
                                             name: 'All Saved',
                                             listId: -1,
                                             selectedState: {
@@ -300,7 +346,7 @@ export default class ListsSidebar extends PureComponent<
                                             },
                                         },
                                         {
-                                            name: 'Saved on Mobile',
+                                            name: 'From Mobile',
                                             listId: SPECIAL_LIST_IDS.MOBILE,
                                             selectedState: {
                                                 isSelected:
@@ -311,96 +357,46 @@ export default class ListsSidebar extends PureComponent<
                                                     .onListSelection,
                                             },
                                         },
-                                        {
-                                            name: 'Activity Feed',
-                                            listId: SPECIAL_LIST_IDS.INBOX + 2,
-                                            hasActivity: this.props
-                                                .hasFeedActivity,
-                                            selectedState: {
-                                                isSelected: false,
-                                                onSelection: this.props
-                                                    .openFeedUrl,
-                                            },
-                                        },
                                     ],
                                     false,
                                 )}
                             </ListsSidebarGroup>
                         </Margin>
-                        <TopGroup>
-                            <Margin top="5px">
-                                <ListsSidebarSearchBar {...searchBarProps} />
-                            </Margin>
-                        </TopGroup>
+                        <Separator />
+                        <Margin top="5px">
+                            <ListsSidebarSearchBar {...searchBarProps} />
+                        </Margin>
                         {listsGroups.map((group, i) => (
-                            <Margin key={i} vertical="10px">
-                                <ListsSidebarGroup {...group}>
-                                    {group.isAddInputShown && (
-                                        <ListsSidebarEditableItem
-                                            onConfirmClick={
-                                                group.confirmAddNewList
-                                            }
-                                            onCancelClick={
-                                                group.cancelAddNewList
-                                            }
-                                            errorMessage={addListErrorMessage}
-                                        />
-                                    )}
-                                    {group.title === 'My Spaces' &&
-                                    group.listsArray.length === 0 ? (
-                                        !group.isAddInputShown &&
-                                        (searchBarProps.searchQuery.length >
-                                        0 ? (
-                                            <NoCollectionsMessage
-                                                onClick={group.onAddBtnClick}
-                                            >
-                                                <SectionCircle>
-                                                    <Icon
-                                                        filePath={icons.plus}
-                                                        heightAndWidth="14px"
-                                                        color="purple"
-                                                        hoverOff
-                                                    />
-                                                </SectionCircle>
-                                                <InfoText>
-                                                    Create a
-                                                    <Link> new Space</Link>
-                                                </InfoText>
-                                            </NoCollectionsMessage>
-                                        ) : (
-                                            <NoCollectionsMessage
-                                                onClick={group.onAddBtnClick}
-                                            >
-                                                <SectionCircle>
-                                                    <Icon
-                                                        filePath={icons.plus}
-                                                        heightAndWidth="14px"
-                                                        color="purple"
-                                                        hoverOff
-                                                    />
-                                                </SectionCircle>
-                                                <InfoText>
-                                                    Create your
-                                                    <Link>first Space</Link>
-                                                </InfoText>
-                                            </NoCollectionsMessage>
-                                        ))
-                                    ) : (
-                                        <>
-                                            {group.title ===
-                                                'Followed Spaces' &&
-                                            group.listsArray.length === 0 ? (
+                            <>
+                                <Margin key={i} vertical="10px">
+                                    <ListsSidebarGroup {...group}>
+                                        {group.isAddInputShown && (
+                                            <ListsSidebarEditableItem
+                                                onConfirmClick={
+                                                    group.confirmAddNewList
+                                                }
+                                                onCancelClick={
+                                                    group.cancelAddNewList
+                                                }
+                                                errorMessage={
+                                                    addListErrorMessage
+                                                }
+                                            />
+                                        )}
+                                        {group.title === 'My Spaces' &&
+                                        group.listsArray.length === 0 ? (
+                                            !group.isAddInputShown &&
+                                            (searchBarProps.searchQuery.length >
+                                            0 ? (
                                                 <NoCollectionsMessage
-                                                    onClick={() =>
-                                                        window.open(
-                                                            'https://links.memex.garden/follow-first-space',
-                                                        )
+                                                    onClick={
+                                                        group.onAddBtnClick
                                                     }
                                                 >
                                                     <SectionCircle>
                                                         <Icon
                                                             filePath={
-                                                                icons.heartEmpty
+                                                                icons.plus
                                                             }
                                                             heightAndWidth="14px"
                                                             color="purple"
@@ -408,20 +404,74 @@ export default class ListsSidebar extends PureComponent<
                                                         />
                                                     </SectionCircle>
                                                     <InfoText>
-                                                        Follow your
-                                                        <Link>first Space</Link>
+                                                        Create a
+                                                        <Link> new Space</Link>
                                                     </InfoText>
                                                 </NoCollectionsMessage>
                                             ) : (
-                                                this.renderLists(
-                                                    group.listsArray,
-                                                    true,
-                                                )
-                                            )}
-                                        </>
-                                    )}
-                                </ListsSidebarGroup>
-                            </Margin>
+                                                <NoCollectionsMessage
+                                                    onClick={
+                                                        group.onAddBtnClick
+                                                    }
+                                                >
+                                                    <SectionCircle>
+                                                        <Icon
+                                                            filePath={
+                                                                icons.plus
+                                                            }
+                                                            heightAndWidth="14px"
+                                                            color="purple"
+                                                            hoverOff
+                                                        />
+                                                    </SectionCircle>
+                                                    <InfoText>
+                                                        Create your
+                                                        <Link>first Space</Link>
+                                                    </InfoText>
+                                                </NoCollectionsMessage>
+                                            ))
+                                        ) : (
+                                            <>
+                                                {group.title ===
+                                                    'Followed Spaces' &&
+                                                group.listsArray.length ===
+                                                    0 ? (
+                                                    <NoCollectionsMessage
+                                                        onClick={() =>
+                                                            window.open(
+                                                                'https://links.memex.garden/follow-first-space',
+                                                            )
+                                                        }
+                                                    >
+                                                        <SectionCircle>
+                                                            <Icon
+                                                                filePath={
+                                                                    icons.heartEmpty
+                                                                }
+                                                                heightAndWidth="14px"
+                                                                color="purple"
+                                                                hoverOff
+                                                            />
+                                                        </SectionCircle>
+                                                        <InfoText>
+                                                            Follow your
+                                                            <Link>
+                                                                first Space
+                                                            </Link>
+                                                        </InfoText>
+                                                    </NoCollectionsMessage>
+                                                ) : (
+                                                    this.renderLists(
+                                                        group.listsArray,
+                                                        true,
+                                                    )
+                                                )}
+                                            </>
+                                        )}
+                                    </ListsSidebarGroup>
+                                </Margin>
+                                <Separator />
+                            </>
                         ))}
                     </BottomGroup>
                 </Sidebar>

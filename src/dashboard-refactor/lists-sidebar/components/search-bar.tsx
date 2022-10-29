@@ -22,8 +22,8 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
     padding-left: 15px;
     padding-right: 15px;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-    border-radius: 3px;
+    background-color: ${(props) => props.theme.colors.darkhover};
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -33,7 +33,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
 `
 
 const InnerContainer = styled.div<{ displayTopBorder?: boolean }>`
-    height: 30px;
+    height: 34px;
     width: 100%;
     background-color: transparent;
     display: flex;

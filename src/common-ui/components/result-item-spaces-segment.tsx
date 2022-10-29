@@ -41,17 +41,7 @@ export class AddSpacesButton extends React.Component<
                         this.props.onEditBtnClick?.(e)
                     }}
                 >
-                    {this.props.hasNoLists ? (
-                        <EditIconContainerWithText>
-                            <Icon
-                                filePath={icons.plus}
-                                height={'10px'}
-                                color={'purple'}
-                                hoverOff
-                            />
-                            Add to Spaces
-                        </EditIconContainerWithText>
-                    ) : (
+                    {!this.props.hasNoLists && (
                         <EditIconContainer>
                             <Icon
                                 filePath={icons.plus}
@@ -126,10 +116,10 @@ export default function ListsSegment({
                                 {' '}
                                 {space.isShared && (
                                     <Icon
-                                        heightAndWidth="12px"
+                                        heightAndWidth="16px"
                                         hoverOff
-                                        icon="people"
-                                        color="white"
+                                        icon="peopleFine"
+                                        color="black"
                                     />
                                 )}
                                 {space.name}
@@ -156,11 +146,12 @@ const Container = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 15px;
+    padding: 0px 20px 10px 20px;
+    margin-top: -5px;
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     pointer-events: auto;
     z-index: 1000;
 `
@@ -175,10 +166,10 @@ const ButtonBox = styled.div`
 `
 
 const EditIconContainer = styled.div`
-    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
     height: 20px;
     width: 20px;
-    border-radius: 50px;
+    border-radius: 3px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -210,7 +201,6 @@ const EditIconContainerWithText = styled.div`
 `
 
 const AddSpacesButtonContainer = styled.div`
-    background-color: white;
     font-size: 12px;
     font-weight: 400;
     justify-content: center;
@@ -228,8 +218,8 @@ const ListsContainer = styled.div`
 `
 
 const ListSpaceContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.purple};
-    color: #fff;
+    background-color: ${(props) => props.theme.colors.signalSoft};
+    color: ${(props) => props.theme.colors.black};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;

@@ -200,6 +200,12 @@ export default class PageResultView extends PureComponent<Props> {
                     image: this.hasNotes
                         ? icons.commentFull
                         : icons.commentEmpty,
+                    ButtonText:
+                        this.props.noteIds[this.props.notesType].length > 0 &&
+                        this.props.noteIds[
+                            this.props.notesType
+                        ].length.toString(),
+                    imageColor: 'purple',
                 },
             ]
         }
@@ -232,11 +238,25 @@ export default class PageResultView extends PureComponent<Props> {
                 //     onClick: this.props.onListPickerBtnClick,
                 //     tooltipText: 'Edit Spaces',
                 // },
+
+                {
+                    key: 'add-spaces-btn',
+                    image: icons.plus,
+                    imageColor: 'purple',
+                    ButtonText: 'Spaces',
+                    iconSize: '14px',
+                },
                 {
                     key: 'expand-notes-btn',
                     image: this.hasNotes
                         ? icons.commentFull
                         : icons.commentEmpty,
+                    ButtonText:
+                        this.props.noteIds[this.props.notesType].length > 0 &&
+                        this.props.noteIds[
+                            this.props.notesType
+                        ].length.toString(),
+                    imageColor: 'purple',
                     onClick: this.props.onNotesBtnClick,
                     tooltipText: (
                         <span>
@@ -260,6 +280,13 @@ export default class PageResultView extends PureComponent<Props> {
                 isDisabled: true,
                 image: icons.copy,
             },
+            {
+                key: 'add-spaces-btn',
+                image: icons.plus,
+                imageColor: 'purple',
+                iconSize: '14px',
+                ButtonText: 'Spaces',
+            },
             // {
             //     key: 'share-page-btn',
             //     isDisabled: true,
@@ -275,6 +302,10 @@ export default class PageResultView extends PureComponent<Props> {
             {
                 key: 'expand-notes-btn',
                 image: this.hasNotes ? icons.commentFull : icons.commentEmpty,
+                ButtonText:
+                    this.props.noteIds[this.props.notesType].length > 0 &&
+                    this.props.noteIds[this.props.notesType].length.toString(),
+                imageColor: 'purple',
             },
         ]
     }
@@ -302,15 +333,6 @@ export default class PageResultView extends PureComponent<Props> {
                         href={this.fullUrl}
                         target="_blank"
                     >
-                        <PageTitle isUrl={!hasTitle}>
-                            {hasTitle
-                                ? this.props.fullTitle === this.props.fullUrl
-                                    ? this.props.fullTitle
-                                          .split('://')
-                                          .slice(-1)
-                                    : this.props.fullTitle
-                                : this.props.fullUrl}
-                        </PageTitle>
                         <ResultContent>
                             <DomainContainer>
                                 {this.props.favIconURI && (
@@ -344,6 +366,15 @@ export default class PageResultView extends PureComponent<Props> {
                                     )}
                             </DomainContainer>
                         </ResultContent>
+                        <PageTitle isUrl={!hasTitle}>
+                            {hasTitle
+                                ? this.props.fullTitle === this.props.fullUrl
+                                    ? this.props.fullTitle
+                                          .split('://')
+                                          .slice(-1)
+                                    : this.props.fullTitle
+                                : this.props.fullUrl}
+                        </PageTitle>
                     </PageContentBox>
                     {this.hasLists && (
                         <ListsSegment
@@ -403,7 +434,7 @@ const StyledPageResult = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    border-radius: 8px;
+    border-radius: 12px;
 
     &:hover {
         outline: 2px solid ${(props) => props.theme.colors.lineGrey};
@@ -428,32 +459,28 @@ const RemoveFromListBtn = styled.div`
 const FavIconBox = styled.div`
     width: 18px;
     height: 18px;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    border-radius: 30px;
+    border: 1px solid ${(props) => props.theme.colors.lineLightGrey}30;
+    border-radius: 3px;
     margin-right: 5px;
 `
 
 const FavIconPlaceholder = styled.div`
-    border-radius: 30px;
+    border-radius: 2px;
 `
 
 const FavIconImg = styled.img`
     width: 100%;
     height: 100%;
-    border-radius: 30px;
+    border-radius: 2px;
 `
 
 const PageContentBox = styled.a`
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    padding: 15px 20px 5px 20px;
+    padding: 15px 20px 15px 20px;
     text-decoration: none;
-    border-radius: 5px;
-
-    &:hover {
-        background-color: #fafafa;
-    }
+    border-radius: 10px;
 `
 
 const AddSpaceButtonContainer = styled.div`
@@ -473,16 +500,35 @@ const ResultContent = styled(Margin)`
 
 const PageTitle = styled(Margin)`
     font-size: 16px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.lightblack};
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
     justify-content: flex-start;
     line-break: ${(props) => (props.isUrl ? 'anywhere' : 'unset')};
 `
 const PageUrl = styled.span`
     font-size: 14px;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.darkerText};
     display: flex;
     height: 20px;
     align-items: center;
+`
+
+const EditIconContainerWithText = styled.div`
+    height: 20px;
+    width: fit-content;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 3px 0 1px;
+    grid-gap: 3px;
+    font-size: 12px;
+    opacity: 0.8;
+    color: ${(props) => props.theme.colors.normalText};
+
+    & * {
+        cursor: pointer;
+    }
 `

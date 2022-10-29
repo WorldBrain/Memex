@@ -65,6 +65,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             newItemsCount,
             onSpaceShare,
             listData,
+            listId,
         } = this.props
 
         if (newItemsCount) {
@@ -75,6 +76,16 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     </NewItemsCountInnerDiv>
                 </NewItemsCount>
             )
+        }
+
+        if (listId === 20201016) {
+            if (this.props.hasActivity) {
+                return (
+                    <IconContainer>
+                        <ActivityBeacon />
+                    </IconContainer>
+                )
+            }
         }
 
         if (dropReceivingState?.wasPageDropped) {
@@ -158,23 +169,15 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         }
 
         if (listId === 20201016) {
-            if (this.props.hasActivity) {
-                return (
-                    <IconContainer>
-                        <ActivityBeacon />
-                    </IconContainer>
-                )
-            } else {
-                return (
-                    <IconContainer>
-                        <Icon
-                            filePath={icons.emptyCircle}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                    </IconContainer>
-                )
-            }
+            return (
+                <IconContainer>
+                    <Icon
+                        filePath={icons.feed}
+                        heightAndWidth="20px"
+                        hoverOff
+                    />
+                </IconContainer>
+            )
         }
     }
 
@@ -234,6 +237,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             selectedState,
             newItemsCount,
             hasActivity,
+            listId,
         } = this.props
 
         return (
@@ -257,6 +261,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     <IconBox
                         dropReceivingState={dropReceivingState}
                         newItemsCount={newItemsCount}
+                        isActivityFeed={listId === 20201016}
                         hasActivity={hasActivity}
                         // onClick={this.handleMoreActionClick}
                         right="10px"
@@ -297,7 +302,8 @@ const IconBox = styled.div<Props>`
     display: ${(props) =>
         props.newItemsCount ||
         props.dropReceivingState?.isDraggedOver ||
-        props.dropReceivingState?.wasPageDropped
+        props.dropReceivingState?.wasPageDropped ||
+        props.isActivityFeed
             ? 'flex'
             : 'None'};
     height: 100%;
@@ -329,7 +335,7 @@ const TitleBox = styled.div<Props>`
 
 const SidebarItem = styled.div<Props>`
  height: 40px;
-margin: 0 10px;
+margin: 5px 10px;
 border-radius: 5px;
  display: flex;
  flex-direction: row;
@@ -342,6 +348,12 @@ border-radius: 5px;
 
  &:hover {
     background-color: ${(props) => props.theme.colors.lightHover};
+
+    ${({ selectedState }: Props) =>
+        selectedState?.isSelected &&
+        css`
+            background: ${(props) => props.theme.colors.activeBackground};
+        `}
  }
 
 
@@ -381,6 +393,7 @@ border-radius: 5px;
      selectedState?.isSelected &&
      css`
          color: ${(props) => props.theme.colors.darkText};
+         background: ${(props) => props.theme.colors.activeBackground};
      `}
 
 
@@ -425,9 +438,7 @@ const ListTitle = styled.span<Props>`
     font-family: ${fonts.primary.name};
     font-weight: 400;
     font-style: normal;
-    ${({ selectedState }: Props) =>
-        selectedState.isSelected && `font-weight: 600;`}
-    font-size:  14px;
+    font-size: 14px;
     line-height: 22px;
     height: 22px;
     white-space: nowrap;

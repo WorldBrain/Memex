@@ -15,6 +15,7 @@ const { fonts } = styles
 const Container = styled.div`
     width: 100%;
     position: relative;
+    padding: 10px 0px;
 `
 
 const LoadingContainer = styled.div`
@@ -38,11 +39,11 @@ const GroupHeaderInnerDiv = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-right: 5px;
+    padding: 0 5px 0 18px;
 `
 
 const GroupTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerBlue};
+    color: ${(props) => props.theme.colors.darkText};
     font-family: ${fonts.primary.name};
     line-height: 18px;
     cursor: pointer;
@@ -52,8 +53,8 @@ const GroupTitle = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 14px;
-    font-weight: 600;
-    padding: 5px 0px 5px 20px;
+    font-weight: 400;
+    padding: 5px 5px 5px 5px;
 `
 
 const IconContainer = styled.div`
@@ -131,6 +132,16 @@ export default class ListsSidebarGroup extends PureComponent<
                 {this.props.title && (
                     <GroupHeaderContainer>
                         <GroupHeaderInnerDiv className="inner">
+                            {this.props.onExpandBtnClick && (
+                                <Icon
+                                    rotation={this.props.isExpanded ? 0 : -90}
+                                    heightAndWidth="16px"
+                                    filePath={icons.triangle}
+                                    color={'iconColor'}
+                                    onClick={this.props.onExpandBtnClick}
+                                    hoverOff
+                                />
+                            )}
                             <GroupTitle onClick={this.props.onExpandBtnClick}>
                                 {this.props.title}
                             </GroupTitle>
@@ -141,17 +152,6 @@ export default class ListsSidebarGroup extends PureComponent<
                                         filePath={icons.plus}
                                         color={'purple'}
                                         onClick={this.props.onAddBtnClick}
-                                    />
-                                )}
-                                {this.props.onExpandBtnClick && (
-                                    <Icon
-                                        rotation={
-                                            this.props.isExpanded ? 0 : -90
-                                        }
-                                        heightAndWidth="16px"
-                                        filePath={icons.triangle}
-                                        color={'iconColor'}
-                                        onClick={this.props.onExpandBtnClick}
                                     />
                                 )}
                             </IconGroup>
