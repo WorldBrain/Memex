@@ -389,6 +389,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 this,
                             )}
                             filteredbyListID={this.props.filteredbyListID}
+                            padding={'0px 20px 10px 20px'}
                         />
                     )}
                     {this.props.onTagPickerBtnClick && (

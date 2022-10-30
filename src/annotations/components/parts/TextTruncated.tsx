@@ -69,7 +69,7 @@ class TextTruncated extends React.Component<Props, State> {
                                         ? icons.expand
                                         : icons.compress
                                 }
-                                heightAndWidth={'10px'}
+                                heightAndWidth={'14px'}
                                 hoverOff
                             />
                             {this.state.isTruncated ? 'Show More' : 'Show Less'}

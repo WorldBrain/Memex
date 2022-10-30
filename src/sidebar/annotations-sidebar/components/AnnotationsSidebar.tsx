@@ -46,6 +46,7 @@ const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
+    sidebarActions: () => void
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
@@ -974,7 +975,9 @@ export class AnnotationsSidebar extends React.Component<
                 {this.props.isExpanded && (
                     <>
                         {this.renderNewAnnotation()}
-
+                        <AnnotationActions>
+                            {this.renderTopBarActionButtons()}
+                        </AnnotationActions>
                         {this.props.noteCreateState === 'running' ||
                         this.props.annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
@@ -1019,12 +1022,6 @@ export class AnnotationsSidebar extends React.Component<
                         <FollowedListSectionTitle
                             active={this.props.isExpanded}
                         >
-                            <Icon
-                                filePath={icons.personFine}
-                                heightAndWidth="18px"
-                                hoverOff
-                                color={this.props.isExpanded ? 'purple' : null}
-                            />
                             My Annotations
                         </FollowedListSectionTitle>
                     </MyNotesClickableArea>
@@ -1045,36 +1042,19 @@ export class AnnotationsSidebar extends React.Component<
                     <FollowedListSectionTitle
                         active={this.props.isExpandedSharedSpaces}
                     >
-                        <Icon
-                            filePath={icons.peopleFine}
-                            heightAndWidth="18px"
-                            hoverOff
-                            color={
-                                this.props.isExpandedSharedSpaces
-                                    ? 'purple'
-                                    : null
-                            }
-                        />
-                        Shared Spaces
+                        Spaces
+                        {this.props.followedListLoadState === 'running' ? (
+                            <LoadingBox>
+                                <LoadingIndicator size={12} />{' '}
+                            </LoadingBox>
+                        ) : followedLists.allIds.length ? (
+                            <LoadingBox>
+                                <FollowedListNoteCount active={true} left="5px">
+                                    {/* {followedLists.allIds.length} */}
+                                </FollowedListNoteCount>
+                            </LoadingBox>
+                        ) : null}
                     </FollowedListSectionTitle>
-
-                    {this.props.followedListLoadState === 'running' ? (
-                        <LoadingBox>
-                            <LoadingIndicator size={16} />{' '}
-                        </LoadingBox>
-                    ) : followedLists.allIds.length ? (
-                        <LoadingBox>
-                            <FollowedListNoteCount active={true} left="5px">
-                                {followedLists.allIds.length}
-                            </FollowedListNoteCount>
-                        </LoadingBox>
-                    ) : (
-                        <LoadingBox>
-                            <FollowedListNoteCount active={false} left="5px">
-                                0
-                            </FollowedListNoteCount>
-                        </LoadingBox>
-                    )}
                 </FollowedListTitleContainer>
             </TopBarContainer>
         )
@@ -1153,8 +1133,10 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
-                    {this.renderTopBarSwitcher()}
-                    {this.props.isExpanded && this.renderTopBarActionButtons()}
+                    <>
+                        {this.renderTopBarSwitcher()}{' '}
+                        {this.props.sidebarActions()}
+                    </>
                 </TopBar>
                 {this.renderResultsBody()}
             </ResultBodyContainer>
@@ -1166,6 +1148,15 @@ export default onClickOutside(AnnotationsSidebar)
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
+
+const AnnotationActions = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 97%;
+    height: 20px;
+    margin-top: -5px;
+`
 
 const SpacerBottom = styled.div`
     height: 1200px;
@@ -1201,14 +1192,13 @@ const TopBar = styled.div`
     background: ${(props) => props.theme.colors.backgroundColor};
     top: 0px;
     width: 93%;
-    z-index: 1300;
-    padding: 5px 15px 5px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    z-index: 11300;
+    padding: 15px 15px 10px 10px;
 `
 
 const TopBarContainer = styled.div`
     display: flex;
-    grid-gap: 10px;
+    grid-gap: 2px;
     align-items: center;
 `
 const EmptyMessageContainer = styled.div`
@@ -1459,17 +1449,28 @@ const ButtonContainer = styled.div`
 `
 
 const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
-    font-size: 13px;
-    color: ${(props) =>
-        props.active
-            ? props.theme.colors.darkerText
-            : props.theme.colors.normalText};
-    justify-content: flex-start;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
+    justify-content: center;
     width: max-content;
     font-weight: 400;
     flex-direction: row;
     grid-gap: 2px;
     align-items: center;
+    height: 40px;
+    padding: 0 10px;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.active &&
+        css`
+            background: ${(props) => props.theme.colors.lightHover};
+            cursor: default;
+        `}
+
+    &:hover {
+        background: ${(props) => props.theme.colors.darkhover};
+    }
 
     & * {
         cursor: pointer;
@@ -1511,13 +1512,10 @@ const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     border-radius: 30px;
     background-color: ${(props) => props.theme.colors.purple};
-    background-color: ${(props) =>
-        props.active
-            ? props.theme.colors.purple
-            : props.theme.colors.lightgrey};
-    color: ${(props) =>
-        props.active ? 'white' : props.theme.colors.normalText};
-    width: 30px;
+    background-color: ${(props) => props.active && props.theme.colors.purple};
+    /* color: ${(props) =>
+        props.active ? 'white' : props.theme.colors.normalText}; */
+    width: 20px;
     font-size: 12px;
 `
 
@@ -1620,7 +1618,6 @@ const NewAnnotationSection = styled.section`
     align-items: flex-start;
     width: fill-available;
     padding-bottom: 8px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
     z-index: 1120;
 `
 
@@ -1628,7 +1625,6 @@ const NewAnnotationSeparator = styled.div`
     align-self: center;
     width: 60%;
     margin-top: 20px;
-    border-bottom: 1px solid #e0e0e0;
 `
 
 const AnnotationsSectionStyled = styled.section`
@@ -1774,4 +1770,5 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         props.sidebarContext === 'dashboard' ? '100%' : '100%'};
 
     scrollbar-width: none;
+    padding-left: 4px;
 `

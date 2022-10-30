@@ -588,6 +588,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                                 this.props.url,
                                             )
                                         }
+                                        padding={'0px 20px 10px 20px'}
                                     />
                                 )}
 
@@ -950,7 +951,7 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     ${(props) =>
         props.isEditMode &&
         css`
-            margin-bottom: 10px;
+            /* margin-bottom: 10px; */
         `}
 `
 

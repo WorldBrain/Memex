@@ -5,6 +5,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { padding } from 'polished'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     showEditBtn: boolean
@@ -14,6 +15,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
     tabIndex?: number
+    padding?: string
 }
 
 interface ButtonProps {
@@ -52,7 +54,7 @@ export class AddSpacesButton extends React.Component<
                             hoverOff
                         />
                     </EditIconContainer>
-                    {this.props.hasNoLists && 'Spaces'}
+                    {this.props.hasNoLists && <>Spaces</>}
                 </AddSpacesButtonContainer>
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
@@ -73,6 +75,7 @@ const SpacePickerButtonWrapper = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
+    grid-gap: 5px;
 `
 
 const SpacePickerWrapper = styled.div`
@@ -92,7 +95,7 @@ export default function ListsSegment({
     ...props
 }: Props) {
     return (
-        <Container onClick={onEditBtnClick} {...props}>
+        <Container padding={padding} onClick={onEditBtnClick} {...props}>
             <ListsContainer>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
@@ -145,12 +148,13 @@ export default function ListsSegment({
     )
 }
 
-const Container = styled.div`
+const Container = styled.div<{ padding: string }>`
     display: grid;
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    padding: 0px 20px 10px 20px;
+    padding: ${(props) =>
+        props.padding ? props.padding : '5px 10px 5px 10px'};
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
@@ -214,6 +218,7 @@ const AddSpacesButtonContainer = styled.div`
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
     color: ${(props) => props.theme.colors.normalText};
+    grid-gap: 5px;
 `
 const ListsContainer = styled.div`
     display: flex;

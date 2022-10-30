@@ -635,36 +635,25 @@ export class AnnotationsSidebarContainer<
                     width={this.state.sidebarWidth}
                     sidebarContext={this.props.sidebarContext}
                 >
-                    <ButtonTooltip
-                        tooltipText="Close (ESC)"
-                        position="rightCentered"
-                    >
-                        <Icon
-                            filePath={icons.close}
-                            heightAndWidth="16px"
-                            onClick={() => this.hideSidebar()}
-                        />
-                    </ButtonTooltip>
                     {this.state.isLocked ? (
                         <ButtonTooltip
                             tooltipText="Unlock sidebar"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
-                                filePath={icons.doubleArrow}
-                                heightAndWidth="16px"
-                                rotation={180}
+                                filePath={icons.arrowRight}
+                                heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>
                     ) : (
                         <ButtonTooltip
                             tooltipText="Lock sidebar open"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
-                                filePath={icons.doubleArrow}
-                                heightAndWidth="16px"
+                                filePath={icons.arrowLeft}
+                                heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>
@@ -672,26 +661,33 @@ export class AnnotationsSidebarContainer<
                     {!this.state.isWidthLocked ? (
                         <ButtonTooltip
                             tooltipText="Adjusted Page Width"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
                                 filePath={icons.compress}
-                                heightAndWidth="16px"
+                                heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
                         </ButtonTooltip>
                     ) : (
                         <ButtonTooltip
                             tooltipText="Full page width"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
                                 filePath={icons.expand}
-                                heightAndWidth="16px"
+                                heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
                         </ButtonTooltip>
                     )}
+                    <ButtonTooltip tooltipText="Close (ESC)" position="bottom">
+                        <Icon
+                            filePath={icons.removeX}
+                            heightAndWidth="26px"
+                            onClick={() => this.hideSidebar()}
+                        />
+                    </ButtonTooltip>
                 </TopBarActionBtns>
             </>
         )
@@ -746,187 +742,166 @@ export class AnnotationsSidebarContainer<
                             )
                         }}
                     >
-                        <SidebarContainerWithTopBar>
-                            {this.renderTopBar()}
-                            <AnnotationsSidebar
-                                {...this.state}
-                                getListDetailsById={this.getListDetailsById}
-                                sidebarContext={this.props.sidebarContext}
-                                ref={this.sidebarRef as any}
-                                openCollectionPage={(remoteListId) =>
-                                    window.open(
-                                        getListShareUrl({ remoteListId }),
-                                        '_blank',
-                                    )
-                                }
-                                onMenuItemClick={({ sortingFn }) =>
-                                    this.processEvent('sortAnnotations', {
-                                        sortingFn,
-                                    })
-                                }
-                                annotationUrls={() =>
-                                    this.state.annotations.map((a) => a.url)
-                                }
-                                normalizedPageUrls={[
-                                    normalizeUrl(this.state.pageUrl),
-                                ]}
-                                normalizedPageUrl={normalizeUrl(
-                                    this.state.pageUrl,
-                                )}
-                                onClickOutsideCopyPaster={() =>
-                                    this.processEvent(
-                                        'resetCopyPasterAnnotationId',
-                                        null,
-                                    )
-                                }
-                                copyPaster={this.props.copyPaster}
-                                contentSharing={this.props.contentSharing}
-                                annotationsShareAll={this.props.annotations}
-                                copyPageLink={(link) => {
-                                    this.processEvent('copyNoteLink', { link })
-                                }}
-                                postBulkShareHook={(shareInfo) =>
-                                    this.processEvent(
-                                        'updateAllAnnotationsShareInfo',
-                                        shareInfo,
-                                    )
-                                }
-                                onCopyBtnClick={() =>
-                                    this.handleCopyAllNotesClick
-                                }
-                                onShareAllNotesClick={() =>
-                                    this.handleCopyAllNotesClick
-                                }
-                                sharingAccess={
-                                    this.state.annotationSharingAccess
-                                }
-                                needsWaypoint={!this.state.noResults}
-                                appendLoader={
-                                    this.state.secondarySearchState ===
-                                    'running'
-                                }
-                                annotationModes={
-                                    this.state.annotationModes.pageAnnotations
-                                }
-                                setActiveAnnotationUrl={(annotationUrl) => () =>
-                                    this.processEvent(
-                                        'setActiveAnnotationUrl',
-                                        {
-                                            annotationUrl,
-                                        },
-                                    )}
-                                isAnnotationCreateShown={
-                                    this.state.showCommentBox
-                                }
-                                annotationCreateProps={this.getCreateProps()}
-                                bindAnnotationFooterEventProps={(
+                        <AnnotationsSidebar
+                            {...this.state}
+                            sidebarActions={() => this.renderTopBar()}
+                            getListDetailsById={this.getListDetailsById}
+                            sidebarContext={this.props.sidebarContext}
+                            ref={this.sidebarRef as any}
+                            openCollectionPage={(remoteListId) =>
+                                window.open(
+                                    getListShareUrl({ remoteListId }),
+                                    '_blank',
+                                )
+                            }
+                            onMenuItemClick={({ sortingFn }) =>
+                                this.processEvent('sortAnnotations', {
+                                    sortingFn,
+                                })
+                            }
+                            annotationUrls={() =>
+                                this.state.annotations.map((a) => a.url)
+                            }
+                            normalizedPageUrls={[
+                                normalizeUrl(this.state.pageUrl),
+                            ]}
+                            normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                            onClickOutsideCopyPaster={() =>
+                                this.processEvent(
+                                    'resetCopyPasterAnnotationId',
+                                    null,
+                                )
+                            }
+                            copyPaster={this.props.copyPaster}
+                            contentSharing={this.props.contentSharing}
+                            annotationsShareAll={this.props.annotations}
+                            copyPageLink={(link) => {
+                                this.processEvent('copyNoteLink', { link })
+                            }}
+                            postBulkShareHook={(shareInfo) =>
+                                this.processEvent(
+                                    'updateAllAnnotationsShareInfo',
+                                    shareInfo,
+                                )
+                            }
+                            onCopyBtnClick={() => this.handleCopyAllNotesClick}
+                            onShareAllNotesClick={() =>
+                                this.handleCopyAllNotesClick
+                            }
+                            sharingAccess={this.state.annotationSharingAccess}
+                            needsWaypoint={!this.state.noResults}
+                            appendLoader={
+                                this.state.secondarySearchState === 'running'
+                            }
+                            annotationModes={
+                                this.state.annotationModes.pageAnnotations
+                            }
+                            setActiveAnnotationUrl={(annotationUrl) => () =>
+                                this.processEvent('setActiveAnnotationUrl', {
+                                    annotationUrl,
+                                })}
+                            isAnnotationCreateShown={this.state.showCommentBox}
+                            annotationCreateProps={this.getCreateProps()}
+                            bindAnnotationFooterEventProps={(
+                                annotation,
+                                followedlistId,
+                            ) =>
+                                this.bindAnnotationFooterEventProps(
                                     annotation,
                                     followedlistId,
-                                ) =>
-                                    this.bindAnnotationFooterEventProps(
-                                        annotation,
-                                        followedlistId,
-                                    )
-                                }
-                                bindAnnotationEditProps={
-                                    this.bindAnnotationEditProps
-                                }
-                                handleScrollPagination={() =>
-                                    this.processEvent('paginateSearch', null)
-                                }
-                                isSearchLoading={
-                                    this.state.annotationsLoadState ===
-                                        'running' ||
-                                    this.state.loadState === 'running'
-                                }
-                                onClickOutside={this.handleClickOutside}
-                                theme={this.props.theme}
-                                renderCopyPasterForAnnotation={
-                                    this.renderCopyPasterManagerForAnnotation
-                                }
-                                renderShareMenuForAnnotation={
-                                    this.renderShareMenuForAnnotation
-                                }
-                                renderTagsPickerForAnnotation={
-                                    this.state.shouldShowTagsUIs
-                                        ? this.renderTagsPickerForAnnotation
-                                        : undefined
-                                }
-                                renderListsPickerForAnnotation={
-                                    this.renderListPickerForAnnotation
-                                }
-                                expandMyNotes={() =>
-                                    this.processEvent('expandMyNotes', null)
-                                }
-                                expandSharedSpaces={(listIds) =>
-                                    this.processEvent('expandSharedSpaces', {
-                                        listIds,
-                                    })
-                                }
-                                expandFollowedListNotes={(listId) =>
+                                )
+                            }
+                            bindAnnotationEditProps={
+                                this.bindAnnotationEditProps
+                            }
+                            handleScrollPagination={() =>
+                                this.processEvent('paginateSearch', null)
+                            }
+                            isSearchLoading={
+                                this.state.annotationsLoadState === 'running' ||
+                                this.state.loadState === 'running'
+                            }
+                            onClickOutside={this.handleClickOutside}
+                            theme={this.props.theme}
+                            renderCopyPasterForAnnotation={
+                                this.renderCopyPasterManagerForAnnotation
+                            }
+                            renderShareMenuForAnnotation={
+                                this.renderShareMenuForAnnotation
+                            }
+                            renderTagsPickerForAnnotation={
+                                this.state.shouldShowTagsUIs
+                                    ? this.renderTagsPickerForAnnotation
+                                    : undefined
+                            }
+                            renderListsPickerForAnnotation={
+                                this.renderListPickerForAnnotation
+                            }
+                            expandMyNotes={() =>
+                                this.processEvent('expandMyNotes', null)
+                            }
+                            expandSharedSpaces={(listIds) =>
+                                this.processEvent('expandSharedSpaces', {
+                                    listIds,
+                                })
+                            }
+                            expandFollowedListNotes={(listId) =>
+                                this.processEvent('expandFollowedListNotes', {
+                                    listId,
+                                })
+                            }
+                            toggleIsolatedListView={(listId) =>
+                                this.processEvent('toggleIsolatedListView', {
+                                    listId,
+                                })
+                            }
+                            bindSharedAnnotationEventHandlers={(
+                                annotationReference,
+                                sharedListReference,
+                            ) => ({
+                                onReplyBtnClick: () =>
                                     this.processEvent(
-                                        'expandFollowedListNotes',
+                                        'toggleAnnotationReplies',
                                         {
-                                            listId,
+                                            annotationReference,
+                                            sharedListReference,
                                         },
-                                    )
-                                }
-                                toggleIsolatedListView={(listId) =>
+                                    ),
+                                onNewReplyInitiate: () =>
                                     this.processEvent(
-                                        'toggleIsolatedListView',
+                                        'initiateNewReplyToAnnotation',
                                         {
-                                            listId,
+                                            annotationReference,
+                                            sharedListReference,
                                         },
-                                    )
-                                }
-                                bindSharedAnnotationEventHandlers={(
-                                    annotationReference,
-                                    sharedListReference,
-                                ) => ({
-                                    onReplyBtnClick: () =>
-                                        this.processEvent(
-                                            'toggleAnnotationReplies',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyInitiate: () =>
-                                        this.processEvent(
-                                            'initiateNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyCancel: () =>
-                                        this.processEvent(
-                                            'cancelNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyConfirm: () =>
-                                        this.processEvent(
-                                            'confirmNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyEdit: ({ content }) =>
-                                        this.processEvent(
-                                            'editNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                                content,
-                                            },
-                                        ),
-                                })}
-                            />
-                        </SidebarContainerWithTopBar>
+                                    ),
+                                onNewReplyCancel: () =>
+                                    this.processEvent(
+                                        'cancelNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyConfirm: () =>
+                                    this.processEvent(
+                                        'confirmNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyEdit: ({ content }) =>
+                                    this.processEvent(
+                                        'editNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                            content,
+                                        },
+                                    ),
+                            })}
+                        />
                     </Rnd>
                 </ContainerStyled>
                 {this.renderModals()}
@@ -960,7 +935,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top: 66px;
+    top: 0px;
 
         &:hover {
         background: #5671cf30;
@@ -1025,7 +1000,7 @@ const ContainerStyled = styled.div`
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-    top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
+    top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px + 1px);
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: 2147483646; /* This is to combat pages setting high values on certain elements under the sidebar */
@@ -1058,19 +1033,10 @@ const TopBarContainerStyled = styled.div`
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
-    display: grid;
-    justify-content: flex-start;
-    margin-left: -25px;
+    display: flex;
+    grid-gap: 5px;
     align-items: center;
     gap: 8px;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    border-radius: 0 0 0 5px;
-    padding: 5px 1px 5px 3px;
-    z-index: 10000;
-    right: 4px;
-    position: relative;
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const CloseBtn = styled.button`

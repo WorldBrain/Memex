@@ -22,6 +22,7 @@ import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from '../types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 interface State {
     isTagPickerShown: boolean
@@ -272,9 +273,15 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private renderActionButtons() {
+        // const shareIconData = getShareButtonData(
+        //     isShared,
+        //     isBulkShareProtected,
+        //     this.hasSharedLists,
+        // )
+
         return (
-            <FooterStyled>
-                <Flex>
+            <DefaultFooterStyled>
+                {/* <Flex>
                     <SaveBtn
                         onSave={this.handleSave}
                         hasSharedLists={this.hasSharedLists}
@@ -287,8 +294,46 @@ export class AnnotationCreate extends React.Component<Props, State>
                             Cancel
                         </CancelBtnStyled>
                     </ButtonTooltip>
-                </Flex>
-            </FooterStyled>
+                </Flex> */}
+                <ShareBtn tabIndex={0}>
+                    {' '}
+                    {/* onClick={footerDeps.onShareClick} */}
+                    {/* <Icon
+                            icon={shareIconData.icon}
+                            hoverOff
+                            color={'iconColor'}
+                            heightAndWidth="18px"
+                        />
+                        {shareIconData.label} */}
+                </ShareBtn>
+                <DeletionBox>
+                    <SaveActionBar>
+                        <BtnContainerStyled>
+                            <ButtonTooltip tooltipText="esc" position="bottom">
+                                <Icon
+                                    onClick={this.handleCancel}
+                                    icon={icons.removeX}
+                                    color={'normalText'}
+                                    heightAndWidth="18px"
+                                />
+                            </ButtonTooltip>
+                            <ButtonTooltip
+                                tooltipText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                                position="bottom"
+                            >
+                                <SaveBtn
+                                    onSave={this.handleSave}
+                                    hasSharedLists={this.hasSharedLists}
+                                    renderCollectionsPicker={
+                                        this.renderSharedCollectionsPicker
+                                    }
+                                />
+                            </ButtonTooltip>
+                        </BtnContainerStyled>
+                        {/* {this.renderMarkdownHelpButton()} */}
+                    </SaveActionBar>
+                </DeletionBox>
+            </DefaultFooterStyled>
         )
     }
 
@@ -310,7 +355,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         isRibbonCommentBox={this.props.isRibbonCommentBox}
                     />
                     {this.props.comment !== '' && (
-                        <>
+                        <FooterContainer>
                             <ListsSegment
                                 lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
@@ -320,6 +365,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.setState({ isListPickerShown: true })
                                 }
                                 renderSpacePicker={this.renderCollectionsPicker}
+                                padding={'5px 10px 5px 10px'}
                             />
                             {/* <TagsSegment
                                 tags={this.props.tags}
@@ -330,14 +376,11 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     setPickerShown(!this.state.isTagPickerShown)
                                 }
                             /> */}
-                            {this.renderTagPicker()}
-                            <FooterContainer>
-                                <SaveActionBar>
-                                    {this.renderActionButtons()}
-                                    {this.renderMarkdownHelpButton()}
-                                </SaveActionBar>
-                            </FooterContainer>
-                        </>
+                            <SaveActionBar>
+                                {this.renderActionButtons()}
+                                {/* {this.renderMarkdownHelpButton()} */}
+                            </SaveActionBar>
+                        </FooterContainer>
                     )}
                 </TextBoxContainerStyled>
                 {this.state.toggleShowTutorial && (
@@ -387,19 +430,65 @@ export class AnnotationCreate extends React.Component<Props, State>
 
 export default onClickOutside(AnnotationCreate)
 
-const FooterContainer = styled.div`
-    border-top: 1px solid #f0f0f0;
+const DeleteConfirmStyled = styled.span`
+    box-sizing: border-box;
+    font-weight: 800;
+    font-size: 14px;
+    color: #000;
+    margin-right: 10px;
+    text-align: right;
+`
+const ShareBtn = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 12px;
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
+`
+const BtnContainerStyled = styled.div`
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
+`
+
+const DefaultFooterStyled = styled.div`
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    justify-content: flex-end;
+    width: fit-content;
+
+    & div {
+        border-top: none;
+    }
+`
+
+const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* border-top: 1px solid #f0f0f0; */
     padding: 5px 15px 5px 15px;
+`
+
+const FooterContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     z-index: 998;
+    width: 100%;
 `
 
 const SaveActionBar = styled.div`
     display: flex;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: flex-end;
     align-items: center;
 `
 
@@ -434,7 +523,8 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: 100%;
-    border-radius: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
