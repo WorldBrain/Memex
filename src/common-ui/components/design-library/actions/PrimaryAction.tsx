@@ -20,7 +20,7 @@ const StyledPrimaryAction = styled.div`
     align-items: center;
     vertical-align: middle;
     background: ${(props) =>
-        props.disabled ? colorDisabled : props.theme.colors.purple};
+        props.disabled ? colorDisabled : props.theme.colors.darkhover};
 
     box-sizing: border-box;
     border-radius: 5px;

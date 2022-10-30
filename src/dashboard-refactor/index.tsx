@@ -1363,11 +1363,13 @@ export class DashboardContainer extends StatefulUIElement<
 const GlobalStyle = createGlobalStyle`
 
     * {
-        font-family: 'Satoshi', sans-serif;,
+        font-family: 'Satoshi', sans-serif;
+        letter-spacing: 0.8px;
     }
 
     body {
-        font-family: 'Satoshi', sans-serif;';
+        font-family: 'Satoshi', sans-serif;
+        letter-spacing: 0.8px;
     }
 `
 

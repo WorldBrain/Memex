@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
@@ -332,6 +332,8 @@ export default class PageResultView extends PureComponent<Props> {
                         }
                         href={this.fullUrl}
                         target="_blank"
+                        tabIndex={-1}
+                        hasSpaces={this.hasLists}
                     >
                         <ResultContent>
                             <DomainContainer>
@@ -346,7 +348,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     <PDFIcon>PDF</PDFIcon>
                                 )}
                                 <PageUrl>{this.domain}</PageUrl>
-                                {this.props.hoverState === 'main-content' &&
+                                {/* {this.props.hoverState === 'main-content' &&
                                     !this.hasLists && (
                                         <AddSpaceButtonContainer>
                                             <AddSpacesButton
@@ -363,7 +365,7 @@ export default class PageResultView extends PureComponent<Props> {
                                                 )}
                                             />
                                         </AddSpaceButtonContainer>
-                                    )}
+                                    )} */}
                             </DomainContainer>
                         </ResultContent>
                         <PageTitle isUrl={!hasTitle}>
@@ -474,13 +476,19 @@ const FavIconImg = styled.img`
     border-radius: 2px;
 `
 
-const PageContentBox = styled.a`
+const PageContentBox = styled.a<{ hasSpaces: boolean }>`
     display: flex;
     flex-direction: column;
     cursor: pointer;
     padding: 15px 20px 15px 20px;
     text-decoration: none;
     border-radius: 10px;
+
+    ${(props) =>
+        props.hasSpaces &&
+        css`
+            padding: 15px 20px 10px 20px;
+        `}
 `
 
 const AddSpaceButtonContainer = styled.div`
@@ -494,7 +502,7 @@ const ResultContent = styled(Margin)`
     justify-content: flex-start;
     cursor: pointer;
     grid-auto-flow: column;
-    grid-grap: 15px;
+    grid-gap: 15px;
     height: 34px;
 `
 

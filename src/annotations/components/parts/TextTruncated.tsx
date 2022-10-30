@@ -85,6 +85,7 @@ const TruncatedBox = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
+    justify-content: flex-end;
 `
 
 const ToggleMoreButtonStyled = styled.div`
@@ -112,9 +113,10 @@ const ToggleMoreButtonStyled = styled.div`
 
 const ToggleMoreBox = styled.div`
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-self: flex-end;
+    align-self: flex-end;
+    position: absolute;
     cursor: pointer;
 `
 

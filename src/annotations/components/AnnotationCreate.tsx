@@ -435,7 +435,6 @@ const TextBoxContainerStyled = styled.div`
     font-size: 14px;
     width: 100%;
     border-radius: 12px;
-    background-color: ${(props) => (props.comment !== '' ? 'white' : 'none')};
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

@@ -35,6 +35,7 @@ export const BtnBackground = styled.div`
     background-repeat: no-repeat;
     background-position: center center;
     border-radius: 3px;
+    background: red;
 `
 
 export const HamburgerButton = styled.div`
@@ -54,6 +55,14 @@ export const RightArrow = styled.div`
     animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `
 
+const TriggerArea = styled.div`
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    left: 0px;
+    top: 0px;
+`
+
 export interface SidebarToggleProps {
     sidebarLockedState: SidebarLockedState
     hoverState: HoverState
@@ -71,23 +80,31 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 isHovered={isHovered}
                 onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
+                onMouseEnter={onHoverEnter}
             >
-                {isHovered ? (
-                    <ButtonTooltip
-                        tooltipText={
-                            isSidebarLocked ? (
-                                <span>
-                                    Click to close sidebar.
-                                    <br />
-                                    Open by hovering on left side of screen
-                                </span>
-                            ) : (
-                                'Click to lock open sidebar'
-                            )
-                        }
-                        position={'right'}
-                    >
-                        <BtnBackground>
+                {!isSidebarLocked ? (
+                    <>
+                        {isHovered ? (
+                            <Icon
+                                path={icons.arrowRight}
+                                rotation="0"
+                                heightAndWidth="26px"
+                            />
+                        ) : (
+                            <Icon
+                                path={icons.hamburger}
+                                heightAndWidth="26px"
+                            />
+                        )}
+                        {isHovered && (
+                            <TriggerArea onMouseEnter={onHoverEnter} />
+                        )}
+                    </>
+                ) : (
+                    <Icon path={icons.arrowLeft} heightAndWidth="26px" />
+                )}
+
+                {/* <BtnBackground>
                             {isSidebarLocked ? (
                                 <Icon
                                     path={icons.doubleArrow}
@@ -102,10 +119,10 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                                 />
                             )}
                         </BtnBackground>
-                    </ButtonTooltip>
                 ) : (
+
                     <Icon path={icons.hamburger} heightAndWidth="20px" />
-                )}
+                )} */}
             </Container>
         )
     }

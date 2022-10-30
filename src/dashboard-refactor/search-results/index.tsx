@@ -726,25 +726,32 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     />
                 )}
                 {this.props.selectedListId != null && (
-                    <ListDetails {...this.props.listDetailsProps} />
+                    <ListDetails
+                        {...this.props.listDetailsProps}
+                        listId={this.props.selectedListId}
+                    />
                 )}
-                <PageTopBarBox
-                    isDisplayed={this.props.isDisplayed}
-                    bottom="5px"
-                >
+                <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={<SearchTypeSwitch {...this.props} />}
                         rightSide={
-                            <RightSideButton>
-                                {/* {this.renderListShareBtn()}
-                                <SearchCopyPaster
-                                    {...this.props.searchCopyPasterProps}
-                                />
-                                <ExpandAllNotes
-                                    isEnabled={this.props.areAllNotesShown}
-                                    onClick={this.props.onShowAllNotesClick}
-                                /> */}
-                            </RightSideButton>
+                            <ReferencesContainer>
+                                {this.props.listData[this.props.selectedListId]
+                                    ?.remoteId != null && (
+                                    <>
+                                        <Icon
+                                            hoverOff
+                                            heightAndWidth="12px"
+                                            color={'iconColor'}
+                                            icon={icons.alertRound}
+                                        />
+                                        <InfoText>
+                                            Only your own contributions to this
+                                            space are visible locally.
+                                        </InfoText>
+                                    </>
+                                )}
+                            </ReferencesContainer>
                         }
                     />
                 </PageTopBarBox>
@@ -762,6 +769,12 @@ const ResultsMessage = styled.div`
     flex-direction: column;
 `
 
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.darkText};
+    font-size: 14px;
+    font-weight: 300;
+`
+
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
 
@@ -772,6 +785,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
+    margin: 2px 0px;
 `
 
 const IconBox = styled.div`
@@ -786,13 +800,16 @@ const IconBox = styled.div`
     }
 `
 
-const RightSideButton = styled.div`
+const ReferencesContainer = styled.div`
+    width: 100%;
+    font-weight: lighter;
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.darkText};
     display: flex;
-    align-items: center;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+    grid-gap: 5px;
 `
 
 const NoteTopBarBox = styled(TopBar)`

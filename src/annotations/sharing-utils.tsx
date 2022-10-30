@@ -15,25 +15,15 @@ export function getShareButtonData(
     if (isShared && isBulkShareProtected) {
         return {
             icon: icons.sharedProtected,
-            label: (
-                <span>
-                    Public
-                    <br />& Protected
-                </span>
-            ),
+            label: <span>Public</span>,
         }
     } else if (isShared && !isBulkShareProtected) {
         return { icon: icons.globe, label: 'Public' }
     } else if (!isShared && isBulkShareProtected) {
         return {
             icon: icons.lockFine,
-            label: (
-                <span>
-                    Private
-                    <br />& Protected
-                </span>
-            ),
+            label: 'Private',
         }
     }
-    return { icon: icons.personFine, label: 'Share' }
+    return { icon: icons.personFine, label: 'Private' }
 }

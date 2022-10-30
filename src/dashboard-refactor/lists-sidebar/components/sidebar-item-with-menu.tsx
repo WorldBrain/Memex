@@ -476,15 +476,15 @@ const NewItemsCount = styled.div`
     width: fit-content;
     min-width: 20px;
     height: 14px;
-    border-radius: 10px;
+    border-radius: 3px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     background-color: ${(props) => props.theme.colors.purple};
-    padding: 2px 8px;
-    color: white;
+    padding: 2px 4px;
+    color: ${(props) => props.theme.colors.black};
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
     justify-content: center;
 `
 

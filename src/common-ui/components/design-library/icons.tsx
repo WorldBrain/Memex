@@ -60,6 +60,8 @@ export const clock = browser.runtime.getURL('/img/clock.svg')
 export const twitter = browser.runtime.getURL('/img/twitter.svg')
 export const sunrise = browser.runtime.getURL('/img/sunrise.svg')
 export const feed = browser.runtime.getURL('/img/feed.svg')
+export const cursor = browser.runtime.getURL('/img/cursor.svg')
+export const highlight = browser.runtime.getURL('/img/highlights.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -115,6 +117,7 @@ export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
 export const peoplePlusFine = browser.runtime.getURL('/img/peoplePlusFine.svg')
 export const people = ''
 export const arrowRight = browser.runtime.getURL('/img/arrowRight.svg')
+export const arrowLeft = browser.runtime.getURL('/img/arrowLeft.svg')
 export const reload = browser.runtime.getURL('/img/reload.svg')
 export const longArrow = browser.runtime.getURL('/img/longarrow.svg')
 export const link = browser.runtime.getURL('/img/link.svg')

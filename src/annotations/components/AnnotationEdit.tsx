@@ -125,8 +125,9 @@ export default AnnotationEdit
 
 const EditorContainer = styled.div`
     height: fit-content;
-    transition: height 0.4s linear;
-    border-top: 1px solid #f0f0f0;
+    padding: 0 5px;
+    // transition: height 1s ease-in-out;
+    // border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 
     &:first-child {
         border-top: none;

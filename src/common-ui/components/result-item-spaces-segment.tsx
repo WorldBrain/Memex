@@ -13,12 +13,14 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onListClick?: (tag: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
+    tabIndex?: number
 }
 
 interface ButtonProps {
     hasNoLists: boolean
     onEditBtnClick?: React.MouseEventHandler
     renderSpacePicker?: () => JSX.Element
+    tabIndex?: number
 }
 
 export class AddSpacesButton extends React.Component<
@@ -40,17 +42,17 @@ export class AddSpacesButton extends React.Component<
                         // this.setState({ showPicker: !this.state.showPicker })
                         this.props.onEditBtnClick?.(e)
                     }}
+                    tabIndex={this.props.tabIndex}
                 >
-                    {!this.props.hasNoLists && (
-                        <EditIconContainer>
-                            <Icon
-                                filePath={icons.plus}
-                                height={'10px'}
-                                color={'purple'}
-                                hoverOff
-                            />
-                        </EditIconContainer>
-                    )}
+                    <EditIconContainer>
+                        <Icon
+                            filePath={icons.plus}
+                            height={'10px'}
+                            color={'purple'}
+                            hoverOff
+                        />
+                    </EditIconContainer>
+                    {this.props.hasNoLists && 'Spaces'}
                 </AddSpacesButtonContainer>
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
@@ -86,6 +88,7 @@ export default function ListsSegment({
     onEditBtnClick,
     renderSpacePicker,
     filteredbyListID,
+    tabIndex,
     ...props
 }: Props) {
     return (
@@ -95,6 +98,7 @@ export default function ListsSegment({
                     hasNoLists={lists.length === 0}
                     // onEditBtnClick={onEditBtnClick}
                     renderSpacePicker={renderSpacePicker}
+                    tabIndex={tabIndex}
                 />
                 {lists
                     .filter(
@@ -147,7 +151,6 @@ const Container = styled.div`
     align-items: center;
     justify-content: flex-start;
     padding: 0px 20px 10px 20px;
-    margin-top: -5px;
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
@@ -210,6 +213,7 @@ const AddSpacesButtonContainer = styled.div`
     align-items: center;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
+    color: ${(props) => props.theme.colors.normalText};
 `
 const ListsContainer = styled.div`
     display: flex;
@@ -223,7 +227,8 @@ const ListSpaceContainer = styled.div`
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 500;
+    letter-spacing: 0.6px;
     height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
