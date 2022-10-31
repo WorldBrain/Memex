@@ -43,10 +43,8 @@ import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
-import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from './push-messaging'
-import type { PushMessagingServiceInterface } from '@worldbrain/memex-common/lib/push-messaging/types'
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
@@ -60,7 +58,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     startWithSyncDisabled?: boolean
     useDownloadTranslationLayer?: boolean
     services?: Services
-    pushMessagingService?: PushMessagingServiceInterface
+    pushMessagingService?: MockPushMessagingService
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -176,6 +174,8 @@ export async function setupBackgroundIntegrationTest(
         )
     }
 
+    const pushMessagingService =
+        options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
     const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
@@ -222,6 +222,7 @@ export async function setupBackgroundIntegrationTest(
             storageModules: serverStorage.modules,
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
+            services: { pushMessaging: pushMessagingService },
         }),
         generateServerId: () => nextServerId++,
     })
@@ -272,9 +273,8 @@ export async function setupBackgroundIntegrationTest(
     setStorex(storageManager)
 
     return {
-        pushMessagingService:
-            options.pushMessagingService ?? new MockPushMessagingService(),
         storageManager,
+        pushMessagingService,
         persistentStorageManager,
         backgroundModules,
         browserLocalStorage,

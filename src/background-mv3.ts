@@ -2,7 +2,6 @@ import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
 import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
-import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
@@ -34,6 +33,7 @@ import type {
     DexieStorageBackend,
     IndexedDbImplementation,
 } from '@worldbrain/storex-backend-dexie'
+import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -130,8 +130,12 @@ async function main() {
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
 
     // Set up incoming FCM handling logic (same thing as SW `push` event)
-    onBackgroundMessage(getMessaging(), (payload) => {
-        if (payload.data?.type === FCM_SYNC_TRIGGER_MSG) {
+    onBackgroundMessage(getMessaging(), (message) => {
+        const payload = message.data as PushMessagePayload
+        if (payload == null) {
+            return
+        }
+        if (payload.type === 'downloadClientUpdates') {
             backgroundModules.personalCloud.triggerSyncContinuation()
         }
     })
