@@ -148,7 +148,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         const lastEdited = handleDateData(
             this.props.lastEdited ?? this.props.createdWhen,
         )
-
         return {
             createdWhen,
             lastEdited: lastEdited !== createdWhen ? lastEdited : undefined,
@@ -687,6 +686,7 @@ const ShareBtn = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 12px;
     cursor: pointer;
+    grid-gap: 4px;
 
     & * {
         cursor: pointer;

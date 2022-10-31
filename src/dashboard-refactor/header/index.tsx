@@ -29,7 +29,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
     background-color: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483646;
+    z-index: 21474836460;
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
 `
 

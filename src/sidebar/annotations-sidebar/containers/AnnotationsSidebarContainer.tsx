@@ -660,7 +660,7 @@ export class AnnotationsSidebarContainer<
                     )}
                     {!this.state.isWidthLocked ? (
                         <ButtonTooltip
-                            tooltipText="Adjusted Page Width"
+                            tooltipText="Adjust Page Width"
                             position="bottom"
                         >
                             <Icon
@@ -684,8 +684,9 @@ export class AnnotationsSidebarContainer<
                     <ButtonTooltip tooltipText="Close (ESC)" position="bottom">
                         <Icon
                             filePath={icons.removeX}
-                            heightAndWidth="26px"
+                            heightAndWidth="22px"
                             onClick={() => this.hideSidebar()}
+                            padding={'5px'}
                         />
                     </ButtonTooltip>
                 </TopBarActionBtns>
@@ -1000,14 +1001,14 @@ const ContainerStyled = styled.div`
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-    top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px + 1px);
+    top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px);
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: 2147483646; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
-    transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;
+    box-sizing: content-box;
 
     &:: -webkit-scrollbar {
         display: none;

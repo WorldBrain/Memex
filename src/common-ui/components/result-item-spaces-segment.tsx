@@ -75,7 +75,6 @@ const SpacePickerButtonWrapper = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    grid-gap: 5px;
 `
 
 const SpacePickerWrapper = styled.div`
@@ -126,7 +125,7 @@ export default function ListsSegment({
                                         heightAndWidth="16px"
                                         hoverOff
                                         icon="peopleFine"
-                                        color="black"
+                                        color="greyScale8"
                                     />
                                 )}
                                 {space.name}
@@ -227,8 +226,8 @@ const ListsContainer = styled.div`
 `
 
 const ListSpaceContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.signalSoft};
-    color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.greyScale8};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;

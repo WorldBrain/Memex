@@ -417,6 +417,8 @@ export class AnnotationsSidebar extends React.Component<
                         )
                     }
 
+                    console.log(this.props.users[data.creatorId])
+
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable
@@ -428,7 +430,9 @@ export class AnnotationsSidebar extends React.Component<
                                 lastEdited={data.updatedWhen}
                                 createdWhen={data.createdWhen}
                                 creatorDependencies={
-                                    this.props.users[data.creatorId]
+                                    data.localId != null
+                                        ? null
+                                        : this.props.users[data.creatorId]
                                 }
                                 isActive={
                                     this.props.activeAnnotationUrl === data.id
@@ -718,35 +722,47 @@ export class AnnotationsSidebar extends React.Component<
             const listData = followedLists.byId[listId]
             return (
                 <FollowedListNotesContainer
-                    bottom={listData.isExpanded ? '20px' : '5px'}
+                    bottom={listData.isExpanded ? '20px' : '0px'}
                     key={listId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        onClick={() =>
-                            this.props.expandFollowedListNotes(listId)
-                        }
+                        // onClick={() =>
+                        //     this.props.expandFollowedListNotes(listId)
+                        // }
                         title={listData.name}
                     >
                         <FollowedListTitleContainer>
+                            <Icon
+                                icon={icons.arrowRight}
+                                heightAndWidth="22px"
+                                rotation={listData.isExpanded && 90}
+                                onClick={() =>
+                                    this.props.expandFollowedListNotes(listId)
+                                }
+                            />
                             <FollowedListTitle>
                                 {listData.name}
                             </FollowedListTitle>
                         </FollowedListTitleContainer>
                         <ButtonContainer>
-                            <ButtonTooltip
-                                tooltipText="Go to Space"
-                                position="left"
-                            >
-                                <Icon
-                                    icon="goTo"
-                                    height="16px"
-                                    onClick={() =>
-                                        this.props.openCollectionPage(listId)
-                                    }
-                                />
-                            </ButtonTooltip>
+                            <ActionButtons>
+                                <ButtonTooltip
+                                    tooltipText="Go to Space"
+                                    position="left"
+                                >
+                                    <Icon
+                                        icon="goTo"
+                                        height="16px"
+                                        onClick={() =>
+                                            this.props.openCollectionPage(
+                                                listId,
+                                            )
+                                        }
+                                    />
+                                </ButtonTooltip>
+                            </ActionButtons>
                             <FollowedListNoteCount active left="5px">
                                 {listData.sharedAnnotationReferences.length}
                             </FollowedListNoteCount>
@@ -1004,6 +1020,7 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderTopBarSwitcher() {
         const { followedLists } = this.props
+
         return (
             <TopBarContainer>
                 <FollowedListTitleContainerMyNotes left="5px">
@@ -1043,17 +1060,19 @@ export class AnnotationsSidebar extends React.Component<
                         active={this.props.isExpandedSharedSpaces}
                     >
                         Spaces
-                        {this.props.followedListLoadState === 'running' ? (
+                        {this.props.followedListLoadState === 'running' && (
                             <LoadingBox>
                                 <LoadingIndicator size={12} />{' '}
                             </LoadingBox>
-                        ) : followedLists.allIds.length ? (
+                        )}
+                        {followedLists.allIds.length > 0 && (
                             <LoadingBox>
-                                <FollowedListNoteCount active={true} left="5px">
-                                    {/* {followedLists.allIds.length} */}
-                                </FollowedListNoteCount>
+                                <PageActivityIndicator
+                                    active={true}
+                                    left="5px"
+                                />
                             </LoadingBox>
-                        ) : null}
+                        )}
                     </FollowedListSectionTitle>
                 </FollowedListTitleContainer>
             </TopBarContainer>
@@ -1158,6 +1177,10 @@ const AnnotationActions = styled.div`
     margin-top: -5px;
 `
 
+const ActionButtons = styled.div`
+    display: none;
+`
+
 const SpacerBottom = styled.div`
     height: 1200px;
 `
@@ -1177,7 +1200,6 @@ const Link = styled.span`
 `
 
 const LoadingBox = styled.div`
-    margin-left: 3px;
     width: 30px;
     display: flex;
     justify-content: center;
@@ -1431,14 +1453,22 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     padding: 5px;
     width: fill-available;
     cursor: pointer;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     height: 40px;
-    padding: 5px 15px 5px 20px;
-    background: white;
+    padding: 5px 15px 5px 10px;
 
     &:first-child {
         margin: 5px 0px 0px 0px;
+    }
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+    }
+
+    &:hover ${ActionButtons} {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 `
 
@@ -1457,7 +1487,7 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
     flex-direction: row;
     grid-gap: 2px;
     align-items: center;
-    height: 40px;
+    height: 36px;
     padding: 0 10px;
     border-radius: 5px;
 
@@ -1466,11 +1496,19 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
         css`
             background: ${(props) => props.theme.colors.lightHover};
             cursor: default;
+
+            &:hover {
+                background: ${(props) => props.theme.colors.lightHover};
+            }
         `}
 
-    &:hover {
-        background: ${(props) => props.theme.colors.darkhover};
-    }
+    ${(props) =>
+        !props.active &&
+        css`
+            &:hover {
+                background: ${(props) => props.theme.colors.lightHover};
+            }
+        `}
 
     & * {
         cursor: pointer;
@@ -1485,6 +1523,7 @@ const FollowedListTitleContainer = styled(Margin)`
         props.context === 'isolatedView' ? 'default' : 'pointer'};
     justify-content: flex-start;
     flex: 1;
+    grid-gap: 10px;
 `
 
 const FollowedListTitleContainerMyNotes = styled(Margin)`
@@ -1498,25 +1537,30 @@ const FollowedListTitleContainerMyNotes = styled(Margin)`
 `
 
 const FollowedListTitle = styled.span<{ context: string }>`
-    font-weight: bold;
     font-size: ${(props) =>
         props.context === 'isolatedView' ? '18px' : '14px'};
     white-space: pre;
     max-width: 295px;
     text-overflow: ellipsis;
     overflow-x: hidden;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
+`
+
+const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
+    font-weight: bold;
+    border-radius: 30px;
+    background-color: ${(props) => props.theme.colors.purple};
+    width: 14px;
+    height: 14px;
+    font-size: 12px;
+    display: flex;
 `
 
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
-    border-radius: 30px;
-    background-color: ${(props) => props.theme.colors.purple};
-    background-color: ${(props) => props.active && props.theme.colors.purple};
-    /* color: ${(props) =>
-        props.active ? 'white' : props.theme.colors.normalText}; */
-    width: 20px;
-    font-size: 12px;
+    font-size: 14px;
+    display: flex;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const FollowedListIconContainer = styled.div`

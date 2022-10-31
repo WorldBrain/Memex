@@ -1,7 +1,7 @@
 import React, { Component, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
 import qs from 'query-string'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
@@ -339,8 +339,8 @@ export default class Ribbon extends Component<Props, State> {
                                 !this.props.tagging.showTagsPicker,
                             )
                         }
-                        color={'darkerIconColor'}
-                        heightAndWidth="18px"
+                        color={'greyScale9'}
+                        heightAndWidth="22px"
                         filePath={
                             this.props.tagging.pageHasTags ||
                             this.props.tagging.tags.length > 0
@@ -360,24 +360,34 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <div
-                className={cx(styles.ribbon, {
-                    [styles.ribbonExpanded]: this.props.isExpanded,
-                    [styles.ribbonSidebarOpen]: this.props.sidebar
-                        .isSidebarOpen,
-                })}
+            <OuterRibbon
+                isPeeking={this.props.isExpanded}
+                isSidebarOpen={this.props.sidebar.isSidebarOpen}
             >
-                <div
+                <InnerRibbon
                     ref={this.props.setRef}
-                    className={cx(styles.innerRibbon, {
-                        [styles.innerRibbonExpanded]: this.props.isExpanded,
-                        [styles.innerRibbonSidebarOpen]: this.props.sidebar
-                            .isSidebarOpen,
-                    })}
+                    isPeeking={this.props.isExpanded}
+                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
                 >
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
+                            <FeedIndicatorBox
+                                isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                            >
+                                <ButtonTooltip
+                                    tooltipText={'View Feed Updates'}
+                                    position="leftNarrow"
+                                >
+                                    <FeedActivityDot
+                                        key="activity-feed-indicator"
+                                        {...this.props.activityIndicator}
+                                    />
+                                </ButtonTooltip>
+                            </FeedIndicatorBox>
+                            <HorizontalLine
+                                sidebaropen={this.props.sidebar.isSidebarOpen}
+                            />
                             <PageAction>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
@@ -389,8 +399,12 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.bookmark.toggleBookmark()
                                         }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
+                                        color={
+                                            this.props.bookmark.isBookmarked
+                                                ? 'purple'
+                                                : 'greyScale9'
+                                        }
+                                        heightAndWidth="22px"
                                         filePath={
                                             this.props.bookmark.isBookmarked
                                                 ? icons.heartFull
@@ -471,8 +485,13 @@ export default class Ribbon extends Component<Props, State> {
                                                     .showListsPicker,
                                             )
                                         }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
+                                        color={
+                                            this.props.lists.pageListIds
+                                                .length > 0
+                                                ? 'purple'
+                                                : 'greyScale9'
+                                        }
+                                        heightAndWidth="22px"
                                         filePath={
                                             this.props.lists.pageListIds
                                                 .length > 0
@@ -482,27 +501,6 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 {this.renderCollectionsPicker()}
-                                {this.renderTagsUIs()}
-                            </PageAction>
-                            <HorizontalLine
-                                sidebaropen={this.props.sidebar.isSidebarOpen}
-                            />
-                            <PageAction>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'openDashboard',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.openOverviewTabRPC()
-                                        }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
-                                        filePath={icons.searchIcon}
-                                    />
-                                </ButtonTooltip>
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <ButtonTooltip
                                         tooltipText={
@@ -524,8 +522,8 @@ export default class Ribbon extends Component<Props, State> {
                                                     e,
                                                 )
                                             }
-                                            color={'darkerIconColor'}
-                                            heightAndWidth="18px"
+                                            color={'greyScale9'}
+                                            heightAndWidth="22px"
                                             filePath={
                                                 this.props.commentBox
                                                     .isCommentSaved
@@ -537,26 +535,32 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </ButtonTooltip>
                                 )}
-                                <FeedIndicatorBox
-                                    isSidebarOpen={
+                                <ButtonTooltip
+                                    tooltipText={this.getTooltipText(
+                                        'openDashboard',
+                                    )}
+                                    position="leftNarrow"
+                                >
+                                    <Icon
+                                        onClick={() =>
+                                            this.openOverviewTabRPC()
+                                        }
+                                        color={'greyScale9'}
+                                        heightAndWidth="22px"
+                                        filePath={icons.searchIcon}
+                                    />
+                                </ButtonTooltip>
+                            </PageAction>
+                            {!this.props.sidebar.isSidebarOpen && (
+                                <HorizontalLine
+                                    sidebaropen={
                                         this.props.sidebar.isSidebarOpen
                                     }
-                                >
-                                    <ButtonTooltip
-                                        tooltipText={'View Feed Updates'}
-                                        position="leftNarrow"
-                                    >
-                                        <FeedActivityDot
-                                            key="activity-feed-indicator"
-                                            {...this.props.activityIndicator}
-                                        />
-                                    </ButtonTooltip>
-                                </FeedIndicatorBox>
-                            </PageAction>
-                            <HorizontalLine
+                                />
+                            )}
+                            <BottomSection
                                 sidebaropen={this.props.sidebar.isSidebarOpen}
-                            />
-                            <PageAction>
+                            >
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="leftNarrow"
@@ -565,8 +569,8 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'darkerIconColor'}
-                                        heightAndWidth="18px"
+                                        color={'darkText'}
+                                        heightAndWidth="22px"
                                         filePath={icons.settings}
                                     />
                                 </ButtonTooltip>
@@ -588,8 +592,8 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowTutorial()
                                         }
-                                        color={'darkerIconColor'}
-                                        heightAndWidth="18px"
+                                        color={'darkText'}
+                                        heightAndWidth="22px"
                                         filePath={icons.helpIcon}
                                     />
                                 </ButtonTooltip>
@@ -628,21 +632,111 @@ export default class Ribbon extends Component<Props, State> {
                                                     this.props.handleRemoveRibbon()
                                                 }
                                             }}
-                                            color={'darkerIconColor'}
-                                            heightAndWidth="14px"
-                                            filePath={icons.close}
-                                            padding={'6px'}
+                                            color={'darkText'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.removeX}
                                         />
                                     </ButtonTooltip>
                                 )}
-                            </PageAction>
+                            </BottomSection>
                         </React.Fragment>
                     )}
-                </div>
-            </div>
+                </InnerRibbon>
+            </OuterRibbon>
         )
     }
 }
+
+const BottomSection = styled.div<{ sidebaropen: boolean }>`
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0px;
+`
+
+const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+    width: 24px;
+    height: 400px;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+
+    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
+    line-height: normal;
+    text-align: start;
+    align-items: center;
+    background: transparent;
+    z-index: 2147483647;
+
+    ${(props) =>
+        props.isPeeking &&
+        css`
+            align-items: flex-end;
+            width: 44px;
+            padding-right: 25px;
+        `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            box-shadow: none;
+            display: flex;
+            justify-content: center;
+            height: 105vh;
+            width: 40px;
+            border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+            align-items: flex-start;
+            padding: 0 5px;
+
+            & .removeSidebar {
+                visibility: hidden;
+                display: none;
+            }
+        `}
+`
+
+const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+    position: absolute;
+    top: 20px;
+    width: 44px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+    display: none;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+
+    ${(props) =>
+        props.isPeeking &&
+        css`
+            border-radius: 8px;
+            display: flex;
+            box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+            background: ${(props) => props.theme.colors.backgroundColorDarker};
+        }
+    `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            box-shadow: none;
+            height: 90%;
+            top: 0px;
+            width: 40px;
+            justify-content: space-between;
+            padding-top: 17px;
+            display: flex;
+            background: transparent;
+            border: none;
+            align-items: center;
+        `}
+`
 
 const ExtraButtonRow = styled.div`
     height: 40px;
@@ -670,17 +764,18 @@ const GeneralActions = styled.div`
 
 const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
     width: 100%;
-    margin: 10px 0;
+    margin: 5px 0;
     height: 1px;
-    background-color: ${(props) => !props.sidebaropen && '#f0f0f0'};
+    background-color: ${(props) => props.theme.colors.lightHover};
 `
 
 const PageAction = styled.div`
     display: grid;
-    grid-gap: 5px;
+    grid-gap: 10px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;
+    padding: 10px;
 `
 
 const SubText = styled.span`
@@ -690,7 +785,7 @@ const SubText = styled.span`
 const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
     display: flex;
     justify-content: center;
-    margin-top: 5px;
+    margin: 10px 0;
     margin-left: ${(props) => props.isSidebarOpen && '-2px'};
 `
 

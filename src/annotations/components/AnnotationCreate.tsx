@@ -446,6 +446,7 @@ const ShareBtn = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 12px;
     cursor: pointer;
+    grid-gap: 4px;
 
     & * {
         cursor: pointer;
