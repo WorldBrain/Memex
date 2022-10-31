@@ -227,7 +227,7 @@ const ListsContainer = styled.div`
 
 const ListSpaceContainer = styled.div`
     background-color: ${(props) => props.theme.colors.lightHover};
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale9};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
