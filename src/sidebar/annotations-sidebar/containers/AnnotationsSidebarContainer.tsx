@@ -709,6 +709,7 @@ export class AnnotationsSidebarContainer<
                 <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
                 <ContainerStyled
                     className={classNames('ignore-react-onclickoutside')}
+                    sidebarContext={this.props.sidebarContext}
                 >
                     <Rnd
                         style={style}
@@ -994,7 +995,7 @@ const PickerWrapper = styled.div`
     z-index: 5;
 `
 
-const ContainerStyled = styled.div`
+const ContainerStyled = styled.div<{ sidebarContext: string }>`
     height: 100%;
     overflow-x: visible;
     position: fixed;
@@ -1004,7 +1005,10 @@ const ContainerStyled = styled.div`
     top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px);
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
-    z-index: 2147483646; /* This is to combat pages setting high values on certain elements under the sidebar */
+    z-index: ${(props) =>
+        props.sidebarContext === 'dashboard'
+            ? '2147483640'
+            : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;

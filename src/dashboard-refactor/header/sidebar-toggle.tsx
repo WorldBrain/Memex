@@ -81,6 +81,7 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
                 onMouseEnter={onHoverEnter}
+                id="testingthis"
             >
                 {!isSidebarLocked ? (
                     <>

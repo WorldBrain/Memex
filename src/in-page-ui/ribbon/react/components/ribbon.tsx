@@ -372,185 +372,198 @@ export default class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
-                            <FeedIndicatorBox
-                                isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                            >
-                                <ButtonTooltip
-                                    tooltipText={'View Feed Updates'}
-                                    position="leftNarrow"
+                            <UpperPart>
+                                <FeedIndicatorBox
+                                    isSidebarOpen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
                                 >
-                                    <FeedActivityDot
-                                        key="activity-feed-indicator"
-                                        {...this.props.activityIndicator}
-                                    />
-                                </ButtonTooltip>
-                            </FeedIndicatorBox>
-                            <HorizontalLine
-                                sidebaropen={this.props.sidebar.isSidebarOpen}
-                            />
-                            <PageAction>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'createBookmark',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.bookmark.toggleBookmark()
-                                        }
-                                        color={
-                                            this.props.bookmark.isBookmarked
-                                                ? 'purple'
-                                                : 'greyScale9'
-                                        }
-                                        heightAndWidth="22px"
-                                        filePath={
-                                            this.props.bookmark.isBookmarked
-                                                ? icons.heartFull
-                                                : icons.heartEmpty
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                {this.props.commentBox.showCommentBox && (
-                                    <HoverBox
-                                        position="absolute"
-                                        top="115px"
-                                        right="40px"
-                                        padding={'0px'}
-                                    >
-                                        <AnnotationCreate
-                                            {...this.props.tagging}
-                                            ref={(ref) =>
-                                                (this.annotationCreateRef = ref)
-                                            }
-                                            hide={() =>
-                                                this.props.commentBox.setShowCommentBox(
-                                                    false,
-                                                )
-                                            }
-                                            onSave={
-                                                this.props.commentBox
-                                                    .saveComment
-                                            }
-                                            onCancel={
-                                                this.props.commentBox
-                                                    .cancelComment
-                                            }
-                                            onTagsUpdate={
-                                                this.props.commentBox
-                                                    .updateCommentBoxTags
-                                            }
-                                            onCommentChange={
-                                                this.props.commentBox
-                                                    .changeComment
-                                            }
-                                            comment={
-                                                this.props.commentBox
-                                                    .commentText
-                                            }
-                                            tags={this.props.commentBox.tags}
-                                            lists={this.props.commentBox.lists}
-                                            getListDetailsById={
-                                                this.props.getListDetailsById
-                                            }
-                                            createNewList={
-                                                this.props.lists.createNewEntry
-                                            }
-                                            addPageToList={
-                                                this.props.lists.selectEntry
-                                            }
-                                            removePageFromList={
-                                                this.props.lists.unselectEntry
-                                            }
-                                            isRibbonCommentBox
-                                            spacesBG={this.props.spacesBG}
-                                            contentSharingBG={
-                                                this.props.contentSharingBG
-                                            }
-                                            autoFocus
-                                        />
-                                    </HoverBox>
-                                )}
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addToCollection',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.lists.setShowListsPicker(
-                                                !this.props.lists
-                                                    .showListsPicker,
-                                            )
-                                        }
-                                        color={
-                                            this.props.lists.pageListIds
-                                                .length > 0
-                                                ? 'purple'
-                                                : 'greyScale9'
-                                        }
-                                        heightAndWidth="22px"
-                                        filePath={
-                                            this.props.lists.pageListIds
-                                                .length > 0
-                                                ? icons.collectionsFull
-                                                : icons.collectionsEmpty
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                {this.renderCollectionsPicker()}
-                                {!this.props.sidebar.isSidebarOpen && (
                                     <ButtonTooltip
-                                        tooltipText={
-                                            <span>
-                                                {this.getTooltipText(
-                                                    'toggleSidebar',
-                                                )}
-                                                <br />{' '}
-                                                <SubText>
-                                                    Shift+Click to add note
-                                                </SubText>
-                                            </span>
-                                        }
+                                        tooltipText={'View Feed Updates'}
+                                        position="leftNarrow"
+                                    >
+                                        <FeedActivityDot
+                                            key="activity-feed-indicator"
+                                            {...this.props.activityIndicator}
+                                        />
+                                    </ButtonTooltip>
+                                </FeedIndicatorBox>
+                                <HorizontalLine
+                                    sidebaropen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                />
+                                <PageAction>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'createBookmark',
+                                        )}
                                         position="leftNarrow"
                                     >
                                         <Icon
-                                            onClick={(e) =>
-                                                this.handleCommentIconBtnClick(
-                                                    e,
-                                                )
+                                            onClick={() =>
+                                                this.props.bookmark.toggleBookmark()
                                             }
-                                            color={'greyScale9'}
+                                            color={
+                                                this.props.bookmark.isBookmarked
+                                                    ? 'purple'
+                                                    : 'greyScale9'
+                                            }
                                             heightAndWidth="22px"
                                             filePath={
-                                                this.props.commentBox
-                                                    .isCommentSaved
-                                                    ? icons.saveIcon
-                                                    : // : this.props.hasAnnotations
-                                                      // ? icons.commentFull
-                                                      icons.commentEmpty
+                                                this.props.bookmark.isBookmarked
+                                                    ? icons.heartFull
+                                                    : icons.heartEmpty
                                             }
                                         />
                                     </ButtonTooltip>
-                                )}
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'openDashboard',
+                                    {this.props.commentBox.showCommentBox && (
+                                        <HoverBox
+                                            position="absolute"
+                                            top="115px"
+                                            right="40px"
+                                            padding={'0px'}
+                                        >
+                                            <AnnotationCreate
+                                                {...this.props.tagging}
+                                                ref={(ref) =>
+                                                    (this.annotationCreateRef = ref)
+                                                }
+                                                hide={() =>
+                                                    this.props.commentBox.setShowCommentBox(
+                                                        false,
+                                                    )
+                                                }
+                                                onSave={
+                                                    this.props.commentBox
+                                                        .saveComment
+                                                }
+                                                onCancel={
+                                                    this.props.commentBox
+                                                        .cancelComment
+                                                }
+                                                onTagsUpdate={
+                                                    this.props.commentBox
+                                                        .updateCommentBoxTags
+                                                }
+                                                onCommentChange={
+                                                    this.props.commentBox
+                                                        .changeComment
+                                                }
+                                                comment={
+                                                    this.props.commentBox
+                                                        .commentText
+                                                }
+                                                tags={
+                                                    this.props.commentBox.tags
+                                                }
+                                                lists={
+                                                    this.props.commentBox.lists
+                                                }
+                                                getListDetailsById={
+                                                    this.props
+                                                        .getListDetailsById
+                                                }
+                                                createNewList={
+                                                    this.props.lists
+                                                        .createNewEntry
+                                                }
+                                                addPageToList={
+                                                    this.props.lists.selectEntry
+                                                }
+                                                removePageFromList={
+                                                    this.props.lists
+                                                        .unselectEntry
+                                                }
+                                                isRibbonCommentBox
+                                                spacesBG={this.props.spacesBG}
+                                                contentSharingBG={
+                                                    this.props.contentSharingBG
+                                                }
+                                                autoFocus
+                                            />
+                                        </HoverBox>
                                     )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.openOverviewTabRPC()
-                                        }
-                                        color={'greyScale9'}
-                                        heightAndWidth="22px"
-                                        filePath={icons.searchIcon}
-                                    />
-                                </ButtonTooltip>
-                            </PageAction>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addToCollection',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.props.lists.setShowListsPicker(
+                                                    !this.props.lists
+                                                        .showListsPicker,
+                                                )
+                                            }
+                                            color={
+                                                this.props.lists.pageListIds
+                                                    .length > 0
+                                                    ? 'purple'
+                                                    : 'greyScale9'
+                                            }
+                                            heightAndWidth="22px"
+                                            filePath={
+                                                this.props.lists.pageListIds
+                                                    .length > 0
+                                                    ? icons.collectionsFull
+                                                    : icons.collectionsEmpty
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                    {this.renderCollectionsPicker()}
+                                    {!this.props.sidebar.isSidebarOpen && (
+                                        <ButtonTooltip
+                                            tooltipText={
+                                                <span>
+                                                    {this.getTooltipText(
+                                                        'toggleSidebar',
+                                                    )}
+                                                    <br />{' '}
+                                                    <SubText>
+                                                        Shift+Click to add note
+                                                    </SubText>
+                                                </span>
+                                            }
+                                            position="leftNarrow"
+                                        >
+                                            <Icon
+                                                onClick={(e) =>
+                                                    this.handleCommentIconBtnClick(
+                                                        e,
+                                                    )
+                                                }
+                                                color={'greyScale9'}
+                                                heightAndWidth="22px"
+                                                filePath={
+                                                    this.props.commentBox
+                                                        .isCommentSaved
+                                                        ? icons.saveIcon
+                                                        : // : this.props.hasAnnotations
+                                                          // ? icons.commentFull
+                                                          icons.commentEmpty
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                    )}
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'openDashboard',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.openOverviewTabRPC()
+                                            }
+                                            color={'greyScale9'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.searchIcon}
+                                        />
+                                    </ButtonTooltip>
+                                </PageAction>
+                            </UpperPart>
                             {!this.props.sidebar.isSidebarOpen && (
                                 <HorizontalLine
                                     sidebaropen={
@@ -646,6 +659,8 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const UpperPart = styled.div``
 
 const BottomSection = styled.div<{ sidebaropen: boolean }>`
     align-self: center;
