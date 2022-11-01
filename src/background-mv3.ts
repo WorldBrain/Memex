@@ -34,6 +34,7 @@ import type {
     IndexedDbImplementation,
 } from '@worldbrain/storex-backend-dexie'
 import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
+import PushMessagingClient from './push-messaging/background'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -129,15 +130,17 @@ async function main() {
     //  Doing this as all event listeners need to be set up synchronously, before any async logic happens. AND to avoid needing to update storex yet.
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
 
-    // Set up incoming FCM handling logic (same thing as SW `push` event)
-    onBackgroundMessage(getMessaging(), (message) => {
+    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
+    const pushMessagingClient = new PushMessagingClient({
+        bgModules: backgroundModules,
+    })
+    onBackgroundMessage(getMessaging(), async (message) => {
         const payload = message.data as PushMessagePayload
         if (payload == null) {
             return
         }
-        if (payload.type === 'downloadClientUpdates') {
-            backgroundModules.personalCloud.triggerSyncContinuation()
-        }
+
+        await pushMessagingClient.handleIncomingMessage(payload)
     })
 
     await setupBackgroundModules(backgroundModules, storageManager)

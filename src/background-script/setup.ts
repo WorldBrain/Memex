@@ -98,6 +98,7 @@ import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
+import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -106,6 +107,7 @@ export interface BackgroundModules {
     social: SocialBackground
     pdfBg: PDFBackground
     // connectivityChecker: ConnectivityCheckerBackground
+    pageActivityIndicator: PageActivityIndicatorBackground
     activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -602,6 +604,9 @@ export function createBackgroundModules(options: {
         search,
         eventLog: new EventLogBackground({ storageManager }),
         activityIndicator,
+        pageActivityIndicator: new PageActivityIndicatorBackground({
+            storageManager,
+        }),
         customLists,
         tags,
         bookmarks,
@@ -767,6 +772,7 @@ export function getBackgroundStorageModules(
     __deprecatedModules: DeprecatedStorageModules,
 ): { [moduleName: string]: StorageModule } {
     return {
+        pageActivityIndicator: backgroundModules.pageActivityIndicator.storage,
         pageFetchBacklog: __deprecatedModules.pageFetchBacklogStorage,
         annotations: backgroundModules.directLinking.annotationStorage,
         readwiseAction: __deprecatedModules.readwiseActionQueueStorage,
