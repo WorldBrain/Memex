@@ -1213,9 +1213,8 @@ const TopBar = styled.div`
     position: sticky;
     background: ${(props) => props.theme.colors.backgroundColor};
     top: 0px;
-    width: 93%;
     z-index: 11300;
-    padding: 15px 15px 10px 10px;
+    padding: 15px 10px 10px 10px;
 `
 
 const TopBarContainer = styled.div`
@@ -1801,11 +1800,11 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     height: fit-content;
     overflow-x: hidden;
     width: fill-available;
-    padding-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '40px'};
+    /* padding-right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '0' : '40px'}; */
     position: absolute;
-    margin-right: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '0' : '-40px'};
+    /* margin-right: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '0' : '-30px'}; */
 
     &::-webkit-scrollbar {
         display: none;
@@ -1814,5 +1813,5 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         props.sidebarContext === 'dashboard' ? '100%' : '100%'};
 
     scrollbar-width: none;
-    padding-left: 4px;
+    padding: 0 4px;
 `

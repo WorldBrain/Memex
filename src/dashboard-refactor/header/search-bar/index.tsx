@@ -169,7 +169,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             >
                                 <Icon
                                     path={icons.removeX}
-                                    heightAndWidth="16px"
+                                    heightAndWidth="24px"
                                 />
                             </ButtonTooltip>
                         ) : (
@@ -179,7 +179,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             >
                                 <Icon
                                     path={icons.filterIcon}
-                                    heightAndWidth="20px"
+                                    heightAndWidth="24px"
                                 />
                             </ButtonTooltip>
                         )}

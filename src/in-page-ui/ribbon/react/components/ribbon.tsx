@@ -679,14 +679,13 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     align-self: center;
     width: 24px;
     height: 400px;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
     align-items: center;
     background: transparent;
-    z-index: 2147483647;
+    z-index: 2147483644;
 
     ${(props) =>
         props.isPeeking &&
@@ -707,6 +706,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
             align-items: flex-start;
             padding: 0 5px;
+            background: ${(props) => props.theme.colors.backgroundColor};
 
             & .removeSidebar {
                 visibility: hidden;
@@ -750,6 +750,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             background: transparent;
             border: none;
             align-items: center;
+            background: ${(props) => props.theme.colors.backgroundColor};
         `}
 `
 
@@ -800,8 +801,7 @@ const SubText = styled.span`
 const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
     display: flex;
     justify-content: center;
-    margin: 10px 0;
-    margin-left: ${(props) => props.isSidebarOpen && '-2px'};
+    margin: ${(props) => (props.isSidebarOpen ? '2px 0 15px' : '10px 0')};
 `
 
 const InfoText = styled.div`

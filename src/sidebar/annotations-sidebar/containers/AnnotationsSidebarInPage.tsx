@@ -37,9 +37,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         isLockable: true,
         theme: {
             ...theme,
-            rightOffsetPx: 0,
+            rightOffsetPx: 50,
             canClickAnnotations: true,
-            paddingRight: 40,
+            paddingRight: 0,
         },
     }
 

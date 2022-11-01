@@ -702,6 +702,8 @@ export class AnnotationsSidebarContainer<
         const style = {
             height: '100%',
             position: 'relative',
+            right: '0px',
+            left: 'unset',
         } as const
 
         return (
@@ -723,7 +725,7 @@ export class AnnotationsSidebarContainer<
                         className="sidebar-draggable"
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'340px'}
+                        minWidth={'380px'}
                         maxWidth={'1000px'}
                         disableDragging={true}
                         enableResizing={{

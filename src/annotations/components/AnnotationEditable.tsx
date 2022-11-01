@@ -194,7 +194,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 <Icon
                                     onClick={onGoToAnnotation}
                                     filePath={icons.goTo}
-                                    heightAndWidth={'16px'}
+                                    heightAndWidth={'20px'}
+                                    padding={'5px'}
                                 />
                             </HighlightAction>
                         </ButtonTooltip>
@@ -214,7 +215,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 <Icon
                                     onClick={footerDeps.onEditIconClick}
                                     icon={'edit'}
-                                    heightAndWidth={'16px'}
+                                    heightAndWidth={'20px'}
                                     padding={'5px'}
                                 />
                             </HighlightAction>
@@ -268,14 +269,16 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         if (mode === 'edit') {
             return (
-                <AnnotationEdit
-                    ref={this.annotEditRef}
-                    {...annotationEditDependencies}
-                    rows={2}
-                    editorHeight={this.state.editorHeight}
-                    isShared={this.props.isShared}
-                    isBulkShareProtected={this.props.isBulkShareProtected}
-                />
+                <AnnotationEditContainer>
+                    <AnnotationEdit
+                        ref={this.annotEditRef}
+                        {...annotationEditDependencies}
+                        rows={2}
+                        editorHeight={this.state.editorHeight}
+                        isShared={this.props.isShared}
+                        isBulkShareProtected={this.props.isBulkShareProtected}
+                    />
+                </AnnotationEditContainer>
             )
         }
 
@@ -285,23 +288,27 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <CommentBox onMouseEnter={this.props.onNoteHover}>
-                {annotationFooterDependencies?.onEditIconClick && (
-                    <EditNoteIconBox tooltipText="Edit Note" position="bottom">
-                        <ButtonTooltip
+                {!this.theme.hasHighlight &&
+                    annotationFooterDependencies?.onEditIconClick && (
+                        <EditNoteIconBox
                             tooltipText="Edit Note"
                             position="bottom"
                         >
-                            <Icon
-                                onClick={
-                                    annotationFooterDependencies?.onEditIconClick
-                                }
-                                icon={'edit'}
-                                heightAndWidth={'16px'}
-                                padding={'5px'}
-                            />
-                        </ButtonTooltip>
-                    </EditNoteIconBox>
-                )}
+                            <ButtonTooltip
+                                tooltipText="Edit Note"
+                                position="bottom"
+                            >
+                                <Icon
+                                    onClick={
+                                        annotationFooterDependencies?.onEditIconClick
+                                    }
+                                    icon={'edit'}
+                                    heightAndWidth={'20px'}
+                                    padding={'5px'}
+                                />
+                            </ButtonTooltip>
+                        </EditNoteIconBox>
+                    )}
                 <TextTruncated text={comment}>
                     {({ text }) => (
                         <NoteTextBox hasHighlight={this.theme.hasHighlight}>
@@ -326,17 +333,18 @@ export default class AnnotationEditable extends React.Component<Props> {
         } = this.props
 
         const repliesToggle: ItemBoxBottomAction =
-            repliesLoadingState === 'running'
-                ? { node: <LoadingIndicator size={16} /> }
-                : {
+            repliesLoadingState === 'success'
+                ? {
                       key: 'replies-btn',
                       onClick: onReplyBtnClick,
-                      tooltipText: 'Toggle replies',
-                      tooltipPosition: 'left',
+                      tooltipText: 'Show replies',
+                      tooltipPosition: 'bottom',
+                      imageColor: 'purple',
                       image: hasReplies
                           ? icons.commentFull
                           : icons.commentEmpty,
                   }
+                : { node: <LoadingIndicator size={16} /> }
 
         if (!footerDeps) {
             return [repliesToggle]
@@ -351,6 +359,19 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (hoverState === null) {
             if (appendRepliesToggle) {
                 return [repliesToggle]
+            }
+
+            if (this.props.lists.length > 0) {
+                return [
+                    {
+                        key: 'add-spaces-btn',
+                        image: icons.plus,
+                        imageColor: 'purple',
+                        // ButtonText: 'Spaces',
+                        iconSize: '14px',
+                    },
+                    appendRepliesToggle && repliesToggle,
+                ]
             }
 
             // if (isShared || isBulkShareProtected) {
@@ -587,7 +608,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                                                 this.props.url,
                                             )
                                         }
-                                        padding={'0px 20px 10px 20px'}
+                                        padding={
+                                            this.props.mode === 'edit'
+                                                ? '5px 15px 10px 15px'
+                                                : '0px 15px 10px 15px'
+                                        }
                                     />
                                 )}
 
@@ -693,6 +718,10 @@ const ShareBtn = styled.div`
     }
 `
 
+const AnnotationEditContainer = styled.div`
+    padding-top: 10px;
+`
+
 const TagPickerWrapper = styled.div`
     position: relative;
 `
@@ -712,16 +741,11 @@ const EditNoteIconBox = styled.div`
     z-index: 100;
     border: none;
     outline: none;
-    background: white;
-    width: 20px;
-    height: 20px;
-    padding: 4px;
-    margin-top: -5px;
-    border-radius: 3px;
-    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
 
     &:hover {
-        background-color: #f0f0f0;
     }
 `
 
@@ -771,7 +795,6 @@ const SaveActionBar = styled.div`
 const HighlightActionsBox = styled.div`
     position: absolute;
     right: 0px;
-    top: -5px;
     width: 50px;
     display: flex;
     justify-content: flex-end;
@@ -810,13 +833,11 @@ const ActionBox = styled.div`
 
 const HighlightAction = styled(Margin)`
     display: flex;
-    background-color: white;
-    border-radius: 3px;
-    padding: 2px;
-    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
 
     &:hover {
-        background-color: #f0f0f0;
     }
 `
 
@@ -875,7 +896,7 @@ const HighlightStyled = styled.div`
 const CommentBox = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;

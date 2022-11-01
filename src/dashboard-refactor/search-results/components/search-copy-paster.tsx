@@ -36,7 +36,7 @@ export default function SearchCopyPaster(props: Props) {
             <ButtonTooltip tooltipText="Copy Search Results" position="bottom">
                 <Icon
                     path={icons.copy}
-                    heightAndWidth="16px"
+                    heightAndWidth="22px"
                     onClick={props.toggleCopyPaster}
                 />
             </ButtonTooltip>
