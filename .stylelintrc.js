@@ -13,18 +13,22 @@ module.exports = {
         'property-no-vendor-prefix': true,
         'selector-no-vendor-prefix': true,
         'value-no-vendor-prefix': true,
-        'declaration-no-important': true,
+        'declaration-no-important': null,
         'value-list-comma-newline-after': null,
         'declaration-colon-newline-after': null,
+        'no-missing-end-of-source-newline': null,
         'declaration-empty-line-before': null,
         'length-zero-no-unit': null,
         'function-url-scheme-whitelist': ['data'],
         'selector-descendant-combinator-no-non-space': null,
         'selector-combinator-space-before': null,
         'no-descending-specificity': null,
-        "at-rule-no-unknown": null,
-        "property-no-unknown":[true, {
-            "ignoreProperties":["composes"]
-        }],
+        'at-rule-no-unknown': null,
+        'property-no-unknown': [
+            true,
+            {
+                ignoreProperties: ['composes'],
+            },
+        ],
     },
 }
