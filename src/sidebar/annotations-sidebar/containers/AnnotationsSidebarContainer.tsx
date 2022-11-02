@@ -80,7 +80,7 @@ export class AnnotationsSidebarContainer<
                         'instanceRef'
                     ] as AnnotationsSidebarComponent).focusCreateForm(),
                 focusEditNoteForm: (annotationId) => {
-                    ;(this.sidebarRef?.current[
+                    ; (this.sidebarRef?.current[
                         'instanceRef'
                     ] as AnnotationsSidebarComponent).focusEditNoteForm(
                         annotationId,
@@ -209,10 +209,10 @@ export class AnnotationsSidebarContainer<
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
-                          this.processEvent('goToAnnotationInNewTab', {
-                              annotationUrl: annotation.url,
-                              ...DEF_CONTEXT,
-                          })
+                        this.processEvent('goToAnnotationInNewTab', {
+                            annotationUrl: annotation.url,
+                            ...DEF_CONTEXT,
+                        })
                     : undefined,
             onCopyPasterBtnClick: () =>
                 this.processEvent('setCopyPasterAnnotationId', {
@@ -349,8 +349,8 @@ export class AnnotationsSidebarContainer<
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
             annotation.isShared &&
-            annotationsCache.listData[listId]?.remoteId != null &&
-            showExternalConfirmations
+                annotationsCache.listData[listId]?.remoteId != null &&
+                showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
                 : 'updateListsForAnnotation'
         return {
@@ -363,7 +363,7 @@ export class AnnotationsSidebarContainer<
 
                 if (
                     this.state.annotationModes.pageAnnotations[
-                        annotation.url
+                    annotation.url
                     ] === 'edit'
                 ) {
                     await this.processEvent('editAnnotation', {
@@ -402,7 +402,7 @@ export class AnnotationsSidebarContainer<
         const state =
             followedListId != null
                 ? this.state.followedLists.byId[followedListId]
-                      .activeCopyPasterAnnotationId
+                    .activeCopyPasterAnnotationId
                 : this.state.activeCopyPasterAnnotationId
 
         if (state !== currentAnnotationId) {
@@ -484,7 +484,7 @@ export class AnnotationsSidebarContainer<
         const state =
             followedListId != null
                 ? this.state.followedLists.byId[followedListId]
-                      .activeListPickerState
+                    .activeListPickerState
                 : this.state.activeListPickerState
 
         if (
@@ -529,7 +529,7 @@ export class AnnotationsSidebarContainer<
         const state =
             followedListId != null
                 ? this.state.followedLists.byId[followedListId]
-                      .activeShareMenuAnnotationId
+                    .activeShareMenuAnnotationId
                 : this.state.activeShareMenuNoteId
 
         if (state !== currentAnnotationId || currentAnnotation == null) {
@@ -851,7 +851,13 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
-                            // sidebarActions={null}
+                            selectedSpace={
+                                document.URL.split('#').length > 1
+                                    ? 'unknown'
+                                    : ''
+                            }
+                            // TODO: check why this got removed
+                            // sidebarActions={() => this.renderTopBar()}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef as any}

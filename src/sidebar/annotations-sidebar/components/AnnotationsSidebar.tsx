@@ -112,6 +112,7 @@ export interface AnnotationsSidebarProps
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+    selectedSpace: string
     //postShareHook: (shareInfo) => void
 }
 
@@ -1010,7 +1011,7 @@ export class AnnotationsSidebar extends React.Component<
                             </AnnotationActions>
                         )}
                         {this.props.noteCreateState === 'running' ||
-                        this.props.annotations.length > 0 ? (
+                            this.props.annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -1044,11 +1045,11 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.isExpanded
                                 ? null
                                 : () => {
-                                      this.props.expandMyNotes()
-                                      this.props.expandSharedSpaces(
-                                          followedLists.allIds,
-                                      )
-                                  }
+                                    this.props.expandMyNotes()
+                                    this.props.expandSharedSpaces(
+                                        followedLists.allIds,
+                                    )
+                                }
                         }
                     >
                         <FollowedListSectionTitle
@@ -1063,11 +1064,11 @@ export class AnnotationsSidebar extends React.Component<
                         this.props.isExpandedSharedSpaces
                             ? null
                             : () => {
-                                  this.props.expandSharedSpaces(
-                                      followedLists.allIds,
-                                  )
-                                  this.props.expandMyNotes()
-                              }
+                                this.props.expandSharedSpaces(
+                                    followedLists.allIds,
+                                )
+                                this.props.expandMyNotes()
+                            }
                     }
                     left="5px"
                 >
@@ -1090,6 +1091,39 @@ export class AnnotationsSidebar extends React.Component<
                         )}
                     </FollowedListSectionTitle>
                 </FollowedListTitleContainer>
+            </TopBarContainer>
+        )
+    }
+
+    /*
+
+        A Leaf Screen refers to a final screen havigation you reach after
+        going through a series of screens levels. Of course you may have links
+        to other documents from a Leaf Screen, but from a navigation standing
+        point, the leaf is the last screen in the hierarchy. From there you
+        can only navigate back up in the hierarchy.
+
+        The LeafTopBar was initially created to basically contain the back
+        button to the uppoer navigation level.
+
+        We don't have a declared navigation structure at this point so take
+        this only as a logical UX matter.
+
+     */
+    private renderLeafTopBar() {
+        return (
+            <TopBarContainer>
+                <ButtonTooltip
+                    tooltipText="Back to all spaces"
+                    position="bottom"
+                >
+                    <Icon
+                        filePath={icons.arrowLeft}
+                        heightAndWidth="26px"
+                        onClick={(evt) => console.log('Clicked VIEW ALL', evt)}
+                    />
+                    View All
+                </ButtonTooltip>
             </TopBarContainer>
         )
     }
@@ -1192,7 +1226,9 @@ export class AnnotationsSidebar extends React.Component<
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
                     <>
-                        {this.renderTopBarSwitcher()}
+                        {this.props.selectedSpace
+                            ? this.renderLeafTopBar()
+                            : this.renderTopBarSwitcher()}{' '}
                         {this.renderSharePageButton()}
                         {/* {this.props.sidebarActions()} */}
                     </>
@@ -1257,6 +1293,8 @@ const LoadingBox = styled.div`
 `
 
 const TopBar = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1495,7 +1533,7 @@ const FollowedListsContainer = styled.div`
     padding: 10px 10px 100px 10px;
 `
 
-const FollowedListRow = styled(Margin)<{ context: string }>`
+const FollowedListRow = styled(Margin) <{ context: string }>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -1528,7 +1566,7 @@ const ButtonContainer = styled.div`
     grid-gap: 10px;
 `
 
-const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
+const FollowedListSectionTitle = styled(Margin) <{ active: boolean }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.normalText};
     justify-content: center;
@@ -1596,7 +1634,7 @@ const FollowedListTitle = styled.span<{ context: string }>`
     color: ${(props) => props.theme.colors.normalText};
 `
 
-const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
+const PageActivityIndicator = styled(Margin) <{ active: boolean }>`
     font-weight: bold;
     border-radius: 30px;
     background-color: ${(props) => props.theme.colors.purple};
@@ -1606,7 +1644,7 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
     display: flex;
 `
 
-const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
+const FollowedListNoteCount = styled(Margin) <{ active: boolean }>`
     font-weight: bold;
     font-size: 14px;
     display: flex;
@@ -1627,7 +1665,7 @@ const FollowedListIconContainer = styled.div`
     }
 `
 
-const FollowedListDropdownIcon = styled(Icon)<{
+const FollowedListDropdownIcon = styled(Icon) <{
     isExpanded: boolean
 }>`
     transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
