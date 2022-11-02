@@ -262,14 +262,14 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             showLink={this.state.showLink}
                             onCopyLinkClick={this.handleLinkCopy}
                             linkTitleCopy="Link to this annotation"
-                            privacyOptionsTitleCopy="Set privacy for this annotation"
+                            privacyOptionsTitleCopy="Privacy settings"
                             isLoading={
                                 this.state.shareState === 'running' ||
                                 this.state.loadState === 'running'
                             }
                             privacyOptions={[
                                 {
-                                    icon: 'webLogo',
+                                    icon: 'globe',
                                     title: 'Public',
                                     hasProtectedOption: true,
                                     onClick: this.handleSetShared,
@@ -279,7 +279,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                         'Auto-added to Spaces the page is shared to',
                                 },
                                 {
-                                    icon: 'person',
+                                    icon: 'personFine',
                                     title: 'Private',
                                     hasProtectedOption: true,
                                     onClick: this.handleSetPrivate,
@@ -301,9 +301,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         />
 
                         <SectionTitle>Add to Spaces</SectionTitle>
-                        <SectionSubTitle>
-                            Selection protected from bulk changes to privacy
-                        </SectionSubTitle>
                         <SpacePicker
                             {...this.props.spacePickerProps}
                             selectEntry={this.handleSpacePickerSelection(
@@ -324,7 +321,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    font-weight: normal;
+    font-weight: 700;
     margin-top: 10px;
     margin-bottom: 5px;
     padding-left: 15px;
