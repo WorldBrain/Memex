@@ -85,8 +85,13 @@ const EditableListTitle = styled.input`
     outline: none;
     border: none;
     width: fill-available;
-    color: ${(props) => props.theme.colors.normalText};
-    background: ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.darkerText};
+    background: ${(props) => props.theme.colors.darkhover};
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        color: ${(props) => props.theme.colors.normalText};
+    }
 `
 
 const ErrMsg = styled.div`

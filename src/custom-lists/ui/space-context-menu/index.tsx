@@ -85,6 +85,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         onClick={wrapClick((e) =>
                             this.processEvent('shareSpace', null),
                         )}
+                        fontSize="14px"
                     />
                 </ShareSectionContainer>
             )
@@ -140,7 +141,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         </Link>
                                         <IconContainer id={'iconContainer'}>
                                             <Icon
-                                                heightAndWidth="18px"
+                                                heightAndWidth="16px"
                                                 path={icons.copy}
                                                 onClick={wrapClick(() =>
                                                     this.processEvent(
@@ -150,7 +151,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                                 )}
                                             />
                                             <Icon
-                                                heightAndWidth="18px"
+                                                heightAndWidth="16px"
                                                 path={icons.goTo}
                                                 onClick={wrapClick(() =>
                                                     window.open(link),
@@ -302,10 +303,6 @@ const EditArea = styled.div`
 
 const IconContainer = styled.div`
     display: none;
-    grid-gap: 5px;
-    grid-auto-flow: row;
-    border-radius: 6px;
-    outline: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const LoadingContainer = styled.div`
@@ -484,24 +481,32 @@ const LinkAndRoleBox = styled.div<{
             align-items: flex-start;
         `}
 
-    &:hover {
-        #iconContainer {
+    &:hover ${IconContainer} {
+            height: fit-content;
+            width: fit-content;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-gap: 5px;
+            grid-auto-flow: row;
+            border-radius: 6px;
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
         }
-    }
+
 `
 
 const LinkBox = styled(Margin)`
     width: fill-available;
     display: flex;
-    background-color: ${(props) => props.theme.colors.lineGrey};
     font-size: 14px;
     border-radius: 3px;
     text-align: left;
     height: 30px;
     cursor: pointer;
     padding-right: 10px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.normalText};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    background: ${(props) => props.theme.colors.darkhover};
 `
 
 const Link = styled.span`
