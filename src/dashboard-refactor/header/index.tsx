@@ -121,7 +121,7 @@ export interface HeaderProps {
     sidebarLockedState: SidebarLockedState
     sidebarToggleHoverState: HoverState
     selectedListName?: string
-    searchBarProps: SearchBarProps
+    searchBarProps: SearchBarProps & SearchCopyPasterProps
     syncStatusMenuProps: SyncStatusMenuProps
     syncStatusIconState: SyncStatusIconState
     activityStatus?: boolean

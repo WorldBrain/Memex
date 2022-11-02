@@ -23,7 +23,7 @@ export interface Props {
     description: string | null
     saveDescription: (description: string) => void
     onAddContributorsClick?: React.MouseEventHandler
-    listId: number
+    listId?: number
 }
 
 interface State {
