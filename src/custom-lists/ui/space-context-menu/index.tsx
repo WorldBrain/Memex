@@ -74,12 +74,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             <ButtonLabel>
                                 {' '}
                                 <Icon
-                                    color="white"
-                                    heightAndWidth="12px"
+                                    color="backgroundColor"
+                                    heightAndWidth="16px"
                                     path={icons.link}
                                     hoverOff
                                 />{' '}
-                                Share this Space
+                                Share Space
                             </ButtonLabel>
                         }
                         onClick={wrapClick((e) =>
@@ -94,47 +94,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <Margin bottom="3px" key={link}>
+                        <Margin horizontal="5px" bottom="3px" key={link}>
                             <LinkAndRoleBox viewportBreakpoint="normal">
-                                <CopyLinkBox>
-                                    <LinkBox
-                                        left="small"
-                                        onClick={wrapClick((e) =>
-                                            this.processEvent(
-                                                'copyInviteLink',
-                                                { linkIndex },
-                                            ),
-                                        )}
-                                    >
-                                        <Link>
-                                            {showCopyMsg
-                                                ? 'Copied to clipboard'
-                                                : link.split('https://')[1]}
-                                        </Link>
-                                        <IconContainer id={'iconContainer'}>
-                                            <Icon
-                                                heightAndWidth="14px"
-                                                path={icons.copy}
-                                                onClick={wrapClick(() =>
-                                                    this.processEvent(
-                                                        'copyInviteLink',
-                                                        { linkIndex },
-                                                    ),
-                                                )}
-                                            />
-                                            <Icon
-                                                heightAndWidth="14px"
-                                                path={icons.goTo}
-                                                onClick={wrapClick(() =>
-                                                    window.open(link),
-                                                )}
-                                            />
-                                        </IconContainer>
-                                    </LinkBox>
-                                </CopyLinkBox>
                                 <PermissionArea>
                                     <ButtonTooltip
-                                        position={'bottomSingleLine'}
+                                        position={'right'}
                                         tooltipText={
                                             sharedListRoleIDToString(roleID) ===
                                             'Contributor' ? (
@@ -159,6 +123,42 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         </PermissionText>
                                     </ButtonTooltip>
                                 </PermissionArea>
+                                <CopyLinkBox>
+                                    <LinkBox
+                                        left="small"
+                                        onClick={wrapClick((e) =>
+                                            this.processEvent(
+                                                'copyInviteLink',
+                                                { linkIndex },
+                                            ),
+                                        )}
+                                    >
+                                        <Link>
+                                            {showCopyMsg
+                                                ? 'Copied to clipboard'
+                                                : link.split('https://')[1]}
+                                        </Link>
+                                        <IconContainer id={'iconContainer'}>
+                                            <Icon
+                                                heightAndWidth="18px"
+                                                path={icons.copy}
+                                                onClick={wrapClick(() =>
+                                                    this.processEvent(
+                                                        'copyInviteLink',
+                                                        { linkIndex },
+                                                    ),
+                                                )}
+                                            />
+                                            <Icon
+                                                heightAndWidth="18px"
+                                                path={icons.goTo}
+                                                onClick={wrapClick(() =>
+                                                    window.open(link),
+                                                )}
+                                            />
+                                        </IconContainer>
+                                    </LinkBox>
+                                </CopyLinkBox>
                             </LinkAndRoleBox>
                         </Margin>
                     ),
@@ -221,13 +221,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
         return (
             <>
-                {this.renderShareLinks()}
-                <MenuButton onClick={deleteHandler}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="14px" path={icons.trash} />
-                    </Margin>
-                    Delete
-                </MenuButton>
                 <EditArea>
                     <EditableMenuItem
                         {...this.props.editableProps}
@@ -237,6 +230,20 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         nameValue={this.state.nameValue}
                     />
                 </EditArea>
+                <MenuButton onClick={deleteHandler}>
+                    <Margin right="6px">
+                        <Icon
+                            hoverOff
+                            heightAndWidth="18px"
+                            path={icons.trash}
+                        />
+                    </Margin>
+                    Delete
+                </MenuButton>
+                {this.props.remoteListId && (
+                    <SectionTitle>Sharing Links</SectionTitle>
+                )}
+                {this.renderShareLinks()}
             </>
         )
     }
@@ -265,6 +272,17 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 }
 
+const SectionTitle = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 600;
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 15px;
+`
+
 const DeleteBox = styled.div`
     padding: 20px;
     display: flex;
@@ -278,20 +296,16 @@ const PermissionArea = styled.div`
 `
 
 const EditArea = styled.div`
-    border-top: 1px solid #f0f0f0;
     color: ${(props) => props.theme.colors.normalText};
     width: fill-available;
-    padding-bottom: 5px;
 `
 
 const IconContainer = styled.div`
     display: none;
     grid-gap: 5px;
-    grid-auto-flow: column;
-
-    & > div {
-        background: white;
-    }
+    grid-auto-flow: row;
+    border-radius: 6px;
+    outline: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const LoadingContainer = styled.div`
@@ -299,12 +313,10 @@ const LoadingContainer = styled.div`
     height: 126px;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #f0f0f0;
 `
 
 const ShareSectionContainer = styled.div`
     padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
 `
 
 const ButtonLabel = styled.div`
@@ -312,8 +324,6 @@ const ButtonLabel = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
-    font-size: 14px;
-    font-weight: 400;
 
     & * {
         cursor: pointer;
@@ -332,6 +342,7 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
     position: relative;
     width: 100%;
 `}
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     ${(props) =>
         props.x || props.y
             ? ''
@@ -355,6 +366,7 @@ const ModalContent = styled.div<{
     width: 300px;
     bottom: ${(props) => (props.x && props.y ? props.y + 'px' : 'unset')};
     right: ${(props) => (props.x && props.y ? props.x + 'px' : 'unset')};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
 `
 
 const Overlay = styled.div`
@@ -375,7 +387,8 @@ const MenuContainer = styled.div`
     width: 100%;
     max-width: 350px;
     position: absolute;
-    background-color: ${colors.white};
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
     box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     border-radius: 12px;
     z-index: 1;
@@ -405,12 +418,12 @@ const TitleBox = styled.div`
     align-items: center;
     padding-right: 10px;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     justify-content: center;
 `
 
 const MenuButton = styled.div`
-    height: 34px;
+    height: 36px;
     font-family: 'Satoshi', sans-serif;
     font-weight: ${fonts.primary.weight.normal};
     color: ${(props) => props.theme.colors.normalText};
@@ -421,11 +434,16 @@ const MenuButton = styled.div`
     justify-content: flex-start;
     align-items: center;
     cursor: pointer;
-    padding: 0px 10px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    padding: 0px 5px;
+    margin: 5px 5px;
+    border-radius: 5px;
+
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+    }
+
+    & * {
+        cursor: pointer;
     }
     & > div {
         width: auto;
@@ -468,7 +486,7 @@ const LinkAndRoleBox = styled.div<{
 
     &:hover {
         #iconContainer {
-            display: grid;
+            display: flex;
         }
     }
 `
@@ -529,6 +547,7 @@ const PermissionText = styled.span<{
     justify-content: flex-end;
     font-size: 12px;
     z-index: 0;
+    margin-bottom: 2px;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||

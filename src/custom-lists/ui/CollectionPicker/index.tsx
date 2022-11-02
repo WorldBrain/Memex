@@ -374,15 +374,9 @@ class SpacePicker extends StatefulUIElement<
                 </EntryList>
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
-                        resultItem={
-                            <ListResultItem>
-                                {this.state.newEntryName}
-                            </ListResultItem>
-                        }
+                        resultItem={this.state.newEntryName}
                         onPress={this.handleNewListPress}
-                    >
-                        {this.renderNewListAllTabsButton()}
-                    </AddNewEntry>
+                    />
                 )}
             </>
         )
@@ -405,7 +399,9 @@ class SpacePicker extends StatefulUIElement<
 const EntryListHeader = styled.div`
     padding: 5px 10px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.subText};
+    color: ${(props) => props.theme.colors.darkText};
+    font-weight: 400;
+    margin-bottom: -2px;
 `
 
 const EntryList = styled.div`
@@ -454,9 +450,8 @@ const LoadingBox = styled.div`
 `
 
 const OuterSearchBox = styled.div`
-    background: ${(props) => props.theme.background};
     border-radius: 12px;
-    padding: 10px 0px;
+    padding: 15px 5px 5px 5px;
 `
 
 const EmptyListsView = styled.div`
@@ -470,9 +465,15 @@ const EmptyListsView = styled.div`
 
 const EntryRowContainer = styled.div`
     display: flex;
-    flex=direction: row;
+    flex-direction: row;
     align-items: center;
-    margin: 0px 10px;
+    margin: 0 5px;
+    border-radius: 6px;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
+    }
 `
 
 const SpaceContextMenuBtn = styled.div`

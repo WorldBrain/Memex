@@ -73,7 +73,7 @@ export default class EditableMenuItem extends React.PureComponent<Props> {
 
 const EditableListTitle = styled.input`
     padding: 2px 10px;
-    border-radius: 3px;
+    border-radius: 5px;
     outline: none;
     background: white;
     flex: 2;
@@ -86,7 +86,7 @@ const EditableListTitle = styled.input`
     border: none;
     width: fill-available;
     color: ${(props) => props.theme.colors.normalText};
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.lightHover};
 `
 
 const ErrMsg = styled.div`
@@ -106,6 +106,5 @@ const Container = styled.div<Props>`
     align-items: flex-start;
     background-color: transparent;
     padding: 10px;
-    margin-bottom: 5px;
     margin-top: 5px;
 `

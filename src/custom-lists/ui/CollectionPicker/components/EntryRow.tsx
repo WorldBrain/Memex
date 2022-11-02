@@ -132,18 +132,20 @@ class EntryRow extends React.Component<Props> {
                         </ButtonContainer>
                     )}
                     {selected ? (
-                        <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} />
+                        <ButtonContainer selected={selected}>
+                            <SelectionBox selected={selected}>
+                                <Icon
+                                    icon={icons.check}
+                                    heightAndWidth="16px"
+                                    color="backgroundColor"
+                                />
+                            </SelectionBox>
                         </ButtonContainer>
                     ) : focused ? (
                         <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} faded={true} />
+                            <SelectionBox selected={selected} />
                         </ButtonContainer>
-                    ) : (
-                        <ButtonContainer>
-                            <EmptyCircle />
-                        </ButtonContainer>
-                    )}
+                    ) : null}
                 </IconStyleWrapper>
             </Row>
         )
@@ -154,25 +156,26 @@ export const ActOnAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-const ButtonContainer = styled.div`
+const ButtonContainer = styled.div<{ selected }>`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    align-items: center;
+`
+
+const SelectionBox = styled.div<{ selected }>`
     height: 20px;
     width: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-`
-
-const IconImg = styled.img<{ faded? }>`
-    opacity: ${(props) => props.faded && '0.5'};
-    height: 20px;
-    width: 20px;
-`
-
-const EmptyCircle = styled.div`
-    height: 18px;
-    width: 18px;
-    border-radius: 18px;
-    border 2px solid ${(props) => props.theme.colors.lineGrey};
+    border-radius: 5px;
+    background: ${(props) =>
+        props.selected
+            ? props.theme.colors.normalText
+            : props.theme.colors.lightHover};
 `
 
 export const IconStyleWrapper = styled.div`
@@ -195,8 +198,6 @@ const Row = styled.div`
     border-radius: 5px;
     padding: 0 10px;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
-    background: ${(props) =>
-        props.isFocused && props.theme.colors.backgroundColor};
 
     &:last-child {
         border-bottom: none;

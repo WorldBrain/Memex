@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -80,9 +80,9 @@ const StyledSearchIcon = styled(SearchIcon)`
     margin-right: 8px;
 `
 
-const SearchBox = styled.div`
+const SearchBox = styled.div<{ isFocused: boolean }>`
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
     border-radius: 3px;
     color: ${(props) => props.theme.colors.normalText};
     display: flex;
@@ -95,6 +95,12 @@ const SearchBox = styled.div`
     margin-bottom: 4px;
     grid-gap: 5px;
     min-height: 20px;
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        `}
 `
 
 const SearchInput = styled(TextInputControlled)`
@@ -107,7 +113,7 @@ const SearchInput = styled(TextInputControlled)`
     display: flex;
     flex: 1;
     color: ${(props) => props.theme.colors.normalText};
-    font-family: 'Satoshi'
+    font-family: 'Satoshi';
     font-size: 14px;
     height: fill-available;
     width: fill-available;
@@ -118,5 +124,9 @@ const SearchInput = styled(TextInputControlled)`
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
         box-shadow: none;
+    }
+
+    &:focus ${SearchBox} {
+        border: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `

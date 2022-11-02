@@ -13,12 +13,12 @@ import { BackgroundSearchParams } from 'src/search/background/types'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
 export interface Props {
-    searchType: SearchType
-    isCopyPasterShown: boolean
-    isCopyPasterBtnShown: boolean
-    searchParams: BackgroundSearchParams
-    hideCopyPaster: React.MouseEventHandler
-    toggleCopyPaster: React.MouseEventHandler
+    searchType?: SearchType
+    isCopyPasterShown?: boolean
+    isCopyPasterBtnShown?: boolean
+    searchParams?: BackgroundSearchParams
+    hideCopyPaster?: React.MouseEventHandler
+    toggleCopyPaster?: React.MouseEventHandler
 }
 
 export default function SearchCopyPaster(props: Props) {

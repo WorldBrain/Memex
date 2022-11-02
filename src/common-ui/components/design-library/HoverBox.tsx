@@ -40,7 +40,8 @@ export const HoverBoxContainer = styled.div<Props>`
 `
 
 export const HoverBoxDiv = styled.div<Props>`
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    box-shadow: 0px 24px 48px 0px ${(props) =>
+        props.theme.colors.backgroundColor};
     border-radius: 12px;
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
     background: ${(props) => props.theme.colors.backgroundColorDarker};

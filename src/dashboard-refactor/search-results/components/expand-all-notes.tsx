@@ -7,8 +7,8 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import colors from 'src/dashboard-refactor/colors'
 
 export interface Props {
-    onClick: React.MouseEventHandler<HTMLButtonElement>
-    isEnabled: boolean
+    onClick?: React.MouseEventHandler<HTMLButtonElement>
+    isEnabled?: boolean
 }
 
 export default class ExpandAllNotes extends PureComponent<Props> {

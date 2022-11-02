@@ -8,11 +8,14 @@ import {
     fontSizeSmall,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
+import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-const StyledPrimaryAction = styled.div`
+const StyledPrimaryAction = styled.div<{
+    backgroundColor: ColorThemeKeys
+}>`
     padding: 8px 20px;
     height: 35px;
-    font-weight: 400;
+    font-weight: 600;
     overflow: visible;
     white-space: nowrap;
     display: flex;
@@ -21,7 +24,10 @@ const StyledPrimaryAction = styled.div`
     vertical-align: middle;
     background: ${(props) =>
         props.disabled ? colorDisabled : props.theme.colors.darkhover};
-
+    background: ${(props) =>
+        props.backgroundColor
+            ? props.backgroundColor
+            : props.theme.colors.normalText};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
@@ -30,16 +36,20 @@ const StyledPrimaryAction = styled.div`
         outline: unset;
     }
 
-    &: hover {
+    &:hover {
         opacity: 0.8;
     }
 `
 
 const StyledPrimaryActionLinkText = styled(TypographyActionText)<{
     fontSize: string
+    fontColor: ColorThemeKeys
 }>`
     font-size: ${(props) => (props.fontSize ? props.fontSize : fontSizeSmall)};
-    color: white;
+    color: ${(props) =>
+        props.fontColor ? props.fontColor : props.theme.colors.backgroundColor};
+    font-weight: 600;
+    font-family: 'Satoshi';
 `
 export const PrimaryAction = ({
     label,
@@ -47,12 +57,16 @@ export const PrimaryAction = ({
     disabled,
     innerRef,
     fontSize,
+    backgroundColor,
+    fontColor,
 }: {
     label: React.ReactNode
     onClick: React.MouseEventHandler
     disabled?: boolean
     innerRef?: any
     fontSize?: string
+    backgroundColor?: ColorThemeKeys
+    fontColor?: ColorThemeKeys
 }) => (
     <StyledPrimaryAction
         autoFocus
@@ -61,6 +75,8 @@ export const PrimaryAction = ({
         disabled={disabled}
         ref={innerRef}
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
+        backgroundColor={backgroundColor}
+        fontColor={fontColor}
     >
         <StyledPrimaryActionLinkText fontSize={fontSize}>
             {label}
