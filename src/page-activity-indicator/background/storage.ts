@@ -51,6 +51,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     collection: 'followedListEntry',
                     operation: 'createObject',
                 },
+                findAllFollowedLists: {
+                    collection: 'followedList',
+                    operation: 'findObjects',
+                    args: {},
+                },
                 updateFollowedListEntryHasAnnotations: {
                     collection: 'followedListEntry',
                     operation: 'updateObjects',

@@ -99,6 +99,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -336,6 +337,9 @@ export function createBackgroundModules(options: {
                 (await options.getServerStorage()).modules.users,
         })
 
+    const getCurrentUserId = async (): Promise<AutoPk | null> =>
+        (await auth.authService.getCurrentUser())?.id ?? null
+
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
         callFirebaseFunction,
@@ -344,10 +348,7 @@ export function createBackgroundModules(options: {
     if (!options.userMessageService) {
         const userMessagesService = new FirebaseUserMessageService({
             firebase: getFirebase,
-            auth: {
-                getCurrentUserId: async () =>
-                    (await auth.authService.getCurrentUser())?.id,
-            },
+            auth: { getCurrentUserId },
         })
         options.userMessageService = userMessagesService
         userMessagesService.startListening({
@@ -467,8 +468,7 @@ export function createBackgroundModules(options: {
         },
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
-        getUserId: async () =>
-            (await auth.authService.getCurrentUser())?.id ?? null,
+        getUserId: getCurrentUserId,
         async *userIdChanges() {
             for await (const nextUser of authChanges(auth.authService)) {
                 yield nextUser
@@ -606,6 +606,8 @@ export function createBackgroundModules(options: {
         activityIndicator,
         pageActivityIndicator: new PageActivityIndicatorBackground({
             storageManager,
+            getCurrentUserId,
+            getServerStorage,
         }),
         customLists,
         tags,

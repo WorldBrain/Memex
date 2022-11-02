@@ -1,14 +1,16 @@
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+
 export interface FollowedList {
     name: string
-    creator: string
+    creator: AutoPk
     lastSync?: number
-    sharedList: string
+    sharedList: AutoPk
 }
 
 export interface FollowedListEntry {
-    creator: string
+    creator: AutoPk
     entryTitle: string
-    followedList: string
+    followedList: AutoPk
     hasAnnotations: boolean
     normalizedPageUrl: string
     createdWhen: number
