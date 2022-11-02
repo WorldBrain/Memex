@@ -749,6 +749,11 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            selectedSpace={
+                                document.URL.split('#').length > 1
+                                    ? 'unknown'
+                                    : ''
+                            }
                             sidebarActions={() => this.renderTopBar()}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}

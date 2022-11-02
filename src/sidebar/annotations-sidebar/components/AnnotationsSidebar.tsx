@@ -109,6 +109,7 @@ export interface AnnotationsSidebarProps
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+    selectedSpace: string
     //postShareHook: (shareInfo) => void
 }
 
@@ -1079,6 +1080,39 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    /*
+
+        A Leaf Screen refers to a final screen havigation you reach after
+        going through a series of screens levels. Of course you may have links
+        to other documents from a Leaf Screen, but from a navigation standing
+        point, the leaf is the last screen in the hierarchy. From there you
+        can only navigate back up in the hierarchy.
+
+        The LeafTopBar was initially created to basically contain the back
+        button to the uppoer navigation level.
+
+        We don't have a declared navigation structure at this point so take
+        this only as a logical UX matter.
+
+     */
+    private renderLeafTopBar() {
+        return (
+            <TopBarContainer>
+                <ButtonTooltip
+                    tooltipText="Back to all spaces"
+                    position="bottom"
+                >
+                    <Icon
+                        filePath={icons.arrowLeft}
+                        heightAndWidth="26px"
+                        onClick={(evt) => console.log('Clicked VIEW ALL', evt)}
+                    />
+                    View All
+                </ButtonTooltip>
+            </TopBarContainer>
+        )
+    }
+
     private renderSortingMenuDropDown() {
         if (!this.state.showSortDropDown) {
             return null
@@ -1158,10 +1192,10 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
-                    <>
-                        {this.renderTopBarSwitcher()}{' '}
-                        {this.props.sidebarActions()}
-                    </>
+                    {this.props.selectedSpace
+                        ? this.renderLeafTopBar()
+                        : this.renderTopBarSwitcher()}{' '}
+                    {this.props.sidebarActions()}
                 </TopBar>
                 {this.renderResultsBody()}
             </ResultBodyContainer>
@@ -1213,6 +1247,8 @@ const LoadingBox = styled.div`
 `
 
 const TopBar = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     justify-content: space-between;
     align-items: center;
