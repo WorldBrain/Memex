@@ -484,7 +484,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                             icon={shareIconData.icon}
                             hoverOff
                             color={'iconColor'}
-                            heightAndWidth="18px"
+                            heightAndWidth="20px"
                         />
                         {shareIconData.label}
                     </ShareBtn>

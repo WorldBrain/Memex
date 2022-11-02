@@ -14,14 +14,14 @@ export function getShareButtonData(
     }
     if (isShared && isBulkShareProtected) {
         return {
-            icon: icons.sharedProtected,
-            label: <span>Public</span>,
+            icon: icons.lock,
+            label: 'Public',
         }
     } else if (isShared && !isBulkShareProtected) {
         return { icon: icons.globe, label: 'Public' }
     } else if (!isShared && isBulkShareProtected) {
         return {
-            icon: icons.lockFine,
+            icon: icons.lock,
             label: 'Private',
         }
     }
