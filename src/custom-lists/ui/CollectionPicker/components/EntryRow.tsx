@@ -1,5 +1,5 @@
 import React, { SyntheticEvent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -186,14 +186,13 @@ export const IconStyleWrapper = styled.div`
     justify-content: flex-end;
 `
 
-const Row = styled.div`
+const Row = styled.div<{ isFocused }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
     width: 100%;
-    max-width: 260px;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;
@@ -201,6 +200,23 @@ const Row = styled.div`
 
     &:last-child {
         border-bottom: none;
+    }
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
+    }
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            background: transparent;
+        `}
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
     }
 `
 

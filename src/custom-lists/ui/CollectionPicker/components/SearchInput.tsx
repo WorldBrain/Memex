@@ -113,10 +113,14 @@ const SearchInput = styled(TextInputControlled)`
     display: flex;
     flex: 1;
     color: ${(props) => props.theme.colors.normalText};
-    font-family: 'Satoshi';
+    font-family: 'Satoshi', sans-serif;
     font-size: 14px;
     height: fill-available;
     width: fill-available;
+
+    & * {
+        font-family: 'Satoshi';
+    }
 
     &:focus {
         border: none;

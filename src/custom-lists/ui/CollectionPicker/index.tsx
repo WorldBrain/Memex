@@ -474,6 +474,11 @@ const EntryRowContainer = styled.div`
         outline: 1px solid ${(props) => props.theme.colors.lineGrey};
         background: transparent;
     }
+
+    &:active {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
+    }
 `
 
 const SpaceContextMenuBtn = styled.div`

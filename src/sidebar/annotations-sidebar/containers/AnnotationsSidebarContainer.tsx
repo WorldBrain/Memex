@@ -931,6 +931,11 @@ const SidebarContainerWithTopBar = styled.div`
 const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
 }>`
+
+    & * {
+        font-family: 'Satoshi'
+    }
+    
     .sidebar-draggable {
         height: 100% !important;
     }
