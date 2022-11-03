@@ -31,10 +31,12 @@ async function setupTest(opts: {
 }) {
     const context = await setupBackgroundIntegrationTest()
 
-    await context.authService.loginWithEmailAndPassword(
-        TEST_USER.email,
-        'password',
-    )
+    if (!opts?.skipAuth) {
+        await context.authService.loginWithEmailAndPassword(
+            TEST_USER.email,
+            'password',
+        )
+    }
 
     if (opts?.testData) {
         const { manager } = await context.getServerStorage()
@@ -84,6 +86,35 @@ async function setupTest(opts: {
 }
 
 describe('Page activity indicator background module tests', () => {
+    it('should do nothing when not logged in', async () => {
+        const { backgroundModules, storageManager } = await setupTest({
+            skipAuth: true,
+            testData: { follows: true, ownLists: true },
+        })
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 1 },
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
+    })
+
     it('should do nothing when no owned or followed sharedLists', async () => {
         const { backgroundModules, storageManager } = await setupTest({})
 
@@ -143,6 +174,90 @@ describe('Page activity indicator background module tests', () => {
                 .collection('followedListEntry')
                 .findAllObjects({}),
         ).toEqual(calcExpectedListEntries(ownListIds))
+    })
+
+    it('should create followedListEntries based on sharedListEntries created after lastSync time', async () => {
+        const {
+            backgroundModules,
+            storageManager,
+            getServerStorage,
+        } = await setupTest({
+            testData: { ownLists: true },
+        })
+
+        const ownListIds = new Set(
+            DATA.sharedLists
+                .filter((list) => list.creator === DATA.userReferenceA.id)
+                .map((list) => list.id),
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 1 },
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(ownListIds))
+
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual(calcExpectedListEntries(ownListIds))
+
+        // Update lastSync time for one followedList, then create two new sharedListEntries: one pre-lastSync time, one post
+        const sharedList = DATA.sharedLists[0].id
+        await storageManager
+            .collection('followedList')
+            .updateOneObject({ sharedList }, { lastSync: { $set: 2 } })
+        const serverStorage = await getServerStorage()
+        const newListEntries = [
+            {
+                sharedList,
+                creator: DATA.users[0].id,
+                normalizedUrl: 'test.com/c',
+                originalUrl: 'https://test.com/c',
+                createdWhen: 1,
+                updatedWhen: 1,
+            },
+            {
+                sharedList,
+                creator: DATA.users[0].id,
+                normalizedUrl: 'test.com/d',
+                originalUrl: 'https://test.com/d',
+                createdWhen: 4,
+                updatedWhen: 4,
+            },
+        ]
+        for (const entry of newListEntries) {
+            await serverStorage.manager
+                .collection('sharedListEntry')
+                .createObject(entry)
+        }
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 1 },
+        )
+        const expected = calcExpectedListEntries(ownListIds)
+
+        // The entry updated post-lastSync time should now be there, but not the one pre-lastSync time
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            ...expected,
+            sharedListEntryToFollowedListEntry(newListEntries[1]),
+        ])
     })
 
     it('should delete followedList and followedListEntries when a sharedList no longer exists', async () => {
