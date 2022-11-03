@@ -460,10 +460,8 @@ const RemoveFromListBtn = styled.div`
 `
 
 const FavIconBox = styled.div`
-    width: 18px;
-    height: 18px;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey}30;
-    border-radius: 3px;
+    width: 20px;
+    height: 20px;
     margin-right: 5px;
 `
 
