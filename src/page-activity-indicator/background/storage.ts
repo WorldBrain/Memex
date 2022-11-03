@@ -56,6 +56,14 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     operation: 'findObjects',
                     args: {},
                 },
+                updateFollowedListLastSyncTime: {
+                    collection: 'followedList',
+                    operation: 'updateObject',
+                    args: [
+                        { sharedList: '$sharedList:pk' },
+                        { lastSync: '$lastSync:number' },
+                    ],
+                },
                 updateFollowedListEntryHasAnnotations: {
                     collection: 'followedListEntry',
                     operation: 'updateObjects',
@@ -128,6 +136,23 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             updatedWhen: data.updatedWhen ?? Date.now(),
         })
         return object.id
+    }
+
+    async findAllFollowedLists(): Promise<Map<AutoPk, FollowedList>> {
+        const followedLists: FollowedList[] = await this.operation(
+            'findAllFollowedLists',
+            {},
+        )
+        return new Map(followedLists.map((list) => [list.sharedList, list]))
+    }
+
+    async updateFollowedListLastSync(
+        data: Pick<FollowedList, 'sharedList' | 'lastSync'>,
+    ): Promise<void> {
+        await this.operation('updateFollowedListLastSyncTime', {
+            sharedList: data.sharedList,
+            lastSync: data.lastSync,
+        })
     }
 
     async updateFollowedListEntryHasAnnotations(

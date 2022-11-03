@@ -4,6 +4,11 @@ import type Storex from '@worldbrain/storex'
 import type { ServerStorageModules } from 'src/storage/types'
 import type { FollowedList } from './types'
 import PageActivityIndicatorStorage from './storage'
+import { SharedList } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    sharedListEntryToFollowedListEntry,
+    sharedListToFollowedList,
+} from './utils'
 
 export interface PageActivityIndicatorDependencies {
     storageManager: Storex
@@ -38,18 +43,92 @@ export class PageActivityIndicatorBackground {
         data,
     ) => this.storage.deleteFollowedListAndAllEntries(data)
 
-    async syncFollowedListsAndEntries(opts?: { from?: number }): Promise<void> {
-        const userId = await this.deps.getCurrentUserId()
-        if (userId == null) {
-            return
-        }
-        const userReference: UserReference = {
-            id: userId,
-            type: 'user-reference',
-        }
+    private async getAllUserFollowedSharedListsFromServer(
+        userReference: UserReference,
+    ): Promise<Array<SharedList & { id: AutoPk; creator: AutoPk }>> {
         const {
             activityFollows,
             contentSharing,
         } = await this.deps.getServerStorage()
+
+        const [sharedListFollows, ownedSharedLists] = await Promise.all([
+            activityFollows.getAllFollowsByCollection({
+                collection: 'sharedList',
+                userReference,
+            }),
+            contentSharing.getListsByCreator(userReference),
+        ])
+
+        // A user can follow their own shared lists, so filter them out to reduce reads
+        const ownedSharedListIds = new Set(
+            ownedSharedLists.map((list) => list.id),
+        )
+        const followedSharedLists = await contentSharing.getListsByReferences(
+            sharedListFollows
+                .filter((follow) => !ownedSharedListIds.has(follow.objectId))
+                .map((follow) => ({
+                    type: 'shared-list-reference',
+                    id: follow.objectId,
+                })),
+        )
+
+        return [
+            ...ownedSharedLists,
+            ...followedSharedLists.map((list) => ({
+                ...list,
+                id: list.reference.id,
+                creator: list.creator.id,
+            })),
+        ]
+    }
+
+    async syncFollowedListsAndEntries(opts?: { now?: number }): Promise<void> {
+        const userId = await this.deps.getCurrentUserId()
+        if (userId == null) {
+            return
+        }
+        const { contentSharing } = await this.deps.getServerStorage()
+
+        const sharedLists = await this.getAllUserFollowedSharedListsFromServer({
+            id: userId,
+            type: 'user-reference',
+        })
+        const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
+
+        // TODO: reduce N list entry reads to 1
+        for (const sharedList of sharedLists) {
+            const localFollowedList = existingFollowedListsLookup.get(
+                sharedList.id,
+            )
+            const sharedListEntries = await contentSharing.getListEntriesByList(
+                {
+                    listReference: {
+                        type: 'shared-list-reference',
+                        id: sharedList.id,
+                    },
+                    from: localFollowedList?.lastSync,
+                },
+            )
+            for (const entry of sharedListEntries) {
+                await this.storage.createFollowedListEntry(
+                    sharedListEntryToFollowedListEntry({
+                        ...entry,
+                        creator: entry.creator.id,
+                        sharedList: entry.sharedList.id,
+                    }),
+                )
+            }
+
+            if (localFollowedList == null) {
+                await this.storage.createFollowedList(
+                    sharedListToFollowedList(sharedList),
+                )
+            } else {
+                await this.storage.updateFollowedListLastSync({
+                    sharedList: sharedList.id,
+                    lastSync: opts?.now ?? Date.now(),
+                })
+            }
+        }
     }
 }

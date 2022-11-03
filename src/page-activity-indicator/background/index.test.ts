@@ -11,9 +11,13 @@ const calcExpectedLists = (wantedListIds?: Set<AutoPk>) =>
     DATA.sharedLists
         .filter((list) => wantedListIds?.has(list.id) ?? true)
         .map(sharedListToFollowedList)
-const calcExpectedListEntries = (wantedListIds?: Set<AutoPk>) =>
-    Object.entries(DATA.listEntries).flatMap(([sharedList, entries]) =>
-        wantedListIds?.has(sharedList) ?? true
+
+const calcExpectedListEntries = (wantedListIds?: Set<AutoPk>) => {
+    const _wantedListIds = wantedListIds
+        ? new Set([...wantedListIds].map((id) => Number(id)))
+        : null
+    return Object.entries(DATA.listEntries).flatMap(([sharedList, entries]) =>
+        _wantedListIds?.has(Number(sharedList)) ?? true
             ? entries.map((entry) =>
                   sharedListEntryToFollowedListEntry({
                       ...entry,
@@ -22,8 +26,10 @@ const calcExpectedListEntries = (wantedListIds?: Set<AutoPk>) =>
               )
             : [],
     )
+}
 
 async function setupTest(opts: {
+    skipAuth?: boolean
     testData?: {
         ownLists?: boolean
         follows?: boolean
@@ -128,7 +134,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -162,7 +168,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -285,7 +291,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -306,7 +312,7 @@ describe('Page activity indicator background module tests', () => {
         ownListIds.delete(DATA.sharedLists[0].id)
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -338,7 +344,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -375,7 +381,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -395,7 +401,7 @@ describe('Page activity indicator background module tests', () => {
         followedListIds.delete(DATA.activityFollows[2].objectId)
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -423,7 +429,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -457,7 +463,7 @@ describe('Page activity indicator background module tests', () => {
         ).toEqual([])
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
@@ -481,7 +487,7 @@ describe('Page activity indicator background module tests', () => {
         listIds.delete(DATA.sharedLists[0].id)
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { from: 1 },
+            { now: 1 },
         )
 
         expect(
