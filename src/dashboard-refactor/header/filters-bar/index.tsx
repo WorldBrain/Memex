@@ -28,8 +28,8 @@ const Container = styled.div<{ hidden: boolean }>`
     justify-content: center;
     position: sticky;
     top: 60px;
-    background: white;
-    z-index: 2147483645;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    z-index: 2147483640;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 
     ${(props) =>
@@ -45,6 +45,7 @@ const FilterBtnsContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    grid-gap: 7px;
 `
 
 const PickersContainer = styled.div`
@@ -59,13 +60,16 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     grid-auto-flow: column;
     align-items: center;
     padding: 3px 12px;
-    background: #ffffff;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+    background: ${(props) => props.theme.colors.greyScale1};
     border-radius: 8px;
     white-space: nowrap;
     max-width: 300px;
     overflow: scroll;
     font-size: 13px;
+
+    &:hover {
+        background: ${(props) => props.theme.colors.lightHover};
+    }
 
     scrollbar-width: none;
 
@@ -82,10 +86,10 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
 `
 
 const TextSpan = styled.span`
-    font - family: ${fonts.primary.name};
-font - weight: ${fonts.primary.weight.normal};
-font - size: 12px;
-line - height: 15px;
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.normal};
+    font-size: 12px;
+    line-height: 15px;
 `
 
 const TagPill = styled.div`
@@ -141,7 +145,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             | DateRangeSelectionProps
             | DomainPickerDependencies,
     ) => (
-        <Margin horizontal="7px" vertical="7px" width="auto">
+        <Margin vertical="7px" width="auto">
             <FilterSelectButton
                 selected={isShown}
                 onClick={onToggle}

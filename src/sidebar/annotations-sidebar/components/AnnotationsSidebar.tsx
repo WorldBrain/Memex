@@ -417,8 +417,6 @@ export class AnnotationsSidebar extends React.Component<
                         )
                     }
 
-                    console.log(this.props.users[data.creatorId])
-
                     return (
                         <React.Fragment key={data.id}>
                             <AnnotationEditable

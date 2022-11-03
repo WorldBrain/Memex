@@ -66,13 +66,17 @@ const Input = styled.input`
     margin-right: 10px;
     margin-left: 10px;
     outline: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.darkhover};
     color: ${(props) => props.theme.colors.normalText};
     border: none;
-    height: 25px;
+    height: 22px;
     padding: 6px;
     font-size: 14px;
     width: 150px;
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+    }
 `
 
 export default DatePickerInput
