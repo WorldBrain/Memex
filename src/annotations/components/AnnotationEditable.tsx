@@ -183,7 +183,8 @@ export default class AnnotationEditable extends React.Component<Props> {
         } = this.props
 
         const actionsBox =
-            this.props.hoverState === 'main-content' ? (
+            this.props.hoverState === 'main-content' &&
+            this.props.mode != 'edit' ? (
                 <HighlightActionsBox>
                     {onGoToAnnotation && (
                         <ButtonTooltip
@@ -718,9 +719,7 @@ const ShareBtn = styled.div`
     }
 `
 
-const AnnotationEditContainer = styled.div`
-    padding-top: 10px;
-`
+const AnnotationEditContainer = styled.div``
 
 const TagPickerWrapper = styled.div`
     position: relative;
@@ -799,6 +798,7 @@ const HighlightActionsBox = styled.div`
     display: flex;
     justify-content: flex-end;
     z-index: 10000;
+    top: -4px;
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`

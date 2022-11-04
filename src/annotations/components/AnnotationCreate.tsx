@@ -253,7 +253,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <div>
                 {this.state.isListPickerShown && (
-                    <HoverBox padding={'0px'}>
+                    <HoverBox padding={'10px 0 0 0'}>
                         <ClickAway onClickAway={() => setPickerShown(false)}>
                             {this.renderSharedCollectionsPicker()}
                         </ClickAway>

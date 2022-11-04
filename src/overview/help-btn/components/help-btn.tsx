@@ -1,11 +1,12 @@
 import React from 'react'
 import browser from 'webextension-polyfill'
+import styled from 'styled-components'
 
 import { HelpMenu, Props as HelpMenuProps } from './help-menu'
 import { menuItems } from '../menu-items'
 import { ClickAway } from 'src/util/click-away-wrapper'
-
-const styles = require('./help-btn.css')
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends HelpMenuProps {}
 
@@ -45,10 +46,28 @@ export class HelpBtn extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <div className={styles.footerBar}>
+            <HelpIconPosition>
                 {this.renderMenu()}
-                <button onClick={this.handleClick} className={styles.btn} />
-            </div>
+                <Icon
+                    filePath={icons.helpIcon}
+                    heightAndWidth={'34px'}
+                    onClick={this.handleClick}
+                />
+            </HelpIconPosition>
         )
     }
 }
+
+const HelpIconPosition = styled.div`
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    width: fit-content;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+
+    @media (max-width: 1100px) {
+        display: none;
+    }
+`

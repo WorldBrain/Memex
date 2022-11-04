@@ -76,6 +76,7 @@ export const collectionsFull = browser.runtime.getURL(
 )
 export const folder = browser.runtime.getURL('/img/folder.svg')
 export const triangle = browser.runtime.getURL('/img/chevron-down.svg')
+export const chatWithUs = browser.runtime.getURL('/img/chatWithUs.svg')
 export const plus = browser.runtime.getURL('/img/plus.svg')
 export const plusIcon = browser.runtime.getURL('/img/plus.svg')
 export const backup = browser.runtime.getURL('/img/backup.svg')

@@ -79,7 +79,7 @@ export const InitialComponent = ({
             <ButtonTooltip
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Add to Space</strong>
+                        <strong>Add Highlight to Space</strong>
                     </AnnotationTooltipText>
                 }
                 position="bottomHighlighter"
