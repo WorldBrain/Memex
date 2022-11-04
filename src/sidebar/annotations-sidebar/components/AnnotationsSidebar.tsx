@@ -1175,7 +1175,8 @@ const AnnotationActions = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    width: 97%;
+    padding: 0 10px;
+    width: fill-available;
     height: 20px;
     margin-top: -5px;
 `
@@ -1217,7 +1218,7 @@ const TopBar = styled.div`
     background: ${(props) => props.theme.colors.backgroundColor};
     top: 0px;
     z-index: 11300;
-    padding: 15px 10px 10px 10px;
+    padding: 15px 0px 10px 0px;
 `
 
 const TopBarContainer = styled.div`
@@ -1235,7 +1236,6 @@ const EmptyMessageContainer = styled.div`
     width: 100%;
 `
 const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
-    padding: 0 2px;
     width: fill-available;
     z-index: ${(props) => props.zIndex};
 `
@@ -1680,7 +1680,7 @@ const AnnotationsSectionStyled = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 5px 10px 500px 10px;
+    padding: 5px 0px 500px 0px;
     height: 100%;
 `
 
@@ -1816,5 +1816,5 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         props.sidebarContext === 'dashboard' ? '100%' : '100%'};
 
     scrollbar-width: none;
-    padding: 0 4px;
+    padding: 0 12px;
 `

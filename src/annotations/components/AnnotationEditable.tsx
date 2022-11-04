@@ -751,7 +751,7 @@ const EditNoteIconBox = styled.div`
 `
 
 const AnnotationBox = styled(Margin)<{ zIndex: number }>`
-    width: 99%;
+    width: 100%;
     align-self: center;
     z-index: ${(props) => props.zIndex};
 `

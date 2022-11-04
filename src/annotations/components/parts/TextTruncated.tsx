@@ -69,7 +69,7 @@ class TextTruncated extends React.Component<Props, State> {
                                         ? icons.expand
                                         : icons.compress
                                 }
-                                heightAndWidth={'14px'}
+                                heightAndWidth={'16px'}
                                 hoverOff
                             />
                             {this.state.isTruncated ? 'Show More' : 'Show Less'}
@@ -93,17 +93,17 @@ const ToggleMoreButtonStyled = styled.div`
     cursor: pointer;
     padding: 2px 5px;
     border-radius: 3px;
-    font-size 12px;
+    font-size: 12px;
     color: grey;
     line-height: 18px;
     color: ${(props) => props.theme.colors.lighterText};
     display: flex;
     grid-gap: 5px;
     align-items: center;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
