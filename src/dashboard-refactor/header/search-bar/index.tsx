@@ -23,9 +23,13 @@ const SearchBarContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
     border-radius: 5px;
     padding: 0px 15px;
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+    }
 `
 
 const Input = styled.input`
@@ -35,10 +39,10 @@ const Input = styled.input`
     border: none;
     background-color: transparent;
     color: ${(props) => props.theme.colors.normalText};
-    font-weight: ${fonts.primary.weight.normal};
+    font-weight: 300;
 
     &::placeholder {
-        opacity: 0.6;
+        color: ${(props) => props.theme.colors.darkText};
     }
 
     &:focus {
@@ -132,7 +136,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <IconContainer>
                                 <Margin right="5px">
                                     <Icon
-                                        heightAndWidth="14px"
+                                        heightAndWidth="22px"
                                         path={icons.removeX}
                                         onClick={() => this.handleClearSearch()}
                                     />
@@ -142,7 +146,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <IconContainer>
                                 <Margin right="5px">
                                     <Icon
-                                        heightAndWidth="16px"
+                                        heightAndWidth="22px"
                                         path={icons.searchIcon}
                                     />
                                 </Margin>
@@ -170,6 +174,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 <Icon
                                     path={icons.removeX}
                                     heightAndWidth="24px"
+                                    color={'greyScale8'}
                                 />
                             </ButtonTooltip>
                         ) : (
@@ -180,6 +185,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 <Icon
                                     path={icons.filterIcon}
                                     heightAndWidth="24px"
+                                    color={'greyScale8'}
                                 />
                             </ButtonTooltip>
                         )}

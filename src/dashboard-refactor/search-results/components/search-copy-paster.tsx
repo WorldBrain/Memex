@@ -38,6 +38,7 @@ export default function SearchCopyPaster(props: Props) {
                     path={icons.copy}
                     heightAndWidth="22px"
                     onClick={props.toggleCopyPaster}
+                    color={'greyScale8'}
                 />
             </ButtonTooltip>
             {props.isCopyPasterShown && (

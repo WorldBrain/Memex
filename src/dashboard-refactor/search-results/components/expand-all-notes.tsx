@@ -28,6 +28,7 @@ export default class ExpandAllNotes extends PureComponent<Props> {
                             path={icons.expand}
                             heightAndWidth="24px"
                             onClick={this.props.onClick}
+                            color={'greyScale8'}
                         />
                     </ButtonTooltip>
                 ) : (
@@ -39,6 +40,7 @@ export default class ExpandAllNotes extends PureComponent<Props> {
                             path={icons.compress}
                             heightAndWidth="24px"
                             onClick={this.props.onClick}
+                            color={'greyScale8'}
                         />
                     </ButtonTooltip>
                 )}
