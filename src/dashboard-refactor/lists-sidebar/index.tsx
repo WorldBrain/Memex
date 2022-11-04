@@ -23,160 +23,6 @@ import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import blacklist from 'src/options/blacklist'
-
-const Sidebar = styled.div<{
-    locked: boolean
-    peeking: boolean
-}>`
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    z-index: 3000;
-    width: 100%;
-    background: red;
-
-    ${(props) =>
-        props.locked &&
-        css`
-            height: 100%;
-            background-color: ${colors.white};
-            /* border-right: solid 1px ${(props) =>
-                props.theme.colors.lineGrey}; */
-        `}
-    ${(props) =>
-        props.peeking &&
-        css`
-            height: max-content;
-            background-color: ${colors.white};
-            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
-            /* margin-top: 50px; */
-            margin-bottom: 9px;
-            height: 90vh;
-            top: 20px;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-            position: sticky;
-        `}
-    ${(props) =>
-        !props.peeking &&
-        !props.locked &&
-        css`
-            display: none;
-        `}
-
-        @keyframes slide-in {
-            0% { 
-                left: -200px;
-                opacity: 0%;
-            }
-            100% { 
-                left: 0px;
-                opacity: 100%;
-            }
-        }
-`
-
-const Container = styled.div`
-    position: absolute;
-    z-index: 2147483645;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-`
-
-const PeekTrigger = styled.div`
-    height: 100vh;
-    width: 10px;
-    position: fixed;
-    background: red;
-`
-
-const Separator = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
-
-    &::last-child {
-        border-top: 'unset';
-    }
-`
-
-const TopGroup = styled.div`
-    /* border-top: 1px solid ${(props) => props.theme.colors.lineGrey}; */
-`
-const BottomGroup = styled.div<{ sidebarWidth: string }>`
-    overflow-y: scroll;
-    overflow-x: visible;
-    padding-bottom: 100px;
-    height: fill-available;
-    width: ${(props) => props.sidebarWidth};
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    scrollbar-width: none;
-}
-`
-
-const NoCollectionsMessage = styled.div`
-    font-family: 'Satoshi', sans-serif;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 15px;
-    margin: 5px 10px;
-    width: fill-available;
-    margin-top: 5px;
-    height: 40px;
-    justify-content: flex-start;
-    border-radius: 5px;
-
-    & * {
-        cursor: pointer;
-    }
-
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
-    }
-`
-
-const GlobalStyle = createGlobalStyle`
-
-    .sidebarResizeHandleSidebar {
-        width: 6px !important;
-        height: 100% !important;
-        right: -3px !important;
-
-        &:hover {
-            background: #5671cf30 !important;
-        }
-    }
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
-    font-weight: 300;
-    font-family: 'Satoshi', sans-serif;
-`
-
-const Link = styled.span`
-    color: ${(props) => props.theme.colors.purple};
-    padding-left: 3px;
-`
-
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
@@ -480,3 +326,155 @@ export default class ListsSidebar extends PureComponent<
         )
     }
 }
+
+const Sidebar = styled.div<{
+    locked: boolean
+    peeking: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    z-index: 3000;
+    width: 100%;
+
+    ${(props) =>
+        props.locked &&
+        css`
+            height: 100%;
+            background-color: ${colors.white};
+            /* border-right: solid 1px ${(props) =>
+                props.theme.colors.lineGrey}; */
+        `}
+    ${(props) =>
+        props.peeking &&
+        css`
+            height: max-content;
+            background-color: ${colors.white};
+            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            /* margin-top: 50px; */
+            margin-bottom: 9px;
+            height: 90vh;
+            top: 20px;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+            position: sticky;
+        `}
+    ${(props) =>
+        !props.peeking &&
+        !props.locked &&
+        css`
+            display: none;
+        `}
+
+        @keyframes slide-in {
+            0% { 
+                left: -200px;
+                opacity: 0%;
+            }
+            100% { 
+                left: 0px;
+                opacity: 100%;
+            }
+        }
+`
+
+const Container = styled.div`
+    position: absolute;
+    z-index: 2147483645;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+`
+
+const PeekTrigger = styled.div`
+    height: 100vh;
+    width: 10px;
+    position: fixed;
+    background: red;
+`
+
+const Separator = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+
+    &::last-child {
+        border-top: 'unset';
+    }
+`
+
+const TopGroup = styled.div`
+    /* border-top: 1px solid ${(props) => props.theme.colors.lineGrey}; */
+`
+const BottomGroup = styled.div<{ sidebarWidth: string }>`
+    overflow-y: scroll;
+    overflow-x: visible;
+    padding-bottom: 100px;
+    height: fill-available;
+    width: ${(props) => props.sidebarWidth};
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
+}
+`
+
+const NoCollectionsMessage = styled.div`
+    font-family: 'Satoshi', sans-serif;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    padding: 0px 15px;
+    margin: 5px 10px;
+    width: fill-available;
+    margin-top: 5px;
+    height: 40px;
+    justify-content: flex-start;
+    border-radius: 5px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &: hover {
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
+    }
+`
+
+const GlobalStyle = createGlobalStyle`
+
+    .sidebarResizeHandleSidebar {
+        width: 6px !important;
+        height: 100% !important;
+        right: -3px !important;
+
+        &:hover {
+            background: #5671cf30 !important;
+        }
+    }
+`
+
+const SectionCircle = styled.div`
+    background: ${(props) => props.theme.colors.backgroundHighlight};
+    border-radius: 100px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    font-weight: 300;
+    font-family: 'Satoshi', sans-serif;
+`
+
+const Link = styled.span`
+    color: ${(props) => props.theme.colors.purple};
+    padding-left: 3px;
+`

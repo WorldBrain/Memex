@@ -1384,7 +1384,7 @@ const ListSidebarContent = styled(Rnd)<{
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
-    z-index: 250000;
+    z-index: 2147483645;
     left: 0px;
 
     ${(props) =>
