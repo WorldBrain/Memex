@@ -195,7 +195,7 @@ export default class ListDetails extends PureComponent<Props, State> {
     render() {
         return (
             <>
-                <TopBarContainer top="10px" bottom="10px">
+                <TopBarContainer bottom="10px">
                     <Container
                         hasDescription={this.props.description?.length > 0}
                         center={!this.props.remoteLink}

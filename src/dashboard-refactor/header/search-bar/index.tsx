@@ -26,10 +26,6 @@ const SearchBarContainer = styled.div`
     background-color: ${(props) => props.theme.colors.darkhover};
     border-radius: 5px;
     padding: 0px 15px;
-
-    &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-    }
 `
 
 const Input = styled.input`
@@ -38,6 +34,7 @@ const Input = styled.input`
     line-height: 18px;
     border: none;
     background-color: transparent;
+    height: 44px;
     color: ${(props) => props.theme.colors.normalText};
     font-weight: 300;
 
@@ -47,6 +44,10 @@ const Input = styled.input`
 
     &:focus {
         outline: none;
+    }
+
+    &:focus ${SearchBarContainer} {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `
 

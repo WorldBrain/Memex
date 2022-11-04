@@ -691,6 +691,8 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     align-items: center;
     background: transparent;
     z-index: 2147483644;
+    animation: slide-in ease-out;
+    animation-duration: 0.05s;
 
     ${(props) =>
         props.isPeeking &&
@@ -718,6 +720,17 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
                 display: none;
             }
         `}
+
+        @keyframes slide-in {
+        0% {
+            right: -600px;
+            opacity: 0%;
+        }
+        100% {
+            right: 0px;
+            opacity: 100%;
+        }
+    }
 `
 
 const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`

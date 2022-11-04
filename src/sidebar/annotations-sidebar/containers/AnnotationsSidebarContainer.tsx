@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider, css } from 'styled-components'
 import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -712,6 +712,7 @@ export class AnnotationsSidebarContainer<
                 <ContainerStyled
                     className={classNames('ignore-react-onclickoutside')}
                     sidebarContext={this.props.sidebarContext}
+                    isShown={this.state.showState}
                 >
                     <Rnd
                         style={style}
@@ -1002,7 +1003,7 @@ const PickerWrapper = styled.div`
     z-index: 5;
 `
 
-const ContainerStyled = styled.div<{ sidebarContext: string }>`
+const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     height: 100%;
     overflow-x: visible;
     position: fixed;
@@ -1020,12 +1021,46 @@ const ContainerStyled = styled.div<{ sidebarContext: string }>`
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
+    animation: ${(props) =>
+        props.sidebarContext === 'in-page' && 'slide-in ease-out'};
+    animation-duration: 0.05s;
+    /* transition : all 2s ease; */
+    // place it initially at -100%
 
     &:: -webkit-scrollbar {
         display: none;
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.isShown !== 'visible' &&
+        css`
+            transition: all 2s ease;
+            transform: translateX(-600px);
+        `}
+
+    @keyframes slide-in {
+        0% {
+            right: -450px;
+            opacity: 0%;
+        }
+        100% {
+            right: 0px;
+            opacity: 100%;
+        }
+    }
+
+    @keyframes slide-out {
+        0% {
+            right: 0px;
+            opacity: 100%;
+        }
+        100% {
+            right: -450px;
+            opacity: 0%;
+        }
+    }
 `
 
 const TopBarContainerStyled = styled.div`

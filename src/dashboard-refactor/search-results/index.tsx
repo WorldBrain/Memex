@@ -346,7 +346,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 />
                 {noteIds[notesType].length > 0 && (
                     <>
-                        <Margin top="3px" />
+                        <Margin top="-12px" />
                         <NoteTopBarBox
                             leftSide={
                                 <TopBarRightSideWrapper>
@@ -370,7 +370,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                 </TopBarRightSideWrapper>
                             }
                         />
-                        <Separator />
                     </>
                 )}
                 {noteIds[notesType].map((noteId, index) => {
