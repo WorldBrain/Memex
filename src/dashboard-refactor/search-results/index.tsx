@@ -394,7 +394,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 withRelativeContainer
                 left={'-30px'}
                 padding={'10px'}
-                top={'20px'}
+                top={'30px'}
                 width={'150px'}
             >
                 <SortingDropdownMenuBtn

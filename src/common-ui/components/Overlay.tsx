@@ -105,9 +105,9 @@ export const OuterDiv = styled.div`
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 2147483646;
-    background: rgba(50, 59, 75, 0.3);
-    backdrop-filter: blur(4px);
+    z-index: 2147483647;
+    background: rgba(18, 19, 27, 0.6);
+    backdrop-filter: blur(30px);
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     justify-content: center;
     align-items: center;
@@ -116,10 +116,10 @@ export const OuterDiv = styled.div`
 export const InnerDiv = styled.div`
     /* elements.css .toolTips */
     border-radius: 3px;
-    background: white;
     overflow: hidden;
     overflow-y: scroll;
-    background: #fff;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
     min-width: 500px;
     min-height: 200px;
     border-radius: 12px;

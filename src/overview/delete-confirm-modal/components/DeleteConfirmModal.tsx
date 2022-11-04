@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-
+import * as icons from 'src/common-ui/components/design-library/icons'
 import { ConfirmModal, ConfirmModalProps } from '../../../common-ui/components'
 
 export interface Props extends ConfirmModalProps {
@@ -30,6 +30,8 @@ class DeleteConfirmModal extends PureComponent<Props> {
                 {...modalProps}
                 message={this.props.message}
                 submessage={this.props.submessage}
+                type={'alert'}
+                icon={icons.trash}
             >
                 <PrimaryAction
                     label="Delete"
