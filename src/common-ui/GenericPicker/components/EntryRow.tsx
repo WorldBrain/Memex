@@ -82,6 +82,10 @@ class EntryRow extends React.Component<Props> {
     }
 }
 
+export const ActOnAllTabsButton = styled(Layers)`
+    pointer-events: auto !important;
+`
+
 const ButtonContainer = styled.div<{ selected }>`
     height: 20px;
     width: 20px;

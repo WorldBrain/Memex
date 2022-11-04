@@ -149,11 +149,11 @@ color7 from colors;
     border-bottom-right-radius: 3px !important;
 }
 
-:global .react-datepicker__day--selected {
+/* :global .react-datepicker__day--selected {
 }
 
 :global .react-datepicker__day--selected:hover {
-}
+} */
 
 /* :global
     .react-datepicker__day--today {

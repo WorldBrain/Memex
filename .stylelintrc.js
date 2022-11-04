@@ -17,6 +17,7 @@ module.exports = {
         'value-list-comma-newline-after': null,
         'declaration-colon-newline-after': null,
         'no-missing-end-of-source-newline': null,
+        'selector-combinator-space-after': null,
         'declaration-empty-line-before': null,
         'length-zero-no-unit': null,
         'function-url-scheme-whitelist': ['data'],
