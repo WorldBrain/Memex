@@ -75,7 +75,7 @@ export const PrimaryAction = ({
         disabled={disabled}
         ref={innerRef}
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
-        backgroundColor={backgroundColor}
+        backgroundColor={(props) => props.theme.colors[backgroundColor]}
         fontColor={fontColor}
     >
         <StyledPrimaryActionLinkText fontSize={fontSize}>

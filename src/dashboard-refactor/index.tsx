@@ -59,6 +59,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends DashboardDependencies {}
 
@@ -1070,6 +1071,7 @@ export class DashboardContainer extends StatefulUIElement<
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
                     }
+                    icon={icons.collectionsEmpty}
                 />
             )
         }
