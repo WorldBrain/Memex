@@ -13,7 +13,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
 
@@ -109,7 +108,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                 </TextInputContainer>
                                 <TextInputContainer>
                                     <Icon
-                                        filePath={icons.lockFine}
+                                        filePath={icons.lock}
                                         heightAndWidth="20px"
                                         hoverOff
                                     />
@@ -483,13 +482,14 @@ const LoadingBox = styled.div`
 `
 
 const AuthErrorMessage = styled.div`
-    background-color: ${(props) => props.theme.colors.warning};
+    background-color: ${(props) => props.theme.colors.warning}10;
     font-size: 14px;
     padding-left: 10px;
     margin-top: 5px;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
+    color: ${(props) => props.theme.colors.warning};
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    padding: 15px;
+    border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -543,10 +543,9 @@ const DisplayNameContainer = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkText};
     font-size: 12px;
-    opacity: 0.7;
-    padding-left: 10px;
+    text-align: center;
 `
 
 const FeatureInfoBox = styled.div`
@@ -558,6 +557,7 @@ const FeatureInfoBox = styled.div`
 `
 
 const ConfirmContainer = styled.div`
+    margin-top: 15px;
     & > div {
         width: 100%;
         border-radius: 8px;
@@ -570,24 +570,28 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
+    background: ${(props) => props.theme.colors.darkhover};
+    height: 44px;
     border-radius: 8px;
     width: 350px;
     padding: 0 15px;
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 const TextInput = styled(SimpleTextInput)`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
+    font-weight: 300;
     border: none;
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 `
 
@@ -692,7 +696,7 @@ const EmailPasswordLogin = styled.div`
 `
 
 const EmailPasswordError = styled.div`
-    color: white;
+    color: ${(props) => props.theme.colors.warning};
     text-align: center;
 `
 

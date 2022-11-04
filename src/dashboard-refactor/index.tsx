@@ -491,6 +491,7 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !syncMenu.isDisplayed,
                         }),
                 }}
+                sidebarWidth={this.state.sidebarWidth}
             />
         )
     }

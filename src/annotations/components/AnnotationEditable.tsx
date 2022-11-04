@@ -270,7 +270,7 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         if (mode === 'edit') {
             return (
-                <AnnotationEditContainer>
+                <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
                     <AnnotationEdit
                         ref={this.annotEditRef}
                         {...annotationEditDependencies}
@@ -719,7 +719,9 @@ const ShareBtn = styled.div`
     }
 `
 
-const AnnotationEditContainer = styled.div``
+const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
+    margin-top: ${(props) => !props.hasHighlight && '5px'};
+`
 
 const TagPickerWrapper = styled.div`
     position: relative;

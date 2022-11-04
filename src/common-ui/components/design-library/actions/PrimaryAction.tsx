@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
     colorDisabled,
     colorPrimary,
@@ -23,7 +23,9 @@ const StyledPrimaryAction = styled.div<{
     align-items: center;
     vertical-align: middle;
     background: ${(props) =>
-        props.disabled ? colorDisabled : props.theme.colors.darkhover};
+        props.disabled
+            ? props.theme.colors.darkHover
+            : props.theme.colors.normalText};
     background: ${(props) =>
         props.backgroundColor
             ? props.backgroundColor
@@ -39,6 +41,13 @@ const StyledPrimaryAction = styled.div<{
     &:hover {
         opacity: 0.8;
     }
+
+    ${(props) =>
+        props.disabled &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale8};
+            background: ${(props) => props.theme.colors.lightHover};
+        `};
 `
 
 const StyledPrimaryActionLinkText = styled(TypographyActionText)<{

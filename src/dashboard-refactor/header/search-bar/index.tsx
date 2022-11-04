@@ -1,5 +1,5 @@
 import React, { PureComponent, ReactElement } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -8,90 +8,8 @@ import styles, { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import { ButtonTooltip } from 'src/common-ui/components'
+import type { SidebarLockedState } from '../../lists-sidebar/types'
 
-const textStyles = `
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-weight: ${fonts.primary.weight.bold};
-    color: ${(props) => props.theme.colors.normalText};
-`
-
-const SearchBarContainer = styled.div`
-    height: 44px;
-    max-width: 450px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: ${(props) => props.theme.colors.darkhover};
-    border-radius: 5px;
-    padding: 0px 15px;
-`
-
-const Input = styled.input`
-    width: inherit;
-    font-size: 14px;
-    line-height: 18px;
-    border: none;
-    background-color: transparent;
-    height: 44px;
-    color: ${(props) => props.theme.colors.normalText};
-    font-weight: 300;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.darkText};
-    }
-
-    &:focus {
-        outline: none;
-    }
-
-    &:focus ${SearchBarContainer} {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-    }
-`
-
-const FilterButton = styled(Margin)`
-    width: max-content;
-    ${textStyles}
-    font-size: 12px;
-    line-height: 15px;
-    cursor: pointer;
-    width: auto;
-    white-space: nowrap;
-`
-
-const FullWidthMargin = styled(Margin)`
-    width: 100%;
-`
-
-const SearchIcon = styled.img`
-    width: 16px;
-    height: 17px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const IconContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-items: start;
-`
-
-const StyledIcon = styled(Icon)`
-    color: ${(props) => props.theme.colors.primary};
-    opacity: 0.7;
-    cursor: pointer;
-`
-
-const ActionButtons = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    grid-gap: 15px;
-`
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
@@ -101,6 +19,7 @@ export interface SearchBarProps {
     onInputClear(): void
     CopyPasterButton: ReactElement
     ExpandButton: ReactElement
+    sidebarLockedState?: boolean
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -125,13 +44,16 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         const {
             searchFiltersOpen,
             searchQuery,
+            sidebarLockedState,
             onSearchFiltersOpen,
             CopyPasterButton,
             ExpandButton,
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer>
+                <SearchBarContainer
+                    isClosed={this.props.sidebarLockedState === false && true}
+                >
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>
@@ -198,3 +120,97 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         )
     }
 }
+
+const textStyles = `
+    font-family: ${fonts.primary.name};
+    font-style: normal;
+    font-weight: ${fonts.primary.weight.bold};
+    color: ${(props) => props.theme.colors.normalText};
+`
+
+const SearchBarContainer = styled.div<{ isClosed: boolean }>`
+    height: 44px;
+    max-width: 450px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: ${(props) => props.theme.colors.darkhover};
+    border-radius: 5px;
+    padding: 0px 15px;
+    flex: 1;
+
+    @media screen and (max-width: 900px) {
+        margin-left: ${(props) => props.isClosed && '50px'};
+    }
+
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
+`
+
+const Input = styled.input`
+    width: inherit;
+    font-size: 14px;
+    line-height: 18px;
+    border: none;
+    background-color: transparent;
+    height: 44px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 300;
+
+    &::placeholder {
+        color: ${(props) => props.theme.colors.darkText};
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &:focus ${SearchBarContainer} {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+    }
+`
+
+const FilterButton = styled(Margin)`
+    width: max-content;
+    ${textStyles}
+    font-size: 12px;
+    line-height: 15px;
+    cursor: pointer;
+    width: auto;
+    white-space: nowrap;
+`
+
+const FullWidthMargin = styled(Margin)`
+    width: 100%;
+`
+
+const SearchIcon = styled.img`
+    width: 16px;
+    height: 17px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const IconContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: start;
+`
+
+const StyledIcon = styled(Icon)`
+    color: ${(props) => props.theme.colors.primary};
+    opacity: 0.7;
+    cursor: pointer;
+`
+
+const ActionButtons = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 15px;
+    flex: 1;
+`

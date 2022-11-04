@@ -51,7 +51,7 @@ export default class LoginModal extends React.PureComponent<Props> {
             <Modal {...this.props}>
                 {this.props.routeToLoginBtn ? (
                     <>
-                        <TitleText>Login or Sign up to Share</TitleText>
+                        <TitleText>Login or Sign up</TitleText>
                         <PrimaryAction
                             onClick={this.handleGoToClick}
                             label={'Next'}
@@ -59,7 +59,7 @@ export default class LoginModal extends React.PureComponent<Props> {
                     </>
                 ) : (
                     <>
-                        <TitleText>Login or Sign up to Share</TitleText>
+                        <TitleText>Login or Sign up</TitleText>
                         <AuthDialog onAuth={() => this.handleLoginSuccess()} />
                     </>
                 )}

@@ -107,7 +107,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             syncStatusIconState,
         } = this.props
 
-        if (!isLoggedIn) {
+        if (isLoggedIn) {
             return (
                 <RowContainer>
                     <TopBox>
@@ -166,7 +166,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return (
                 <RowContainer>
                     <TopBox>
-                        <TextBlock color={'normalText'}>
+                        <TextBlock color={'purple'}>
                             {this.renderTitleText()}
                         </TextBlock>
                         {new Date(this.props.lastSuccessfulSyncDate).getTime() >
@@ -272,7 +272,8 @@ const ExternalLink = styled.a`
 
 const StyledHoverBox = styled(HoverBox)`
     height: min-content;
-    width: 320px;
+    width: min-content;
+    min-width: 270px;
     flex-direction: column;
     overflow: hidden;
 `
@@ -390,6 +391,7 @@ const HelpTextBlock = styled.span<{
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale8};
     text-decoration: none;
+    white-space: nowrap;
 `
 
 const HelpTextBlockLink = styled.a<{
@@ -411,6 +413,7 @@ const TextBlockSmall = styled.div`
     font-size: 14px;
     line-height: 16px;
     text-align: left;
+    white-space: nowrap;
 `
 
 const ActionButton = styled.div`

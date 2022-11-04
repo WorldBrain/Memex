@@ -75,7 +75,7 @@ const Input = styled.input`
     width: 150px;
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
 `
 

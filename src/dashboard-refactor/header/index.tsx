@@ -33,7 +33,7 @@ const Container = styled.div`
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
 `
 
-const SearchSection = styled(Margin)`
+const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
     justify-content: flex-start !important;
     max-width: 825px !important;
 
@@ -106,7 +106,7 @@ const SyncStatusHeaderText = styled.span<{
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         display: none;
     }
 `
@@ -125,6 +125,7 @@ export interface HeaderProps {
     syncStatusMenuProps: SyncStatusMenuProps
     syncStatusIconState: SyncStatusIconState
     activityStatus?: boolean
+    sidebarWidth?: string
 }
 
 export type Props = HeaderProps & {
@@ -138,6 +139,7 @@ export default class Header extends PureComponent<Props> {
 
     render() {
         const {
+            sidebarWidth,
             searchBarProps,
             syncStatusIconState,
             syncStatusMenuProps,
@@ -147,7 +149,11 @@ export default class Header extends PureComponent<Props> {
         return (
             <Container>
                 {/* <PlaceholderContainer /> */}
-                <SearchSection vertical="auto" left="24px">
+                <SearchSection
+                    sidebarWidth={this.props.sidebarWidth}
+                    vertical="auto"
+                    left="24px"
+                >
                     <SearchBar
                         {...searchBarProps}
                         CopyPasterButton={
@@ -158,6 +164,9 @@ export default class Header extends PureComponent<Props> {
                                 isEnabled={this.props.areAllNotesShown}
                                 onClick={this.props.onShowAllNotesClick}
                             />
+                        }
+                        sidebarLockedState={
+                            this.props.sidebarLockedState.isSidebarLocked
                         }
                     />
                 </SearchSection>
@@ -176,7 +185,7 @@ export default class Header extends PureComponent<Props> {
                         horizontal="17px"
                         onClick={() => window.open(SETTINGS_URL, '_self')}
                     >
-                        <Icon heightAndWidth="18px" path={icons.settings} />
+                        <Icon heightAndWidth="22px" path={icons.settings} />
                     </SettingsSection>
                     <SyncStatusMenu
                         {...syncStatusMenuProps}
