@@ -174,7 +174,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             >
                                 <Icon
                                     path={icons.removeX}
-                                    heightAndWidth="24px"
+                                    heightAndWidth="22px"
                                     color={'greyScale8'}
                                 />
                             </ButtonTooltip>

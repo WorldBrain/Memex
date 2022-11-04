@@ -43,21 +43,31 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 
     render() {
         return (
-            <DropdownMenuBtn
-                onMenuItemClick={this.props.onMenuItemClick}
-                menuItems={this.props.menuItems}
-                theme={{ leftMenuOffset: '35px' }}
-                btnId="DropdownMenuBtn"
-                keepSelectedState
-                tooltipProps={{
-                    tooltipText: 'Sort notes',
-                    position: 'bottomSidebar',
-                }}
-                onClickOutside={this.props.onClickOutSide}
-            />
+            <>
+                <SortingTitle>Sort Notes</SortingTitle>
+                <DropdownMenuBtn
+                    onMenuItemClick={this.props.onMenuItemClick}
+                    menuItems={this.props.menuItems}
+                    theme={{ leftMenuOffset: '35px' }}
+                    btnId="DropdownMenuBtn"
+                    keepSelectedState
+                    tooltipProps={{
+                        tooltipText: 'Sort notes',
+                        position: 'bottomSidebar',
+                    }}
+                    onClickOutside={this.props.onClickOutSide}
+                />
+            </>
         )
     }
 }
+
+const SortingTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 700;
+    padding-left: 10px;
+    margin-top: 5px;
+`
 
 const DropdownMenuContainer = styled.div`
     & > div {

@@ -393,8 +393,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             <HoverBox
                 withRelativeContainer
                 left={'-30px'}
-                padding={'0px'}
+                padding={'10px'}
                 top={'20px'}
+                width={'150px'}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -695,7 +696,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         right="-90px"
                         withRelativeContainer
                         position="absolute"
-                        padding={'0px'}
                     >
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}

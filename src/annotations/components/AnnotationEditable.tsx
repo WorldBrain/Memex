@@ -887,7 +887,7 @@ const HighlightStyled = styled.div`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0;
-    padding: 10px 15px 7px 10px;
+    padding: 15px 15px 7px 15px;
     line-height: 20px;
     text-align: left;
     line-break: normal;

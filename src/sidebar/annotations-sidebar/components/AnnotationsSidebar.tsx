@@ -1083,7 +1083,12 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <HoverBox right={'-20px'} padding={'0px'} top={'30px'}>
+            <HoverBox
+                width={'150px'}
+                right={'90px'}
+                top={'160px'}
+                padding={'10px'}
+            >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={(sortingFn) =>
                         this.props.onMenuItemClick(sortingFn)
