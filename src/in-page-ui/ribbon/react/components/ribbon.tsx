@@ -170,7 +170,12 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <HoverBox padding="0px" position="absolute" top="30px" right="40px">
+            <HoverBox
+                padding="10px 0"
+                position="absolute"
+                top="30px"
+                right="40px"
+            >
                 <BlurredSidebarOverlay
                     onOutsideClick={this.hideListPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}

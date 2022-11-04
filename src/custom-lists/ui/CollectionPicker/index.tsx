@@ -338,7 +338,7 @@ class SpacePicker extends StatefulUIElement<
         if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
-                    <LoadingIndicator size={25} />
+                    <LoadingIndicator size={30} />
                 </LoadingBox>
             )
         }
@@ -445,13 +445,13 @@ const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 150px;
+    height: 300px;
     width: 100%;
 `
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    padding: 15px 5px 5px 5px;
+    padding: 5px 5px 5px 5px;
 `
 
 const EmptyListsView = styled.div`

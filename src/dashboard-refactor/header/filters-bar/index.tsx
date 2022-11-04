@@ -21,6 +21,14 @@ import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPick
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
 
+const DateHelp = styled.div`
+    color: ${(props) => props.theme.colors.darkText};
+`
+
+const DateText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+`
+
 const Container = styled.div<{ hidden: boolean }>`
     height: 50px;
     width: 100%;
@@ -53,6 +61,20 @@ const PickersContainer = styled.div`
     top: 30px;
 `
 
+const DomainScroll = styled.div`
+    overflow: scroll;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    width: 200px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+
 const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     width: fit-content;
     display: grid;
@@ -63,8 +85,7 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     background: ${(props) => props.theme.colors.greyScale1};
     border-radius: 8px;
     white-space: nowrap;
-    max-width: 300px;
-    overflow: scroll;
+    max-width: fit-content;
     font-size: 13px;
 
     &:hover {
@@ -81,15 +102,28 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     height: 30px;
     color: ${(props) =>
         props.filterActive
-            ? props.theme.colors.darkerText
+            ? props.theme.colors.normalText
             : props.theme.colors.normalText};
 `
 
 const TextSpan = styled.span`
     font-family: ${fonts.primary.name};
     font-weight: ${fonts.primary.weight.normal};
-    font-size: 12px;
     line-height: 15px;
+`
+
+const CounterPill = styled.div`
+    background: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.black};
+    border-radius: 3px;
+    height: 20px;
+    padding: 0 5px;
+    width: fit-content;
+    margin-left: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 const TagPill = styled.div`
@@ -105,7 +139,6 @@ const DomainPill = styled.div`
     display: flex;
     justify-content: center;
     padding: 2px 6px;
-    border: 1px solid ${(props) => props.theme.colors.lightgrey};
     color: ${(props) => props.theme.colors.normalText};
     border-radius: 3px;
 `
@@ -181,14 +214,14 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                         <>
                             {startDate && (
                                 <>
-                                    <strong>From</strong>
-                                    {startDate}
+                                    <DateHelp>From</DateHelp>
+                                    <DateText>{startDate}</DateText>
                                 </>
                             )}
                             {endDate && (
                                 <>
-                                    <strong>to</strong>
-                                    {endDate}
+                                    <DateHelp>to</DateHelp>
+                                    <DateText>{endDate}</DateText>
                                 </>
                             )}
                         </>
@@ -203,28 +236,27 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             return (
                 <>
                     {isFiltered && (
-                        <>
+                        <DomainScroll>
                             {domainsIncluded
                                 .map((domain) => (
                                     <DomainPill>{domain}</DomainPill>
                                 ))
                                 .reverse()}
-                        </>
+                        </DomainScroll>
                     )}
                 </>
             )
         }
 
-        if (name === 'tag' && isFiltered) {
-            var tagsIncluded = this.props.searchFilters.tagsIncluded
+        if (name === 'space' && isFiltered) {
+            var spacesIncluded = this.props.searchFilters.spacesIncluded
 
             return (
                 <>
                     {isFiltered && (
                         <>
-                            {tagsIncluded
-                                .map((tag) => <TagPill>{tag}</TagPill>)
-                                .reverse()}
+                            Spaces{' '}
+                            <CounterPill>{spacesIncluded.length}</CounterPill>
                         </>
                     )}
                 </>
@@ -334,20 +366,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.areDomainsFiltered,
                             icons.globe,
                             this.props.domainPickerProps,
-                        )}
-                        {this.props.tagPickerProps && (
-                            <>
-                                {this.renderTagPicker()}
-                                {this.renderFilterSelectButton(
-                                    'Tags',
-                                    'tag',
-                                    this.props.toggleTagsFilter,
-                                    this.props.showTagsFilter,
-                                    this.props.areTagsFiltered,
-                                    icons.tagEmpty,
-                                    this.props.tagPickerProps,
-                                )}
-                            </>
                         )}
                         {this.renderSpacePicker()}
                         {this.renderFilterSelectButton(

@@ -46,18 +46,21 @@ const RecentItemsNotif = styled.div`
 `
 
 const StyledContainer = styled.div`
-    overflow-y: auto;
-    max-height: 280px;
-
-    scrollbar-width: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 5px;
+    border-radius: 6px;
+    flex-direction: column;
 
     &::-webkit-scrollbar {
         display: none;
     }
 `
+
 const FilterHelp = styled.div`
-    font-size: ${fontSizeSmall}px;
-    color: ${(props) => props.theme.text};
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.normalText};
     padding: 6px 2px;
     ${StyledIconBase} {
         stroke-width: 2px;
