@@ -46,26 +46,19 @@ const Container = styled.div<{ hidden: boolean }>`
         `};
 `
 
-const FilterBtnsContainer = styled.div<{ sidebarWidth }>`
-    ${(props) =>
-        props.sidebarWidth &&
-        css`
-            width: calc(
-                ${searchBarWidthPx}px - ${(props) => props.sidebarWidth}
-            );
-        `};
-
-    ${(props) =>
-        !props.sidebarWidth &&
-        css`
-            width: calc(${searchBarWidthPx}px - 250px);
-        `};
+const FilterBtnsContainer = styled.div<{ sidebarWidth; spaceSidebarLocked }>`
+    max-width: 800px;
+    flex: 1;
     position: relative;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     grid-gap: 7px;
+
+    @media screen and (max-width: 900px) {
+        margin-left: ${(props) => props.spaceSidebarLocked && '24px'};
+    }
 `
 
 const PickersContainer = styled.div`
@@ -175,6 +168,7 @@ export interface FiltersBarProps {
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
     spaceSidebarWidth: string
+    spaceSidebarLocked: boolean
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
@@ -357,12 +351,13 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     render() {
-        console.log(this.props.spaceSidebarWidth)
+        console.log(this.props.spaceSidebarLocked)
         return (
             <>
                 <Container hidden={!this.props.isDisplayed}>
                     <FilterBtnsContainer
                         sidebarWidth={this.props.spaceSidebarWidth}
+                        spaceSidebarLocked={this.props.spaceSidebarLocked}
                     >
                         {this.renderFilterSelectButton(
                             'Date',

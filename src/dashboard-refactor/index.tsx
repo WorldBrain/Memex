@@ -303,6 +303,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <FiltersBar
                 spaceSidebarWidth={this.state.sidebarWidth}
+                spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
@@ -499,10 +500,6 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderListsSidebar() {
         const { listsSidebar } = this.state
-
-        // this.setState({
-        //     sidebarWidth: '250px'
-        // })
 
         const lockedState = {
             isSidebarLocked: listsSidebar.isSidebarLocked,
