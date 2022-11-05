@@ -84,13 +84,13 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     private renderLastSyncText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
 
-        console.log(lastSuccessfulSyncDate)
-
         if (new Date(lastSuccessfulSyncDate).getTime() === 0) {
             return null
         }
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
-            return 'Last sync: ' + timeSinceNowToString(lastSuccessfulSyncDate)
+            return (
+                'Last download: ' + timeSinceNowToString(lastSuccessfulSyncDate)
+            )
         }
         if (!lastSuccessfulSyncDate && syncStatusIconState === 'green') {
             return 'Save your first page or annotation'

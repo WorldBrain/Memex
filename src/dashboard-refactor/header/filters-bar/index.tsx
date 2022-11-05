@@ -46,8 +46,20 @@ const Container = styled.div<{ hidden: boolean }>`
         `};
 `
 
-const FilterBtnsContainer = styled.div`
-    width: ${searchBarWidthPx}px;
+const FilterBtnsContainer = styled.div<{ sidebarWidth }>`
+    ${(props) =>
+        props.sidebarWidth &&
+        css`
+            width: calc(
+                ${searchBarWidthPx}px - ${(props) => props.sidebarWidth}
+            );
+        `};
+
+    ${(props) =>
+        !props.sidebarWidth &&
+        css`
+            width: calc(${searchBarWidthPx}px - 250px);
+        `};
     position: relative;
     height: 100%;
     display: flex;
@@ -162,6 +174,7 @@ export interface FiltersBarProps {
     datePickerProps: DateRangeSelectionProps
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
+    spaceSidebarWidth: string
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
@@ -344,10 +357,13 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     render() {
+        console.log(this.props.spaceSidebarWidth)
         return (
             <>
                 <Container hidden={!this.props.isDisplayed}>
-                    <FilterBtnsContainer>
+                    <FilterBtnsContainer
+                        sidebarWidth={this.props.spaceSidebarWidth}
+                    >
                         {this.renderFilterSelectButton(
                             'Date',
                             'date',

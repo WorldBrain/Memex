@@ -715,6 +715,20 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private firstTimeUser() {
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            this.props.searchQuery.length === 0 &&
+            !this.props.searchFilters.isDateFilterActive &&
+            !this.props.searchFilters.isTagFilterActive &&
+            !this.props.searchFilters.isDomainFilterActive
+        ) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     render() {
         return (
             <ResultsContainer bottom="100px">
@@ -732,7 +746,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 )}
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
-                        leftSide={<SearchTypeSwitch {...this.props} />}
+                        leftSide={
+                            this.firstTimeUser() === false && (
+                                <SearchTypeSwitch {...this.props} />
+                            )
+                        }
                         rightSide={
                             <ReferencesContainer>
                                 {this.props.listData[this.props.selectedListId]
@@ -889,19 +907,19 @@ const IconImg = styled.img`
     width: 18px;
 `
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 60px;
     width: 60px;
-    margin-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
 `
 
 const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.purple};
-    margin-bottom: 40px;
-    font-weight: 500;
-    cursor: pointer;
+color: ${(props) => props.theme.colors.purple};
+margin - bottom: 40px;
+font - weight: 500;
+cursor: pointer;
 `

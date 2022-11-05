@@ -117,7 +117,7 @@ class DomainPicker extends StatefulUIElement<
                         />
                     </SectionCircle>
                     <SectionTitle>No Domains to filter</SectionTitle>
-                    <InfoText>Save your first page or annotation</InfoText>
+                    <InfoText>Save a first page or annotation</InfoText>
                 </EmptyDomainsView>
             )
         }
@@ -190,18 +190,19 @@ class DomainPicker extends StatefulUIElement<
 }
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 30px;
     width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
+    margin-top: 10px;
     font-size: 14px;
     font-weight: bold;
 `

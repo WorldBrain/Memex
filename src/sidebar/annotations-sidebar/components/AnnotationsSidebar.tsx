@@ -989,9 +989,11 @@ export class AnnotationsSidebar extends React.Component<
                 {this.props.isExpanded && (
                     <>
                         {this.renderNewAnnotation()}
-                        <AnnotationActions>
-                            {this.renderTopBarActionButtons()}
-                        </AnnotationActions>
+                        {annots.length > 1 && (
+                            <AnnotationActions>
+                                {this.renderTopBarActionButtons()}
+                            </AnnotationActions>
+                        )}
                         {this.props.noteCreateState === 'running' ||
                         this.props.annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
@@ -1241,17 +1243,18 @@ const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 50px;
-    width: 50px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
+    height: 48px;
+    width: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     font-weight: 400;
     text-align: center;
