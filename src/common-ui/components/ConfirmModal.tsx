@@ -55,9 +55,7 @@ class ConfirmModal extends PureComponent<Props> {
                                 </MessageContainer>
                             )}
                         </TextContainer>
-                        <ButtonBar tabIndex={0}>
-                            {this.props.children}
-                        </ButtonBar>
+                        <ButtonBar>{this.props.children}</ButtonBar>
                     </ContentBox>
                 )}
             </Modal>

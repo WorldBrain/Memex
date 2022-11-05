@@ -387,10 +387,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listData: { [id: number]: ListData } = {}
 
                 localLists = localLists.sort((listDataA, listDataB) => {
-                    if (listDataA.name < listDataB.name) {
+                    if (
+                        listDataA.name.toLowerCase() <
+                        listDataB.name.toLowerCase()
+                    ) {
                         return -1
                     }
-                    if (listDataA.name > listDataB.name) {
+                    if (
+                        listDataA.name.toLowerCase() >
+                        listDataB.name.toLowerCase()
+                    ) {
                         return 1
                     }
                     return 0

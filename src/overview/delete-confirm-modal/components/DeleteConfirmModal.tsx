@@ -16,10 +16,8 @@ class DeleteConfirmModal extends PureComponent<Props> {
         this._action = React.createRef()
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this._action.current) {
-            this._action.current.focus()
-        }
+    componentDidMount() {
+        this._action.current.focus()
     }
 
     render() {
@@ -37,6 +35,7 @@ class DeleteConfirmModal extends PureComponent<Props> {
                     label="Delete"
                     onClick={deleteDocs}
                     innerRef={this._action}
+                    tabIndex={0}
                 />
             </ConfirmModal>
         )

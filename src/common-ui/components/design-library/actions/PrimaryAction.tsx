@@ -68,6 +68,7 @@ export const PrimaryAction = ({
     fontSize,
     backgroundColor,
     fontColor,
+    tabIndex,
 }: {
     label: React.ReactNode
     onClick: React.MouseEventHandler
@@ -76,10 +77,11 @@ export const PrimaryAction = ({
     fontSize?: string
     backgroundColor?: ColorThemeKeys
     fontColor?: ColorThemeKeys
+    tabIndex?: number
 }) => (
     <StyledPrimaryAction
         autoFocus
-        tabIndex={0}
+        tabIndex={tabIndex}
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
         ref={innerRef}
