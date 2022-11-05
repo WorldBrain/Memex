@@ -18,6 +18,8 @@ const Container = styled.div`
     padding: 10px 0px;
 `
 
+const ArrowIcon = styled(Icon)``
+
 const LoadingContainer = styled.div`
     height: 40px;
     display: flex;
@@ -31,6 +33,10 @@ const GroupHeaderContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: start;
+
+    &:hover ${ArrowIcon} {
+        background-color: ${(props) => props.theme.colors.lightHover};
+    }
 `
 
 const GroupHeaderInnerDiv = styled.div`
@@ -73,6 +79,10 @@ const IconGroup = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
+
+    &:hover ${ArrowIcon} {
+        background-color: unset;
+    }
 `
 
 const ErrorMsg = styled.div`
@@ -133,7 +143,7 @@ export default class ListsSidebarGroup extends PureComponent<
                     <GroupHeaderContainer>
                         <GroupHeaderInnerDiv className="inner">
                             {this.props.onExpandBtnClick && (
-                                <Icon
+                                <ArrowIcon
                                     rotation={this.props.isExpanded ? 0 : -90}
                                     heightAndWidth="16px"
                                     filePath={icons.triangle}
@@ -143,14 +153,16 @@ export default class ListsSidebarGroup extends PureComponent<
                                 />
                             )}
                             <GroupTitle onClick={this.props.onExpandBtnClick}>
-                                {this.props.title}
+                                {this.props.title} (
+                                {this.props.listsArray.length})
                             </GroupTitle>
                             <IconGroup>
                                 {this.props.onAddBtnClick && (
                                     <Icon
-                                        heightAndWidth="14px"
+                                        heightAndWidth="16px"
                                         filePath={icons.plus}
                                         color={'purple'}
+                                        padding={'4px'}
                                         onClick={this.props.onAddBtnClick}
                                     />
                                 )}

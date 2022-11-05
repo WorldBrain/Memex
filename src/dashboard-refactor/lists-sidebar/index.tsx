@@ -231,51 +231,34 @@ export default class ListsSidebar extends PureComponent<
                                         )}
                                         {group.title === 'My Spaces' &&
                                         group.listsArray.length === 0 ? (
-                                            !group.isAddInputShown &&
-                                            (searchBarProps.searchQuery.length >
-                                            0 ? (
-                                                <NoCollectionsMessage
-                                                    onClick={
-                                                        group.onAddBtnClick
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={
-                                                                icons.plus
-                                                            }
-                                                            heightAndWidth="14px"
-                                                            color="purple"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Create a
-                                                        <Link> new Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            ) : (
-                                                <NoCollectionsMessage
-                                                    onClick={
-                                                        group.onAddBtnClick
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={
-                                                                icons.plus
-                                                            }
-                                                            heightAndWidth="14px"
-                                                            color="purple"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Create your
-                                                        <Link>first Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            ))
+                                            !(
+                                                !group.isAddInputShown &&
+                                                searchBarProps.searchQuery
+                                                    .length > 0 && (
+                                                    <NoCollectionsMessage
+                                                        onClick={
+                                                            group.onAddBtnClick
+                                                        }
+                                                    >
+                                                        <SectionCircle>
+                                                            <Icon
+                                                                filePath={
+                                                                    icons.plus
+                                                                }
+                                                                heightAndWidth="14px"
+                                                                color="purple"
+                                                                hoverOff
+                                                            />
+                                                        </SectionCircle>
+                                                        <InfoText>
+                                                            Create your
+                                                            <Link>
+                                                                first Space
+                                                            </Link>
+                                                        </InfoText>
+                                                    </NoCollectionsMessage>
+                                                )
+                                            )
                                         ) : (
                                             <>
                                                 {group.title ===
@@ -458,8 +441,9 @@ const GlobalStyle = createGlobalStyle`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 24px;
     width: 24px;
     display: flex;
@@ -468,10 +452,13 @@ const SectionCircle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
-    font-weight: 300;
-    font-family: 'Satoshi', sans-serif;
+    font-weight: 400;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    white-space: nowrap;
 `
 
 const Link = styled.span`

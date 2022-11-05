@@ -2565,6 +2565,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             isAddInputShown: { $set: false },
                             filteredListIds: { $push: [listId] },
                             allListIds: { $push: [listId] },
+                            isExpanded: { $set: true },
                         },
                         listData: {
                             [listId]: {

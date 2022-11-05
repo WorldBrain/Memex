@@ -223,6 +223,6 @@ const TextInput = styled.input`
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 `

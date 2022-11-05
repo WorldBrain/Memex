@@ -533,13 +533,16 @@ export class DashboardContainer extends StatefulUIElement<
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
                     sidebarLockedState: lockedState,
-                    hasPerfectMatch: true,
                     onCreateNew: (value) =>
                         this.processEvent('confirmListCreate', { value }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
+                    localLists: this.listsStateToProps(
+                        listsSidebar.localLists.filteredListIds,
+                        'local-lists',
+                    ),
                 }}
                 listsGroups={[
                     {

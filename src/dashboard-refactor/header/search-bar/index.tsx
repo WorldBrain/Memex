@@ -157,10 +157,10 @@ const Input = styled.input`
     background-color: transparent;
     height: 44px;
     color: ${(props) => props.theme.colors.normalText};
-    font-weight: 300;
+    font-weight: 400;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.darkText};
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 
     &:focus {
