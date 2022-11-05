@@ -107,7 +107,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             syncStatusIconState,
         } = this.props
 
-        if (isLoggedIn) {
+        if (!isLoggedIn) {
             return (
                 <RowContainer>
                     <TopBox>
