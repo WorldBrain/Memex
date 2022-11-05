@@ -11,16 +11,24 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 10px 15px;
+    padding: 10px 20px 10px 20px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+`
+
+const ButtonBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    justify-self: flex-end;
 `
 
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     font-weight: bold;
+    flex: 1;
 `
 
 const HeaderplaceHolder = styled.div`
@@ -86,23 +94,21 @@ const ContentBlock = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
+    height: 30px;
+    width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
 `
 
-const InfoText = styled.div<{ small: boolean }>`
-    color: ${(props) =>
-        props.small
-            ? props.theme.colors.normalText
-            : props.theme.colors.lighterText};
-    font-size: ${(props) => (props.small ? '12px' : '14px')};
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: 400;
     text-align: center;
-    margin-top: ${(props) => props.small && '-25px'};
 `
 
 interface InternalTemplateListProps {
@@ -181,22 +187,26 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <>
                 <Header>
-                    <Icon
-                        filePath={icons.helpIcon}
-                        heightAndWidth="16px"
-                        onClick={() =>
-                            window.open(
-                                'https://links.memex.garden/tutorials/text-exporter',
-                            )
-                        }
-                    />
                     <SectionTitle>Copy/Paste Templates</SectionTitle>
-                    <Icon
-                        filePath={icons.plus}
-                        color="purple"
-                        heightAndWidth="16px"
-                        onClick={this.props.onClickNew}
-                    />
+                    <ButtonBox>
+                        <Icon
+                            filePath={icons.helpIcon}
+                            heightAndWidth="18px"
+                            padding={'5px'}
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/text-exporter',
+                                )
+                            }
+                        />
+                        <Icon
+                            filePath={icons.plus}
+                            color="purple"
+                            padding={'5px'}
+                            heightAndWidth="16px"
+                            onClick={this.props.onClickNew}
+                        />
+                    </ButtonBox>
                 </Header>
                 <ContentBlock>
                     <InternalTemplateList

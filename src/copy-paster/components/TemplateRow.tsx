@@ -120,7 +120,7 @@ const Row = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
 
         ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
