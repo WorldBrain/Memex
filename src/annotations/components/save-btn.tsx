@@ -32,6 +32,7 @@ export interface Props {
     ) => void | Promise<void>
     renderCollectionsPicker?: () => React.ReactNode
     tabIndex?: number
+    shortcutText?: string
 }
 
 interface State {
@@ -124,10 +125,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
         return (
             <HoverBox
-                withRelativeContainer
-                left={'0px'}
+                right={'20px'}
                 padding={'0px'}
-                top={'5px'}
+                top={'25px'}
+                width={'fit-content'}
+                zIndex={10010000}
             >
                 <DropdownMenuBtn
                     width={'340px'}
@@ -176,31 +178,37 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>
-                    <SaveBtnArrow>
+                    <SaveBtnArrow
+                        onClick={() =>
+                            this.setState({
+                                isShareMenuShown: !this.state.isShareMenuShown,
+                            })
+                        }
+                    >
                         <Icon
-                            onClick={() =>
-                                this.setState({
-                                    isShareMenuShown: !this.state
-                                        .isShareMenuShown,
-                                })
-                            }
                             heightAndWidth="12px"
                             filePath={icons.triangle}
                             hoverOff
                         />
+                        {this.props.isShared ? 'Public' : 'Private'}
                     </SaveBtnArrow>
-                    <Icon
-                        heightAndWidth="18px"
-                        icon={icons.check}
-                        color={'purple'}
-                        onClick={() =>
-                            this.props.onSave(
-                                !!this.props.isShared,
-                                !!this.props.isProtected,
-                                { mainBtnPressed: true },
-                            )
-                        }
-                    />{' '}
+                    <ButtonTooltip
+                        tooltipText={this.props.shortcutText}
+                        position="bottom"
+                    >
+                        <Icon
+                            heightAndWidth="22px"
+                            icon={icons.check}
+                            color={'purple'}
+                            onClick={() =>
+                                this.props.onSave(
+                                    !!this.props.isShared,
+                                    !!this.props.isProtected,
+                                    { mainBtnPressed: true },
+                                )
+                            }
+                        />
+                    </ButtonTooltip>
                 </SaveBtn>
                 {this.renderShareMenu()}
             </>
@@ -209,10 +217,16 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 }
 
 const SaveBtnArrow = styled.div`
-    width: 24px;
+    width: fit-content;
     border-radius: 3px;
     z-index: 10;
     display: none;
+    padding: 0 0 0 5px;
+    margin-right: 10px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.normalText};
+    grid-gap: 5px;
+    font-size: 12px;
 
     & * {
         cursor: pointer;
@@ -224,10 +238,11 @@ const SaveBtn = styled.div`
     align-items: center;
     box-sizing: border-box;
     cursor: pointer;
+    padding-right: 5px;
     font-size: 14px;
     border: none;
     outline: none;
-    margin-right: 5px;
+    margin-right: 3px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;

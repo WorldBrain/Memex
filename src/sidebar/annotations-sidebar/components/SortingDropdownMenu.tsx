@@ -67,6 +67,8 @@ const SortingTitle = styled.div`
     font-weight: 700;
     padding-left: 10px;
     margin-top: 5px;
+    font-size: 14px;
+    margin-bottom: 5px;
 `
 
 const DropdownMenuContainer = styled.div`

@@ -362,18 +362,18 @@ export default class AnnotationEditable extends React.Component<Props> {
                 return [repliesToggle]
             }
 
-            if (this.props.lists.length > 0) {
-                return [
-                    {
-                        key: 'add-spaces-btn',
-                        image: icons.plus,
-                        imageColor: 'purple',
-                        // ButtonText: 'Spaces',
-                        iconSize: '14px',
-                    },
-                    appendRepliesToggle && repliesToggle,
-                ]
-            }
+            // if (this.props.lists.length === 0) {
+            //     return [
+            //         {
+            //             key: 'add-spaces-btn',
+            //             image: icons.plus,
+            //             imageColor: 'purple',
+            //             // ButtonText: 'Spaces',
+            //             iconSize: '14px',
+            //         },
+            //         appendRepliesToggle && repliesToggle,
+            //     ]
+            // }
 
             // if (isShared || isBulkShareProtected) {
             //     return [
@@ -505,18 +505,29 @@ export default class AnnotationEditable extends React.Component<Props> {
             confirmBtn = (
                 <ActionBtnStyled onClick={footerDeps.onDeleteConfirm}>
                     Delete
+                    <Icon
+                        filePath={icons.check}
+                        color={'purple'}
+                        heightAndWidth={'20px'}
+                        hoverOff
+                    />
                 </ActionBtnStyled>
             )
         } else {
             cancelBtnHandler = editDeps.onEditCancel
             confirmBtn = (
-                <SaveBtn
-                    onSave={editDeps.onEditConfirm(false)}
-                    hasSharedLists={this.hasSharedLists}
-                    isProtected={isBulkShareProtected}
-                    isShared={isShared}
-                    tabIndex={0}
-                />
+                <ButtonTooltip
+                    tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                    position="bottom"
+                >
+                    <SaveBtn
+                        onSave={editDeps.onEditConfirm(false)}
+                        hasSharedLists={this.hasSharedLists}
+                        isProtected={isBulkShareProtected}
+                        isShared={isShared}
+                        tabIndex={0}
+                    />
+                </ButtonTooltip>
             )
         }
 
@@ -537,20 +548,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                     )}
                     <SaveActionBar>
                         <BtnContainerStyled>
-                            <ButtonTooltip tooltipText="esc" position="bottom">
-                                <Icon
-                                    onClick={cancelBtnHandler}
-                                    icon={icons.removeX}
-                                    color={'normalText'}
-                                    heightAndWidth="18px"
-                                />
-                            </ButtonTooltip>
-                            <ButtonTooltip
-                                tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                                position="bottom"
-                            >
-                                {confirmBtn}
-                            </ButtonTooltip>
+                            <Icon
+                                onClick={cancelBtnHandler}
+                                icon={icons.removeX}
+                                color={'normalText'}
+                                heightAndWidth="18px"
+                            />
+                            {confirmBtn}
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
@@ -709,7 +713,7 @@ const ShareBtn = styled.div`
     justify-content: center;
     align-items: center;
     height: 24px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
     font-size: 12px;
     cursor: pointer;
     grid-gap: 4px;
@@ -838,6 +842,7 @@ const HighlightAction = styled(Margin)`
     border-radius: 6px;
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
     background: ${(props) => props.theme.colors.backgroundColorDarker};
+    margin-top: -3px;
 
     &:hover {
     }
@@ -935,7 +940,7 @@ const DefaultFooterStyled = styled.div`
     padding-left: 15px;
     justify-content: space-between;
 
-    & div {
+    & > div {
         border-top: none;
     }
 `
@@ -982,7 +987,7 @@ const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
     font-weight: 800;
     font-size: 14px;
-    color: #000;
+    color: ${(props) => props.theme.colors.normalText};
     margin-right: 10px;
     text-align: right;
 `
@@ -1009,9 +1014,10 @@ const CancelBtnStyled = styled.button`
 
 const BtnContainerStyled = styled.div`
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
+    grid-gap: 10px;
 `
 
 const ActionBtnStyled = styled.button`
@@ -1020,23 +1026,20 @@ const ActionBtnStyled = styled.button`
     font-size: 14px;
     border: none;
     outline: none;
-    padding: 3px 5px;
+    padding: 0px 5px 0px 10px;
     margin-right: 5px;
     background: transparent;
     border-radius: 3px;
-    font-weight: 700;
-    border: 1px solid #f0f0f0;
+    font-weight: 400;
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
 
-    &:focus {
-        background-color: grey;
-    }
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
+    & * {
+        cursor: pointer;
     }
 `
 
@@ -1045,5 +1048,5 @@ const DeletionBox = styled.div`
     justify-content: space-between;
     align-items: center;
     border-top: 1px solid #f0f0f0;
-    padding: 5px 15px 5px 15px;
+    padding: 5px 5px 5px 15px;
 `

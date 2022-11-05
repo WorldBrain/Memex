@@ -266,8 +266,12 @@ export class AnnotationCreate extends React.Component<Props, State>
     private renderMarkdownHelpButton() {
         return (
             <MarkdownButtonContainer onClick={() => this.toggleShowTutorial()}>
-                Formatting Help
-                <MarkdownButton src={icons.helpIcon} />
+                Formatting
+                <Icon
+                    filePath={icons.helpIcon}
+                    heightAndWidth={'20px'}
+                    hoverOff
+                />
             </MarkdownButtonContainer>
         )
     }
@@ -308,29 +312,25 @@ export class AnnotationCreate extends React.Component<Props, State>
                 </ShareBtn>
                 <DeletionBox>
                     <SaveActionBar>
+                        {this.renderMarkdownHelpButton()}
                         <BtnContainerStyled>
                             <ButtonTooltip tooltipText="esc" position="bottom">
                                 <Icon
                                     onClick={this.handleCancel}
                                     icon={icons.removeX}
                                     color={'normalText'}
-                                    heightAndWidth="18px"
+                                    heightAndWidth="20px"
                                 />
                             </ButtonTooltip>
-                            <ButtonTooltip
-                                tooltipText={`${AnnotationCreate.MOD_KEY} + Enter`}
-                                position="bottom"
-                            >
-                                <SaveBtn
-                                    onSave={this.handleSave}
-                                    hasSharedLists={this.hasSharedLists}
-                                    renderCollectionsPicker={
-                                        this.renderSharedCollectionsPicker
-                                    }
-                                />
-                            </ButtonTooltip>
+                            <SaveBtn
+                                onSave={this.handleSave}
+                                hasSharedLists={this.hasSharedLists}
+                                renderCollectionsPicker={
+                                    this.renderSharedCollectionsPicker
+                                }
+                                shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                            />
                         </BtnContainerStyled>
-                        {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
                 </DeletionBox>
             </DefaultFooterStyled>
@@ -357,6 +357,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     {this.props.comment !== '' && (
                         <FooterContainer>
                             <ListsSegment
+                                newLineOrientation={true}
                                 lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
                                 showEditBtn={this.props.hoverState === 'lists'}
@@ -365,7 +366,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.setState({ isListPickerShown: true })
                                 }
                                 renderSpacePicker={this.renderCollectionsPicker}
-                                padding={'5px 10px 5px 10px'}
+                                padding={'0px 10px 5px 10px'}
                             />
                             {/* <TagsSegment
                                 tags={this.props.tags}
@@ -454,7 +455,7 @@ const ShareBtn = styled.div`
 `
 const BtnContainerStyled = styled.div`
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     justify-content: flex-end;
     align-items: center;
 `
@@ -466,7 +467,7 @@ const DefaultFooterStyled = styled.div`
     justify-content: flex-end;
     width: fit-content;
 
-    & div {
+    & > div {
         border-top: none;
     }
 `
@@ -491,6 +492,9 @@ const SaveActionBar = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    position: absolute;
+    right: 6px;
+    z-index: 1001;
 `
 
 const TagsActionBar = styled.div`
@@ -505,6 +509,17 @@ const MarkdownButtonContainer = styled.div`
     color: ${(props) => props.theme.colors.lighterText};
     align-items: center;
     cursor: pointer;
+    margin-right: 15px;
+    padding: 0 5px;
+    border-radius: 3px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.lightHover};
+    }
 `
 
 const MarkdownButton = styled.img`

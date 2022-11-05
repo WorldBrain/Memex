@@ -351,7 +351,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     render() {
-        console.log(this.props.spaceSidebarLocked)
         return (
             <>
                 <Container hidden={!this.props.isDisplayed}>

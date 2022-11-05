@@ -104,7 +104,7 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.isListPickerShown) {
             return (
                 <div onMouseLeave={this.props.onListPickerBtnClick}>
-                    <HoverBox padding={'0px'} withRelativeContainer>
+                    <HoverBox padding={'10px 0 0 0'} withRelativeContainer>
                         <CollectionPicker
                             selectEntry={(listId) =>
                                 this.props.onListPickerUpdate({

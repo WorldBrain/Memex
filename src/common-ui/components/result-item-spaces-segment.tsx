@@ -16,6 +16,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     filteredbyListID?: number
     tabIndex?: number
     padding?: string
+    newLineOrientation?: boolean
 }
 
 interface ButtonProps {
@@ -23,6 +24,7 @@ interface ButtonProps {
     onEditBtnClick?: React.MouseEventHandler
     renderSpacePicker?: () => JSX.Element
     tabIndex?: number
+    newLineOrientation?: boolean
 }
 
 export class AddSpacesButton extends React.Component<
@@ -54,7 +56,8 @@ export class AddSpacesButton extends React.Component<
                             hoverOff
                         />
                     </EditIconContainer>
-                    {this.props.hasNoLists && <>Spaces</>}
+                    {(this.props.hasNoLists ||
+                        this.props.newLineOrientation === true) && <>Spaces</>}
                 </AddSpacesButtonContainer>
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
@@ -75,6 +78,7 @@ const SpacePickerButtonWrapper = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
+    margin-top: 1px;
 `
 
 const SpacePickerWrapper = styled.div`
@@ -91,46 +95,50 @@ export default function ListsSegment({
     renderSpacePicker,
     filteredbyListID,
     tabIndex,
+    newLineOrientation,
     ...props
 }: Props) {
     return (
         <Container padding={padding} onClick={onEditBtnClick} {...props}>
-            <ListsContainer>
+            <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
                     // onEditBtnClick={onEditBtnClick}
                     renderSpacePicker={renderSpacePicker}
                     tabIndex={tabIndex}
+                    newLineOrientation={newLineOrientation}
                 />
-                {lists
-                    .filter(
-                        (l) =>
-                            !Object.values(SPECIAL_LIST_IDS).includes(l.id) &&
-                            l.id !== filteredbyListID,
-                    )
-                    .slice(0)
-                    .map((space) => {
-                        return (
-                            <ListSpaceContainer
-                                key={space.id}
-                                onClick={
-                                    onListClick
-                                        ? () => onListClick(space.id)
-                                        : undefined
-                                }
-                            >
-                                {' '}
-                                {space.isShared && (
-                                    <Icon
-                                        heightAndWidth="16px"
-                                        hoverOff
-                                        icon="peopleFine"
-                                        color="greyScale8"
-                                    />
-                                )}
-                                {space.name}
-                                {/* TODO: uncomment when collection context menu is done */}
-                                {/* {showEditBtn && (
+                <SpacesListContainer>
+                    {lists
+                        .filter(
+                            (l) =>
+                                !Object.values(SPECIAL_LIST_IDS).includes(
+                                    l.id,
+                                ) && l.id !== filteredbyListID,
+                        )
+                        .slice(0)
+                        .map((space) => {
+                            return (
+                                <ListSpaceContainer
+                                    key={space.id}
+                                    onClick={
+                                        onListClick
+                                            ? () => onListClick(space.id)
+                                            : undefined
+                                    }
+                                >
+                                    {' '}
+                                    {space.isShared && (
+                                        <Icon
+                                            heightAndWidth="16px"
+                                            hoverOff
+                                            icon="peopleFine"
+                                            color="greyScale8"
+                                        />
+                                    )}
+                                    {space.name}
+                                    {/* TODO: uncomment when collection context menu is done */}
+                                    {/* {showEditBtn && (
                             <ListPillSettingButton
                                 onClick={() => {
                                     // open the space context modal
@@ -139,27 +147,35 @@ export default function ListsSegment({
                                 {' ... '}
                             </ListPillSettingButton>
                         )} */}
-                            </ListSpaceContainer>
-                        )
-                    })}
+                                </ListSpaceContainer>
+                            )
+                        })}
+                </SpacesListContainer>
             </ListsContainer>
         </Container>
     )
 }
 
+const SpacesListContainer = styled.div`
+    width: fill-available;
+    display: flex;
+    flex-wrap: wrap;
+`
+
 const Container = styled.div<{ padding: string }>`
-    display: grid;
+    display: flex;
     grid-gap: 10px;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
     padding: ${(props) =>
-        props.padding ? props.padding : '5px 10px 5px 10px'};
+        props.padding ? props.padding : '0px 10px 5px 10px'};
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
     //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     pointer-events: auto;
     z-index: 1000;
+    width: fill-available;
 `
 
 const ButtonBox = styled.div`
@@ -173,8 +189,8 @@ const ButtonBox = styled.div`
 
 const EditIconContainer = styled.div`
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    height: 20px;
-    width: 20px;
+    height: 24px;
+    width: 24px;
     border-radius: 3px;
     display: flex;
     justify-content: center;
@@ -219,10 +235,10 @@ const AddSpacesButtonContainer = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     grid-gap: 5px;
 `
-const ListsContainer = styled.div`
+const ListsContainer = styled.div<{ newLineOrientation }>`
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
+    flex-direction: ${(props) => (props.newLineOrientation ? 'column' : 'row')};
 `
 
 const ListSpaceContainer = styled.div`

@@ -174,8 +174,17 @@ const MenuItem = styled.div<{ isSelected }>`
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    border-radius: 5px;
+    border-radius: 12px;
+    margin: 0 10px;
     cursor: ${(props) => !props.isSelected && 'pointer'};
+
+    &:first-child {
+        margin-top: 10px;
+    }
+
+    &:last-child {
+        margin-bottom: 10px;
+    }
 
     ${(props) =>
         !props.isSelected &&
@@ -189,6 +198,7 @@ const MenuItem = styled.div<{ isSelected }>`
 const MenuTitle = styled.div`
     padding: 8px 15px 0px 15px;
     margin-bottom: 10px;
+    font-size: 14px;
 `
 
 const SoonPill = styled.span`
@@ -232,10 +242,9 @@ const MenuBtn = styled.div<{ isOpen: boolean }>`
 `
 
 const Menu = styled.div<{ leftPosition: string }>`
-    margin-top: 5px;
     width: max-content;
     list-style: none;
-    border-radius: 8px;
+    border-radius: 12px;
     background: ${(props) => props.theme.colors.backgroundColorDarker};
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;

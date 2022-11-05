@@ -1086,10 +1086,11 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <HoverBox
-                width={'150px'}
-                right={'90px'}
-                top={'160px'}
+                width={'fit-content'}
+                right={'-40px'}
+                top={'15px'}
                 padding={'10px'}
+                withRelativeContainer
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={(sortingFn) =>
@@ -1108,6 +1109,7 @@ export class AnnotationsSidebar extends React.Component<
             <TopBarActionBtns>
                 {this.renderAllNotesShareMenu()}
                 {this.renderAllNotesCopyPaster()}
+                {this.renderSortingMenuDropDown()}
                 <ButtonTooltip tooltipText="Sort Annotations" position="bottom">
                     <Icon
                         filePath={icons.sort}
@@ -1120,7 +1122,6 @@ export class AnnotationsSidebar extends React.Component<
                         width="20px"
                     />
                 </ButtonTooltip>
-                {this.renderSortingMenuDropDown()}
                 <ButtonTooltip
                     tooltipText={'Copy All Notes'}
                     position="bottomSidebar"
@@ -1666,8 +1667,8 @@ const NewAnnotationSection = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     width: fill-available;
-    padding-bottom: 8px;
-    z-index: 1120;
+    margin-bottom: 8px;
+    z-index: 11200;
 `
 
 const NewAnnotationSeparator = styled.div`

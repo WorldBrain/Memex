@@ -13,6 +13,7 @@ export interface Props {
     overflow?: string
     padding?: string
     onMouseLeave?: () => void
+    zIndex?: number
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -53,7 +54,7 @@ export const HoverBoxDiv = styled.div<Props>`
     ${(props) => (props.left ? `left: ${props.left};` : '')}
     ${(props) => (props.right ? `right: ${props.right};` : '')}
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
-    z-index: 1001;
+    z-index: ${(props) => (props.zIndex ? props.zIndex : '1001')};
     padding: ${(props) => (props.padding ? props.padding : '10px 0px')};
 
     &::-webkit-scrollbar {
