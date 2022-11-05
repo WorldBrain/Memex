@@ -492,7 +492,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
-        this.emitMutation({ ...mutation, mode: { $set: 'search' } })
+        this.emitMutation({
+            ...mutation,
+            mode: { $set: 'search' },
+            searchResults: {
+                searchState: { $set: 'running' },
+            },
+        })
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -2563,7 +2569,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         localLists: {
                             isAddInputShown: { $set: false },
-                            filteredListIds: { $push: [listId] },
+                            filteredListIds: { $unshift: [listId] },
                             allListIds: { $push: [listId] },
                             isExpanded: { $set: true },
                         },
