@@ -23,13 +23,9 @@ const StyledPrimaryAction = styled.div<{
     align-items: center;
     vertical-align: middle;
     background: ${(props) =>
-        props.disabled
-            ? props.theme.colors.darkHover
-            : props.theme.colors.normalText};
-    background: ${(props) =>
         props.backgroundColor
             ? props.backgroundColor
-            : props.theme.colors.normalText};
+            : props.theme.colors.warning};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
@@ -54,9 +50,9 @@ const StyledPrimaryActionLinkText = styled(TypographyActionText)<{
     fontSize: string
     fontColor: ColorThemeKeys
 }>`
-    font-size: ${(props) => (props.fontSize ? props.fontSize : fontSizeSmall)};
+    font-size: ${(props) => (props.fontSize ? props.fontSize : 14)}px;
     color: ${(props) =>
-        props.fontColor ? props.fontColor : props.theme.colors.backgroundColor};
+        props.fontColor ? props.fontColor : props.theme.colors.purple};
     font-weight: 600;
     font-family: 'Satoshi';
 `
@@ -87,9 +83,12 @@ export const PrimaryAction = ({
         ref={innerRef}
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
         backgroundColor={(props) => props.theme.colors[backgroundColor]}
-        fontColor={fontColor}
+        fontColor={(props) => props.theme.colors[fontColor]}
     >
-        <StyledPrimaryActionLinkText fontSize={fontSize}>
+        <StyledPrimaryActionLinkText
+            fontColor={(props) => props.theme.colors[fontColor]}
+            fontSize={fontSize}
+        >
             {label}
         </StyledPrimaryActionLinkText>
     </StyledPrimaryAction>

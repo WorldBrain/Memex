@@ -88,8 +88,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                     })
                 }
             >
-                Formatting Help
-                <MarkdownButton src={icons.helpIcon} />
+                Formatting
+                <Icon filePath={icons.helpIcon} heightAndWidth={'20px'} />
             </MarkdownButtonContainer>
         )
     }
@@ -108,32 +108,34 @@ export default class ListDetails extends PureComponent<Props, State> {
                         }
                     />
                     <SaveActionBar>
+                        {this.renderMarkdownHelpButton()}
                         <BtnContainerStyled>
                             <ButtonTooltip
                                 tooltipText={`${ListDetails.MOD_KEY} + Enter`}
                                 position="bottom"
                             >
-                                <SaveBtn
+                                <Icon
+                                    heightAndWidth="22px"
+                                    icon={icons.check}
+                                    color={'purple'}
                                     onClick={() =>
                                         this.finishEdit({ shouldSave: true })
                                     }
-                                >
-                                    Save
-                                </SaveBtn>
+                                />
                             </ButtonTooltip>
                             <ButtonTooltip tooltipText="esc" position="bottom">
-                                <CancelBtnStyled
+                                <Icon
+                                    heightAndWidth="22px"
+                                    icon={icons.removeX}
+                                    color={'normalText'}
                                     onClick={() =>
                                         this.setState({
                                             isEditingDescription: false,
                                         })
                                     }
-                                >
-                                    Cancel
-                                </CancelBtnStyled>
+                                />
                             </ButtonTooltip>
                         </BtnContainerStyled>
-                        {this.renderMarkdownHelpButton()}
                     </SaveActionBar>
                 </DescriptionEditorContainer>
             )
@@ -237,7 +239,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 label={
                                                     <ShareCollectionBtn>
                                                         <Icon
-                                                            height="14px"
+                                                            height="20px"
                                                             filePath={
                                                                 icons.link
                                                             }
@@ -249,6 +251,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                         </ShareCollectionBtnLabel>
                                                     </ShareCollectionBtn>
                                                 }
+                                                backgroundColor={'darkhover'}
+                                                fontColor={'normalText'}
                                             />
                                         </>
                                     ) : (
@@ -264,7 +268,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 label={
                                                     <ShareCollectionBtn>
                                                         <Icon
-                                                            height="14px"
+                                                            height="20px"
                                                             filePath={
                                                                 icons.link
                                                             }
@@ -276,6 +280,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                         </ShareCollectionBtnLabel>
                                                     </ShareCollectionBtn>
                                                 }
+                                                backgroundColor={'darkhover'}
+                                                fontColor={'normalText'}
                                             />
                                         </ButtonTooltip>
                                     )}
@@ -357,7 +363,6 @@ const EditDescriptionButton = styled.div`
 const DescriptionEditorContainer = styled.div`
     width: 100%;
     border-radius: 6px;
-    box-shadow: 0px 3px 7px -6px #d0d0d057;
     margin-top: 5px;
 
     & > div:first-child {
@@ -380,6 +385,7 @@ const BtnContainerStyled = styled.div`
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+    grid-gap: 10px;
 `
 
 const CancelBtnStyled = styled.button`
@@ -490,10 +496,10 @@ const ShareCollectionBtn = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    grid-gap: 5px;
 `
 
 const ShareCollectionBtnLabel = styled.div`
-    padding-left: 10px;
     font-size: 14px;
 `
 
@@ -534,5 +540,5 @@ const DescriptionContainer = styled.div`
 `
 
 const DescriptionText = styled(Markdown)`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale8};
 `
