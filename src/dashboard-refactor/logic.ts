@@ -533,6 +533,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         : 'searchState']: { $set: taskState },
                 },
             }),
+
             async () => {
                 const searchState = this.withMutation(previousState, {
                     searchFilters,
@@ -570,7 +571,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             : 'no-results'
                     }
                 }
-
                 this.emitMutation({
                     searchFilters,
                     searchResults: {

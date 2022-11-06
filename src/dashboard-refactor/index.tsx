@@ -517,12 +517,12 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('clickFeedActivityIndicator', null)
                 }
                 onAllSavedSelection={() =>
-                    this.processEvent('resetFilters', null)
+                    this.processEvent('setSelectedListId', { listId: null })
                 }
-                isAllSavedSelected={areSearchFiltersEmpty(this.state)}
-                onListSelection={(listId) =>
+                isAllSavedSelected={null}
+                onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
-                }
+                }}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     setSidebarPeekState: (isPeeking) => () =>

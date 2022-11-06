@@ -26,8 +26,8 @@ import blacklist from 'src/options/blacklist'
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     onListSelection: (id: number) => void
-    isAllSavedSelected: boolean
-    onAllSavedSelection: () => void
+    isAllSavedSelected?: boolean
+    onAllSavedSelection: (id: number) => void
     hasFeedActivity?: boolean
     inboxUnreadCount: number
     selectedListId?: number
@@ -171,8 +171,9 @@ export default class ListsSidebar extends PureComponent<
                                             name: 'All Saved',
                                             listId: -1,
                                             selectedState: {
-                                                isSelected: this.props
-                                                    .isAllSavedSelected,
+                                                isSelected:
+                                                    this.props
+                                                        .selectedListId === -1,
                                                 onSelection: this.props
                                                     .onAllSavedSelection,
                                             },
