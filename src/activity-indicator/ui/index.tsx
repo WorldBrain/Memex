@@ -48,7 +48,7 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
                     <OuterRing>
                         <Dot
                             unread={this.state.hasFeedActivity ? 1 : 0}
-                            onClick={this.handleFeedIndicatorClick}
+                            // onClick={this.handleFeedIndicatorClick}
                         />
                     </OuterRing>
                 )

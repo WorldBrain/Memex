@@ -516,6 +516,7 @@ export class DashboardContainer extends StatefulUIElement<
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
                 }
+                switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onAllSavedSelection={() =>
                     this.processEvent('setSelectedListId', { listId: null })
                 }
@@ -1324,11 +1325,19 @@ export class DashboardContainer extends StatefulUIElement<
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
                     <MainContent>
-                        {this.renderHeader()}
-                        {this.renderFiltersBar()}
-                        {mode === 'locate-pdf'
-                            ? this.renderPdfLocator()
-                            : this.renderSearchResults()}
+                        {this.state.listsSidebar.showFeed ? (
+                            <FeedFrame
+                                src={'https://staging.memex.social/feed'}
+                            />
+                        ) : (
+                            <>
+                                {this.renderHeader()}
+                                {this.renderFiltersBar()}
+                                {mode === 'locate-pdf'
+                                    ? this.renderPdfLocator()
+                                    : this.renderSearchResults()}
+                            </>
+                        )}
                     </MainContent>
                 </MainFrame>
 
@@ -1442,6 +1451,13 @@ const ListSidebarContent = styled(Rnd)<{
 //     width: fit-content;
 //     block-size: fit-content;
 // `
+
+const FeedFrame = styled.iframe`
+    width: fill-available;
+    min-height: 100vh;
+    height: 100%;
+    border: none;
+`
 const MainContent = styled.div`
     width: 100%;
     align-items: center;

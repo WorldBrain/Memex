@@ -25,6 +25,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import blacklist from 'src/options/blacklist'
 export interface ListsSidebarProps {
     openFeedUrl: () => void
+    switchToFeed: () => void
     onListSelection: (id: number) => void
     isAllSavedSelected?: boolean
     onAllSavedSelection: (id: number) => void
@@ -84,7 +85,7 @@ export default class ListsSidebar extends PureComponent<
         const style = {
             display: !isSidebarPeeking && !isSidebarLocked ? 'none' : 'flex',
             top: '20',
-            height: isSidebarPeeking ? '90vh' : '100vh',
+            height: isSidebarPeeking ? '90vh' : 'fill-available',
             width: '96%',
             background: 'transparent',
         }
@@ -149,9 +150,12 @@ export default class ListsSidebar extends PureComponent<
                                             hasActivity: this.props
                                                 .hasFeedActivity,
                                             selectedState: {
-                                                isSelected: false,
+                                                isSelected:
+                                                    this.props
+                                                        .selectedListId ===
+                                                    SPECIAL_LIST_IDS.INBOX + 2,
                                                 onSelection: this.props
-                                                    .openFeedUrl,
+                                                    .switchToFeed,
                                             },
                                         },
                                     ],
@@ -173,7 +177,8 @@ export default class ListsSidebar extends PureComponent<
                                             selectedState: {
                                                 isSelected:
                                                     this.props
-                                                        .selectedListId === -1,
+                                                        .selectedListId ===
+                                                    null,
                                                 onSelection: this.props
                                                     .onAllSavedSelection,
                                             },
@@ -391,7 +396,6 @@ const TopGroup = styled.div`
 const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-y: scroll;
     overflow-x: visible;
-    padding-bottom: 100px;
     height: fill-available;
     width: ${(props) => props.sidebarWidth};
 

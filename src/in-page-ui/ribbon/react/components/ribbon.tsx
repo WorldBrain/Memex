@@ -1,5 +1,4 @@
 import React, { Component, KeyboardEventHandler } from 'react'
-import cx from 'classnames'
 import qs from 'query-string'
 import styled, { css } from 'styled-components'
 
@@ -27,8 +26,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
-
-const styles = require('./ribbon.css')
+import FeedPanel from './feed-panel'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -45,6 +43,8 @@ export interface Props extends RibbonSubcomponentProps {
     handleRemoveRibbon: () => void
     highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
+    toggleFeed: () => void
+    showFeed: boolean
 }
 
 interface State {
@@ -216,6 +216,23 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private renderFeedInfo() {
+        if (!this.props.showFeed) {
+            return
+        }
+
+        return (
+            <BlurredSidebarOverlay
+                onOutsideClick={() => this.props.toggleFeed()}
+                skipRendering={!this.props.sidebar.isSidebarOpen}
+            >
+                <FeedPanel closePanel={() => this.props.toggleFeed()}>
+                    <FeedFrame src={'https://staging.memex.social/feed'} />
+                </FeedPanel>
+            </BlurredSidebarOverlay>
+        )
+    }
+
     private renderExtraButtons() {
         if (!this.props.showExtraButtons) {
             return
@@ -382,6 +399,7 @@ export default class Ribbon extends Component<Props, State> {
                                     isSidebarOpen={
                                         this.props.sidebar.isSidebarOpen
                                     }
+                                    onClick={() => this.props.toggleFeed()}
                                 >
                                     <ButtonTooltip
                                         tooltipText={'View Feed Updates'}
@@ -393,6 +411,16 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </ButtonTooltip>
                                 </FeedIndicatorBox>
+                                {this.props.showFeed && (
+                                    <HoverBox
+                                        withRelativeContainer
+                                        right="45px"
+                                        height={'600px'}
+                                        width={'500px'}
+                                    >
+                                        {this.renderFeedInfo()}
+                                    </HoverBox>
+                                )}
                                 <HorizontalLine
                                     sidebaropen={
                                         this.props.sidebar.isSidebarOpen
@@ -595,8 +623,8 @@ export default class Ribbon extends Component<Props, State> {
                                 {this.props.showExtraButtons && (
                                     <HoverBox
                                         position="absolute"
-                                        top="200px"
-                                        right="40px"
+                                        bottom="0px"
+                                        right="45px"
                                         padding={'0px'}
                                     >
                                         {this.renderExtraButtons()}
@@ -618,8 +646,8 @@ export default class Ribbon extends Component<Props, State> {
                                 {this.props.showTutorial && (
                                     <HoverBox
                                         position="absolute"
-                                        top="230px"
-                                        right="40px"
+                                        bottom="0px"
+                                        right="45px"
                                         padding={'0px'}
                                         width={'400px'}
                                     >
@@ -826,4 +854,10 @@ const InfoText = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     font-weight: 400;
+`
+
+const FeedFrame = styled.iframe`
+    width: fill-available;
+    height: 600px;
+    border: none;
 `

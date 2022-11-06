@@ -217,6 +217,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     allListIds: [],
                     filteredListIds: [],
                 },
+                selectedListId: null,
+                showFeed: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -497,14 +499,44 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async mutateAndTriggerSearch(
         previousState: State,
         mutation: UIMutation<State>,
+        event?,
     ) {
-        this.emitMutation({
-            ...mutation,
-            mode: { $set: 'search' },
-            searchResults: {
-                searchState: { $set: 'running' },
-            },
-        })
+        if (previousState.listsSidebar.showFeed === true) {
+            if (event.listId === null) {
+                this.emitMutation({
+                    ...mutation,
+                    mode: { $set: 'search' },
+                    searchResults: {
+                        searchState: { $set: 'running' },
+                    },
+                    listsSidebar: {
+                        showFeed: { $set: false },
+                        selectedListId: { $set: null },
+                    },
+                })
+            } else {
+                this.emitMutation({
+                    ...mutation,
+                    mode: { $set: 'search' },
+                    searchResults: {
+                        searchState: { $set: 'running' },
+                    },
+                    listsSidebar: {
+                        showFeed: { $set: false },
+                        selectedListId: { $set: event.listId },
+                    },
+                })
+            }
+        } else {
+            this.emitMutation({
+                ...mutation,
+                mode: { $set: 'search' },
+                searchResults: {
+                    searchState: { $set: 'running' },
+                },
+            })
+        }
+
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -2621,14 +2653,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.emitMutation({
+            listsSidebar: {
+                showFeed: { $set: false },
+            },
+        })
+
         const listIdToSet =
             previousState.listsSidebar.selectedListId === event.listId
                 ? undefined
                 : event.listId
 
-        await this.mutateAndTriggerSearch(previousState, {
-            listsSidebar: { selectedListId: { $set: listIdToSet } },
-        })
+        await this.mutateAndTriggerSearch(
+            previousState,
+            {
+                listsSidebar: { selectedListId: { $set: listIdToSet } },
+            },
+            event,
+        )
     }
 
     setDragOverListId: EventHandler<'setDragOverListId'> = async ({
@@ -3092,6 +3134,31 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { hasFeedActivity: { $set: false } },
             })
         }
+    }
+
+    switchToFeed: EventHandler<'clickFeedActivityIndicator'> = async ({
+        previousState,
+        event,
+    }) => {
+        if (!(await this.ensureLoggedIn())) {
+            return
+        }
+
+        if (previousState.listsSidebar.hasFeedActivity) {
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: false },
+                },
+            })
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                showFeed: { $set: true },
+                selectedListId: { $set: SPECIAL_LIST_IDS.INBOX + 2 },
+            },
+        })
     }
     /* END - lists sidebar event handlers */
 

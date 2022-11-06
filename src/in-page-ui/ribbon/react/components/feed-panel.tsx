@@ -6,7 +6,7 @@ interface Props {
     closePanel: () => void
 }
 
-class ExtraButtonsPanel extends React.PureComponent<Props> {
+class FeedPanel extends React.PureComponent<Props> {
     async componentDidMount() {
         document.addEventListener('keydown', this.handleKeyDown)
     }
@@ -30,6 +30,9 @@ class ExtraButtonsPanel extends React.PureComponent<Props> {
     }
 }
 
-export default onClickOutside(ExtraButtonsPanel)
+export default onClickOutside(FeedPanel)
 
-const Div = styled.div``
+const Div = styled.div`
+    height: fill-available;
+    width: fill-available;
+`
