@@ -17,7 +17,7 @@ export const sharedListToFollowedList = (
 
 export const sharedListEntryToFollowedListEntry = (
     entry: SharedListEntry & { creator: AutoPk; sharedList: AutoPk },
-    extra?: { id: AutoPk },
+    extra?: { id?: AutoPk; hasAnnotations?: boolean },
 ): FollowedListEntry & { id?: AutoPk } => ({
     id: extra?.id,
     followedList: entry.sharedList,
@@ -26,12 +26,14 @@ export const sharedListEntryToFollowedListEntry = (
     entryTitle: entry.entryTitle ?? '',
     normalizedPageUrl: entry.normalizedUrl,
     creator: entry.creator,
-    hasAnnotations: false,
+    hasAnnotations: extra?.hasAnnotations ?? false,
 })
 
 /** Should be used when dealing with identifying followedListEntries without using the PK field. e.g., relating them back to sharedListEntries */
 export const getFollowedListEntryIdentifier = (
-    entry: FollowedListEntry | (SharedListEntry & { sharedList: AutoPk }),
+    entry:
+        | Pick<FollowedListEntry, 'followedList' | 'normalizedPageUrl'>
+        | (Pick<SharedListEntry, 'normalizedUrl'> & { sharedList: AutoPk }),
 ): string =>
     'sharedList' in entry
         ? `${entry.sharedList}-${entry.normalizedUrl}`

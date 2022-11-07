@@ -2,9 +2,11 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
 import type { ServerStorageModules } from 'src/storage/types'
-import type { FollowedList } from './types'
 import PageActivityIndicatorStorage from './storage'
-import { SharedList } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type {
+    SharedList,
+    SharedListReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
     getFollowedListEntryIdentifier,
     sharedListEntryToFollowedListEntry,
@@ -107,8 +109,11 @@ export class PageActivityIndicatorBackground {
             }
         }
 
-        // TODO: reduce N list entry server reads to 1
         for (const sharedList of sharedLists) {
+            const listReference: SharedListReference = {
+                type: 'shared-list-reference',
+                id: sharedList.id,
+            }
             const existingFollowedListEntryLookup = await this.storage.findAllFollowedListEntries(
                 {
                     sharedList: sharedList.id,
@@ -119,31 +124,98 @@ export class PageActivityIndicatorBackground {
             )
             const sharedListEntries = await contentSharing.getListEntriesByList(
                 {
-                    listReference: {
-                        type: 'shared-list-reference',
-                        id: sharedList.id,
-                    },
+                    listReference,
                     from: localFollowedList?.lastSync,
                 },
             )
+            const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
+                {
+                    listReference,
+                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotations` if you only have partial results
+                    // from: localFollowedList?.lastSync,
+                },
+            )
+
             for (const entry of sharedListEntries) {
-                if (
-                    existingFollowedListEntryLookup.has(
-                        getFollowedListEntryIdentifier({
-                            ...entry,
-                            sharedList: entry.sharedList.id,
-                        }),
-                    )
-                ) {
-                    continue
-                }
-                await this.storage.createFollowedListEntry(
-                    sharedListEntryToFollowedListEntry({
+                const hasAnnotations = !!sharedAnnotationListEntries[
+                    entry.normalizedUrl
+                ]?.length
+                const localFollowedListEntry = existingFollowedListEntryLookup.get(
+                    getFollowedListEntryIdentifier({
                         ...entry,
-                        creator: entry.creator.id,
                         sharedList: entry.sharedList.id,
                     }),
                 )
+
+                if (!localFollowedListEntry) {
+                    await this.storage.createFollowedListEntry(
+                        sharedListEntryToFollowedListEntry(
+                            {
+                                ...entry,
+                                creator: entry.creator.id,
+                                sharedList: entry.sharedList.id,
+                            },
+                            { hasAnnotations },
+                        ),
+                    )
+                } else if (
+                    localFollowedListEntry.hasAnnotations !== hasAnnotations
+                ) {
+                    await this.storage.updateFollowedListEntryHasAnnotations({
+                        normalizedPageUrl: entry.normalizedUrl,
+                        followedList: entry.sharedList.id,
+                        updatedWhen: opts?.now,
+                        hasAnnotations,
+                    })
+                }
+            }
+
+            // This handles the case where a new annotation was created, but the assoc. sharedListEntry didn't get their updatedWhen timestamp updated
+            const recentAnnotationEntries = Object.values(
+                sharedAnnotationListEntries,
+            )
+                .flat()
+                .filter(
+                    (annotationEntry) =>
+                        !sharedListEntries.find(
+                            (entry) =>
+                                entry.normalizedUrl ===
+                                annotationEntry.normalizedPageUrl,
+                        ),
+                )
+            for (const entry of recentAnnotationEntries) {
+                const localFollowedListEntry = existingFollowedListEntryLookup.get(
+                    getFollowedListEntryIdentifier({
+                        normalizedUrl: entry.normalizedPageUrl,
+                        sharedList: entry.sharedList.id,
+                    }),
+                )
+                if (localFollowedListEntry?.hasAnnotations) {
+                    continue
+                }
+
+                await this.storage.updateFollowedListEntryHasAnnotations({
+                    normalizedPageUrl: entry.normalizedPageUrl,
+                    followedList: entry.sharedList.id,
+                    updatedWhen: opts?.now,
+                    hasAnnotations: true,
+                })
+            }
+
+            // This handles the case where the last annotation for an entry was deleted
+            for (const localEntry of existingFollowedListEntryLookup.values()) {
+                if (
+                    localEntry.hasAnnotations &&
+                    !sharedAnnotationListEntries[localEntry.normalizedPageUrl]
+                        ?.length
+                ) {
+                    await this.storage.updateFollowedListEntryHasAnnotations({
+                        normalizedPageUrl: localEntry.normalizedPageUrl,
+                        followedList: localEntry.followedList,
+                        updatedWhen: opts?.now,
+                        hasAnnotations: false,
+                    })
+                }
             }
 
             if (localFollowedList == null) {

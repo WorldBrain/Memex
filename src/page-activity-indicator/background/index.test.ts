@@ -31,7 +31,18 @@ const calcExpectedListEntries = (
                               ...entry,
                               sharedList: Number(sharedList),
                           },
-                          { id: expect.any(Number) },
+                          {
+                              id: expect.any(Number),
+                              hasAnnotations: DATA.annotationListEntries[
+                                  sharedList
+                              ]?.reduce(
+                                  (acc, curr) =>
+                                      acc ||
+                                      curr.normalizedPageUrl ===
+                                          entry.normalizedUrl,
+                                  false,
+                              ),
+                          },
                       ),
                   )
                 : [],
@@ -308,6 +319,217 @@ describe('Page activity indicator background module tests', () => {
                 ],
             }),
         )
+    })
+
+    it('should set hasAnnotation flag on existing followedListEntry if new annotation exists on resync', async () => {
+        const {
+            backgroundModules,
+            storageManager,
+            getServerStorage,
+        } = await setupTest({
+            testData: { ownLists: true },
+        })
+
+        const ownListIds = new Set(
+            DATA.sharedLists
+                .filter((list) => list.creator === DATA.userReferenceA.id)
+                .map((list) => list.id),
+        )
+        const createExpectedListEntry = (
+            entry: any,
+            sharedList: AutoPk,
+            hasAnnotations: boolean,
+        ) =>
+            sharedListEntryToFollowedListEntry(
+                { ...entry, sharedList },
+                { hasAnnotations, id: expect.any(Number) },
+            )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 1 },
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(ownListIds))
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][1],
+                DATA.sharedLists[0].id,
+                false,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][0],
+                DATA.sharedLists[0].id,
+                true,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[1].id][1],
+                DATA.sharedLists[1].id,
+                false,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[1].id][0],
+                DATA.sharedLists[1].id,
+                false,
+            ),
+        ])
+
+        const serverStorage = await getServerStorage()
+        // Create an annotation list entry for one of the existing list entries
+        await serverStorage.manager
+            .collection('sharedAnnotationListEntry')
+            .createObject({
+                creator: DATA.users[2].id,
+                sharedList: DATA.sharedLists[1].id,
+                normalizedPageUrl: 'test.com/a',
+                updatedWhen: 1,
+                createdWhen: 1,
+                uploadedWhen: 1,
+            })
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 2 },
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][1],
+                DATA.sharedLists[0].id,
+                false,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][0],
+                DATA.sharedLists[0].id,
+                true,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[1].id][1],
+                DATA.sharedLists[1].id,
+                false,
+            ),
+            createExpectedListEntry(
+                {
+                    ...DATA.listEntries[DATA.sharedLists[1].id][0],
+                    updatedWhen: 2,
+                },
+                DATA.sharedLists[1].id,
+                true,
+            ),
+        ])
+
+        // And another one
+        await serverStorage.manager
+            .collection('sharedAnnotationListEntry')
+            .createObject({
+                creator: DATA.users[2].id,
+                sharedList: DATA.sharedLists[1].id,
+                normalizedPageUrl: 'test.com/b',
+                updatedWhen: 3,
+                createdWhen: 3,
+                uploadedWhen: 3,
+            })
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 3 },
+        )
+
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][1],
+                DATA.sharedLists[0].id,
+                false,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][0],
+                DATA.sharedLists[0].id,
+                true,
+            ),
+            createExpectedListEntry(
+                {
+                    ...DATA.listEntries[DATA.sharedLists[1].id][1],
+                    updatedWhen: 3,
+                },
+                DATA.sharedLists[1].id,
+                true,
+            ),
+            createExpectedListEntry(
+                {
+                    ...DATA.listEntries[DATA.sharedLists[1].id][0],
+                    updatedWhen: 2,
+                },
+                DATA.sharedLists[1].id,
+                true,
+            ),
+        ])
+
+        // Now delete them, to ensure it works the other way around
+        await serverStorage.manager
+            .collection('sharedAnnotationListEntry')
+            .deleteObjects({
+                sharedList: DATA.sharedLists[1].id,
+            })
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 4 },
+        )
+
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][1],
+                DATA.sharedLists[0].id,
+                false,
+            ),
+            createExpectedListEntry(
+                DATA.listEntries[DATA.sharedLists[0].id][0],
+                DATA.sharedLists[0].id,
+                true,
+            ),
+            createExpectedListEntry(
+                {
+                    ...DATA.listEntries[DATA.sharedLists[1].id][1],
+                    updatedWhen: 4,
+                },
+                DATA.sharedLists[1].id,
+                false,
+            ),
+            createExpectedListEntry(
+                {
+                    ...DATA.listEntries[DATA.sharedLists[1].id][0],
+                    updatedWhen: 4,
+                },
+                DATA.sharedLists[1].id,
+                false,
+            ),
+        ])
     })
 
     it('should delete followedList and followedListEntries when a sharedList no longer exists', async () => {

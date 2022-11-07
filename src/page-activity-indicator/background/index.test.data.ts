@@ -112,14 +112,14 @@ export const listEntries: {
 }
 
 export const annotationListEntries: {
-    [normalizedPageUrl: string]: Array<
+    [sharedList: number]: Array<
         SharedAnnotationListEntry & {
             sharedList: AutoPk
             creator: AutoPk
         }
     >
 } = {
-    ['test.com/a']: [
+    [sharedLists[0].id]: [
         {
             creator: users[0].id,
             sharedList: sharedLists[0].id,
