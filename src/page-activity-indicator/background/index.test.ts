@@ -211,7 +211,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -263,8 +263,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds))
-
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -305,6 +304,9 @@ describe('Page activity indicator background module tests', () => {
             { now: 2 },
         )
 
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
         // The entry updated post-lastSync time should now be there, but not the one pre-lastSync time
         expect(
             await storageManager
@@ -360,7 +362,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds))
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -562,7 +564,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds))
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
 
         expect(
             await storageManager
@@ -615,7 +617,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(followedListIds))
+        ).toEqual(calcExpectedLists(followedListIds, { lastSync: 1 }))
 
         expect(
             await storageManager
@@ -652,7 +654,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(followedListIds))
+        ).toEqual(calcExpectedLists(followedListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -720,7 +722,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(expectedListIds))
+        ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -772,7 +774,7 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(expectedListIds))
+        ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
         expect(
             await storageManager
                 .collection('followedListEntry')

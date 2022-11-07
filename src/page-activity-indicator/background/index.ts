@@ -90,6 +90,7 @@ export class PageActivityIndicatorBackground {
         if (userId == null) {
             return
         }
+        const now = opts?.now ?? Date.now()
         const { contentSharing } = await this.deps.getServerStorage()
 
         const sharedLists = await this.getAllUserFollowedSharedListsFromServer({
@@ -164,7 +165,7 @@ export class PageActivityIndicatorBackground {
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: entry.normalizedUrl,
                         followedList: entry.sharedList.id,
-                        updatedWhen: opts?.now,
+                        updatedWhen: now,
                         hasAnnotations,
                     })
                 }
@@ -197,7 +198,7 @@ export class PageActivityIndicatorBackground {
                 await this.storage.updateFollowedListEntryHasAnnotations({
                     normalizedPageUrl: entry.normalizedPageUrl,
                     followedList: entry.sharedList.id,
-                    updatedWhen: opts?.now,
+                    updatedWhen: now,
                     hasAnnotations: true,
                 })
             }
@@ -212,7 +213,7 @@ export class PageActivityIndicatorBackground {
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: localEntry.normalizedPageUrl,
                         followedList: localEntry.followedList,
-                        updatedWhen: opts?.now,
+                        updatedWhen: now,
                         hasAnnotations: false,
                     })
                 }
@@ -220,12 +221,14 @@ export class PageActivityIndicatorBackground {
 
             if (localFollowedList == null) {
                 await this.storage.createFollowedList(
-                    sharedListToFollowedList(sharedList),
+                    sharedListToFollowedList(sharedList, {
+                        lastSync: now,
+                    }),
                 )
             } else {
                 await this.storage.updateFollowedListLastSync({
                     sharedList: sharedList.id,
-                    lastSync: opts?.now ?? Date.now(),
+                    lastSync: now,
                 })
             }
         }
