@@ -6,26 +6,41 @@ import {
     sharedListEntryToFollowedListEntry,
     sharedListToFollowedList,
 } from './utils'
+import type { FollowedListEntry } from './types'
 
-const calcExpectedLists = (wantedListIds?: Set<AutoPk>) =>
+const calcExpectedLists = (
+    wantedListIds?: Set<AutoPk>,
+    opts?: { lastSync?: number },
+) =>
     DATA.sharedLists
         .filter((list) => wantedListIds?.has(list.id) ?? true)
-        .map(sharedListToFollowedList)
+        .map((list) =>
+            sharedListToFollowedList(list, { lastSync: opts?.lastSync }),
+        )
 
-const calcExpectedListEntries = (wantedListIds?: Set<AutoPk>) => {
+const calcExpectedListEntries = (
+    wantedListIds?: Set<AutoPk>,
+    opts?: { extraEntries?: FollowedListEntry[] },
+) => {
     const _wantedListIds = wantedListIds
         ? new Set([...wantedListIds].map((id) => Number(id)))
         : null
-    return Object.entries(DATA.listEntries).flatMap(([sharedList, entries]) =>
-        _wantedListIds?.has(Number(sharedList)) ?? true
-            ? entries.map((entry) =>
-                  sharedListEntryToFollowedListEntry({
-                      ...entry,
-                      sharedList,
-                  }),
-              )
-            : [],
-    )
+    return expect.arrayContaining([
+        ...Object.entries(DATA.listEntries).flatMap(([sharedList, entries]) =>
+            _wantedListIds?.has(Number(sharedList)) ?? true
+                ? entries.map((entry) =>
+                      sharedListEntryToFollowedListEntry(
+                          {
+                              ...entry,
+                              sharedList: Number(sharedList),
+                          },
+                          { id: expect.any(Number) },
+                      ),
+                  )
+                : [],
+        ),
+        ...(opts?.extraEntries ?? []),
+    ])
 }
 
 async function setupTest(opts: {
@@ -62,9 +77,10 @@ async function setupTest(opts: {
         await Promise.all(
             Object.entries(DATA.listEntries).flatMap(([sharedList, entries]) =>
                 entries.map((data) =>
-                    manager
-                        .collection('sharedListEntry')
-                        .createObject({ ...data, sharedList }),
+                    manager.collection('sharedListEntry').createObject({
+                        ...data,
+                        sharedList: Number(sharedList),
+                    }),
                 ),
             ),
         )
@@ -173,8 +189,21 @@ describe('Page activity indicator background module tests', () => {
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds))
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual(calcExpectedListEntries(ownListIds))
 
+        // Do it again to assert idempotency
+        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            { now: 2 },
+        )
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
         expect(
             await storageManager
                 .collection('followedListEntry')
@@ -224,7 +253,7 @@ describe('Page activity indicator background module tests', () => {
         const sharedList = DATA.sharedLists[0].id
         await storageManager
             .collection('followedList')
-            .updateOneObject({ sharedList }, { lastSync: { $set: 2 } })
+            .updateOneObject({ sharedList }, { lastSync: 2 })
         const serverStorage = await getServerStorage()
         const newListEntries = [
             {
@@ -251,19 +280,23 @@ describe('Page activity indicator background module tests', () => {
         }
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { now: 1 },
+            { now: 2 },
         )
-        const expected = calcExpectedListEntries(ownListIds)
 
         // The entry updated post-lastSync time should now be there, but not the one pre-lastSync time
         expect(
             await storageManager
                 .collection('followedListEntry')
                 .findAllObjects({}),
-        ).toEqual([
-            ...expected,
-            sharedListEntryToFollowedListEntry(newListEntries[1]),
-        ])
+        ).toEqual(
+            calcExpectedListEntries(ownListIds, {
+                extraEntries: [
+                    sharedListEntryToFollowedListEntry(newListEntries[1], {
+                        id: expect.any(Number),
+                    }),
+                ],
+            }),
+        )
     })
 
     it('should delete followedList and followedListEntries when a sharedList no longer exists', async () => {
@@ -312,12 +345,12 @@ describe('Page activity indicator background module tests', () => {
         ownListIds.delete(DATA.sharedLists[0].id)
 
         await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { now: 1 },
+            { now: 2 },
         )
 
         expect(
             await storageManager.collection('followedList').findAllObjects({}),
-        ).toEqual(calcExpectedLists(ownListIds))
+        ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
         expect(
             await storageManager
                 .collection('followedListEntry')

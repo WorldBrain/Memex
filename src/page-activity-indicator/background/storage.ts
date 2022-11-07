@@ -5,6 +5,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { FollowedList, FollowedListEntry } from './types'
+import { getFollowedListEntryIdentifier } from './utils'
 
 export default class PageActivityIndicatorStorage extends StorageModule {
     getConfig(): StorageModuleConfig {
@@ -55,6 +56,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     collection: 'followedList',
                     operation: 'findObjects',
                     args: {},
+                },
+                findFollowedListEntries: {
+                    collection: 'followedListEntry',
+                    operation: 'findObjects',
+                    args: { followedList: '$followedList:number' },
                 },
                 updateFollowedListLastSyncTime: {
                     collection: 'followedList',
@@ -144,6 +150,21 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             {},
         )
         return new Map(followedLists.map((list) => [list.sharedList, list]))
+    }
+
+    async findAllFollowedListEntries(
+        data: Pick<FollowedList, 'sharedList'>,
+    ): Promise<Map<AutoPk, FollowedListEntry>> {
+        const followedListEntries: FollowedListEntry[] = await this.operation(
+            'findFollowedListEntries',
+            { followedList: data.sharedList },
+        )
+        return new Map(
+            followedListEntries.map((entry) => [
+                getFollowedListEntryIdentifier(entry),
+                entry,
+            ]),
+        )
     }
 
     async updateFollowedListLastSync(

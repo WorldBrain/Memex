@@ -6,6 +6,7 @@ import type { FollowedList } from './types'
 import PageActivityIndicatorStorage from './storage'
 import { SharedList } from '@worldbrain/memex-common/lib/content-sharing/types'
 import {
+    getFollowedListEntryIdentifier,
     sharedListEntryToFollowedListEntry,
     sharedListToFollowedList,
 } from './utils'
@@ -95,8 +96,24 @@ export class PageActivityIndicatorBackground {
         })
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
 
-        // TODO: reduce N list entry reads to 1
+        // Do a run over the existing followedLists, to remove any that no longer have assoc. sharedLists existing
+        for (const followedList of existingFollowedListsLookup.values()) {
+            if (
+                !sharedLists.find((list) => list.id === followedList.sharedList)
+            ) {
+                await this.storage.deleteFollowedListAndAllEntries({
+                    sharedList: followedList.sharedList,
+                })
+            }
+        }
+
+        // TODO: reduce N list entry server reads to 1
         for (const sharedList of sharedLists) {
+            const existingFollowedListEntryLookup = await this.storage.findAllFollowedListEntries(
+                {
+                    sharedList: sharedList.id,
+                },
+            )
             const localFollowedList = existingFollowedListsLookup.get(
                 sharedList.id,
             )
@@ -110,6 +127,16 @@ export class PageActivityIndicatorBackground {
                 },
             )
             for (const entry of sharedListEntries) {
+                if (
+                    existingFollowedListEntryLookup.has(
+                        getFollowedListEntryIdentifier({
+                            ...entry,
+                            sharedList: entry.sharedList.id,
+                        }),
+                    )
+                ) {
+                    continue
+                }
                 await this.storage.createFollowedListEntry(
                     sharedListEntryToFollowedListEntry({
                         ...entry,
