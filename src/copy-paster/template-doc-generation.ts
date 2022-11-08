@@ -39,7 +39,7 @@ export const joinSpaces = (spaceNames?: string[]): string | undefined =>
 
 export const serializeDate = (
     date?: Date,
-    locale = window.navigator.language,
+    locale = globalThis.navigator.language,
 ): string | undefined =>
     date == null ? undefined : date.toLocaleString(locale)
 
