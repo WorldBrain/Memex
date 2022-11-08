@@ -230,7 +230,7 @@ export class AuthBackground {
                 userWithClaims,
             )
 
-            if (this.options.getFCMRegistrationToken != null) {
+            if (this.options.getFCMRegistrationToken != null && user != null) {
                 const userManagement = await this.options.getUserManagement()
                 const token = await this.options.getFCMRegistrationToken()
                 await userManagement.addUserFCMRegistrationToken(
