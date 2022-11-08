@@ -102,6 +102,13 @@ export interface AnnotationsSidebarProps
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
     onMenuItemClick: (sortingFn) => void
+
+    // Event triggered when you either enter a selected space
+    // for the isolated view, or get out of an isolated or leaf
+    // view for a currently selected space. In the last case
+    // listId argument will be null
+    onSelectSpace?: (listId: string | null) => void
+
     copyPaster: any
     onClickOutsideCopyPaster: () => void
     normalizedPageUrls: string[]
@@ -112,7 +119,12 @@ export interface AnnotationsSidebarProps
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+
+    // TODO: change to selectedSpaceId and figure how to get its name
+    // Space, list or collection currently selected to be shown as part
+    // of the isolated view or leaf page.
     selectedSpace: string
+
     //postShareHook: (shareInfo) => void
 }
 
@@ -221,6 +233,21 @@ export class AnnotationsSidebar extends React.Component<
             return this.props.onClickOutside(e)
         }
     }
+
+    private triggerSelectSpace(listId: string | null) {
+        if (listId === this.props.selectedSpace) {
+            console.debug(
+                'Not triggering select space because it is the same',
+                listId,
+            )
+        } else if (this.props.onSelectSpace) {
+            console.debug('Triggering select space', listId)
+            this.props.onSelectSpace(listId)
+        } else {
+            console.warn('No handler to select space', listId)
+        }
+    }
+
     private getListsForAnnotationCreate = (
         followedLists,
         isolatedView: string,
@@ -846,7 +873,11 @@ export class AnnotationsSidebar extends React.Component<
         // ) : (
         return (
             <React.Fragment>
-                {this.props.isExpanded ? (
+                {this.props.selectedSpace ? (
+                    <AnnotationsSectionStyled>
+                        {this.renderAnnotationsEditable()}
+                    </AnnotationsSectionStyled>
+                ) : this.props.isExpanded ? (
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditable()}
                     </AnnotationsSectionStyled>
@@ -1112,7 +1143,7 @@ export class AnnotationsSidebar extends React.Component<
      */
     private renderLeafTopBar() {
         return (
-            <TopBarContainer>
+            <TopBarContainer onClick={() => this.triggerSelectSpace(null)}>
                 <ButtonTooltip
                     tooltipText="Back to all spaces"
                     position="bottom"
@@ -1603,6 +1634,7 @@ const FollowedListSectionTitle = styled(Margin) <{ active: boolean }>`
     }
 `
 
+// TODO: stop referring to these styled components as containers
 const FollowedListTitleContainer = styled(Margin)`
     display: flex;
     flex-direction: row;
@@ -1762,6 +1794,7 @@ const NewAnnotationSeparator = styled.div`
 const AnnotationsSectionStyled = styled.section`
     font-family: 'Satoshi', sans-serif;
     background: ${(props) => props.theme.colors.backgroundColor};
+    color: ${(props) => props.theme.colors.normalText};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
