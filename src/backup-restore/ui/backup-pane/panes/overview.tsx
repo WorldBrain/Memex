@@ -97,7 +97,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
             loadingChargebee: true,
         })
         const portalLink = await subscription.getManageLink()
-        window.open(portalLink['access_url'])
+        globalThis.open(portalLink['access_url'])
         this.setState({
             loadingChargebee: false,
         })

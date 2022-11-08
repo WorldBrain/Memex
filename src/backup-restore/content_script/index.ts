@@ -3,7 +3,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 let timerId
 
 const isDOMContentLoaded = () =>
-    new Promise<void>(resolve => {
+    new Promise<void>((resolve) => {
         timerId = setInterval(() => {
             if (document.readyState === 'complete') {
                 clearInterval(timerId)
@@ -25,9 +25,10 @@ export async function sniffWordpressWorldbrainUser() {
         remoteFunction('storeWordpressUserId')(userId)
     }
 
-    if (window.location.pathname === '/order-received/thank-you/') {
+    if (globalThis.location.pathname === '/order-received/thank-you/') {
         setTimeout(() => {
-            window.location.href = window.location.pathname + 'redirect/'
+            globalThis.location.href =
+                globalThis.location.pathname + 'redirect/'
         }, 1000 * 5)
     }
 }
