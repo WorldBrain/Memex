@@ -118,7 +118,7 @@ export default class ImportItemProcessor {
         })
     }
 
-    async _storeOtherData({ url, tags, collections, annotations }) {
+    async _storeOtherData({ url, tags = [], collections, annotations }) {
         this._checkCancelled()
         try {
             const listIds = await this.options.customListsModule.createCustomLists(

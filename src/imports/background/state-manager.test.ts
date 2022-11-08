@@ -24,8 +24,8 @@ const runSuite = (DATA: TestData) => () => {
     beforeAll(() => {
         // Init fake data source
         const dataSources = new DataSources({
-            history: DATA.history,
-            bookmarks: DATA.bookmarks,
+            history: DATA.history as any,
+            bookmarks: DATA.bookmarks as any,
         })
 
         const itemCreator = new ItemCreator({
@@ -47,8 +47,8 @@ const runSuite = (DATA: TestData) => () => {
     test('duped input items do not influence state', async () => {
         // Init fake data source with duped history
         const dataSources = new DataSources({
-            history: [...DATA.history, ...DATA.history],
-            bookmarks: [],
+            history: [...DATA.history, ...DATA.history] as any,
+            bookmarks: [] as any,
         })
 
         const itemCreator = new ItemCreator({
