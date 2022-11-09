@@ -80,6 +80,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
+        sidebarEvents.on('selectSpace', this.handleSelectSpace)
+
         sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
@@ -188,6 +190,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
 
         this.forceUpdate()
+    }
+
+    private handleSelectSpace(listId: string) {
+        this.processEvent('selectSpace', { listId })
     }
 
     private handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
