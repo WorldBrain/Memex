@@ -5,6 +5,7 @@ import type {
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export class MockPushMessagingService implements PushMessagingServiceInterface {
+    topicSubscribers = new Map<string, Set<AutoPk>>()
     sentMessages: Array<
         {
             payload: PushMessagePayload
@@ -13,6 +14,22 @@ export class MockPushMessagingService implements PushMessagingServiceInterface {
             | { type: 'to-user'; userId: AutoPk }
         )
     > = []
+
+    subscribeUserToTopic: PushMessagingServiceInterface['subscribeUserToTopic'] = async (
+        userReference,
+        topic,
+    ) => {
+        const existing = this.topicSubscribers.get(topic) ?? new Set()
+        existing.add(userReference.id)
+    }
+
+    unsubscribeUserFromTopic: PushMessagingServiceInterface['unsubscribeUserFromTopic'] = async (
+        userReference,
+        topic,
+    ) => {
+        const existing = this.topicSubscribers.get(topic) ?? new Set()
+        existing.delete(userReference.id)
+    }
 
     sendToTopic: PushMessagingServiceInterface['sendToTopic'] = async (
         topic,
