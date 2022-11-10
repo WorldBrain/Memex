@@ -14,6 +14,21 @@ const firebaseConfig = {
 export const getFirebase = () => {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig)
+
+        firebase
+            .firestore()
+            .settings({ cacheSizeBytes: 1000000 * 10, merge: true })
+        firebase
+            .firestore()
+            .enablePersistence({ synchronizeTabs: true })
+            .catch((error) => {
+                console.warn(
+                    'Could not enable Firestore offline persistence. Reason: ',
+                    error.code,
+                    error,
+                )
+            })
     }
+
     return firebase
 }
