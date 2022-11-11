@@ -147,6 +147,19 @@ export class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
+    /**
+     * Handles AnnotationSidebar onSelectSpace event
+     *
+     * This handler will actually select the space change by asking our
+     * UILogic to emit the change. Sub-classes like AnnotationSidebarInPage
+     * may override this to notify other elements like the InPageUI.
+     *
+     * @param listId space ID being selected or null
+     */
+    protected handleSelectSpace(listId: string | null) {
+        this.processEvent('selectSpace', { listId })
+    }
+
     private handleClickOutside = (e) => {
         if (this.state.isLocked) {
             return
@@ -851,10 +864,14 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            // TODO: determine selected space after anchor
                             selectedSpace={
                                 document.URL.split('#').length > 1
                                     ? 'unknown'
-                                    : ''
+                                    : this.state.selectedSpace
+                            }
+                            onSelectSpace={(listId) =>
+                                this.handleSelectSpace(listId)
                             }
                             // TODO: check why this got removed
                             // sidebarActions={() => this.renderTopBar()}
