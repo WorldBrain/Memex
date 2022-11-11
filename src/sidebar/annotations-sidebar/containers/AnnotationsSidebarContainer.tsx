@@ -624,6 +624,89 @@ export class AnnotationsSidebarContainer<
         return null
     }
 
+    private renderTopSideBar() {
+        if (this.props.skipTopBarRender) {
+            return null
+        }
+
+        return (
+            <>
+                <TopBarActionBtns
+                    width={this.state.sidebarWidth}
+                    sidebarContext={this.props.sidebarContext}
+                >
+                    {this.state.isLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Unlock sidebar"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.arrowRight}
+                                    heightAndWidth="16px"
+                                    onClick={this.toggleSidebarLock}
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Lock sidebar open"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.arrowLeft}
+                                    heightAndWidth="16px"
+                                    onClick={this.toggleSidebarLock}
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    )}
+                    {!this.state.isWidthLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Adjust Page Width"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.compress}
+                                    heightAndWidth="16px"
+                                    onClick={() =>
+                                        this.toggleSidebarWidthLock()
+                                    }
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Full page width"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.expand}
+                                    heightAndWidth="16px"
+                                    onClick={() =>
+                                        this.toggleSidebarWidthLock()
+                                    }
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    )}
+                    <ButtonTooltip tooltipText="Close (ESC)" position="left">
+                        <IconBoundary>
+                            <Icon
+                                filePath={icons.removeX}
+                                heightAndWidth="16px"
+                                onClick={() => this.hideSidebar()}
+                            />
+                        </IconBoundary>
+                    </ButtonTooltip>
+                </TopBarActionBtns>
+            </>
+        )
+    }
+
     private renderTopBar() {
         if (this.props.skipTopBarRender) {
             return null
@@ -714,6 +797,7 @@ export class AnnotationsSidebarContainer<
                     sidebarContext={this.props.sidebarContext}
                     isShown={this.state.showState}
                 >
+                    {this.renderTopSideBar()}
                     <Rnd
                         style={style}
                         default={{
@@ -749,7 +833,7 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
-                            sidebarActions={() => this.renderTopBar()}
+                            // sidebarActions={null}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef as any}
@@ -1083,7 +1167,19 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     display: flex;
     grid-gap: 5px;
     align-items: center;
+    flex-direction: column;
     gap: 8px;
+    position: absolute;
+    top: 17px;
+    margin-left: -12px;
+`
+
+const IconBoundary = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-radius: 5px;
+    height: fit-content;
+    width: fit-content;
+    background: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const CloseBtn = styled.button`

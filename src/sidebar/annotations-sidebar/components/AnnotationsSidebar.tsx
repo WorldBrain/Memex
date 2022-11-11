@@ -41,12 +41,13 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
-    sidebarActions: () => void
+    // sidebarActions: () => void
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
@@ -120,6 +121,7 @@ interface AnnotationsSidebarState {
     showAllNotesCopyPaster?: boolean
     showAllNotesShareMenu?: boolean
     showSortDropDown?: boolean
+    showPageShareMenu?: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -138,6 +140,7 @@ export class AnnotationsSidebar extends React.Component<
         showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
         showSortDropDown: false,
+        showPageShareMenu: false,
     }
 
     async componentDidMount() {
@@ -1104,6 +1107,23 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private renderShareButton() {
+        return (
+            <>
+                <PrimaryAction
+                    label={'Share Page'}
+                    backgroundColor={'purple'}
+                    onClick={() =>
+                        this.setState({
+                            showPageShareMenu: !this.state.showPageShareMenu,
+                        })
+                    }
+                />
+                {this.state.showPageShareMenu && this.renderAllNotesShareMenu()}
+            </>
+        )
+    }
+
     private renderTopBarActionButtons() {
         return (
             <TopBarActionBtns>
@@ -1159,8 +1179,8 @@ export class AnnotationsSidebar extends React.Component<
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
                     <>
-                        {this.renderTopBarSwitcher()}{' '}
-                        {this.props.sidebarActions()}
+                        {this.renderTopBarSwitcher()} {this.renderShareButton()}
+                        {/* {this.props.sidebarActions()} */}
                     </>
                 </TopBar>
                 {this.renderResultsBody()}
@@ -1820,5 +1840,5 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         props.sidebarContext === 'dashboard' ? '100%' : '100%'};
 
     scrollbar-width: none;
-    padding: 0 12px;
+    padding: 0 20px;
 `
