@@ -80,8 +80,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
-        sidebarEvents.on('selectSpace', this.handleSelectSpace)
-
         sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
@@ -189,8 +187,19 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.forceUpdate()
     }
 
-    private handleSelectSpace(listId: string) {
-        this.processEvent('selectSpace', { listId })
+    /**
+     * Handles AnnotationSidebar onSelectSpace event
+     *
+     * This method specializes super method of AnnotationSidebarContainer so
+     * we propagate the selected space to InPageUI. The idea is that our
+     * global script will have access to such state there then.
+     *
+     * @param listId space ID being selected or null
+     */
+    protected handleSelectSpace(listId: string | null) {
+        super.handleSelectSpace(listId)
+        console.debug('Propagating selected space to InPageUI state', listId)
+        this.props.inPageUI.selectedSpace = listId
     }
 
     private handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
