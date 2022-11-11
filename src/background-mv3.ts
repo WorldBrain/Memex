@@ -170,6 +170,8 @@ async function main() {
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
+        pageActivityIndicator:
+            backgroundModules.pageActivityIndicator.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
     rpcManager.unpause()

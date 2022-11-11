@@ -202,6 +202,8 @@ export async function main() {
         featuresBeta: backgroundModules.featuresBeta,
         tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
+        pageActivityIndicator:
+            backgroundModules.pageActivityIndicator.remoteFunctions,
         readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,

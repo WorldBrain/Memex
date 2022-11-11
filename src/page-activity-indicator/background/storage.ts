@@ -62,6 +62,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     operation: 'findObjects',
                     args: { followedList: '$followedList:number' },
                 },
+                findFollowedListEntriesByPage: {
+                    collection: 'followedListEntry',
+                    operation: 'findObjects',
+                    args: { normalizedPageUrl: '$normalizedPageUrl:string' },
+                },
                 updateFollowedListLastSyncTime: {
                     collection: 'followedList',
                     operation: 'updateObject',
@@ -165,6 +170,17 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                 entry,
             ]),
         )
+    }
+
+    async findFollowedListEntriesByPage(
+        data: Pick<FollowedListEntry, 'normalizedPageUrl'>,
+    ): Promise<FollowedListEntry[]> {
+        const followedListEntries: FollowedListEntry[] = await this.operation(
+            'findFollowedListEntriesByPage',
+            { normalizedPageUrl: data.normalizedPageUrl },
+        )
+
+        return followedListEntries
     }
 
     async updateFollowedListLastSync(

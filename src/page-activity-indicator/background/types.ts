@@ -16,3 +16,14 @@ export interface FollowedListEntry {
     createdWhen: number
     updatedWhen: number
 }
+
+export type PageActivityStatus =
+    | 'has-annotations'
+    | 'no-annotations'
+    | 'no-activity'
+
+export interface RemotePageActivityIndicatorInterface {
+    getPageActivityStatus: (
+        fullPageUrl: string,
+    ) => Promise<PageActivityStatus | false>
+}

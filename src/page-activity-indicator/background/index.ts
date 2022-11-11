@@ -2,11 +2,13 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
 import type { ServerStorageModules } from 'src/storage/types'
-import PageActivityIndicatorStorage from './storage'
+import type { RemotePageActivityIndicatorInterface } from './types'
 import type {
     SharedList,
     SharedListReference,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import PageActivityIndicatorStorage from './storage'
 import {
     getFollowedListEntryIdentifier,
     sharedListEntryToFollowedListEntry,
@@ -23,11 +25,34 @@ export interface PageActivityIndicatorDependencies {
 
 export class PageActivityIndicatorBackground {
     storage: PageActivityIndicatorStorage
+    remoteFunctions: RemotePageActivityIndicatorInterface
 
     constructor(private deps: PageActivityIndicatorDependencies) {
         this.storage = new PageActivityIndicatorStorage({
             storageManager: deps.storageManager,
         })
+
+        this.remoteFunctions = {
+            getPageActivityStatus: this.getPageActivityStatus,
+        }
+    }
+
+    private getPageActivityStatus: RemotePageActivityIndicatorInterface['getPageActivityStatus'] = async (
+        fullPageUrl,
+    ) => {
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+        const followedListEntries = await this.storage.findFollowedListEntriesByPage(
+            { normalizedPageUrl },
+        )
+        if (!followedListEntries.length) {
+            return 'no-activity'
+        }
+        return followedListEntries.reduce(
+            (acc, curr) => acc || curr.hasAnnotations,
+            false,
+        )
+            ? 'has-annotations'
+            : 'no-annotations'
     }
 
     createFollowedList: PageActivityIndicatorStorage['createFollowedList'] = (
