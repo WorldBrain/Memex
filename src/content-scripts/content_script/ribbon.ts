@@ -1,10 +1,11 @@
 import browser from 'webextension-polyfill'
 
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
-import { ContentScriptRegistry, RibbonScriptMain } from './types'
+import type { ContentScriptRegistry, RibbonScriptMain } from './types'
 import { setupRibbonUI, destroyRibbonUI } from 'src/in-page-ui/ribbon/react'
 import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
 import { setSidebarState, getSidebarState } from 'src/sidebar-overlay/utils'
+import type { ShouldSetUpOptions } from 'src/in-page-ui/shared-state/types'
 
 export const main: RibbonScriptMain = async (options) => {
     const cssFile = browser.runtime.getURL(`/content_script_ribbon.css`)
@@ -18,20 +19,23 @@ export const main: RibbonScriptMain = async (options) => {
     }
     createMount()
 
-    options.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
-        if (component === 'ribbon') {
-            setUp()
-        }
-    })
+    options.inPageUI.events.on(
+        'componentShouldSetUp',
+        ({ component, options }) => {
+            if (component === 'ribbon') {
+                setUp(options)
+            }
+        },
+    )
     options.inPageUI.events.on('componentShouldDestroy', ({ component }) => {
         if (component === 'ribbon') {
             destroy()
         }
     })
 
-    const setUp = async () => {
+    const setUp = async (setUpOptions: ShouldSetUpOptions = {}) => {
         createMount()
-        setupRibbonUI(mount.rootElement, {
+        setupRibbonUI(mount, {
             containerDependencies: {
                 ...options,
                 currentTab: (await browser.tabs?.getCurrent()) ?? {
@@ -42,6 +46,7 @@ export const main: RibbonScriptMain = async (options) => {
                 getSidebarEnabled: getSidebarState,
             },
             inPageUI: options.inPageUI,
+            setUpOptions,
         })
     }
 

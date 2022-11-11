@@ -168,7 +168,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         await (this.logic as SidebarContainerLogic).annotationsLoadComplete
 
         if (event.action === 'comment') {
-            this.processEvent('addNewPageComment', {
+            await this.processEvent('addNewPageComment', {
                 comment: event.annotationData?.commentText,
                 tags: event.annotationData?.tags,
             })
@@ -179,9 +179,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'edit_annotation_spaces') {
             this.activateAnnotation(event.annotationUrl, 'edit_spaces')
         } else if (event.action === 'set_sharing_access') {
-            this.processEvent('receiveSharingAccessChange', {
+            await this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,
             })
+        } else if (event.action === 'show_shared_spaces') {
+            // TODO: Get this working properly opening the shared spaces view
+            await this.processEvent('expandSharedSpaces', { listIds: [] })
         }
 
         this.forceUpdate()
