@@ -783,6 +783,18 @@ export class AnnotationsSidebar extends React.Component<
                         <ButtonContainer>
                             <ActionButtons>
                                 <ButtonTooltip
+                                    tooltipText="Select Space"
+                                    position="left"
+                                >
+                                    <Icon
+                                        icon="edit"
+                                        height="16px"
+                                        onClick={() =>
+                                            this.triggerSelectSpace(listId)
+                                        }
+                                    />
+                                </ButtonTooltip>
+                                <ButtonTooltip
                                     tooltipText="Go to Space"
                                     position="left"
                                 >

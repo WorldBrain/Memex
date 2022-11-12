@@ -867,7 +867,7 @@ export class AnnotationsSidebarContainer<
                             // TODO: determine selected space after anchor
                             selectedSpace={
                                 document.URL.split('#').length > 1
-                                    ? 'unknown'
+                                    ? this.state.selectedSpace
                                     : this.state.selectedSpace
                             }
                             onSelectSpace={(listId) =>
