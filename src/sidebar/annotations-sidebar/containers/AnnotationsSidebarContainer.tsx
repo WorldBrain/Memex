@@ -236,12 +236,15 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setTagPickerAnnotationId', {
                     id: annotation.url,
                 }),
-            onListIconClick: () =>
+            onListIconClick: () => {
+                // TODO: why this has only the spaceId from the spaces tab?
+                console.debug('Select space now', followedListId)
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
                     position: 'footer',
                     followedListId,
-                }),
+                })
+            },
         }
     }
 
