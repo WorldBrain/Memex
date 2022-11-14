@@ -183,7 +183,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharingAccess: event.annotationSharingAccess,
             })
         } else if (event.action === 'show_shared_spaces') {
-            // TODO: Get this working properly opening the shared spaces view
+            // TODO: Shouldn't need to trigger two events here. Confusing interface
+            await this.processEvent('expandMyNotes', null)
             await this.processEvent('expandSharedSpaces', { listIds: [] })
         }
 

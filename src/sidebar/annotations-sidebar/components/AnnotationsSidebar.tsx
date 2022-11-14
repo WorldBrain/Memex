@@ -1062,16 +1062,13 @@ export class AnnotationsSidebar extends React.Component<
                         <LoadingBox>
                             <LoadingIndicator size={16} />{' '}
                         </LoadingBox>
-                    ) : followedLists.allIds.length ? (
-                        <LoadingBox>
-                            <FollowedListNoteCount active={true} left="5px">
-                                {followedLists.allIds.length}
-                            </FollowedListNoteCount>
-                        </LoadingBox>
                     ) : (
                         <LoadingBox>
-                            <FollowedListNoteCount active={false} left="5px">
-                                0
+                            <FollowedListNoteCount
+                                active={followedLists.allIds?.length > 0}
+                                left="5px"
+                            >
+                                {followedLists.allIds?.length ?? 0}
                             </FollowedListNoteCount>
                         </LoadingBox>
                     )}
