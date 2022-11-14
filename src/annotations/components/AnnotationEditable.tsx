@@ -412,7 +412,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     key: 'add-spaces-btn',
                     image: icons.plus,
                     imageColor: 'purple',
-                    // ButtonText: 'Spaces',
+                    onClick: footerDeps.onListIconClick,
                     iconSize: '14px',
                 },
                 // {

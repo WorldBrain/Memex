@@ -231,21 +231,13 @@ export default class PageResultView extends PureComponent<Props> {
                 //     onClick: this.props.onShareBtnClick,
                 //     tooltipText: 'Share Page and Notes',
                 // },
-                // {
-                //     key: 'list-page-btn',
-                //     image: this.hasLists
-                //         ? icons.collectionsFull
-                //         : icons.collectionsEmpty,
-                //     onClick: this.props.onListPickerBtnClick,
-                //     tooltipText: 'Edit Spaces',
-                // },
-
                 {
                     key: 'add-spaces-btn',
                     image: icons.plus,
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
+                    onClick: this.props.onListPickerBtnClick,
                 },
                 {
                     key: 'expand-notes-btn',
