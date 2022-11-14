@@ -3,8 +3,6 @@ import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
-import type { UIMutation } from 'ui-logic-core'
-import colors from 'src/dashboard-refactor/colors'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
@@ -28,11 +26,7 @@ import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
-import {
-    updatePickerValues,
-    areSearchFiltersEmpty,
-    stateToSearchParams,
-} from './util'
+import { updatePickerValues, stateToSearchParams } from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
@@ -40,7 +34,6 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
@@ -60,6 +53,8 @@ import {
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import SearchCopyPaster from './search-results/components/search-copy-paster'
+import ExpandAllNotes from './search-results/components/expand-all-notes'
 
 export interface Props extends DashboardDependencies {}
 
@@ -421,6 +416,36 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <HeaderContainer
                 searchBarProps={{
+                    renderExpandButton: () => (
+                        <ExpandAllNotes
+                            isEnabled={searchResultUtils.areAllNotesShown(
+                                searchResults,
+                            )}
+                            onClick={() =>
+                                this.processEvent('setAllNotesShown', null)
+                            }
+                        />
+                    ),
+                    renderCopyPasterButton: () => (
+                        <SearchCopyPaster
+                            searchType={searchResults.searchType}
+                            searchParams={stateToSearchParams(this.state)}
+                            isCopyPasterShown={
+                                searchResults.isSearchCopyPasterShown
+                            }
+                            isCopyPasterBtnShown
+                            hideCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: false,
+                                })
+                            }
+                            toggleCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: !searchResults.isSearchCopyPasterShown,
+                                })
+                            }
+                        />
+                    ),
                     searchQuery: searchFilters.searchQuery,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
                     onSearchFiltersOpen: () =>
@@ -431,20 +456,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query }),
                     onInputClear: () =>
                         this.processEvent('setSearchQuery', { query: '' }),
-                }}
-                searchCopyPasterProps={{
-                    searchType: searchResults.searchType,
-                    searchParams: stateToSearchParams(this.state),
-                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: true,
-                    hideCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: false,
-                        }),
-                    toggleCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: !searchResults.isSearchCopyPasterShown,
-                        }),
                 }}
                 sidebarLockedState={{
                     isSidebarLocked: listsSidebar.isSidebarLocked,
@@ -1002,20 +1013,6 @@ export class DashboardContainer extends StatefulUIElement<
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
                 }}
-                searchCopyPasterProps={{
-                    searchType: searchResults.searchType,
-                    searchParams: stateToSearchParams(this.state),
-                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: true,
-                    hideCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: false,
-                        }),
-                    toggleCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: !searchResults.isSearchCopyPasterShown,
-                        }),
-                }}
             />
         )
     }
@@ -1436,11 +1433,11 @@ const ListSidebarContent = styled(Rnd)<{
 
 
         @keyframes slide-in {
-            0% { 
+            0% {
                 left: -200px;
                 opacity: 0%;
             }
-            100% { 
+            100% {
                 left: 0px;
                 opacity: 100%;
             }

@@ -20,9 +20,6 @@ import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
 } from './components/search-type-switch'
-import SearchCopyPaster, {
-    Props as SearchCopyPasterProps,
-} from './components/search-copy-paster'
 import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
@@ -45,7 +42,6 @@ import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
-import OnboardingMsg from './components/onboarding-msg'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
@@ -54,7 +50,6 @@ import ListDetails, {
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
-import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
@@ -78,7 +73,6 @@ export type Props = RootState &
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
-        searchCopyPasterProps: SearchCopyPasterProps
         listDetailsProps: ListDetailsProps
         pagePickerProps: PagePickerAugdProps
         onShowAllNotesClick: React.MouseEventHandler

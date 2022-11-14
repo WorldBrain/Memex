@@ -12,11 +12,7 @@ import Margin from '../components/Margin'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import type { SidebarLockedState } from '../lists-sidebar/types'
 import type { HoverState } from '../types'
-import ExpandAllNotes from '../search-results/components/expand-all-notes'
 import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
-import SearchCopyPaster, {
-    Props as SearchCopyPasterProps,
-} from '../search-results/components/search-copy-paster'
 
 const Container = styled.div`
     height: ${sizeConstants.header.heightPx}px;
@@ -128,22 +124,16 @@ export interface HeaderProps {
     sidebarWidth?: string
 }
 
-export type Props = HeaderProps & {
-    searchCopyPasterProps: SearchCopyPasterProps
-    areAllNotesShown: boolean
-    onShowAllNotesClick: React.MouseEventHandler
-}
+export type Props = HeaderProps & {}
 
 export default class Header extends PureComponent<Props> {
     static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
 
     render() {
         const {
-            sidebarWidth,
             searchBarProps,
             syncStatusIconState,
             syncStatusMenuProps,
-            searchCopyPasterProps,
             selectedListName: selectedList,
         } = this.props
         return (
@@ -156,15 +146,6 @@ export default class Header extends PureComponent<Props> {
                 >
                     <SearchBar
                         {...searchBarProps}
-                        CopyPasterButton={
-                            <SearchCopyPaster {...searchCopyPasterProps} />
-                        }
-                        ExpandButton={
-                            <ExpandAllNotes
-                                isEnabled={this.props.areAllNotesShown}
-                                onClick={this.props.onShowAllNotesClick}
-                            />
-                        }
                         sidebarLockedState={
                             this.props.sidebarLockedState.isSidebarLocked
                         }

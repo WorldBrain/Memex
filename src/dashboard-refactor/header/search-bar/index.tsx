@@ -3,12 +3,10 @@ import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
-import colors from '../../colors'
-import styles, { fonts } from '../../styles'
+import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import { ButtonTooltip } from 'src/common-ui/components'
-import type { SidebarLockedState } from '../../lists-sidebar/types'
 
 export interface SearchBarProps {
     placeholder?: string
@@ -17,8 +15,8 @@ export interface SearchBarProps {
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
     onInputClear(): void
-    CopyPasterButton: ReactElement
-    ExpandButton: ReactElement
+    renderCopyPasterButton: () => ReactElement
+    renderExpandButton: () => ReactElement
     sidebarLockedState?: boolean
 }
 
@@ -46,14 +44,12 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
             searchQuery,
             sidebarLockedState,
             onSearchFiltersOpen,
-            CopyPasterButton,
-            ExpandButton,
+            renderCopyPasterButton,
+            renderExpandButton,
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer
-                    isClosed={this.props.sidebarLockedState === false && true}
-                >
+                <SearchBarContainer isClosed={!sidebarLockedState}>
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>
@@ -113,8 +109,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             </ButtonTooltip>
                         )}
                     </FilterButton>
-                    {CopyPasterButton}
-                    {ExpandButton}
+                    {renderCopyPasterButton()}
+                    {renderExpandButton()}
                 </ActionButtons>
             </Margin>
         )
