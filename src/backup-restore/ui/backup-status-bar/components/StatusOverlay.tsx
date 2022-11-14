@@ -82,7 +82,7 @@ export default class StatusOverlay extends PureComponent<Props> {
     }
 
     onBackupSetupRequested() {
-        window.open(`${browser.runtime.getURL('/options.html')}#/backup`)
+        globalThis.open(`${browser.runtime.getURL('/options.html')}#/backup`)
     }
 
     enableAutomaticBackup() {
@@ -91,7 +91,7 @@ export default class StatusOverlay extends PureComponent<Props> {
             this.setState({ automaticBackupEnabled: true })
         }
         if (!this.state.hasInitialBackup) {
-            window.location.href = `${browser.runtime.getURL(
+            globalThis.location.href = `${browser.runtime.getURL(
                 '/options.html',
             )}#/backup`
         }
