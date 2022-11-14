@@ -42,6 +42,7 @@ import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -114,14 +115,14 @@ export interface AnnotationsSidebarProps
 }
 
 interface AnnotationsSidebarState {
-    searchText?: string
+    searchText: string
     isolatedView?: string | null // if null show default view
-    showIsolatedViewNotif?: boolean // if null show default view
-    isMarkdownHelpShown?: boolean
-    showAllNotesCopyPaster?: boolean
-    showAllNotesShareMenu?: boolean
-    showSortDropDown?: boolean
-    showPageShareMenu?: boolean
+    showIsolatedViewNotif: boolean // if null show default view
+    isMarkdownHelpShown: boolean
+    showAllNotesCopyPaster: boolean
+    showAllNotesShareMenu: boolean
+    showPageSpacePicker: boolean
+    showSortDropDown: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -133,14 +134,14 @@ export class AnnotationsSidebar extends React.Component<
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
 
-    state = {
+    state: AnnotationsSidebarState = {
         searchText: '',
         showIsolatedViewNotif: false,
         isMarkdownHelpShown: false,
         showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
+        showPageSpacePicker: false,
         showSortDropDown: false,
-        showPageShareMenu: false,
     }
 
     async componentDidMount() {
@@ -1107,7 +1108,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderShareButton() {
+    private renderSharePageButton() {
         return (
             <>
                 <PrimaryAction
@@ -1115,11 +1116,21 @@ export class AnnotationsSidebar extends React.Component<
                     backgroundColor={'purple'}
                     onClick={() =>
                         this.setState({
-                            showPageShareMenu: !this.state.showPageShareMenu,
+                            showPageSpacePicker: !this.state
+                                .showPageSpacePicker,
                         })
                     }
                 />
-                {this.state.showPageShareMenu && this.renderAllNotesShareMenu()}
+                {this.state.showPageSpacePicker && (
+                    <HoverBox
+                        width="fit-content"
+                        padding="10px"
+                        withRelativeContainer
+                    >
+                        TOOD: Space picker goes here!
+                    </HoverBox>
+                )}
+                {/* <SpacePicker initialSelectedListIds={this.props.pag}  />} */}
             </>
         )
     }
@@ -1179,7 +1190,8 @@ export class AnnotationsSidebar extends React.Component<
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
                     <>
-                        {this.renderTopBarSwitcher()} {this.renderShareButton()}
+                        {this.renderTopBarSwitcher()}
+                        {this.renderSharePageButton()}
                         {/* {this.props.sidebarActions()} */}
                     </>
                 </TopBar>

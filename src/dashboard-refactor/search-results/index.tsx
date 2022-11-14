@@ -20,12 +20,10 @@ import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
 } from './components/search-type-switch'
-import ExpandAllNotes from './components/expand-all-notes'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
 import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
-import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
@@ -37,7 +35,6 @@ import AnnotationEditable from 'src/annotations/components/HoverControlledAnnota
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import TagPicker from 'src/tags/ui/TagPicker'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DismissibleResultsMessage from './components/dismissible-results-message'
@@ -179,30 +176,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             />
                         </HoverBox>
                     )
-                }
-                renderTagsPickerForAnnotation={
-                    this.props.shouldShowTagsUIs
-                        ? () =>
-                              noteData.isTagPickerShown && (
-                                  <HoverBox
-                                      left="0"
-                                      top="-40px"
-                                      withRelativeContainer
-                                  >
-                                      <TagPicker
-                                          initialSelectedEntries={() =>
-                                              noteData.tags
-                                          }
-                                          onClickOutside={
-                                              interactionProps.onTagPickerBtnClick
-                                          }
-                                          onUpdateEntrySelection={
-                                              interactionProps.updateTags
-                                          }
-                                      />
-                                  </HoverBox>
-                              )
-                        : undefined
                 }
                 renderListsPickerForAnnotation={() =>
                     noteData.isListPickerShown && (
