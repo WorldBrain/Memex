@@ -537,7 +537,7 @@ const FeedActivitySection = styled.div`
     height: 50px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     align-items: center;
-    padding: 0px 24px 0px 24px;
+    padding: 0px 20px 0px 20px;
     grid-auto-flow: column;
     width: fill-available;
 
