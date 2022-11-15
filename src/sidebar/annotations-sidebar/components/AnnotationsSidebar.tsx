@@ -1121,15 +1121,6 @@ export class AnnotationsSidebar extends React.Component<
                         })
                     }
                 />
-                {this.state.showPageSpacePicker && (
-                    <HoverBox
-                        width="fit-content"
-                        padding="10px"
-                        withRelativeContainer
-                    >
-                        TOOD: Space picker goes here!
-                    </HoverBox>
-                )}
                 {/* <SpacePicker initialSelectedListIds={this.props.pag}  />} */}
             </>
         )
@@ -1194,6 +1185,16 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharePageButton()}
                         {/* {this.props.sidebarActions()} */}
                     </>
+                    {this.state.showPageSpacePicker && (
+                        <HoverBox
+                            padding="10px"
+                            right="0px"
+                            top="55px"
+                            width="250px"
+                        >
+                            TOOD: Space picker goes here!
+                        </HoverBox>
+                    )}
                 </TopBar>
                 {this.renderResultsBody()}
             </ResultBodyContainer>
