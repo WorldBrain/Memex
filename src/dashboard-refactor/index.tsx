@@ -37,7 +37,6 @@ import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
-import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
@@ -81,7 +80,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'localStorage'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
-        | 'personalCloudBG'
         | 'contentShareBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
@@ -101,7 +99,6 @@ export class DashboardContainer extends StatefulUIElement<
         localStorage: browser.storage.local,
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
-        personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -405,7 +402,6 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const {
-            isCloudEnabled,
             searchFilters,
             listsSidebar,
             currentUser,
@@ -482,17 +478,12 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
-                    isCloudEnabled,
                     syncStatusIconState,
                     isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     onLoginClick: () =>
                         this.processEvent('setShowLoginModal', {
-                            isShown: true,
-                        }),
-                    onMigrateClick: () =>
-                        this.processEvent('setShowCloudOnboardingModal', {
                             isShown: true,
                         }),
                     onClickOutside: () =>
@@ -669,11 +660,6 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
-                }
-                showCloudOnboardingModal={() =>
-                    this.processEvent('setShowCloudOnboardingModal', {
-                        isShown: true,
-                    })
                 }
                 noResultsType={searchResults.noResultsType}
                 filterSearchByTag={(tag) =>
@@ -1181,22 +1167,6 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showCloudOnboarding) {
-            return (
-                <CloudOnboardingModal
-                    services={this.props.services}
-                    backupBG={this.props.backupBG}
-                    syncSettingsBG={this.props.syncSettingsBG}
-                    personalCloudBG={this.props.personalCloudBG}
-                    onModalClose={(args) =>
-                        this.processEvent('closeCloudOnboardingModal', {
-                            didFinish: !!args.didFinish,
-                        })
-                    }
-                />
-            )
-        }
-
         return null
     }
 
@@ -1205,12 +1175,7 @@ export class DashboardContainer extends StatefulUIElement<
         // <GlobalStyle />
         const { listsSidebar, mode } = this.state
         if (mode === 'onboarding') {
-            return (
-                <Onboarding
-                    authBG={this.props.authBG}
-                    personalCloudBG={this.props.personalCloudBG}
-                />
-            )
+            return <Onboarding authBG={this.props.authBG} />
         }
 
         const lockedState = {

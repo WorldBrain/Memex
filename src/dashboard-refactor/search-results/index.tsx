@@ -76,7 +76,6 @@ export type Props = RootState &
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
-        showCloudOnboardingModal: React.MouseEventHandler
         onDismissSubscriptionBanner: React.MouseEventHandler
         isDisplayed: boolean
         filterSearchByTag: (tag: string) => void

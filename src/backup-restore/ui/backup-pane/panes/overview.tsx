@@ -36,14 +36,9 @@ interface Props {
     authorizedFeatures: UserFeature[]
     backupPath: string
     showSubscriptionModal: () => void
-    personalCloudBG?: PersonalCloudRemoteInterface
 }
 
 export class OverviewContainer extends Component<Props & AuthContextInterface> {
-    static defaultProps: Pick<Props, 'personalCloudBG'> = {
-        personalCloudBG: runInBackground(),
-    }
-
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -60,13 +55,11 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         subscribeModal: false,
         backupPath: null,
         loadingChargebee: false,
-        isCloudSyncEnabled: true,
         isDev: process.env.NODE_ENV !== 'production',
     }
 
     async componentDidMount() {
         const status = await checkServerStatus()
-        const isCloudSyncEnabled = await this.props.personalCloudBG.isCloudSyncEnabled()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -83,7 +76,6 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         }
         this.setState({
             automaticBackupEnabled,
-            isCloudSyncEnabled,
             backupTimes,
             hasInitialBackup,
             backupLocation,
@@ -319,9 +311,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                     />
                 )}
                 {
-                    !this.state.isCloudSyncEnabled
-                        ? this.renderOldBackupPanes()
-                        : this.renderOldBackupPanes()
+                    this.renderOldBackupPanes()
                     //<DumpPane onDumpClick={this.props.onDumpRequested} />
                 }
                 {this.state.isDev && (

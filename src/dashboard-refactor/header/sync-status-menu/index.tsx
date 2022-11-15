@@ -56,12 +56,10 @@ export const timeSinceNowToString = (date: Date | null): string => {
 
 export interface SyncStatusMenuProps extends RootState {
     isLoggedIn: boolean
-    isCloudEnabled: boolean
     outsideClickIgnoreClass?: string
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
-    onMigrateClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
@@ -99,13 +97,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
 
     private renderStatus() {
-        const {
-            isLoggedIn,
-            isCloudEnabled,
-            onLoginClick,
-            onMigrateClick,
-            syncStatusIconState,
-        } = this.props
+        const { isLoggedIn, onLoginClick, syncStatusIconState } = this.props
 
         if (!isLoggedIn) {
             return (
