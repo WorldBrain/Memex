@@ -240,11 +240,15 @@ export class AnnotationsSidebar extends React.Component<
                 'Not triggering select space because it is the same',
                 listId,
             )
-        } else if (this.props.onSelectSpace) {
-            console.debug('Triggering select space', listId)
-            this.props.onSelectSpace(listId)
         } else {
-            console.warn('No handler to select space', listId)
+            // Make sure followed list annotations will be loaded after selected
+            this.props.expandFollowedListNotes(listId)
+            if (this.props.onSelectSpace) {
+                console.debug('Triggering select space', listId)
+                this.props.onSelectSpace(listId)
+            } else {
+                console.warn('No handler to select space', listId)
+            }
         }
     }
 
