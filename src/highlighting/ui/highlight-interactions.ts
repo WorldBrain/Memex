@@ -175,12 +175,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const anchor = await extractAnchorFromSelection(selection)
         const body = anchor ? anchor.quote : ''
 
+        let actualLists = []
+        if (params.inPageUI.selectedSpace) {
+            actualLists = [params.inPageUI.selectedSpace]
+        }
+
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body,
             pageUrl,
             tags: [],
-            lists: [],
+            lists: actualLists,
             comment: '',
             selector: anchor,
             pageTitle: title,
