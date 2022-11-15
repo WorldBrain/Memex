@@ -14,9 +14,9 @@ export const BackContainer = (props: Props) => (
         <IconBoxBox>
             <IconBox>
                 <Icon
-                    filePath={icons.arrowRight}
+                    filePath={icons.arrowLeft}
                     onClick={props.onClick}
-                    heightAndWidth="16px"
+                    heightAndWidth="22px"
                 />
             </IconBox>
         </IconBoxBox>
@@ -32,28 +32,27 @@ const IconBoxBox = styled.div`
 `
 
 const IconBox = styled.div`
-    transform: rotate(-180deg);
     width: fit-content;
 `
 
 const Header = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
 `
 
 const Container = styled.div`
-    height: 50px;
+    height: 44px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
     padding: 0 20px;
 `
 
 const AutoSaveNote = styled.div`
     font-weight: 400;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale8};
     width: 60px;
 `

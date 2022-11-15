@@ -56,16 +56,20 @@ class Checkbox extends React.PureComponent<Props> {
                             mode={this.props.mode}
                             isChecked={this.props.isChecked}
                         >
-                            <Icon
-                                filePath={icons.check}
-                                color="white"
-                                heightAndWidth={'14px'}
-                                hoverOff
-                            />
+                            {this.props.isChecked && (
+                                <Icon
+                                    filePath={icons.check}
+                                    color="black"
+                                    heightAndWidth={'14px'}
+                                    hoverOff
+                                />
+                            )}
                         </LabelCheck>
-                        <ChildrenBox mode={this.props.mode}>
-                            {this.props.children}
-                        </ChildrenBox>
+                        {this.props.children && (
+                            <ChildrenBox mode={this.props.mode}>
+                                {this.props.children}
+                            </ChildrenBox>
+                        )}
                     </LabelText>
                 </LabelContainer>
             </Container>
@@ -101,7 +105,7 @@ const LabelContainer = styled.label`
 const InputContainer = styled.input`
     display: none;
     padding: 2px;
-    border: 2px solid ${(props) => props.theme.colors.purple};
+    border: 2px solid ${(props) => props.theme.colors.black};
     cursor: pointer;
 `
 
@@ -111,19 +115,26 @@ const LabelText = styled.span`
     align-items: center;
     width: inherit;
     cursor: pointer;
+    width: fill-available;
+    height: fill-available;
 
     &:hover {
-        color: black;
+        color: ${(props) => props.theme.colors.black};
     }
 `
 
 const LabelCheck = styled.span<{ isChecked; mode; size }>`
-    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
-    border: 2px solid ${(props) => props.theme.colors.purple}70;
+    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
+    border: 2px solid
+        ${(props) =>
+            props.isChecked
+                ? props.theme.colors.normalText
+                : props.theme.colors.darkhover};
     background: ${(props) =>
-        props.isChecked ? props.theme.colors.purple : 'white'};
+        props.isChecked
+            ? props.theme.colors.normalText
+            : props.theme.colors.darkhover};
     vertical-align: middle;
-    margin-right: 15px;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};
     display: flex;

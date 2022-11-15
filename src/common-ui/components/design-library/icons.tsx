@@ -6,6 +6,8 @@ export const logoSmall = browser.runtime.getURL(
 export const logoHorizontal = browser.runtime.getURL(
     '/img/memexLogoHorizontal.png',
 )
+export const memexLogoGrey = browser.runtime.getURL('/img/memexLogoGrey.svg')
+
 export const settings = browser.runtime.getURL('/img/settings.svg')
 
 export const discord = browser.runtime.getURL('/img/discord.svg')
@@ -49,6 +51,9 @@ export const mail = browser.runtime.getURL('/img/mail.svg')
 export const inbox = browser.runtime.getURL('/img/inbox.svg')
 export const emptyCircle = browser.runtime.getURL('/img/emptyCircle.svg')
 export const sadFace = browser.runtime.getURL('/img/sadFace.svg')
+export const quickActionRibbon = browser.runtime.getURL(
+    '/img/quickActionRibbon.svg',
+)
 export const ribbonOn = browser.runtime.getURL('/img/ribbonOn.svg')
 export const ribbonOff = browser.runtime.getURL('/img/ribbonOff.svg')
 export const tooltipOn = browser.runtime.getURL('/img/tooltipOn.svg')

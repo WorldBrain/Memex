@@ -441,6 +441,7 @@ const EntryList = styled.div`
     position: relative;
     overflow-y: auto;
     max-height: 280px;
+    padding-bottom: 5px;
 
     scrollbar-width: none;
 

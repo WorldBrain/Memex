@@ -1,79 +1,67 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import { ClickHandler, RootState } from '../../types'
+import { ToggleSwitchButton } from '../../components/ToggleSwitchButton'
+import type { RootState } from '../../types'
+import * as selectors from '../selectors'
 import * as acts from '../actions'
-import * as popup from '../../selectors'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { CheckboxToggle } from 'src/common-ui/components'
 
 export interface OwnProps {
-    pageListsIds: number[]
+    closePopup: () => void
 }
 
 interface StateProps {
-    isDisabled: boolean
+    isEnabled: boolean
 }
 
 interface DispatchProps {
-    toggleCollectionsPopup: ClickHandler<HTMLButtonElement>
-    toggleAllTabsPopup: ClickHandler<HTMLButtonElement>
+    handleChange: CheckboxToggle
+    openSidebar: React.MouseEventHandler
+    initState: () => Promise<void>
+}
+
+interface State {
+    highlightInfo?: string
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class CollectionsButton extends PureComponent<Props> {
+class SidebarOpenButton extends PureComponent<Props, State> {
     async componentDidMount() {
-        await this.getKeyboardShortcutText()
+        await this.props.initState()
+        await this.getHighlightContextMenuTitle()
     }
 
-    state = {
-        highlightInfo: undefined,
-        hasCollections: false,
-    }
+    state: State = { highlightInfo: undefined }
 
-    private async getKeyboardShortcutText() {
+    private async getHighlightContextMenuTitle() {
         const {
             shortcutsEnabled,
-            addToCollection,
+            toggleSidebar,
         } = await getKeyboardShortcutsState()
 
-        if (!shortcutsEnabled || !addToCollection.enabled) {
+        if (!shortcutsEnabled || !toggleSidebar.enabled) {
             this.setState({
-                highlightInfo: `${addToCollection.shortcut} (disabled)`,
+                highlightInfo: `${toggleSidebar.shortcut} (disabled)`,
             })
-        } else
-            this.setState({
-                highlightInfo: `${addToCollection.shortcut}`,
-            })
+        } else this.setState({ highlightInfo: `${toggleSidebar.shortcut}` })
     }
 
     render() {
         return (
-            <ButtonItem
-                onClick={
-                    !this.props.isDisabled && this.props.toggleCollectionsPopup
-                }
-                disabled={this.props.isDisabled}
-            >
+            <ButtonItem onClick={this.props.openSidebar}>
                 <Icon
-                    filePath={
-                        this.props.pageListsIds.length > 0
-                            ? icons.collectionsFull
-                            : icons.collectionsEmpty
-                    }
+                    filePath={icons.sidebarIcon}
                     heightAndWidth="22px"
                     hoverOff
-                    color={
-                        this.props.pageListsIds.length > 0
-                            ? 'purple'
-                            : 'iconColor'
-                    }
                 />
                 <ButtonInnerContent>
-                    Add Page to Spaces
+                    Open Annotation Sidebar
                     <ShortCutContainer>
                         <ShortCutBlock>
                             <ShortCutText>
@@ -124,6 +112,11 @@ const ShortCutBlock = styled.div`
     font-size: 10px;
 `
 
+const ButtonInnerContainer = styled.div`
+    display: flex;
+    grid-gap: 15px;
+`
+
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.backgroundHighlight}80;
     border-radius: 100px;
@@ -138,11 +131,11 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     display: flex;
     grid-gap: 15px;
     width: fill-available;
-    border-radius: 8px;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     padding: 0px 10px;
     margin: 0px 10px 10px 10px;
+    border-radius: 8px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
@@ -174,23 +167,28 @@ const SubTitle = styled.div`
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
-    isDisabled: !popup.isLoggable(state),
+    isEnabled: selectors.isSidebarEnabled(state),
 })
 
-const mapDispatch = (dispatch): DispatchProps => ({
-    toggleCollectionsPopup: (event) => {
-        event.preventDefault()
-        dispatch(acts.setAllTabs(false))
-        dispatch(acts.toggleShowTagsPicker())
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+    props,
+) => ({
+    openSidebar: async (e) => {
+        e.preventDefault()
+        props.closePopup()
+        await dispatch(acts.openSideBar())
     },
-    toggleAllTabsPopup: (event) => {
-        event.preventDefault()
-        dispatch(acts.setAllTabs(true))
-        dispatch(acts.toggleShowTagsPicker())
+    handleChange: async (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        await dispatch(acts.toggleSidebarFlag())
+        // setTimeout(props.closePopup, 200)
     },
+    initState: () => dispatch(acts.init()),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(
     mapState,
     mapDispatch,
-)(CollectionsButton)
+)(SidebarOpenButton)
