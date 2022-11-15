@@ -341,9 +341,20 @@ export class AnnotationsSidebar extends React.Component<
         </LoadingIndicatorContainer>
     )
 
-    private renderFollowedListNotes(listId: string) {
+    private renderFollowedListNotes(
+        listId: string,
+        forceRendering: boolean = false,
+    ) {
         const list = this.props.followedLists.byId[listId]
-        if (!list.isExpanded || list.annotationsLoadState === 'pristine') {
+        if (
+            (!list.isExpanded || list.annotationsLoadState === 'pristine') &&
+            !forceRendering
+        ) {
+            console.debug(
+                'Ignore rendering of followed list notes',
+                listId,
+                forceRendering,
+            )
             return null
         }
 
@@ -372,6 +383,8 @@ export class AnnotationsSidebar extends React.Component<
         const annotationsData = list.sharedAnnotationReferences
             .map((ref) => this.props.followedAnnotations[ref.id])
             .filter((a) => !!a)
+
+        console.debug('Annotations Data', annotationsData)
 
         if (!annotationsData.length) {
             return (
@@ -875,15 +888,19 @@ export class AnnotationsSidebar extends React.Component<
         //         {this.renderIsolatedView(this.props.isolatedView)}
         //     </AnnotationsSectionStyled>
         // ) : (
+        console.debug('Results body', this.props.selectedSpace)
         return (
             <React.Fragment>
                 {this.props.selectedSpace ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
+                        {this.renderFollowedListNotes(
+                            this.props.selectedSpace,
+                            true,
+                        )}
                     </AnnotationsSectionStyled>
                 ) : this.props.isExpanded ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
+                        {this.renderAnnotationsEditable(this.props.annotations)}
                     </AnnotationsSectionStyled>
                 ) : (
                     <AnnotationsSectionStyled>
@@ -953,7 +970,7 @@ export class AnnotationsSidebar extends React.Component<
     //     )
     // }
 
-    private renderAnnotationsEditable() {
+    private renderAnnotationsEditable(annotations: Annotation[]) {
         const annots: JSX.Element[] = []
 
         if (this.props.noteCreateState === 'running') {
@@ -963,7 +980,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         annots.push(
-            ...this.props.annotations.map((annot, i) => {
+            ...annotations.map((annot, i) => {
                 const footerDeps = this.props.bindAnnotationFooterEventProps(
                     annot,
                 )
@@ -973,7 +990,7 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationBox
                         key={annot.url}
                         isActive={this.props.activeAnnotationUrl === annot.url}
-                        zIndex={this.props.annotations.length - i}
+                        zIndex={annotations.length - i}
                     >
                         <AnnotationEditable
                             {...annot}
@@ -1039,7 +1056,7 @@ export class AnnotationsSidebar extends React.Component<
                             </AnnotationActions>
                         )}
                         {this.props.noteCreateState === 'running' ||
-                        this.props.annotations.length > 0 ? (
+                        annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>

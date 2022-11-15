@@ -238,6 +238,7 @@ export class AnnotationsSidebarContainer<
             onListIconClick: () => {
                 // TODO: why this has only the spaceId from the spaces tab?
                 console.debug('Select space now', followedListId)
+                this.handleSelectSpace('dtsCHjXTXjqtss9EjV3')
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
                     followedListId,
