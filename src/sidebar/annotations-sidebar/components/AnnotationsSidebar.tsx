@@ -378,6 +378,8 @@ export class AnnotationsSidebar extends React.Component<
             .map((ref) => this.props.followedAnnotations[ref.id])
             .filter((a) => !!a)
 
+        console.debug('Annotations Data', annotationsData)
+
         if (!annotationsData.length) {
             return (
                 <EmptyMessageContainer>
@@ -883,15 +885,19 @@ export class AnnotationsSidebar extends React.Component<
         //         {this.renderIsolatedView(this.props.isolatedView)}
         //     </AnnotationsSectionStyled>
         // ) : (
+        console.debug('Results body', this.props.selectedSpace)
         return (
             <React.Fragment>
                 {this.props.selectedSpace ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
+                        {this.renderFollowedListNotes(
+                            this.props.selectedSpace,
+                            true,
+                        )}
                     </AnnotationsSectionStyled>
                 ) : this.props.isExpanded ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable()}
+                        {this.renderAnnotationsEditable(this.props.annotations)}
                     </AnnotationsSectionStyled>
                 ) : (
                     <AnnotationsSectionStyled>
@@ -965,7 +971,7 @@ export class AnnotationsSidebar extends React.Component<
     //     )
     // }
 
-    private renderAnnotationsEditable() {
+    private renderAnnotationsEditable(annotations: Annotation[]) {
         const annots: JSX.Element[] = []
 
         if (this.props.noteCreateState === 'running') {
@@ -975,7 +981,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         annots.push(
-            ...this.props.annotations.map((annot, i) => {
+            ...annotations.map((annot, i) => {
                 const footerDeps = this.props.bindAnnotationFooterEventProps(
                     annot,
                 )
@@ -985,7 +991,7 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationBox
                         key={annot.url}
                         isActive={this.props.activeAnnotationUrl === annot.url}
-                        zIndex={this.props.annotations.length - i}
+                        zIndex={annotations.length - i}
                     >
                         <AnnotationEditable
                             {...annot}
@@ -1054,7 +1060,7 @@ export class AnnotationsSidebar extends React.Component<
                             </AnnotationActions>
                         )}
                         {this.props.noteCreateState === 'running' ||
-                            this.props.annotations.length > 0 ? (
+                        annotations.length > 0 ? (
                             <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -1088,11 +1094,11 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.isExpanded
                                 ? null
                                 : () => {
-                                    this.props.expandMyNotes()
-                                    this.props.expandSharedSpaces(
-                                        followedLists.allIds,
-                                    )
-                                }
+                                      this.props.expandMyNotes()
+                                      this.props.expandSharedSpaces(
+                                          followedLists.allIds,
+                                      )
+                                  }
                         }
                     >
                         <FollowedListSectionTitle
@@ -1107,11 +1113,11 @@ export class AnnotationsSidebar extends React.Component<
                         this.props.isExpandedSharedSpaces
                             ? null
                             : () => {
-                                this.props.expandSharedSpaces(
-                                    followedLists.allIds,
-                                )
-                                this.props.expandMyNotes()
-                            }
+                                  this.props.expandSharedSpaces(
+                                      followedLists.allIds,
+                                  )
+                                  this.props.expandMyNotes()
+                              }
                     }
                     left="5px"
                 >
@@ -1576,7 +1582,7 @@ const FollowedListsContainer = styled.div`
     padding: 10px 10px 100px 10px;
 `
 
-const FollowedListRow = styled(Margin) <{ context: string }>`
+const FollowedListRow = styled(Margin)<{ context: string }>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -1609,7 +1615,7 @@ const ButtonContainer = styled.div`
     grid-gap: 10px;
 `
 
-const FollowedListSectionTitle = styled(Margin) <{ active: boolean }>`
+const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.normalText};
     justify-content: center;
@@ -1678,7 +1684,7 @@ const FollowedListTitle = styled.span<{ context: string }>`
     color: ${(props) => props.theme.colors.normalText};
 `
 
-const PageActivityIndicator = styled(Margin) <{ active: boolean }>`
+const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     border-radius: 30px;
     background-color: ${(props) => props.theme.colors.purple};
@@ -1688,7 +1694,7 @@ const PageActivityIndicator = styled(Margin) <{ active: boolean }>`
     display: flex;
 `
 
-const FollowedListNoteCount = styled(Margin) <{ active: boolean }>`
+const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     font-size: 14px;
     display: flex;
@@ -1709,7 +1715,7 @@ const FollowedListIconContainer = styled.div`
     }
 `
 
-const FollowedListDropdownIcon = styled(Icon) <{
+const FollowedListDropdownIcon = styled(Icon)<{
     isExpanded: boolean
 }>`
     transform: ${(props) => (props.isExpanded ? 'none' : 'rotate(-90deg)')};
