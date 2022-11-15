@@ -55,14 +55,6 @@ export default class OnboardingScreen extends StatefulUIElement<
         <WelcomeContainer>
             <LeftSide>
                 <ContentBox>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.check}
-                            heightAndWidth="34px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
                     <Title>Learn the basics in 90 seconds.</Title>
                     <DescriptionText>
                         Hop on our guided tutorial and get yourself up and
@@ -78,16 +70,19 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     )
                                 }}
                                 label={'Get Started'}
-                                fontSize={'14px'}
+                                fontSize={'20px'}
+                                backgroundColor={'purple'}
+                                icon={'longArrowRight'}
+                                iconPosition={'right'}
                             />
                         </ConfirmContainer>
-                        <GoToDashboard
+                        {/* <GoToDashboard
                             onClick={() => {
                                 this.processEvent('finishOnboarding', null)
                             }}
                         >
                             or go to search dashboard
-                        </GoToDashboard>
+                        </GoToDashboard> */}
                     </TutorialContainer>
                 </ContentBox>
             </LeftSide>
@@ -133,15 +128,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderInfoSide = () => {
         return (
             <RightSide>
-                <CommentDemo src={'img/commentDemo.svg'} />
-                <FeatureInfoBox>
-                    <TitleSmall>
-                        Curate, annotate and discuss the web
-                    </TitleSmall>
-                    <DescriptionText>
-                        By yourself and with your team, friends and community.
-                    </DescriptionText>
-                </FeatureInfoBox>
+                <CommentDemo src={'img/welcomeScreenIllustration.svg'} />
             </RightSide>
         )
     }
@@ -153,7 +140,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <ContentBox>
                         {this.state.authDialogMode === 'signup' && (
                             <>
-                                <LogoImg src={'/img/onlyIconLogo.svg'} />
                                 <Title>Welcome to Memex</Title>
                                 <DescriptionText>
                                     Create an account to get started
@@ -163,15 +149,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         {this.state.authDialogMode === 'login' &&
                             setSaveState !== 'running' && (
                                 <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.login}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>Welcome Back!</SectionTitle>
+                                    <Title>Welcome Back!</Title>
                                     <DescriptionText>
                                         Login to continue
                                     </DescriptionText>
@@ -180,30 +158,17 @@ export default class OnboardingScreen extends StatefulUIElement<
                         {setSaveState === 'running' && <></>}
                         {this.state.authDialogMode === 'resetPassword' && (
                             <UserScreenContainer>
-                                <SectionCircle>
-                                    <Icon
-                                        filePath={icons.reload}
-                                        heightAndWidth="24px"
-                                        color="purple"
-                                        hoverOff
-                                    />
-                                </SectionCircle>
-                                <SectionTitle>Reset your password</SectionTitle>
-                                <DescriptionText></DescriptionText>
+                                <Title>Reset your password</Title>
+                                <DescriptionText>
+                                    We'll send you an email with reset
+                                    instructions
+                                </DescriptionText>
                             </UserScreenContainer>
                         )}
                         {this.state.authDialogMode ===
                             'ConfirmResetPassword' && (
                             <UserScreenContainer>
-                                <SectionCircle>
-                                    <Icon
-                                        filePath={icons.mail}
-                                        heightAndWidth="24px"
-                                        color="purple"
-                                        hoverOff
-                                    />
-                                </SectionCircle>
-                                <SectionTitle>Check your Emails</SectionTitle>
+                                <Title>Check your Emails</Title>
                                 <DescriptionText>
                                     Don't forget the spam folder!
                                 </DescriptionText>
@@ -234,14 +199,17 @@ export default class OnboardingScreen extends StatefulUIElement<
             <OnboardingBox>
                 {this.state.shouldShowLogin
                     ? this.renderLoginStep(this.state.setSaveState)
-                    : this.renderOnboardingSteps()}
+                    : this.processEvent('finishOnboarding', null) &&
+                      this.processEvent('goToGuidedTutorial', null)}
             </OnboardingBox>
         )
     }
 }
 
 const UserScreenContainer = styled.div`
-    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 `
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
@@ -330,14 +298,16 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const LeftSide = styled.div`
-    width: 60%;
+    width: fill-available;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -353,38 +323,34 @@ const ContentBox = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
 `
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 26px;
     font-weight: 800;
     margin-bottom: 10px;
     margin-top: 30px;
+    text-align: center;
 `
 
 const DescriptionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
     font-size: 18px;
-    font-weight: normal;
-    margin-bottom: 20px;
-    text-align: left;
+    font-weight: 300;
+    margin-bottom: 34px;
+    text-align: center;
 `
 
 const RightSide = styled.div`
-    width: 40%;
-    background-image: url('img/onboardingBackground1.svg');
+    width: min-content;
     height: 100vh;
     background-size: cover;
     background-repeat: no-repeat;
-    display: grid;
     grid-auto-flow: row;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    padding: 100px 0 50px 0;
-    overflow: hidden;
 
     @media (max-width: 1000px) {
         display: none;
@@ -392,7 +358,7 @@ const RightSide = styled.div`
 `
 
 const CommentDemo = styled.img`
-    height: 70%;
+    height: fill-available;
     width: auto;
     margin: auto;
 `

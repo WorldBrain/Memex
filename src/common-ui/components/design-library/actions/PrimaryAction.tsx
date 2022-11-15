@@ -8,10 +8,16 @@ import {
     fontSizeSmall,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
-import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import {
+    ColorThemeKeys,
+    IconKeys,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { props } from 'lodash/fp'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const StyledPrimaryAction = styled.div<{
     backgroundColor: ColorThemeKeys
+    iconPosition: string
 }>`
     padding: 8px 20px;
     height: 35px;
@@ -29,6 +35,12 @@ const StyledPrimaryAction = styled.div<{
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
+    flex-direction: ${(props) =>
+        props.iconPosition === 'right' && 'row-reverse'};
+
+    & * {
+        cursor: pointer;
+    }
 
     :focus {
         outline: unset;
@@ -65,6 +77,9 @@ export const PrimaryAction = ({
     backgroundColor,
     fontColor,
     tabIndex,
+    icon,
+    iconSize,
+    iconPosition,
 }: {
     label: React.ReactNode
     onClick: React.MouseEventHandler
@@ -74,6 +89,9 @@ export const PrimaryAction = ({
     backgroundColor?: ColorThemeKeys
     fontColor?: ColorThemeKeys
     tabIndex?: number
+    icon?: IconKeys
+    iconSize?: string
+    iconPosition?: string
 }) => (
     <StyledPrimaryAction
         autoFocus
@@ -84,7 +102,18 @@ export const PrimaryAction = ({
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
         backgroundColor={(props) => props.theme.colors[backgroundColor]}
         fontColor={(props) => props.theme.colors[fontColor]}
+        icon={icon}
+        iconSize={iconSize}
+        iconPosition={iconPosition}
     >
+        {icon && (
+            <Icon
+                icon={icon}
+                heightAndWidth={iconSize}
+                color={fontColor ? fontColor : 'iconColor'}
+                hoverOff
+            />
+        )}
         <StyledPrimaryActionLinkText
             fontColor={(props) => props.theme.colors[fontColor]}
             fontSize={fontSize}

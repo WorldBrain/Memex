@@ -184,7 +184,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Sign Up'}
-                                        fontSize={'14px'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -285,7 +290,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Login'}
-                                        fontSize={'14px'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -353,8 +363,13 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                 this.state.email.includes('.')
                                             )
                                         }
-                                        label={'Login'}
-                                        fontSize={'14px'}
+                                        label={'Send Reset Email'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -599,6 +614,7 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const LeftSide = styled.div`
@@ -607,6 +623,7 @@ const LeftSide = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 
     @media (max-width: 1000px) {
         width: 100%;
