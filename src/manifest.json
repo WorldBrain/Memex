@@ -33,7 +33,6 @@
         "alarms",
         "idle",
         "bookmarks",
-        "history",
         "contextMenus",
         "tabs",
         "webNavigation",
@@ -57,7 +56,6 @@
         "filesystem:/*"
     ],
     "content_security_policy": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: file:",
-
     "omnibox": {
         "keyword": "m"
     },
