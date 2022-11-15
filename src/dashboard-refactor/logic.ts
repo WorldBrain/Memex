@@ -493,44 +493,17 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async mutateAndTriggerSearch(
         previousState: State,
         mutation: UIMutation<State>,
-        event?,
     ) {
-        if (previousState.listsSidebar.showFeed === true) {
-            if (event.listId === null) {
-                this.emitMutation({
-                    ...mutation,
-                    mode: { $set: 'search' },
-                    searchResults: {
-                        searchState: { $set: 'running' },
-                    },
-                    listsSidebar: {
-                        showFeed: { $set: false },
-                        selectedListId: { $set: null },
-                    },
-                })
-            } else {
-                this.emitMutation({
-                    ...mutation,
-                    mode: { $set: 'search' },
-                    searchResults: {
-                        searchState: { $set: 'running' },
-                    },
-                    listsSidebar: {
-                        showFeed: { $set: false },
-                        selectedListId: { $set: event.listId },
-                    },
-                })
-            }
-        } else {
-            this.emitMutation({
-                ...mutation,
-                mode: { $set: 'search' },
-                searchResults: {
-                    searchState: { $set: 'running' },
-                },
-            })
+        mutation = {
+            ...mutation,
+            mode: { $set: 'search' },
+            listsSidebar: {
+                ...(mutation['listsSidebar'] ?? {}),
+                showFeed: { $set: false },
+            },
         }
 
+        this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -2616,24 +2589,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            listsSidebar: {
-                showFeed: { $set: false },
-            },
-        })
-
         const listIdToSet =
             previousState.listsSidebar.selectedListId === event.listId
                 ? undefined
                 : event.listId
 
-        await this.mutateAndTriggerSearch(
-            previousState,
-            {
-                listsSidebar: { selectedListId: { $set: listIdToSet } },
-            },
-            event,
-        )
+        await this.mutateAndTriggerSearch(previousState, {
+            listsSidebar: { selectedListId: { $set: listIdToSet } },
+        })
     }
 
     setDragOverListId: EventHandler<'setDragOverListId'> = async ({
@@ -2831,7 +2794,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        // listNameEdit
         const { editingListId: listId } = previousState.listsSidebar
 
         if (!listId) {
@@ -2892,6 +2854,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 this.emitMutation({
                     listsSidebar: {
+                        editingListId: { $set: undefined },
                         editListErrorMessage: {
                             $set: null,
                         },
@@ -3099,11 +3062,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    switchToFeed: EventHandler<'clickFeedActivityIndicator'> = async ({
-        previousState,
-        event,
-    }) => {
+    switchToFeed: EventHandler<'switchToFeed'> = async ({ previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                showFeed: { $set: true },
+                selectedListId: { $set: SPECIAL_LIST_IDS.INBOX + 2 },
+            },
+        })
         if (!(await this.ensureLoggedIn())) {
+            this.emitMutation({
+                listsSidebar: {
+                    showFeed: { $set: false },
+                    selectedListId: {
+                        $set: previousState.listsSidebar.selectedListId,
+                    },
+                },
+            })
             return
         }
 
@@ -3115,13 +3089,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         }
-
-        this.emitMutation({
-            listsSidebar: {
-                showFeed: { $set: true },
-                selectedListId: { $set: SPECIAL_LIST_IDS.INBOX + 2 },
-            },
-        })
     }
     /* END - lists sidebar event handlers */
 

@@ -101,26 +101,6 @@ describe('Dashboard search results logic', () => {
             ).toEqual(false)
         })
 
-        it('should be able to set all notes shown', async ({ device }) => {
-            const { searchResults } = await setupTest(device)
-
-            expect(searchResults.state.searchResults.searchType).toEqual(
-                'pages',
-            )
-            await searchResults.processEvent('setSearchType', {
-                searchType: 'notes',
-            })
-            expect(searchResults.state.searchResults.searchType).toEqual(
-                'notes',
-            )
-            await searchResults.processEvent('setSearchType', {
-                searchType: 'pages',
-            })
-            expect(searchResults.state.searchResults.searchType).toEqual(
-                'pages',
-            )
-        })
-
         it('should be able to set search copy paster shown state', async ({
             device,
         }) => {
