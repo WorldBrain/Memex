@@ -177,7 +177,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         let actualLists = []
         if (params.inPageUI.selectedSpace) {
-            actualLists = [params.inPageUI.selectedSpace]
+            const remoteSelectedListId = params.inPageUI.selectedSpace
+            const localSelectedListId = params.annotationsCache.getListIdByRemoteId(
+                remoteSelectedListId,
+            )
+            actualLists = [localSelectedListId]
         }
 
         const annotation: Annotation = {
@@ -190,6 +194,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
             selector: anchor,
             pageTitle: title,
         }
+
+        console.debug('AnnotationsCache:', params.annotationsCache)
 
         try {
             await Promise.all([
