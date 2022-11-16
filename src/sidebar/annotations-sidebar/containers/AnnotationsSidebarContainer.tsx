@@ -820,9 +820,14 @@ export class AnnotationsSidebarContainer<
                     border: 'solid 2px blue',
                     backgroundColor: 'yellow',
                     color: 'blue',
+                    position: 'fixed',
+                    bottom: 15,
+                    right: 15,
+                    padding: 15,
+                    borderRadius: 5,
                 }}
             >
-                PILL {this.state.selectedSpace} PILL
+                SELECTED SPACE {this.state.selectedSpace}
             </div>
         )
     }
