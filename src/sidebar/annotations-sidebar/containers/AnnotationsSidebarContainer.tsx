@@ -829,6 +829,7 @@ export class AnnotationsSidebarContainer<
                     padding: 15,
                     borderRadius: 5,
                 }}
+                onClick={() => this.showSidebar()}
             >
                 Working on Memex space
                 <strong> {followedList.name} </strong>
