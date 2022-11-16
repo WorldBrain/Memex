@@ -1618,6 +1618,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+
     setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
         event,
     }) => {
@@ -1626,7 +1627,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isListPickerShown: { $set: event.isShown },
+                            listPickerShowStatus: {
+                                $apply: (prev) =>
+                                    prev === event.show ? 'hide' : event.show,
+                            },
                         },
                     },
                 },

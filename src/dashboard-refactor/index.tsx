@@ -930,11 +930,15 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (noteId) => () =>
+                    onListPickerBarBtnClick: (noteId) => () =>
                         this.processEvent('setNoteListPickerShown', {
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isListPickerShown,
+                            show: 'lists-bar',
+                        }),
+                    onListPickerFooterBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            show: 'footer',
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
