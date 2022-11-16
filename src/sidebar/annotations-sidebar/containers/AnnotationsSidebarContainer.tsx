@@ -814,6 +814,9 @@ export class AnnotationsSidebarContainer<
 
     private renderSelectedSpacePill() {
         console.debug('Rendering selected space pill')
+        const followedList = this.state.followedLists.byId[
+            this.state.selectedSpace
+        ]
         return (
             <div
                 style={{
@@ -827,7 +830,8 @@ export class AnnotationsSidebarContainer<
                     borderRadius: 5,
                 }}
             >
-                SELECTED SPACE {this.state.selectedSpace}
+                Working on Memex space
+                <strong> {followedList.name} </strong>
             </div>
         )
     }
