@@ -106,7 +106,7 @@ export const getInitialPageResultState = (
     isTagPickerShown: false,
     isShareMenuShown: false,
     isCopyPasterShown: false,
-    isListPickerShown: false,
+    listPickerShowStatus: 'hide',
     loadNotesState: 'pristine',
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },

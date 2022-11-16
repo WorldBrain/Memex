@@ -20,7 +20,8 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick?: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
+    onListPickerBarBtnClick: React.MouseEventHandler
+    onListPickerFooterBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
     createNewList: (name: string) => Promise<number>
@@ -161,6 +162,7 @@ export interface NoteShareInfo {
     isProtected?: boolean
 }
 
+export type ListPickerShowState = 'footer' | 'lists-bar' | 'hide'
 export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
@@ -177,8 +179,8 @@ export interface PageResult {
     areNotesShown: boolean
     isShareMenuShown: boolean
     isTagPickerShown: boolean
-    isListPickerShown: boolean
     isCopyPasterShown: boolean
+    listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
@@ -280,7 +282,7 @@ export type Events = UIEvent<{
 
     // Page result state mutations (*specific to each* occurrence of the page in different days)
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
-    setPageListPickerShown: PageEventArgs & { isShown: boolean }
+    setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }

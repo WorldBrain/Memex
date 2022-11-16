@@ -770,28 +770,38 @@ describe('Dashboard search results logic', () => {
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
-                    ].isListPickerShown,
-                ).toBe(false)
+                    ].listPickerShowStatus,
+                ).toBe('hide')
                 await searchResults.processEvent('setPageListPickerShown', {
                     day,
                     pageId,
-                    isShown: true,
+                    show: 'footer',
                 })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
-                    ].isListPickerShown,
-                ).toBe(true)
+                    ].listPickerShowStatus,
+                ).toBe('footer')
                 await searchResults.processEvent('setPageListPickerShown', {
                     day,
                     pageId,
-                    isShown: false,
+                    show: 'lists-bar',
                 })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
-                    ].isListPickerShown,
-                ).toBe(false)
+                    ].listPickerShowStatus,
+                ).toBe('lists-bar')
+                await searchResults.processEvent('setPageListPickerShown', {
+                    day,
+                    pageId,
+                    show: 'lists-bar',
+                })
+                expect(
+                    searchResults.state.searchResults.results[day].pages.byId[
+                        pageId
+                    ].listPickerShowStatus,
+                ).toBe('hide')
             })
 
             it('should be able to show and hide page share menu', async ({

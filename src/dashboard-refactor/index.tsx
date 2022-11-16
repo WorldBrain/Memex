@@ -735,13 +735,17 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId
                             ].isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (day, pageId) => () =>
+                    onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
                             pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isListPickerShown,
+                            show: 'footer',
+                        }),
+                    onListPickerBarBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageListPickerShown', {
+                            day,
+                            pageId,
+                            show: 'lists-bar',
                         }),
                     onCopyPasterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageCopyPasterShown', {

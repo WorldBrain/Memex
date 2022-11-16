@@ -1074,7 +1074,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pages: {
                             byId: {
                                 [event.pageId]: {
-                                    isListPickerShown: { $set: event.isShown },
+                                    listPickerShowStatus: {
+                                        $apply: (prev) =>
+                                            prev === event.show
+                                                ? 'hide'
+                                                : event.show,
+                                    },
                                 },
                             },
                         },

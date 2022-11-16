@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
@@ -12,20 +12,18 @@ import {
     PageInteractionProps,
     PageResult,
     PagePickerProps,
+    ListPickerShowState,
 } from '../types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
 import { ButtonTooltip } from 'src/common-ui/components'
-import ListsSegment, {
-    AddSpacesButton,
-} from 'src/common-ui/components/result-item-spaces-segment'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
@@ -99,36 +97,39 @@ export default class PageResultView extends PureComponent<Props> {
         }))
     }
 
-    private renderSpacePicker() {
-        // space picker is separated out to make the Add to Space button contain the call to render the picker
-        if (this.props.isListPickerShown) {
-            return (
-                <div onMouseLeave={this.props.onListPickerBtnClick}>
-                    <HoverBox padding={'10px 0 0 0'} withRelativeContainer>
-                        <CollectionPicker
-                            selectEntry={(listId) =>
-                                this.props.onListPickerUpdate({
-                                    added: listId,
-                                    deleted: null,
-                                    selected: [],
-                                })
-                            }
-                            unselectEntry={(listId) =>
-                                this.props.onListPickerUpdate({
-                                    added: null,
-                                    deleted: listId,
-                                    selected: [],
-                                })
-                            }
-                            createNewEntry={this.props.createNewList}
-                            initialSelectedListIds={() => this.props.lists}
-                            onClickOutside={this.props.onListPickerBtnClick}
-                        />
-                    </HoverBox>
-                </div>
-            )
+    private get listPickerBtnClickHandler(): React.MouseEventHandler<any> {
+        if (this.props.listPickerShowStatus === 'footer') {
+            return this.props.onListPickerFooterBtnClick
         }
+        return this.props.onListPickerBarBtnClick
     }
+
+    private renderSpacePicker = () => (
+        <div onMouseLeave={this.listPickerBtnClickHandler}>
+            <HoverBox padding={'10px 0 0 0'} withRelativeContainer right="0px">
+                <CollectionPicker
+                    selectEntry={(listId) =>
+                        this.props.onListPickerUpdate({
+                            added: listId,
+                            deleted: null,
+                            selected: [],
+                        })
+                    }
+                    unselectEntry={(listId) =>
+                        this.props.onListPickerUpdate({
+                            added: null,
+                            deleted: listId,
+                            selected: [],
+                        })
+                    }
+                    createNewEntry={this.props.createNewList}
+                    initialSelectedListIds={() => this.props.lists}
+                    onClickOutside={this.listPickerBtnClickHandler}
+                />
+            </HoverBox>
+        </div>
+    )
+
     private renderPopouts() {
         if (this.props.isTagPickerShown) {
             return (
@@ -237,7 +238,7 @@ export default class PageResultView extends PureComponent<Props> {
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
-                    onClick: this.props.onListPickerBtnClick,
+                    onClick: this.props.onListPickerFooterBtnClick,
                 },
                 {
                     key: 'expand-notes-btn',
@@ -319,8 +320,8 @@ export default class PageResultView extends PureComponent<Props> {
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
                         onMouseLeave={
-                            this.props.isListPickerShown
-                                ? this.props.onListPickerBtnClick
+                            this.props.listPickerShowStatus !== 'hide'
+                                ? this.listPickerBtnClickHandler
                                 : undefined
                         }
                         href={this.fullUrl}
@@ -343,10 +344,11 @@ export default class PageResultView extends PureComponent<Props> {
                             onMouseEnter={this.props.onListsHover}
                             showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}
-                            onEditBtnClick={this.props.onListPickerBtnClick}
-                            renderSpacePicker={this.renderSpacePicker.bind(
-                                this,
-                            )}
+                            onEditBtnClick={this.props.onListPickerBarBtnClick}
+                            renderSpacePicker={
+                                this.props.listPickerShowStatus ===
+                                    'lists-bar' && this.renderSpacePicker
+                            }
                             filteredbyListID={this.props.filteredbyListID}
                             padding={'0px 20px 10px 20px'}
                         />
@@ -358,6 +360,8 @@ export default class PageResultView extends PureComponent<Props> {
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={this.calcFooterActions()}
                     />
+                    {this.props.listPickerShowStatus === 'footer' &&
+                        this.renderSpacePicker()}
                 </StyledPageResult>
                 <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
             </ItemBox>
