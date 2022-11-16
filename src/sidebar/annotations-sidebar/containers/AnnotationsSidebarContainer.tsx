@@ -812,9 +812,28 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    private renderSelectedSpacePill() {
+        console.debug('Rendering selected space pill')
+        return (
+            <div
+                style={{
+                    border: 'solid 2px blue',
+                    backgroundColor: 'yellow',
+                    color: 'blue',
+                }}
+            >
+                PILL {this.state.selectedSpace} PILL
+            </div>
+        )
+    }
+
     render() {
         if (this.state.showState === 'hidden') {
-            return null
+            if (this.state.selectedSpace) {
+                return this.renderSelectedSpacePill()
+            } else {
+                return null
+            }
         }
 
         const style = {
