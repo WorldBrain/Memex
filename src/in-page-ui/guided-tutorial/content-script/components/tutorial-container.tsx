@@ -6,7 +6,7 @@ import { reactEventHandler } from 'src/util/ui-logic'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { ThemeProvider } from 'styled-components'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
@@ -97,7 +97,7 @@ export default class TutorialContainer extends React.Component<Props, State> {
                             .position
                     }
                 >
-                    <TopArea>
+                    <TopArea firstContainer={this.state.cardIndex === 0}>
                         <CardBody>
                             {this.props.content[this.state.cardIndex].component}
                         </CardBody>
@@ -114,15 +114,17 @@ export default class TutorialContainer extends React.Component<Props, State> {
                             )}
                             {this.state.cardIndex <
                             this.props.content.length - 1 ? (
-                                <PrimaryAction
-                                    onClick={this.nextCard}
-                                    label={'Next'}
-                                    backgroundColor={'purple'}
-                                    fontColor={'backgroundColor'}
-                                    // icon={'longArrowRight'}
-                                    // iconPosition={'right'}
-                                    // iconSize={'22px'}
-                                />
+                                this.state.cardIndex > 0 && (
+                                    <PrimaryAction
+                                        onClick={this.nextCard}
+                                        label={'Next'}
+                                        backgroundColor={'purple'}
+                                        fontColor={'backgroundColor'}
+                                        // icon={'longArrowRight'}
+                                        // iconPosition={'right'}
+                                        // iconSize={'22px'}
+                                    />
+                                )
                             ) : (
                                 <PrimaryAction
                                     label={'Finish'}
@@ -168,16 +170,13 @@ export function destroyUIContainer(target) {
 
 const HoverArea = styled.div`
     position: fixed;
-    top: 70px;
     right: 0px;
-    width: 60px;
-    height: 300px;
     /* border-bottom-left-radius: 40px;
     border-top-left-radius: 40px; */
-    top: 130px;
+    top: 120px;
     right: 0px;
-    width: 24px;
-    height: 400px;
+    width: 30px;
+    height: 420px;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
     border: 1px solid ${(props) => props.theme.colors.purple};
@@ -206,11 +205,19 @@ const BottomArea = styled.div`
     width: 100%;
 `
 
-const TopArea = styled.div`
+const TopArea = styled.div<{ firstContainer: boolean }>`
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
+
+    ${(props) =>
+        props.firstContainer &&
+        css`
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        `}
 `
 
 const TutorialCardContainer = styled.div<{

@@ -6,6 +6,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import browser from 'webextension-polyfill'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {
@@ -21,71 +22,6 @@ export type TutorialStepContent = {
     position?: string
     extraArea?: JSX.Element | string | React.Component
 }
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 20px;
-    font-weight: bold;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 18px;
-    margin-bottom: 40px;
-    font-weight: 500;
-    margin-top: 10px;
-`
-
-const SmallImages = styled.img`
-    width: 16px;
-    height: 16px;
-    vertical-align: sub;
-    padding: 0 5px 1px 5px;
-`
-
-const FinishHeader = styled.div`
-    font-size: 16px;
-    font-weight: bold;
-    text-align: left;
-    margin-bottom: 17px;
-`
-
-const SaveTextContainer = styled.div`
-    padding-left: 40px;
-`
-
-const OptionsList = styled.div`
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 20px;
-    padding: 0 60px 30px;
-`
-
-const OptionItem = styled.div`
-    font-size: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 400;
-    flex-direction: column;
-    text-align: center;
-    padding: 10px 10px;
-    cursor: pointer;
-    font-weight: bold;
-    height: 140px;
-    width: 140px;
-    color: ${(props) => props.theme.colors.normalText};
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-
-    &:hover {
-        background-color: #f5f5f5;
-    }
-`
-
-const OptionItemIcon = styled.div`
-    font-size: 30px;
-    margin-bottom: 10px;
-`
 
 const FinishContainer = styled.div`
     display: flex;
@@ -133,6 +69,20 @@ const CardContainer = styled.div`
     grid-gap: 16px;
 `
 
+const FirstCardContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    grid-gap: 16px;
+
+    & * {
+        align-items: center !important;
+        display: flex;
+        justify-content: center !important;
+    }
+`
+
 const IconBlock = styled.div`
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     background: ${(props) => props.theme.colors.darkhover};
@@ -149,12 +99,12 @@ const ContentArea = styled.div`
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    grid-gap: 10px;
+    grid-gap: 5px;
 `
 
 const Title = styled.div`
     color: ${(props) => props.theme.colors.normalText};
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
 `
 
@@ -171,87 +121,118 @@ const TitleArea = styled.div`
     height: 26px;
 `
 
+const ActionsBlock = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    width: 100%;
+`
+
+const ActionCard = styled.div`
+    height: 100px;
+    width: fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: ${(props) => props.theme.colors.darkhover};
+    flex-direction: column;
+    border-radius: 8px;
+    grid-gap: 10px;
+
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
+`
+
+const ActionText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 400;
+    font-size: 14px;
+`
+
+const TutorialTitleSection = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    width: 100%;
+    margin-bottom: 15px;
+`
+
+const TutorialTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 700;
+    font-size: 16px;
+`
+
+const ViewAllButton = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    grid-gap: 10px;
+    cursor: pointer;
+    align-items: center;
+    padding: 4px 4px 4px 8px;
+    border-radius: 5px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.lightHover};
+    }
+`
+
+const TutorialOptionsList = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    grid-gap: 10px;
+`
+
+const TutorialOption = styled.div`
+    width: fill-available;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px;
+    grid-gap: 15px;
+    background-color: ${(props) => props.theme.colors.darkhover};
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
+`
+
+const TutorialOptionText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 400;
+    font-size: 14px;
+`
+
 export const tutorialSteps: TutorialStepContent[] = [
     // Specific kind of card: Tutorial Step (e.g., not a final screen)
 
     {
         subtitle: (
             <>
-                <CardContainer>
-                    <IconBlock>
-                        <Icon
-                            filePath={icons.searchIcon}
-                            heightAndWidth="28px"
-                            hoverOff
-                            color={'purple'}
-                        />
-                    </IconBlock>
-                    <ContentArea>
-                        <TitleArea>
-                            <Title>Onboarding Done!</Title>
-                        </TitleArea>
-                        <Description>Some things you can do next.</Description>
-                    </ContentArea>
-                </CardContainer>
-            </>
-        ),
-        extraArea: (
-            <>
-                <FinishContainer>
-                    <OptionsList>
-                        {/* <OptionItem
-                                onClick={() =>
-                                    window.open(`${browser.runtime.getURL('/options.html')}#/import`)
-                                }
-                            >
-                                ❤️ Import your existing bookmarks and folders
-                            </OptionItem> */}
-                        <OptionItem
-                            onClick={() =>
-                                window.open('https://tutorials.memex.garden')
-                            }
-                        >
-                            <OptionItemIcon>🎓</OptionItemIcon>
-                            Visit
-                            <br />
-                            tutorials
-                        </OptionItem>
-                        <OptionItem
-                            onClick={() =>
-                                window.open(
-                                    'https://links.memex.garden/onboarding',
-                                )
-                            }
-                        >
-                            <OptionItemIcon>☎️</OptionItemIcon>
-                            Personalised <br />
-                            onboarding
-                        </OptionItem>
-                        {/* <OptionItem
-                            onClick={() =>
-                                window.open(
-                                    'https://links.memex.garden/onboarding',
-                                )
-                            }
-                        >
-                            <OptionItemIcon>🔖</OptionItemIcon>
-                            Import <br />Bookmarks
-                        </OptionItem> */}
-                    </OptionsList>
-                </FinishContainer>
-            </>
-        ),
-        top: '25%',
-        bottom: null,
-        left: '0px',
-        width: '700px',
-        height: 'fit-content',
-    },
-
-    {
-        subtitle: (
-            <>
-                <CardContainer>
+                <FirstCardContainer>
                     <IconBlock>
                         <Icon
                             filePath={icons.stars}
@@ -269,7 +250,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             quick action bar.
                         </Description>
                     </ContentArea>
-                </CardContainer>
+                </FirstCardContainer>
             </>
         ),
         top: '44%',
@@ -277,7 +258,7 @@ export const tutorialSteps: TutorialStepContent[] = [
         right: null,
         showHoverArea: true,
         position: 'center',
-        width: '700px',
+        width: '500px',
     },
 
     {
@@ -523,6 +504,175 @@ export const tutorialSteps: TutorialStepContent[] = [
         showHoverArea: false,
         position: 'center',
         width: '700px',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Onboarding Done!</Title>
+                        </TitleArea>
+                        <Description>Some things you can do next.</Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        extraArea: (
+            <>
+                <FinishContainer>
+                    <ActionsBlock>
+                        <ActionCard
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/onboarding',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.phone}
+                                heightAndWidth="28px"
+                                hoverOff
+                                color={'backgroundHighlight'}
+                            />
+                            <ActionText>
+                                Personalised Onboarding Call
+                            </ActionText>
+                        </ActionCard>
+                        <ActionCard
+                            onClick={() =>
+                                window.open('https://community.memex.garden')
+                            }
+                        >
+                            <Icon
+                                filePath={icons.searchIcon}
+                                heightAndWidth="28px"
+                                hoverOff
+                                color={'backgroundHighlight'}
+                            />
+                            <ActionText>Community FAQs</ActionText>
+                        </ActionCard>
+                    </ActionsBlock>
+
+                    <TutorialTitleSection>
+                        <TutorialTitle>More Tutorials</TutorialTitle>
+                        <ViewAllButton
+                            onClick={() =>
+                                window.open(
+                                    'https://tutorials.memex.garden/tutorials',
+                                )
+                            }
+                        >
+                            View All
+                            <Icon
+                                filePath={icons.arrowRight}
+                                heightAndWidth="22px"
+                                color={'greyScale8'}
+                                hoverOff
+                            />
+                        </ViewAllButton>
+                    </TutorialTitleSection>
+                    <TutorialOptionsList>
+                        <TutorialOption
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/youtubeannotations',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.play}
+                                heightAndWidth="28px"
+                                hoverOff
+                            />
+                            <TutorialOptionText>
+                                Annotate YouTube videos
+                            </TutorialOptionText>
+                        </TutorialOption>
+                        <TutorialOption
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/pdfAnnotations',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.pdf}
+                                heightAndWidth="28px"
+                                hoverOff
+                            />
+                            <TutorialOptionText>
+                                Annotate local or web PDFs
+                            </TutorialOptionText>
+                        </TutorialOption>
+                        <TutorialOption
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/ShareAndCollaborateSpaces',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.collectionsEmpty}
+                                heightAndWidth="28px"
+                                hoverOff
+                            />
+                            <TutorialOptionText>
+                                Share and collaboratively annotate the web with
+                                Spaces
+                            </TutorialOptionText>
+                        </TutorialOption>
+                        <TutorialOption
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/CopyPasteTemplates',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.copy}
+                                heightAndWidth="28px"
+                                hoverOff
+                            />
+                            <TutorialOptionText>
+                                Export saved content in customisable copy/paste
+                                templates
+                            </TutorialOptionText>
+                        </TutorialOption>
+                        <TutorialOption
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/readwiseIntegration',
+                                )
+                            }
+                        >
+                            <Icon
+                                filePath={icons.readwise}
+                                heightAndWidth="28px"
+                                hoverOff
+                            />
+                            <TutorialOptionText>
+                                Integrate with Readwise (and from there to Roam,
+                                Notion & Evernote)
+                            </TutorialOptionText>
+                        </TutorialOption>
+                    </TutorialOptionsList>
+                </FinishContainer>
+            </>
+        ),
+        top: '25%',
+        bottom: null,
+        left: '0px',
+        width: '500px',
+        height: 'fit-content',
     },
 ]
 

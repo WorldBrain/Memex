@@ -24,7 +24,6 @@ export default class TutorialStep extends React.Component<Props> {
                         </ShortcutLabel>
                     )}
                 </CardBodyHeader>
-                <TutorialText>{this.props.text}</TutorialText>
             </React.Fragment>
         )
     }
