@@ -176,13 +176,27 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
+                listPickerRenderLocation={noteData.listPickerShowStatus}
+                onListsBarPickerBtnClick={
+                    interactionProps.onListPickerBarBtnClick
+                }
                 renderListsPickerForAnnotation={() =>
-                    noteData.isListPickerShown && (
-                        <HoverBox withRelativeContainer>
+                    noteData.listPickerShowStatus !== 'hide' && (
+                        <HoverBox
+                            withRelativeContainer
+                            right={
+                                noteData.listPickerShowStatus === 'footer'
+                                    ? '0px'
+                                    : undefined
+                            }
+                        >
                             <CollectionPicker
                                 initialSelectedListIds={() => listsToDisplay}
                                 onClickOutside={
-                                    interactionProps.onListPickerBtnClick
+                                    noteData.listPickerShowStatus ===
+                                    'lists-bar'
+                                        ? interactionProps.onListPickerBarBtnClick
+                                        : interactionProps.onListPickerFooterBtnClick
                                 }
                                 selectEntry={(listId) =>
                                     interactionProps.updateLists({
@@ -267,7 +281,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
-                    onListIconClick: interactionProps.onListPickerBtnClick,
+                    onListIconClick:
+                        interactionProps.onListPickerFooterBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,

@@ -735,13 +735,17 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId
                             ].isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (day, pageId) => () =>
+                    onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
                             pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isListPickerShown,
+                            show: 'footer',
+                        }),
+                    onListPickerBarBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageListPickerShown', {
+                            day,
+                            pageId,
+                            show: 'lists-bar',
                         }),
                     onCopyPasterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageCopyPasterShown', {
@@ -926,11 +930,15 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (noteId) => () =>
+                    onListPickerBarBtnClick: (noteId) => () =>
                         this.processEvent('setNoteListPickerShown', {
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isListPickerShown,
+                            show: 'lists-bar',
+                        }),
+                    onListPickerFooterBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            show: 'footer',
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {

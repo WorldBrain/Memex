@@ -19,7 +19,6 @@ import SaveBtn from 'src/annotations/components/save-btn'
 import type { SidebarAnnotationTheme, ListDetailsGetter } from '../types'
 import { ButtonTooltip } from 'src/common-ui/components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import TagsSegment from 'src/common-ui/components/result-item-tags-segment'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
@@ -30,6 +29,7 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -67,6 +67,8 @@ export interface AnnotationProps {
         name: string
         profileImgSrc?: string
     }
+    listPickerRenderLocation?: ListPickerShowState
+    onListsBarPickerBtnClick?: React.MouseEventHandler
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
@@ -496,6 +498,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
+                    {this.props.listPickerRenderLocation === 'footer' &&
+                        this.props.renderListsPickerForAnnotation(
+                            this.props.url,
+                        )}
                 </DefaultFooterStyled>
             )
         }
@@ -604,11 +610,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                                         }
                                         onListClick={undefined}
                                         onEditBtnClick={
-                                            this.props
-                                                .annotationFooterDependencies
-                                                ?.onListIconClick
+                                            this.props.onListsBarPickerBtnClick
                                         }
                                         renderSpacePicker={() =>
+                                            this.props
+                                                .listPickerRenderLocation ===
+                                                'lists-bar' &&
                                             this.props.renderListsPickerForAnnotation(
                                                 this.props.url,
                                             )
@@ -620,32 +627,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                         }
                                     />
                                 )}
-
-                            {/* tags */}
-                            {this.props.renderTagsPickerForAnnotation && (
-                                <TagsSegment
-                                    tags={this.props.tags}
-                                    onMouseEnter={this.props.onTagsHover}
-                                    showEditBtn={
-                                        this.props.hoverState === 'tags'
-                                    }
-                                    onTagClick={this.props.onTagClick}
-                                    onEditBtnClick={
-                                        this.props.annotationFooterDependencies
-                                            ?.onTagIconClick
-                                    }
-                                />
-                            )}
                             {this.renderFooter()}
-                            {this.props.renderTagsPickerForAnnotation && (
-                                <TagPickerWrapper>
-                                    <HoverBox left="0px" padding={'px'}>
-                                        {this.props.renderTagsPickerForAnnotation(
-                                            this.props.url,
-                                        )}
-                                    </HoverBox>
-                                </TagPickerWrapper>
-                            )}
                             {this.props.renderCopyPasterForAnnotation && (
                                 <CopyPasterWrapper>
                                     {this.props.renderCopyPasterForAnnotation(
