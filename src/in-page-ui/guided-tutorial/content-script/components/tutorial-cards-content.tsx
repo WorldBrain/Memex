@@ -11,13 +11,15 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 export type TutorialStepContent = {
     subtitle: JSX.Element | string | React.Component
     keyboardShortcut?: string
-    text: JSX.Element | string | React.Component
     top?: string
     bottom?: string
     left?: string
     right?: string
     width?: string
     height?: string
+    showHoverArea?: boolean
+    position?: string
+    extraArea?: JSX.Element | string | React.Component
 }
 
 const SectionTitle = styled.div`
@@ -93,190 +95,80 @@ const FinishContainer = styled.div`
     padding-top: 20px;
 `
 
-const PinTitleContainer = styled.div`
+const ShortCutContainer = styled.div`
     display: flex;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale9};
+    grid-gap: 3px;
+    font-weight: 400;
+`
+
+const ShortCutText = styled.div`
+    display: block;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale9};
+    letter-spacing: 1px;
+    margin-right: -1px;
+
+    &:first-letter {
+        text-transform: capitalize;
+    }
+`
+
+const ShortCutBlock = styled.div`
+    border-radius: 5px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale10};
+    color: ${(props) => props.theme.colors.greyScale9};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0px 6px;
+    font-size: 12px;
+`
+const CardContainer = styled.div`
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
-    align-items: center;
-    width: 100%;
+    grid-gap: 16px;
 `
 
-const PinTitleImage = styled(Icon)`
-    width: 24px;
-    height: 24px;
-    vertical-align: sub;
-`
-
-const AnnotationTitleContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-`
-
-const AnnotationTitleBox = styled.div`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    grid-gap: 8px;
-`
-
-const FinishTitleBox = styled.div`
+const IconBlock = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    background: ${(props) => props.theme.colors.darkhover};
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    flex-direction: column;
-    margin-bottom: 30px;
+    height: 48px;
+    width: 48px;
 `
 
-const AnnotationTitleText = styled.div`
-    font-size: 1.1em;
+const ContentArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+`
+
+const Title = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 16px;
+    font-weight: 600;
+`
+
+const Description = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 16px;
+    font-weight: 300;
+`
+
+const TitleArea = styled.div`
     display: flex;
     align-items: center;
-`
-
-const AnnotationSubTitleText = styled.div`
-    font-size: 1em;
-    font-weight: normal;
-    color: ${(props) => props.theme.colors.subText};
-`
-
-const AnnotationTitleImage = styled.div`
-    font-size: 30px;
-    padding: 0 5px 0 0;
-`
-
-const MouseOverArea = styled.div<{ top: string }>`
-    width: 20px;
-    height: 360px;
-    position: absolute;
-    top: ${(props) => (props.top ? props.top : '-100px')};
-    right: -70px;
-    background: #ff000040;
-    border: 2px solid #ff000080;
-    border-radius: 3px;
-    opacity: 0;
-    animation: 3s ease-in-out 0.5s MouseAreaAppear infinite;
-    animation-iteration-count: infinite;
-    display: ${(props) => (props.onMouseEnter ? 'none' : 'flex')};
-
-    @keyframes MouseAreaAppear {
-        0% {
-            opacity: 0;
-        }
-        50% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 0;
-        }
-    }
-`
-
-const ShortcutLabelContainer = styled.div`
-    margin: 20px 0px;
-`
-
-const ShortcutLabel = styled.span`
-    border: 1px solid #f29d9d;
-    border-radius: 3px;
-    padding: 4px 14px;
-    font-size: 16px;
-    width: fit-content;
-    background-color: #f29d9d60;
-    white-space: nowrap;
-    vertical-align: top;
-    color: #545454;
-    font-weight: 600;
-    margin: 2px 0px;
-`
-
-const PinTutorialArrow = styled.span`
-    display: flex;
-    height: 30px;
-    width: 30px;
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    mask-size: contain;
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-image: url(${icons.arrowUp});
-    background-color: ${(props) => props.theme.colors.primary};
-
-    animation: 2s ease-in-out 0s PinWiggle infinite;
-    animation-iteration-count: infinite;
-
-    @keyframes PinWiggle {
-        0% {
-            transform: translateY(20px);
-        }
-        50% {
-            transform: translateY(0%);
-        }
-        100% {
-            transform: translateY(20px);
-        }
-    }
-`
-
-const AnnotationTutorialArrow = styled.span`
-    display: flex;
-    height: 30px;
-    width: 30px;
-    position: absolute;
-    left: 20px;
-    bottom: 20px;
-    mask-size: contain;
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-image: url(${icons.arrowUp});
-    background-color: ${(props) => props.theme.colors.primary};
-    animation: 2s ease-in-out 0s AnnotationWiggle infinite;
-    animation-iteration-count: infinite;
-    transform: rotate(180deg);
-
-    @keyframes AnnotationWiggle {
-        0% {
-            transform: translate(30px, -30px) rotate(225.5deg);
-        }
-        50% {
-            transform: translate(0%, 0%) rotate(225.5deg);
-        }
-        100% {
-            transform: translate(30px, -30px) rotate(225.5deg);
-        }
-    }
-`
-
-const RibbonTutorialArrow = styled.span`
-    display: flex;
-    height: 30px;
-    width: 30px;
-    position: absolute;
-    right: 20px;
-    top: 40px;
-    mask-size: contain;
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-image: url(${icons.arrowUp});
-    background-color: ${(props) => props.theme.colors.primary};
-    animation: 2s ease-in-out 0s RibbonWiggle infinite;
-    animation-iteration-count: infinite;
-    transform: rotate(180deg);
-
-    @keyframes RibbonWiggle {
-        0% {
-            transform: translate(-30px, 0px) rotate(90deg);
-        }
-        50% {
-            transform: translate(0%, 0%) rotate(90deg);
-        }
-        100% {
-            transform: translate(-30px, 0px) rotate(90deg);
-        }
-    }
+    grid-gap: 15px;
+    height: 26px;
 `
 
 export const tutorialSteps: TutorialStepContent[] = [
@@ -285,160 +177,27 @@ export const tutorialSteps: TutorialStepContent[] = [
     {
         subtitle: (
             <>
-                <PinTitleContainer>
-                    <AnnotationTitleContainer>
-                        <AnnotationTitleBox>
-                            <PinTitleImage
-                                filePath={icons.heartEmpty}
-                                heightAndWidth="20px"
-                                hoverOff
-                            />
-                            <SectionTitle>Bookmark this page</SectionTitle>
-                        </AnnotationTitleBox>
-                    </AnnotationTitleContainer>
-                    <RibbonTutorialArrow />
-                </PinTitleContainer>
-                <MouseOverArea top={'-40px'} />
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Onboarding Done!</Title>
+                        </TitleArea>
+                        <Description>Some things you can do next.</Description>
+                    </ContentArea>
+                </CardContainer>
             </>
         ),
-        text: (
-            <SaveTextContainer>
-                <InfoText>Use the sidebar or keyboard shortcuts</InfoText>
-                <ShortcutLabelContainer>
-                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
-                    + <ShortcutLabel>s</ShortcutLabel>
-                </ShortcutLabelContainer>
-            </SaveTextContainer>
-        ),
-        top: '60px',
-        bottom: null,
-        left: null,
-        right: '60px',
-        width: '470px',
-        height: '220px',
-    },
-
-    {
-        subtitle: (
-            <>
-                <PinTitleContainer>
-                    <AnnotationTitleContainer>
-                        <AnnotationTitleBox>
-                            <PinTitleImage
-                                filePath={icons.highlighterFull}
-                                heightAndWidth="20px"
-                                hoverOff
-                            />
-                            <SectionTitle>
-                                Add Highlights and Annotations
-                            </SectionTitle>
-                        </AnnotationTitleBox>
-                    </AnnotationTitleContainer>
-                    <AnnotationTutorialArrow />
-                </PinTitleContainer>
-            </>
-        ),
-        text: (
-            <SaveTextContainer>
-                <InfoText>
-                    Select text and use the tooltip or keyboard shortcuts
-                </InfoText>
-                <ShortcutLabelContainer>
-                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
-                    + <ShortcutLabel>a</ShortcutLabel> or{' '}
-                    <ShortcutLabel>w</ShortcutLabel>
-                </ShortcutLabelContainer>
-            </SaveTextContainer>
-        ),
-        top: '30px',
-        bottom: null,
-        left: null,
-        right: '40px',
-        width: '480px',
-        height: '230px',
-    },
-
-    {
-        subtitle: (
-            <>
-                <PinTitleContainer>
-                    <AnnotationTitleContainer>
-                        <AnnotationTitleBox>
-                            <PinTitleImage
-                                filePath={icons.commentEmpty}
-                                heightAndWidth="20px"
-                                hoverOff
-                            />
-                            <SectionTitle>View your annotations</SectionTitle>
-                        </AnnotationTitleBox>
-                    </AnnotationTitleContainer>
-                    <RibbonTutorialArrow />
-                </PinTitleContainer>
-                <MouseOverArea top={'-70px'} />
-            </>
-        ),
-        text: (
-            <SaveTextContainer>
-                <InfoText>
-                    Hover over the red area to open the annotation sidebar.
-                </InfoText>
-                <br />
-                <ShortcutLabelContainer>
-                    <ShortcutLabel>{getKeyName({ key: 'alt' })}</ShortcutLabel>{' '}
-                    + <ShortcutLabel>q</ShortcutLabel>
-                </ShortcutLabelContainer>
-            </SaveTextContainer>
-        ),
-        top: '85px',
-        bottom: null,
-        left: null,
-        right: '60px',
-        width: '540px',
-        height: '220px',
-    },
-
-    {
-        subtitle: (
-            <PinTitleContainer>
-                <AnnotationTitleBox>
-                    <PinTitleImage
-                        filePath={icons.pin}
-                        heightAndWidth="20px"
-                        hoverOff
-                    />
-                    <SectionTitle>Pin Memex to your menu</SectionTitle>
-                </AnnotationTitleBox>
-                <PinTutorialArrow />
-            </PinTitleContainer>
-        ),
-        text: (
-            <SaveTextContainer>
-                <InfoText>
-                    Easy access to bookmarking, adding to Spaces & searching.
-                </InfoText>
-            </SaveTextContainer>
-        ),
-        top: '30px',
-        bottom: null,
-        left: null,
-        right: '140px',
-        width: '540px',
-        height: '170px',
-    },
-
-    {
-        subtitle: (
+        extraArea: (
             <>
                 <FinishContainer>
-                    <FinishTitleBox>
-                        <SectionTitle>
-                            <AnnotationTitleImage>✌🏽</AnnotationTitleImage>{' '}
-                            Done!
-                        </SectionTitle>
-                        <InfoText>
-                            Here are some next steps you can do.
-                        </InfoText>
-                    </FinishTitleBox>
                     <OptionsList>
                         {/* <OptionItem
                                 onClick={() =>
@@ -482,7 +241,6 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </FinishContainer>
             </>
         ),
-        text: <></>,
         top: '25%',
         bottom: null,
         left: '0px',
@@ -490,61 +248,282 @@ export const tutorialSteps: TutorialStepContent[] = [
         height: 'fit-content',
     },
 
-    // {
-    //     subtitle: 'Save the page',
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.stars}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Get the basics in 90s</Title>
+                        </TitleArea>
+                        <Description>
+                            Hover over the green area on the right to open the
+                            quick action bar.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        top: '44%',
+        left: null,
+        right: null,
+        showHoverArea: true,
+        position: 'center',
+        width: '700px',
+    },
 
-    //     text: (
-    //         <span>
-    //             Click the <SmallImages src={icons.heartEmpty} /> in the ribbon
-    //             that appears when hovering to the top right of the screen or
-    //             when clicking the <SmallImages src={icons.logoSmall} /> icon in
-    //             the browser menu bar.
-    //         </span>
-    //     ),
-    //     top: '30px',
-    //     bottom: null,
-    //     left: null,
-    //     right: null,
-    // },
-    // {
-    //     subtitle: 'Highlight & Annotate',
-    //     keyboardShortcut: getKeyName({ key: 'alt' }) + ' + a/w',
-    //     text: (
-    //         <span>
-    //             Select a piece of text and right click to highlight, or use the
-    //             highlighter tooltip that appears.
-    //             <br />
-    //             <strong>Shift+click</strong> on the tooltip to instantly create
-    //             a shareable link.
-    //         </span>
-    //     ),
-    //     top: '0px',
-    //     bottom: null,
-    //     left: null,
-    //     right: null,
-    // },
-    // {
-    //     subtitle: 'Search Saved Pages',
-    //     keyboardShortcut: getKeyName({ key: 'alt' }) + ' + f',
-    //     text: (
-    //         <span>
-    //             Any page you save or highlight is full-text searchable via the
-    //             dashboard. <br />
-    //             <br />
-    //             Do so by clicking on the <SmallImages
-    //                 src={icons.searchIcon}
-    //             />{' '}
-    //             icon in the ribbon that appears when hovering to the top right
-    //             of the screen or when clicking the{' '}
-    //             <SmallImages src={icons.logoSmall} /> icon in the browser menu
-    //             bar.
-    //         </span>
-    //     ),
-    //     top: '0px',
-    //     bottom: null,
-    //     left: null,
-    //     right: null,
-    // },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.heartEmpty}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Bookmark this Page</Title>
+                            <ShortCutContainer>
+                                <ShortCutBlock>
+                                    <ShortCutText>
+                                        {getKeyName({ key: 'alt' })}
+                                    </ShortCutText>
+                                </ShortCutBlock>{' '}
+                                +{' '}
+                                <ShortCutBlock>
+                                    <ShortCutText>S</ShortCutText>
+                                </ShortCutBlock>{' '}
+                            </ShortCutContainer>
+                        </TitleArea>
+                        <Description>
+                            Use the heart icon in the quick action bar or use
+                            keyboard shortcuts.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: true,
+        position: 'center',
+        width: '700px',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Add this page to a Space</Title>
+                            <ShortCutContainer>
+                                <ShortCutBlock>
+                                    <ShortCutText>
+                                        {getKeyName({ key: 'alt' })}
+                                    </ShortCutText>
+                                </ShortCutBlock>{' '}
+                                +{' '}
+                                <ShortCutBlock>
+                                    <ShortCutText>C</ShortCutText>
+                                </ShortCutBlock>{' '}
+                            </ShortCutContainer>
+                        </TitleArea>
+                        <Description>
+                            Spaces are like tags that you can share and
+                            collaboratively curate.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
+        width: '700px',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.highlight}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Create a Highlight</Title>
+                            <ShortCutContainer>
+                                <ShortCutBlock>
+                                    <ShortCutText>
+                                        {getKeyName({ key: 'alt' })}
+                                    </ShortCutText>
+                                </ShortCutBlock>{' '}
+                                +{' '}
+                                <ShortCutBlock>
+                                    <ShortCutText>A</ShortCutText>
+                                </ShortCutBlock>{' '}
+                            </ShortCutContainer>
+                        </TitleArea>
+                        <Description>
+                            Select some text and use the tooltip, or use
+                            keyboard shortcuts.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
+        width: '700px',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.commentEmpty}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>View your Highlights</Title>
+                            <ShortCutContainer>
+                                <ShortCutBlock>
+                                    <ShortCutText>
+                                        {getKeyName({ key: 'alt' })}
+                                    </ShortCutText>
+                                </ShortCutBlock>{' '}
+                                +{' '}
+                                <ShortCutBlock>
+                                    <ShortCutText>Q</ShortCutText>
+                                </ShortCutBlock>{' '}
+                            </ShortCutContainer>
+                        </TitleArea>
+                        <Description>
+                            Click on the highlight or open the sidebar via the
+                            quick action ribbon
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
+        width: '700px',
+    },
+
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.searchIcon}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>
+                                Search everything you saved or annotated
+                            </Title>
+                            <ShortCutContainer>
+                                <ShortCutBlock>
+                                    <ShortCutText>
+                                        {getKeyName({ key: 'alt' })}
+                                    </ShortCutText>
+                                </ShortCutBlock>{' '}
+                                +{' '}
+                                <ShortCutBlock>
+                                    <ShortCutText>F</ShortCutText>
+                                </ShortCutBlock>{' '}
+                            </ShortCutContainer>
+                        </TitleArea>
+                        <Description>
+                            Click on the search icon in the Quick Action Ribbon.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
+        width: '700px',
+    },
+
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.pin}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'purple'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Pin Memex to the extension bar</Title>
+                        </TitleArea>
+                        <Description>
+                            Don't like the Quick Action Ribbon and want to use
+                            something else?
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        left: null,
+        right: '20px',
+        top: '20px',
+        showHoverArea: false,
+        position: 'center',
+        width: '700px',
+    },
 ]
 
 export type TutorialCardContent = {
@@ -557,6 +536,8 @@ export type TutorialCardContent = {
     right?: string
     width?: string
     height?: string
+    showHoverArea?: boolean
+    extraArea?: JSX.Element | string | React.Component
 }
 
 export const tutorialContents: TutorialCardContent[] = [
