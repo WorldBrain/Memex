@@ -68,12 +68,9 @@ export interface AnnotationProps {
         profileImgSrc?: string
     }
     listPickerRenderLocation?: ListPickerShowState
-    onListsBarPickerBtnClick?: React.MouseEventHandler
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
-    onTagClick?: (tag: string) => void
-    renderTagsPickerForAnnotation?: (id: string) => JSX.Element
     renderListsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
@@ -610,7 +607,9 @@ export default class AnnotationEditable extends React.Component<Props> {
                                         }
                                         onListClick={undefined}
                                         onEditBtnClick={
-                                            this.props.onListsBarPickerBtnClick
+                                            this.props
+                                                .annotationEditDependencies
+                                                ?.onListsBarPickerBtnClick
                                         }
                                         renderSpacePicker={() =>
                                             this.props

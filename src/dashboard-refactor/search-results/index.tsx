@@ -78,7 +78,6 @@ export type Props = RootState &
         onDismissOnboardingMsg: React.MouseEventHandler
         onDismissSubscriptionBanner: React.MouseEventHandler
         isDisplayed: boolean
-        filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
@@ -150,7 +149,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
-                onTagClick={this.props.filterSearchByTag}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
                 contextLocation={'dashboard'}
                 lastEdited={
@@ -177,13 +175,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     )
                 }
                 listPickerRenderLocation={noteData.listPickerShowStatus}
-                onListsBarPickerBtnClick={
-                    interactionProps.onListPickerBarBtnClick
-                }
                 renderListsPickerForAnnotation={() =>
                     noteData.listPickerShowStatus !== 'hide' && (
                         <HoverBox
                             withRelativeContainer
+                            top="20px"
                             right={
                                 noteData.listPickerShowStatus === 'footer'
                                     ? '0px'
@@ -269,6 +265,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
+                    onListsBarPickerBtnClick:
+                        interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (value) =>
                         interactionProps.onCommentChange({
                             target: { value },
@@ -417,7 +415,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
                     getListDetailsById={this.props.getListDetailsById}
-                    onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
                         closeShareMenu: interactionProps.onShareBtnClick,

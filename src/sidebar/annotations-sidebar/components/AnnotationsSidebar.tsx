@@ -38,11 +38,10 @@ import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import { getLocalStorage } from 'src/util/storage'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -89,6 +88,7 @@ export interface AnnotationsSidebarProps
     }
     bindAnnotationEditProps: (
         annotation: Pick<Annotation, 'url' | 'isShared'>,
+        followedListId?: string,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -403,8 +403,11 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.mode = this.props.followedLists.byId[
                             listId
                         ].annotationModes[data.localId]
+                        ownAnnotationProps.listPickerRenderLocation =
+                            list.activeListPickerState?.position
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
                             { url: data.localId, isShared: true },
+                            listId,
                         )
                         ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
                             { url: data.localId, body: data.body },
@@ -950,6 +953,9 @@ export class AnnotationsSidebar extends React.Component<
                             onHighlightClick={this.props.setActiveAnnotationUrl(
                                 annot.url,
                             )}
+                            listPickerRenderLocation={
+                                this.props.activeListPickerState?.position
+                            }
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
                                 annot,

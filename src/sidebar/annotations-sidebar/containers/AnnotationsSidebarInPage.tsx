@@ -147,7 +147,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             if (annotationMode === 'edit_spaces') {
-                this.processEvent('setListPickerAnnotationId', { id: url })
+                this.processEvent('setListPickerAnnotationId', {
+                    id: url,
+                    position: 'footer',
+                })
             }
         }
 

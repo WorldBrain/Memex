@@ -428,20 +428,45 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.processEvent('setListPickerAnnotationId', {
                 id: DATA.ANNOT_1.url,
+                position: 'footer',
             })
+            expect(sidebar.state.activeListPickerState).toEqual({
+                annotationId: DATA.ANNOT_1.url,
+                position: 'footer',
+            })
+            expect(focusedAnnotId).toEqual(null)
 
-            expect(sidebar.state.activeListPickerAnnotationId).toEqual(
-                DATA.ANNOT_1.url,
-            )
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: DATA.ANNOT_1.url,
+                position: 'lists-bar',
+            })
+            expect(sidebar.state.activeListPickerState).toEqual({
+                annotationId: DATA.ANNOT_1.url,
+                position: 'lists-bar',
+            })
+            expect(focusedAnnotId).toEqual(null)
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: DATA.ANNOT_1.url,
+                position: 'lists-bar',
+            })
+            expect(sidebar.state.activeListPickerState).toEqual(undefined)
+            expect(focusedAnnotId).toEqual(null)
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: DATA.ANNOT_1.url,
+                position: 'lists-bar',
+            })
+            expect(sidebar.state.activeListPickerState).toEqual({
+                annotationId: DATA.ANNOT_1.url,
+                position: 'lists-bar',
+            })
             expect(focusedAnnotId).toEqual(null)
 
             await sidebar.processEvent('resetListPickerAnnotationId', {
                 id: DATA.ANNOT_1.url,
             })
-
-            expect(sidebar.state.activeListPickerAnnotationId).toEqual(
-                undefined,
-            )
+            expect(sidebar.state.activeListPickerState).toEqual(undefined)
             expect(focusedAnnotId).toEqual(DATA.ANNOT_1.url)
         })
     })
@@ -2526,7 +2551,7 @@ describe('SidebarContainerLogic', () => {
                             annotationsLoadState: 'pristine',
                             conversationsLoadState: 'pristine',
                             activeCopyPasterAnnotationId: undefined,
-                            activeListPickerAnnotationId: undefined,
+                            activeListPickerState: undefined,
                             activeShareMenuAnnotationId: undefined,
                             annotationModes: expect.any(Object),
                             annotationEditForms: expect.any(Object),
@@ -3513,7 +3538,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: undefined,
                 }),
             )
@@ -3526,7 +3551,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: annotationId,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: undefined,
                 }),
             )
@@ -3536,7 +3561,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: undefined,
                 }),
             )
@@ -3544,12 +3569,47 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setListPickerAnnotationId', {
                 id: annotationId,
                 followedListId,
+                position: 'footer',
             })
 
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: annotationId,
+                    activeListPickerState: {
+                        annotationId,
+                        position: 'footer',
+                    },
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: annotationId,
+                followedListId,
+                position: 'footer',
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerState: undefined,
+                    activeShareMenuAnnotationId: undefined,
+                }),
+            )
+
+            await sidebar.processEvent('setListPickerAnnotationId', {
+                id: annotationId,
+                followedListId,
+                position: 'lists-bar',
+            })
+
+            expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
+                expect.objectContaining({
+                    activeCopyPasterAnnotationId: undefined,
+                    activeListPickerState: {
+                        annotationId,
+                        position: 'lists-bar',
+                    },
                     activeShareMenuAnnotationId: undefined,
                 }),
             )
@@ -3559,7 +3619,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: undefined,
                 }),
             )
@@ -3574,7 +3634,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: annotationId,
                 }),
             )
@@ -3584,7 +3644,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.followedLists.byId[followedListId]).toEqual(
                 expect.objectContaining({
                     activeCopyPasterAnnotationId: undefined,
-                    activeListPickerAnnotationId: undefined,
+                    activeListPickerState: undefined,
                     activeShareMenuAnnotationId: undefined,
                 }),
             )

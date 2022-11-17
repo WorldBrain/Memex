@@ -225,6 +225,7 @@ export class AnnotationsSidebarContainer<
             onListIconClick: () =>
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
+                    position: 'footer',
                     followedListId,
                 }),
         }
@@ -232,6 +233,8 @@ export class AnnotationsSidebarContainer<
 
     protected bindAnnotationEditProps = (
         annotation: Pick<Annotation, 'url' | 'isShared'>,
+        /** This needs to be defined for footer events for annots in followed lists states  */
+        followedListId?: string,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
@@ -240,6 +243,12 @@ export class AnnotationsSidebarContainer<
 
         return {
             comment: form.commentText,
+            onListsBarPickerBtnClick: () =>
+                this.processEvent('setListPickerAnnotationId', {
+                    id: annotation.url,
+                    position: 'lists-bar',
+                    followedListId,
+                }),
             onCommentChange: (comment) =>
                 this.processEvent('changeEditCommentText', {
                     annotationUrl: annotation.url,
@@ -474,16 +483,24 @@ export class AnnotationsSidebarContainer<
         const state =
             followedListId != null
                 ? this.state.followedLists.byId[followedListId]
-                      .activeListPickerAnnotationId
-                : this.state.activeListPickerAnnotationId
+                      .activeListPickerState
+                : this.state.activeListPickerState
 
-        if (state !== currentAnnotationId || currentAnnotation == null) {
+        if (
+            state == null ||
+            state.annotationId !== currentAnnotationId ||
+            currentAnnotation == null
+        ) {
             return null
         }
 
         return (
             <PickerWrapper>
-                <HoverBox top="7px" padding={'10px 0 0 0'}>
+                <HoverBox
+                    top="20px"
+                    right={state.position === 'footer' ? '0px' : undefined}
+                    padding={'10px 0 0 0'}
+                >
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent('resetListPickerAnnotationId', {})
@@ -893,11 +910,11 @@ export class AnnotationsSidebarContainer<
                             annotationCreateProps={this.getCreateProps()}
                             bindAnnotationFooterEventProps={(
                                 annotation,
-                                followedlistId,
+                                followedListId,
                             ) =>
                                 this.bindAnnotationFooterEventProps(
                                     annotation,
-                                    followedlistId,
+                                    followedListId,
                                 )
                             }
                             bindAnnotationEditProps={
@@ -1020,7 +1037,7 @@ const GlobalStyle = createGlobalStyle<{
     & * {
         font-family: 'Satoshi'
     }
-    
+
     .sidebar-draggable {
         height: 100% !important;
     }

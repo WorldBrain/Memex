@@ -7,12 +7,11 @@ import ItemBoxBottom, {
 
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import {
+import type {
     PageData,
     PageInteractionProps,
     PageResult,
     PagePickerProps,
-    ListPickerShowState,
 } from '../types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
@@ -34,7 +33,6 @@ export interface Props
         PageInteractionProps,
         PagePickerProps {
     getListDetailsById: ListDetailsGetter
-    onTagClick?: (tag: string) => void
     isSearchFilteredByList: boolean
     filteredbyListID: number
     shareMenuProps: Omit<
@@ -64,10 +62,6 @@ export default class PageResultView extends PureComponent<Props> {
             return decodeURIComponent(fullUrl.pathname)
         }
         return ''
-    }
-
-    private get hasTags(): boolean {
-        return this.props.tags.length > 0
     }
 
     private get hasNotes(): boolean {
@@ -106,7 +100,15 @@ export default class PageResultView extends PureComponent<Props> {
 
     private renderSpacePicker = () => (
         <div onMouseLeave={this.listPickerBtnClickHandler}>
-            <HoverBox padding={'10px 0 0 0'} withRelativeContainer right="0px">
+            <HoverBox
+                padding={'10px 0 0 0'}
+                withRelativeContainer
+                right={
+                    this.props.listPickerShowStatus === 'footer'
+                        ? '0px'
+                        : undefined
+                }
+            >
                 <CollectionPicker
                     selectEntry={(listId) =>
                         this.props.onListPickerUpdate({

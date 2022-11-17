@@ -662,9 +662,6 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
                 noResultsType={searchResults.noResultsType}
-                filterSearchByTag={(tag) =>
-                    this.processEvent('addIncludedTag', { tag })
-                }
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
                 }
