@@ -14,8 +14,6 @@ import {
 } from './index.test.data'
 import {
     DataChangeType,
-    DataUsageAction,
-    ContentLocatorFormat,
     PersonalDeviceType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
@@ -170,11 +168,17 @@ type DataChange = [
     /* info: */ any?,
 ]
 
+interface DataChangeAssertOpts {
+    skipChanges?: number
+    skipAssertTimestamp?: boolean
+    skipAssertDeviceId?: boolean
+}
+
 function dataChanges(
     remoteData: typeof REMOTE_TEST_DATA_V24,
     userId: number | string,
     changes: DataChange[],
-    options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+    options?: DataChangeAssertOpts,
 ) {
     let now = 554
     const advance = () => {
@@ -197,7 +201,9 @@ function dataChanges(
                 createdWhen: options?.skipAssertTimestamp
                     ? expect.anything()
                     : now,
-                createdByDevice: remoteData.personalDeviceInfo.first.id,
+                createdByDevice: options?.skipAssertDeviceId
+                    ? undefined
+                    : remoteData.personalDeviceInfo.first.id,
                 user: userId,
                 type: change[0],
                 collection: change[1],
@@ -218,7 +224,7 @@ function blockStats(params: { userId: number | string; usedBlocks: number }) {
     }
 }
 
-async function setup(options?: { runReadwiseTrigger?: boolean }) {
+async function setup(options?: { withStorageHooks?: boolean }) {
     const serverIdCapturer = new IdCapturer({
         postprocesessMerge: (params) => {
             // tag connections don't connect with the content they tag through a
@@ -261,7 +267,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         getNow,
     } = await setupSyncBackgroundTest({
         deviceCount: 2,
-        serverChangeWatchSettings: options?.runReadwiseTrigger
+        serverChangeWatchSettings: options?.withStorageHooks
             ? storageHooksChangeWatcher
             : {
                   shouldWatchCollection: (collection) =>
@@ -271,6 +277,15 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                   },
               },
     })
+
+    await setups[0].authService.loginWithEmailAndPassword(
+        TEST_USER.email,
+        'password',
+    )
+    await setups[1].authService.loginWithEmailAndPassword(
+        TEST_USER.email,
+        'password',
+    )
 
     let sqlUserId: number | string | undefined
     if (getSqlStorageMananager) {
@@ -305,6 +320,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
             return { user: sqlUserId ?? TEST_USER.id }
         }
     }
+
     return {
         serverIdCapturer,
         setups,
@@ -313,7 +329,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         personalDataChanges: (
             remoteData: typeof REMOTE_TEST_DATA_V24,
             changes: DataChange[],
-            options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+            options?: DataChangeAssertOpts,
         ) => ({
             personalDataChange: dataChanges(
                 remoteData,
@@ -4274,7 +4290,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4324,7 +4340,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4372,7 +4388,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4424,7 +4440,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4507,7 +4523,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4564,7 +4580,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4654,7 +4670,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
@@ -4742,7 +4758,7 @@ describe('Personal cloud translation layer', () => {
                     testFetches,
                     testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const {
@@ -5460,6 +5476,138 @@ describe('Personal cloud translation layer', () => {
                 ], { skip: 0 })
                 testSyncPushTrigger({ wasTriggered: true })
             })
+        })
+
+        it('should create followedList next sync download after following a sharedList', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup({ withStorageHooks: true })
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const serverStorage = await setups[0].getServerStorage()
+            await serverStorage.modules.activityFollows.storeFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testFollowedLists = remoteData.personalFollowedList
+
+            expect(
+                await getDatabaseContents(['personalDataChange'], {
+                    getWhere: getPersonalWhere,
+                }),
+            ).toEqual({
+                ...personalDataChanges(
+                    remoteData,
+                    [
+                        [
+                            DataChangeType.Create,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                        ],
+                    ],
+                    {
+                        skipChanges: 2,
+                        skipAssertDeviceId: true,
+                        skipAssertTimestamp: true,
+                    },
+                ),
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: LOCAL_TEST_DATA_V24.followedList.first },
+            ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should delete followedList next sync download after unfollowing a sharedList', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup({ withStorageHooks: true })
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const serverStorage = await setups[0].getServerStorage()
+            await serverStorage.modules.activityFollows.storeFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await serverStorage.modules.activityFollows.deleteFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testFollowedLists = remoteData.personalFollowedList
+
+            expect(
+                await getDatabaseContents(['personalDataChange'], {
+                    getWhere: getPersonalWhere,
+                }),
+            ).toEqual({
+                ...personalDataChanges(
+                    remoteData,
+                    [
+                        [
+                            DataChangeType.Create,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                        ],
+                        [
+                            DataChangeType.Delete,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                            {
+                                sharedList:
+                                    LOCAL_TEST_DATA_V24.sharedListMetadata.first
+                                        .remoteId,
+                            },
+                        ],
+                    ],
+                    {
+                        skipChanges: 2,
+                        skipAssertDeviceId: true,
+                        skipAssertTimestamp: true,
+                    },
+                ),
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId } },
+            ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
     })
 })
