@@ -40,7 +40,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
-import { Services } from 'src/services/types'
+import { AuthServices, Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { createAuthServices } from 'src/services/local-services'
@@ -59,6 +59,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     useDownloadTranslationLayer?: boolean
     services?: Services
     pushMessagingService?: MockPushMessagingService
+    authServices?: AuthServices
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -88,10 +89,12 @@ export async function setupBackgroundIntegrationTest(
         options?.getServerStorage ?? createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
 
-    const authServices = createAuthServices({
-        backend: 'memory',
-        getServerStorage,
-    })
+    const authServices =
+        options?.authServices ??
+        createAuthServices({
+            backend: 'memory',
+            getServerStorage,
+        })
     const services =
         options?.services ??
         (await createServices({

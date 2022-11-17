@@ -392,6 +392,7 @@ export async function setupSyncBackgroundTest(
             {
                 ...options,
                 services,
+                authServices,
                 getServerStorage,
                 pushMessagingService,
                 personalCloudBackend,
