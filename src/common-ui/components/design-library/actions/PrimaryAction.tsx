@@ -30,8 +30,8 @@ const StyledPrimaryAction = styled.div<{
     vertical-align: middle;
     background: ${(props) =>
         props.backgroundColor
-            ? props.backgroundColor
-            : props.theme.colors.warning};
+            ? props.theme.colors[props.backgroundColor]
+            : props.theme.colors.normalText};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
@@ -100,7 +100,7 @@ export const PrimaryAction = ({
         disabled={disabled}
         ref={innerRef}
         onKeyPress={(e) => (e.key === 'Enter' ? onClick(e) : false)}
-        backgroundColor={(props) => props.theme.colors[backgroundColor]}
+        backgroundColor={backgroundColor}
         fontColor={(props) => props.theme.colors[fontColor]}
         icon={icon}
         iconSize={iconSize}

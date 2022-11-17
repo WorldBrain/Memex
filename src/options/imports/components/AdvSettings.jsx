@@ -5,7 +5,6 @@ import { Checkbox } from 'src/common-ui/components'
 import styled from 'styled-components'
 
 import Concurrency from './Concurrency'
-import PrevFailedCheckbox from './PrevFailedCheckbox'
 
 import styles from './AdvSettings.css'
 
@@ -14,27 +13,29 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
         <SectionTitleSmall>Import Settings</SectionTitleSmall>
         <div className={styles.advFunctionality}>
             <ul className={styles.settingsList}>
-                <SettingsListItem>
+                <SettingsListItem onClick={() => props.onIndexTitleToggle()}>
                     <Checkbox
                         id="index-imports"
                         handleChange={props.onIndexTitleToggle}
                         isChecked={props.indexTitle}
-                    >
-                        <Label>
-                            <LabelMain htmlFor="index-imports">
-                                Only import title, urls and metadata
-                            </LabelMain>
-                            <SubLabel htmlFor="index-imports">
-                                This setting skips the full-text indexing.
-                            </SubLabel>
-                        </Label>
-                    </Checkbox>
+                        label={'Only import title, urls and metadata'}
+                        subLabel={'This setting skips the full-text indexing.'}
+                    />
                 </SettingsListItem>
-                <SettingsListItem>
-                    <PrevFailedCheckbox
+                <SettingsListItem onClick={() => onPrevFailedToggle}>
+                    <Checkbox
+                        id="process-failed"
+                        // handleChange={onPrevFailedToggle}
+                        isChecked={prevFailedValue}
+                        label={'Include previously failed urls'}
+                        subLabel={
+                            'Retry also urls that have previously been unsuccessful'
+                        }
+                    />
+                    {/* <PrevFailedCheckbox
                         checked={prevFailedValue}
                         onChange={onPrevFailedToggle}
-                    />
+                    /> */}
                 </SettingsListItem>
                 <SettingsListItem>
                     <Concurrency {...props} />
@@ -69,25 +70,16 @@ const SettingsListItem = styled.div`
     align-items: center;
     justify-content: flex-start;
     height: 60px;
-`
+    width: fill-available;
+    margin-left: -10px;
+    padding: 10px;
+    border-radius: 8px;
+    width: fill-available;
+    cursor: pointer;
 
-const Label = styled.div`
-    display: grid;
-    grid-gap: 5px;
-    grid-auto-flow: row;
-    align-items: flex-start;
-    justify-content: center;
-`
-
-const LabelMain = styled.div`
-    font-size: 14px;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.darkerText};
-`
-
-const SubLabel = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+    }
 `
 
 const SectionTitleSmall = styled.div`

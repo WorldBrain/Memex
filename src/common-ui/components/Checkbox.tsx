@@ -22,6 +22,8 @@ export interface Props {
     labelClass?: string
     mode?: 'radio' | 'multiSelect'
     size?: number
+    label?: string
+    subLabel?: string
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -40,39 +42,43 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <Container>
-                <LabelContainer htmlFor={this.props.id}>
-                    <InputContainer
-                        type="checkbox"
-                        checked={this.props.isChecked}
-                        onChange={this.props.handleChange}
-                        id={this.props.id}
-                        disabled={this.props.isDisabled}
-                        name={this.props.name}
-                    />
-                    <LabelText>
-                        <LabelCheck
-                            size={this.props.size}
-                            mode={this.props.mode}
-                            isChecked={this.props.isChecked}
-                        >
-                            {this.props.isChecked && (
-                                <Icon
-                                    filePath={icons.check}
-                                    color="black"
-                                    heightAndWidth={'14px'}
-                                    hoverOff
-                                />
-                            )}
-                        </LabelCheck>
-                        {this.props.children && (
-                            <ChildrenBox mode={this.props.mode}>
-                                {this.props.children}
-                            </ChildrenBox>
+            <LabelContainer htmlFor={this.props.id}>
+                <InputContainer
+                    type="checkbox"
+                    checked={this.props.isChecked}
+                    onChange={this.props.handleChange}
+                    id={this.props.id}
+                    disabled={this.props.isDisabled}
+                    name={this.props.name}
+                />
+                <LabelText>
+                    <LabelCheck
+                        size={this.props.size}
+                        mode={this.props.mode}
+                        isChecked={this.props.isChecked}
+                    >
+                        {this.props.isChecked && (
+                            <Icon
+                                filePath={icons.check}
+                                color="black"
+                                heightAndWidth={'14px'}
+                                hoverOff
+                            />
                         )}
-                    </LabelText>
-                </LabelContainer>
-            </Container>
+                    </LabelCheck>
+                    {this.props.label && (
+                        <LabelContentBox>
+                            <LabelTitle>{this.props.label}</LabelTitle>
+                            <SubLabel>{this.props.subLabel}</SubLabel>
+                        </LabelContentBox>
+                    )}
+                    {this.props.children && (
+                        <ChildrenBox mode={this.props.mode}>
+                            {this.props.children}
+                        </ChildrenBox>
+                    )}
+                </LabelText>
+            </LabelContainer>
         )
     }
 }
@@ -81,14 +87,35 @@ const Container = styled.div`
     cursor: pointer;
 `
 
+const LabelContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    margin-left: 10px;
+`
+const LabelTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 300;
+    font-size: 14px;
+    white-space: nowrap;
+`
+
+const SubLabel = styled.div`
+    color: ${(props) => props.theme.colors.darkText};
+    font-weight: 300;
+    font-size: 14px;
+    white-space: nowrap;
+`
+
 const ChildrenBox = styled.span<{ mode }>`
     color: ${(props) => props.theme.colors.darkerText};
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     cursor: pointer;
+    flex: 1;
 
     & * {
         cursor: pointer;

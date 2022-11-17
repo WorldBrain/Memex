@@ -21,6 +21,7 @@ import { ReadwiseInterface } from 'src/readwise-integration/background/types/rem
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { userAuthorizedForReadwise } from './utils'
 import analytics from 'src/analytics'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 class ReadwiseSettingsContainer extends React.Component<
     AuthContextInterface & { showSubscriptionModal: () => void }
@@ -103,23 +104,7 @@ class ReadwiseSettings extends StatefulUIElement<
     renderForm() {
         return (
             <div>
-                {!selectors.showKeyRemoveButton(this.state) && (
-                    <SuccessMessage>
-                        <span>
-                            Automatically push all your highlights to Readwise.
-                        </span>
-                        <div>
-                            Here you can get the{' '}
-                            <a
-                                target="_blank"
-                                href="https://readwise.io/access_token"
-                            >
-                                API key
-                            </a>
-                            .
-                        </div>
-                    </SuccessMessage>
-                )}
+                {!selectors.showKeyRemoveButton(this.state) && ''}
                 {selectors.formEditable(this.state) && (
                     <ExistingHighlightBox>
                         <Checkbox
@@ -131,34 +116,37 @@ class ReadwiseSettings extends StatefulUIElement<
                                     null,
                                 )
                             }
-                        />{' '}
-                        Sync existing highlights
+                            label={'Sync existing highlights'}
+                        />
                     </ExistingHighlightBox>
                 )}
-                {selectors.showKeySaveError(this.state) && (
+
+                {selectors.showKeySaveError(this.state) ? (
                     <ErrorMessage>
                         {selectors.keySaveErrorMessage(this.state)}
                     </ErrorMessage>
-                )}
-                {selectors.showKeySuccessMessage(this.state) && (
-                    <SuccessMessage>
-                        Your ReadWise integration is now active! <br />
-                        Any annotation you make from now on is immediately
-                        uploaded.
-                    </SuccessMessage>
-                )}
-                {selectors.showSyncSuccessMessage(this.state) && (
-                    <SuccessMessage>
-                        Your ReadWise integration is now active! <br />
-                        Existing annotations are uploaded and every new one you
-                        make too.
-                    </SuccessMessage>
+                ) : (
+                    <>
+                        {selectors.showKeySuccessMessage(this.state) && (
+                            <SuccessMessage>
+                                Your ReadWise integration is now active! <br />
+                                Any annotation you make from now on is
+                                immediately uploaded.
+                            </SuccessMessage>
+                        )}
+                        {selectors.showSyncSuccessMessage(this.state) && (
+                            <SuccessMessage>
+                                Your ReadWise integration is now active! <br />
+                                Existing annotations are uploaded and every new
+                                one you make too.
+                            </SuccessMessage>
+                        )}
+                    </>
                 )}
                 <MainBox>
-                    <KeyBox
-                        type="text"
+                    <TextField
                         placeholder="ReadWise API key"
-                        disabled={selectors.apiKeyDisabled(this.state)}
+                        disabled={!this.state.apiKeyEditable}
                         value={
                             selectors.showKeySaving(this.state)
                                 ? 'Saving API key...'
@@ -169,6 +157,7 @@ class ReadwiseSettings extends StatefulUIElement<
                                 key: e.target.value,
                             })
                         }
+                        type="text"
                     />
                     {selectors.showKeySaveButton(this.state) && (
                         <div>
@@ -206,23 +195,12 @@ export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(ReadwiseSettingsContainer))
 
-const KeyBox = styled.input`
-    background: ${(props) => props.theme.colors.backgroundColor};
-    border-radius: 3px;
-    padding: 5px 10px;
-    border: none;
-    width: 100%;
-    outline: none;
-    height: 36px;
-    margin-left: 0;
-    margin-right: 15px;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-`
-
 const MainBox = styled.div`
     display: flex;
     margin-top: 10px;
     justify-content: space-between;
+    align-items: center;
+    grid-gap: 15px;
 `
 
 const ExistingHighlightBox = styled.div`
@@ -248,25 +226,13 @@ const ErrorMessage = styled.div`
 
 const SuccessMessage = styled.div`
     display: flex;
-    margin: 10px 0px 20px 0px;
+    margin: 0px 0px 20px 0px;
     font-size: 14px;
+
     border-radius: 3px;
     border: none;
+    font-weight: 300;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
     flex-direction: column;
-`
-
-const Container = styled.div`
-    position: absolute;
-    z-index: 2500;
-    background: #f29d9d;
-    top: 70px;
-    border-radius: 5px;
-    padding: 10px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
-    max-width: 800px;
 `

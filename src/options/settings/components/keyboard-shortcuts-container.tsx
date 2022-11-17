@@ -12,13 +12,12 @@ import analytics from 'src/analytics'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import styled from 'styled-components'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -139,9 +138,9 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                             handleChange={this.handleEnabledToggle}
                             isDisabled={!this.state.shortcutsEnabled}
                             name={name}
+                            label={text.toString()}
                         >
                             <Title>
-                                {text}{' '}
                                 {subText && <SubText>({subText})</SubText>}
                             </Title>
                             <RightBox>
@@ -163,34 +162,26 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <Section>
-                <SectionCircle>
-                    <Icon
-                        filePath={icons.atSign}
-                        heightAndWidth="34px"
-                        color="purple"
-                        hoverOff
-                    />
-                </SectionCircle>
-                <SectionTitle>Keyboard Shortcuts</SectionTitle>
-                <InfoText>
-                    You can also use shift, ctrl, alt, or meta to define
-                    keyboard shortcuts.
-                </InfoText>
+            <SettingSection
+                icon={'command'}
+                title={'Keyboard Shortcuts'}
+                description={
+                    'You can also use shift, ctrl, alt, or meta to define keyboard shortcuts.'
+                }
+            >
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}
                     handleChange={this.handleEnabledToggle}
                     name="shortcutsEnabled"
-                >
-                    Enable Keyboard Shortcuts
-                </Checkbox>
+                    label={'Enable Keyboard Shortcuts'}
+                />
                 {this.state.shortcutsEnabled && (
                     <CheckBoxContainer>
                         {this.renderCheckboxes()}
                     </CheckBoxContainer>
                 )}
-            </Section>
+            </SettingSection>
         )
     }
 }
@@ -200,6 +191,8 @@ const RightBox = styled.div`
     align-items: center;
     grid-auto-flow: column;
     grid-gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
 `
 
 const Title = styled.span`
@@ -222,53 +215,34 @@ const CheckBoxContainer = styled.div`
 
 const CheckBoxRow = styled.div`
     height: 50px;
+    margin-left: -10px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+    }
 `
 
 const KeyboardInput = styled.input`
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.darkhover};
     height: 40px;
     width: 120px;
     padding: 0 15px;
     align-items: center;
     justify-content: center;
-    color: ${(props) => props.theme.colors.darkerText};
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    color: ${(props) => props.theme.colors.greyScale8};
     outline: none;
     text-align: center;
-    border-radius: 5px;
-`
+    border-radius: 8px;
+    border: none;
 
-const Section = styled.div`
-    background: #ffffff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    padding: 50px;
-    margin-bottom: 30px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    margin-bottom: 40px;
-    font-weight: 500;
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+    }
 `
 
 export default KeyboardShortcutsContainer
