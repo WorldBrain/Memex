@@ -69,7 +69,7 @@ const StatusBar = (props: Props, state: State) => {
                                 >
                                     <PrimaryAction
                                         onClick={() =>
-                                            (window.location.href =
+                                            (globalThis.location.href =
                                                 '/options.html#/backup')
                                         }
                                         label={` Backup  `}
@@ -83,7 +83,7 @@ const StatusBar = (props: Props, state: State) => {
                                 >
                                     <PrimaryAction
                                         onClick={() =>
-                                            (window.location.href =
+                                            (globalThis.location.href =
                                                 '/options.html#/backup')
                                         }
                                         label={`Backup Now`}
@@ -98,7 +98,7 @@ const StatusBar = (props: Props, state: State) => {
                                 >
                                     <PrimaryAction
                                         onClick={() =>
-                                            (window.location.href =
+                                            (globalThis.location.href =
                                                 props.paymentUrl)
                                         }
                                         label={`Upgrade Now`}

@@ -351,7 +351,7 @@ export class BackupBackgroundModule {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
         const times = {
-            lastBackup: lastBackup?.getTime() ?? null,
+            lastBackup: lastBackup?.getTime?.() ?? null,
             nextBackup:
                 nextBackup && nextBackup.getTime
                     ? nextBackup.getTime()
@@ -366,6 +366,9 @@ export class BackupBackgroundModule {
         const lastBackup = await this.localBackupSettings.get(
             'lastBackupFinished',
         )
+        if (!lastBackup) {
+            return
+        }
         // const backupProblemThreshold = 1000 * 60
         const backupProblemThreshold = 1000 * 60 * 60 * 24
         const timeSinceLastBackup = Date.now() - lastBackup.getTime()
