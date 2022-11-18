@@ -28,6 +28,7 @@ const StyledPrimaryAction = styled.div<{
     justify-content: center;
     align-items: center;
     vertical-align: middle;
+    width: fit-content;
     background: ${(props) =>
         props.backgroundColor
             ? props.theme.colors[props.backgroundColor]

@@ -17,6 +17,7 @@ import * as Raven from 'src/util/raven'
 import type { BackupInterface, LocalBackupSettings } from './types'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
+import { checkServerStatus } from '../../backup-restore/ui/utils'
 
 export * from './backend'
 
@@ -344,20 +345,31 @@ export class BackupBackgroundModule {
         const lastBackup = await this.localBackupSettings.get(
             'lastBackupFinished',
         )
+        console.log('test3', lastBackup)
+
         let nextBackup = null
         if (this.backupProcedure?.running) {
             nextBackup = 'running'
         } else if (await this.isAutomaticBackupEnabled()) {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
-        const times = {
-            lastBackup: lastBackup?.getTime() ?? null,
-            nextBackup:
-                nextBackup && nextBackup.getTime
-                    ? nextBackup.getTime()
-                    : nextBackup,
+        if (lastBackup) {
+            console.log('test', lastBackup)
+            const times = {
+                lastBackup: lastBackup ?? null,
+                nextBackup:
+                    lastBackup && nextBackup && nextBackup.getTime
+                        ? nextBackup.getTime()
+                        : null,
+            }
+            return times
+        } else {
+            const times = {
+                lastBackup: null,
+                nextBackup: null,
+            }
+            return times
         }
-        return times
     }
 
     async maybeShowBackupProblemNotif(
@@ -368,9 +380,12 @@ export class BackupBackgroundModule {
         )
         // const backupProblemThreshold = 1000 * 60
         const backupProblemThreshold = 1000 * 60 * 60 * 24
-        const timeSinceLastBackup = Date.now() - lastBackup.getTime()
-        if (timeSinceLastBackup < backupProblemThreshold) {
-            return
+
+        if (lastBackup.getTime() > 0) {
+            const timeSinceLastBackup = Date.now() - lastBackup.getTime()
+            if (timeSinceLastBackup < backupProblemThreshold) {
+                return
+            }
         }
 
         const lastNotifShown = await this.localBackupSettings.get(
@@ -403,6 +418,10 @@ export class BackupBackgroundModule {
     }
 
     async doBackup() {
+        const status = await checkServerStatus()
+        if (!status) {
+            await this.localBackupSettings.set('backupStatus', 'fail')
+        }
         this.clearAutomaticBackupTimeout()
         const always = () => {
             this.scheduleAutomaticBackupIfEnabled()
@@ -423,8 +442,6 @@ export class BackupBackgroundModule {
         this.backupProcedure.events.once('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
             await this.localBackupSettings.set('progressSuccessful', true)
-
-            await this.localBackupSettings.set('lastBackupFinished', new Date())
             always()
         })
         this.backupProcedure.events.once('fail', async () => {

@@ -9,6 +9,8 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 const overviewStyles = require('src/backup-restore/ui/styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -27,9 +29,6 @@ interface Props {
     preparingStepLabel: string
     synchingStepLabel: string
     localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
-    renderHeader: () => any
-    renderFailMessage: (errorId: string) => any
-    renderSuccessMessage: () => any
     onFinish: () => void
 }
 
@@ -149,8 +148,8 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     async handleCancel() {
-        //await localStorage.removeItem('backup.restore.restore-running')
-        //await remoteFunction(this.props.functionNames.cancel)()
+        await localStorage.removeItem('backup.restore.restore-running')
+        // await remoteFunction(this.props.functionNames.cancel)()
         this.props.onFinish()
     }
 
@@ -162,16 +161,13 @@ export default class RunningProcess extends React.Component<Props> {
 
         return (
             <div>
-                {this.props.renderHeader()}
                 <div className={localStyles.steps}>
                     {/* {this.renderSteps(info)} */}
                     <ProgressBar progress={progressPercentage} />
                 </div>
                 <WhiteSpacer20 />
-                <div className={settingsStyle.buttonArea}>
-                    <div />
-                    {this.renderActions(info)}
-                </div>
+                <WhiteSpacer20 />
+                {this.renderActions(info)}
             </div>
         )
     }
@@ -244,7 +240,6 @@ export default class RunningProcess extends React.Component<Props> {
     renderSuccess() {
         return (
             <FinishContainer>
-                {this.props.renderSuccessMessage()}
                 <PrimaryAction
                     onClick={() => {
                         this.props.onFinish()
@@ -258,7 +253,6 @@ export default class RunningProcess extends React.Component<Props> {
     renderFail() {
         return (
             <div className={localStyles.fail}>
-                {this.props.renderFailMessage(this.state.info.state)}
                 <div className={settingsStyle.buttonArea}>
                     <div />
                     <PrimaryAction
@@ -272,46 +266,104 @@ export default class RunningProcess extends React.Component<Props> {
         )
     }
 
+    getTitle() {
+        const { info, status, overlay } = this.state
+
+        if (status === 'running') {
+            return 'Backup in Progress'
+        }
+
+        if (status === 'success') {
+            return 'Backup Successful'
+        }
+        if (status === 'fail') {
+            return 'Backup Failed'
+        }
+    }
+
+    getIcon() {
+        const { info, status, overlay } = this.state
+
+        if (status === 'running') {
+            return 'reload'
+        }
+
+        if (status === 'success') {
+            return 'check'
+        }
+        if (status === 'fail') {
+            return 'warning'
+        }
+    }
+
+    getDescription() {
+        const { info, status, overlay } = this.state
+
+        if (status === 'running') {
+            return (
+                (info.processedChanges && info.totalChanges
+                    ? (info.processedChanges / info.totalChanges) * 100
+                    : 0) + '%'
+            )
+        }
+
+        if (status === 'fail') {
+            return (
+                <span>
+                    There has been an issue with your backup process. <br />
+                    Try again, and if the problem persists, please{' '}
+                    <a href="mailto:support@memex.garden">contact support</a>.
+                </span>
+            )
+        }
+    }
+
     render() {
         const { info, status, overlay } = this.state
         if (!info) {
-            return <LoadingBlocker />
+            return (
+                <LoadingBox>
+                    <LoadingIndicator size={30} />
+                </LoadingBox>
+            )
         }
 
         return (
-            <div>
-                <Section>
-                    {status === 'running' && this.renderRunning(info)}
-                    {status === 'success' && this.renderSuccess()}
-                    {status === 'fail' && this.renderFail()}
-                    <FailedOverlay
-                        disabled={!overlay}
-                        onClick={async (action) => {
-                            if (action === 'continue') {
-                                await this.startRestore()
-                            }
-                            this.setState({
-                                overlay: null,
-                            })
-                        }}
-                    />
-                </Section>
-            </div>
+            <SettingSection
+                title={this.getTitle()}
+                icon={this.getIcon()}
+                description={this.getDescription()}
+            >
+                {status === 'running' && this.renderRunning(info)}
+                {status === 'success' && this.renderSuccess()}
+                {status === 'fail' && this.renderFail()}
+                <FailedOverlay
+                    disabled={!overlay}
+                    onClick={async (action) => {
+                        if (action === 'continue') {
+                            await this.startRestore()
+                        }
+                        this.setState({
+                            overlay: null,
+                        })
+                    }}
+                />
+            </SettingSection>
         )
     }
 }
+
+const LoadingBox = styled.div`
+    height: 100%;
+    width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const FinishContainer = styled.div`
     display: grid;
     grid-gap: 30px;
     grid-auto-flow: row;
     justify-content: flex-start;
-`
-
-const Section = styled.div`
-    background: #ffffff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    padding: 50px;
-    margin-bottom: 30px;
 `
