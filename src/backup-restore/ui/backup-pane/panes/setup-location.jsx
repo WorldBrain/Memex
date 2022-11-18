@@ -12,8 +12,6 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
-const settingsStyle = require('src/options/settings/components/settings.css')
-
 export default class SetupLocation extends React.Component {
     state = {
         provider: null,
