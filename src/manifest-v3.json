@@ -9,6 +9,10 @@
         "48": "./img/worldbrain-logo-narrow-bw-48.png",
         "128": "./img/worldbrain-logo-narrow-bw.png"
     },
+    "externally_connectable": {
+        "matches": ["*"],
+        "ids": ["memex-worldbrain-extension-id"]
+    },
     "background": {
         "service_worker": "background.js"
     },
