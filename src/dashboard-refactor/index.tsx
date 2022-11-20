@@ -1179,7 +1179,7 @@ export class DashboardContainer extends StatefulUIElement<
         if (process.env.NODE_ENV === 'production') {
             return 'https://memex.social/feed'
         } else {
-            return 'http://localhost:3000/feed?scenario=activity-streams/home-feed.default.$start'
+            return 'https://staging.memex.social/feed'
         }
     }
 
