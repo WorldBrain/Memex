@@ -216,6 +216,14 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
     private renderFeedInfo() {
         if (!this.props.showFeed) {
             return
@@ -227,7 +235,23 @@ export default class Ribbon extends Component<Props, State> {
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
                 <FeedPanel closePanel={() => this.props.toggleFeed()}>
-                    <FeedFrame src={'https://staging.memex.social/feed'} />
+                    <FeedContainer>
+                        <TitleContainer>
+                            <Icon
+                                heightAndWidth="30px"
+                                filePath="feed"
+                                hoverOff
+                            />
+                            <TitleContent>
+                                <SectionTitle>Activity Feed</SectionTitle>
+                                <SectionDescription>
+                                    Updates from Spaces you follow or
+                                    conversation you participate in
+                                </SectionDescription>
+                            </TitleContent>
+                        </TitleContainer>
+                        <FeedFrame src={this.whichFeed()} />
+                    </FeedContainer>
                 </FeedPanel>
             </BlurredSidebarOverlay>
         )
@@ -417,6 +441,7 @@ export default class Ribbon extends Component<Props, State> {
                                         right="45px"
                                         height={'600px'}
                                         width={'500px'}
+                                        padding={'0px'}
                                     >
                                         {this.renderFeedInfo()}
                                     </HoverBox>
@@ -860,4 +885,49 @@ const FeedFrame = styled.iframe`
     width: fill-available;
     height: 600px;
     border: none;
+    border-radius: 10px;
+`
+
+const FeedContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    height: 580px;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 20px;
+    padding-top: 20px;
+    max-width: 800px;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 10px;
+`
+
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 15px;
+    width: fill-available;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+`
+const TitleContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 20px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 14px;
+    font-weight: 300;
 `

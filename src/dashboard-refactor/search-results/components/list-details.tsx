@@ -388,44 +388,6 @@ const BtnContainerStyled = styled.div`
     grid-gap: 10px;
 `
 
-const CancelBtnStyled = styled.button`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const SaveBtn = styled.div`
-    flex-direction: row;
-    align-items: center;
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    margin-right: 5px;
-    background: transparent;
-    border-radius: 3px;
-    font-weight: 700;
-    border: 1px solid ${(props) => props.theme.colors.lightgrey};
-    display: grid;
-    grid-auto-flow: column;
-    padding: 4px 8px;
-`
-
 const TopBarContainer = styled(Margin)`
     z-index: 2147483640;
     display: flex;
@@ -440,15 +402,6 @@ const MarkdownButtonContainer = styled.div`
     font-size: 12px;
     color: ${(props) => props.theme.colors.lighterText};
     align-items: center;
-    cursor: pointer;
-`
-
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
     cursor: pointer;
 `
 
@@ -508,21 +461,6 @@ const BtnsContainer = styled.div`
     align-items: center;
     z-index: 100;
     align-self: flex-start;
-`
-
-const Name = styled.div`
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-size: 20px;
-    font-weight: ${fonts.primary.weight.bold};
-    color: ${fonts.primary.colors.primary};
-`
-
-const Note = styled.span`
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-size: 12px;
-    color: ${fonts.primary.colors.secondary};
 `
 
 const DescriptionContainer = styled.div`

@@ -1175,6 +1175,14 @@ export class DashboardContainer extends StatefulUIElement<
         return null
     }
 
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'http://localhost:3000/feed?scenario=activity-streams/home-feed.default.$start'
+        }
+    }
+
     render() {
         // <GlobalFonts />
         // <GlobalStyle />
@@ -1293,9 +1301,16 @@ export class DashboardContainer extends StatefulUIElement<
                     </ListSidebarContent>
                     <MainContent>
                         {this.state.listsSidebar.showFeed ? (
-                            <FeedFrame
-                                src={'https://staging.memex.social/feed'}
-                            />
+                            <FeedContainer>
+                                <TitleContainer>
+                                    <SectionTitle>Activity Feed</SectionTitle>
+                                    <SectionDescription>
+                                        Updates from Spaces you follow or
+                                        conversation you participate in
+                                    </SectionDescription>
+                                </TitleContainer>
+                                <FeedFrame src={this.whichFeed()} />
+                            </FeedContainer>
                         ) : (
                             <>
                                 {this.renderHeader()}
@@ -1419,12 +1434,46 @@ const ListSidebarContent = styled(Rnd)<{
 //     block-size: fit-content;
 // `
 
+const FeedContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 20px;
+    margin-top: 60px;
+    max-width: 800px;
+`
+
 const FeedFrame = styled.iframe`
     width: fill-available;
     min-height: 100vh;
     height: 100%;
     border: none;
 `
+
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+    padding: 0 30px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 24px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 16px;
+    font-weight: 300;
+`
+
 const MainContent = styled.div`
     width: 100%;
     align-items: center;

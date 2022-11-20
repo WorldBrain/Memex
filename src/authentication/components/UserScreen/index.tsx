@@ -15,6 +15,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -40,79 +41,70 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         super(props, new Logic(props))
     }
 
+    getTitle() {
+        if (this.state.authDialogMode === 'login') {
+            return 'Welcome Back'
+        }
+
+        if (this.state.authDialogMode === 'signup') {
+            return 'Welcome to Memex'
+        }
+
+        if (this.state.authDialogMode === 'resetPassword') {
+            return 'Reset your password'
+        }
+
+        if (this.state.authDialogMode === 'ConfirmResetPassword') {
+            return 'Check your Emails'
+        }
+    }
+
+    getDescription() {
+        if (this.state.authDialogMode === 'login') {
+            return 'Login to continue'
+        }
+
+        if (this.state.authDialogMode === 'signup') {
+            return 'Welcome to Memex'
+        }
+
+        if (this.state.authDialogMode === 'resetPassword') {
+            return 'Enter the email you used to sign up for Memex'
+        }
+
+        if (this.state.authDialogMode === 'ConfirmResetPassword') {
+            return 'Check your Emails, and your Spam folder'
+        }
+    }
+
+    getIcon() {
+        if (this.state.authDialogMode === 'login') {
+            return 'login'
+        }
+
+        if (this.state.authDialogMode === 'signup') {
+            return 'peopleFine'
+        }
+
+        if (this.state.authDialogMode === 'resetPassword') {
+            return 'reload'
+        }
+
+        if (this.state.authDialogMode === 'ConfirmResetPassword') {
+            return 'mail'
+        }
+    }
+
     render() {
         return (
             <>
                 {this.state.currentUser === null ? (
                     <div>
-                        <Section>
-                            {this.state.authDialogMode === 'login' && (
-                                <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.login}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>Welcome Back!</SectionTitle>
-                                    <InfoText>Login to continue</InfoText>
-                                </UserScreenContainer>
-                            )}
-                            {this.state.authDialogMode === 'signup' && (
-                                <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.peoplePlusFine}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>
-                                        Welcome to Memex{' '}
-                                    </SectionTitle>
-                                    <InfoText>
-                                        Create an account to get started
-                                    </InfoText>
-                                </UserScreenContainer>
-                            )}
-                            {this.state.authDialogMode === 'resetPassword' && (
-                                <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.reload}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>
-                                        Reset your password
-                                    </SectionTitle>
-                                    <InfoText></InfoText>
-                                </UserScreenContainer>
-                            )}
-                            {this.state.authDialogMode ===
-                                'ConfirmResetPassword' && (
-                                <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.mail}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>
-                                        Check your Emails
-                                    </SectionTitle>
-                                    <InfoText>
-                                        Don't forget the spam folder!
-                                    </InfoText>
-                                </UserScreenContainer>
-                            )}
+                        <SettingSection
+                            icon={this.getIcon()}
+                            title={this.getTitle()}
+                            description={this.getDescription()}
+                        >
                             <AuthDialog
                                 onAuth={() => {
                                     window.location.reload()
@@ -123,31 +115,8 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     })
                                 }}
                             />
-                        </Section>
+                        </SettingSection>
                     </div>
-                ) : this.state.authDialogMode === 'ConfirmResetPassword' ? (
-                    <Section>
-                        <UserScreenContainer>
-                            <SectionCircle>
-                                <Icon
-                                    filePath={icons.mail}
-                                    heightAndWidth="24px"
-                                    color="purple"
-                                    hoverOff
-                                />
-                            </SectionCircle>
-                            <SectionTitle>Check your Emails</SectionTitle>
-                            <InfoText>Don't forget the spam folder!</InfoText>
-                        </UserScreenContainer>
-                        <PrimaryAction
-                            label={'Go Back'}
-                            onClick={() => {
-                                this.processEvent('setAuthDialogMode', {
-                                    mode: 'login',
-                                })
-                            }}
-                        />
-                    </Section>
                 ) : (
                     <AccountInfo
                         setAuthMode={(mode) => {
@@ -167,7 +136,7 @@ const UserScreenContainer = styled.div`
 `
 
 const Section = styled.div`
-    background: #ffffff;
+    background: ${(props) => props.theme.colors.backgroundHighlight};
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     padding: 50px;
@@ -186,14 +155,14 @@ const SectionCircle = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale8};
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 300;
 `

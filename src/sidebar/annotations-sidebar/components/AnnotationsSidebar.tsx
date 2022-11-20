@@ -42,6 +42,7 @@ import type { AnnotationSharingStates } from 'src/content-sharing/background/typ
 import { getLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -853,6 +854,10 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
+                <UpdateNotifBanner
+                    location={'sidebar'}
+                    theme={{ position: 'fixed' }}
+                />
                 <SpacerBottom />
             </React.Fragment>
         )

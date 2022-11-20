@@ -293,16 +293,16 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
     }
 
-    protected renderTopBanner() {
-        return (
-            <UpdateNotifBanner
-                theme={{
-                    ...theme,
-                    position: 'fixed',
-                    width: 'fill-available',
-                    iconSize: '20px',
-                }}
-            />
-        )
-    }
+    // protected renderTopBanner() {
+    //     return (
+    //         <UpdateNotifBanner
+    //             theme={{
+    //                 ...theme,
+    //                 position: 'fixed',
+    //                 width: 'fill-available',
+    //                 iconSize: '20px',
+    //             }}
+    //         />
+    //     )
+    // }
 }

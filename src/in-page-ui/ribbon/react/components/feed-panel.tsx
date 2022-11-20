@@ -35,4 +35,5 @@ export default onClickOutside(FeedPanel)
 const Div = styled.div`
     height: fill-available;
     width: fill-available;
+    border-radius: 10px;
 `

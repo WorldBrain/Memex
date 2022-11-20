@@ -10,6 +10,7 @@ import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 export interface Props extends Partial<LogicDeps> {
     theme?: ThemeProps
     openLink?: (link: string) => void
+    location?: string
 }
 
 export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
@@ -33,15 +34,18 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             return null
         }
 
+        console.log(this.props.location && this.props.location)
+
         return (
             <NotifBanner
-                mainText="Memex Updated!"
-                mainBtnText="What's new?"
+                mainText="Memex updated"
+                mainBtnText="See what changed"
                 onCloseBtnClick={() => this.processEvent('hide', null)}
                 onMainBtnClick={() => {
                     this.processEvent('hide', null)
                     this.props.openLink(CHANGE_LOG_LINK)
                 }}
+                location={this.props.location}
                 {...this.props}
             />
         )

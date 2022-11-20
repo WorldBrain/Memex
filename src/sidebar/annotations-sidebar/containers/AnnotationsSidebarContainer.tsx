@@ -52,6 +52,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
