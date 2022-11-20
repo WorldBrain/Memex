@@ -100,6 +100,14 @@ const Banner = styled.div<{
             margin: 0 10px 10px -10px;
         `}
 
+    ${(props) =>
+        props.location === 'search' &&
+        css`
+            animation: slide-down ease-out;
+            animation-duration: 0.1s;
+            grid-gap: 10px;
+            margin: 10px 10px 10px 10px;
+        `}
     @keyframes slide-up {
         0% {
             bottom: -100px;
@@ -107,6 +115,17 @@ const Banner = styled.div<{
         }
         100% {
             bottom: 0px;
+            opacity: 100%;
+        }
+    }
+
+    @keyframes slide-down {
+        0% {
+            margin-top: -60px;
+            opacity: 0%;
+        }
+        100% {
+            margin-top: 0px;
             opacity: 100%;
         }
     }
@@ -123,10 +142,11 @@ const MainContent = styled.div<{
     grid-gap: 50px;
 
     ${(props) =>
-        props.location === 'sidebar' &&
-        css`
-            grid-gap: 20px;
-        `}
+        props.location === 'sidebar' ||
+        (props.location === 'search' &&
+            css`
+                grid-gap: 20px;
+            `)}
 `
 const MainText = styled.span`
     font-size: 16px;

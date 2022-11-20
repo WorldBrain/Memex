@@ -23,6 +23,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import Margin from 'src/dashboard-refactor/components/Margin'
 
 interface State {
     isTagPickerShown: boolean
@@ -341,19 +342,21 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <>
                 <TextBoxContainerStyled>
-                    <MemexEditor
-                        onKeyDown={this.handleInputKeyDown}
-                        onContentUpdate={(content) =>
-                            this.props.onCommentChange(content)
-                        }
-                        markdownContent={this.props.comment}
-                        setEditorInstanceRef={(editor) =>
-                            (this.editor = editor)
-                        }
-                        autoFocus={this.props.autoFocus}
-                        placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                        isRibbonCommentBox={this.props.isRibbonCommentBox}
-                    />
+                    <Margin vertical="10px">
+                        <MemexEditor
+                            onKeyDown={this.handleInputKeyDown}
+                            onContentUpdate={(content) =>
+                                this.props.onCommentChange(content)
+                            }
+                            markdownContent={this.props.comment}
+                            setEditorInstanceRef={(editor) =>
+                                (this.editor = editor)
+                            }
+                            autoFocus={this.props.autoFocus}
+                            placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                            isRibbonCommentBox={this.props.isRibbonCommentBox}
+                        />
+                    </Margin>
                     {this.props.comment !== '' && (
                         <FooterContainer>
                             <ListsSegment

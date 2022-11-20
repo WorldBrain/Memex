@@ -7,11 +7,6 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ButtonTooltip } from 'src/common-ui/components'
 import browser from 'webextension-polyfill'
 
-const settings = browser.runtime.getURL('/img/settings.svg')
-const compress = browser.runtime.getURL('/img/compress-alt.svg')
-const expand = browser.runtime.getURL('/img/expand-alt.svg')
-const search = browser.runtime.getURL('/img/search.svg')
-
 const Results = (props) => {
     // const searchEngineClass = `${props.searchEngine}_${props.position}`
     return (
@@ -29,12 +24,13 @@ const Results = (props) => {
                             position: 'relative',
                             iconSize: '20px',
                         }}
+                        location="search"
                     />
                 </UpdateNotifBannerBox>
                 <TopBarArea hideResults={props.hideResults}>
                     <ResultsBox>
                         <ButtonTooltip
-                            position={'bottom'}
+                            position={'right'}
                             tooltipText={
                                 props.hideResults
                                     ? 'Show Results'
@@ -42,8 +38,10 @@ const Results = (props) => {
                             }
                         >
                             <Icon
-                                filePath={props.hideResults ? expand : compress}
-                                heightAndWidth="16px"
+                                filePath={
+                                    props.hideResults ? 'expand' : 'compress'
+                                }
+                                heightAndWidth="22px"
                                 onClick={props.toggleHideResults}
                             />
                         </ButtonTooltip>
@@ -56,8 +54,9 @@ const Results = (props) => {
                             tooltipText={'Go to Dashboard'}
                         >
                             <Icon
-                                filePath={search}
-                                heightAndWidth="16px"
+                                filePath={'searchIcon'}
+                                heightAndWidth="18px"
+                                padding="5px"
                                 onClick={props.seeMoreResults}
                             />
                         </ButtonTooltip>
@@ -67,8 +66,9 @@ const Results = (props) => {
                                 tooltipText={'Settings'}
                             >
                                 <Icon
-                                    filePath={settings}
-                                    heightAndWidth="16px"
+                                    filePath={'settings'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
                                     onClick={props.toggleDropdown}
                                 />
                             </ButtonTooltip>
@@ -110,14 +110,21 @@ const MemexContainer = styled.div`
     margin-bottom: 20px;
     border-radius: 8px;
     margin-right: ${(props) => (props.position === 'above' ? '0px' : '30px')};
-    background: white;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    font-family: ${(props) => props.theme.fonts.primary};
+    border-radius: 12px;
+    overflow: hidden;
+
+    & * {
+        font-family: ${(props) => props.theme.fonts.primary};
+    }
 `
 
 const TopBarArea = styled.div<{ hideResults }>`
     border-bottom: ${(props) =>
         props.hideResults
             ? 'none'
-            : '1px solid' + props.theme.colors.lightgrey};
+            : '1px solid' + props.theme.colors.lightHover};
     height: 50px;
     align-items: center;
     display: flex;
@@ -170,10 +177,11 @@ const ResultsContainer = styled.div`
 const UpdateNotifBannerBox = styled.div`
     height: fit-content;
     border-radius: 8px 8px 0 0;
-    position: relative;
-    bottom: 0px;
+    position: absolute;
+    top: 0px;
     width: fill-available;
     overflow: hidden;
+    height: 120px;
 `
 
 Results.propTypes = {
