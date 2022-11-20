@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
@@ -77,7 +77,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
         }
     }
 
-    private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    private changeInput: ChangeEventHandler = (e) => {
         const displayNameInput = (e.target as HTMLInputElement).value
         this.setState({ displayNameInput, saveState: 'pristine' })
     }

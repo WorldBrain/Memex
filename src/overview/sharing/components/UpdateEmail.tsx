@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
@@ -77,7 +77,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
         }
     }
 
-    private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    private changeInput: ChangeEventHandler<HTMLInputElement> = (e) => {
         const emailInput = (e.target as HTMLInputElement).value
         this.setState({ emailInput, saveState: 'pristine' })
     }

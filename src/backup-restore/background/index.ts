@@ -345,7 +345,6 @@ export class BackupBackgroundModule {
         const lastBackup = await this.localBackupSettings.get(
             'lastBackupFinished',
         )
-        console.log('test3', lastBackup)
 
         let nextBackup = null
         if (this.backupProcedure?.running) {
@@ -354,7 +353,6 @@ export class BackupBackgroundModule {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
         if (lastBackup) {
-            console.log('test', lastBackup)
             const times = {
                 lastBackup: lastBackup ?? null,
                 nextBackup:

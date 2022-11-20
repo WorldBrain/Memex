@@ -154,7 +154,7 @@ class ReadwiseSettings extends StatefulUIElement<
                         }
                         onChange={(e) =>
                             this.processEvent('setAPIKey', {
-                                key: e.target.value,
+                                key: (e.target as HTMLInputElement).value,
                             })
                         }
                         type="text"
